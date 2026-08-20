@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -8,11 +8,12 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { QuestionRenderer } from "@/components/Questionnaire/QuestionRenderer";
+import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftCore";
+import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -28,6 +29,28 @@ interface DraftQuestionnaireResponse {
   responses: QuestionnaireResponse[];
 }
 
+/**
+ * The dump stores responses as an array; the renderer seeds from a
+ * `question_id → response` record. JSON round-tripping flattened Dates to
+ * strings, so revive them the same way the `?continue_draft=` restore path
+ * does.
+ *
+ * The clone is load-bearing: `reviveDraftResponses` rewrites entries IN
+ * PLACE, and these objects belong to the TanStack Query cache — the same
+ * `submission` this component spreads back into the discard PUT. Without
+ * it, rendering the preview would silently rewrite the dump we later send
+ * (dates re-serialized, unparseable ones dropped).
+ */
+function draftResponsesRecord(
+  responses: QuestionnaireResponse[],
+): Record<string, QuestionnaireResponse> {
+  const record: Record<string, QuestionnaireResponse> = {};
+  for (const response of structuredClone(responses)) {
+    record[response.question_id] = response;
+  }
+  return reviveDraftResponses(record);
+}
+
 export function FormSubmissionDrafts({
   facilityId,
   patientId,
@@ -38,8 +61,16 @@ export function FormSubmissionDrafts({
   const [submissionToDiscard, setSubmissionToDiscard] =
     useState<FormSubmissionRead | null>(null);
 
+  // Stable identity — the renderer's context value is keyed on it, so an
+  // inline literal would re-render every consumer of every preview's form
+  // context on each render of this list.
+  const subject = useMemo(
+    () => ({ facilityId, patientId, encounterId }),
+    [facilityId, patientId, encounterId],
+  );
+
   const { data: formSubmissions } = useQuery({
-    queryKey: ["formSubmissions", encounterId],
+    queryKey: formSubmissionKeys.list(encounterId),
     queryFn: query(formSubmissionApi.list, {
       queryParams: { encounter: encounterId, status: "draft" },
     }),
@@ -59,7 +90,7 @@ export function FormSubmissionDrafts({
     onSuccess: () => {
       toast.success(t("form_submission_discarded"));
       queryClient.invalidateQueries({
-        queryKey: ["formSubmissions", encounterId],
+        queryKey: formSubmissionKeys.list(encounterId),
       });
     },
     onError: () => {
@@ -82,7 +113,14 @@ export function FormSubmissionDrafts({
           const questions = questionnaire?.questions;
           const responses = questionnaireResponses?.responses;
 
-          if (!questionnaire || !questions || !responses) {
+          // `response_dump` is an untyped blob written by whoever saved the
+          // draft (this app, a plugin, an older release) — shape-check it
+          // instead of trusting the cast above.
+          if (
+            !questionnaire ||
+            !Array.isArray(questions) ||
+            !Array.isArray(responses)
+          ) {
             return null;
           }
 
@@ -119,16 +157,19 @@ export function FormSubmissionDrafts({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
-                <QuestionRenderer
-                  facilityId={facilityId}
-                  encounterId={encounterId}
-                  questions={questions as Question[]}
-                  responses={responses}
-                  patientId={patientId}
-                  onResponseChange={() => {}}
-                  errors={[]}
-                  clearError={() => {}}
-                  disabled
+                {/* `initialResponses` seeds the renderer's store once, at
+                    creation — by design, so a live questionnaire edit can't
+                    wipe in-progress answers. A re-saved draft therefore
+                    needs a NEW store, which the timestamped key forces;
+                    without it this preview would keep showing the answers
+                    it first mounted with. */}
+                <QuestionnaireFormRenderer
+                  key={`${submission.id}-${submission.modified_date ?? submission.created_date}`}
+                  questionnaire={questionnaire}
+                  mode="readonly"
+                  subject={subject}
+                  initialResponses={draftResponsesRecord(responses)}
+                  hideHeader
                 />
               </CardContent>
             </Card>

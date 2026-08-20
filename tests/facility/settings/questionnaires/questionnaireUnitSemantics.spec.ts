@@ -1,9 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  addTopLevelQuestion,
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
   getQuestionnaireIdBySlug,
+  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -27,19 +29,6 @@ test.use({ storageState: "tests/.auth/user.json" });
  */
 
 const UNITS_FIXTURE_SLUG = "e2e-units";
-
-/** Adds a top-level question via the sticky-bar button and titles it. */
-async function addQuestion(page: Page, title: string): Promise<void> {
-  const addFirst = page.getByRole("button", { name: "Add First Question" });
-  if (await addFirst.isVisible().catch(() => false)) {
-    await addFirst.click();
-  } else {
-    await page.getByRole("button", { name: "Add new question" }).last().click();
-  }
-  await page
-    .getByRole("textbox", { name: "Question Title" })
-    .pressSequentially(title);
-}
 
 /** Picks a question type by its cmdk data-value token (see builder matrix). */
 async function pickType(page: Page, type: string): Promise<void> {
@@ -76,17 +65,19 @@ test.describe("Questionnaire v2 unit semantics", () => {
 
     await test.step("Integer question shows its unit next to the label", async () => {
       await jumpTo(page, "Resting heart rate");
+      const integerBlock = questionBlock(page, "Resting heart rate");
       await expect(
-        page.locator("label").filter({ hasText: "Resting heart rate" }),
+        integerBlock.locator("label").filter({ hasText: "Resting heart rate" }),
       ).toBeVisible();
-      await expect(page.getByText("(/min)")).toBeVisible();
-      await expect(page.getByRole("spinbutton")).toBeVisible();
+      await expect(integerBlock.getByText("(/min)")).toBeVisible();
+      await expect(integerBlock.getByRole("spinbutton")).toBeVisible();
     });
 
     await test.step("Decimal question shows its unit next to the label", async () => {
       await jumpTo(page, "Body temperature");
-      await expect(page.getByText("(Cel)")).toBeVisible();
-      await expect(page.getByRole("spinbutton")).toBeVisible();
+      const decimalBlock = questionBlock(page, "Body temperature");
+      await expect(decimalBlock.getByText("(Cel)")).toBeVisible();
+      await expect(decimalBlock.getByRole("spinbutton")).toBeVisible();
     });
 
     await test.step("Quantity renders every unit of the bounded valueset as chips", async () => {
@@ -110,7 +101,9 @@ test.describe("Questionnaire v2 unit semantics", () => {
     });
 
     await test.step("Picking a chip writes the unit; the value sticks", async () => {
-      await page.getByRole("spinbutton").fill("250");
+      await questionBlock(page, "Dose given")
+        .getByRole("spinbutton")
+        .fill("250");
       await page.getByRole("radio", { name: "gram", exact: true }).click();
       await expect(
         page.getByRole("radio", { name: "gram", exact: true }),
@@ -118,7 +111,9 @@ test.describe("Questionnaire v2 unit semantics", () => {
       await expect(
         page.getByRole("radio", { name: "milligram", exact: true }),
       ).toHaveAttribute("aria-checked", "false");
-      await expect(page.getByRole("spinbutton")).toHaveValue("250");
+      await expect(
+        questionBlock(page, "Dose given").getByRole("spinbutton"),
+      ).toHaveValue("250");
     });
   });
 
@@ -141,7 +136,7 @@ test.describe("Questionnaire v2 unit semantics", () => {
     const unitTrigger = page.getByRole("combobox", { name: "Unit" });
 
     await test.step("Author an integer question with a unit", async () => {
-      await addQuestion(page, integerTitle);
+      await addTopLevelQuestion(page, integerTitle);
       await pickType(page, "integer");
       await expect(unitTrigger).toBeVisible();
       await selectFromValueSet(page, unitTrigger, { search: "milligram" });
@@ -149,7 +144,7 @@ test.describe("Questionnaire v2 unit semantics", () => {
     });
 
     await test.step("Author a decimal question with a unit", async () => {
-      await addQuestion(page, decimalTitle);
+      await addTopLevelQuestion(page, decimalTitle);
       await pickType(page, "decimal");
       await selectFromValueSet(page, unitTrigger, { search: "kilogram" });
       await expect(unitTrigger).toContainText("kilogram");
@@ -219,7 +214,7 @@ test.describe("Questionnaire v2 unit semantics", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Quantity Guard ${stamp}`,
     });
-    await addQuestion(page, `Dose amount ${stamp}`);
+    await addTopLevelQuestion(page, `Dose amount ${stamp}`);
     await pickType(page, "quantity");
 
     await page.getByRole("button", { name: "Save Changes" }).click();

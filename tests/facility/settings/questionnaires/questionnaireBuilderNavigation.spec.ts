@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -29,40 +32,74 @@ async function importStringQuestions(
 }
 
 test.describe("Questionnaire v2 builder navigation", () => {
-  test("footer Previous/Next walk the top-level questions while editing", async ({
+  test("canvas click selects a question; the floating toolbar reorders, duplicates and deletes", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
     const stamp = Date.now();
     const titles = [`Q One ${stamp}`, `Q Two ${stamp}`, `Q Three ${stamp}`];
     const titleInput = page.getByRole("textbox", { name: "Question Title" });
-    const previous = page.getByRole("button", { name: "Previous" });
-    const next = page.getByRole("button", { name: "Next" });
+    const nav = page.getByRole("navigation");
 
     await createQuestionnaireAndOpenBuilder(page, {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
-      title: `QV2 Footer ${stamp}`,
+      title: `QV2 Canvas ${stamp}`,
     });
     await importStringQuestions(page, titles);
 
-    await test.step("Import lands on question 1 with Previous disabled", async () => {
+    await test.step("Import lands on question 1", async () => {
       await expect(titleInput).toHaveValue(titles[0]);
-      await expect(previous).toBeDisabled();
-      await expect(next).toBeEnabled();
     });
 
-    await test.step("Next steps forward to the last question", async () => {
-      await next.click();
+    await test.step("Clicking a question card on the canvas selects it", async () => {
+      // The card's inputs are inert on the edit canvas — the click lands on
+      // the selection chrome. Aim at the label, which is never inert.
+      await questionBlock(page, titles[1]).locator("label").click();
       await expect(titleInput).toHaveValue(titles[1]);
-      await next.click();
-      await expect(titleInput).toHaveValue(titles[2]);
-      await expect(next).toBeDisabled();
     });
 
-    await test.step("Previous steps back again", async () => {
-      await previous.click();
-      await expect(titleInput).toHaveValue(titles[1]);
-      await expect(previous).toBeEnabled();
+    await test.step("Move question up via the floating toolbar", async () => {
+      await page.getByRole("button", { name: "Move question up" }).click();
+      await expect(nav.getByRole("button", { name: titles[1] })).toContainText(
+        "1.",
+      );
+      await expect(nav.getByRole("button", { name: titles[0] })).toContainText(
+        "2.",
+      );
+    });
+
+    await test.step("Move question down restores the order", async () => {
+      await page.getByRole("button", { name: "Move question down" }).click();
+      await expect(nav.getByRole("button", { name: titles[0] })).toContainText(
+        "1.",
+      );
+    });
+
+    await test.step("Duplicate creates a selected copy right after", async () => {
+      await page.getByRole("button", { name: "Duplicate question" }).click();
+      await expect(titleInput).toHaveValue(`${titles[1]} (copy)`);
+      await expect(
+        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+      ).toContainText("3.");
+    });
+
+    await test.step("The duplicate persists through save and reload", async () => {
+      // Pins cloneSubtree's id/link_id regeneration server-side: a copy
+      // reusing the source's ids would be rejected or collapse on save.
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      await page.reload();
+      await expect(
+        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+      ).toContainText("3.");
+    });
+
+    await test.step("Delete removes the copy via the toolbar", async () => {
+      await questionBlock(page, `${titles[1]} (copy)`).locator("label").click();
+      await page.getByRole("button", { name: "Delete question" }).click();
+      await expect(
+        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+      ).not.toBeVisible();
     });
   });
 

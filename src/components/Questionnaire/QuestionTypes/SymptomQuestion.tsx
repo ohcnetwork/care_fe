@@ -47,7 +47,6 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -653,7 +652,6 @@ export function SymptomQuestion({
   updateQuestionnaireResponseCB,
   disabled,
   encounterId,
-  question,
 }: SymptomQuestionProps) {
   const { t } = useTranslation();
 
@@ -799,8 +797,7 @@ export function SymptomQuestion({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<SymptomRequest>
           title={t("past_symptoms")}
           structuredTypes={[

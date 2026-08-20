@@ -1,74 +1,71 @@
 import { type Page, expect } from "@playwright/test";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 /**
- * Locates the question container div for a given label.
- * Questions render with id="question-{uuid}" on the wrapper div.
+ * Fill-flow interaction helpers, targeting the v2 fill page (the one-scroll
+ * form renderer). Everything scopes through `questionBlock` — the
+ * `data-question-id` leaf block for an exact label — because the page also
+ * renders every question title in the outline sidebar, so bare
+ * `getByText(label)` matches twice.
  */
-function getQuestionContainer(page: Page, labelText: string) {
-  return page
-    .getByText(labelText, { exact: true })
-    .locator("xpath=ancestor::div[contains(@id, 'question-')]");
-}
 
 /**
- * Fills a string (type="text") input field identified by its label.
+ * Fills a string (single-line) input field identified by its label.
  */
 export async function fillStringField(
   page: Page,
   labelText: string,
   value: string,
 ) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  const input = container.locator('input[type="text"]').first();
-  await input.fill(value);
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("textbox").fill(value);
 }
 
 /**
  * Clears a string input field identified by its label.
  */
 export async function clearStringField(page: Page, labelText: string) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  const input = container.locator('input[type="text"]').first();
-  await input.clear();
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("textbox").clear();
 }
 
 /**
- * Asserts whether a field label is visible or hidden.
+ * Asserts whether a question is on the canvas. Hidden (enable_when-false)
+ * questions unmount entirely, so the assertion is on block count — a
+ * visible label would also exist as an outline row, which this ignores.
  */
 export async function checkVisibility(
   page: Page,
   labelText: string,
   shouldBeVisible: boolean,
 ) {
-  const label = page.getByText(labelText, { exact: true });
+  const block = questionBlock(page, labelText);
   if (shouldBeVisible) {
-    await expect(label).toBeVisible();
+    await expect(block).toBeVisible();
   } else {
-    await expect(label).not.toBeVisible();
+    await expect(block).toHaveCount(0);
   }
 }
 
 /**
- * Clicks the Submit button on the questionnaire form.
+ * Clicks the submit button on the fill page ("Save Changes" per the
+ * reference design).
  */
 export async function submitForm(page: Page) {
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
 /**
- * Asserts that a questionnaire field shows a validation error.
- * The error <p> is a sibling of the question container's parent wrapper.
+ * Asserts that a questionnaire field shows a validation error (the error
+ * paragraphs render inside the question's block).
  */
 export async function expectFieldError(page: Page, labelText: string) {
-  const wrapper = page
-    .getByText(labelText, { exact: true })
-    .locator("xpath=ancestor::div[contains(@class, 'space-y-2')]");
-  await expect(wrapper.locator("p.text-red-500")).toBeVisible();
+  await expect(
+    questionBlock(page, labelText).locator("p.text-red-600"),
+  ).toBeVisible();
 }
 
 /**
@@ -127,26 +124,23 @@ export async function verifyLabelledValues(
 }
 
 /**
- * Selects a boolean (Yes/No) radio option for a question identified by its label.
+ * Selects a boolean (Yes/No) option for a question identified by its label.
+ * The v2 boolean input is a radiogroup of chips named "Yes"/"No".
  */
 export async function selectBooleanOption(
   page: Page,
   labelText: string,
   option: "Yes" | "No",
 ) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  // RadioInput renders duplicate radio ids ("true"/"false") across multiple
-  // boolean questions on the same page, breaking accessible-name lookup.
-  // Click the Label text inside the container instead; the native htmlFor
-  // association triggers the underlying radio.
-  await container.getByText(option, { exact: true }).click();
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("radio", { name: option, exact: true }).click();
 }
 
 /**
  * Clears a boolean selection by clicking the currently selected option again.
- * Only works when the question is not required (per RadioInput behavior).
+ * Only works when the question is not required (legacy RadioInput contract,
+ * preserved by the v2 BooleanInput).
  */
 export async function clearBooleanField(
   page: Page,

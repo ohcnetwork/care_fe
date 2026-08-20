@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { AlertCircle, ExternalLink } from "lucide-react";
+import { AlertCircle, ClipboardList, ExternalLink } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -132,12 +132,26 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>{t("device_information")}</CardTitle>
-            <Link href={`/devices/${deviceId}/edit`}>
-              <Button variant="outline_primary" size="sm">
-                <CareIcon icon="l-pen" className="size-4" />
-                {t("edit")}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/settings/devices/${deviceId}/questionnaire`,
+                  )
+                }
+              >
+                <ClipboardList className="size-4" />
+                {t("fill_questionnaire")}
               </Button>
-            </Link>
+              <Link href={`/devices/${deviceId}/edit`}>
+                <Button variant="outline_primary" size="sm">
+                  <CareIcon icon="l-pen" className="size-4" />
+                  {t("edit")}
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">

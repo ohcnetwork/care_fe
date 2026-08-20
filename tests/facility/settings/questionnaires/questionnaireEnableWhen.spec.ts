@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  addTopLevelQuestion,
+  createQuestionnaireAndOpenBuilder,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -34,22 +37,11 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
       // so this can't be an exact match — "Boolean" alone is still unambiguous.
       await page.getByRole("option", { name: "Boolean" }).click();
 
-      // Two "Add new question" buttons render once a question exists — one
-      // in the tree nav footer, one in the sticky bottom bar — both dispatch
-      // the same action, so pick the last (sticky bar) to disambiguate.
-      await page
-        .getByRole("button", { name: "Add new question" })
-        .last()
-        .click();
-      await page
-        .getByRole("textbox", { name: "Question Title" })
-        .pressSequentially(dependentTitle);
+      await addTopLevelQuestion(page, dependentTitle);
     });
 
     await test.step("Add a visibility condition: trigger equals Yes", async () => {
-      await page
-        .getByRole("button", { name: "Question Visibility Conditions" })
-        .click();
+      await page.getByRole("tab", { name: "Logic" }).click();
       await page.getByRole("button", { name: "Add a condition" }).click();
 
       const conditionRow = page.locator('div[class*="sm:grid-cols-2"]');
@@ -77,22 +69,18 @@ test.describe("Questionnaire v2 enable_when visibility", () => {
       // needs either to confirm the trigger question is on screen.
       await expect(page.getByText(triggerTitle).first()).toBeVisible();
 
-      const nextButton = page.getByRole("button", { name: "Next" });
-      await expect(nextButton).toBeDisabled();
+      // The whole form renders on one scroll — a hidden dependent simply
+      // isn't on the page (no pagination to walk).
       await expect(page.getByText(dependentTitle)).not.toBeVisible();
     });
 
     await test.step("Answering No keeps the dependent question hidden", async () => {
       await page.getByRole("radio", { name: "No", exact: true }).click();
-      await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
       await expect(page.getByText(dependentTitle)).not.toBeVisible();
     });
 
     await test.step("Answering Yes reveals the dependent question", async () => {
       await page.getByRole("radio", { name: "Yes", exact: true }).click();
-      const nextButton = page.getByRole("button", { name: "Next" });
-      await expect(nextButton).toBeEnabled();
-      await nextButton.click();
       await expect(page.getByText(dependentTitle).first()).toBeVisible();
     });
   });

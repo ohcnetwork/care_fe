@@ -1,30 +1,15 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  addTopLevelQuestion,
   createQuestionnaireAndOpenBuilder,
+  expectQuestionBlock,
   pickValuesetFromAutocomplete,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-const BEHAVIOUR_CARD_NAME = "Question Behaviour & Data Capture Settings";
-
-/** Adds a top-level question via the sticky-bar button and titles it. */
-async function addQuestion(page: Page, title: string): Promise<void> {
-  const addFirst = page.getByRole("button", { name: "Add First Question" });
-  if (await addFirst.isVisible().catch(() => false)) {
-    await addFirst.click();
-  } else {
-    // Two "Add new question" buttons render once a question exists (tree
-    // nav footer + sticky bar) — the sticky bar one is last.
-    await page.getByRole("button", { name: "Add new question" }).last().click();
-  }
-  await page
-    .getByRole("textbox", { name: "Question Title" })
-    .pressSequentially(title);
-}
 
 /**
  * Picks a question type for the currently-selected question by its type
@@ -57,12 +42,12 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Author a date question", async () => {
-      await addQuestion(page, dateTitle);
+      await addTopLevelQuestion(page, dateTitle);
       await pickType(page, "date");
     });
 
     await test.step("Author a quantity question and bind a UCUM unit", async () => {
-      await addQuestion(page, quantityTitle);
+      await addTopLevelQuestion(page, quantityTitle);
       await pickType(page, "quantity");
       // Quantity is valueset-only (legacy contract): no Custom Options mode,
       // the valueset is the unit-choice source.
@@ -83,7 +68,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Author a group with one sub-question", async () => {
-      await addQuestion(page, groupTitle);
+      await addTopLevelQuestion(page, groupTitle);
       await pickType(page, "group");
       await page.getByRole("button", { name: "Add Sub-Question" }).click();
       await page
@@ -138,16 +123,14 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Coding Actions ${Date.now()}`,
     });
-    await addQuestion(page, faker.lorem.words(3));
+    await addTopLevelQuestion(page, faker.lorem.words(3));
 
     const searchTrigger = page.getByRole("combobox", {
       name: "Search for observation codes",
     });
 
     await test.step("Bind a code", async () => {
-      await page
-        .getByRole("button", { name: "Coding Details", exact: true })
-        .click();
+      await page.getByRole("tab", { name: "Coding" }).click();
       await selectFromValueSet(page, searchTrigger, { search: "heart" });
       await expect(page.getByText("Code Verified")).toBeVisible();
     });
@@ -183,7 +166,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Options ${Date.now()}`,
     });
-    await addQuestion(page, faker.lorem.words(3));
+    await addTopLevelQuestion(page, faker.lorem.words(3));
     await pickType(page, "choice");
 
     const rows = page.getByRole("row");
@@ -235,7 +218,7 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Valueset Choice ${Date.now()}`,
     });
-    await addQuestion(page, `Unit choice ${Date.now()}`);
+    await addTopLevelQuestion(page, `Unit choice ${Date.now()}`);
     await pickType(page, "choice");
 
     await test.step("Switch the options editor to Value Set mode", async () => {
@@ -249,16 +232,13 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     });
 
     await test.step("Pick an existing valueset", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select a value set" })
-        .click();
-      const search = page.locator('[data-slot="command-input"]').first();
-      await search.fill("UCUM");
-      await page.getByRole("option", { name: "UCUM Units" }).click();
-      await expect(
-        page.getByRole("combobox").filter({ hasText: "UCUM Units" }),
-      ).toBeVisible();
+      // Scoped through the shared helper — a page-level
+      // [data-slot="command-input"].first() can race the type picker's
+      // closing popover portal (the documented flake).
+      await pickValuesetFromAutocomplete(page, {
+        search: "UCUM",
+        optionName: "UCUM Units",
+      });
     });
 
     await test.step("Save and preview renders a valueset search input", async () => {
@@ -284,17 +264,22 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Display ${stamp}`,
     });
-    await addQuestion(page, displayText);
+    await addTopLevelQuestion(page, displayText);
     await pickType(page, "display");
 
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, "Questionnaire updated successfully");
 
     await page.getByRole("button", { name: "Preview" }).click();
-    // The text renders (label + display paragraph) with no input control
-    // and no note affordance.
-    await expect(page.getByText(displayText).first()).toBeVisible();
-    await expect(page.getByRole("textbox")).not.toBeVisible();
+    // Anchor the block first — questionBlock() resolves to zero elements
+    // silently, so a bare negative assertion would pass with the question
+    // missing entirely. Then: no input control inside the block, no note
+    // affordance anywhere (single-question form, page level is stronger).
+    const block = await expectQuestionBlock(page, displayText);
+    // The text renders twice inside the block by design (label + display
+    // paragraph) — assert the label node specifically.
+    await expect(block.locator("label")).toBeVisible();
+    await expect(block.getByRole("textbox")).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Add note" }),
     ).not.toBeVisible();
@@ -310,16 +295,18 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Flags ${Date.now()}`,
     });
-    await addQuestion(page, questionTitle);
+    await addTopLevelQuestion(page, questionTitle);
 
     const repeatable = page.getByRole("checkbox", { name: "Repeatable" });
 
     await test.step("Mark Required and Repeatable", async () => {
-      await page.getByRole("button", { name: BEHAVIOUR_CARD_NAME }).click();
+      // Behaviour chips render inline on the inspector's Question tab.
       await page.getByRole("checkbox", { name: "Required" }).click();
       await repeatable.click();
       await expect(repeatable).toHaveAttribute("aria-checked", "true");
-      await expect(page.getByText("Configured • 2")).toBeVisible();
+      await expect(
+        page.getByRole("checkbox", { name: "Required" }),
+      ).toHaveAttribute("aria-checked", "true");
     });
 
     await test.step("Boolean never offers Repeats — and clears the flag", async () => {
@@ -332,7 +319,6 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await pickType(page, "string");
       await expect(repeatable).toBeVisible();
       await expect(repeatable).toHaveAttribute("aria-checked", "false");
-      await expect(page.getByText("Configured • 1")).toBeVisible();
     });
 
     await test.step("Preview shows the required asterisk", async () => {
@@ -343,6 +329,70 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
         page.locator("label").filter({ hasText: questionTitle }),
       ).toBeVisible();
       await expect(page.locator("span.text-red-500")).toBeVisible();
+    });
+  });
+
+  test("switching a structured question to string clears its type-specific fields from the save payload", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const questionTitle = `Symptom entry ${stamp}`;
+    const typeTrigger = page.getByRole("combobox", { name: "Question Type" });
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Type Residue ${stamp}`,
+    });
+    await addTopLevelQuestion(page, questionTitle);
+
+    await test.step("Author it as a structured Symptoms question", async () => {
+      await pickType(page, "structured");
+      // Picking a bare "Structured" tile only opens its sub-list (see
+      // QuestionTypePicker.handleSelectType) — the actual type patch fires
+      // from the structured sub-type tile, still inside the same popover.
+      await page
+        .locator('[data-slot="command-item"][data-value="symptom"]')
+        .click();
+      await expect(typeTrigger).toContainText("Symptoms");
+    });
+
+    await test.step("Switch the type to String", async () => {
+      await pickType(page, "string");
+      await expect(typeTrigger).toContainText("String");
+    });
+
+    await test.step("Save; the PUT payload carries no structured-type residue", async () => {
+      // A stale `structured_type` on a non-structured question would route
+      // fill-time answers into the structured compose path, which then
+      // never submits (P2-4) — assert on the actual outgoing payload
+      // rather than the UI, which wouldn't catch a field the picker no
+      // longer shows an editor for.
+      const putRequest = page.waitForRequest(
+        (request) =>
+          request.url().includes("/api/v1/questionnaire/") &&
+          request.method() === "PUT",
+      );
+      await page.getByRole("button", { name: "Save Changes" }).click();
+
+      const body = JSON.parse((await putRequest).postData() ?? "{}") as {
+        questions: {
+          text: string;
+          type: string;
+          structured_type?: unknown;
+          answer_option?: unknown;
+          answer_value_set?: unknown;
+          unit?: unknown;
+        }[];
+      };
+      const question = body.questions.find((q) => q.text === questionTitle);
+      expect(question?.type).toBe("string");
+      expect(question?.structured_type).toBeUndefined();
+      expect(question?.answer_option).toBeUndefined();
+      expect(question?.answer_value_set).toBeUndefined();
+      expect(question?.unit).toBeUndefined();
+
+      await expectToast(page, "Questionnaire updated successfully");
     });
   });
 });

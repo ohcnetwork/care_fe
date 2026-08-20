@@ -11,6 +11,7 @@ import {
   verifyLabelledValues,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -29,15 +30,19 @@ test.describe("Enable When — Boolean Operators", () => {
     const facilityId = getFacilityId();
     const patientId = getPatientId();
     const encounterId = getEncounterId();
-    // The fill route fetches by external_id (slug lookup removed on ENG-737).
-    const questionnaireId = getQuestionnaireId();
+    // The fill route fetches by external_id (slug lookup is not supported).
+    const questionnaireId = await getQuestionnaireId();
 
     await page.goto(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    await expect(
-      page.getByText("Has Allergies", { exact: true }),
-    ).toBeVisible();
+    await expect(questionBlock(page, "Has Allergies")).toBeVisible();
+
+    // "Self-Pay Reason" (exists.spec.ts) is required whenever "Insurance
+    // Provider" is unanswered — none of this file's tests touch that field,
+    // so it would otherwise become a visible, required, empty question and
+    // every submission below would fail validation.
+    await fillStringField(page, "Insurance Provider", "N/A");
   });
 
   // ──────────────────────────────────────────────

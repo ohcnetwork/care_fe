@@ -1,5 +1,3 @@
-import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
-
 import { Code } from "@/types/base/code/code";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import { AllergyIntoleranceRequest } from "@/types/emr/allergyIntolerance/allergyIntolerance";
@@ -7,8 +5,10 @@ import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
+import { StructuredTypeValue } from "@/types/questionnaire/structured";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 /**
@@ -38,11 +38,12 @@ export type ResponseValue =
   | RV<"time_of_death", string[]>
   | RV<"files", FileUploadQuestion[]>
   | RV<"time", string | undefined>
-  | RV<"charge_item", ApplyChargeItemDefinitionRequest[]>;
+  | RV<"charge_item", ApplyChargeItemDefinitionRequest[]>
+  | RV<"service_request", ServiceRequestApplyActivityDefinitionForm[]>;
 
 export interface QuestionnaireResponse {
   question_id: string;
-  structured_type: StructuredQuestionType | null;
+  structured_type: StructuredTypeValue | null;
   link_id: string;
   values: ResponseValue[];
   note?: string;

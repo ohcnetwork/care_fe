@@ -1,11 +1,12 @@
 import { useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { QuestionnaireBuilderPage } from "@/components/QuestionnaireV2/builder/QuestionnaireBuilderPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -64,6 +65,25 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
+  // Questionnaire fill for the device subject. Registered before
+  // "/devices/:id" — raviger matches routes in object order.
+  "/devices/:id/questionnaire": ({ id }: { id: string }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+    />
+  ),
+  "/devices/:id/questionnaire/:questionnaireId": ({
+    id,
+    questionnaireId,
+  }: {
+    id: string;
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+      questionnaireId={questionnaireId}
+    />
+  ),
   "/devices/:id": ({ id }: { id: string }) => (
     <DeviceDetail facilityId={facilityId} deviceId={id} />
   ),
@@ -280,7 +300,7 @@ const getRoutes = (facilityId: string) => ({
   // Must be registered before "/questionnaires/:id" for the same reason —
   // otherwise "edit" would be captured as an :id.
   "/questionnaires/:id/edit": ({ id }: { id: string }) => (
-    <QuestionnaireBuilderPage
+    <QuestionnaireStudioPage
       scope={{
         authContext: "facility",
         facilityId,

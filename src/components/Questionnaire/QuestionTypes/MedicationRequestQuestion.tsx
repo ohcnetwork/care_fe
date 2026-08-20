@@ -116,7 +116,6 @@ import { formatName } from "@/Utils/utils";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Question } from "@/types/questionnaire/question";
 
@@ -349,7 +348,6 @@ export function MedicationRequestQuestion({
   errors,
   questionnaireId: _questionnaireId,
   questionnaireSlug,
-  question,
 }: MedicationRequestQuestionProps) {
   const authUser = useAuthUser();
   const { t } = useTranslation();
@@ -908,9 +906,7 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
-
+      <div className="flex flex-wrap items-center justify-end">
         {/* Add to Template Dialog */}
         <AddToTemplateDialog
           open={!!medicationToAddToTemplate}

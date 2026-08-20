@@ -16,10 +16,14 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Question ids (any depth) currently hidden by enable_when (renderer
-   *  only) — skipped entirely, matching the legacy renderer where hidden
-   *  questions simply don't appear. Numbering stays stable across hides. */
+  /** Question ids currently hidden by enable_when; numbering stays stable. */
   hiddenIds?: Set<string>;
+  /** Decorative per-row trailing icons (the studio's logic/issue cues) —
+   *  rendered aria-hidden so row accessible names stay number + title. */
+  rowAdornment?: (question: Question) => React.ReactNode;
+  /** Accessible name for the `nav` landmark when the consumer renders its
+   *  own visible heading instead of passing `title`. Supply one of the two. */
+  ariaLabel?: string;
 }
 
 export function QuestionTreeNav({
@@ -30,6 +34,8 @@ export function QuestionTreeNav({
   footer,
   renderSeparator,
   hiddenIds,
+  rowAdornment,
+  ariaLabel,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
   const items = numberQuestions(questions).filter(
@@ -42,6 +48,7 @@ export function QuestionTreeNav({
       <button
         key={item.question.id}
         type="button"
+        aria-current={activeId === item.question.id ? "true" : undefined}
         onClick={() => onSelect(item.question.id)}
         className={cn(
           "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
@@ -52,8 +59,7 @@ export function QuestionTreeNav({
         )}
       >
         <span className="shrink-0">{item.number}</span>
-        {/* Decorative type recognition cue — aria-hidden keeps row names
-            (number + title) unchanged for a11y and specs. */}
+        {/* Decorative type recognition cue; aria-hidden keeps row names unchanged. */}
         <span
           aria-hidden
           className={cn(
@@ -63,13 +69,21 @@ export function QuestionTreeNav({
         >
           <TypeIcon className="size-3" />
         </span>
-        <span className="min-w-0">
+        <span className="min-w-0 flex-1">
           {item.question.text || (
             <span className="italic text-gray-400">
               {t("untitled_question")}
             </span>
           )}
         </span>
+        {rowAdornment && (
+          <span
+            aria-hidden
+            className="mr-1 flex shrink-0 items-center gap-1 self-center"
+          >
+            {rowAdornment(item.question)}
+          </span>
+        )}
         {activeId === item.question.id && (
           <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
         )}
@@ -78,7 +92,7 @@ export function QuestionTreeNav({
   };
 
   return (
-    <nav aria-label={title} className="w-full space-y-1">
+    <nav aria-label={ariaLabel ?? title} className="w-full space-y-1">
       {title && (
         <h3 className="px-3 py-2 text-sm font-semibold text-gray-900">
           {title}

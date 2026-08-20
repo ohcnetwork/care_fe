@@ -1,17 +1,16 @@
-import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
+import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import { Question, QuestionType } from "@/types/questionnaire/question";
 
 /**
  * Types the renderer never records a response for: `initializeResponses`
- * (renderer/store.ts) skips `group` entirely, and `display` gets an entry
+ * (`form/engine/store.ts`) skips `group` entirely, and `display` gets an entry
  * whose values `DisplayText` never writes — so `evaluateEnableWhen` sees
  * "unanswered" forever and a condition targeting one permanently hides its
  * question with zero feedback. The visibility card excludes them from the
- * target picker, and the save check below blocks legacy data that already
- * targets one. Structured questions stay eligible: they DO record values
- * (StructuredQuestionSlot writes through `updateResponse`), matching the
- * legacy editor, which offered every non-group question as a target.
+ * target picker, and the save check below blocks saved/imported data that
+ * already targets one. Structured questions stay eligible: they DO record
+ * values through `StructuredSlot`.
  */
 export const NON_RESPONSE_TYPES: QuestionType[] = ["group", "display"];
 
@@ -47,15 +46,24 @@ const SAVE_CHECKS: SaveCheck[] = [
   },
   {
     // The backend rejects quantity questions carrying neither answer_option
-    // nor answer_value_set (Question spec validate_choice_and_group_questions),
-    // so surface a clear client-side error instead of a raw 400. The builder
-    // only authors the valueset (legacy contract: quantity was never
-    // custom-options), but grandfathered answer_option data still passes.
+    // nor answer_value_set, so surface a clear client-side error instead of a
+    // raw 400. Grandfathered answer_option data still passes.
     predicate: (question) =>
       question.type === "quantity" &&
       !question.answer_value_set &&
       (question.answer_option?.length ?? 0) === 0,
     messageKey: "quantity_needs_valueset",
+  },
+  {
+    // A structured question whose type resolves to nothing — neither core
+    // nor a registered plugin. Saving it would persist a question no fill
+    // session can render or submit, so the studio blocks it (the type
+    // reappears the moment its plugin is enabled again).
+    predicate: (question) =>
+      question.type === "structured" &&
+      !!question.structured_type &&
+      !resolveStructuredType(question.structured_type),
+    messageKey: "structured_type_unknown",
   },
   {
     // A visibility condition with no target question selected. Persisting
@@ -69,8 +77,8 @@ const SAVE_CHECKS: SaveCheck[] = [
   {
     // A visibility condition targeting a question that never records a
     // response (see NON_RESPONSE_TYPES) — the picker no longer offers these,
-    // but legacy/imported data can still carry one; it would hide the
-    // question forever, so the save is blocked until it's retargeted.
+    // but saved/imported data can still carry one; it would hide the question
+    // forever, so the save is blocked until it's retargeted.
     predicate: (question, { typeByLinkId }) =>
       question.enable_when?.some((condition) => {
         const targetType = typeByLinkId.get(condition.question);
@@ -82,11 +90,18 @@ const SAVE_CHECKS: SaveCheck[] = [
   },
 ];
 
-/** The first question failing any save check, with the message to show —
- *  or undefined when the tree is saveable. */
-export function findFirstInvalidQuestion(
-  questions: Question[],
-): { question: Question; messageKey: string } | undefined {
+export interface SaveIssue {
+  question: Question;
+  messageKey: string;
+}
+
+/**
+ * Every save-blocking issue in the tree, check-major (all matches of rule 1,
+ * then rule 2, …) with one issue per question (its first failing rule). The
+ * studio's issues popover renders the whole list; `findFirstInvalidQuestion`
+ * is element 0, so the save-toast contract is unchanged.
+ */
+export function findInvalidQuestions(questions: Question[]): SaveIssue[] {
   const typeByLinkId = new Map<string, QuestionType>();
   const walk = (list: Question[]) => {
     for (const question of list) {
@@ -97,11 +112,27 @@ export function findFirstInvalidQuestion(
   walk(questions);
   const context: SaveCheckContext = { typeByLinkId };
 
+  const issues: SaveIssue[] = [];
+  const flagged = new Set<string>();
   for (const { predicate, messageKey } of SAVE_CHECKS) {
-    const question = findFirstQuestion(questions, (candidate) =>
-      predicate(candidate, context),
-    );
-    if (question) return { question, messageKey };
+    const collect = (list: Question[]) => {
+      for (const question of list) {
+        if (!flagged.has(question.id) && predicate(question, context)) {
+          flagged.add(question.id);
+          issues.push({ question, messageKey });
+        }
+        collect(question.questions ?? []);
+      }
+    };
+    collect(questions);
   }
-  return undefined;
+  return issues;
+}
+
+/** The first question failing any save check, with the message to show —
+ *  or undefined when the tree is saveable. */
+export function findFirstInvalidQuestion(
+  questions: Question[],
+): SaveIssue | undefined {
+  return findInvalidQuestions(questions)[0];
 }

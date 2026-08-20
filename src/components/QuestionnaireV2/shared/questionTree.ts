@@ -81,25 +81,33 @@ export function findQuestionNumber(
   return undefined;
 }
 
+/** Questions that record answers (everything except `group` containers),
+ *  at any depth — the count surfaces in canvas/outline "N questions" lines. */
+export function countLeafQuestions(questions: Question[]): number {
+  let count = 0;
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (question.type === "group") walk(question.questions ?? []);
+      else count += 1;
+    }
+  };
+  walk(questions);
+  return count;
+}
+
 /**
- * Deep-clones a question tree with fresh `id`s and `link_id`s (used by clone
- * and import, where reusing the source's ids would collide with the
- * originals once both exist as separate questionnaires/questions).
- *
- * `enable_when[].question` references point at a sibling's `link_id`, so a
- * naive per-question regeneration would leave those references dangling.
- * Instead this builds an old→new `link_id` map for the whole tree up front,
- * then rewrites every condition's `question` through that map — conditions
- * whose target isn't in the map (e.g. it pointed outside the copied subtree)
- * are dropped rather than left pointing at a stale id.
- *
- * Imported/hand-edited trees can carry missing or duplicate `link_id`s. Only
- * the FIRST occurrence of an old link_id claims the map entry (so enable_when
- * references still resolve deterministically); every other occurrence —
- * duplicate or missing — gets its own fresh link_id, instead of collapsing
- * all of them onto one shared regenerated id.
+ * Deep-clones a question tree with fresh `id`s and `link_id`s, remapping
+ * `enable_when` references through the whole copied tree. Missing or duplicate
+ * link ids receive fresh values; only the first occurrence claims the remap.
+ * `unmappedConditions` controls whether external references are dropped or
+ * preserved for in-questionnaire duplication.
  */
-export function regenerateQuestionIds(questions: Question[]): Question[] {
+export function regenerateQuestionIds(
+  questions: Question[],
+  {
+    unmappedConditions = "drop",
+  }: { unmappedConditions?: "drop" | "keep" } = {},
+): Question[] {
   const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
 
   const linkIdMap = new Map<string, string>();
@@ -116,12 +124,18 @@ export function regenerateQuestionIds(questions: Question[]): Question[] {
   const remapEnableWhen = (
     enableWhen: EnableWhen[] | undefined,
   ): EnableWhen[] | undefined =>
-    enableWhen
-      ?.filter((condition) => linkIdMap.has(condition.question))
-      .map((condition) => ({
-        ...condition,
-        question: linkIdMap.get(condition.question)!,
-      }));
+    unmappedConditions === "keep"
+      ? enableWhen?.map((condition) =>
+          linkIdMap.has(condition.question)
+            ? { ...condition, question: linkIdMap.get(condition.question)! }
+            : condition,
+        )
+      : enableWhen
+          ?.filter((condition) => linkIdMap.has(condition.question))
+          .map((condition) => ({
+            ...condition,
+            question: linkIdMap.get(condition.question)!,
+          }));
 
   // Same DFS preorder as mapLinkIds, so the occurrence that claimed the map
   // entry is also the first one seen here.

@@ -25,10 +25,12 @@ export function ChoiceChip({
       disabled={disabled}
       onClick={() => onCheckedChange(control === "radio" ? true : !checked)}
       className={cn(
-        "inline-flex h-10 items-center gap-2 rounded-md border px-3 text-sm transition-colors",
+        // Bare option row (reference design): circle/square + label, no
+        // chip border — selection reads from the control glyph and weight.
+        "inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
         checked
-          ? "border-primary-600 bg-primary-50 text-gray-900"
-          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+          ? "font-medium text-gray-900"
+          : "text-gray-700 hover:bg-gray-50",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >

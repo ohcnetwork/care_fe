@@ -68,13 +68,9 @@ interface MoveQuestionsDialogProps {
 }
 
 /**
- * Target picker for bulk-moving questions: every group across the
- * questionnaire plus a root/"top level" option, matching the legacy
- * MoveQuestionDialog. Groups inside a moved subtree are excluded — moving a
- * subtree into itself would drop it (the reducer no-ops that case too).
- *
- * Mounted only while open (the caller conditionally renders it), so the
- * target/position state re-initializes on every open without effects.
+ * Target picker for bulk-moving questions: every group plus a root/"top level"
+ * option. Groups inside a moved subtree are excluded so a subtree cannot move
+ * into itself. Mounted only while open, so state re-initializes on every open.
  */
 export function MoveQuestionsDialog({
   allQuestions,

@@ -37,9 +37,7 @@ function conditionGrid(page: Page) {
 }
 
 async function openVisibilityCard(page: Page): Promise<void> {
-  await page
-    .getByRole("button", { name: "Question Visibility Conditions" })
-    .click();
+  await page.getByRole("tab", { name: "Logic" }).click();
 }
 
 test.describe("Questionnaire v2 visibility condition authoring", () => {
@@ -301,11 +299,15 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
     await test.step("The visibility card surfaces the invalid target", async () => {
       await nav.getByRole("button", { name: dependentTitle }).click();
       await openVisibilityCard(page);
+      // The sentence appears twice: inline under the condition's target
+      // select and as the canvas error chip.
       await expect(
-        page.getByText(
-          "Visibility conditions can't target group or display questions",
-          { exact: false },
-        ),
+        page
+          .getByText(
+            "Visibility conditions can't target group or display questions",
+            { exact: false },
+          )
+          .first(),
       ).toBeVisible();
     });
 

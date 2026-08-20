@@ -11,6 +11,12 @@ import { Question, QuestionType } from "@/types/questionnaire/question";
 interface BehaviourSettingsCardProps {
   question: Question;
   onChange: (patch: Partial<Question>) => void;
+  /** Render the chip groups without the collapsible card shell — the
+   *  studio inspector hosts each section flat inside its own tab. */
+  bare?: boolean;
+  /** Which chip groups to render (default both). The studio's Question tab
+   *  takes "behaviour", its Coding tab takes "data_capture". */
+  sections?: readonly ("behaviour" | "data_capture")[];
 }
 
 interface BehaviourFlag {
@@ -40,8 +46,7 @@ const DATA_CAPTURE_FLAGS: readonly BehaviourFlag[] = [
   { key: "collect_body_site", label: "collect_body_site" },
 ];
 
-/** Mirrors the legacy editor's HIDE_REPEATABLE_QUESTION_TYPES
- *  (QuestionnaireEditor.tsx) — these types never offer the Repeats flag. */
+/** Types that never offer the Repeats flag. */
 export const NON_REPEATABLE_TYPES: readonly QuestionType[] = [
   "boolean",
   "group",
@@ -52,6 +57,8 @@ export const NON_REPEATABLE_TYPES: readonly QuestionType[] = [
 export function BehaviourSettingsCard({
   question,
   onChange,
+  bare = false,
+  sections = ["behaviour", "data_capture"],
 }: BehaviourSettingsCardProps) {
   const { t } = useTranslation();
 
@@ -62,9 +69,44 @@ export function BehaviourSettingsCard({
 
   // Derived from the same flag lists that render the chips, so adding a
   // flag can never silently miss the "configured" badge count.
-  const count = [...behaviourFlags, ...DATA_CAPTURE_FLAGS].filter(
-    (flag) => question[flag.key],
-  ).length;
+  const count = [
+    ...(sections.includes("behaviour") ? behaviourFlags : []),
+    ...(sections.includes("data_capture") ? DATA_CAPTURE_FLAGS : []),
+  ].filter((flag) => question[flag.key]).length;
+
+  // A bare single-section host (the studio's tabs) provides its own label
+  // above the chips — the inner group label would duplicate it.
+  const showGroupLabels = !(bare && sections.length === 1);
+
+  const chipGroup = (flags: readonly BehaviourFlag[], label: string) => (
+    <div className="space-y-1.5">
+      {showGroupLabels && (
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {flags.map((flag) => (
+          <ChoiceChip
+            key={flag.key}
+            control="checkbox"
+            label={t(flag.label)}
+            checked={!!question[flag.key]}
+            onCheckedChange={(checked) => onChange({ [flag.key]: checked })}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  const content = (
+    <div className="space-y-4">
+      {sections.includes("behaviour") &&
+        chipGroup(behaviourFlags, t("behaviour"))}
+      {sections.includes("data_capture") &&
+        chipGroup(DATA_CAPTURE_FLAGS, t("data_capture"))}
+    </div>
+  );
+
+  if (bare) return content;
 
   return (
     <CollapsibleSettingsCard
@@ -79,39 +121,7 @@ export function BehaviourSettingsCard({
         ) : undefined
       }
     >
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-gray-500">{t("behaviour")}</p>
-          <div className="flex flex-wrap gap-2">
-            {behaviourFlags.map((flag) => (
-              <ChoiceChip
-                key={flag.key}
-                control="checkbox"
-                label={t(flag.label)}
-                checked={!!question[flag.key]}
-                onCheckedChange={(checked) => onChange({ [flag.key]: checked })}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-gray-500">
-            {t("data_capture")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {DATA_CAPTURE_FLAGS.map((flag) => (
-              <ChoiceChip
-                key={flag.key}
-                control="checkbox"
-                label={t(flag.label)}
-                checked={!!question[flag.key]}
-                onCheckedChange={(checked) => onChange({ [flag.key]: checked })}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      {content}
     </CollapsibleSettingsCard>
   );
 }

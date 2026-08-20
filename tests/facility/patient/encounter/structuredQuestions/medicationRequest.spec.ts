@@ -220,7 +220,7 @@ test.describe("Medication Request Questionnaire", () => {
       .last()
       .fill(notes);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -279,7 +279,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await selectDuration(page, duration, durationUnit);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -317,7 +317,7 @@ test.describe("Medication Request Questionnaire", () => {
       .getByRole("option", { name: medicationName, exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 

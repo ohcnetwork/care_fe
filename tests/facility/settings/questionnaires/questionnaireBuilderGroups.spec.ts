@@ -122,9 +122,9 @@ test.describe("Questionnaire v2 builder groups", () => {
     await test.step("Move A1 into Group Beta at position 0", async () => {
       await selectInNav(page, groupA);
       await page.getByRole("checkbox", { name: a1 }).click();
-      await page.getByRole("button", { name: "Move 1 questions" }).click();
+      await page.getByRole("button", { name: "Move 1 question" }).click();
 
-      const dialog = page.getByRole("dialog", { name: "Move 1 questions" });
+      const dialog = page.getByRole("dialog", { name: "Move 1 question" });
       await dialog.getByRole("combobox").click();
       await page.getByRole("option", { name: groupB }).click();
       await dialog.getByRole("spinbutton").fill("0");
@@ -144,9 +144,9 @@ test.describe("Questionnaire v2 builder groups", () => {
     await test.step("Move A2 to the top level at position 0", async () => {
       await selectInNav(page, groupA);
       await page.getByRole("checkbox", { name: a2 }).click();
-      await page.getByRole("button", { name: "Move 1 questions" }).click();
+      await page.getByRole("button", { name: "Move 1 question" }).click();
 
-      const dialog = page.getByRole("dialog", { name: "Move 1 questions" });
+      const dialog = page.getByRole("dialog", { name: "Move 1 question" });
       await dialog.getByRole("combobox").click();
       await page.getByRole("option", { name: "Top Level" }).click();
       await dialog.getByRole("spinbutton").fill("0");

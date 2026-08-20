@@ -39,29 +39,49 @@ const slugCache = new Map<string, string>();
 
 /**
  * Resolves a fixture questionnaire's id from its slug. The detail endpoint
- * looks up by external_id only (ENG-737 dropped slug lookup) and the list
+ * looks up by external_id only (slug lookup is not supported) and the list
  * has no slug filter, so this lists broadly and matches client-side.
  */
 export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {
   const cached = slugCache.get(slug);
   if (cached) return cached;
-  const res = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/?limit=100`, {
-    headers: adminApiHeaders(),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to list questionnaires: ${res.status}`);
-  }
-  const data = (await res.json()) as {
-    results: { id: string; slug: string }[];
-  };
-  const match = data.results.find((entry) => entry.slug === slug);
-  if (!match) {
-    throw new Error(
-      `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+
+  const limit = 100;
+  let offset = 0;
+
+  while (true) {
+    const res = await fetch(
+      `${apiBaseUrl()}/api/v1/questionnaire/?limit=${limit}&offset=${offset}`,
+      {
+        headers: adminApiHeaders(),
+      },
     );
+    if (!res.ok) {
+      throw new Error(`Failed to list questionnaires: ${res.status}`);
+    }
+    const data = (await res.json()) as {
+      results: { id: string; slug: string }[];
+    };
+
+    // Cache and check all results on this page
+    for (const entry of data.results) {
+      slugCache.set(entry.slug, entry.id);
+      if (entry.slug === slug) {
+        return entry.id;
+      }
+    }
+
+    // If we got fewer results than the limit, we've reached the end
+    if (data.results.length < limit) {
+      break;
+    }
+
+    offset += limit;
   }
-  slugCache.set(slug, match.id);
-  return match.id;
+
+  throw new Error(
+    `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+  );
 }
 
 /** Matches the questionnaire v2 detail URL on both mounts
@@ -141,4 +161,64 @@ export async function pickValuesetFromAutocomplete(
   await expect(
     page.getByRole("combobox").filter({ hasText: optionName }),
   ).toBeVisible();
+}
+
+/**
+ * The canvas block for one LEAF question on the one-scroll form renderer,
+ * anchored on the `data-question-id` attribute the renderer stamps and the
+ * question's exact label text. The whole questionnaire renders on one
+ * scroll, so bare role queries (`spinbutton`, `Add note`, `textarea`) match
+ * every question at once — scope them through this instead.
+ *
+ * Leaf blocks only (the `hasNot` filter drops enclosing section cards,
+ * which would also satisfy `has:` through their children) and exact label
+ * matching, so strict mode stays armed: two questions sharing a label fail
+ * loudly instead of silently resolving to whichever renders last. Assert
+ * the block visible (or use `expectQuestionBlock`) before building any
+ * negative assertion on it — a zero-match locator passes `.not.` checks
+ * vacuously.
+ */
+export function questionBlock(page: Page, label: string) {
+  return page
+    .locator("[data-question-id]")
+    .filter({ hasNot: page.locator("[data-question-id]") })
+    .filter({
+      has: page.locator(
+        `xpath=.//label[normalize-space(.)=${JSON.stringify(label)}]`,
+      ),
+    });
+}
+
+/** questionBlock + a count assertion — use before any `.not.` assertion,
+ *  where a zero-match locator would otherwise pass vacuously. */
+export async function expectQuestionBlock(page: Page, label: string) {
+  const block = questionBlock(page, label);
+  await expect(block).toHaveCount(1);
+  return block;
+}
+
+/**
+ * Appends a top-level question and types its title. On an empty form the
+ * canvas shows "Add First Question"; once questions exist, several controls
+ * carry the "Add new question" name (outline separators and footer, the
+ * canvas append zone, the mobile button) — the canvas zone is addressed via
+ * the labeled "Form canvas" region instead of a DOM-order-dependent
+ * `.last()`.
+ */
+export async function addTopLevelQuestion(
+  page: Page,
+  title: string,
+): Promise<void> {
+  const addFirst = page.getByRole("button", { name: "Add First Question" });
+  if (await addFirst.isVisible().catch(() => false)) {
+    await addFirst.click();
+  } else {
+    await page
+      .getByRole("region", { name: "Form canvas" })
+      .getByRole("button", { name: "Add new question" })
+      .click();
+  }
+  await page
+    .getByRole("textbox", { name: "Question Title" })
+    .pressSequentially(title);
 }

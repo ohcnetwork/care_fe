@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -33,7 +36,11 @@ test.describe("Questionnaire v2 builder", () => {
 
     await test.step("Preview renders the question", async () => {
       await page.getByRole("button", { name: "Preview" }).click();
-      await expect(page.getByText(questionTitle)).toBeVisible();
+      // Assert the CANVAS label specifically (the outline row also carries
+      // the title — a bare .first() could pass on the outline alone).
+      await expect(
+        questionBlock(page, questionTitle).locator("label"),
+      ).toBeVisible();
       await expect(page.getByPlaceholder("Enter details")).toBeVisible();
     });
   });
@@ -59,10 +66,8 @@ test.describe("Questionnaire v2 builder", () => {
       name: "Search for observation codes",
     });
 
-    await test.step("Expand Coding Details and open the code search", async () => {
-      await page
-        .getByRole("button", { name: "Coding Details", exact: true })
-        .click();
+    await test.step("Open the Coding tab and the code search", async () => {
+      await page.getByRole("tab", { name: "Coding" }).click();
       await expect(searchTrigger).toBeVisible();
       await searchTrigger.click();
       // The valueset search UI opens with its command input…
@@ -71,12 +76,10 @@ test.describe("Questionnaire v2 builder", () => {
       ).toBeVisible();
       // …and after closing it the editor is still alive (regression guard:
       // the old coding editor crashed at this point when its FormFields
-      // mounted without a FormProvider). The search popover is modal, so the
-      // rest of the page is aria-hidden until it closes.
+      // mounted without a FormProvider). The Coding tab is active, so the
+      // search trigger is the visible editor surface.
       await page.keyboard.press("Escape");
-      await expect(
-        page.getByRole("textbox", { name: "Question Title" }),
-      ).toBeVisible();
+      await expect(searchTrigger).toBeVisible();
     });
 
     await test.step("Select a code from the observation valueset", async () => {

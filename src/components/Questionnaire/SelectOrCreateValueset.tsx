@@ -8,7 +8,10 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
+import {
+  ValueSetCreateContext,
+  ValueSetEditor,
+} from "@/components/ValueSet/ValueSetEditor";
 
 import {
   ValueSetConfig,
@@ -23,11 +26,16 @@ import { mergeAutocompleteOptions } from "@/Utils/utils";
 interface CreateValueSetProps {
   onValueSetChange?: (valueSet: ValueSetConfig) => void;
   value?: ValueSetConfig;
+  /** Auth context the inline "Create valueset" sheet files new valuesets
+   *  under — a facility-scoped host must pass its own, since only superusers
+   *  may create instance-context valuesets. */
+  createContext?: ValueSetCreateContext;
 }
 
 export function SelectOrCreateValueset({
   onValueSetChange,
   value,
+  createContext,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
@@ -119,6 +127,7 @@ export function SelectOrCreateValueset({
           className="w-full sm:max-w-2xl overflow-y-auto"
         >
           <ValueSetEditor
+            createContext={createContext}
             onSuccess={(data) => {
               setIsSheetOpen(false);
               setCurrentValueSet(data);

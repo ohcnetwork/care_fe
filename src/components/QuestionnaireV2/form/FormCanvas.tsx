@@ -1,0 +1,196 @@
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/form/engine/store";
+import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+
+import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+
+import { FormChrome, FormChromeProvider, useFormChrome } from "./chrome";
+import { QuestionnaireFormProvider, useFormRenderer } from "./FormContext";
+import { QuestionBlock } from "./QuestionBlock";
+import type { FormMode, RendererSubject } from "./types";
+
+/** Presentation slots shared by every canvas entry point. */
+export interface CanvasSlots {
+  /** Replaces the default "no questions" text (the studio passes its
+   *  add-first/import affordances). */
+  emptyState?: React.ReactNode;
+  /** Hide the questionnaire title/description header (hosts that already
+   *  show them elsewhere). */
+  hideHeader?: boolean;
+  /** Right-aligned hint next to the header (the studio's "click any
+   *  question to edit it"). */
+  headerHint?: React.ReactNode;
+  className?: string;
+}
+
+export interface QuestionnaireFormRendererProps extends CanvasSlots {
+  questionnaire: QuestionnaireRead;
+  mode: FormMode;
+  subject?: RendererSubject;
+  /** Builder edit canvas: render enable_when-hidden questions too. */
+  revealHidden?: boolean;
+  /** Builder edit canvas: inputs visible but non-interactive. */
+  inert?: boolean;
+  /** Creation-time seed overrides (a restored draft) — forwarded verbatim
+   *  to the provider, which applies them once. See FormContext. */
+  initialResponses?: Record<string, QuestionnaireResponse>;
+  /** Decoration seam — see chrome.tsx. */
+  chrome?: FormChrome;
+}
+
+/**
+ * The renderer: the whole questionnaire on one scroll — top-level groups
+ * as section cards, everything live against the per-instance store. The
+ * studio canvas, the read-only previews and the fill flow all mount this
+ * one module; there is no second renderer.
+ */
+export function QuestionnaireFormRenderer({
+  questionnaire,
+  mode,
+  subject,
+  revealHidden,
+  inert,
+  initialResponses,
+  chrome = {},
+  emptyState,
+  hideHeader,
+  headerHint,
+  className,
+}: QuestionnaireFormRendererProps) {
+  return (
+    <QuestionnaireFormProvider
+      questionnaire={questionnaire}
+      mode={mode}
+      subject={subject}
+      revealHidden={revealHidden}
+      inert={inert}
+      initialResponses={initialResponses}
+    >
+      <FormChromeProvider chrome={chrome}>
+        <CanvasBody
+          emptyState={emptyState}
+          hideHeader={hideHeader}
+          headerHint={headerHint}
+          className={className}
+        />
+      </FormChromeProvider>
+    </QuestionnaireFormProvider>
+  );
+}
+
+/**
+ * The canvas body for hosts that mount `QuestionnaireFormProvider`
+ * themselves — the studio does, so its outline and canvas share one store
+ * (the outline's preview mode reads live enable_when hidden ids).
+ */
+export function QuestionnaireFormCanvas({
+  chrome = {},
+  emptyState,
+  hideHeader,
+  headerHint,
+  className,
+}: CanvasSlots & { chrome?: FormChrome }) {
+  return (
+    <FormChromeProvider chrome={chrome}>
+      <CanvasBody
+        emptyState={emptyState}
+        hideHeader={hideHeader}
+        headerHint={headerHint}
+        className={className}
+      />
+    </FormChromeProvider>
+  );
+}
+
+function CanvasBody({
+  emptyState,
+  hideHeader,
+  headerHint,
+  className,
+}: CanvasSlots) {
+  const { t } = useTranslation();
+  const { questionnaire, revealHidden } = useFormRenderer();
+  const { AppendZone } = useFormChrome();
+  const hasVisibleQuestions = useHasVisibleTopLevelQuestions();
+  const questions = questionnaire.questions;
+
+  const sectionCount = questions.filter(
+    (question) => question.type === "group",
+  ).length;
+  const countLine = [
+    sectionCount > 0 && t("n_sections", { count: sectionCount }),
+    t("n_questions", { count: countLeafQuestions(questions) }),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const header = !hideHeader && (
+    <div className="flex items-baseline justify-between gap-3 pb-4">
+      <div className="min-w-0 space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+          {questionnaire.title}
+        </h2>
+        {questionnaire.description && (
+          <p className="text-sm text-gray-500">{questionnaire.description}</p>
+        )}
+        {questions.length > 0 && (
+          <p className="text-xs text-gray-400">{countLine}</p>
+        )}
+      </div>
+      {headerHint && (
+        <div className="shrink-0 text-xs text-gray-400">{headerHint}</div>
+      )}
+    </div>
+  );
+
+  if (questions.length === 0) {
+    return (
+      <div className={cn("mx-auto w-full max-w-3xl", className)}>
+        {header}
+        {emptyState ?? (
+          <div className="rounded-lg bg-white p-8 text-center text-sm text-gray-500">
+            {t("no_questions_added_yet")}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Every top-level question hidden by enable_when: explain the empty form
+  // instead of a blank canvas. The edit canvas (`revealHidden`) never hits
+  // this — hidden questions render there with a logic badge.
+  if (!revealHidden && !hasVisibleQuestions) {
+    return (
+      <div className={cn("mx-auto w-full max-w-3xl", className)}>
+        {header}
+        <div className="p-8 text-center text-sm text-gray-500">
+          {t("no_visible_questions")}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("mx-auto w-full max-w-3xl", className)}>
+      {header}
+      <div className="space-y-4 pb-4">
+        {questions.map((question, index) => (
+          <QuestionBlock
+            key={question.id}
+            question={question}
+            parentId={null}
+            index={index}
+            siblingCount={questions.length}
+            depth={0}
+            number={`${index + 1}.`}
+          />
+        ))}
+        {AppendZone && <AppendZone parentId={null} />}
+      </div>
+    </div>
+  );
+}

@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   KITCHEN_SINK_FACILITY_SLUG,
   getQuestionnaireIdBySlug,
+  questionBlock,
 } from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -40,16 +41,20 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
       // The question title appears both as the field label and as a tree-nav
       // row — assert the label specifically.
       await expect(
-        page.locator("label").filter({ hasText: "Primary symptom" }),
+        page.locator("label").filter({ hasText: "Primary symptom" }).first(),
       ).toBeVisible();
-      const input = page.getByPlaceholder("Enter details");
+      const input = questionBlock(page, "Primary symptom").getByPlaceholder(
+        "Enter details",
+      );
       await input.fill("headache");
       await expect(input).toHaveValue("headache");
     });
 
     await test.step("Text question renders a textarea", async () => {
       await jumpTo(page, "Detailed history");
-      const textarea = page.locator("textarea");
+      const textarea = questionBlock(page, "Detailed history").locator(
+        "textarea",
+      );
       await expect(textarea).toBeVisible();
       await textarea.fill("long history text");
       await expect(textarea).toHaveValue("long history text");
@@ -57,7 +62,9 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("URL question renders a url-typed input", async () => {
       await jumpTo(page, "Reference document URL");
-      const urlInput = page.locator('input[type="url"]');
+      const urlInput = questionBlock(page, "Reference document URL").locator(
+        'input[type="url"]',
+      );
       await expect(urlInput).toBeVisible();
       await urlInput.fill("https://example.com/doc");
       await expect(urlInput).toHaveValue("https://example.com/doc");
@@ -69,7 +76,9 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("Decimal question accepts a fractional value", async () => {
       await jumpTo(page, "Body temperature (C)");
-      const input = page.getByRole("spinbutton");
+      const input = questionBlock(page, "Body temperature (C)").getByRole(
+        "spinbutton",
+      );
       await expect(input).toHaveAttribute("inputmode", "decimal");
       await input.fill("37.5");
       await expect(input).toHaveValue("37.5");
@@ -77,10 +86,50 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("Integer question uses numeric input mode", async () => {
       await jumpTo(page, "Pain score (0-10)");
-      const input = page.getByRole("spinbutton");
+      const input = questionBlock(page, "Pain score (0-10)").getByRole(
+        "spinbutton",
+      );
       await expect(input).toHaveAttribute("inputmode", "numeric");
       await input.fill("7");
       await expect(input).toHaveValue("7");
+    });
+  });
+
+  /**
+   * Keystroke-level decimal entry. `fill()` sets the value in one shot and so
+   * never exercises the intermediate states a real typist produces — these
+   * type character by character instead.
+   *
+   * NumberInput keeps only the parsed `number` and re-renders
+   * `value.toString()`, so every intermediate string that is not its own
+   * round-trip ("0.", "1.30") is rewritten between keystrokes and the
+   * remaining characters land against a truncated value.
+   */
+  test("decimal input preserves a value typed character by character", async ({
+    page,
+  }) => {
+    await openKitchenSinkPreview(page);
+    await jumpTo(page, "Body temperature (C)");
+    const input = questionBlock(page, "Body temperature (C)").getByRole(
+      "spinbutton",
+    );
+
+    await test.step("a zero directly after the point survives", async () => {
+      await input.fill("");
+      await input.pressSequentially("0.0", { delay: 50 });
+      await expect.soft(input).toHaveValue("0.0");
+    });
+
+    await test.step("digits after a leading 0. are not absorbed into the units place", async () => {
+      await input.fill("");
+      await input.pressSequentially("0.01", { delay: 50 });
+      await expect.soft(input).toHaveValue("0.01");
+    });
+
+    await test.step("trailing zeros in the fraction survive", async () => {
+      await input.fill("");
+      await input.pressSequentially("1.30001", { delay: 50 });
+      await expect.soft(input).toHaveValue("1.30001");
     });
   });
 
@@ -91,23 +140,23 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("Date question: picking a day fills the trigger", async () => {
       await jumpTo(page, "Symptom onset date");
-      const trigger = page.getByRole("button", { name: "Pick a date" });
+      const dateBlock = questionBlock(page, "Symptom onset date");
+      const trigger = dateBlock.getByRole("button", { name: "Pick a date" });
       await expect(trigger).toBeVisible();
       await trigger.click();
       await page
         .locator('[role="gridcell"]:not([data-outside]) button')
         .first()
         .click();
-      await expect(
-        page.getByRole("button", { name: "Pick a date" }),
-      ).not.toBeVisible();
+      await expect(trigger).not.toBeVisible();
     });
 
     await test.step("DateTime question: time input unlocks after picking a date", async () => {
       await jumpTo(page, "Admission timestamp");
-      const timeInput = page.locator('input[type="time"]');
+      const dateTimeBlock = questionBlock(page, "Admission timestamp");
+      const timeInput = dateTimeBlock.locator('input[type="time"]');
       await expect(timeInput).toBeDisabled();
-      await page.getByRole("button", { name: "Pick a date" }).click();
+      await dateTimeBlock.getByRole("button", { name: "Pick a date" }).click();
       await page
         .locator('[role="gridcell"]:not([data-outside]) button')
         .first()
@@ -119,7 +168,9 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
 
     await test.step("Time question renders a time input", async () => {
       await jumpTo(page, "Last medication time");
-      const timeInput = page.locator('input[type="time"]');
+      const timeInput = questionBlock(page, "Last medication time").locator(
+        'input[type="time"]',
+      );
       await timeInput.fill("08:15");
       await expect(timeInput).toHaveValue("08:15");
     });
@@ -131,8 +182,9 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
     await openKitchenSinkPreview(page);
     await jumpTo(page, "Dose administered");
 
-    const input = page.getByRole("spinbutton");
-    const unitTrigger = page.getByRole("combobox", {
+    const quantityBlock = questionBlock(page, "Dose administered");
+    const input = quantityBlock.getByRole("spinbutton");
+    const unitTrigger = quantityBlock.getByRole("combobox", {
       name: "Unit",
       exact: true,
     });
@@ -238,7 +290,10 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
   }) => {
     await openKitchenSinkPreview(page);
 
-    const noteButton = page.getByRole("button", { name: "Add note" });
+    const noteButton = questionBlock(page, "Primary symptom").getByRole(
+      "button",
+      { name: "Add note" },
+    );
     const noteDot = noteButton.locator("span.bg-amber-500");
 
     await test.step("No dot before a note is written", async () => {
