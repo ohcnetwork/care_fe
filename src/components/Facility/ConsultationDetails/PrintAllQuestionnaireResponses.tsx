@@ -126,18 +126,18 @@ export function PrintAllQuestionnaireResponses({
 const DetailRow = ({
   label,
   value,
-  isStrong = true,
+  valueClassName = "",
 }: {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
 }) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
       <span
-        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
+        className={cn("ml-1 whitespace-pre-wrap font-semibold", valueClassName)}
       >
         {value || "-"}
       </span>
@@ -161,7 +161,11 @@ export function PrintableEncounterDetails({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-6 mb-8">
       <div className="space-y-2">
-        <DetailRow label={t("patient")} value={patient.name} isStrong />
+        <DetailRow
+          label={t("patient")}
+          value={patient.name}
+          valueClassName="capitalize"
+        />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
           value={
@@ -193,7 +197,6 @@ export function PrintableEncounterDetails({
               ? format(new Date(encounter.period.start), "dd MMM yyyy, EEEE")
               : t("na")
           }
-          isStrong
         />
         <DetailRow
           label={t("mobile_number")}

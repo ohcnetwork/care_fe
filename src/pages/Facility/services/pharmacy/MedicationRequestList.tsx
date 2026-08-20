@@ -337,7 +337,7 @@ export default function MedicationRequestList({
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
                 <TableRow key={item.id} className="group">
                   <TableCell
-                    className="font-semibold group-hover:underline cursor-pointer capitalize"
+                    className="font-semibold group-hover:underline cursor-pointer "
                     onClick={() =>
                       updateQuery({
                         patient_external_id: item.encounter.patient.id,
@@ -345,7 +345,9 @@ export default function MedicationRequestList({
                       })
                     }
                   >
-                    {item.encounter.patient.name}
+                    <span className="capitalize">
+                      {item.encounter.patient.name}
+                    </span>
                     <div className="text-xs text-gray-500">
                       {t("by")}: {formatName(item.prescribed_by)}
                     </div>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -148,11 +148,15 @@ export function CreateDispenseSheet({
         <SheetHeader>
           <SheetTitle>{t("new_dispense")}</SheetTitle>
           <SheetDescription>
-            {selectedPatient
-              ? t("dispense_for_patient", {
-                  patientName: selectedPatient.name,
-                })
-              : t("select_patient_to_dispense")}
+            {selectedPatient ? (
+              <Trans
+                i18nKey="dispense_for_patient"
+                values={{ patientName: selectedPatient.name }}
+                components={{ name: <span className="capitalize" /> }}
+              />
+            ) : (
+              t("select_patient_to_dispense")
+            )}
           </SheetDescription>
         </SheetHeader>
 

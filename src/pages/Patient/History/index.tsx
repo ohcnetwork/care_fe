@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, X } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { NavTabs } from "@/components/ui/nav-tabs";
@@ -114,10 +114,12 @@ function ClinicalHistoryPage({
           <Separator orientation="vertical" />
           <div className="min-w-0">
             {patient ? (
-              <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis capitalize">
-                {t("patient_clinical_history_page_title", {
-                  name: patient.name,
-                })}
+              <h5 className="text-lg font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                <Trans
+                  i18nKey="patient_clinical_history_page_title"
+                  values={{ name: patient.name }}
+                  components={{ name: <span className="capitalize" /> }}
+                />
               </h5>
             ) : (
               <Skeleton className="w-20 h-4" />

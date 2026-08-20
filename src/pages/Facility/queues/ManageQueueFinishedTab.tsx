@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { Link } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { useTokenListInfiniteQuery } from "./utils";
 
@@ -411,10 +411,16 @@ function FinishedTokenOptions({
         open={showMoveBackToInServiceDialog}
         onOpenChange={setShowMoveBackToInServiceDialog}
         title={t("move_back_to_in_service")}
-        description={t("move_back_to_in_service_confirmation", {
-          patientName: token.patient?.name,
-          tokenNumber: renderTokenNumber(token),
-        })}
+        description={
+          <Trans
+            i18nKey="move_back_to_in_service_confirmation"
+            values={{
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            }}
+            components={{ name: <span className="capitalize" /> }}
+          />
+        }
         onConfirm={handleMoveBackToInService}
         cancelText={t("cancel")}
         confirmText={t("confirm")}
@@ -426,10 +432,16 @@ function FinishedTokenOptions({
         open={showMoveBackToWaitingDialog}
         onOpenChange={setShowMoveBackToWaitingDialog}
         title={t("move_back_to_waiting")}
-        description={t("move_back_to_waiting_confirmation", {
-          patientName: token.patient?.name,
-          tokenNumber: renderTokenNumber(token),
-        })}
+        description={
+          <Trans
+            i18nKey="move_back_to_waiting_confirmation"
+            values={{
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            }}
+            components={{ name: <span className="capitalize" /> }}
+          />
+        }
         onConfirm={handleMoveBackToWaiting}
         cancelText={t("cancel")}
         confirmText={t("confirm")}

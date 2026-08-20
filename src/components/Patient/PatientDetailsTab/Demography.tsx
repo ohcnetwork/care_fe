@@ -174,7 +174,10 @@ export const Demography = (props: PatientProps) => {
           facilityId={facilityId ?? ""}
           {...props}
         />,
-        { label: t("full_name"), value: patientData.name },
+        {
+          label: t("full_name"),
+          value: <span className="capitalize">{patientData.name}</span>,
+        },
         {
           label: t("phone_number"),
           value: (

@@ -174,7 +174,9 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
                   {t("bill_to")}:
                 </div>
                 <p className="font-semibold text-base capitalize">
-                  {invoice.account.patient.name}
+                  <span className="capitalize">
+                    {invoice.account.patient.name}
+                  </span>
                   <span className="text-gray-600 ml-2 font-normal">
                     ({t(`GENDER__${invoice.account.patient.gender}`)},{" "}
                     {formatPatientAge(invoice.account.patient, true)})

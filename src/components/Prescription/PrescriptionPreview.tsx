@@ -30,7 +30,6 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 export interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
   valueClassName?: string;
 }
 
@@ -111,17 +110,12 @@ const PrescriptionContent = ({
   );
 };
 
-const DetailRow = ({
-  label,
-  value,
-  isStrong = false,
-  valueClassName = "",
-}: DetailRowProps) => {
+const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={cn("ml-1", isStrong && "font-semibold", valueClassName)}>
+      <span className={cn("ml-1 font-semibold", valueClassName)}>
         {value || "-"}
       </span>
     </div>
@@ -211,7 +205,6 @@ export const PrescriptionPreview = ({
               <DetailRow
                 label={t("patient")}
                 value={patient.name}
-                isStrong
                 valueClassName="capitalize"
               />
               <DetailRow
@@ -221,7 +214,6 @@ export const PrescriptionPreview = ({
                     ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
                     : undefined
                 }
-                isStrong
               />
               {patient.instance_identifiers
                 ?.filter(
@@ -233,20 +225,14 @@ export const PrescriptionPreview = ({
                     key={identifier.config.id}
                     label={identifier.config.config.display}
                     value={identifier.value}
-                    isStrong
                   />
                 ))}
               {prescriptions.length === 1 && (
-                <DetailRow
-                  label={t("encounter_date")}
-                  value={displayDate}
-                  isStrong
-                />
+                <DetailRow label={t("encounter_date")} value={displayDate} />
               )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
               />
             </div>
             <div className="space-y-1 flex justify-end items-center pr-3">

@@ -209,6 +209,7 @@ export default function AppointmentPrint(props: Props) {
                   <DetailRow
                     label={t("patient")}
                     value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+                    valueClassName="capitalize"
                   />
                   {patientExtensionData.map((field) => (
                     <DetailRow
@@ -479,14 +480,14 @@ export default function AppointmentPrint(props: Props) {
 interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
   width?: string;
 }
 
 const DetailRow = ({
   label,
   value,
-  isStrong = true,
+  valueClassName = "",
   width = "w-20",
 }: DetailRowProps) => {
   return (
@@ -494,9 +495,10 @@ const DetailRow = ({
       <span className={cn("text-gray-600 shrink-0", width)}>{label}</span>
       <span className="text-gray-950 font-semibold">: </span>
       <span
-        className={cn("ml-0.5 whitespace-pre-wrap text-gray-950", {
-          "font-semibold": isStrong,
-        })}
+        className={cn(
+          "ml-0.5 whitespace-pre-wrap text-gray-950 font-semibold",
+          valueClassName,
+        )}
       >
         {value}
       </span>

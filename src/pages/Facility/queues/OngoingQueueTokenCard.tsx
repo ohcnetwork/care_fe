@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import { useTokenListInfiniteQuery } from "./utils";
@@ -433,10 +433,16 @@ function EnteredInErrorDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={t("mark_as_entered_in_error")}
-      description={t("mark_as_entered_in_error_confirmation", {
-        patientName: token.patient?.name,
-        tokenNumber: renderTokenNumber(token),
-      })}
+      description={
+        <Trans
+          i18nKey="mark_as_entered_in_error_confirmation"
+          values={{
+            patientName: token.patient?.name,
+            tokenNumber: renderTokenNumber(token),
+          }}
+          components={{ name: <span className="capitalize" /> }}
+        />
+      }
       onConfirm={() =>
         updateToken({
           status: TokenStatus.ENTERED_IN_ERROR,

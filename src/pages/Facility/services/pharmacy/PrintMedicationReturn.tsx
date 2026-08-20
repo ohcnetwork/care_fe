@@ -9,6 +9,7 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -28,15 +29,15 @@ import { formatPatientAge } from "@/Utils/utils";
 interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
 }
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span className={cn("ml-1 font-semibold", valueClassName)}>
         {value || "-"}
       </span>
     </div>
@@ -138,7 +139,11 @@ const MedicationReturnPreview = ({
         {/* Patient Details */}
         <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
           <div className="space-y-2">
-            <DetailRow label={t("patient")} value={patient.name} isStrong />
+            <DetailRow
+              label={t("patient")}
+              value={patient.name}
+              valueClassName="capitalize"
+            />
             <DetailRow
               label={`${t("age")} / ${t("sex")}`}
               value={
@@ -146,7 +151,6 @@ const MedicationReturnPreview = ({
                   ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
                   : undefined
               }
-              isStrong
             />
             {patient?.instance_identifiers
               ?.filter(
@@ -158,7 +162,6 @@ const MedicationReturnPreview = ({
                   key={identifier.config.id}
                   label={identifier.config.config.display}
                   value={identifier.value}
-                  isStrong
                 />
               ))}
           </div>
@@ -166,23 +169,16 @@ const MedicationReturnPreview = ({
             <DetailRow
               label={t("date")}
               value={format(new Date(), "dd MMM yyyy, EEEE")}
-              isStrong
             />
             <DetailRow
               label={t("mobile_number")}
               value={patient && formatPhoneNumberIntl(patient.phone_number)}
-              isStrong
             />
             <DetailRow
               label={t("return_to")}
               value={deliveryOrder.destination.name}
-              isStrong
             />
-            <DetailRow
-              label={t("status")}
-              value={t(deliveryOrder.status)}
-              isStrong
-            />
+            <DetailRow label={t("status")} value={t(deliveryOrder.status)} />
           </div>
         </div>
 
