@@ -1,7 +1,5 @@
 import careConfig from "@careConfig";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-
 import {
   ApiCallOptions,
   ApiRoute,
@@ -57,8 +55,8 @@ export async function callApi<
 
   try {
     res = await fetch(url, fetchOptions);
-  } catch {
-    throw new Error("Network Error");
+  } catch (error) {
+    throw new Error("Network Error", { cause: error });
   }
 
   const data = await getResponseBody<Route["TRes"]>(res);
@@ -188,7 +186,8 @@ const paginatedQuery = <
     let page = 0;
     let count = 0;
 
-    const pageSize = options?.pageSize ?? RESULTS_PER_PAGE_LIMIT;
+    const pageSize =
+      options?.pageSize ?? careConfig.pagination.limitOffset.maxLimit;
 
     while (hasNextPage) {
       const res = await query(route, {

@@ -1,14 +1,11 @@
-import { Badge } from "@/components/ui/badge";
+import TagBadge from "@/components/Tags/TagBadge";
 import { cn } from "@/lib/utils";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import {
-  getTagHierarchyDisplay,
-  TagConfig,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { useTranslation } from "react-i18next";
 
 interface PatientTagsDisplayProps {
@@ -48,14 +45,7 @@ export const PatientTagsDisplay = ({
       {showLabel && <span className="text-gray-700">{t("patient_tags")}:</span>}
       <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
         {allTags.map((tag) => (
-          <Badge
-            key={tag.id}
-            variant="secondary"
-            className="capitalize"
-            title={tag.description}
-          >
-            {getTagHierarchyDisplay(tag)}
-          </Badge>
+          <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
         ))}
       </div>
     </div>
