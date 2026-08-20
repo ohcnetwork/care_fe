@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -46,10 +47,10 @@ function ProductKnowledgeCard({
   const { t } = useTranslation();
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 min-w-0 w-full sm:w-auto">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
@@ -70,7 +71,10 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3
+                className="font-medium text-gray-900 text-lg break-words"
+                title={product.name}
+              >
                 {product.name}
               </h3>
               {product.alternate_identifier && (
@@ -122,13 +126,21 @@ function ProductKnowledgeTableRow({
           <div className="p-1 rounded bg-gray-100 text-gray-600">
             <CareIcon icon="l-folder" className="h-4 w-4" />
           </div>
-          <div>
-            <div className="font-medium text-gray-900">{product.name}</div>
-            {product.alternate_identifier && (
-              <div className="text-sm text-gray-500">
-                {t("product_knowledge_alternate_identifier")}:{" "}
-                {product.alternate_identifier}
+          <div className="min-w-0">
+            <TooltipComponent content={product.name}>
+              <div className="font-medium text-gray-900 truncate">
+                {product.name}
               </div>
+            </TooltipComponent>
+            {product.alternate_identifier && (
+              <TooltipComponent
+                content={`${t("product_knowledge_alternate_identifier")}: ${product.alternate_identifier}`}
+              >
+                <div className="text-sm text-gray-500 truncate">
+                  {t("product_knowledge_alternate_identifier")}:{" "}
+                  {product.alternate_identifier}
+                </div>
+              </TooltipComponent>
             )}
           </div>
         </div>
@@ -213,7 +225,7 @@ export function ProductKnowledgeListContent({
   return (
     <div>
       {/* Header with filters and view toggle */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col flex-wrap sm:flex-row gap-4 mb-6">
         {/* Search */}
         <div className="relative w-full sm:w-auto">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -276,15 +288,15 @@ export function ProductKnowledgeListContent({
           {/* Desktop Table View */}
           <div className="hidden lg:block">
             <div className="border rounded-lg overflow-hidden">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[35%]">{t("name")}</TableHead>
-                    <TableHead className="w-[15%]">
+                    <TableHead className="w-[40%]">{t("name")}</TableHead>
+                    <TableHead className="w-[20%]">
                       {t("product_type")}
                     </TableHead>
-                    <TableHead className="w-[15%]">{t("status")}</TableHead>
-                    <TableHead className="w-[5%]">{t("actions")}</TableHead>
+                    <TableHead className="w-[20%]">{t("status")}</TableHead>
+                    <TableHead className="w-[20%]">{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
