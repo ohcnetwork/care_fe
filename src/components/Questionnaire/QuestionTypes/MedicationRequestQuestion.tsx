@@ -149,6 +149,7 @@ export function buildMedicationForTemplate(
   // Remove internal objects that shouldn't be stored in templates
   delete medicationForTemplate.requested_product_internal;
   delete medicationForTemplate.id;
+  delete medicationForTemplate.dispense_status;
 
   return medicationForTemplate;
 }
@@ -646,6 +647,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medication,
+        dispense_status: undefined,
         dirty: true, // Mark new medication as dirty
         create_prescription: {
           status: PrescriptionStatus.active,
@@ -684,6 +686,7 @@ export function MedicationRequestQuestion({
 
         return {
           ...request,
+          dispense_status: undefined,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: currentUser,
@@ -701,6 +704,7 @@ export function MedicationRequestQuestion({
           ...parseMedicationStringToRequest(currentUser, statement.medication),
           authored_on: new Date().toISOString(),
           note: statement.note,
+          dispense_status: undefined,
           requester: currentUser,
           dirty: true, // Mark as dirty since it's being added as new
           create_prescription: {
@@ -798,6 +802,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medicationToAdd,
+        dispense_status: undefined,
         create_prescription: {
           status: PrescriptionStatus.active,
           alternate_identifier: "",
@@ -835,6 +840,7 @@ export function MedicationRequestQuestion({
         ...medications,
         ...medicationsWithProductKnowledge.map((med) => ({
           ...med,
+          dispense_status: undefined,
           create_prescription: {
             status: PrescriptionStatus.active,
             alternate_identifier: "",
