@@ -97,7 +97,6 @@ export const PrintMedicationAdministration = (props: {
           ? { medications_only: true }
           : { product_type: productType }),
       },
-      pageSize: 200,
     }),
     enabled: !!patientId,
   });
@@ -112,7 +111,6 @@ export const PrintMedicationAdministration = (props: {
           encounter: encounterId,
           status: "completed",
         },
-        pageSize: 200,
       }),
       enabled: !!patientId,
     });
