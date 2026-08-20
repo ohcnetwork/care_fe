@@ -99,8 +99,7 @@ export type MedicationRequestStatus =
 
 /** A medication request status filter accepted by the list endpoint. */
 export type MedicationRequestStatusFilter =
-  | MedicationRequestStatus
-  | `${MedicationRequestStatus},${string}`;
+  MedicationRequestStatus | `${MedicationRequestStatus},${string}`;
 
 /** Serializes one or more medication request statuses for list filtering. */
 export function formatMedicationRequestStatusFilter(

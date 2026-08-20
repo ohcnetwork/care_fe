@@ -46,12 +46,12 @@ import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
 import { MedicineAdminSheet } from "./MedicineAdminSheet";
 import {
-  GroupedMedication,
-  TIME_SLOTS,
   createMedicationAdministrationRequest,
   getLatestActiveRequest,
+  GroupedMedication,
   groupMedicationsByProduct,
   isTimeInSlot,
+  TIME_SLOTS,
 } from "./utils";
 
 // Types and Interfaces
