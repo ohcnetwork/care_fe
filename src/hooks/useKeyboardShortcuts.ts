@@ -1,15 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
-import { evaluateShortcutCondition } from "@/hooks/utils/evaluateShortcutCondition";
-
-export interface ShortcutConditions {
-  readOnly?: boolean;
-  canEdit?: boolean;
-  canCreate?: boolean;
-  questionnairesEnabled?: boolean;
-  [key: string]: unknown; // Allow custom conditions
-}
 
 export interface ShortcutHandlers {
   [action: string]: () => void;
@@ -19,13 +10,11 @@ export interface KeyboardShortcut {
   key: string;
   action: string;
   description: string;
-  when: string;
   subContext?: string;
 }
 
 export function useKeyboardShortcuts(
   contexts: string[],
-  conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
   activeSubContext?: string,
   ignoreInputFields?: boolean,
@@ -44,23 +33,12 @@ export function useKeyboardShortcuts(
     return allShortcuts;
   }, [contexts]);
 
-  const evaluateWhenCondition = useCallback(
-    (whenClause: string): boolean =>
-      evaluateShortcutCondition(whenClause, conditions),
-    [conditions],
-  );
-
   const categorizedShortcuts = useMemo(() => {
     const direct: Record<string, KeyboardShortcut> = {};
     const prefixGroups: Record<string, Record<string, KeyboardShortcut>> = {};
     const modified: Record<string, KeyboardShortcut> = {};
 
     shortcuts.forEach((shortcut) => {
-      //should be active or not check
-      if (!evaluateWhenCondition(shortcut.when)) {
-        return;
-      }
-
       if (
         (activeSubContext &&
           shortcut.subContext &&
@@ -94,7 +72,7 @@ export function useKeyboardShortcuts(
     });
 
     return { direct, prefixGroups, modified };
-  }, [shortcuts, evaluateWhenCondition]);
+  }, [shortcuts, activeSubContext]);
 
   const matchesKeyCombo = useCallback(
     (keyCombo: string, event: KeyboardEvent): boolean => {
@@ -303,9 +281,7 @@ export function useKeyboardShortcuts(
   }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   return {
-    shortcuts: shortcuts.filter((shortcut) =>
-      evaluateWhenCondition(shortcut.when),
-    ),
+    shortcuts,
     activePrefix,
     isOptionPressed,
   };
