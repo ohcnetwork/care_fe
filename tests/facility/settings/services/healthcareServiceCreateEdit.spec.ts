@@ -135,7 +135,8 @@ test.describe("Healthcare Service Create & Edit", () => {
     await expect(createButton).toBeDisabled();
 
     // Filling the required name and selecting a location makes the form valid,
-    // which must enable the create action.
+    // which must enable the create action. The form is intentionally never
+    // submitted — this asserts validation only, so nothing is persisted.
     await page
       .getByRole("textbox", { name: "Name", exact: true })
       .fill(faker.commerce.productName());

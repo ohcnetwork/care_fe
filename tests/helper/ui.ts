@@ -698,8 +698,9 @@ export async function clickTabOrMenuItem(
 }
 
 /**
- * Opens the deterministic fixture encounter's Overview tab, using the facility,
- * patient, and encounter IDs saved during setup (`tests/setup/patient.setup.ts`).
+ * Opens the deterministic fixture encounter's Overview tab (served at the
+ * `/updates` route), using the facility, patient, and encounter IDs saved during
+ * setup (`tests/setup/patient.setup.ts`).
  *
  * Prefer this over selecting an encounter from a UI list: picking a row from a
  * filtered listing flakes when fixture data changes (skill Critical Rule #2 —
