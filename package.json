@@ -35,7 +35,8 @@
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
     "build": "npm run build:meta && npm run supported-browsers && npm run build:react",
     "build:e2e": "cross-env REACT_ENABLE_E2E_CONFIG_OVERRIDES=true npm run build",
-    "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-headers.ts",
+    "postinstall": "tsx scripts/install-platform-deps.ts",
+    "postbuild": "tsx scripts/generate-headers.ts",
     "test": "snyk test",
     "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\"",
     "playwright:test": "playwright test",
@@ -53,7 +54,8 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
     "sort-locales": "node ./scripts/sort-locales.js",
-    "clone-component": "tsx scripts/clone-component.ts"
+    "clone-component": "tsx scripts/clone-component.ts",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.2.10",

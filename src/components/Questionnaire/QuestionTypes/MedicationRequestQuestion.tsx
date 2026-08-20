@@ -1697,7 +1697,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+        <div
+          className={cn(
+            "lg:p-4 lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm",
+            isReadOnly ? "justify-center" : "justify-between",
+          )}
+        >
           <span
             className={cn(
               "wrap-break-word line-clamp-2 hidden lg:block",
@@ -1744,6 +1749,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                         "h-9 text-sm cursor-pointer",
                         hasError(fieldKey) && "border-red-500",
                       )}
+                      disabled={disabled || isReadOnly}
                     />
                   ) : (
                     <>
