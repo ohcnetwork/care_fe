@@ -191,6 +191,7 @@ async function fetchProductAndBuildMedication(
   return {
     ...med,
     id: undefined,
+    dispense_status: undefined,
     do_not_perform: med.do_not_perform ?? false,
     dosage_instruction: med.dosage_instruction ?? [
       { as_needed_boolean: false },
