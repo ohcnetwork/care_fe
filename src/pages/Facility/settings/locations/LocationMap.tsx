@@ -417,7 +417,7 @@ function LocationMapContent({
       });
 
       // Only fit view when there's an actual search
-      setTimeout(() => {
+      const fitViewTimeoutId = setTimeout(() => {
         fitView({
           padding: 0.2,
           minZoom: 0.2,
@@ -425,6 +425,9 @@ function LocationMapContent({
           duration: 800,
         });
       }, 100);
+
+      // Cancel the pending fit if the search changes or the component unmounts.
+      return () => clearTimeout(fitViewTimeoutId);
     }
   }, [locations, fitView, rootLocations, searchQuery]);
 
@@ -432,7 +435,7 @@ function LocationMapContent({
     if (searchQuery === "") {
       setExpandedNodes([]);
       // Fit view when collapsing all nodes
-      setTimeout(() => {
+      const fitViewTimeoutId = setTimeout(() => {
         fitView({
           padding: 0.2,
           minZoom: 0.2,
@@ -440,6 +443,9 @@ function LocationMapContent({
           duration: 800,
         });
       }, 100);
+
+      // Cancel the pending fit if the search changes or the component unmounts.
+      return () => clearTimeout(fitViewTimeoutId);
     }
   }, [searchQuery, fitView]);
 
