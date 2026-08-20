@@ -142,7 +142,7 @@ export function EncounterList({
     ],
   });
   const { t } = useTranslation();
-  const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
+  const [savedFilters, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
 
@@ -211,35 +211,28 @@ export function EncounterList({
       patient_filter;
 
     if (!hasUrlFilters) {
-      try {
-        const stored = sessionStorage.getItem("encounter_list_filters");
-        if (stored) {
-          const filters = JSON.parse(stored);
-          if (filters.status) restoredParams.status = filters.status;
-          if (filters.priority) restoredParams.priority = filters.priority;
-          if (filters.selectedOrg)
-            restoredParams.organization = filters.selectedOrg.id;
-          if (filters.selectedCareTeamMember)
-            restoredParams.care_team_user =
-              filters.selectedCareTeamMember.username;
-          if (filters.selectedTags?.length > 0)
-            restoredParams.tags = filters.selectedTags
-              .map((t: TagConfig) => t.id)
-              .join(",");
-          if (filters.tagsBehavior)
-            restoredParams.tags_behavior = filters.tagsBehavior;
-          if (filters.dateFrom)
-            restoredParams.created_date_after = dateQueryString(
-              new Date(filters.dateFrom),
-            );
-          if (filters.dateTo)
-            restoredParams.created_date_before = dateQueryString(
-              new Date(filters.dateTo),
-            );
-        }
-      } catch {
-        // Ignore parsing errors
-      }
+      if (savedFilters.status) restoredParams.status = savedFilters.status;
+      if (savedFilters.priority)
+        restoredParams.priority = savedFilters.priority;
+      if (savedFilters.selectedOrg)
+        restoredParams.organization = savedFilters.selectedOrg.id;
+      if (savedFilters.selectedCareTeamMember)
+        restoredParams.care_team_user =
+          savedFilters.selectedCareTeamMember.username;
+      if (savedFilters.selectedTags?.length > 0)
+        restoredParams.tags = savedFilters.selectedTags
+          .map((t: TagConfig) => t.id)
+          .join(",");
+      if (savedFilters.tagsBehavior)
+        restoredParams.tags_behavior = savedFilters.tagsBehavior;
+      if (savedFilters.dateFrom)
+        restoredParams.created_date_after = dateQueryString(
+          new Date(savedFilters.dateFrom),
+        );
+      if (savedFilters.dateTo)
+        restoredParams.created_date_before = dateQueryString(
+          new Date(savedFilters.dateTo),
+        );
     }
 
     const hasAnyDates =
