@@ -698,14 +698,14 @@ export async function clickTabOrMenuItem(
 }
 
 /**
- * Opens the deterministic fixture encounter's Overview tab (served at the
- * `/updates` route), using the facility, patient, and encounter IDs saved during
- * setup (`tests/setup/patient.setup.ts`).
+ * Opens the fixture encounter's Overview tab (served at the `/updates` route),
+ * using the facility, patient, and encounter IDs saved during setup
+ * (`tests/setup/patient.setup.ts`).
  *
- * Prefer this over selecting an encounter from a UI list: picking a row from a
- * filtered listing flakes when fixture data changes (skill Critical Rule #2 —
- * never pick a random row from a UI list). The saved encounter is a writable
- * (planned / in-progress) encounter, so questionnaires and actions are available.
+ * The encounter is selected once during setup — pinned to a writable
+ * planned/in-progress encounter via its `status` filter — and reused here,
+ * instead of each spec re-querying a filtered listing. One selection point,
+ * consistent across specs, matching the `encounterShortcuts.spec.ts` convention.
  *
  * @param page - Playwright page instance
  */
