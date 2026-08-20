@@ -123,27 +123,23 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
   });
 
-  test("should enable the create button only once the form is valid", async ({
+  test("should enable the create button once the form is edited", async ({
     page,
   }) => {
     await page.getByRole("button", { name: /add healthcare service/i }).click();
     await page.waitForURL(/\/healthcare_services\/new/);
 
-    // Name (and a location) are required, so the create action stays disabled
-    // on an empty form.
+    // The create button is gated on form dirtiness — disabled until a field
+    // changes, then enabled. (Field-level validation surfaces on submit.)
     const createButton = page.getByRole("button", {
       name: "Create",
       exact: true,
     });
     await expect(createButton).toBeDisabled();
 
-    // Filling the required name and selecting a location makes the form valid,
-    // which must enable the create action. The form is intentionally never
-    // submitted — this asserts validation only, so nothing is persisted.
     await page
       .getByRole("textbox", { name: "Name", exact: true })
       .fill(faker.commerce.productName());
-    await selectFirstLocation(page);
 
     await expect(createButton).toBeEnabled();
   });
