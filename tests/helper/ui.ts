@@ -702,10 +702,10 @@ export async function clickTabOrMenuItem(
  * using the facility, patient, and encounter IDs saved during setup
  * (`tests/setup/patient.setup.ts`).
  *
- * The encounter is selected once during setup — pinned to a writable
- * planned/in-progress encounter via its `status` filter — and reused here,
- * instead of each spec re-querying a filtered listing. One selection point,
- * consistent across specs, matching the `encounterShortcuts.spec.ts` convention.
+ * The encounter is selected once during setup (which targets a writable
+ * planned/in-progress encounter) and reused here, instead of each spec
+ * re-querying a filtered listing. One selection point, consistent across specs,
+ * matching the `encounterShortcuts.spec.ts` convention.
  *
  * @param page - Playwright page instance
  */

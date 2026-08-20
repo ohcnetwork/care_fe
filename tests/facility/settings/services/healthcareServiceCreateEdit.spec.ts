@@ -45,7 +45,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Submit the form", async () => {
-      await page.getByRole("button", { name: /create/i }).click();
+      await page.getByRole("button", { name: "Create", exact: true }).click();
 
       await expect(
         page.getByText(/healthcare service created successfully/i),
@@ -86,7 +86,7 @@ test.describe("Healthcare Service Create & Edit", () => {
       // Select a location
       await selectFirstLocation(page);
 
-      await page.getByRole("button", { name: /create/i }).click();
+      await page.getByRole("button", { name: "Create", exact: true }).click();
       await expect(
         page.getByText(/healthcare service created successfully/i),
       ).toBeVisible({ timeout: 10000 });
@@ -131,7 +131,10 @@ test.describe("Healthcare Service Create & Edit", () => {
 
     // Name (and a location) are required, so the create action stays disabled
     // on an empty form.
-    const createButton = page.getByRole("button", { name: /create/i });
+    const createButton = page.getByRole("button", {
+      name: "Create",
+      exact: true,
+    });
     await expect(createButton).toBeDisabled();
 
     // Filling the required name and selecting a location makes the form valid,
