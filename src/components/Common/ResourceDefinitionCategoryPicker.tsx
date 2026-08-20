@@ -425,7 +425,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     return (
       <div className="flex items-center gap-1">
-        <Folder className="size-2.5 text-gray-500 flex-shrink-0" />
+        <Folder className="size-2.5 text-gray-500 shrink-0" />
         <span className="truncate">
           {pathParts.length === 0
             ? definition.title || t("select_category")
@@ -448,7 +448,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     return (
       <div className="flex items-center gap-1 min-w-0">
-        <span className="wrap-break-word text-wrap">
+        <span className="wrap-anywhere text-wrap text-left">
           {selectedDefinition.title}
         </span>
       </div>
@@ -845,7 +845,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             <DrawerTitle className="sr-only">
               {t(`select_${translationBaseKey}`) || t("select_item")}
             </DrawerTitle>
-            <div className="px-4 py-3 border-b flex-shrink-0">
+            <div className="px-4 py-3 border-b shrink-0">
               {!isMobile && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -865,6 +865,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                       size="sm"
                       onClick={handleClearSelection}
                       className="text-gray-500 hover:text-gray-700"
+                      type="button"
                     >
                       <X className="mr-1" />
                       {t("clear")}
@@ -880,7 +881,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 onValueChange={setActiveTab}
                 className="flex flex-col flex-1 min-h-0"
               >
-                <div className="px-4 py-2 border-b flex-shrink-0">
+                <div className="px-4 py-2 border-b shrink-0">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="search">{t("search")}</TabsTrigger>
                     <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
@@ -1006,6 +1007,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                         size="sm"
                         onClick={handleClearSelection}
                         className="h-4 px-2 text-xs text-gray-500 hover:text-gray-700"
+                        type="button"
                       >
                         <X className="mr-1" />
                         {t("clear")}
@@ -1134,6 +1136,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                       size="sm"
                       className="size-6 p-0 hover:bg-gray-200"
                       onClick={() => handleRemoveDefinition(def)}
+                      type="button"
                     >
                       <X className="size-4" />
                       <span className="sr-only">{t("remove")}</span>
