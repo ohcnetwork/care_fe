@@ -1,15 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { openFirstInProgressEncounter } from "tests/helper/ui";
-import { getFacilityId } from "tests/support/facilityId";
+import { expectToast, openFixtureEncounter } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Observations Tab", () => {
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await openFirstInProgressEncounter(page, facilityId);
+    await openFixtureEncounter(page);
   });
 
   test("should display the observations tab", async ({ page }) => {
@@ -45,7 +41,7 @@ test.describe("Encounter Observations Tab", () => {
     await combobox.scrollIntoViewIfNeeded();
     await combobox.click();
 
-    const search = page.locator("[cmdk-input]");
+    const search = page.locator('[data-slot="command-input"]');
     await search.waitFor({ state: "visible" });
     await search.fill("Headache");
     await page
@@ -54,11 +50,7 @@ test.describe("Encounter Observations Tab", () => {
       .click();
 
     await page.getByRole("button", { name: "Submit", exact: true }).click();
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText("Questionnaire submitted successfully"),
-    ).toBeVisible();
+    await expectToast(page, "Questionnaire submitted successfully");
   });
 
   test("should navigate between encounter tabs without errors", async ({

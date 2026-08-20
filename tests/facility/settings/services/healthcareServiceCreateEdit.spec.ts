@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { selectFromLocationMultiSelect } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -7,7 +7,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 // Selecting the first available location is repeated across the create and edit
 // flows, so keep it in one place.
-async function selectFirstLocation(page: import("@playwright/test").Page) {
+async function selectFirstLocation(page: Page) {
   const locationTrigger = page
     .getByRole("combobox")
     .filter({ hasText: /select locations/i })
@@ -117,7 +117,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
   });
 
-  test("should keep the create button disabled until the form is valid", async ({
+  test("should enable the create button only once the form is valid", async ({
     page,
   }) => {
     await page.getByRole("button", { name: /add healthcare service/i }).click();
@@ -125,6 +125,16 @@ test.describe("Healthcare Service Create & Edit", () => {
 
     // Name (and a location) are required, so the create action stays disabled
     // on an empty form.
-    await expect(page.getByRole("button", { name: /create/i })).toBeDisabled();
+    const createButton = page.getByRole("button", { name: /create/i });
+    await expect(createButton).toBeDisabled();
+
+    // Filling the required name and selecting a location makes the form valid,
+    // which must enable the create action.
+    await page
+      .getByRole("textbox", { name: /name/i })
+      .fill(faker.commerce.productName());
+    await selectFirstLocation(page);
+
+    await expect(createButton).toBeEnabled();
   });
 });
