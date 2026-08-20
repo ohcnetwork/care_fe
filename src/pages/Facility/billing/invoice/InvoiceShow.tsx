@@ -71,6 +71,8 @@ import {
   InvoiceChargeItemTitle,
   useMedicationDispenseData,
 } from "@/pages/Facility/billing/invoice/components/InvoiceChargeItemTitle";
+import { MarkInvoiceAsBalancedDialog } from "@/pages/Facility/billing/invoice/components/MarkInvoiceAsBalancedDialog";
+import { useInvoiceStatusActions } from "@/pages/Facility/billing/invoice/components/useInvoiceStatusActions";
 import { PaymentReconciliationSheet } from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -127,12 +129,7 @@ function InvoiceShow({
   const [chargeItemToRemove, setChargeItemToRemove] = useState<string | null>(
     null,
   );
-  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(
-    null,
-  );
-  const [activePaymentsDialogOpen, setActivePaymentsDialogOpen] =
-    useState(false);
+  const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
   const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
     useState(false);
   const queryClient = useQueryClient();
@@ -193,19 +190,6 @@ function InvoiceShow({
     },
   });
 
-  const { mutate: cancelInvoice, isPending: isCancelPending } = useMutation({
-    mutationFn: mutate(invoiceApi.cancelInvoice, {
-      pathParams: { facilityId, invoiceId },
-    }),
-    onSuccess: () => {
-      toast.success(t("invoice_cancelled_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-    },
-    onError: () => {
-      toast.error(t("failed_to_cancel_invoice"));
-    },
-  });
-
   const { mutate: updateInvoice, isPending: isUpdatingInvoice } = useMutation({
     mutationFn: mutate(invoiceApi.updateInvoice, {
       pathParams: { facilityId, invoiceId },
@@ -219,29 +203,21 @@ function InvoiceShow({
     },
   });
 
-  const { mutate: lockInvoice, isPending: isLockPending } = useMutation({
-    mutationFn: mutate(invoiceApi.lockInvoice, {
-      pathParams: { facilityId, invoiceId },
-    }),
+  const {
+    promptCancel,
+    promptEnteredInError,
+    lockInvoice,
+    unlockInvoice,
+    isCancelPending,
+    isLockPending,
+    isUnlockPending,
+    dialogs: invoiceStatusDialogs,
+  } = useInvoiceStatusActions({
+    facilityId,
+    invoiceId,
+    invoice,
     onSuccess: () => {
-      toast.success(t("invoice_locked_successfully"));
       queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-    },
-    onError: () => {
-      toast.error(t("failed_to_lock_invoice"));
-    },
-  });
-
-  const { mutate: unlockInvoice, isPending: isUnlockPending } = useMutation({
-    mutationFn: mutate(invoiceApi.unlockInvoice, {
-      pathParams: { facilityId, invoiceId },
-    }),
-    onSuccess: () => {
-      toast.success(t("invoice_unlocked_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
-    },
-    onError: () => {
-      toast.error(t("failed_to_unlock_invoice"));
     },
   });
 
@@ -285,72 +261,42 @@ function InvoiceShow({
   };
 
   const handleStatusChange = (status: InvoiceStatus) => {
-    if (
-      status === InvoiceStatus.cancelled ||
-      status === InvoiceStatus.entered_in_error ||
-      status === InvoiceStatus.balanced
-    ) {
-      // Check for active payments or credit notes when trying to cancel or mark as entered in error
-      if (
-        status === InvoiceStatus.cancelled ||
-        status === InvoiceStatus.entered_in_error
-      ) {
-        const hasActivePayments = !!invoice?.payments?.some(
-          (p) => p.status === PaymentReconciliationStatus.active,
-        );
-        const hasActiveCreditNotes = !!invoice?.credit_notes?.some(
-          (p) => p.status === PaymentReconciliationStatus.active,
-        );
-
-        if (hasActivePayments || hasActiveCreditNotes) {
-          setSelectedStatus(status);
-          setActivePaymentsDialogOpen(true);
-          return;
-        }
-      }
-
-      setSelectedStatus(status);
-      setReasonDialogOpen(true);
-    } else {
-      const data: InvoiceCreate = {
-        status,
-        payment_terms: invoice?.payment_terms,
-        note: invoice?.note,
-        account: invoice?.account.id || "",
-        charge_items: invoice?.charge_items.map((item) => item.id) || [],
-        issue_date:
-          status === InvoiceStatus.issued
-            ? invoice?.issue_date || dayjs().toISOString()
-            : invoice?.issue_date,
-      };
-
-      updateInvoice(data, {
-        onSuccess: () => {
-          if (status === InvoiceStatus.issued) {
-            openPaymentSheet();
-          }
-        },
-      });
+    if (status === InvoiceStatus.balanced) {
+      setMarkBalancedDialogOpen(true);
+      return;
     }
+
+    const data: InvoiceCreate = {
+      status,
+      payment_terms: invoice?.payment_terms,
+      note: invoice?.note,
+      account: invoice?.account.id || "",
+      charge_items: invoice?.charge_items.map((item) => item.id) || [],
+      issue_date:
+        status === InvoiceStatus.issued
+          ? invoice?.issue_date || dayjs().toISOString()
+          : invoice?.issue_date,
+    };
+
+    updateInvoice(data, {
+      onSuccess: () => {
+        if (status === InvoiceStatus.issued) {
+          openPaymentSheet();
+        }
+      },
+    });
   };
 
-  const handleDialogSubmit = () => {
-    if (!selectedStatus) return;
-
-    if (selectedStatus === InvoiceStatus.balanced) {
-      updateInvoice({
-        status: selectedStatus,
-        payment_terms: invoice?.payment_terms,
-        note: invoice?.note,
-        account: invoice?.account.id || "",
-        charge_items: invoice?.charge_items.map((item) => item.id) || [],
-        issue_date: invoice?.issue_date,
-      });
-    } else {
-      cancelInvoice({ reason: selectedStatus });
-    }
-
-    setReasonDialogOpen(false);
+  const handleMarkAsBalanced = () => {
+    updateInvoice({
+      status: InvoiceStatus.balanced,
+      payment_terms: invoice?.payment_terms,
+      note: invoice?.note,
+      account: invoice?.account.id || "",
+      charge_items: invoice?.charge_items.map((item) => item.id) || [],
+      issue_date: invoice?.issue_date,
+    });
+    setMarkBalancedDialogOpen(false);
   };
 
   const canEdit =
@@ -734,9 +680,7 @@ function InvoiceShow({
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() =>
-                            handleStatusChange(InvoiceStatus.cancelled)
-                          }
+                          onClick={() => promptCancel()}
                           disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
@@ -747,9 +691,7 @@ function InvoiceShow({
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
-                          onClick={() =>
-                            handleStatusChange(InvoiceStatus.entered_in_error)
-                          }
+                          onClick={() => promptEnteredInError()}
                           disabled={isCancelPending}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
@@ -1565,255 +1507,18 @@ function InvoiceShow({
           </AlertDialogContent>
         </AlertDialog>
 
-        <AlertDialog
-          open={reasonDialogOpen}
-          onOpenChange={(open) => {
-            setReasonDialogOpen(open);
-            if (!open) {
-              setTimeout(() => setSelectedStatus(null), 150);
-            }
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-4">
-                  {selectedStatus === InvoiceStatus.balanced ? (
-                    <>
-                      <p>{t("are_you_sure_want_to_mark_as_balanced")}</p>
-                      <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {t("invoice_total")}
-                          </span>
-                          <span className="font-medium text-gray-900">
-                            <MonetaryDisplay amount={invoice.total_gross} />
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {t("total_payments_received")}
-                          </span>
-                          <span className="font-medium text-green-600">
-                            <MonetaryDisplay amount={invoice.total_payments} />
-                          </span>
-                        </div>
-                        {parseFloat(invoice.total_credit_notes || "0") > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">
-                              {t("total_credit_notes")}
-                            </span>
-                            <span className="font-medium text-red-600">
-                              <MonetaryDisplay
-                                amount={-invoice.total_credit_notes}
-                              />
-                            </span>
-                          </div>
-                        )}
-                        <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {t("outstanding_balance")}
-                          </span>
-                          <span className="font-semibold text-gray-900">
-                            <MonetaryDisplay
-                              amount={subtract(
-                                subtract(
-                                  invoice.total_gross,
-                                  invoice.total_payments,
-                                ),
-                                multiply(
-                                  invoice.total_credit_notes || "0",
-                                  invoice.is_refund ? -1 : 1,
-                                ),
-                              )}
-                            />
-                          </span>
-                        </div>
-                      </div>
-                      {parseFloat(
-                        subtract(
-                          subtract(invoice.total_gross, invoice.total_payments),
-                          multiply(
-                            invoice.total_credit_notes || "0",
-                            invoice.is_refund ? -1 : 1,
-                          ),
-                        ).toString(),
-                      ) > 0 && (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex gap-2 items-start">
-                          <CareIcon
-                            icon="l-exclamation-triangle"
-                            className="text-yellow-600 size-5 mt-0.5 shrink-0"
-                          />
-                          <p className="text-sm text-yellow-800">
-                            {t("mark_as_balanced_warning")}
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  ) : selectedStatus === InvoiceStatus.entered_in_error ? (
-                    <p>{t("are_you_sure_want_to_mark_as_error")}</p>
-                  ) : (
-                    <p>{t("are_you_sure_want_to_cancel_invoice")}</p>
-                  )}
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDialogSubmit}
-                id="confirm-invoice-status-change"
-                className={cn(
-                  buttonVariants({
-                    variant:
-                      selectedStatus === InvoiceStatus.balanced
-                        ? "primary"
-                        : "destructive",
-                  }),
-                )}
-              >
-                {t("confirm")}
-                <ShortcutBadge actionId="submit-action" />
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <MarkInvoiceAsBalancedDialog
+          open={markBalancedDialogOpen}
+          onOpenChange={setMarkBalancedDialogOpen}
+          invoice={invoice}
+          onConfirm={handleMarkAsBalanced}
+          isPending={isUpdatingInvoice}
+          cancelShortcutActionId="cancel-action"
+          confirmShortcutActionId="submit-action"
+          confirmButtonId="confirm-invoice-status-change"
+        />
 
-        <AlertDialog
-          open={activePaymentsDialogOpen}
-          onOpenChange={setActivePaymentsDialogOpen}
-        >
-          <AlertDialogContent className="max-w-lg">
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {selectedStatus === InvoiceStatus.entered_in_error
-                  ? t("mark_as_entered_in_error_warning")
-                  : t("cancel_invoice_warning")}
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-4">
-                  <p>
-                    {t("invoice_has_active_payments_or_credit_notes_warning")}
-                  </p>
-
-                  {/* Active Payments Summary */}
-                  {invoice?.payments?.filter(
-                    (p) => p.status === PaymentReconciliationStatus.active,
-                  ).length > 0 && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                      <div className="text-sm font-medium text-gray-700">
-                        {t("active_payments")}
-                      </div>
-                      {invoice.payments
-                        .filter(
-                          (p) =>
-                            p.status === PaymentReconciliationStatus.active,
-                        )
-                        .map((payment, index) => (
-                          <div
-                            key={payment.id}
-                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
-                          >
-                            <span className="text-gray-600">
-                              {index + 1}.{" "}
-                              <span className="font-mono text-xs">
-                                {payment.id}
-                              </span>
-                              {" - "}
-                              {
-                                PAYMENT_RECONCILIATION_METHOD_MAP[
-                                  payment.method
-                                ]
-                              }
-                              {payment.reference_number &&
-                                ` (${payment.reference_number})`}
-                            </span>
-                            <span className="font-medium text-gray-900">
-                              <MonetaryDisplay amount={payment.amount} />
-                            </span>
-                          </div>
-                        ))}
-                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
-                        <span className="text-gray-700">{t("total")}</span>
-                        <span className="text-green-600">
-                          <MonetaryDisplay amount={invoice.total_payments} />
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Active Credit Notes Summary */}
-                  {invoice?.credit_notes?.filter(
-                    (p) => p.status === PaymentReconciliationStatus.active,
-                  ).length > 0 && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-                      <div className="text-sm font-medium text-gray-700">
-                        {t("active_credit_notes")}
-                      </div>
-                      {invoice.credit_notes
-                        .filter(
-                          (p) =>
-                            p.status === PaymentReconciliationStatus.active,
-                        )
-                        .map((creditNote, index) => (
-                          <div
-                            key={creditNote.id}
-                            className="flex justify-between text-sm border-t border-gray-100 pt-1"
-                          >
-                            <span className="text-gray-600">
-                              {index + 1}.{" "}
-                              <span className="font-mono text-xs">
-                                {creditNote.id}
-                              </span>
-                              {" - "}
-                              {
-                                PAYMENT_RECONCILIATION_METHOD_MAP[
-                                  creditNote.method
-                                ]
-                              }
-                              {creditNote.reference_number &&
-                                ` (${creditNote.reference_number})`}
-                            </span>
-                            <span className="font-medium text-gray-900">
-                              <MonetaryDisplay amount={creditNote.amount} />
-                            </span>
-                          </div>
-                        ))}
-                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2 font-medium">
-                        <span className="text-gray-700">{t("total")}</span>
-                        <span className="text-red-600">
-                          <MonetaryDisplay
-                            amount={invoice.total_credit_notes}
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setSelectedStatus(null)}>
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setActivePaymentsDialogOpen(false);
-                  setReasonDialogOpen(true);
-                }}
-                className={cn(buttonVariants({ variant: "destructive" }))}
-              >
-                {t("proceed")}
-                <ShortcutBadge actionId="submit-action" />
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {invoiceStatusDialogs}
 
         <EditInvoiceDialog
           open={isEditDialogOpen}
