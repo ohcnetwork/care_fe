@@ -48,6 +48,7 @@ import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { DottedDivider } from "@/components/careui/dotted-divider";
@@ -342,6 +343,7 @@ export function PaymentStatusBanner({
                 >
                   <ReceiptIcon className="size-4" />
                   {t("view_invoice")}
+                  <ShortcutBadge actionId="issue-invoice" />
                 </Link>
               </Button>
               {!readOnly && (
@@ -352,6 +354,7 @@ export function PaymentStatusBanner({
                 >
                   <SendIcon className="size-4" />
                   {t("issue_invoice")}
+                  <ShortcutBadge actionId="enter-action" />
                 </Button>
               )}
               {!readOnly && (
@@ -549,6 +552,7 @@ export function PaymentStatusBanner({
                   >
                     <PrinterIcon className="size-4" />
                     {t("print_invoice")}
+                    <ShortcutBadge actionId="print-button" />
                   </Link>
                 </Button>
                 {invoice.status === InvoiceStatus.issued && (
@@ -608,6 +612,7 @@ export function PaymentStatusBanner({
                   >
                     <PrinterIcon className="size-4" />
                     {t("invoice")}
+                    <ShortcutBadge actionId="print-button" />
                   </Link>
                 </Button>
                 {accountId && (
@@ -619,6 +624,7 @@ export function PaymentStatusBanner({
                     >
                       <BanknoteIcon className="size-4" />
                       {t("collect_payment")}
+                      <ShortcutBadge actionId="enter-action" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

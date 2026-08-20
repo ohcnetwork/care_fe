@@ -59,6 +59,7 @@ import {
   round,
   roundWhole,
 } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
@@ -369,6 +370,7 @@ const PrescriptionSummary = ({
           >
             <PrinterIcon />
             {t("print")}
+            <ShortcutBadge actionId="print-button" />
           </Link>
         </Button>
         <DropdownMenu>

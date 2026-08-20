@@ -66,7 +66,8 @@
     { "key": "shift+r", "action": "medication-return", "description": "Return Medication", "when": "always" },
     { "key": "b", "action": "billing-action", "description": "Billing related action", "when": "always" },
     { "key": "shift+p", "action": "view-prescriptions", "description": "View Prescription", "when": "always" },
-    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" }
+    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" },
+    { "key": "h", "action": "put-on-hold-action", "description": "Put on Hold", "when": "always" }
   ],
 
   "facility:pharmacy:supply-delivery": [

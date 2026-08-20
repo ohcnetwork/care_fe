@@ -815,6 +815,7 @@ export function DispenseOrderView({
               >
                 <PauseCircle className="size-4" />
                 {t("put_on_hold")}
+                <ShortcutBadge actionId="put-on-hold-action" />
               </Button>
             )}
             <div className="flex">
@@ -834,7 +835,7 @@ export function DispenseOrderView({
                       disabled={isUpdatingStatus || !canCompleteDispense}
                     >
                       {t("complete_dispense")}
-                      <ShortcutBadge actionId="dispense-button" />
+                      <ShortcutBadge actionId="submit-action" />
                     </Button>
                   </span>
                 </TooltipTrigger>
@@ -936,6 +937,7 @@ export function DispenseOrderView({
                   basePath="/"
                 >
                   {t("prescription_queue")}
+                  <ShortcutBadge actionId="cancel-action" />
                 </Link>
               </Button>
               <DropdownMenu>
@@ -1017,6 +1019,7 @@ export function DispenseOrderView({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isUpdatingStatus}>
               {t("stay_on_this_page")}
+              <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
@@ -1027,6 +1030,7 @@ export function DispenseOrderView({
             >
               <ArrowLeftRight className="size-4" />
               {t("put_on_hold")}
+              <ShortcutBadge actionId="submit-action" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

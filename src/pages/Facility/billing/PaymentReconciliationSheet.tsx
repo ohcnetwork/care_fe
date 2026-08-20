@@ -936,7 +936,7 @@ function PaymentReconciliationSuccessView({
           >
             <EqualApproximatelyIcon className="size-4" />
             {t("mark_as_balanced")}
-            <ShortcutBadge actionId="mark-as-balanced" />
+            <ShortcutBadge actionId="enter-action" />
           </Button>
         )}
       </div>

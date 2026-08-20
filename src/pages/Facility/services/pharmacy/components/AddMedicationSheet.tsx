@@ -39,8 +39,9 @@ import {
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
-import { isLessThanOrEqual, isPositive, roundWhole } from "@/Utils/decimal";
 import { useInventoryItemsAutoSelect } from "@/pages/Facility/services/pharmacy/billMedications/utils/useInventoryItemsAutoSelect";
+import { isLessThanOrEqual, isPositive, roundWhole } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 const EMPTY_INSTRUCTION: MedicationRequestDosageInstruction = {
   as_needed_boolean: true,
@@ -509,6 +510,7 @@ export function AddMedicationSheet({
               }
             >
               {t("add_medication")}
+              <ShortcutBadge actionId="submit-action" />
             </Button>
           </SheetFooter>
         </SheetContent>

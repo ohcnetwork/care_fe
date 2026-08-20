@@ -55,6 +55,54 @@ export function formatKeyboardShortcut(key: string): string {
 // Debounce map to prevent multiple rapid clicks
 const clickDebounceMap = new Map<string, number>();
 
+const INTERACTIVE_HOST_SELECTOR =
+  "button, [role='button'], a, [data-shortcut-target]";
+
+const OPEN_OVERLAY_SELECTOR = [
+  "[role='dialog'][data-state='open']",
+  "[role='alertdialog'][data-state='open']",
+  "[data-radix-popper-content-wrapper] [data-state='open']",
+].join(", ");
+
+function isRenderedAndEnabled(host: HTMLElement): boolean {
+  if (!host.isConnected || host.getClientRects().length === 0) {
+    return false;
+  }
+  if ("disabled" in host && (host as { disabled?: boolean }).disabled) {
+    return false;
+  }
+  return host.getAttribute("aria-disabled") !== "true";
+}
+
+function resolveInteractiveHosts(shortcutId: string): HTMLElement[] {
+  const badges = document.querySelectorAll(
+    `[data-shortcut-id='${CSS.escape(shortcutId)}']`,
+  );
+  const hosts: HTMLElement[] = [];
+
+  badges.forEach((badge) => {
+    const host = badge.closest(INTERACTIVE_HOST_SELECTOR) as HTMLElement | null;
+    if (host && !hosts.includes(host) && isRenderedAndEnabled(host)) {
+      hosts.push(host);
+    }
+  });
+
+  return hosts;
+}
+
+// Among enabled candidates, prefer the one inside the topmost (last-rendered) open overlay
+function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
+  let lastInOverlay: HTMLElement | undefined;
+
+  for (const host of hosts) {
+    if (host.closest(OPEN_OVERLAY_SELECTOR)) {
+      lastInOverlay = host;
+    }
+  }
+
+  return lastInOverlay ?? hosts[0];
+}
+
 export function shortcutActionHandler(shortcutId: string) {
   return () => {
     const now = Date.now();
@@ -67,12 +115,10 @@ export function shortcutActionHandler(shortcutId: string) {
 
     clickDebounceMap.set(shortcutId, now);
 
-    const element = document.querySelector(
-      `[data-shortcut-id='${shortcutId}']`,
-    ) as HTMLElement;
+    const host = resolveBestHost(resolveInteractiveHosts(shortcutId));
 
-    if (element) {
-      element.click();
+    if (host) {
+      host.click();
     }
   };
 }
