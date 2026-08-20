@@ -306,6 +306,15 @@ const careConfig = {
     ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
     : [],
   /**
+   * Supplementary sidebar links from `REACT_CUSTOM_NAV_LINKS` env JSON.
+   * Each link: name, url, optional placement and openInNewTab.
+   * Icons are auto-assigned from URL (Link / ExternalLink); no icon field.
+   * Absolute http(s) URLs are treated as external automatically.
+   */
+  customNavLinks: env.REACT_CUSTOM_NAV_LINKS
+    ? JSON.parse(env.REACT_CUSTOM_NAV_LINKS)
+    : [],
+  /**
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",

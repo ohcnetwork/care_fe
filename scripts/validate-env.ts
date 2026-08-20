@@ -4,6 +4,10 @@ import {
   ENCOUNTER_DISCHARGE_DISPOSITION,
   EncounterDischargeDisposition,
 } from "../src/types/emr/encounter/encounter";
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import { customNavLinksSchema } from "../src/types/nav/customNavLink";
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import { isSafeNavUrl } from "../src/Utils/url";
 
 import { z } from "zod";
 
@@ -53,6 +57,22 @@ const logoSchemaString = jsonAsStringSchema
 const customShortcutsSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
   .pipe(customShortcutSchema);
+
+const customNavLinksSchemaString = jsonAsStringSchema
+  .transform((val) => JSON.parse(val))
+  .pipe(customNavLinksSchema)
+  .superRefine((links, ctx) => {
+    links.forEach((link, index) => {
+      if (!isSafeNavUrl(link.url)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "url must be an internal app path starting with / (and not //) or an absolute http(s) URL",
+          path: [index, "url"],
+        });
+      }
+    });
+  });
 
 const VALID_ROUNDING_METHODS = [
   "ROUND_UP",
@@ -159,6 +179,7 @@ const envSchema = z
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
     REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
+    REACT_CUSTOM_NAV_LINKS: customNavLinksSchemaString.optional(),
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
     REACT_APP_UPDATE_CHECK_INTERVAL: numberAsString.optional(),
