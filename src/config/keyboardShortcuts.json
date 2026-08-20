@@ -88,11 +88,6 @@
     { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" }
   ],
 
-  "facility:billing:payment": [
-    { "key": "shift+enter", "action": "submit-action", "description": "Record Payment/Credit Note", "when": "always" },
-    { "key": "shift+enter", "action": "mark-as-balanced", "description": "Mark as Balanced", "when": "always" }
-  ],
-
   "facility:account:show": [
     { "key": "s", "action": "settle-close-account", "description": "Settle and Close Account", "when": "always" },
     { "key": "i", "action": "create-invoice", "description": "Create Invoice", "when": "always" },

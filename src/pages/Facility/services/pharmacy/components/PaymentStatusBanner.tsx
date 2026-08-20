@@ -306,6 +306,7 @@ export function PaymentStatusBanner({
               disabled={isCreatingInvoice}
             >
               {t("create_invoice")}
+              <ShortcutBadge actionId="enter-action" />
             </Button>
           )}
         </div>
@@ -343,7 +344,6 @@ export function PaymentStatusBanner({
                 >
                   <ReceiptIcon className="size-4" />
                   {t("view_invoice")}
-                  <ShortcutBadge actionId="issue-invoice" />
                 </Link>
               </Button>
               {!readOnly && (

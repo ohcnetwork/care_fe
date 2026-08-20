@@ -64,6 +64,11 @@ const OPEN_OVERLAY_SELECTOR = [
   "[data-radix-popper-content-wrapper] [data-state='open']",
 ].join(", ");
 
+const MOUNTED_OVERLAY_SELECTOR = "[role='dialog'], [role='alertdialog']";
+
+const DISABLED_HOST_SELECTOR =
+  "[disabled], [aria-disabled='true'], [data-disabled]";
+
 function isRenderedAndEnabled(host: HTMLElement): boolean {
   if (!host.isConnected || host.getClientRects().length === 0) {
     return false;
@@ -71,23 +76,23 @@ function isRenderedAndEnabled(host: HTMLElement): boolean {
   if ("disabled" in host && (host as { disabled?: boolean }).disabled) {
     return false;
   }
-  return host.getAttribute("aria-disabled") !== "true";
+  return !host.matches(DISABLED_HOST_SELECTOR);
 }
 
 function resolveInteractiveHosts(shortcutId: string): HTMLElement[] {
   const badges = document.querySelectorAll(
     `[data-shortcut-id='${CSS.escape(shortcutId)}']`,
   );
-  const hosts: HTMLElement[] = [];
+  const hosts = new Set<HTMLElement>();
 
   badges.forEach((badge) => {
     const host = badge.closest(INTERACTIVE_HOST_SELECTOR) as HTMLElement | null;
-    if (host && !hosts.includes(host) && isRenderedAndEnabled(host)) {
-      hosts.push(host);
+    if (host && !hosts.has(host) && isRenderedAndEnabled(host)) {
+      hosts.add(host);
     }
   });
 
-  return hosts;
+  return [...hosts];
 }
 
 // Among enabled candidates, prefer the one inside the topmost (last-rendered) open overlay
@@ -100,7 +105,15 @@ function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
     }
   }
 
-  return lastInOverlay ?? hosts[0];
+  if (lastInOverlay) {
+    return lastInOverlay;
+  }
+
+  if (document.querySelector(MOUNTED_OVERLAY_SELECTOR)) {
+    return undefined;
+  }
+
+  return hosts[0];
 }
 
 export function shortcutActionHandler(shortcutId: string) {

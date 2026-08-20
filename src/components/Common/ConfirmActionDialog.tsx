@@ -27,7 +27,6 @@ interface ConfirmActionDialogProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   hideCancel?: boolean;
-  confirmationShortcutActionId?: string;
 }
 
 export default function ConfirmActionDialog({
@@ -41,7 +40,6 @@ export default function ConfirmActionDialog({
   variant = "primary",
   disabled,
   hideCancel,
-  confirmationShortcutActionId = "submit-action",
 }: ConfirmActionDialogProps) {
   const { t } = useTranslation();
   return (
@@ -61,7 +59,7 @@ export default function ConfirmActionDialog({
             disabled={disabled}
           >
             {confirmText}
-            <ShortcutBadge actionId={confirmationShortcutActionId} />
+            <ShortcutBadge actionId="submit-action" />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
