@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
+import { evaluateShortcutCondition } from "@/hooks/utils/evaluateShortcutCondition";
 
 export interface ShortcutConditions {
   readOnly?: boolean;
@@ -44,33 +45,8 @@ export function useKeyboardShortcuts(
   }, [contexts]);
 
   const evaluateWhenCondition = useCallback(
-    (whenClause: string): boolean => {
-      if (whenClause === "always") return true;
-
-      const evalContext = {
-        canEdit: conditions.canEdit || false,
-        canCreate: conditions.canCreate || false,
-        readOnly: conditions.readOnly || false,
-        questionnairesEnabled: conditions.questionnairesEnabled || false,
-        ...conditions, // Allow custom conditions
-      };
-
-      try {
-        let expression = whenClause;
-        Object.entries(evalContext).forEach(([key, value]) => {
-          const regex = new RegExp(`\\b${key}\\b`, "g");
-          expression = expression.replace(regex, String(value));
-        });
-
-        return new Function(`return ${expression}`)();
-      } catch (error) {
-        console.warn(
-          `Failed to evaluate shortcut condition: ${whenClause}`,
-          error,
-        );
-        return false;
-      }
-    },
+    (whenClause: string): boolean =>
+      evaluateShortcutCondition(whenClause, conditions),
     [conditions],
   );
 
