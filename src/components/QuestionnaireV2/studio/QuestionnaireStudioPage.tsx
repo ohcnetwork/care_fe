@@ -1,7 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -45,9 +53,16 @@ import {
   findTopLevelIndex,
   numberQuestions,
 } from "@/components/QuestionnaireV2/shared/questionTree";
+import {
+  getStructuredTypesVersion,
+  subscribeToStructuredTypes,
+} from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
-import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
+import {
+  QuestionnaireScope,
+  scopeCreateFields,
+} from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
@@ -66,12 +81,9 @@ const INITIAL_STATE: BuilderState = {
 };
 
 /**
- * The WYSIWYG questionnaire builder: left outline, live canvas rendered by
- * the full renderer (form/), right inspector. Replaces the old
- * QuestionnaireBuilderPage on the same routes and keeps its contracts: all
- * edit state in builderReducer, `?mode=preview` / `?import=1` params, the
- * dirty-guarded re-seed, save through `buildUpdateBody` as one full PUT —
- * now including the questionnaire metadata edited in Form settings.
+ * WYSIWYG questionnaire builder: left outline, live form canvas, and right
+ * inspector. Edit state lives in `builderReducer`; saves use `buildUpdateBody`
+ * as one full PUT including questionnaire metadata from Form settings.
  */
 export function QuestionnaireStudioPage({
   scope,
@@ -91,7 +103,18 @@ export function QuestionnaireStudioPage({
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
-  const [state, dispatch] = useReducer(builderReducer, INITIAL_STATE);
+  const [state, reactDispatch] = useReducer(builderReducer, INITIAL_STATE);
+
+  // Counts user edits only, letting `onSaved` detect whether anything changed
+  // while the PUT was in flight. Resets are exempt because they come from load,
+  // background re-seed, Discard and post-save synchronization.
+  const dispatchSeqRef = useRef(0);
+  const dispatch: typeof reactDispatch = (action) => {
+    if (action.type !== "reset") {
+      dispatchSeqRef.current += 1;
+    }
+    reactDispatch(action);
+  };
 
   useEffect(() => {
     // Skip while the user has unsaved edits (`state.dirty`) — otherwise a
@@ -127,7 +150,7 @@ export function QuestionnaireStudioPage({
 
   const [queryParams, setQueryParams] = useQueryParams();
   const { mode, import: importParam } = queryParams;
-  const [view, setView] = useState<"edit" | "preview">(
+  const [requestedView, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
   );
   const [importOpen, setImportOpen] = useState(importParam === "1");
@@ -154,6 +177,12 @@ export function QuestionnaireStudioPage({
 
   const { canWrite, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
+
+  // Read-only users get preview only — including on an `/edit` deep link.
+  // The edit surface has nothing to save through (StudioTopBar hides Save and
+  // Discard), so offering it would collect edits that can never be persisted
+  // and then prompt about them on the way out.
+  const view = canWrite ? requestedView : "preview";
 
   // Creating or importing questions selects them in the reducer — the
   // inspector must follow, or it would stay on Form settings showing
@@ -191,10 +220,34 @@ export function QuestionnaireStudioPage({
     [questionnaire, state.questions, metaTitle, metaDescription],
   );
 
-  const issues = useMemo(
-    () => findInvalidQuestions(state.questions),
-    [state.questions],
+  // The unknown-structured-type rule reads the plugin registry, which fills
+  // in only after the federation manifests resolve — later than the first
+  // render of a cold-loaded questionnaire. Without re-running on that, a
+  // plugin-typed question would show false "Unknown structured type"
+  // warnings (outline icons, canvas chips, issues popover) until an edit
+  // happened to invalidate the memo.
+  const structuredTypesVersion = useSyncExternalStore(
+    subscribeToStructuredTypes,
+    getStructuredTypesVersion,
+    getStructuredTypesVersion,
   );
+  // `findInvalidQuestions` walks the whole question tree with every save
+  // rule on every render — a full DFS + per-rule scans on EACH keystroke,
+  // since `state.questions` gets a fresh identity per dispatch. Deferring
+  // the input lets typing stay unblocked while this recompute lags a tick
+  // behind; it feeds only the issues POPOVER/outline warnings display, not
+  // Save's gating — `handleSave` below calls `findFirstInvalidQuestion`
+  // directly on the live (non-deferred) `state.questions`, so a click
+  // always blocks on the CURRENT tree even while this memo is still
+  // catching up.
+  const deferredQuestions = useDeferredValue(state.questions);
+  const issues = useMemo(() => {
+    // Referenced so the dependency is a real read, not one exhaustive-deps
+    // would call spurious: the registry lookup happens inside
+    // `findInvalidQuestions`, where the rule cannot see it.
+    void structuredTypesVersion;
+    return findInvalidQuestions(deferredQuestions);
+  }, [deferredQuestions, structuredTypesVersion]);
   // First failing rule per question — powers the outline warning icons and
   // the canvas error chips alongside the top bar's popover.
   const issueKeysByQuestionId = useMemo(
@@ -205,21 +258,78 @@ export function QuestionnaireStudioPage({
     [issues],
   );
 
+  // Snapshot of `dispatchSeqRef` taken the instant the save PUT is fired
+  // (see `handleSave`) — compared against the live ref in `onSaved` below.
+  const saveDispatchSeqRef = useRef(0);
+  // The metadata (`title`/`slug`/`description`/`status`) actually included
+  // in that same PUT — the form side's equivalent snapshot. A plain
+  // `form.formState.isDirty` boolean can't do this job: it reads the same
+  // `true` both before AND after a SECOND in-flight edit lands on a field
+  // that was already dirty when Save was clicked (e.g. title "A" → Save →
+  // still in flight → title "B"), so a before/after equality check on it
+  // would miss that second edit and let the reset clobber "B". Comparing
+  // the actual submitted values against the form's LIVE values instead
+  // (via `form.getValues()`, an uncontrolled ref read — never stale)
+  // catches every case: unchanged, changed once, or changed again.
+  const saveMetaRef = useRef<DetailFormValues | null>(null);
+  const metaMatches = (a: DetailFormValues, b: DetailFormValues) =>
+    a.title === b.title &&
+    a.slug === b.slug &&
+    a.description === b.description &&
+    a.status === b.status;
+
   const { mutate: save, isPending } = useUpdateQuestionnaire(id, (updated) => {
-    dispatch({
-      type: "reset",
-      questions: updated.questions,
-      keepSelectedId: state.selectedId,
-    });
-    form.reset({
-      title: updated.title,
-      slug: updated.slug,
-      description: updated.description ?? "",
-      status: updated.status,
-    });
+    // A reducer dispatch landed while this PUT was in flight (the author
+    // kept editing — e.g. a question change) — `state` is now ahead of
+    // what `updated` reflects, so resetting to it would silently discard
+    // those in-flight edits.
+    const questionsEditedDuringFlight =
+      dispatchSeqRef.current !== saveDispatchSeqRef.current;
+    // Same idea for the metadata form — its live values now differ from
+    // what this PUT actually submitted, so resetting it would discard an
+    // in-flight Form-settings edit (Title/Slug/Description/Status).
+    const metaEditedDuringFlight =
+      !saveMetaRef.current ||
+      !metaMatches(saveMetaRef.current, form.getValues());
+
+    // The two sides are independent: an edit to only one must not block
+    // the other's reset. The cache write in useUpdateQuestionnaire's
+    // onSuccess (setQueryData) already ran before this callback, so
+    // metadata read straight from the query cache — the revision badge
+    // and the Save button's next-version chip, both driven by the
+    // `questionnaire` prop, not `state`/`form` — updates regardless of
+    // what either check below decides.
+    if (!questionsEditedDuringFlight) {
+      dispatch({
+        type: "reset",
+        questions: updated.questions,
+        keepSelectedId: state.selectedId,
+      });
+    }
+    if (!metaEditedDuringFlight) {
+      form.reset({
+        title: updated.title,
+        slug: updated.slug,
+        description: updated.description ?? "",
+        status: updated.status,
+      });
+    }
   });
 
   const backPath = `${scope.basePath}/${id}`;
+
+  // Stable identity — the provider's context value is keyed on it, so an
+  // inline literal would re-render every consumer of the form context on
+  // each keystroke.
+  const rendererSubject = useMemo(
+    () => ({ facilityId: scope.facilityId }),
+    [scope.facilityId],
+  );
+
+  // Valuesets created from the inspector are filed under the mount's own auth
+  // context: instance-context creation is superuser-only, so a facility mount
+  // authoring an instance valueset would 403 for every facility admin.
+  const valueSetContext = useMemo(() => scopeCreateFields(scope), [scope]);
 
   const revealQuestion = (questionId: string) => {
     dispatch({ type: "select", id: questionId });
@@ -244,7 +354,13 @@ export function QuestionnaireStudioPage({
     }
 
     form.handleSubmit(
-      (meta) =>
+      (meta) => {
+        // Snapshot right before the PUT fires (mutate() starts the request
+        // synchronously) — any dispatch, or any form field left differing
+        // from `meta` after this point, is an in-flight edit `onSaved`
+        // must not clobber.
+        saveDispatchSeqRef.current = dispatchSeqRef.current;
+        saveMetaRef.current = meta;
         save(
           buildUpdateBody(questionnaire, {
             questions: state.questions,
@@ -253,7 +369,8 @@ export function QuestionnaireStudioPage({
             description: meta.description,
             status: meta.status,
           }),
-        ),
+        );
+      },
       () => {
         // Metadata invalid (e.g. slug out of bounds) — surface the fields.
         setView("edit");
@@ -319,7 +436,7 @@ export function QuestionnaireStudioPage({
     <QuestionnaireFormProvider
       questionnaire={draft}
       mode="preview"
-      subject={{ facilityId: scope.facilityId }}
+      subject={rendererSubject}
       revealHidden={editing}
       inert={editing}
     >
@@ -435,6 +552,8 @@ export function QuestionnaireStudioPage({
                   question={selectedQuestion}
                   number={selectedNumber}
                   allQuestions={state.questions}
+                  subjectType={questionnaire.subject_type}
+                  valueSetContext={valueSetContext}
                   dispatch={studioDispatch}
                 />
               )}

@@ -28,16 +28,23 @@ import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/Questio
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
+import { ValueSetCreateContext } from "@/components/ValueSet/ValueSetEditor";
 import { BehaviourToggles } from "./BehaviourToggles";
 
 import { Question } from "@/types/questionnaire/question";
+import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 import { plainWordsSummary, questionsByLinkId } from "./conditionSummary";
 
-/** Types with a question-level unit, per the legacy editor's UNIT_TYPES —
- *  quantity configures its unit inside AnswerOptionsEditor; these get the
- *  plain unit row (shown as a `({code})` label suffix in the renderer). */
+/** Types with a question-level unit row. Quantity configures its default unit
+ *  inside AnswerOptionsEditor. */
 const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
+
+/** Every type that keeps a question-level `unit` — the plain-row types
+ *  above plus quantity, whose AnswerOptionsEditor sets `unit` as the
+ *  picked valueset's default. Used by `handleTypeChange` to decide when a
+ *  unit must be cleared on a type switch. */
+const UNIT_BEARING_TYPES: Question["type"][] = [...UNIT_ROW_TYPES, "quantity"];
 
 const TAB_TRIGGER_CLASSES =
   "rounded-none border-b-3 border-transparent bg-transparent px-2.5 py-2 text-sm font-semibold text-gray-600 shadow-none data-[state=active]:border-b-primary-700 data-[state=active]:bg-transparent data-[state=active]:text-primary-800 data-[state=active]:shadow-none";
@@ -46,6 +53,10 @@ interface QuestionInspectorProps {
   question: Question;
   number: string;
   allQuestions: Question[];
+  subjectType: SubjectType;
+  /** Auth context for valuesets authored from the options editor — the
+   *  mount's own, so a facility admin's create isn't rejected. */
+  valueSetContext: ValueSetCreateContext;
   dispatch: Dispatch<BuilderAction>;
 }
 
@@ -61,6 +72,8 @@ export function QuestionInspector({
   question,
   number,
   allQuestions,
+  subjectType,
+  valueSetContext,
   dispatch,
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
@@ -78,12 +91,28 @@ export function QuestionInspector({
       toast.error(t("group_type_change_blocked"));
       return;
     }
-    // Mirrors the legacy editor's type-change handling: switching to a type
-    // that never offers Repeats also clears a previously-set flag, so it
-    // can't linger invisibly once the chip disappears.
+    // Switching to a type that never offers Repeats also clears a previously set
+    // flag, so it can't linger invisibly once the chip disappears.
     const nextType = patch.type ?? question.type;
     if (question.repeats && NON_REPEATABLE_TYPES.includes(nextType)) {
       patch = { ...patch, repeats: false };
+    }
+    // Explicit `undefined` clears fields the new type no longer supports. A
+    // stale `structured_type` can route fill-time structured plumbing down the
+    // wrong path, while structured selections set `type` and `structured_type`
+    // together.
+    if (nextType !== "structured") {
+      patch = { ...patch, structured_type: undefined };
+    }
+    if (nextType !== "choice") {
+      patch = {
+        ...patch,
+        answer_option: undefined,
+        answer_value_set: undefined,
+      };
+    }
+    if (!UNIT_BEARING_TYPES.includes(nextType)) {
+      patch = { ...patch, unit: undefined };
     }
     onChange(patch);
   };
@@ -151,11 +180,7 @@ export function QuestionInspector({
           </TabsList>
 
           <TabsContent value="question" className="space-y-4 p-4">
-            {/* Reference field order: question text, helper text, answer
-                type. The visible label keeps the accessible name every spec
-                relies on ("Question Title"); the type picker stays the
-                first combobox even though it now sits third — the two
-                fields above it are plain textboxes. */}
+            {/* The visible label keeps "Question Title" as the accessible name. */}
             <div className="space-y-1.5">
               <Label
                 htmlFor={`question-title-${question.id}`}
@@ -202,12 +227,17 @@ export function QuestionInspector({
               <QuestionTypePicker
                 value={question.type}
                 structuredType={question.structured_type}
+                subjectType={subjectType}
                 onChange={handleTypeChange}
               />
             </div>
 
             {(question.type === "choice" || question.type === "quantity") && (
-              <AnswerOptionsEditor question={question} onChange={onChange} />
+              <AnswerOptionsEditor
+                question={question}
+                onChange={onChange}
+                valueSetContext={valueSetContext}
+              />
             )}
 
             {UNIT_ROW_TYPES.includes(question.type) && (

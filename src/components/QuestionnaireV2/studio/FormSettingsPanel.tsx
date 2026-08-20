@@ -31,12 +31,9 @@ export interface FormSettingsPanelProps {
 }
 
 /**
- * The inspector's questionnaire-level state (the reference design's "Form
- * settings"): identity fields, status, subject type, organizations, clone
- * and JSON export — composed from the manage components so the detail page
- * and the studio cannot drift. Note organizations keep their own
- * immediate-save semantics (same as the detail page), independent of the
- * Save Changes flow.
+ * The inspector's questionnaire-level state: identity fields, status, subject
+ * type, organizations, clone and JSON export. Organizations keep their own
+ * immediate-save semantics, independent of the Save Changes flow.
  */
 export function FormSettingsPanel({
   scope,

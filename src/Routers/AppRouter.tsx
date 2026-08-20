@@ -50,8 +50,13 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
   /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
-  // Questionnaire form routes
+  // Questionnaire fill routes (fullscreen v2 fill experience)
   /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/patient\/[^/]+\/consultation$/,
+  /^\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/settings\/devices\/[^/]+\/questionnaire(\/[^/]+)?$/,
   // Questionnaire studio (fullscreen builder) routes
   /^\/facility\/[^/]+\/settings\/questionnaires\/[^/]+\/edit$/,
   /^\/admin\/questionnaires\/[^/]+\/edit$/,

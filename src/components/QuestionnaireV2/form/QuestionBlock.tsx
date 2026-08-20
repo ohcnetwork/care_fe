@@ -1,18 +1,24 @@
 import { Plus, X } from "lucide-react";
+import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
-import { emptyEntry } from "@/components/QuestionnaireV2/renderer/inputs/withEntryAt";
-import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/renderer/questionTypeRegistry";
-import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/renderer/sanitizeStylingClasses";
+import { emptyEntry } from "@/components/QuestionnaireV2/form/engine/inputs/withEntryAt";
+import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import {
+  EMPTY_ROW_KEYS,
+  dropRowKey,
+  growRowKeys,
+} from "@/components/QuestionnaireV2/form/engine/rowKeys";
+import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
   useQuestionErrors,
   useQuestionResponse,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -39,17 +45,24 @@ export interface QuestionBlockProps {
  * slot, sanitized styling), new layout, plus the two canvas seams: chrome
  * wrapping and `revealHidden`/`inert` handling from the form context.
  */
-export function QuestionBlock(props: QuestionBlockProps) {
+export const QuestionBlock = memo(function QuestionBlock(
+  props: QuestionBlockProps,
+) {
   const { question, depth, number } = props;
-  const { mode, revealHidden } = useFormRenderer();
+  const { mode, revealHidden, frozen } = useFormRenderer();
   const { QuestionShell } = useFormChrome();
   const enabled = useQuestionEnabled(question);
 
   const hiddenByLogic = !enabled && question.disabled_display !== "protected";
   if (hiddenByLogic && !revealHidden) return null;
 
-  const disabled = mode === "readonly" || question.read_only === true;
-  const effectiveDisabled = disabled || !enabled;
+  // Two distinct states, and only inputs take both: `locked` is the question's
+  // persistent inertness, `frozen` is the in-flight submit. Anything that
+  // decides whether a control RENDERS must read `locked` alone — the freeze
+  // lasts one request, and a control that unmounts for it reflows the form
+  // mid-submit and flickers back on failure.
+  const locked = mode === "readonly" || question.read_only === true || !enabled;
+  const effectiveDisabled = locked || frozen;
 
   const wrap = (children: React.ReactNode) =>
     QuestionShell ? (
@@ -77,9 +90,10 @@ export function QuestionBlock(props: QuestionBlockProps) {
       depth={depth}
       number={number}
       effectiveDisabled={effectiveDisabled}
+      locked={locked}
     />,
   );
-}
+});
 
 /**
  * The non-group body — a separate component so the response and error
@@ -91,11 +105,13 @@ function LeafBlock({
   depth,
   number,
   effectiveDisabled,
+  locked,
 }: {
   question: Question;
   depth: number;
   number?: string;
   effectiveDisabled: boolean;
+  locked: boolean;
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
@@ -111,23 +127,31 @@ function LeafBlock({
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
 
-  // Repeats → one input per value entry (legacy QuestionInput's per-index
-  // rendering). Choice handles repeats itself (multi-select chips),
-  // structured questions manage their own arrays, and display has no values
-  // to repeat — those keep the single-input path.
+  // Repeating questions render one input per value entry, except fixed-option
+  // choices, which render every selected value through their own multi-select
+  // control. The branch matches ChoiceInput: `answer_option` wins over
+  // `answer_value_set` when both are present.
+  const isSelfManagedChoice =
+    question.type === "choice" && !!question.answer_option?.length;
+
   const isMultiEntry =
     !!InputComponent &&
     question.repeats === true &&
     question.type !== "structured" &&
-    question.type !== "choice" &&
-    question.type !== "display";
+    question.type !== "display" &&
+    !isSelfManagedChoice;
 
   const entryCount = Math.max(response?.values.length ?? 0, 1);
   const canRemoveEntries = (response?.values.length ?? 0) > 1;
 
-  // Mirrors the legacy handleAddValue: adding from an empty response
-  // materializes the on-screen placeholder entry too, so the new row never
-  // swallows the one the user was looking at.
+  // Rows that appeared since the last render claim a key here — see
+  // rowKeys.ts for why an index key cannot survive a removal.
+  const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
+  const visibleRowKeys = growRowKeys(rowKeys, entryCount);
+  if (visibleRowKeys !== rowKeys) setRowKeys(visibleRowKeys);
+
+  // Adding from an empty response materializes the on-screen placeholder entry
+  // too, so the new row never swallows the one the user was looking at.
   const handleAddEntry = () => {
     const current = response?.values ?? [];
     const next = current.length === 0 ? [emptyEntry()] : [...current];
@@ -136,6 +160,7 @@ function LeafBlock({
   };
 
   const handleRemoveEntry = (index: number) => {
+    setRowKeys((current) => dropRowKey(current, entryCount, index));
     updateResponse({
       values: (response?.values ?? []).filter((_, i) => i !== index),
     });
@@ -171,10 +196,14 @@ function LeafBlock({
         >
           {question.text}
         </label>
-        {question.required && <span className="text-red-500">*</span>}
-        {/* Question-level unit, any type (legacy QuestionLabel contract):
-            integer/decimal/choice have no answer-time unit picker, so this
-            suffix is their only unit display. */}
+        {/* Visual-only: the programmatic required state is aria-required
+            on the input itself (every engine input sets it). */}
+        {question.required && (
+          <span aria-hidden className="text-red-500">
+            *
+          </span>
+        )}
+        {/* Question-level unit display for types without answer-time unit pickers. */}
         {question.unit?.code && (
           <span className="text-sm text-gray-500">({question.unit.code})</span>
         )}
@@ -192,7 +221,10 @@ function LeafBlock({
         ) : isMultiEntry ? (
           <div className="space-y-2">
             {Array.from({ length: entryCount }, (_, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div
+                key={visibleRowKeys.keys[index]}
+                className="flex items-center gap-2"
+              >
                 <div className="min-w-0 flex-1">
                   <InputComponent
                     question={question}
@@ -228,7 +260,7 @@ function LeafBlock({
                 <Plus className="size-4" />
                 {t("add_another")}
               </Button>
-              <NoteControl questionId={question.id} />
+              <NoteControl questionId={question.id} locked={locked} />
             </div>
           </div>
         ) : (
@@ -251,13 +283,16 @@ function LeafBlock({
               )}
             </div>
             {question.type !== "display" && (
-              <NoteControl questionId={question.id} />
+              <NoteControl questionId={question.id} locked={locked} />
             )}
           </div>
         )}
       </div>
+      {/* role="alert" so a validation failure is ANNOUNCED, not only
+          drawn: client-side validation writes these straight into the
+          store with no other live region anywhere on the fill page. */}
       {errors.map((error, i) => (
-        <p key={i} className="text-sm text-red-600">
+        <p key={i} role="alert" className="text-sm text-red-600">
           {error.msg ?? error.error}
         </p>
       ))}

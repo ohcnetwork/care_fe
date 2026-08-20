@@ -59,10 +59,8 @@ export function SubQuestionsList({
   if (question.type !== "group") return null;
 
   const children = question.questions ?? [];
-  // Layout presets live in styling_metadata.containerClasses — the deployed
-  // contract shared with the legacy editor (LAYOUT_OPTIONS →
-  // containerClasses) and both renderers, which apply containerClasses to
-  // the sub-question container and keep `classes` for outer decoration.
+  // Layout presets live in styling_metadata.containerClasses, which renderers
+  // apply to the sub-question container while `classes` decorates the group.
   const layoutValue =
     question.styling_metadata?.containerClasses ?? LAYOUT_OPTIONS[0].value;
 

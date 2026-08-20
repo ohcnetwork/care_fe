@@ -1,4 +1,4 @@
-import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
+import { StructuredTypeValue } from "@/types/questionnaire/structured";
 
 import { Code } from "@/types/base/code/code";
 import { ValueSetConfig } from "@/types/valueSet/valueSet";
@@ -147,7 +147,7 @@ export interface Question {
   text: string;
   description?: string;
   type: QuestionType;
-  structured_type?: StructuredQuestionType;
+  structured_type?: StructuredTypeValue;
   styling_metadata?: {
     classes?: string;
     containerClasses?: string;

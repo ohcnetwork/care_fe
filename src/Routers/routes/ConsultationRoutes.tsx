@@ -2,7 +2,7 @@ import { PrintAllQuestionnaireResponses } from "@/components/Facility/Consultati
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
-import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
@@ -95,22 +95,16 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
-        patientId={patientId}
-        subjectType="encounter"
+      <QuestionnaireFillPage
+        subject={{ type: "encounter", facilityId, patientId, encounterId }}
       />
     ),
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:questionnaireId":
     ({ facilityId, encounterId, questionnaireId, patientId }) => (
-      <EncounterQuestionnaire
-        facilityId={facilityId}
-        encounterId={encounterId}
+      <QuestionnaireFillPage
+        subject={{ type: "encounter", facilityId, patientId, encounterId }}
         questionnaireId={questionnaireId}
-        patientId={patientId}
-        subjectType="encounter"
       />
     ),
 
@@ -131,29 +125,54 @@ const consultationRoutes: AppRoutes = {
       );
     return acc;
   }, {}),
+  // Legacy pre-encounter URL, kept so old links resolve. Nothing in the app
+  // links here any more — encounters are created by CreateEncounterForm, not
+  // by this questionnaire — so the SUBJECT is the patient and the fixed
+  // "encounter" question reports that it needs an encounter in scope. The
+  // picker keeps offering encounter-subject forms, as it did before the
+  // subject union landed.
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
   }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
+    <QuestionnaireFillPage
+      subject={{ type: "patient", facilityId, patientId }}
       questionnaireId="encounter"
-      subjectType="encounter"
+      pickerSubjectType="encounter"
     />
   ),
   "/facility/:facilityId/patient/:patientId/questionnaire": ({
     facilityId,
     patientId,
   }) => (
-    <EncounterQuestionnaire
-      facilityId={facilityId}
-      patientId={patientId}
-      subjectType="patient"
+    <QuestionnaireFillPage
+      subject={{ type: "patient", facilityId, patientId }}
+    />
+  ),
+  // The patient-subject picker needs an id route to land on — the legacy
+  // form appended picked questionnaires in-session instead of navigating,
+  // so these two shapes are new alongside the v2 single-questionnaire fill.
+  "/facility/:facilityId/patient/:patientId/questionnaire/:questionnaireId": ({
+    facilityId,
+    patientId,
+    questionnaireId,
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "patient", facilityId, patientId }}
+      questionnaireId={questionnaireId}
     />
   ),
   "/patient/:patientId/questionnaire": ({ patientId }) => (
-    <EncounterQuestionnaire patientId={patientId} subjectType="patient" />
+    <QuestionnaireFillPage subject={{ type: "patient", patientId }} />
+  ),
+  "/patient/:patientId/questionnaire/:questionnaireId": ({
+    patientId,
+    questionnaireId,
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "patient", patientId }}
+      questionnaireId={questionnaireId}
+    />
   ),
 };
 

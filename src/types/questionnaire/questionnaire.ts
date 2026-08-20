@@ -129,7 +129,7 @@ export interface QuestionnaireCreate extends QuestionnaireBase {
   organizations: string[];
 }
 
-/** v2 create body — auth-context aware (ENG-737 QuestionnaireCreateSpec). */
+/** v2 create body — auth-context aware. */
 export interface QuestionnaireCreateV2 extends QuestionnaireBase {
   auth_context: QuestionnaireAuthContext;
   facility?: string;

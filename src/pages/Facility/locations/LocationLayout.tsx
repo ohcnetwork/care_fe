@@ -1,6 +1,7 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
@@ -414,6 +415,24 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       resourceId={locationId}
       queueId={queueId}
       tab="completed"
+    />
+  ),
+
+  // Questionnaire fill for the location subject (fullscreen shell — see
+  // PATHS_WITHOUT_SIDEBAR in AppRouter).
+  "/questionnaire": () => (
+    <QuestionnaireFillPage
+      subject={{ type: "location", facilityId, locationId }}
+    />
+  ),
+  "/questionnaire/:questionnaireId": ({
+    questionnaireId,
+  }: {
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "location", facilityId, locationId }}
+      questionnaireId={questionnaireId}
     />
   ),
 

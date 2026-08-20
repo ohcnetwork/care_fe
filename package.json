@@ -36,7 +36,7 @@
     "build": "npm run build:meta && npm run supported-browsers && npm run build:react",
     "postinstall": "tsx scripts/install-platform-deps.ts && tsx scripts/generate-headers.ts",
     "test": "snyk test",
-    "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\"",
+    "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\" \"src/**/*.test.ts\"",
     "playwright:test": "playwright test",
     "playwright:test:ui": "playwright test --ui",
     "playwright:test:headed": "playwright test --headed",

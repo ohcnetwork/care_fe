@@ -10,22 +10,11 @@ import { cn } from "@/lib/utils";
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { useHiddenQuestionIds } from "@/components/QuestionnaireV2/form/FormContext";
 import { QuestionTreeNav } from "@/components/QuestionnaireV2/shared/QuestionTreeNav";
+import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { Question } from "@/types/questionnaire/question";
 
 import { searchHiddenIds } from "./outlineSearch";
-
-function countLeafQuestions(questions: Question[]): number {
-  let count = 0;
-  const walk = (list: Question[]) => {
-    for (const question of list) {
-      if (question.type === "group") walk(question.questions ?? []);
-      else count += 1;
-    }
-  };
-  walk(questions);
-  return count;
-}
 
 export interface StudioOutlineProps {
   questions: Question[];

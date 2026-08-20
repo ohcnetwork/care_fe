@@ -1,4 +1,5 @@
 import { Check, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +17,10 @@ import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
 
 import {
+  buildCondition,
   collectIds,
   normalizeBooleanConditionAnswer,
+  normalizeExistsConditionAnswer,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { NON_RESPONSE_TYPES } from "@/components/QuestionnaireV2/builder/saveValidation";
 
@@ -38,14 +41,23 @@ interface VisibilityConditionsCardProps {
   bare?: boolean;
 }
 
-const BOOLEAN_OPERATORS = ["exists", "equals", "not_equals"] as const;
+type ConditionOperator = EnableWhen["operator"];
+
+const BOOLEAN_OPERATORS = [
+  "exists",
+  "equals",
+  "not_equals",
+] as const satisfies readonly ConditionOperator[];
 const NUMERIC_OPERATORS = [
   "greater",
   "less",
   "greater_or_equals",
   "less_or_equals",
-] as const;
-const STRING_OPERATORS = ["equals", "not_equals"] as const;
+] as const satisfies readonly ConditionOperator[];
+const STRING_OPERATORS = [
+  "equals",
+  "not_equals",
+] as const satisfies readonly ConditionOperator[];
 
 function flattenQuestions(questions: Question[]): Question[] {
   return questions.flatMap((question) => [
@@ -54,7 +66,9 @@ function flattenQuestions(questions: Question[]): Question[] {
   ]);
 }
 
-function operatorsForType(type: QuestionType | undefined): readonly string[] {
+function operatorsForType(
+  type: QuestionType | undefined,
+): readonly ConditionOperator[] {
   if (type === "boolean") return BOOLEAN_OPERATORS;
   if (type === "integer" || type === "decimal") return NUMERIC_OPERATORS;
   return STRING_OPERATORS;
@@ -63,30 +77,45 @@ function operatorsForType(type: QuestionType | undefined): readonly string[] {
 function buildEnableWhen(
   targetLinkId: string,
   targetType: QuestionType | undefined,
-  operator: string,
+  operator: ConditionOperator,
 ): EnableWhen {
-  if (targetType === "boolean") {
-    return {
-      question: targetLinkId,
-      operator,
-      // "Yes"/"No" string, matching the legacy editor's storage format (see
-      // normalizeBooleanConditionAnswer above).
-      answer: "No",
-    } as EnableWhen;
-  }
-  if (targetType === "integer" || targetType === "decimal") {
-    return {
-      question: targetLinkId,
-      operator: operator as
-        "greater" | "less" | "greater_or_equals" | "less_or_equals",
-      answer: 0,
-    };
-  }
-  return {
-    question: targetLinkId,
-    operator: operator as "equals" | "not_equals",
-    answer: "",
-  };
+  // A fresh `exists` rule reads "has been answered"; the other operators start
+  // from the empty answer of their own shape (`buildCondition` coerces).
+  const answer =
+    operator === "exists" ? true : targetType === "boolean" ? "No" : "";
+  return buildCondition(targetLinkId, operator, answer);
+}
+
+/**
+ * Number entry for a comparison rule. The stored answer must stay a number,
+ * so in-progress text the browser cannot parse ("0.", "-", cleared) is held
+ * here and committed only once it parses — a controlled input fed straight
+ * from the answer would rewrite "0." to "0" mid-keystroke, turning 0.5 into 5.
+ */
+function NumericAnswerInput({
+  value,
+  onChange,
+}: {
+  value: EnableWhen["answer"];
+  onChange: (next: number) => void;
+}) {
+  const [buffer, setBuffer] = useState<string | null>(null);
+
+  return (
+    <Input
+      type="number"
+      value={buffer ?? String(value ?? "")}
+      onChange={(e) => {
+        setBuffer(e.target.value);
+        if (e.target.value !== "" && !Number.isNaN(e.target.valueAsNumber)) {
+          onChange(e.target.valueAsNumber);
+        }
+      }}
+      // Blur drops the buffer, so an unparseable entry falls back to the last
+      // committed number instead of persisting as one.
+      onBlur={() => setBuffer(null)}
+    />
+  );
 }
 
 export function VisibilityConditionsCard({
@@ -118,27 +147,19 @@ export function VisibilityConditionsCard({
     updateConditions(next);
   };
 
-  const handleOperatorChange = (index: number, operator: string) => {
+  const handleOperatorChange = (index: number, operator: ConditionOperator) => {
     const next = [...enableWhen];
-    next[index] = { ...next[index], operator } as EnableWhen;
+    const { question: target, answer } = next[index];
+    // Switching to or away from `exists` changes what the answer must be —
+    // a literal boolean there, a "Yes"/"No" string for equals/not_equals.
+    next[index] = buildCondition(target, operator, answer);
     updateConditions(next);
   };
 
-  const handleAnswerChange = (
-    index: number,
-    rawValue: string,
-    targetType: QuestionType | undefined,
-  ) => {
+  const handleAnswerChange = (index: number, answer: EnableWhen["answer"]) => {
     const next = [...enableWhen];
-    let answer: EnableWhen["answer"];
-    if (targetType === "boolean") {
-      answer = normalizeBooleanConditionAnswer(rawValue);
-    } else if (targetType === "integer" || targetType === "decimal") {
-      answer = Number(rawValue) || 0;
-    } else {
-      answer = rawValue;
-    }
-    next[index] = { ...next[index], answer } as EnableWhen;
+    const { question: target, operator } = next[index];
+    next[index] = buildCondition(target, operator, answer);
     updateConditions(next);
   };
 
@@ -194,9 +215,8 @@ export function VisibilityConditionsCard({
             (q) => q.link_id === condition.question,
           );
           const operators = operatorsForType(target?.type);
-          // A saved condition (legacy data) may still target a question
-          // the renderer never answers — surface it as invalid instead of
-          // silently keeping a condition that can never match.
+          // A saved condition may target a question the renderer never
+          // answers; surface it as invalid instead of keeping it silently.
           const invalidTarget = condition.question
             ? flatQuestions.find(
                 (q) =>
@@ -287,9 +307,12 @@ export function VisibilityConditionsCard({
                     <p className="text-xs text-gray-500">{t("operator")}</p>
                     <Select
                       value={condition.operator}
-                      onValueChange={(value) =>
-                        handleOperatorChange(index, value)
-                      }
+                      onValueChange={(value) => {
+                        // Radix hands back a bare string — resolve it against
+                        // the offered operators instead of asserting.
+                        const operator = operators.find((o) => o === value);
+                        if (operator) handleOperatorChange(index, operator);
+                      }}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -306,15 +329,41 @@ export function VisibilityConditionsCard({
 
                   <div className="space-y-1">
                     <p className="text-xs text-gray-500">{t("answer")}</p>
-                    {target?.type === "boolean" ? (
+                    {condition.operator === "exists" ? (
+                      // `exists` asks whether the target carries a value at
+                      // all — never which value — and persists that as a
+                      // literal boolean.
                       <Select
-                        // Tolerates legacy true/false answers on load; any
-                        // change re-writes them as "Yes"/"No".
+                        value={
+                          normalizeExistsConditionAnswer(condition.answer)
+                            ? "true"
+                            : "false"
+                        }
+                        onValueChange={(value) =>
+                          handleAnswerChange(index, value === "true")
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">
+                            {t("condition_answer_present")}
+                          </SelectItem>
+                          <SelectItem value="false">
+                            {t("condition_answer_absent")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : target?.type === "boolean" ? (
+                      <Select
+                        // Tolerates true/false answers on load; any change
+                        // re-writes them as "Yes"/"No".
                         value={normalizeBooleanConditionAnswer(
                           condition.answer,
                         )}
                         onValueChange={(value) =>
-                          handleAnswerChange(index, value, target?.type)
+                          handleAnswerChange(index, value)
                         }
                       >
                         <SelectTrigger className="w-full">
@@ -327,26 +376,15 @@ export function VisibilityConditionsCard({
                       </Select>
                     ) : target?.type === "integer" ||
                       target?.type === "decimal" ? (
-                      <Input
-                        type="number"
-                        value={String(condition.answer ?? "")}
-                        onChange={(e) =>
-                          handleAnswerChange(
-                            index,
-                            e.target.value,
-                            target?.type,
-                          )
-                        }
+                      <NumericAnswerInput
+                        value={condition.answer}
+                        onChange={(next) => handleAnswerChange(index, next)}
                       />
                     ) : (
                       <Input
                         value={String(condition.answer ?? "")}
                         onChange={(e) =>
-                          handleAnswerChange(
-                            index,
-                            e.target.value,
-                            target?.type,
-                          )
+                          handleAnswerChange(index, e.target.value)
                         }
                       />
                     )}

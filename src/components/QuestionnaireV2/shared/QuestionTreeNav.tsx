@@ -16,9 +16,7 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Question ids (any depth) currently hidden by enable_when (renderer
-   *  only) — skipped entirely, matching the legacy renderer where hidden
-   *  questions simply don't appear. Numbering stays stable across hides. */
+  /** Question ids currently hidden by enable_when; numbering stays stable. */
   hiddenIds?: Set<string>;
   /** Decorative per-row trailing icons (the studio's logic/issue cues) —
    *  rendered aria-hidden so row accessible names stay number + title. */
@@ -61,8 +59,7 @@ export function QuestionTreeNav({
         )}
       >
         <span className="shrink-0">{item.number}</span>
-        {/* Decorative type recognition cue — aria-hidden keeps row names
-            (number + title) unchanged for a11y and specs. */}
+        {/* Decorative type recognition cue; aria-hidden keeps row names unchanged. */}
         <span
           aria-hidden
           className={cn(

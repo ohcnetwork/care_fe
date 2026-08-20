@@ -96,28 +96,11 @@ export function countLeafQuestions(questions: Question[]): number {
 }
 
 /**
- * Deep-clones a question tree with fresh `id`s and `link_id`s (used by clone
- * and import, where reusing the source's ids would collide with the
- * originals once both exist as separate questionnaires/questions).
- *
- * `enable_when[].question` references point at a sibling's `link_id`, so a
- * naive per-question regeneration would leave those references dangling.
- * Instead this builds an old→new `link_id` map for the whole tree up front,
- * then rewrites every condition's `question` through that map — conditions
- * whose target isn't in the map (e.g. it pointed outside the copied subtree)
- * are dropped rather than left pointing at a stale id.
- *
- * Imported/hand-edited trees can carry missing or duplicate `link_id`s. Only
- * the FIRST occurrence of an old link_id claims the map entry (so enable_when
- * references still resolve deterministically); every other occurrence —
- * duplicate or missing — gets its own fresh link_id, instead of collapsing
- * all of them onto one shared regenerated id.
- *
- * `unmappedConditions` picks what happens to a condition whose target is not
- * in the map: "drop" (default) for clone/import into a NEW questionnaire,
- * where the target will never exist; "keep" for in-questionnaire duplication
- * (the studio's Duplicate action), where a condition pointing outside the
- * copied subtree still references a live sibling and must survive verbatim.
+ * Deep-clones a question tree with fresh `id`s and `link_id`s, remapping
+ * `enable_when` references through the whole copied tree. Missing or duplicate
+ * link ids receive fresh values; only the first occurrence claims the remap.
+ * `unmappedConditions` controls whether external references are dropped or
+ * preserved for in-questionnaire duplication.
  */
 export function regenerateQuestionIds(
   questions: Question[],

@@ -46,8 +46,7 @@ const DATA_CAPTURE_FLAGS: readonly BehaviourFlag[] = [
   { key: "collect_body_site", label: "collect_body_site" },
 ];
 
-/** Mirrors the legacy editor's HIDE_REPEATABLE_QUESTION_TYPES
- *  (QuestionnaireEditor.tsx) — these types never offer the Repeats flag. */
+/** Types that never offer the Repeats flag. */
 export const NON_REPEATABLE_TYPES: readonly QuestionType[] = [
   "boolean",
   "group",

@@ -17,14 +17,48 @@ export const questionnaireKeys = {
     [
       ...questionnaireKeys.all,
       scope.authContext,
+      // Both scoping ids ride along: `authContext` alone does not separate
+      // two facility_organization mounts from each other, and a list cached
+      // under one organization must never be served to another.
       scope.facilityId,
+      scope.facilityOrganizationId,
       filters,
     ] as const,
   detail: (id: string) => [...questionnaireKeys.all, "detail", id] as const,
-  organizations: (id: string) =>
-    [...questionnaireKeys.all, "organizations", id] as const,
+  /**
+   * `variant` is load-bearing, not decoration: the instance
+   * (`get_organizations`) and facility (`get_facility_organizations`)
+   * endpoints return different collections for the SAME questionnaire id,
+   * so one questionnaire opened from both mounts in a session would
+   * otherwise serve each other's payload from cache.
+   */
+  organizations: (id: string, variant: "instance" | "facility") =>
+    [...questionnaireKeys.all, "organizations", variant, id] as const,
   revisions: (id: string) =>
     [...questionnaireKeys.all, "revisions", id] as const,
   revisionDetail: (id: string | undefined) =>
     [...questionnaireKeys.all, "revision-detail", id] as const,
+};
+
+/**
+ * Keys for the server-side `form_submission` drafts the fill page saves and
+ * resumes (`useSaveServerDraft`, `?continue_draft=`) and the encounter
+ * overview lists. Hand-built literals here were a correctness hazard: the
+ * only thing separating the detail key from the list key was singular vs
+ * plural, spelled out across three files.
+ */
+export const formSubmissionKeys = {
+  all: ["formSubmissions"] as const,
+  /**
+   * Prefix for every list query — the invalidation target after a draft
+   * save. Deliberately NARROWER than `all`: invalidating a DETAIL query
+   * from a page that navigates away in the same tick makes React Query
+   * cancel the resulting refetch and revert the cache to the pre-save dump
+   * (see `useSaveServerDraft`), so a re-resume would seed stale answers.
+   */
+  lists: () => [...formSubmissionKeys.all, "list"] as const,
+  list: (encounterId: string) =>
+    [...formSubmissionKeys.lists(), encounterId] as const,
+  detail: (id: string | undefined) =>
+    [...formSubmissionKeys.all, "detail", id] as const,
 };

@@ -180,7 +180,7 @@ function StudioQuestionShell({
           </div>
         </>
       )}
-      {hiddenByLogic && hiddenBadge}
+      {hiddenByLogic && !selected && hiddenBadge}
       {children}
     </div>
   );

@@ -1,16 +1,27 @@
 import { Provider as JotaiProvider, createStore } from "jotai";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   initializeResponses,
   questionnaireAtom,
   responsesAtom,
-} from "@/components/QuestionnaireV2/renderer/store";
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 // Live-store hooks hosts may need (the studio outline drops
-// enable_when-hidden rows in preview). Re-exported here so consumers stay
-// on form/'s public surface — the engine reach-in is this module's alone.
-export { useHiddenQuestionIds } from "@/components/QuestionnaireV2/renderer/store";
+// enable_when-hidden rows in preview; the fill outline adds completion
+// icons). Re-exported here so consumers stay on form/'s public surface —
+// the engine reach-in is this module's alone.
+export {
+  useAnsweredQuestionIds,
+  useHiddenQuestionIds,
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -27,9 +38,20 @@ interface FormContextValue {
   /** Render inputs visually but non-interactive and out of the a11y tree
    *  (builder edit canvas — clicks land on the selection chrome instead). */
   inert: boolean;
+  /** The whole session is mid-submit (composing the batch or the request
+   *  itself in flight) — every question in this form freezes read-only so
+   *  an edit typed during that window can never diverge from the payload
+   *  already being sent. False everywhere but the fill flow's submit
+   *  window; every other mount (studio, preview) never sets it. */
+  frozen: boolean;
 }
 
 const FormContext = createContext<FormContextValue | null>(null);
+
+/** Module-level so the subject-less default keeps one identity — a fresh
+ *  `{}` per render would invalidate the memoized context value and re-render
+ *  every block of the form. */
+const EMPTY_SUBJECT: RendererSubject = {};
 
 export function useFormRenderer(): FormContextValue {
   const context = useContext(FormContext);
@@ -85,7 +107,7 @@ function questionSignatures(questions: Question[]): Map<string, string> {
  * re-seeds that one entry so a stale value of another shape can't linger in
  * enable_when evaluation.
  */
-export function syncResponses(
+function syncResponses(
   previous: Record<string, QuestionnaireResponse>,
   previousSignatures: Map<string, string>,
   questions: Question[],
@@ -116,23 +138,47 @@ interface ProviderProps {
   subject?: RendererSubject;
   revealHidden?: boolean;
   inert?: boolean;
+  /** See `FormContextValue.frozen`. Defaults false — only the fill host's
+   *  submit window ever sets it. */
+  frozen?: boolean;
+  /**
+   * Creation-time seed overrides (a restored fill draft). Applied once,
+   * merged over `initializeResponses` so the store is never observed
+   * unseeded; entries only take effect when the question id still exists
+   * with the same structured_type (both restore paths already run the
+   * draft through `mergeDraftResponses`, which drops per QUESTION and
+   * names what it dropped — this is defense in depth). Changing the prop
+   * after mount has no effect by design.
+   */
+  initialResponses?: Record<string, QuestionnaireResponse>;
   children: React.ReactNode;
 }
 
 export function QuestionnaireFormProvider({
   questionnaire,
   mode,
-  subject = {},
+  subject = EMPTY_SUBJECT,
   revealHidden = false,
   inert = false,
+  frozen = false,
+  initialResponses,
   children,
 }: ProviderProps) {
   // useState (not useMemo) so the store is created exactly once per instance
   // and never observed unseeded (same rationale as the old provider).
   const [store] = useState(() => {
     const seeded = createStore();
+    const responses = initializeResponses(questionnaire.questions);
+    if (initialResponses) {
+      for (const [id, entry] of Object.entries(initialResponses)) {
+        const base = responses[id];
+        if (base && base.structured_type === entry.structured_type) {
+          responses[id] = { ...entry, question_id: id, link_id: base.link_id };
+        }
+      }
+    }
     seeded.set(questionnaireAtom, questionnaire);
-    seeded.set(responsesAtom, initializeResponses(questionnaire.questions));
+    seeded.set(responsesAtom, responses);
     return seeded;
   });
 
@@ -165,10 +211,17 @@ export function QuestionnaireFormProvider({
     );
   }, [questionnaire, store]);
 
+  // Every canvas component consumes this context, so a fresh object literal
+  // per render would re-render every block on any host re-render (a studio
+  // keystroke, a fill-page state change) — defeating the response-identity
+  // preservation `syncResponses` above exists for.
+  const value = useMemo(
+    () => ({ mode, subject, questionnaire, revealHidden, inert, frozen }),
+    [mode, subject, questionnaire, revealHidden, inert, frozen],
+  );
+
   return (
-    <FormContext.Provider
-      value={{ mode, subject, questionnaire, revealHidden, inert }}
-    >
+    <FormContext.Provider value={value}>
       <JotaiProvider store={store}>{children}</JotaiProvider>
     </FormContext.Provider>
   );

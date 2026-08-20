@@ -39,29 +39,49 @@ const slugCache = new Map<string, string>();
 
 /**
  * Resolves a fixture questionnaire's id from its slug. The detail endpoint
- * looks up by external_id only (ENG-737 dropped slug lookup) and the list
+ * looks up by external_id only (slug lookup is not supported) and the list
  * has no slug filter, so this lists broadly and matches client-side.
  */
 export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {
   const cached = slugCache.get(slug);
   if (cached) return cached;
-  const res = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/?limit=100`, {
-    headers: adminApiHeaders(),
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to list questionnaires: ${res.status}`);
-  }
-  const data = (await res.json()) as {
-    results: { id: string; slug: string }[];
-  };
-  const match = data.results.find((entry) => entry.slug === slug);
-  if (!match) {
-    throw new Error(
-      `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+
+  const limit = 100;
+  let offset = 0;
+
+  while (true) {
+    const res = await fetch(
+      `${apiBaseUrl()}/api/v1/questionnaire/?limit=${limit}&offset=${offset}`,
+      {
+        headers: adminApiHeaders(),
+      },
     );
+    if (!res.ok) {
+      throw new Error(`Failed to list questionnaires: ${res.status}`);
+    }
+    const data = (await res.json()) as {
+      results: { id: string; slug: string }[];
+    };
+
+    // Cache and check all results on this page
+    for (const entry of data.results) {
+      slugCache.set(entry.slug, entry.id);
+      if (entry.slug === slug) {
+        return entry.id;
+      }
+    }
+
+    // If we got fewer results than the limit, we've reached the end
+    if (data.results.length < limit) {
+      break;
+    }
+
+    offset += limit;
   }
-  slugCache.set(slug, match.id);
-  return match.id;
+
+  throw new Error(
+    `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+  );
 }
 
 /** Matches the questionnaire v2 detail URL on both mounts
