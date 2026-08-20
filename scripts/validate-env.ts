@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_DISCHARGE_DISPOSITION,
@@ -8,8 +7,8 @@ import {
 import { z } from "zod";
 
 const logoSchema = z.object({
-  light: z.string().url(),
-  dark: z.string().url(),
+  light: z.url(),
+  dark: z.url(),
 });
 
 const customShortcutSchema = z.array(
@@ -31,6 +30,14 @@ const booleanAsStringSchema = z
 const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
   message: "Must be a valid number",
 });
+
+const positiveNumberAsString = z.string().refine(
+  (val) => {
+    const n = parseInt(val, 10);
+    return !isNaN(n) && n > 0;
+  },
+  { message: "Must be a positive number greater than 0" },
+);
 
 const jsonAsStringSchema = z.string().refine(
   (val) => {
@@ -93,17 +100,17 @@ const apiUrlMapSchema = jsonAsStringSchema
 const envSchema = z
   .object({
     // An empty string is allowed and means "use relative, same-origin API requests".
-    REACT_CARE_API_URL: z.string().url().or(z.literal("")).optional(),
+    REACT_CARE_API_URL: z.url().or(z.literal("")).optional(),
     REACT_CARE_URL_MAP: apiUrlMapSchema.optional(),
     REACT_APP_TITLE: z.string(),
     REACT_APP_META_DESCRIPTION: z.string(),
-    REACT_PUBLIC_URL: z.string().url(),
-    REACT_APP_COVER_IMAGE: z.string().url(),
-    REACT_APP_COVER_IMAGE_ALT: z.string().url(),
-    REACT_SBOM_BASE_URL: z.string().url().optional(),
-    REACT_GITHUB_URL: z.string().url().optional(),
-    REACT_OHCN_URL: z.string().url().optional(),
-    REACT_SENTRY_DSN: z.string().url().optional(),
+    REACT_PUBLIC_URL: z.url(),
+    REACT_APP_COVER_IMAGE: z.url(),
+    REACT_APP_COVER_IMAGE_ALT: z.url(),
+    REACT_SBOM_BASE_URL: z.url().optional(),
+    REACT_GITHUB_URL: z.url().optional(),
+    REACT_OHCN_URL: z.url().optional(),
+    REACT_SENTRY_DSN: z.url().optional(),
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
     REACT_MAIN_LOGO: logoSchemaString.optional(),
@@ -111,11 +118,12 @@ const envSchema = z
     REACT_CUSTOM_LOGO: logoSchemaString.optional(),
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
-    REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
+    REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
-    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: numberAsString.optional(),
-    REACT_JWT_TOKEN_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
+    REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
+    REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED: booleanAsStringSchema.optional(),
@@ -130,14 +138,14 @@ const envSchema = z
     REACT_INVENTORY_EXPIRY_MONTH_OFFSET: numberAsString.optional(),
     REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION:
       booleanAsStringSchema.optional(),
-    REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
+    REACT_OBSERVATION_PLOTS_CONFIG_URL: z.url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
     REACT_CDN_URLS: z
       .string()
       .optional()
       .transform((val) => val?.split(" "))
-      .pipe(z.array(z.string().url()).optional())
+      .pipe(z.array(z.url()).optional())
       .describe("Optional: Space-separated list of CDN URLs"),
     REACT_ALLOWED_ENCOUNTER_CLASSES: z
       .string()
@@ -156,27 +164,27 @@ const envSchema = z
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
-    REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
-    REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
+    REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.uuid().optional(),
+    REACT_CUSTOM_REMOTE_I18N_URL: z.url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
-    REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_AUTO_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
-    REACT_APP_UPDATE_CHECK_INTERVAL: numberAsString.optional(),
-    REACT_DECIMAL_PRECISION: numberAsString.optional(),
-    REACT_ACCOUNTING_PRECISION: numberAsString.optional(),
+    REACT_APP_UPDATE_CHECK_INTERVAL: positiveNumberAsString.optional(),
+    REACT_DECIMAL_PRECISION: positiveNumberAsString.optional(),
+    REACT_ACCOUNTING_PRECISION: positiveNumberAsString.optional(),
     REACT_DECIMAL_ROUNDING_METHOD: z
       .string()
       .refine((val) => VALID_ROUNDING_METHODS.includes(val), {
         message: `Must be one of: ${VALID_ROUNDING_METHODS.join(", ")}`,
       })
       .optional(),
-    REACT_MAX_FORM_DIALOG_FAVORITES: numberAsString.optional(),
     REACT_MAX_DATAPOINTS_PER_UPSERT: numberAsString.optional(),
+    REACT_MAX_FORM_DIALOG_FAVORITES: positiveNumberAsString.optional(),
   })
   .superRefine(async (data, ctx) => {
     if (data.REACT_CARE_API_URL === undefined && !data.REACT_CARE_URL_MAP) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message:
           "Either REACT_CARE_API_URL or REACT_CARE_URL_MAP must be provided",
         path: ["REACT_CARE_API_URL"],
@@ -191,7 +199,7 @@ const envSchema = z
       !allowedClasses.includes(data.REACT_DEFAULT_ENCOUNTER_TYPE as any)
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Encounter class not in allowed encounter classes",
         path: ["REACT_DEFAULT_ENCOUNTER_TYPE"],
       });
@@ -204,7 +212,7 @@ const envSchema = z
       )
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Invalid discharge disposition",
         path: ["REACT_DEFAULT_DISCHARGE_DISPOSITION"],
       });
@@ -215,7 +223,7 @@ const envSchema = z
       (data.REACT_SENTRY_ENVIRONMENT && !data.REACT_SENTRY_DSN)
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Sentry environment and DSN are both required",
         path: ["REACT_SENTRY_ENVIRONMENT", "REACT_SENTRY_DSN"],
       });
