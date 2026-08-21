@@ -79,7 +79,7 @@ const PrescriptionContent = ({
             })}
             className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
             cellConfig={{
-              medicine: { className: "text-left" },
+              medicine: { className: "text-left wrap-anywhere" },
               frequency: { className: "text-left" },
             }}
             rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
