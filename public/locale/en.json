@@ -5162,6 +5162,7 @@
   "responsibility_manages_subtitle": "Responsibilities that {{name}} is authorized to manage.",
   "responsibility_manages_title": "What responsibilities can <highlight>{{name}}</highlight> manage?",
   "responsibility_new": "New Responsibility",
+  "responsibility_next_section_managed_by": "Next section · Who can manage <highlight>{{name}}</highlight>?",
   "responsibility_none_available": "No responsibilities available",
   "responsibility_search": "Search Responsibilities",
   "restart_encounter": "Restart Encounter",

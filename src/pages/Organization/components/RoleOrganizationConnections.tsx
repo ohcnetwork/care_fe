@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDownToDot, ArrowUpFromDot, Loader2, Plus, X } from "lucide-react";
+import { ArrowDown, HatGlasses, Loader2, Plus, Users, X } from "lucide-react";
 import { Link } from "raviger";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -119,6 +120,18 @@ function DotSeparator() {
   );
 }
 
+function getScrollParent(node: HTMLElement | null): HTMLElement | null {
+  let el = node?.parentElement;
+  while (el) {
+    const { overflowY } = getComputedStyle(el);
+    if (overflowY === "auto" || overflowY === "scroll") {
+      return el;
+    }
+    el = el.parentElement;
+  }
+  return null;
+}
+
 export default function RoleOrganizationConnections({ organization }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -129,6 +142,29 @@ export default function RoleOrganizationConnections({ organization }: Props) {
     organization.permissions,
   );
   const canCreateOrganization = hasPermission(PERMISSION_CREATE_ORGANIZATION);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const managedBySectionRef = useRef<HTMLDivElement>(null);
+  const [showJumpToManagedBy, setShowJumpToManagedBy] = useState(false);
+
+  useEffect(() => {
+    const target = managedBySectionRef.current;
+    if (!target) return;
+
+    const scrollParent = getScrollParent(containerRef.current);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const isBelowView =
+          entry.boundingClientRect.top > (entry.rootBounds?.bottom ?? 0);
+        setShowJumpToManagedBy(!entry.isIntersecting && isBelowView);
+      },
+      { root: scrollParent, threshold: 0 },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   const noOptionsContent = (
     <div className="space-y-2 py-1">
@@ -260,12 +296,12 @@ export default function RoleOrganizationConnections({ organization }: Props) {
   const name = organization.name;
 
   return (
-    <div className="space-y-6">
+    <div ref={containerRef} className="relative space-y-6">
       {/* What responsibilities can this one manage? (managed) */}
       <section className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-primary-100 text-primary-700">
-            <ArrowDownToDot className="size-3.5" />
+            <Users className="size-3.5" />
           </span>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-gray-900">
@@ -336,10 +372,10 @@ export default function RoleOrganizationConnections({ organization }: Props) {
       <DotSeparator />
 
       {/* Who can manage this one? (managing) */}
-      <section className="space-y-3">
+      <section ref={managedBySectionRef} className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-700">
-            <ArrowUpFromDot className="size-3.5" />
+            <HatGlasses className="size-3.5" />
           </span>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-gray-900">
@@ -409,6 +445,35 @@ export default function RoleOrganizationConnections({ organization }: Props) {
           )}
         </div>
       </section>
+
+      {showJumpToManagedBy && (
+        <button
+          type="button"
+          onClick={() =>
+            managedBySectionRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            })
+          }
+          className="sticky inset-x-0 bottom-0 z-10 -mx-5 flex w-[calc(100%+2.5rem)] items-center justify-between gap-3 border-t border-gray-200 bg-white/95 px-5 py-2.5 text-left text-sm font-medium text-gray-700 backdrop-blur-sm hover:text-gray-900"
+        >
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-700">
+              <HatGlasses className="size-3.5" />
+            </span>
+            <span className="truncate">
+              <Trans
+                i18nKey="responsibility_next_section_managed_by"
+                values={{ name }}
+                components={{
+                  highlight: <span className="italic text-gray-500" />,
+                }}
+              />
+            </span>
+          </span>
+          <ArrowDown className="size-4 shrink-0" />
+        </button>
+      )}
     </div>
   );
 }
