@@ -212,7 +212,7 @@ export default function Autocomplete({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full justify-between",
+                "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
                 selectedOption && "rounded-r-none",
               )}
@@ -271,7 +271,7 @@ export default function Autocomplete({
             aria-invalid={props["aria-invalid"]}
             aria-expanded={open}
             className={cn(
-              "w-full justify-between",
+              "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
               className,
               selectedOption && "rounded-r-none",
             )}
@@ -292,7 +292,7 @@ export default function Autocomplete({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]",
+            "p-0 pointer-events-auto w-(--radix-popover-trigger-width)",
             popoverContentClassName,
           )}
           align={align}
