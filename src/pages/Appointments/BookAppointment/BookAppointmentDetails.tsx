@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
@@ -31,6 +31,7 @@ export const BookAppointmentDetails = ({
   onSuccess,
 }: BookAppointmentDetailsProps) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const { facilityId } = useCurrentFacility();
   const [cachedServiceType, setCachedServiceType] = useAtom(
@@ -92,6 +93,13 @@ export const BookAppointmentDetails = ({
       }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_successfully"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            "patient-active-appointments-for-conflict-check",
+            facilityId,
+            patientId,
+          ],
+        });
         onSuccess?.();
         navigate(
           `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,

@@ -253,10 +253,18 @@ export function AppointmentSlotPicker({
   }, [filteredSlotGroups]);
 
   // Pre-select the first slot for current date if there are any slots available
-  // Also triggers when selected schedule changes
   useEffect(() => {
-    handleSlotSelect(filteredAvailableSlots?.[0]?.id);
-  }, [filteredAvailableSlots, handleSlotSelect]);
+    const firstSlot = filteredAvailableSlots?.[0];
+    handleSlotSelect(firstSlot?.id);
+
+    if (!firstSlot || !patientId) {
+      setConflictAlert(null);
+      return;
+    }
+
+    const conflict = checkForConflict(firstSlot);
+    setConflictAlert(conflict ? { slotId: firstSlot.id, ...conflict } : null);
+  }, [filteredAvailableSlots, handleSlotSelect, patientId, checkForConflict]);
 
   return (
     <div
