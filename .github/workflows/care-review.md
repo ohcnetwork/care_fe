@@ -41,7 +41,7 @@ on:
 #
 # Bot-authored comments are filtered HERE, not in the prompt. GitHub's recursion protection only
 # suppresses events from comments posted with the repo's GITHUB_TOKEN — which covers gh-aw
-# safe-outputs (grumpy-reviewer, and this workflow itself) but NOT third-party App bots. Codex and
+# safe-outputs (this workflow's own comments) but NOT third-party App bots. CodeRabbit, Greptile and
 # copilot-pull-request-reviewer post under their own App tokens and DO fire issue_comment. Without
 # this filter, every one of their comments starts a billed run that reads the whole agent file and
 # then noops. The prompt-level bot rule stays as a second line of defence.
@@ -83,9 +83,14 @@ safe-outputs:
   create-pull-request-review-comment:
     max: 8
     side: RIGHT
+  # APPROVE is allowed so a clean PR gets an explicit green check rather than a neutral comment the
+  # author has to read to discover nothing is wrong. It is safe here because this workflow is not a
+  # required status check and gh-aw posts as `github-actions[bot]`, whose approval does not satisfy
+  # a CODEOWNERS or "required approving reviews" gate. REQUEST_CHANGES stays out: a bot must never
+  # block a merge.
   submit-pull-request-review:
     max: 1
-    allowed-events: [COMMENT]
+    allowed-events: [COMMENT, APPROVE]
   reply-to-pull-request-review-comment:
     max: 8
   resolve-pull-request-review-thread:
@@ -120,9 +125,9 @@ is what the approach lens needs. To see this PR's own content — including whet
 fixed — fetch the file **at the head SHA via the GitHub API**. Confusing the two is what produces a
 false "this was fixed": you read the old file and saw the old code.
 
-**Which comments are yours.** Not by author — this repo runs several agentic reviewers
-(`grumpy-reviewer`, Codex, Copilot) and gh-aw safe-outputs all post as `github-actions[bot]`.
-Instead, gh-aw appends an attribution marker to every comment automatically; yours carry
+**Which comments are yours.** Not by author — this repo runs several automated reviewers (Copilot,
+CodeRabbit, Greptile, React Doctor) and gh-aw safe-outputs post as `github-actions[bot]`. Instead,
+gh-aw appends an attribution marker to every comment automatically; yours carry
 `workflow_id: care-review` (and `<!-- gh-aw-workflow-call-id: ohcnetwork/care_fe/care-review -->`).
 Don't write the marker yourself — it is added for you.
 
@@ -170,10 +175,16 @@ what you already said, and the commit history tells you what has landed since.
 4. Cap yourself at 8 inline comments and **prioritize** — correctness and legibility first, then
    approach, then convention, then polish. Do not fill the quota. Four real findings beat eight
    padded ones.
-5. Submit one consolidated `submit-pull-request-review` (event `COMMENT`, never `REQUEST_CHANGES`)
-   summarizing the state of the PR. On a re-review this summary is where you say what got fixed.
-6. If the changed lines are genuinely fine, say so plainly in the summary and post no inline
-   comments.
+5. Submit one consolidated `submit-pull-request-review` summarizing the state of the PR. On a
+   re-review this summary is where you say what got fixed. Choose the event:
+   - **`APPROVE`** when the changed lines carry nothing that must be fixed. `Polish` findings, and
+     open questions you framed as questions, are not reasons to withhold it — an approval means "I
+     found nothing blocking", not "this is perfect". Approve on a re-review too, once the findings
+     that mattered have been addressed.
+   - **`COMMENT`** when you found a `Broken` or `Convention` issue, or when you are genuinely unsure.
+   - **Never `REQUEST_CHANGES`.** A bot must not block a merge.
+6. If the changed lines are genuinely fine, say so plainly in the summary, post no inline comments,
+   and approve.
 
 ## Re-review: closing the loop on your own findings
 
@@ -214,6 +225,12 @@ Direct, concrete, and short. No preamble, no praise sandwich, no restating the d
 author. You are a colleague pointing at a specific line, not a report generator. Where you are
 unsure, say you are unsure and frame it as a question — a confident wrong finding costs the author
 more time than an honest hedge.
+
+**Lead with the concrete failure, then the consequence.** Name what actually breaks and who it
+breaks for, rather than citing a principle. "The 101st responsibility silently does not exist in
+the directory or the connection pickers" is a finding; "consider adding pagination" is a suggestion
+box. A reader should be able to tell from the first sentence whether they need to act. This is about
+being specific, not about being harsh — no theatrics, no persona, no padding.
 
 ## Security
 
