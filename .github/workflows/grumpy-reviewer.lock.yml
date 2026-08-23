@@ -80,7 +80,11 @@ run-name: "Grumpy PR Reviewer"
 
 jobs:
   activation:
-    if: github.repository == 'ohcnetwork/care_fe'
+    if: >
+      github.repository == 'ohcnetwork/care_fe' &&
+      (github.event.pull_request == null ||
+      (github.event.pull_request.user.login != 'renovate[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'))
     runs-on: ubuntu-slim
     permissions:
       actions: read

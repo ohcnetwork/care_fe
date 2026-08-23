@@ -25,7 +25,15 @@ on:
 # credentials configured, so runs on forks would otherwise fail loudly and spam
 # fork maintainers. This condition short-circuits every job cleanly (workflow
 # shows as skipped, no error) on any repo other than ohcnetwork/care_fe.
-if: ${{ github.repository == 'ohcnetwork/care_fe' }}
+#
+# Renovate and Dependabot PRs are excluded too: their diffs are auto-generated
+# dependency bumps, so a grumpy line-by-line review adds noise, not value, and
+# these bots are frequent contributors that would otherwise spam Copilot usage.
+if: >
+  ${{ github.repository == 'ohcnetwork/care_fe' &&
+      (github.event.pull_request == null ||
+       (github.event.pull_request.user.login != 'renovate[bot]' &&
+        github.event.pull_request.user.login != 'dependabot[bot]')) }}
 # The Copilot engine authenticates inference with the COPILOT_GITHUB_TOKEN repo
 # secret — a fine-grained PAT whose owner has a Copilot license and only the
 # "Copilot Requests: Read" account permission (no repo scopes). Reading the PR

@@ -45,9 +45,16 @@ on:
 # copilot-pull-request-reviewer post under their own App tokens and DO fire issue_comment. Without
 # this filter, every one of their comments starts a billed run that reads the whole agent file and
 # then noops. The prompt-level bot rule stays as a second line of defence.
+#
+# Renovate and Dependabot PRs are excluded too, for the same trigger-level-is-cheaper reason as the
+# draft filter above: their diffs are auto-generated dependency bumps, so a review adds noise, not
+# value, and these bots push frequently enough to otherwise burn a lot of Copilot usage for nothing.
 if: >
   ${{ github.repository == 'ohcnetwork/care_fe' &&
       (github.event.pull_request == null || github.event.pull_request.draft == false) &&
+      (github.event.pull_request == null ||
+       (github.event.pull_request.user.login != 'renovate[bot]' &&
+        github.event.pull_request.user.login != 'dependabot[bot]')) &&
       (github.event.comment == null || github.event.comment.user.type != 'Bot') &&
       (github.event.issue == null || github.event.issue.pull_request != null) }}
 # Least privilege for the agent job. It only reads: the base repo (contents), the PR's files and
