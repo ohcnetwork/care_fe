@@ -173,7 +173,7 @@ export function PrintInvoiceBase({ facilityId, invoiceId }: PrintInvoiceProps) {
                 <div className="font-medium text-gray-700 text-sm">
                   {t("bill_to")}:
                 </div>
-                <p className="font-semibold text-base capitalize">
+                <p className="font-semibold text-base">
                   <span className="capitalize">
                     {invoice.account.patient.name}
                   </span>
