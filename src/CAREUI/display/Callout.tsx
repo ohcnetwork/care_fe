@@ -28,9 +28,7 @@ export default function Callout({
       )}
     >
       <span className="font-medium">{props.badge}</span>
-      <div className="flex-1">
-        <span className="font-medium">{props.children}</span>
-      </div>
+      <div className="flex-1 font-medium">{props.children}</div>
     </div>
   );
 }
