@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,13 +6,12 @@ import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { BatchRequest } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   ChargeItemRead,
   ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import query from "@/Utils/request/query";
 
 interface InvoiceChargeItemTitleProps {
@@ -84,47 +83,32 @@ export function useMedicationDispenseData(
   const { t } = useTranslation();
 
   // Get medication dispense charge items
-  const medicationDispenseItems =
-    chargeItems?.filter(
-      (item) =>
-        item.service_resource ===
-          ChargeItemServiceResource.medication_dispense &&
-        item.service_resource_id,
-    ) || [];
+  const dispenseIds =
+    chargeItems
+      ?.filter(
+        (item) =>
+          item.service_resource ===
+            ChargeItemServiceResource.medication_dispense &&
+          item.service_resource_id,
+      )
+      .map((item) => item.service_resource_id!) || [];
 
-  // Build batch requests for all medication dispenses
-  const batchRequests: BatchRequest[] = medicationDispenseItems.map((item) => ({
-    url: `/api/v1/medication/dispense/${item.service_resource_id}/`,
-    method: "GET",
-    reference_id: item.service_resource_id!,
-    body: {},
-  }));
-
-  const {
-    data: batchResponse,
-    isLoading: isLoadingDispenses,
-    isError: hasDispenseErrors,
-  } = useQuery({
-    queryKey: [
-      "medication_dispense_batch",
-      ...medicationDispenseItems.map((item) => item.service_resource_id),
-    ],
-    queryFn: query(batchApi.batchRequest, {
-      body: { requests: batchRequests },
-    }),
-    enabled: batchRequests.length > 0,
+  const dispenseQueries = useQueries({
+    queries: dispenseIds.map((id) => ({
+      queryKey: ["medication_dispense_retrieve", id],
+      queryFn: query(medicationDispenseApi.get, { pathParams: { id } }),
+    })),
   });
 
-  // Build dispense map from batch response
+  const isLoadingDispenses = dispenseQueries.some((result) => result.isLoading);
+  const hasDispenseErrors = dispenseQueries.some((result) => result.isError);
+
   const dispenseMap: Record<string, MedicationDispenseRead | undefined> = {};
-  if (batchResponse?.results) {
-    for (const result of batchResponse.results) {
-      if (result.status_code === 200 && result.data) {
-        dispenseMap[result.reference_id] =
-          result.data as MedicationDispenseRead;
-      }
+  dispenseQueries.forEach((result, index) => {
+    if (result.data) {
+      dispenseMap[dispenseIds[index]] = result.data;
     }
-  }
+  });
 
   // Show toast on error (only once using ref)
   const hasShownErrorToast = useRef(false);

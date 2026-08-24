@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,7 +23,6 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { cn } from "@/lib/utils";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
@@ -40,7 +39,8 @@ import {
   PaymentReconciliationStatus,
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
-import mutate from "@/Utils/request/mutate";
+import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { useBatchRequest } from "@/Utils/request/batch";
 import query from "@/Utils/request/query";
 
 interface TransferPaymentSheetProps {
@@ -80,8 +80,7 @@ export default function TransferPaymentSheet({
     (a) => a.id !== account.id,
   );
 
-  const { mutate: submitTransfer, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: submitTransfer, isPending } = useBatchRequest({
     onSuccess: () => {
       toast.success(t("payment_transferred_successfully"));
       queryClient.invalidateQueries({ queryKey: ["account", account.id] });
@@ -95,57 +94,6 @@ export default function TransferPaymentSheet({
       onOpenChange(false);
       setSelectedAccountId(null);
       setAmount("");
-    },
-    onError: (error) => {
-      const errorData = error.cause as {
-        results?: Array<{
-          reference_id: string;
-          status_code: number;
-          data: {
-            detail?: string;
-            errors?: Array<{
-              msg?: string;
-              error?: string;
-              type?: string;
-              loc?: string[];
-            }>;
-            non_field_errors?: string[];
-          };
-        }>;
-      };
-
-      if (errorData?.results) {
-        const failedResults = errorData.results.filter(
-          (result) => result.status_code >= 400,
-        );
-
-        if (failedResults.length > 0) {
-          for (const result of failedResults) {
-            if (result.data?.detail) {
-              toast.error(result.data.detail);
-              return;
-            }
-
-            const errors = result.data?.errors || [];
-            if (errors.length > 0) {
-              const message =
-                errors[0].msg ||
-                errors[0].error ||
-                t("payment_transfer_failed");
-              toast.error(message);
-              return;
-            }
-
-            const nonFieldErrors = result.data?.non_field_errors || [];
-            if (nonFieldErrors.length > 0) {
-              toast.error(nonFieldErrors[0]);
-              return;
-            }
-          }
-        }
-      }
-
-      toast.error(t("payment_transfer_failed"));
     },
   });
 
@@ -171,32 +119,30 @@ export default function TransferPaymentSheet({
       returned_amount: "0",
     };
 
-    submitTransfer({
-      requests: [
-        {
-          url: `/api/v1/facility/${facilityId}/payment_reconciliation/`,
-          method: "POST",
-          reference_id: "debit_current",
-          body: {
-            ...basePayment,
-            account: account.id,
-            is_credit_note: true,
-            note: t("outgoing_transfer_note", { account: selectedAccountId }),
-          },
+    submitTransfer([
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        referenceId: "debit_current",
+        body: {
+          ...basePayment,
+          account: account.id,
+          is_credit_note: true,
+          note: t("outgoing_transfer_note", { account: selectedAccountId }),
         },
-        {
-          url: `/api/v1/facility/${facilityId}/payment_reconciliation/`,
-          method: "POST",
-          reference_id: "credit_target",
-          body: {
-            ...basePayment,
-            account: selectedAccountId,
-            is_credit_note: false,
-            note: t("incoming_transfer_note", { account: account.id }),
-          },
+      },
+      {
+        api: paymentReconciliationApi.createPaymentReconciliation,
+        pathParams: { facilityId },
+        referenceId: "credit_target",
+        body: {
+          ...basePayment,
+          account: selectedAccountId,
+          is_credit_note: false,
+          note: t("incoming_transfer_note", { account: account.id }),
         },
-      ],
-    });
+      },
+    ]);
   };
 
   return (

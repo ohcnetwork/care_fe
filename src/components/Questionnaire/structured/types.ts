@@ -17,7 +17,7 @@ import {
   ServiceRequestApplyActivityDefinitionSpec,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
-import { FileUploadQuestion } from "@/types/files/file";
+import { FileUploadQuestion, FileUploadRequest } from "@/types/files/file";
 import {
   AppointmentCreateRequest,
   CreateAppointmentQuestion,
@@ -48,7 +48,7 @@ export interface StructuredRequestMap {
   encounter: EncounterEdit;
   appointment: AppointmentCreateRequest;
   service_request: ServiceRequestApplyActivityDefinitionSpec;
-  files: FileUploadQuestion;
+  files: FileUploadRequest;
   time_of_death: {
     deceased_datetime: string;
   };

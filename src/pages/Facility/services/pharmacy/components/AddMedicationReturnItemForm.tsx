@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, Search, Trash2 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -38,7 +38,6 @@ import {
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
-import batchApi from "@/types/base/batch/batchApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
@@ -46,9 +45,10 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
+import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { roundWhole, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
+import { useBatchRequest } from "@/Utils/request/batch";
 import { formatDateTime } from "@/Utils/utils";
 
 const returnItemSchema = z.object({
@@ -179,9 +179,7 @@ export function AddMedicationReturnItemForm({
     setSelectedDispenses([]);
   };
 
-  const { mutateAsync: createSupplyDeliveries } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-  });
+  const { mutateAsync: createSupplyDeliveries } = useBatchRequest({});
 
   const validateFormWithToasts = useCallback(
     (data: FormValues) => {
@@ -214,62 +212,35 @@ export function AddMedicationReturnItemForm({
     setIsProcessing(true);
 
     try {
-      // Build batch request for all supply deliveries
-      const requests = data.items.map((item, index) => ({
-        url: `/api/v1/supply_delivery/`,
-        method: "POST",
-        reference_id: `supply_delivery_${index}`,
-        body: {
-          status: SupplyDeliveryStatus.in_progress,
-          supplied_item_type: SupplyDeliveryType.product,
-          supplied_item_condition: SupplyDeliveryCondition.normal,
-          supplied_item_quantity: item.supplied_item_quantity,
-          supplied_item: item.supplied_item, // Product ID
-          destination: locationId,
-          order: deliveryOrderId,
-          extensions: {},
-        },
-      }));
-
-      const response = await createSupplyDeliveries({ requests });
-
-      // Check for any failures in the batch response
-      const failedRequests = response.results.filter(
-        (result) => result.status_code >= 400,
+      // The batch runs in one atomic transaction, so reaching here means every
+      // supply delivery was created.
+      await createSupplyDeliveries(
+        data.items.map((item, index) => ({
+          api: supplyDeliveryApi.createSupplyDelivery,
+          referenceId: `supply_delivery_${index}`,
+          body: {
+            status: SupplyDeliveryStatus.in_progress,
+            supplied_item_type: SupplyDeliveryType.product,
+            supplied_item_condition: SupplyDeliveryCondition.normal,
+            supplied_item_quantity: item.supplied_item_quantity,
+            supplied_item: item.supplied_item, // Product ID
+            destination: locationId,
+            order: deliveryOrderId,
+            extensions: {},
+          },
+        })),
       );
 
-      if (failedRequests.length === 0) {
-        // All succeeded
-        toast.success(
-          t("medication_return_completed_successfully", {
-            count: data.items.length,
-          }),
-        );
-        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-        onSuccess();
-        form.reset();
-      } else if (failedRequests.length < response.results.length) {
-        // Partial success
-        const successCount = response.results.length - failedRequests.length;
-        toast.success(
-          t("partially_completed_medication_return", { count: successCount }),
-        );
-        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-
-        // Remove successful items from form (in reverse order)
-        const successfulIndices = response.results
-          .map((result, index) => (result.status_code < 400 ? index : null))
-          .filter((index): index is number => index !== null);
-
-        [...successfulIndices]
-          .sort((a, b) => b - a)
-          .forEach((idx) => remove(idx));
-      } else {
-        // All failed
-        toast.error(t("error_completing_medication_return_items"));
-      }
+      toast.success(
+        t("medication_return_completed_successfully", {
+          count: data.items.length,
+        }),
+      );
+      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+      onSuccess();
+      form.reset();
     } catch (_) {
-      toast.error(t("error_completing_medication_return_items"));
+      // Errors are surfaced by the batch request hook.
     } finally {
       setIsProcessing(false);
     }
