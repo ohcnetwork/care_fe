@@ -87,7 +87,6 @@ export function AddMedicationReturnItemForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isProcessing, setIsProcessing] = useState(false);
   const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
     null,
   );
@@ -179,7 +178,14 @@ export function AddMedicationReturnItemForm({
     setSelectedDispenses([]);
   };
 
-  const { mutateAsync: createSupplyDeliveries } = useBatchRequest({});
+  const { mutate: createSupplyDeliveries, isPending } = useBatchRequest({
+    onSuccess: () => {
+      toast.success(t("medication_return_completed_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+      onSuccess();
+      form.reset();
+    },
+  });
 
   const validateFormWithToasts = useCallback(
     (data: FormValues) => {
@@ -209,45 +215,26 @@ export function AddMedicationReturnItemForm({
       return;
     }
 
-    setIsProcessing(true);
-
-    try {
-      // The batch runs in one atomic transaction, so reaching here means every
-      // supply delivery was created.
-      await createSupplyDeliveries(
-        data.items.map((item, index) => ({
-          api: supplyDeliveryApi.createSupplyDelivery,
-          referenceId: `supply_delivery_${index}`,
-          body: {
-            status: SupplyDeliveryStatus.in_progress,
-            supplied_item_type: SupplyDeliveryType.product,
-            supplied_item_condition: SupplyDeliveryCondition.normal,
-            supplied_item_quantity: item.supplied_item_quantity,
-            supplied_item: item.supplied_item, // Product ID
-            destination: locationId,
-            order: deliveryOrderId,
-            extensions: {},
-          },
-        })),
-      );
-
-      toast.success(
-        t("medication_return_completed_successfully", {
-          count: data.items.length,
-        }),
-      );
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-      onSuccess();
-      form.reset();
-    } catch (_) {
-      // Errors are surfaced by the batch request hook.
-    } finally {
-      setIsProcessing(false);
-    }
+    createSupplyDeliveries(
+      data.items.map((item, index) => ({
+        api: supplyDeliveryApi.createSupplyDelivery,
+        referenceId: `supply_delivery_${index}`,
+        body: {
+          status: SupplyDeliveryStatus.in_progress,
+          supplied_item_type: SupplyDeliveryType.product,
+          supplied_item_condition: SupplyDeliveryCondition.normal,
+          supplied_item_quantity: item.supplied_item_quantity,
+          supplied_item: item.supplied_item, // Product ID
+          destination: locationId,
+          order: deliveryOrderId,
+          extensions: {},
+        },
+      })),
+    );
   }
 
   return (
-    <DisablingCover disabled={isProcessing} message={t("saving")}>
+    <DisablingCover disabled={isPending} message={t("saving")}>
       <Card className="bg-gray-50 py-4 rounded-md">
         <CardContent className="space-y-4">
           {fields.length > 0 ? (
@@ -449,14 +436,14 @@ export function AddMedicationReturnItemForm({
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={isProcessing}
+                    disabled={isPending}
                     onClick={() => form.reset()}
                   >
                     {t("cancel")}
                   </Button>
                   <div className="flex space-x-3">
-                    <Button type="submit" disabled={isProcessing}>
-                      {isProcessing ? t("saving") : t("save")}
+                    <Button type="submit" disabled={isPending}>
+                      {isPending ? t("saving") : t("save")}
                       <ShortcutBadge actionId="submit-action" />
                     </Button>
                   </div>
