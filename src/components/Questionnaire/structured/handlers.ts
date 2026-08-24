@@ -197,7 +197,7 @@ export const structuredHandlers: {
       return [
         {
           api: scheduleApis.slots.createAppointment,
-          pathParams: { facilityId: facilityId ?? "", slotId: slot_id },
+          pathParams: { facilityId: facilityId!, slotId: slot_id },
           body: {
             note,
             patient: patientId,
@@ -244,7 +244,7 @@ export const structuredHandlers: {
       return [
         {
           api: chargeItemApi.applyChargeItemDefinitions,
-          pathParams: { facilityId: facilityId ?? "" },
+          pathParams: { facilityId: facilityId! },
           body: {
             requests: chargeItems,
           },
@@ -257,7 +257,7 @@ export const structuredHandlers: {
     getRequests: async (serviceRequests, { facilityId }) => {
       return serviceRequests.map((serviceRequest) => ({
         api: serviceRequestApi.applyActivityDefinition,
-        pathParams: { facilityId: facilityId ?? "" },
+        pathParams: { facilityId: facilityId! },
         body: {
           ...serviceRequest,
           service_request: {

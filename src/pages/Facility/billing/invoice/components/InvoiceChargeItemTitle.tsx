@@ -82,17 +82,19 @@ export function useMedicationDispenseData(
 ): UseMedicationDispenseDataResult {
   const { t } = useTranslation();
 
-  // Get medication dispense charge items
   const dispenseIds =
-    chargeItems
-      ?.filter(
-        (item) =>
-          item.service_resource ===
-            ChargeItemServiceResource.medication_dispense &&
-          item.service_resource_id,
-      )
-      .map((item) => item.service_resource_id!) || [];
+    chargeItems?.reduce((ids: string[], item) => {
+      if (
+        item.service_resource ===
+          ChargeItemServiceResource.medication_dispense &&
+        item.service_resource_id
+      ) {
+        ids.push(item.service_resource_id);
+      }
+      return ids;
+    }, []) || [];
 
+  // Get medication dispense charge items
   const dispenseQueries = useQueries({
     queries: dispenseIds.map((id) => ({
       queryKey: ["medication_dispense_retrieve", id],
