@@ -37,6 +37,7 @@ import {
   Operation,
   createFilterConfig,
   getVariantColorClasses,
+  isSameDateRange,
 } from "./utils/Utils";
 
 import { SelectedFacilityUserBadge } from "@/components/ui/multi-filter/facilityUserFilter";
@@ -72,9 +73,18 @@ import {
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import {
+  INVENTORY_STATUS_COLORS,
+  InventoryStatus,
+  InventoryStatusOptions,
+} from "@/types/inventory/product/inventory";
+import {
   REQUEST_ORDER_PRIORITY_COLORS,
   RequestOrderPriority,
 } from "@/types/inventory/requestOrder/requestOrder";
+import {
+  getExpiredDateRange,
+  getExpiringSoonDateRange,
+} from "@/Utils/inventory";
 import careConfig from "@careConfig";
 import { Zap } from "lucide-react";
 export const encounterStatusFilter = (
@@ -189,6 +199,7 @@ export const dateFilter = (
   label?: string,
   dateRangeOptions?: DateRangeOption[],
   disableClear?: boolean,
+  getOperations: (selected: FilterDateRange) => Operation[] = getDateOperations,
 ) =>
   createFilterConfig(key, label || t("started_date"), "date", [], {
     renderSelected: (
@@ -205,7 +216,7 @@ export const dateFilter = (
       );
     },
     getOperations: (selected: FilterValues) =>
-      getDateOperations(selected as FilterDateRange),
+      getOperations(selected as FilterDateRange),
     mode: "single",
     icon: <CalendarFold className="w-4 h-4" />,
     dateRangeOptions,
@@ -683,6 +694,70 @@ export const inventoryPriorityFilter = (
       icon: <Zap className="size-4" />,
     },
   );
+
+export const inventoryStatusFilter = (
+  key: string = "status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("status"),
+    "command",
+    InventoryStatusOptions.map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(INVENTORY_STATUS_COLORS[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant = INVENTORY_STATUS_COLORS[option as InventoryStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: true,
+    },
+  );
+
+export const productExpirationDateFilter = (
+  key: string = "product_expiration_date",
+  label?: string,
+) => {
+  const expiringSoonRange = getExpiringSoonDateRange();
+
+  const presetOptions: DateRangeOption[] = [
+    { label: "expired", getDateRange: getExpiredDateRange },
+    ...(expiringSoonRange
+      ? [{ label: "expiring_soon", getDateRange: () => expiringSoonRange }]
+      : []),
+  ];
+
+  return dateFilter(
+    key,
+    label || t("expiration_date"),
+    presetOptions,
+    undefined,
+    (selected) =>
+      presetOptions.some((option) =>
+        isSameDateRange(selected, option.getDateRange()),
+      )
+        ? [{ label: "is" }]
+        : getDateOperations(selected),
+  );
+};
 
 export const dispenseStatusFilter = (
   key: string = "dispense_status",

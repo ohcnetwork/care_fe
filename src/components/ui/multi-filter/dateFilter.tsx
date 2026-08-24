@@ -25,6 +25,7 @@ import {
   FilterConfig,
   FilterDateRange,
   FilterValues,
+  isSameDateRange,
   longDateRangeOptions,
 } from "./utils/Utils";
 
@@ -169,7 +170,7 @@ function DateRangeOptions({
   isCustomDateRangeSelected: boolean;
   filter: FilterConfig;
   handleDateRangeSelect: (option: DateRangeOption) => void;
-  isSameRange: (option: DateRangeOption) => boolean | undefined;
+  isSameRange: (option: DateRangeOption) => boolean;
 }) {
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
@@ -259,12 +260,8 @@ export default function RenderDateFilter({
     setDateTo(date?.to);
   };
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      dateFrom && isSameDay(dateFrom, from) && dateTo && isSameDay(dateTo, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange({ from: dateFrom, to: dateTo }, option.getDateRange());
 
   const isCustomDateRangeSelected =
     selected.from || selected.to
@@ -335,15 +332,8 @@ export const SelectedDateBadge = ({
     selected.from && selected.to && isSameDay(selected.from, selected.to);
   const presentDate = isSameDate ? selected.from : selected.from || selected.to;
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      selected.from &&
-      isSameDay(selected.from, from) &&
-      selected.to &&
-      isSameDay(selected.to, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange(selected, option.getDateRange());
 
   const isRangeSelected = (filter.meta as DateFilterMeta)?.presetOptions?.find(
     (option) => isSameRange(option),

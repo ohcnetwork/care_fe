@@ -1,6 +1,13 @@
 import React from "react";
 
-import { addDays, subDays, subMonths, subWeeks, subYears } from "date-fns";
+import {
+  addDays,
+  isSameDay,
+  subDays,
+  subMonths,
+  subWeeks,
+  subYears,
+} from "date-fns";
 
 import { ActivityDefinitionFilterValue } from "@/components/ui/multi-filter/activityDefinitionFilter";
 import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
@@ -153,9 +160,19 @@ export interface FilterDateRange {
 
 export interface DateRangeOption {
   label: string;
-  getDateRange: () => { from: Date; to: Date };
+  /** Ranges may be open ended, i.e. bound on only one end. */
+  getDateRange: () => FilterDateRange;
   count?: number;
 }
+
+const isSameBoundary = (a?: Date, b?: Date) =>
+  a && b ? isSameDay(a, b) : !a && !b;
+
+/**
+ * Compares two (possibly open ended) date ranges with a day's precision.
+ */
+export const isSameDateRange = (a: FilterDateRange, b: FilterDateRange) =>
+  isSameBoundary(a.from, b.from) && isSameBoundary(a.to, b.to);
 
 export type Operation = {
   value?: string;
