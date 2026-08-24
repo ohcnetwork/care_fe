@@ -68,21 +68,31 @@ interface ProductDeliveriesDrawerContentProps {
   selectedProductKnowledge?: ProductKnowledgeBase;
 }
 
-function ProductDeliveriesDrawerContent({
+interface PaginatedDeliveriesProps {
+  facilityId: string;
+  locationId: string;
+  direction: DeliveryDirection;
+  page: number;
+  productKnowledgeId: string;
+  setPage: (page: number) => void;
+}
+
+const PaginatedDeliveries = ({
   facilityId,
   locationId,
-  selectedProductKnowledge,
-}: ProductDeliveriesDrawerContentProps) {
+  direction,
+  page,
+  productKnowledgeId,
+  setPage,
+}: PaginatedDeliveriesProps) => {
   const { t } = useTranslation();
-  const [direction, setDirection] = useState<DeliveryDirection>("incoming");
-  const [page, setPage] = useState(1);
 
   const { data: deliveries, isLoading } = useQuery({
     queryKey: [
       "supplyDeliveries",
       facilityId,
       locationId,
-      selectedProductKnowledge?.id,
+      productKnowledgeId,
       direction,
       page,
     ],
@@ -92,50 +102,58 @@ function ProductDeliveriesDrawerContent({
         ...(direction === "incoming"
           ? { destination: locationId }
           : { origin: locationId }),
-        supplied_inventory_item_product_knowledge: selectedProductKnowledge?.id,
+        supplied_inventory_item_product_knowledge: productKnowledgeId,
         status: ACTIVE_DELIVERY_STATUS_FILTER,
         limit: DELIVERIES_PER_PAGE,
         offset: (page - 1) * DELIVERIES_PER_PAGE,
       },
     }),
-    enabled: !!selectedProductKnowledge?.id,
+    enabled: !!productKnowledgeId,
   });
 
-  const renderDeliveries = () => {
-    if (isLoading) {
-      return <TableSkeleton count={2} />;
-    }
+  if (isLoading) {
+    return <TableSkeleton count={2} />;
+  }
 
-    if (!deliveries?.results?.length) {
-      return (
-        <EmptyState
-          icon={<Truck className="size-5 text-primary-600" />}
-          title={t("no_deliveries_found")}
-          description={t("no_deliveries_found_description")}
-        />
-      );
-    }
-
+  if (!deliveries?.results?.length) {
     return (
-      <>
-        <SupplyDeliveryTable
-          deliveries={deliveries.results}
-          facilityId={facilityId}
-          serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
-          linkToProduct
-          showLocations
-        />
-        <div className="flex justify-center">
-          <PaginationComponent
-            data={{ totalCount: deliveries.count }}
-            onChange={(newPage) => setPage(newPage)}
-            defaultPerPage={DELIVERIES_PER_PAGE}
-            cPage={page}
-          />
-        </div>
-      </>
+      <EmptyState
+        icon={<Truck className="size-5 text-primary-600" />}
+        title={t("no_deliveries_found")}
+        description={t("no_deliveries_found_description")}
+      />
     );
-  };
+  }
+
+  return (
+    <>
+      <SupplyDeliveryTable
+        deliveries={deliveries.results}
+        facilityId={facilityId}
+        serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
+        linkToProduct
+        showLocations
+      />
+      <div className="flex justify-center">
+        <PaginationComponent
+          data={{ totalCount: deliveries.count }}
+          onChange={(newPage) => setPage(newPage)}
+          defaultPerPage={DELIVERIES_PER_PAGE}
+          cPage={page}
+        />
+      </div>
+    </>
+  );
+};
+
+function ProductDeliveriesDrawerContent({
+  facilityId,
+  locationId,
+  selectedProductKnowledge,
+}: ProductDeliveriesDrawerContentProps) {
+  const { t } = useTranslation();
+  const [direction, setDirection] = useState<DeliveryDirection>("incoming");
+  const [page, setPage] = useState(1);
 
   return (
     <div className="flex flex-col overflow-y-auto pt-4 max-h-[68vh]">
@@ -151,8 +169,26 @@ function ProductDeliveriesDrawerContent({
           <TabsTrigger value="incoming">{t("incoming_deliveries")}</TabsTrigger>
           <TabsTrigger value="outgoing">{t("outgoing_deliveries")}</TabsTrigger>
         </TabsList>
-        <TabsContent value="incoming">{renderDeliveries()}</TabsContent>
-        <TabsContent value="outgoing">{renderDeliveries()}</TabsContent>
+        <TabsContent value="incoming">
+          <PaginatedDeliveries
+            facilityId={facilityId}
+            locationId={locationId}
+            direction="incoming"
+            productKnowledgeId={selectedProductKnowledge?.id || ""}
+            page={page}
+            setPage={setPage}
+          />
+        </TabsContent>
+        <TabsContent value="outgoing">
+          <PaginatedDeliveries
+            facilityId={facilityId}
+            locationId={locationId}
+            direction="outgoing"
+            productKnowledgeId={selectedProductKnowledge?.id || ""}
+            page={page}
+            setPage={setPage}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   );
