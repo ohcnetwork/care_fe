@@ -476,13 +476,11 @@ export function DeliveryOrderShow({
       (d) => d.status !== SupplyDeliveryStatus.entered_in_error,
     ) ?? [];
 
-  const allSupplyDeliveriesCompletedOrAbandoned =
-    pendingDeliveries.length > 0 &&
-    pendingDeliveries.every(
-      (d) =>
-        d.status === SupplyDeliveryStatus.completed ||
-        d.status === SupplyDeliveryStatus.abandoned,
-    );
+  const allSupplyDeliveriesCompletedOrAbandoned = pendingDeliveries.every(
+    (d) =>
+      d.status === SupplyDeliveryStatus.completed ||
+      d.status === SupplyDeliveryStatus.abandoned,
+  );
 
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
