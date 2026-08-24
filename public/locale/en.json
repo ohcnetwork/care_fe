@@ -3107,7 +3107,6 @@
   "issuer_type": "Issuer Type",
   "item": "Item",
   "item_condition": "Item Condition?",
-  "item_limit_reached": "Item limit reached",
   "item_location": "Item Location",
   "item_marked_as_abandoned": "Item marked as abandoned successfully",
   "item_marked_as_entered_in_error": "Item marked as entered in error successfully",
