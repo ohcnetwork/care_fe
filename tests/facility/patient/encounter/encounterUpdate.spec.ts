@@ -1,18 +1,14 @@
-import { expect, test } from "@playwright/test";
-import { openFirstInProgressEncounter } from "tests/helper/ui";
-import { getFacilityId } from "tests/support/facilityId";
+import { expect, test, type Page } from "@playwright/test";
+import { openFixtureEncounter } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Update", () => {
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await openFirstInProgressEncounter(page, facilityId);
+    await openFixtureEncounter(page);
   });
 
-  async function openUpdateForm(page: import("@playwright/test").Page) {
+  async function openUpdateForm(page: Page) {
     await page.getByRole("link", { name: "Update Encounter" }).first().click();
     await page.waitForURL(/\/questionnaire\/encounter/);
     await expect(page.getByText("Encounter Status")).toBeVisible();

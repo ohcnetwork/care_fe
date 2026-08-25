@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { selectFromLocationMultiSelect } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -7,7 +7,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 // Selecting the first available location is repeated across the create and edit
 // flows, so keep it in one place.
-async function selectFirstLocation(page: import("@playwright/test").Page) {
+async function selectFirstLocation(page: Page) {
   const locationTrigger = page
     .getByRole("combobox")
     .filter({ hasText: /select locations/i })
@@ -35,7 +35,9 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Fill service name", async () => {
-      await page.getByRole("textbox", { name: /name/i }).fill(serviceName);
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(serviceName);
     });
 
     await test.step("Select a location", async () => {
@@ -43,7 +45,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
 
     await test.step("Submit the form", async () => {
-      await page.getByRole("button", { name: /create/i }).click();
+      await page.getByRole("button", { name: "Create", exact: true }).click();
 
       await expect(
         page.getByText(/healthcare service created successfully/i),
@@ -77,12 +79,14 @@ test.describe("Healthcare Service Create & Edit", () => {
         .click();
       await page.waitForURL(/\/healthcare_services\/new/);
 
-      await page.getByRole("textbox", { name: /name/i }).fill(originalName);
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(originalName);
 
       // Select a location
       await selectFirstLocation(page);
 
-      await page.getByRole("button", { name: /create/i }).click();
+      await page.getByRole("button", { name: "Create", exact: true }).click();
       await expect(
         page.getByText(/healthcare service created successfully/i),
       ).toBeVisible({ timeout: 10000 });
@@ -102,8 +106,10 @@ test.describe("Healthcare Service Create & Edit", () => {
       await page.waitForURL(/\/edit$/);
 
       // Clear and update the name
-      await page.getByRole("textbox", { name: /name/i }).clear();
-      await page.getByRole("textbox", { name: /name/i }).fill(updatedName);
+      await page.getByRole("textbox", { name: "Name", exact: true }).clear();
+      await page
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill(updatedName);
 
       await page.getByRole("button", { name: "Save" }).click();
       await expect(
@@ -117,14 +123,24 @@ test.describe("Healthcare Service Create & Edit", () => {
     });
   });
 
-  test("should keep the create button disabled until the form is valid", async ({
+  test("should enable the create button once the form is edited", async ({
     page,
   }) => {
     await page.getByRole("button", { name: /add healthcare service/i }).click();
     await page.waitForURL(/\/healthcare_services\/new/);
 
-    // Name (and a location) are required, so the create action stays disabled
-    // on an empty form.
-    await expect(page.getByRole("button", { name: /create/i })).toBeDisabled();
+    // The create button is gated on form dirtiness — disabled until a field
+    // changes, then enabled. (Field-level validation surfaces on submit.)
+    const createButton = page.getByRole("button", {
+      name: "Create",
+      exact: true,
+    });
+    await expect(createButton).toBeDisabled();
+
+    await page
+      .getByRole("textbox", { name: "Name", exact: true })
+      .fill(faker.commerce.productName());
+
+    await expect(createButton).toBeEnabled();
   });
 });

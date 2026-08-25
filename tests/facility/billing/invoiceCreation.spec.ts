@@ -8,7 +8,7 @@ test.describe("Invoice Creation", () => {
   let facilityId: string;
   let accountId: string;
 
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     facilityId = getFacilityId();
     accountId = getAccountId();
   });

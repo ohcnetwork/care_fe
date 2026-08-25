@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  clickTabOrMenuItem,
-  openFirstInProgressEncounter,
-} from "tests/helper/ui";
-import { getFacilityId } from "tests/support/facilityId";
+import { clickTabOrMenuItem, openFixtureEncounter } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -13,11 +9,8 @@ test.describe("Encounter Consents Tab", () => {
   // single worker instead of in parallel.
   test.describe.configure({ mode: "serial" });
 
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await openFirstInProgressEncounter(page, facilityId);
+    await openFixtureEncounter(page);
     await clickTabOrMenuItem(page, "Consents");
     await expect(page).toHaveURL(/\/consents$/);
   });

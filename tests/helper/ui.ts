@@ -1,5 +1,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import { format, subDays } from "date-fns";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 export async function selectFromLocationMultiSelect(
   page: Page,
@@ -696,33 +698,30 @@ export async function clickTabOrMenuItem(
 }
 
 /**
- * Opens the first in-progress encounter for a facility from the encounter
- * listing and waits until its detail page (Overview tab) is ready.
+ * Opens the fixture encounter's Overview tab (served at the `/updates` route),
+ * using the facility, patient, and encounter IDs saved during setup
+ * (`tests/setup/patient.setup.ts`).
  *
- * Centralises the fixture-selection query used across the encounter specs so
- * the date window / status filter lives in one place.
+ * The encounter is selected once during setup (which targets a writable
+ * planned/in-progress encounter) and reused here, instead of each spec
+ * re-querying a filtered listing. One selection point, consistent across specs,
+ * matching the `encounterShortcuts.spec.ts` convention.
  *
  * @param page - Playwright page instance
- * @param facilityId - Facility whose encounters to list
  */
-export async function openFirstInProgressEncounter(
-  page: Page,
-  facilityId: string,
-): Promise<void> {
-  const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-  const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+export async function openFixtureEncounter(page: Page): Promise<void> {
+  const facilityId = getFacilityId();
+  const patientId = getPatientId();
+  const encounterId = getEncounterId();
 
   await page.goto(
-    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
   );
-  const firstEncounter = page
-    .getByRole("link", { name: "View Encounter" })
-    .first();
+  // `Encounter Actions` only renders once the encounter itself resolves
+  // (`EncounterShow.tsx`), so this doubles as the readiness gate — a stale or
+  // deleted fixture id fails here with a clear reason instead of a blank page.
   await expect(
-    firstEncounter,
-    `No in-progress encounter found for facility ${facilityId} — the shared fixture may be missing.`,
+    page.getByRole("button", { name: /encounter actions/i }).first(),
+    `Fixture encounter ${encounterId} did not load — the saved encounterMeta.json id may be stale or deleted; re-run the patient setup.`,
   ).toBeVisible();
-  await firstEncounter.click();
-  await page.waitForURL(/\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+/);
-  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }

@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
 import {
   clickTabOrMenuItem,
-  openFirstInProgressEncounter,
+  openFixtureEncounter,
   selectFromCommand,
 } from "tests/helper/ui";
-import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -13,11 +12,8 @@ test.describe("Encounter Devices Tab", () => {
   // tests serially in one worker for deterministic ordering.
   test.describe.configure({ mode: "serial" });
 
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await openFirstInProgressEncounter(page, facilityId);
+    await openFixtureEncounter(page);
     await clickTabOrMenuItem(page, "Devices");
     await expect(page).toHaveURL(/\/devices$/);
   });

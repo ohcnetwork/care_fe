@@ -1,15 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { openFirstInProgressEncounter } from "tests/helper/ui";
-import { getFacilityId } from "tests/support/facilityId";
+import { openFixtureEncounter } from "tests/helper/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Diagnostic Reports Tab", () => {
-  let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
-    facilityId = getFacilityId();
-    await openFirstInProgressEncounter(page, facilityId);
+    await openFixtureEncounter(page);
   });
 
   test("should display the diagnostic reports tab with its empty state", async ({
