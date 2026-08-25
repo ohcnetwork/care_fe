@@ -72,20 +72,17 @@ interface PaginatedDeliveriesProps {
   facilityId: string;
   locationId: string;
   direction: DeliveryDirection;
-  page: number;
   productKnowledgeId: string;
-  setPage: (page: number) => void;
 }
 
 const PaginatedDeliveries = ({
   facilityId,
   locationId,
   direction,
-  page,
   productKnowledgeId,
-  setPage,
 }: PaginatedDeliveriesProps) => {
   const { t } = useTranslation();
+  const [page, setPage] = useState(1);
 
   const { data: deliveries, isLoading } = useQuery({
     queryKey: [
@@ -153,16 +150,12 @@ function ProductDeliveriesDrawerContent({
 }: ProductDeliveriesDrawerContentProps) {
   const { t } = useTranslation();
   const [direction, setDirection] = useState<DeliveryDirection>("incoming");
-  const [page, setPage] = useState(1);
 
   return (
     <div className="flex flex-col overflow-y-auto pt-4 max-h-[68vh]">
       <Tabs
         value={direction}
-        onValueChange={(value) => {
-          setDirection(value as DeliveryDirection);
-          setPage(1);
-        }}
+        onValueChange={(value) => setDirection(value as DeliveryDirection)}
         className="mb-4"
       >
         <TabsList>
@@ -175,8 +168,6 @@ function ProductDeliveriesDrawerContent({
             locationId={locationId}
             direction="incoming"
             productKnowledgeId={selectedProductKnowledge?.id || ""}
-            page={page}
-            setPage={setPage}
           />
         </TabsContent>
         <TabsContent value="outgoing">
@@ -185,8 +176,6 @@ function ProductDeliveriesDrawerContent({
             locationId={locationId}
             direction="outgoing"
             productKnowledgeId={selectedProductKnowledge?.id || ""}
-            page={page}
-            setPage={setPage}
           />
         </TabsContent>
       </Tabs>
