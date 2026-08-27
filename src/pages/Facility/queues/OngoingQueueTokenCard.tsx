@@ -327,10 +327,12 @@ function OngoingQueueTokenCardInner({
               className="font-semibold hover:underline transition-colors min-w-0"
             >
               <span className="font-semibold flex items-center gap-1 min-w-0">
-                <span className="truncate capitalize">
-                  {token.patient
-                    ? token.patient.name
-                    : renderTokenNumber(token)}
+                <span className="truncate">
+                  {token.patient ? (
+                    <span className="capitalize">{token.patient.name}</span>
+                  ) : (
+                    renderTokenNumber(token)
+                  )}
                 </span>
                 <ExternalLink className="size-4 shrink-0" />
               </span>

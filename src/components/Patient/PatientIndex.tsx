@@ -390,7 +390,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                   onClick={() => handlePatientSelect(index)}
                                 >
                                   <TableCell className="font-medium">
-                                    <p className="capitalize">{patient.name}</p>
+                                    <span className="capitalize">
+                                      {patient.name}
+                                    </span>
                                     {!patientList?.partial && (
                                       <p className="text-xs text-gray-500 text-wrap line-clamp-2">
                                         {"address" in patient &&

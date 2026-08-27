@@ -1,6 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { format, formatDate } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -208,8 +209,12 @@ export default function AppointmentPrint(props: Props) {
                 <>
                   <DetailRow
                     label={t("patient")}
-                    value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
-                    valueClassName="capitalize"
+                    value={
+                      <>
+                        <span className="capitalize">{patient?.name}</span>
+                        {` | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+                      </>
+                    }
                   />
                   {patientExtensionData.map((field) => (
                     <DetailRow
@@ -479,7 +484,7 @@ export default function AppointmentPrint(props: Props) {
 
 interface DetailRowProps {
   label: string;
-  value?: string | null;
+  value?: ReactNode;
   valueClassName?: string;
   width?: string;
 }
