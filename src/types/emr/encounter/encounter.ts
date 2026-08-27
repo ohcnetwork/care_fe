@@ -200,10 +200,6 @@ export type History = {
   moved_at: string;
 };
 
-export type EncounterClassHistory = {
-  history: History[];
-};
-
 export type StatusHistory = {
   history: History[];
 };
@@ -223,7 +219,6 @@ export interface EncounterListRead extends EncounterBase {
   patient: PatientListRead;
   facility: FacilityBareMinimum;
   status_history: StatusHistory;
-  encounter_class_history: EncounterClassHistory;
   created_date: string;
   modified_date: string;
   tags: TagConfig[];
