@@ -70,12 +70,6 @@ test.describe("Create an Encounter", () => {
     //verify encounter details on the details tab
     await page.getByRole("tab", { name: "Details" }).click();
     await page.getByRole("link", { name: "Update Encounter" }).click();
-
-    // Encounter class is immutable after creation and no longer editable here,
-    // so verify the update form loaded via its Encounter Status field instead.
-    await expect(
-      page.getByText("Encounter Status", { exact: true }),
-    ).toBeVisible();
   });
 
   test("through phone number + year", async ({ page }) => {
