@@ -213,10 +213,7 @@ export function EncounterQuestion({
     const encounterClass = encounterData.encounter_class;
     if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass)) {
       newEncounter.hospitalization = {};
-    } else if (
-      HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass) &&
-      newEncounter.status === EncounterStatus.DISCHARGED
-    ) {
+    } else if (newEncounter.status === EncounterStatus.DISCHARGED) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:

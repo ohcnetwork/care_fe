@@ -140,7 +140,7 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("tab", { name: "Details" }).click();
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
-    // Verify encounter status and priority are displayed correctly. Encounter
+    // Verify encounter status and priority are displayed correctly.
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
     ).toBeVisible();
