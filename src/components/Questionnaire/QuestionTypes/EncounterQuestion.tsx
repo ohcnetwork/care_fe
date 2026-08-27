@@ -86,6 +86,8 @@ export function validateEncounterQuestion(
 
   if (
     value?.status === EncounterStatus.DISCHARGED &&
+    value?.hospitalization &&
+    Object.keys(value.hospitalization).length > 0 &&
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
@@ -205,9 +207,7 @@ export function EncounterQuestion({
     const encounterClass = encounterData?.encounter_class;
     if (encounterClass && ["amb", "vr", "hh"].includes(encounterClass)) {
       newEncounter.hospitalization = {};
-    }
-
-    if (
+    } else if (
       encounterClass &&
       ["imp", "obsenc", "emer"].includes(encounterClass) &&
       newEncounter.status === EncounterStatus.DISCHARGED
