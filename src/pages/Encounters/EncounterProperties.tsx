@@ -62,14 +62,14 @@ export const EncounterClassBadge = ({
 }) => {
   const { t } = useTranslation();
 
+  const ClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
+
   return (
     <Badge
       variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
       size="sm"
     >
-      {React.createElement(ENCOUNTER_CLASS_ICONS[encounter.encounter_class], {
-        className: "size-3",
-      })}
+      <ClassIcon className="size-3" />
       {t(`encounter_class__${encounter.encounter_class}`)}
     </Badge>
   );
