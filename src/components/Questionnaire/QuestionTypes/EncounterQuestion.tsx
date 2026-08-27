@@ -27,7 +27,6 @@ import {
   ENCOUNTER_PRIORITY,
   EncounterStatus,
   type EncounterAdmitSources,
-  type EncounterClass,
   type EncounterDietPreference,
   type EncounterDischargeDisposition,
   type EncounterEdit,
@@ -289,30 +288,6 @@ export function EncounterQuestion({
                   </SelectItem>
                 ),
               )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>{t("encounter_class")}</Label>
-          <Select
-            value={encounter.encounter_class}
-            onValueChange={(value: EncounterClass) =>
-              handleUpdateEncounter({
-                encounter_class: value,
-              })
-            }
-            disabled={disabled}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("select_class")} />
-            </SelectTrigger>
-            <SelectContent>
-              {careConfig.encounterClasses.map((encounterClass) => (
-                <SelectItem key={encounterClass} value={encounterClass}>
-                  {t(`encounter_class__${encounterClass}`)}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
         </div>
