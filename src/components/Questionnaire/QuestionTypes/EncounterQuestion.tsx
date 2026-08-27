@@ -334,26 +334,31 @@ export function EncounterQuestion({
         </div>
       </div>
 
-      {/* Mark for discharge button - Show if not already discharged */}
-      {encounter.status !== EncounterStatus.DISCHARGED && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
+      {/* Mark for discharge button - Show if encounter is a hospitalization encounter class and not already discharged  */}
+      {encounter.status !== EncounterStatus.DISCHARGED &&
+        HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+          encounterData.encounter_class,
+        ) && (
+          <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">
+                  {t("discharge_patient")}
+                </h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={disabled}
+                onClick={() =>
+                  handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
+                }
+              >
+                {t("mark_for_discharge")}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() =>
-                handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
-              }
-            >
-              {t("mark_for_discharge")}
-            </Button>
           </div>
-        </div>
-      )}
+        )}
 
       {(encounter.status === EncounterStatus.DISCHARGED ||
         encounter.discharge_summary_advice) && (
