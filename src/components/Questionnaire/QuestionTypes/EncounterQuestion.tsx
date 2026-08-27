@@ -27,6 +27,7 @@ import {
   ENCOUNTER_PRIORITY,
   EncounterStatus,
   type EncounterAdmitSources,
+  type EncounterClass,
   type EncounterDietPreference,
   type EncounterDischargeDisposition,
   type EncounterEdit,
@@ -69,6 +70,12 @@ const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
   EncounterStatus.DISCHARGED,
   EncounterStatus.UNKNOWN,
   EncounterStatus.COMPLETED,
+];
+
+const HOSPITALIZATION_ENCOUNTER_CLASSES: EncounterClass[] = [
+  "imp",
+  "obsenc",
+  "emer",
 ];
 
 const ENCOUNTER_FIELDS: FieldDefinitions = {
@@ -209,7 +216,7 @@ export function EncounterQuestion({
       newEncounter.hospitalization = {};
     } else if (
       encounterClass &&
-      ["imp", "obsenc", "emer"].includes(encounterClass) &&
+      HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass) &&
       newEncounter.status === EncounterStatus.DISCHARGED
     ) {
       newEncounter.hospitalization = {
@@ -371,7 +378,9 @@ export function EncounterQuestion({
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
       {!!encounterData?.encounter_class &&
-        ["imp", "obsenc", "emer"].includes(encounterData.encounter_class) && (
+        HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+          encounterData.encounter_class,
+        ) && (
           <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
             <h3 className="text-lg font-semibold break-words">
               {t("hospitalization_details")}

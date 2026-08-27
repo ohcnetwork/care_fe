@@ -151,7 +151,6 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
     // Verify encounter status and priority are displayed correctly. Encounter
-    // class is immutable after creation and no longer editable in this form.
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
     ).toBeVisible();
