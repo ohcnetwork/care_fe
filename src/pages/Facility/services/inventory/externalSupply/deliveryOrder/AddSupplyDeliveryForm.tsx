@@ -961,7 +961,14 @@ export function AddSupplyDeliveryForm({
                       {t("cancel")}
                     </Button>
                     <div className="flex space-x-3">
-                      <Button type="submit" disabled={isProcessing}>
+                      <Button
+                        type="submit"
+                        disabled={
+                          isProcessing ||
+                          supplyDeliveriesCount + fields.length >
+                            careConfig.maxDatapointsPerUpsert
+                        }
+                      >
                         {isProcessing ? t("saving") : t("save")}
                         <ShortcutBadge actionId="submit-action" />
                       </Button>

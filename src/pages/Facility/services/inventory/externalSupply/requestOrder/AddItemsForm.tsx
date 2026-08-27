@@ -31,7 +31,6 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -257,7 +256,12 @@ export function AddItemsForm({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isCreating || fields.length === 0}
+                    disabled={
+                      isCreating ||
+                      fields.length === 0 ||
+                      supplyRequestsCount + fields.length >
+                        careConfig.maxDatapointsPerUpsert
+                    }
                   >
                     <Check className="mr-2 h-4 w-4" />
                     {isCreating ? t("creating") : t("save_list")}
@@ -266,9 +270,7 @@ export function AddItemsForm({
               </>
             ) : (
               <div className="mt-2 flex flex-col gap-2">
-                <p className={cn(hasReachedUpsertLimit && "hidden")}>
-                  -{t("or")}-
-                </p>
+                {!hasReachedUpsertLimit && <p>-{t("or")}-</p>}
                 <div className="flex flex-row gap-2 justify-between bg-white p-2 items-center border border-gray-200 rounded-md">
                   <div className="flex flex-col gap-2">
                     <p className="font-bold">

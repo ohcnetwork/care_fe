@@ -471,16 +471,14 @@ export function DeliveryOrderShow({
       (delivery) => delivery.status === SupplyDeliveryStatus.completed,
     ) ?? false;
 
-  const pendingDeliveries =
-    supplyDeliveries?.results.filter(
-      (d) => d.status !== SupplyDeliveryStatus.entered_in_error,
-    ) ?? [];
-
-  const allSupplyDeliveriesCompletedOrAbandoned = pendingDeliveries.every(
-    (d) =>
-      d.status === SupplyDeliveryStatus.completed ||
-      d.status === SupplyDeliveryStatus.abandoned,
-  );
+  const canMarkAsCompleted =
+    !!supplyDeliveries?.results?.length &&
+    supplyDeliveries.results.every(
+      (delivery) =>
+        delivery.status === SupplyDeliveryStatus.completed ||
+        delivery.status === SupplyDeliveryStatus.abandoned ||
+        delivery.status === SupplyDeliveryStatus.entered_in_error,
+    );
 
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
@@ -603,7 +601,7 @@ export function DeliveryOrderShow({
                     isUpsertingDeliveries ||
                     isUpdating ||
                     selectedDeliveries.length !== 0 ||
-                    !allSupplyDeliveriesCompletedOrAbandoned
+                    !canMarkAsCompleted
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
