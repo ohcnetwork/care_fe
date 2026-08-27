@@ -206,7 +206,6 @@ export type StatusHistory = {
 
 export interface EncounterBase {
   status: EncounterStatus;
-  encounter_class: EncounterClass;
   period: Period;
   hospitalization?: Hospitalization | null;
   priority: EncounterPriority;
@@ -224,6 +223,7 @@ export interface EncounterListRead extends EncounterBase {
   tags: TagConfig[];
   current_location: LocationMinSpec | null;
   care_team: CareTeamResponse[];
+  encounter_class: EncounterClass;
 }
 
 export interface EncounterRead
@@ -249,6 +249,7 @@ export interface EncounterCreate extends Omit<
   appointment?: string;
   external_identifier?: string;
   discharge_summary_advice?: string;
+  encounter_class: EncounterClass;
 }
 
 export type EncounterEdit = EncounterBase;

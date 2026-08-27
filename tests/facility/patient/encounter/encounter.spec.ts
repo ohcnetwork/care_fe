@@ -71,10 +71,9 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("tab", { name: "Details" }).click();
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
-    // Verify encounter status, class, and priority are displayed correctly
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
-    ).toBeVisible();
+    // Encounter class is immutable after creation and no longer editable here,
+    // so verify the update form loaded via its Status combobox instead.
+    await expect(page.getByRole("combobox", { name: "Status" })).toBeVisible();
   });
 
   test("through phone number + year", async ({ page }) => {
@@ -149,12 +148,10 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("tab", { name: "Details" }).click();
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
-    // Verify encounter status, class, and priority are displayed correctly
+    // Verify encounter status and priority are displayed correctly. Encounter
+    // class is immutable after creation and no longer editable in this form.
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
     ).toBeVisible();
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterPriority }),

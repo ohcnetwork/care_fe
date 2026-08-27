@@ -86,7 +86,6 @@ export function validateEncounterQuestion(
 
   if (
     value?.status === EncounterStatus.DISCHARGED &&
-    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
@@ -123,7 +122,6 @@ export function EncounterQuestion({
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: EncounterStatus.UNKNOWN,
-    encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
       end: undefined,
@@ -171,7 +169,6 @@ export function EncounterQuestion({
   ): Partial<EncounterEdit> => {
     return {
       status: read.status,
-      encounter_class: read.encounter_class,
       period: read.period,
       priority: read.priority,
       hospitalization: read.hospitalization,
@@ -205,12 +202,14 @@ export function EncounterQuestion({
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
-    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
+    const encounterClass = encounterData?.encounter_class;
+    if (encounterClass && ["amb", "vr", "hh"].includes(encounterClass)) {
       newEncounter.hospitalization = {};
     }
 
     if (
-      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
+      encounterClass &&
+      ["imp", "obsenc", "emer"].includes(encounterClass) &&
       newEncounter.status === EncounterStatus.DISCHARGED
     ) {
       newEncounter.hospitalization = {
@@ -250,6 +249,7 @@ export function EncounterQuestion({
 
   const isCurrentStatusNonSelectable =
     NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
+
   const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
     (encounterStatus) => {
       if (isCurrentStatusNonSelectable) {
@@ -370,219 +370,222 @@ export function EncounterQuestion({
       )}
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
-          <h3 className="text-lg font-semibold break-words">
-            {t("hospitalization_details")}
-          </h3>
+      {!!encounterData?.encounter_class &&
+        ["imp", "obsenc", "emer"].includes(encounterData.encounter_class) && (
+          <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
+            <h3 className="text-lg font-semibold break-words">
+              {t("hospitalization_details")}
+            </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2 overflow-x-auto">
-              <Switch
-                checked={encounter.hospitalization?.re_admission || false}
-                onCheckedChange={(checked: boolean) => {
-                  if (!encounter.hospitalization) return;
-                  handleUpdateEncounter({
-                    hospitalization: {
-                      ...encounter.hospitalization,
-                      re_admission: checked,
-                    },
-                  });
-                }}
-                disabled={disabled}
-              />
-              <Label>{t("readmission")}</Label>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2 overflow-x-auto">
+                <Switch
+                  checked={encounter.hospitalization?.re_admission || false}
+                  onCheckedChange={(checked: boolean) => {
+                    if (!encounter.hospitalization) return;
+                    handleUpdateEncounter({
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        re_admission: checked,
+                      },
+                    });
+                  }}
+                  disabled={disabled}
+                />
+                <Label>{t("readmission")}</Label>
+              </div>
 
-            <div className="space-y-2">
-              <Label>{t("admit_source")}</Label>
-              <Select
-                value={encounter.hospitalization?.admit_source}
-                onValueChange={(value: EncounterAdmitSources) => {
-                  if (!encounter.hospitalization) return;
-                  handleUpdateEncounter({
-                    hospitalization: {
-                      ...encounter.hospitalization,
-                      admit_source: value,
-                    },
-                  });
-                }}
-                disabled={disabled}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_admit_source")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {ENCOUNTER_ADMIT_SOURCE.map((admitSource) => (
-                    <SelectItem key={admitSource} value={admitSource}>
-                      {t(`encounter_admit_sources__${admitSource}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label>{t("admit_source")}</Label>
+                <Select
+                  value={encounter.hospitalization?.admit_source}
+                  onValueChange={(value: EncounterAdmitSources) => {
+                    if (!encounter.hospitalization) return;
+                    handleUpdateEncounter({
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        admit_source: value,
+                      },
+                    });
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("select_admit_source")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENCOUNTER_ADMIT_SOURCE.map((admitSource) => (
+                      <SelectItem key={admitSource} value={admitSource}>
+                        {t(`encounter_admit_sources__${admitSource}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Show discharge disposition and date when status is discharged OR has discharge disposition */}
-            {(encounter.status === EncounterStatus.DISCHARGED ||
-              encounter.hospitalization?.discharge_disposition) && (
-              <>
-                <div className="space-y-2">
-                  <Label>
-                    {t("discharge_disposition")}
-                    <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={
-                      encounter.hospitalization?.discharge_disposition ??
-                      careConfig.defaultDischargeDisposition
-                    }
-                    onValueChange={(value: EncounterDischargeDisposition) => {
-                      if (!encounter.hospitalization) return;
-                      handleUpdateEncounter({
-                        hospitalization: {
-                          ...encounter.hospitalization,
-                          discharge_disposition: value,
-                        },
-                      });
-                    }}
-                    disabled={disabled}
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) &&
-                          "ring-1 ring-red-500",
-                      )}
-                    >
-                      <SelectValue
-                        placeholder={t("select_discharge_disposition")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ENCOUNTER_DISCHARGE_DISPOSITION.map((disposition) => (
-                        <SelectItem key={disposition} value={disposition}>
-                          {t(`encounter_discharge_disposition__${disposition}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
-                    <p className="text-red-500 text-sm">
-                      {
-                        getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
-                          ?.msg
-                      }
-                    </p>
-                  )}
-                </div>
-
-                {encounter.status === EncounterStatus.DISCHARGED && (
+              {/* Show discharge disposition and date when status is discharged OR has discharge disposition */}
+              {(encounter.status === EncounterStatus.DISCHARGED ||
+                encounter.hospitalization?.discharge_disposition) && (
+                <>
                   <div className="space-y-2">
-                    <Label>{t("discharge_date_time")}</Label>
-                    <div className="flex gap-1 flex-wrap">
-                      <DatePicker
-                        date={
-                          encounter.period.end
-                            ? new Date(encounter.period.end)
-                            : new Date()
+                    <Label>
+                      {t("discharge_disposition")}
+                      <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={
+                        encounter.hospitalization?.discharge_disposition ??
+                        careConfig.defaultDischargeDisposition
+                      }
+                      onValueChange={(value: EncounterDischargeDisposition) => {
+                        if (!encounter.hospitalization) return;
+                        handleUpdateEncounter({
+                          hospitalization: {
+                            ...encounter.hospitalization,
+                            discharge_disposition: value,
+                          },
+                        });
+                      }}
+                      disabled={disabled}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          hasError(
+                            ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key,
+                          ) && "ring-1 ring-red-500",
+                        )}
+                      >
+                        <SelectValue
+                          placeholder={t("select_discharge_disposition")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ENCOUNTER_DISCHARGE_DISPOSITION.map((disposition) => (
+                          <SelectItem key={disposition} value={disposition}>
+                            {t(
+                              `encounter_discharge_disposition__${disposition}`,
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
+                      <p className="text-red-500 text-sm">
+                        {
+                          getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
+                            ?.msg
                         }
-                        onChange={(newDate) => {
-                          if (!newDate) return;
-                          const currentDate = encounter.period.end
-                            ? new Date(encounter.period.end)
-                            : new Date();
-                          const updatedDate = new Date(newDate);
-                          updatedDate.setHours(currentDate.getHours());
-                          updatedDate.setMinutes(currentDate.getMinutes());
-                          handleUpdateEncounter({
-                            period: {
-                              ...encounter.period,
-                              end: updatedDate.toISOString(),
-                            },
-                          });
-                        }}
-                        disabled={(date) => {
-                          if (!encounter.period.start) return false;
-                          const startDate = new Date(encounter.period.start);
-                          startDate.setHours(0, 0, 0, 0);
-                          return date < startDate;
-                        }}
-                        dateFormat="d/M/yyyy"
-                        className="flex-1"
-                      />
-                      <Input
-                        type="time"
-                        className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
-                        value={
-                          encounter.period.end
-                            ? new Date(encounter.period.end).toLocaleTimeString(
-                                [],
-                                {
+                      </p>
+                    )}
+                  </div>
+
+                  {encounter.status === EncounterStatus.DISCHARGED && (
+                    <div className="space-y-2">
+                      <Label>{t("discharge_date_time")}</Label>
+                      <div className="flex gap-1 flex-wrap">
+                        <DatePicker
+                          date={
+                            encounter.period.end
+                              ? new Date(encounter.period.end)
+                              : new Date()
+                          }
+                          onChange={(newDate) => {
+                            if (!newDate) return;
+                            const currentDate = encounter.period.end
+                              ? new Date(encounter.period.end)
+                              : new Date();
+                            const updatedDate = new Date(newDate);
+                            updatedDate.setHours(currentDate.getHours());
+                            updatedDate.setMinutes(currentDate.getMinutes());
+                            handleUpdateEncounter({
+                              period: {
+                                ...encounter.period,
+                                end: updatedDate.toISOString(),
+                              },
+                            });
+                          }}
+                          disabled={(date) => {
+                            if (!encounter.period.start) return false;
+                            const startDate = new Date(encounter.period.start);
+                            startDate.setHours(0, 0, 0, 0);
+                            return date < startDate;
+                          }}
+                          dateFormat="d/M/yyyy"
+                          className="flex-1"
+                        />
+                        <Input
+                          type="time"
+                          className="flex-1 border-t-0 sm:border-t text-sm border-gray-200 h-9"
+                          value={
+                            encounter.period.end
+                              ? new Date(
+                                  encounter.period.end,
+                                ).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                   hour12: false,
-                                },
-                              )
-                            : new Date().toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              })
-                        }
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value
-                            .split(":")
-                            .map(Number);
-                          if (isNaN(hours) || isNaN(minutes)) return;
-                          const updatedDate = new Date(
-                            encounter.period.end || new Date(),
-                          );
-                          updatedDate.setHours(hours);
-                          updatedDate.setMinutes(minutes);
-                          handleUpdateEncounter({
-                            period: {
-                              ...encounter.period,
-                              end: updatedDate.toISOString(),
-                            },
-                          });
-                        }}
-                        disabled={disabled}
-                      />
+                                })
+                              : new Date().toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })
+                          }
+                          onChange={(e) => {
+                            const [hours, minutes] = e.target.value
+                              .split(":")
+                              .map(Number);
+                            if (isNaN(hours) || isNaN(minutes)) return;
+                            const updatedDate = new Date(
+                              encounter.period.end || new Date(),
+                            );
+                            updatedDate.setHours(hours);
+                            updatedDate.setMinutes(minutes);
+                            handleUpdateEncounter({
+                              period: {
+                                ...encounter.period,
+                                end: updatedDate.toISOString(),
+                              },
+                            });
+                          }}
+                          disabled={disabled}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              )}
 
-            <div className="space-y-2">
-              <Label>{t("diet_preference")}</Label>
-              <Select
-                value={encounter.hospitalization?.diet_preference}
-                onValueChange={(value: EncounterDietPreference) => {
-                  if (!encounter.hospitalization) return;
-                  handleUpdateEncounter({
-                    hospitalization: {
-                      ...encounter.hospitalization,
-                      diet_preference: value,
-                    },
-                  });
-                }}
-                disabled={disabled}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_diet_preference")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {ENCOUNTER_DIET_PREFERENCE.map((dietPreference) => (
-                    <SelectItem key={dietPreference} value={dietPreference}>
-                      {t(`encounter_diet_preference__${dietPreference}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label>{t("diet_preference")}</Label>
+                <Select
+                  value={encounter.hospitalization?.diet_preference}
+                  onValueChange={(value: EncounterDietPreference) => {
+                    if (!encounter.hospitalization) return;
+                    handleUpdateEncounter({
+                      hospitalization: {
+                        ...encounter.hospitalization,
+                        diet_preference: value,
+                      },
+                    });
+                  }}
+                  disabled={disabled}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("select_diet_preference")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENCOUNTER_DIET_PREFERENCE.map((dietPreference) => (
+                      <SelectItem key={dietPreference} value={dietPreference}>
+                        {t(`encounter_diet_preference__${dietPreference}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
