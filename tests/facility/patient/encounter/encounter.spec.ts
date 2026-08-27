@@ -72,9 +72,9 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
     // Encounter class is immutable after creation and no longer editable here,
-    // so verify the update form loaded via its Encounter Status combobox instead.
+    // so verify the update form loaded via its Encounter Status field instead.
     await expect(
-      page.getByRole("combobox", { name: "Encounter Status" }),
+      page.getByText("Encounter Status", { exact: true }),
     ).toBeVisible();
   });
 
