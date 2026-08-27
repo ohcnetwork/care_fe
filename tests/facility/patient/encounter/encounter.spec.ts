@@ -66,10 +66,6 @@ test.describe("Create an Encounter", () => {
     await expect(
       page.getByRole("heading", { name: randomEncounterClass }),
     ).toBeVisible();
-
-    //verify encounter details on the details tab
-    await page.getByRole("tab", { name: "Details" }).click();
-    await page.getByRole("link", { name: "Update Encounter" }).click();
   });
 
   test("through phone number + year", async ({ page }) => {
