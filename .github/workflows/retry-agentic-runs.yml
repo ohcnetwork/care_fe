@@ -25,10 +25,14 @@ on:
 permissions: {}
 
 concurrency:
-  # One retry watcher per run. `cancel-in-progress: false` because this job spends most of its life
-  # sleeping — cancelling it would abandon a retry that is waiting out the rate-limit window.
+  # One retry watcher per run. A re-run reuses the SAME run id, so every attempt's watcher lands in
+  # this group. `cancel-in-progress: true` because the newest watcher always has the freshest view:
+  # if a later completion event arrives for this run while an earlier watcher is still sleeping,
+  # that earlier watcher has not acted yet, so cancelling it loses nothing and the newer one
+  # performs the retry. Queueing them instead would let a watcher wake up and act on a payload that
+  # is already several attempts stale, which can push past the `run_attempt` cap below.
   group: retry-agentic-${{ github.event.workflow_run.id }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   retry:
@@ -111,33 +115,8 @@ jobs:
             echo "retry=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Skip if a newer run has superseded this one
-        id: superseded
-        if: steps.classify.outputs.retry == 'true'
-        run: |
-          set -uo pipefail
-
-          # A push that lands while the old run is failing starts a fresh run against the new head.
-          # Re-running the stale one would spend credits reviewing a diff that no longer exists and
-          # could post a review against superseded lines. Only retry if we are still the newest run
-          # for this workflow on this branch.
-          #
-          # `-X GET -f` puts the branch in the query string with proper encoding, which matters for
-          # branch names like `renovate/all-dependencies-(patch)`.
-          LATEST=$(gh api -X GET "repos/$GH_REPO/actions/workflows/$WORKFLOW_ID/runs" \
-            -f branch="$HEAD_BRANCH" -f per_page=1 \
-            --jq '.workflow_runs[0].id // empty' 2>/dev/null || true)
-
-          if [ -n "$LATEST" ] && [ "$LATEST" != "$RUN_ID" ]; then
-            echo "Run $LATEST is newer than $RUN_ID on $HEAD_BRANCH — superseded, not retrying."
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Still the newest run on $HEAD_BRANCH."
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Wait out the rate-limit window
-        if: steps.classify.outputs.retry == 'true' && steps.superseded.outputs.proceed == 'true'
+        if: steps.classify.outputs.retry == 'true'
         run: |
           set -euo pipefail
 
@@ -151,10 +130,45 @@ jobs:
           echo "Waiting ${DELAY}s before re-running $WORKFLOW_NAME #$RUN_ID."
           sleep "$DELAY"
 
-      - name: Re-run failed jobs
-        if: steps.classify.outputs.retry == 'true' && steps.superseded.outputs.proceed == 'true'
+      - name: Re-run failed jobs unless a newer run has superseded this one
+        if: steps.classify.outputs.retry == 'true'
         run: |
           set -euo pipefail
+
+          # The freshness check lives HERE, after the sleep and in the same step as the re-run.
+          # Checking before the wait would answer the question at the one moment it cannot matter:
+          # the whole point of the wait is that it is long enough for a push to land during it, and
+          # a stale answer from 20 minutes ago would happily re-run against a superseded SHA.
+          #
+          # A push that lands while this job sleeps starts a fresh run against the new head. Re-running
+          # the old one would spend credits reviewing a diff that no longer exists and could post a
+          # review against lines that have already been replaced.
+          #
+          # Compare run IDs numerically rather than trusting list position. Run IDs are monotonic, so
+          # "a newer run exists" is exactly "some run on this branch has a higher ID than ours" —
+          # which holds no matter how the API happens to order its response. Position-based
+          # (`workflow_runs[0]`) would be betting on undocumented ordering.
+          #
+          # Note a re-run does NOT mint a new ID: it increments `run_attempt` on this same run and
+          # leaves `created_at` frozen at the original time. So on later attempts we legitimately
+          # compare against ourselves and find no higher ID, which is the correct "not superseded"
+          # answer — a genuinely newer run would still carry a higher ID.
+          #
+          # `-X GET -f` puts the branch in the query string with proper encoding, which matters for
+          # branch names like `renovate/all-dependencies-(patch)`.
+          HIGHEST=$(gh api -X GET "repos/$GH_REPO/actions/workflows/$WORKFLOW_ID/runs" \
+            -f branch="$HEAD_BRANCH" -f per_page=30 \
+            --jq '[.workflow_runs[].id] | max // empty' 2>/dev/null || true)
+
+          if [ -n "$HIGHEST" ] && [ "$HIGHEST" -gt "$RUN_ID" ]; then
+            echo "Run $HIGHEST supersedes $RUN_ID on $HEAD_BRANCH — not retrying."
+            {
+              echo "### Skipped retry of \`$WORKFLOW_NAME\`"
+              echo
+              echo "Run \`$RUN_ID\` failed transiently but was superseded by run \`$HIGHEST\` while waiting."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
 
           # --failed re-runs only the jobs that failed, reusing the original event payload, so the
           # reviewer sees the same PR and head SHA it was originally triggered for.
