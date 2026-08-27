@@ -76,6 +76,23 @@ checkout:
   repository: ${{ github.repository }}
 imports:
   - .github/agents/care-review.agent.md
+# Harness retry policy. The Copilot CLI already retries an unanswered model call ~5 times internally
+# (~90s) before the harness sees a failure; these settings control how many times the harness then
+# re-launches it. Defaults (3 retries, 5s initial delay, 60s cap) space the attempts only ~35s
+# apart, so a run exhausts all four attempts in ~8 minutes — faster than a Copilot rate-limit window
+# typically clears, which is how a brief 429 spike turns into a red check.
+#
+# Widening the backoff to 15s/30s/60s/120s across five attempts covers ~12 minutes while staying
+# inside the 20-minute agent job timeout. This costs nothing when the model answers: the delays only
+# elapse on a retry path. Spikes that outlast it are picked up by `.github/workflows/retry-agentic-runs.yml`,
+# which re-runs the whole workflow rather than holding a runner open.
+engine:
+  id: copilot
+  harness:
+    max-retries: 4
+    initial-delay-ms: 15000
+    backoff-multiplier: 2
+    max-delay-ms: 120000
 tools:
   github:
     toolsets: [default]
