@@ -231,7 +231,7 @@ export function MultiSelect({
               role="combobox"
               onClick={() => setOpen((open) => !open)}
               className={cn(
-                "flex w-full p-1 rounded-md border items-center justify-between",
+                "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
                 open && "ring-2 ring-blue-500 border-0",
                 className,
               )}
@@ -285,7 +285,7 @@ export function MultiSelect({
             role="combobox"
             onClick={() => setOpen((open) => !open)}
             className={cn(
-              "flex w-full p-1 rounded-md border items-center justify-between",
+              "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
               open && "ring-2 ring-blue-500 border-0",
               className,
             )}
