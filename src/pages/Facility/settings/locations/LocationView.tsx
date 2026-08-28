@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Hash } from "lucide-react";
 import { Link, navigate } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +27,7 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
+import TagBadge from "@/components/Tags/TagBadge";
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
@@ -36,6 +38,7 @@ import locationApi from "@/types/location/locationApi";
 import LocationSheet from "./LocationSheet";
 import { SettingsLocationCard as LocationCard } from "./components/LocationCard";
 import { LocationTable } from "./components/LocationTable";
+import { LocationTags } from "./components/LocationTags";
 
 interface Props {
   id: string;
@@ -222,6 +225,9 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
+                  {location?.tags?.map((tag) => (
+                    <TagBadge key={tag.id} tag={tag} className="text-xs" />
+                  ))}
                 </>
               )}
             </div>
@@ -248,6 +254,20 @@ export default function LocationView({
                       {t("add_location")}
                     </Button>
                   )}
+                {!isLocationLoading && location && (
+                  <LocationTags
+                    location={location}
+                    facilityId={facilityId}
+                    trigger={
+                      <Button variant="outline" className="w-full md:w-auto">
+                        <Hash className="size-4 mr-2" />
+                        {(location.tags?.length ?? 0) > 0
+                          ? t("manage_tags")
+                          : t("add_tags")}
+                      </Button>
+                    }
+                  />
+                )}
                 {!isLocationLoading && locationOrganizations && (
                   <LinkDepartmentsSheet
                     entityType="location"

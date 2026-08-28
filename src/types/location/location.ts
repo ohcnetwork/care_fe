@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export type Status = "active" | "inactive" | "unknown";
@@ -42,6 +43,7 @@ export interface LocationDetail extends LocationBase {
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
+  tags?: TagConfig[];
 }
 
 export interface LocationRead extends LocationBase {
@@ -51,6 +53,7 @@ export interface LocationRead extends LocationBase {
   current_encounter?: EncounterRead;
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
+  tags?: TagConfig[];
 }
 
 export type LocationMinSpec = Omit<LocationRead, "current_encounter">;

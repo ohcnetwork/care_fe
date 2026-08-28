@@ -37,6 +37,8 @@ import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
+import { LocationTags } from "./LocationTags";
+
 // Animated version of TableRow
 const AnimatedTableRow = motion.create(TableRow);
 
@@ -99,6 +101,7 @@ export function LocationTable({
             <TableHead>{t("type")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("availability")}</TableHead>
+            <TableHead>{t("tags_proper")}</TableHead>
             <TableHead className="text-right">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -182,6 +185,9 @@ export function LocationTable({
                       ? t("unavailable")
                       : t("available")}
                   </Badge>
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <LocationTags location={location} facilityId={facilityId} />
                 </TableCell>
                 <TableCell className="text-right">
                   <div

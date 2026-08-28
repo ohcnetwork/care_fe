@@ -31,6 +31,8 @@ import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
+import { LocationTags } from "./LocationTags";
+
 interface Props {
   location: LocationRead;
   onEdit?: (location: LocationRead) => void;
@@ -138,6 +140,7 @@ export function SettingsLocationCard({
                     {t("has_child_locations")}
                   </Badge>
                 )}
+                <LocationTags location={location} facilityId={facilityId} />
               </div>
             </div>
 
