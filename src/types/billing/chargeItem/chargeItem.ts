@@ -5,7 +5,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { InvoiceList } from "@/types/billing/invoice/invoice";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum ChargeItemStatus {
@@ -56,7 +56,7 @@ export interface ChargeItemBase {
   note?: string;
   override_reason?: ChargeItemOverrideReason;
   total_price: string;
-  paid_invoice?: InvoiceRead;
+  paid_invoice?: InvoiceList;
 }
 
 export interface ChargeItemCreate extends Omit<

@@ -262,7 +262,7 @@ export function CareTeamSheet({
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <Avatar
-                            name={formatName(member.member)}
+                            name={formatName(member.member, true)}
                             imageUrl={member.member?.profile_picture_url}
                             className="size-8"
                           />

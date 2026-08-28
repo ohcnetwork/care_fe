@@ -44,7 +44,7 @@ export function DosageInstructionList({
             idx < instructions.length - 1 && pb,
           )}
         >
-          {renderItem(di, idx)}
+          <span>{renderItem(di, idx)}</span>
         </div>
       ))}
     </div>

@@ -52,6 +52,10 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
   // Questionnaire form routes
   /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  // Pharmacy related routes
+  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/prescriptions\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_requests\/patient\/[^/]+\/bill\/dispense\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/medication_dispense\/order\/[^/]+$/,
 ];
 
 export type RouteParams<T extends string> =
