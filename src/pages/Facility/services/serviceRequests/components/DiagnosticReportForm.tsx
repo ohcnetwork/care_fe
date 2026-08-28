@@ -340,6 +340,8 @@ function DiagnosticReportItem({
     onSuccess: ({ results }) => {
       if (results.some((r) => r.reference_id === "upsert-observations")) {
         toast.success(t("test_results_saved_successfully"));
+      } else {
+        toast.success(t("diagnostic_report_saved_successfully"));
       }
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
@@ -1364,6 +1366,7 @@ function ReportTypePicker({
     <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
       {onDismiss && (
         <Button
+          aria-label={t("close")}
           onClick={() => {
             onDismiss();
             setSelectedCode(null);

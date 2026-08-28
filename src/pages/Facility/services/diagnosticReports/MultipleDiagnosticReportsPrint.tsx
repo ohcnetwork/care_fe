@@ -32,7 +32,7 @@ export const MultipleDiagnosticReportsPrint = ({
   const { diagnosticReports, isLoading: isLoadingReports } = useQueries({
     queries:
       diagnosticReportResults?.map((report) => ({
-        queryKey: ["diagnosticReport", report.id, patientId],
+        queryKey: ["diagnosticReport", report.id],
         queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
           pathParams: {
             patient_external_id: patientId,
