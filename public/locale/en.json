@@ -3226,7 +3226,7 @@
   "live": "Live",
   "live_monitoring": "Live Monitoring",
   "live_patients_total_beds": "Live Patients / Total beds",
-  "load_from_order_with_items": "Load from order ({{count}} items)",
+  "load_from_order": "Load from order",
   "load_more": "Load More",
   "loading": "Loading...",
   "loading_appointment_details": "Loading appointment details...",
