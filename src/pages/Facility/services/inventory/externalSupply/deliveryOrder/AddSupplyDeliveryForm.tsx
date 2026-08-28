@@ -942,7 +942,8 @@ export function AddSupplyDeliveryForm({
                           onClick={loadFromSupplyRequests}
                           disabled={disableAddItem}
                         >
-                          {t("load_from_order")}
+                          {t("load_from_order")} ({supplyRequests.count}{" "}
+                          {t("items")})
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
                       )}
@@ -988,7 +989,8 @@ export function AddSupplyDeliveryForm({
                           onClick={loadFromSupplyRequests}
                           disabled={disableAddItem}
                         >
-                          {t("load_from_order")}
+                          {t("load_from_order")} ({supplyRequests.count}{" "}
+                          {t("items")})
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
                         <p>- {t("or")} -</p>
