@@ -1,3 +1,4 @@
 * text=auto
 
 .github/workflows/*.lock.yml linguist-generated=true merge=ours
+graphify-out/graph.json merge=graphify
