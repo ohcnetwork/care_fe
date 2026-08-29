@@ -175,10 +175,9 @@ test.describe("Patient Service Request Tab", () => {
       .getByRole("combobox")
       .filter({ hasText: "Select Diagnostic Report Type" });
 
-    if ((await reportTypeSelect.count()) === 0) {
+    if (!(await reportTypeSelect.isVisible())) {
       await page.getByText("Test Results Entry").click();
     }
-    await page.getByText("Test Results Entry").click();
     await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
