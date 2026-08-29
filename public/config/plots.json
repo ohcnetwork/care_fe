@@ -49,6 +49,16 @@
                 ]
             },
             {
+                "title": "Body height",
+                "codes": [
+                    {
+                        "code": "3137-7",
+                        "system": "http://loinc.org",
+                        "display": "Height"
+                    }
+                ]
+            },
+            {
                 "title": "Body weight",
                 "codes": [
                     {
@@ -326,7 +336,7 @@
                     }
                 ]
             },
-             {
+            {
                 "title": "Fluid Output Wound Drain",
                 "codes": [
                     {
