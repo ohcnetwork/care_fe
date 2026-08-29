@@ -5,6 +5,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -326,11 +327,13 @@ export default function useFileUpload(
     }
   };
 
-  const clearFiles = () => {
+  // Stable identity so consumers can safely list it in effect dependency
+  // arrays without triggering re-runs on every render.
+  const clearFiles = useCallback(() => {
     setFiles([]);
     setError(null);
     setUploadFileNames([]);
-  };
+  }, []);
 
   const Dialogues = (
     <>

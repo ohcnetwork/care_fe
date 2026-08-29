@@ -18,7 +18,7 @@ export const MultipleDiagnosticReportsPrint = ({
 }) => {
   const { data, isLoading } = useQuery({
     queryKey: ["diagnosticReports", patientId, serviceRequestId],
-    queryFn: query(diagnosticReportApi.listDiagnosticReports, {
+    queryFn: query.paginated(diagnosticReportApi.listDiagnosticReports, {
       pathParams: { patient_external_id: patientId },
       queryParams: {
         service_request: serviceRequestId,

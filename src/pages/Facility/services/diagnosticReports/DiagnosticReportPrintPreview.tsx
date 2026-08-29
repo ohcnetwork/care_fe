@@ -11,12 +11,16 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Document, Page } from "react-pdf";
+
+// Fixed printable page width (px). The rendered PDF/image sizes the paper, not
+// the screen, so this must not depend on the (non-reactive) viewport width.
+const PRINT_PAGE_WIDTH = 600;
 
 // TODO: Replace with PDFViewer or extract this to a component
 function PDFRenderer({ fileUrl }: { fileUrl: string }) {
@@ -36,7 +40,7 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
             <Page
               key={`page_${index + 1}`}
               pageNumber={index + 1}
-              width={Math.min(window.innerWidth * 0.9, 600)}
+              width={PRINT_PAGE_WIDTH}
               scale={1.2}
               renderTextLayer={false}
               renderAnnotationLayer={false}
@@ -72,8 +76,7 @@ function ImageRenderer({
       <img
         src={fileUrl}
         alt={fileName || t("diagnostic_report_image")}
-        className={`max-w-full h-auto mx-auto ${isLoading || hasError ? "hidden" : ""}`}
-        style={{ maxWidth: "600px" }}
+        className={`max-w-[600px] h-auto mx-auto ${isLoading || hasError ? "hidden" : ""}`}
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false);
@@ -152,25 +155,29 @@ export const DiagnosticReportPrintPreview = ({
             {diagnosticReportDetail?.encounter.patient &&
               "instance_identifiers" in
                 diagnosticReportDetail.encounter.patient &&
-              diagnosticReportDetail.encounter.patient.instance_identifiers
-                .filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <div
-                    key={identifier.config.id}
-                    className="grid grid-cols-[6rem_auto_1fr] items-center"
-                  >
-                    <span className="text-gray-600">
-                      {identifier.config.config.display}
-                    </span>
-                    <span className="text-gray-600">:</span>
-                    <span className="font-semibold ml-2">
-                      {identifier.value}
-                    </span>
-                  </div>
-                ))}
+              diagnosticReportDetail.encounter.patient.instance_identifiers.reduce<
+                ReactNode[]
+              >((acc, identifier) => {
+                if (
+                  identifier.config.config.use === PatientIdentifierUse.official
+                ) {
+                  acc.push(
+                    <div
+                      key={identifier.config.id}
+                      className="grid grid-cols-[6rem_auto_1fr] items-center"
+                    >
+                      <span className="text-gray-600">
+                        {identifier.config.config.display}
+                      </span>
+                      <span className="text-gray-600">:</span>
+                      <span className="font-semibold ml-2">
+                        {identifier.value}
+                      </span>
+                    </div>,
+                  );
+                }
+                return acc;
+              }, [])}
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">
                 {t("age")} / {t("sex")}
@@ -198,9 +205,12 @@ export const DiagnosticReportPrintPreview = ({
             <DiagnosticReportPreviewItem
               key={report.id}
               report={report}
-              files={allFiles
-                .filter((entry) => entry.reportId === report.id)
-                .map((entry) => entry.file)}
+              files={allFiles.reduce<FileReadMinimal[]>((acc, entry) => {
+                if (entry.reportId === report.id) {
+                  acc.push(entry.file);
+                }
+                return acc;
+              }, [])}
               fileUrls={fileUrls}
             />
           ))}

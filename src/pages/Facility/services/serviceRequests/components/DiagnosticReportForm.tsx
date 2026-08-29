@@ -379,12 +379,13 @@ function DiagnosticReportItem({
     }
   }, [fileUpload.files, fileUpload.previewing, disableEdit]);
 
+  const { clearFiles } = fileUpload;
+
   useEffect(() => {
     if (!openUploadDialog) {
-      fileUpload.clearFiles();
+      clearFiles();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openUploadDialog]);
+  }, [openUploadDialog, clearFiles]);
 
   // Initialize form with existing observations from the full report
   useEffect(() => {
