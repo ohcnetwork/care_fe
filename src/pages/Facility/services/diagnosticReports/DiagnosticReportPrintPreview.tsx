@@ -249,7 +249,9 @@ const DiagnosticReportPreviewItem = ({
     <div className="mt-8 border-t border-gray-300 pt-6">
       {/* Report header with per-report details */}
       <div className="break-inside-avoid">
-        <h2 className="text-lg font-semibold mb-3">{report.code?.display}</h2>
+        <h2 className="text-lg font-semibold mb-3">
+          {report.code?.display ?? report.service_request?.title}
+        </h2>
         <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 mb-6">
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
             <span className="text-gray-600">{t("category")}</span>

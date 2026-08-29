@@ -328,8 +328,6 @@ function DiagnosticReportItem({
       queryParams: {
         file_type: "diagnostic_report",
         associating_id: report.id,
-        limit: 100,
-        offset: 0,
       },
     }),
     enabled: !!report.id && isExpanded,
