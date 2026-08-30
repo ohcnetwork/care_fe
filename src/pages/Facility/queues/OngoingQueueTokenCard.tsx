@@ -762,9 +762,7 @@ const TokenContent = ({
                   { onSuccess: () => toast.success(t("token_now_serving")) },
                 );
               }}
-              disabled={
-                isPending || isLoadingSubQueues || hasNoAssignedServicePoints
-              }
+              disabled={isPending || isLoadingSubQueues}
               className="flex-1"
             >
               <Megaphone className="size-4 mr-2" />

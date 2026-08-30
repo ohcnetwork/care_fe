@@ -26,10 +26,14 @@ import { toast } from "sonner";
 export type ServicePointSelectorAction =
   "serve" | "move_to_up_next" | "change_service_point";
 
-const ACTION_TO_STATUS: Record<ServicePointSelectorAction, TokenStatus> = {
+// `change_service_point` intentionally keeps the token's current status (see
+// `targetStatus` below), so it is not part of this map.
+const ACTION_TO_STATUS: Record<
+  Exclude<ServicePointSelectorAction, "change_service_point">,
+  TokenStatus
+> = {
   serve: TokenStatus.IN_PROGRESS,
   move_to_up_next: TokenStatus.CREATED,
-  change_service_point: TokenStatus.IN_PROGRESS,
 };
 
 const ACTION_TO_CONTENT: Record<
@@ -107,6 +111,11 @@ export const ServicePointSelector = ({
       toast.success(t(successMessage));
       onOpenChange(false);
     },
+    onError: () => {
+      setSelectedSubQueueId(
+        token.status === targetStatus ? (token.sub_queue?.id ?? "") : "",
+      );
+    },
   });
 
   const handleSelect = (subQueueId: string) => {
@@ -136,7 +145,7 @@ export const ServicePointSelector = ({
               {t(description)}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="overflow-y-auto p-3 pb-6">
+          <div className="overflow-y-auto max-h-[50vh] p-3 pb-6">
             <RadioInput
               options={subQueues.map((subQueue) => ({
                 label: subQueue.name,
