@@ -167,7 +167,7 @@ function DiagnosticReportReviewItem({
     });
 
   useEffect(() => {
-    if (expandedReportId === report.id) {
+    if (expandedReportId?.split(":")[0] === report.id) {
       setIsExpanded(true);
     }
   }, [expandedReportId, report.id]);
