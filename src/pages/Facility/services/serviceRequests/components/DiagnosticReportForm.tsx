@@ -914,18 +914,16 @@ function DiagnosticReportItem({
                       </span>
                       <span className="text-sm text-gray-500 truncate">
                         {t("last_updated")}:{" "}
-                        {fullReport
-                          ? format(
-                              fullReport.modified_date,
-                              "hh:mm a, MMM dd, yyyy",
-                            )
-                          : "-"}
+                        {format(report.modified_date, "hh:mm a, MMM dd, yyyy")}
                       </span>
                     </div>
                   </div>
                 </CardTitle>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
+                {/* created_by is only present on the detail (retrieve) payload,
+                    which is fetched lazily when the card is expanded, so the
+                    creator avatar is shown only in the expanded state. */}
                 {fullReport && (
                   <div className="flex items-center gap-2 min-w-0">
                     <Avatar
