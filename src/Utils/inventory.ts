@@ -48,9 +48,7 @@ export function getExpiredDateRange() {
 }
 
 /**
- * Gets the expiration date range of products considered "expiring_soon" by
- * {@link getExpiryStatus}, or `null` if no such range exists, i.e. when the
- * expiry restriction is disabled or covers only the current month.
+ * Gets the expiration date range of products considered "expiring_soon"
  */
 export function getExpiringSoonDateRange(expiryMonthOffset: number) {
   const today = new Date();
