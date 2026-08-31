@@ -10,6 +10,7 @@ import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { getPermissions } from "@/common/Permissions";
+import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
 import TagBadge from "@/components/Tags/TagBadge";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -107,6 +108,8 @@ export default function AppointmentPrint(props: Props) {
     .map((q) => q.data)
     .filter((inv): inv is InvoiceRead => !!inv);
 
+  const isLoadingInvoices = invoiceQueries.some((q) => q.isLoading);
+
   const patient = appointment?.patient;
   const token = appointment?.token;
 
@@ -171,149 +174,227 @@ export default function AppointmentPrint(props: Props) {
       title={t("appointment_details")}
       facility={facility}
       templateSlug={PrintTemplateType.appointment}
+      disabled={isLoadingInvoices}
       className="w-[720px] mx-auto"
     >
-      <div className="max-w-4xl mx-auto text-xs">
-        {/* Header */}
-        <div className="flex justify-between items-start border-b border-gray-300 pb-1 mb-2">
-          <span className="font-semibold text-base text-gray-950">
-            {t("appointment_details")}
-          </span>
-          <div className="text-right text-gray-600 leading-snug">
-            <div className="text-xs font-semibold text-gray-950 gap-1 flex justify-end">
-              <span>
-                {formatDate(
-                  appointment.token_slot.start_datetime,
-                  "dd MMM, yyyy, EEE",
-                )}
-              </span>
-              |<span>{formatSlotTimeRange(appointment.token_slot)}</span>
-            </div>
-            <div className="flex gap-1 justify-end">
-              {t(`schedulable_resource__${appointment.resource_type}`)}:{" "}
-              <span className="text-gray-800 font-medium">
-                {formatScheduleResourceName(appointment)}
-              </span>
-              <span className="text-gray-800 font-semibold"> | </span>
-              <span>{appointment.token_slot.availability.name}</span>
+      <DisablingCover disabled={isLoadingInvoices} message={t("loading")}>
+        <div className="max-w-4xl mx-auto text-xs">
+          {/* Header */}
+          <div className="flex justify-between items-start border-b border-gray-300 pb-1 mb-2">
+            <span className="font-semibold text-base text-gray-950">
+              {t("appointment_details")}
+            </span>
+            <div className="text-right text-gray-600 leading-snug">
+              <div className="text-xs font-semibold text-gray-950 gap-1 flex justify-end">
+                <span>
+                  {formatDate(
+                    appointment.token_slot.start_datetime,
+                    "dd MMM, yyyy, EEE",
+                  )}
+                </span>
+                |<span>{formatSlotTimeRange(appointment.token_slot)}</span>
+              </div>
+              <div className="flex gap-1 justify-end">
+                {t(`schedulable_resource__${appointment.resource_type}`)}:{" "}
+                <span className="text-gray-800 font-medium">
+                  {formatScheduleResourceName(appointment)}
+                </span>
+                <span className="text-gray-800 font-semibold"> | </span>
+                <span>{appointment.token_slot.availability.name}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Patient Info + QR/Token — compact two-column grid */}
-        <div className="flex justify-between gap-3 mb-1.5">
-          <div className="flex-1">
-            <div className="text-xs leading-snug space-y-px">
-              {patient && (
-                <>
-                  <DetailRow
-                    label={t("patient")}
-                    value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
-                  />
-                  {patientExtensionData.map((field) => (
+          {/* Patient Info + QR/Token — compact two-column grid */}
+          <div className="flex justify-between gap-3 mb-1.5">
+            <div className="flex-1">
+              <div className="text-xs leading-snug space-y-px">
+                {patient && (
+                  <>
                     <DetailRow
-                      key={field.name}
-                      label={t(field.name)}
-                      value={field.value}
+                      label={t("patient")}
+                      value={`${patient?.name} | ${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`}
+                    />
+                    {patientExtensionData.map((field) => (
+                      <DetailRow
+                        key={field.name}
+                        label={t(field.name)}
+                        value={field.value}
+                      />
+                    ))}
+                  </>
+                )}
+                <DetailRow
+                  label={t("contact_system_phone")}
+                  value={
+                    patient?.phone_number
+                      ? formatPhoneNumberIntl(patient.phone_number) ||
+                        patient.phone_number
+                      : undefined
+                  }
+                />
+                {patient?.instance_identifiers
+                  ?.filter(
+                    (identifier) =>
+                      identifier.config.config.use ===
+                      PatientIdentifierUse.official,
+                  )
+                  .map((identifier) => (
+                    <DetailRow
+                      key={identifier.config.id}
+                      label={identifier.config.config.display}
+                      value={identifier.value}
                     />
                   ))}
-                </>
+                {patient?.address?.trim() && (
+                  <DetailRow label={t("address")} value={patient.address} />
+                )}
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              {token && (
+                <div className="text-right">
+                  <p className="text-xs text-gray-600">{t("token_no")}</p>
+                  <p className="text-xl font-bold tracking-tight text-gray-950 leading-tight">
+                    {renderTokenNumber(token)}
+                  </p>
+                </div>
               )}
-              <DetailRow
-                label={t("contact_system_phone")}
-                value={
-                  patient?.phone_number
-                    ? formatPhoneNumberIntl(patient.phone_number) ||
-                      patient.phone_number
-                    : undefined
-                }
-              />
-              {patient?.instance_identifiers
-                ?.filter(
-                  (identifier) =>
-                    identifier.config.config.use ===
-                    PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <DetailRow
-                    key={identifier.config.id}
-                    label={identifier.config.config.display}
-                    value={identifier.value}
+              <QRCodeSVG size={80} value={patient?.id || ""} />
+            </div>
+          </div>
+
+          {/* Tags — inline, compact */}
+          {(patientTags.length > 0 || appointmentTags.length > 0) && (
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-gray-600 text-xs w-28">{t("tags")}</span>
+              <div className="flex flex-wrap gap-0.5">
+                {patientTags.map((tag) => (
+                  <TagBadge
+                    key={tag.id}
+                    tag={tag}
+                    hierarchyDisplay
+                    className="text-xs rounded-sm py-0 px-1"
                   />
                 ))}
-              {patient?.address?.trim() && (
-                <DetailRow label={t("address")} value={patient.address} />
-              )}
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            {token && (
-              <div className="text-right">
-                <p className="text-xs text-gray-600">{t("token_no")}</p>
-                <p className="text-xl font-bold tracking-tight text-gray-950 leading-tight">
-                  {renderTokenNumber(token)}
-                </p>
+                {appointmentTags.map((tag) => (
+                  <TagBadge
+                    key={tag.id}
+                    tag={tag}
+                    hierarchyDisplay
+                    className="text-xs rounded-sm py-0 px-1"
+                  />
+                ))}
               </div>
-            )}
-            <QRCodeSVG size={80} value={patient?.id || ""} />
-          </div>
-        </div>
-
-        {/* Tags — inline, compact */}
-        {(patientTags.length > 0 || appointmentTags.length > 0) && (
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-gray-600 text-xs w-28">{t("tags")}</span>
-            <div className="flex flex-wrap gap-0.5">
-              {patientTags.map((tag) => (
-                <TagBadge
-                  key={tag.id}
-                  tag={tag}
-                  hierarchyDisplay
-                  className="text-xs rounded-sm py-0 px-1"
-                />
-              ))}
-              {appointmentTags.map((tag) => (
-                <TagBadge
-                  key={tag.id}
-                  tag={tag}
-                  hierarchyDisplay
-                  className="text-xs rounded-sm py-0 px-1"
-                />
-              ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Charges Table — compact */}
-        {hasChargeItems && (
-          <div className="mb-2">
-            <div className="text-xs font-semibold text-gray-950 mb-0.5">
-              {t("charges")}
+          {/* Charges Table — compact */}
+          {hasChargeItems && (
+            <div className="mb-2">
+              <div className="text-xs font-semibold text-gray-950 mb-0.5">
+                {t("charges")}
+              </div>
+
+              <div className="border rounded overflow-hidden">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 divide-x">
+                      <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
+                        #
+                      </TableHead>
+                      <TableHead className="text-xs text-gray-700 h-7">
+                        {t("particulars")}
+                      </TableHead>
+                      <TableHead className="font-medium text-center text-xs text-gray-700 w-20 h-7">
+                        {t("amount")}
+                      </TableHead>
+                      <TableHead className="text-xs text-gray-700 w-20 text-center h-7">
+                        {t("status")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="text-xs font-medium text-gray-950">
+                    {displayChargeItems.map((item, index) => {
+                      return (
+                        <TableRow
+                          key={item.id}
+                          className="divide-x hover:bg-transparent"
+                        >
+                          <TableCell className="text-center py-0.5 px-1">
+                            {index + 1}.
+                          </TableCell>
+                          <TableCell className="py-0.5">
+                            <div className="flex flex-col">
+                              <span>{item.title}</span>
+                              {item.paid_invoice && (
+                                <span className="text-gray-500">
+                                  {item.paid_invoice.number}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold py-0.5">
+                            <MonetaryDisplay
+                              amount={item.total_price}
+                              hideCurrency
+                            />
+                          </TableCell>
+                          <TableCell className="text-center py-0.5">
+                            {item.status === ChargeItemStatus.paid ? (
+                              <span>{t("paid")}</span>
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex justify-end mt-1 mr-1">
+                <span className="text-xs text-gray-950 mr-2">
+                  {t("total_amount")} :
+                </span>
+                <MonetaryDisplay
+                  amount={totalAmount}
+                  className="text-xs text-gray-950 font-semibold"
+                />
+              </div>
             </div>
+          )}
 
-            <div className="border rounded overflow-hidden">
-              <Table className="text-xs">
-                <TableHeader>
-                  <TableRow className="bg-gray-50 divide-x">
-                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
-                      #
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 h-7">
-                      {t("particulars")}
-                    </TableHead>
-                    <TableHead className="font-medium text-center text-xs text-gray-700 w-20 h-7">
-                      {t("amount")}
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 w-20 text-center h-7">
-                      {t("status")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="text-xs font-medium text-gray-950">
-                  {displayChargeItems.map((item, index) => {
-                    return (
+          {/* Payment Details — single table for all invoices */}
+          {hasPayments && (
+            <div className="mb-2">
+              <div className="border-t border-dashed border-gray-300 my-1.5" />
+              <div className="text-xs font-semibold text-gray-950 mb-0.5">
+                {t("payment_details")}
+              </div>
+
+              <div className="border rounded overflow-hidden">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 divide-x">
+                      <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
+                        #
+                      </TableHead>
+                      <TableHead className="text-xs text-gray-700 h-7">
+                        {t("invoice")}
+                      </TableHead>
+                      <TableHead className="text-xs text-gray-700 h-7">
+                        {t("payment_method")}
+                      </TableHead>
+                      <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
+                        {t("amount")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="text-xs font-medium text-gray-950">
+                    {allPayments.map((payment, index) => (
                       <TableRow
-                        key={item.id}
+                        key={payment.id}
                         className="divide-x hover:bg-transparent"
                       >
                         <TableCell className="text-center py-0.5 px-1">
@@ -321,157 +402,85 @@ export default function AppointmentPrint(props: Props) {
                         </TableCell>
                         <TableCell className="py-0.5">
                           <div className="flex flex-col">
-                            <span>{item.title}</span>
-                            {item.paid_invoice && (
+                            <span>{payment.invoiceNumber}</span>
+                            {payment.payment_datetime && (
                               <span className="text-gray-500">
-                                {item.paid_invoice.number}
+                                {format(
+                                  new Date(payment.payment_datetime),
+                                  "dd MMM yyyy, hh:mm a",
+                                )}
                               </span>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-semibold py-0.5">
+                        <TableCell className="py-0.5">
+                          <div className="flex flex-col">
+                            <span>
+                              {PAYMENT_RECONCILIATION_METHOD_MAP[
+                                payment.method
+                              ] ?? payment.method}
+                            </span>
+                            {payment.reference_number && (
+                              <span className="text-gray-500">
+                                {payment.reference_number}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-semibold py-0.5">
                           <MonetaryDisplay
-                            amount={item.total_price}
+                            amount={payment.amount}
                             hideCurrency
                           />
                         </TableCell>
-                        <TableCell className="text-center py-0.5">
-                          {item.status === ChargeItemStatus.paid ? (
-                            <span>{t("paid")}</span>
-                          ) : (
-                            <span>-</span>
-                          )}
-                        </TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex justify-end mt-1 mr-1">
+                <span className="text-xs text-gray-950 mr-2">
+                  {t("amount_paid")} :
+                </span>
+                <MonetaryDisplay
+                  amount={totalPaid}
+                  className="text-xs text-gray-950 font-semibold"
+                />
+              </div>
             </div>
-            <div className="flex justify-end mt-1 mr-1">
-              <span className="text-xs text-gray-950 mr-2">
-                {t("total_amount")} :
-              </span>
-              <MonetaryDisplay
-                amount={totalAmount}
-                className="text-xs text-gray-950 font-semibold"
-              />
+          )}
+
+          {/* Notes — compact */}
+          {appointment.note && (
+            <div className="mb-2">
+              <div className="text-xs font-semibold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
+                {t("note")}
+              </div>
+              <div className="text-xs whitespace-pre-wrap bg-gray-50 p-1.5 rounded">
+                {appointment.note}
+              </div>
             </div>
+          )}
+
+          <div className="border-t border-gray-200">
+            <PrintFooter
+              rightContent={format(new Date(), "PP 'at' p")}
+              leftContent={
+                <>
+                  <span className="font-semibold">{t("created_by")}:</span>{" "}
+                  {formatName(appointment.created_by)}
+                  <span className="text-gray-400"> | </span>
+                  <span className="font-semibold">
+                    {t("last_updated_by")}:
+                  </span>{" "}
+                  {formatName(appointment.updated_by)}
+                </>
+              }
+              className="text-xs"
+            />
           </div>
-        )}
-
-        {/* Payment Details — single table for all invoices */}
-        {hasPayments && (
-          <div className="mb-2">
-            <div className="border-t border-dashed border-gray-300 my-1.5" />
-            <div className="text-xs font-semibold text-gray-950 mb-0.5">
-              {t("payment_details")}
-            </div>
-
-            <div className="border rounded overflow-hidden">
-              <Table className="text-xs">
-                <TableHeader>
-                  <TableRow className="bg-gray-50 divide-x">
-                    <TableHead className="text-xs text-gray-700 w-8 text-center h-7">
-                      #
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 h-7">
-                      {t("invoice")}
-                    </TableHead>
-                    <TableHead className="text-xs text-gray-700 h-7">
-                      {t("payment_method")}
-                    </TableHead>
-                    <TableHead className="font-medium text-right text-xs text-gray-700 w-20 h-7">
-                      {t("amount")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="text-xs font-medium text-gray-950">
-                  {allPayments.map((payment, index) => (
-                    <TableRow
-                      key={payment.id}
-                      className="divide-x hover:bg-transparent"
-                    >
-                      <TableCell className="text-center py-0.5 px-1">
-                        {index + 1}.
-                      </TableCell>
-                      <TableCell className="py-0.5">
-                        <div className="flex flex-col">
-                          <span>{payment.invoiceNumber}</span>
-                          {payment.payment_datetime && (
-                            <span className="text-gray-500">
-                              {format(
-                                new Date(payment.payment_datetime),
-                                "dd MMM yyyy, hh:mm a",
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-0.5">
-                        <div className="flex flex-col">
-                          <span>
-                            {PAYMENT_RECONCILIATION_METHOD_MAP[
-                              payment.method
-                            ] ?? payment.method}
-                          </span>
-                          {payment.reference_number && (
-                            <span className="text-gray-500">
-                              {payment.reference_number}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-semibold py-0.5">
-                        <MonetaryDisplay amount={payment.amount} hideCurrency />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="flex justify-end mt-1 mr-1">
-              <span className="text-xs text-gray-950 mr-2">
-                {t("amount_paid")} :
-              </span>
-              <MonetaryDisplay
-                amount={totalPaid}
-                className="text-xs text-gray-950 font-semibold"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Notes — compact */}
-        {appointment.note && (
-          <div className="mb-2">
-            <div className="text-xs font-semibold text-gray-700 border-b border-gray-200 pb-0.5 mb-0.5">
-              {t("note")}
-            </div>
-            <div className="text-xs whitespace-pre-wrap bg-gray-50 p-1.5 rounded">
-              {appointment.note}
-            </div>
-          </div>
-        )}
-
-        <div className="border-t border-gray-200">
-          <PrintFooter
-            rightContent={format(new Date(), "PP 'at' p")}
-            leftContent={
-              <>
-                <span className="font-semibold">{t("created_by")}:</span>{" "}
-                {formatName(appointment.created_by)}
-                <span className="text-gray-400"> | </span>
-                <span className="font-semibold">
-                  {t("last_updated_by")}:
-                </span>{" "}
-                {formatName(appointment.updated_by)}
-              </>
-            }
-            className="text-xs"
-          />
         </div>
-      </div>
+      </DisablingCover>
     </PrintPreview>
   );
 }
