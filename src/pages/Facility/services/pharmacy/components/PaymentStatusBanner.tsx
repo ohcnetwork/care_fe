@@ -563,6 +563,7 @@ export function PaymentStatusBanner({
                   >
                     <EqualApproximatelyIcon className="size-4" />
                     {t("mark_as_balanced")}
+                    <ShortcutBadge actionId="enter-action" />
                   </Button>
                 )}
                 <DropdownMenu>
