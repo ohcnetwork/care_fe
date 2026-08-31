@@ -101,8 +101,6 @@ interface DiagnosticReportFormProps {
   onReportSaved: (report: SavedReportSignal) => void;
 }
 
-// Signal passed up when a report is saved. `savedAt` is a nonce so consumers can
-// re-react even when the same report id is saved twice in a row.
 export interface SavedReportSignal {
   id: string;
   savedAt: number;
