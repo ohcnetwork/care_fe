@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { parseISO } from "date-fns";
 import { TriangleAlertIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useState } from "react";
@@ -28,7 +27,7 @@ import useFilters from "@/hooks/useFilters";
 import { isLessThan, round } from "@/Utils/decimal";
 import { getExpiryBadgeVariant, getExpiryStatus } from "@/Utils/inventory";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, parseValidISO } from "@/Utils/utils";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
@@ -91,28 +90,20 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     [t],
   );
 
-  const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
-    let query = { ...filterQuery };
-    for (const [key, value] of Object.entries(filterQuery)) {
-      switch (key) {
-        case "product_expiration_date":
-          {
-            const dateRange = value as FilterDateRange | null;
-            query = {
-              ...query,
-              product_expiration_date: undefined,
-              product_expiration_date_after: dateRange?.from
-                ? dateQueryString(dateRange.from)
-                : undefined,
-              product_expiration_date_before: dateRange?.to
-                ? dateQueryString(dateRange.to)
-                : undefined,
-            };
-          }
-          break;
-      }
-    }
-    updateQuery(query);
+  const onFilterUpdate = ({
+    product_expiration_date,
+    ...params
+  }: Record<string, unknown>) => {
+    const dateRange = product_expiration_date as FilterDateRange | null;
+    updateQuery({
+      ...params,
+      product_expiration_date_after: dateRange?.from
+        ? dateQueryString(dateRange.from)
+        : undefined,
+      product_expiration_date_before: dateRange?.to
+        ? dateQueryString(dateRange.to)
+        : undefined,
+    });
   };
 
   const {
@@ -127,12 +118,8 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
       qParams.product_expiration_date_after ||
       qParams.product_expiration_date_before
         ? {
-            from: qParams.product_expiration_date_after
-              ? parseISO(qParams.product_expiration_date_after)
-              : undefined,
-            to: qParams.product_expiration_date_before
-              ? parseISO(qParams.product_expiration_date_before)
-              : undefined,
+            from: parseValidISO(qParams.product_expiration_date_after),
+            to: parseValidISO(qParams.product_expiration_date_before),
           }
         : undefined,
   });

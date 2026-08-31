@@ -736,24 +736,25 @@ export const productExpirationDateFilter = (
   key: string = "product_expiration_date",
   label?: string,
 ) => {
-  const expiringSoonRange = getExpiringSoonDateRange();
-
-  const presetOptions: DateRangeOption[] = [
+  const options: DateRangeOption[] = [
     { label: "expired", getDateRange: getExpiredDateRange },
-    ...(expiringSoonRange
-      ? [{ label: "expiring_soon", getDateRange: () => expiringSoonRange }]
-      : []),
   ];
+
+  const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
+  if (expiryMonthOffset) {
+    options.push({
+      label: "expiring_soon",
+      getDateRange: () => getExpiringSoonDateRange(expiryMonthOffset),
+    });
+  }
 
   return dateFilter(
     key,
     label || t("expiration_date"),
-    presetOptions,
+    options,
     undefined,
     (selected) =>
-      presetOptions.some((option) =>
-        isSameDateRange(selected, option.getDateRange()),
-      )
+      options.some((option) => isSameDateRange(selected, option.getDateRange()))
         ? [{ label: "is" }]
         : getDateOperations(selected),
   );

@@ -52,10 +52,7 @@ export function getExpiredDateRange() {
  * {@link getExpiryStatus}, or `null` if no such range exists, i.e. when the
  * expiry restriction is disabled or covers only the current month.
  */
-export function getExpiringSoonDateRange() {
-  const expiryMonthOffset = careConfig.inventory.expiryMonthOffset;
-  if (!expiryMonthOffset) return null;
-
+export function getExpiringSoonDateRange(expiryMonthOffset: number) {
   const today = new Date();
   return {
     from: startOfMonth(addMonths(today, 1)),
