@@ -98,7 +98,14 @@ interface DiagnosticReportFormProps {
   specimens: SpecimenRead[];
   disableEdit: boolean;
   serviceRequestStatus: ServiceRequestStatus;
-  onReportSaved: (reportId: string) => void;
+  onReportSaved: (report: SavedReportSignal) => void;
+}
+
+// Signal passed up when a report is saved. `savedAt` is a nonce so consumers can
+// re-react even when the same report id is saved twice in a row.
+export interface SavedReportSignal {
+  id: string;
+  savedAt: number;
 }
 
 // Interface for component values
@@ -299,7 +306,7 @@ function DiagnosticReportItem({
   disableEdit: boolean;
   facilityId: string;
   isMultipleDiagnosticReport: boolean;
-  onReportSaved: (reportId: string) => void;
+  onReportSaved: (report: SavedReportSignal) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -348,7 +355,7 @@ function DiagnosticReportItem({
         queryKey: ["diagnosticReport", report.id],
       });
       setIsExpanded(false);
-      onReportSaved(`${report.id}:${Date.now()}`);
+      onReportSaved({ id: report.id, savedAt: Date.now() });
     },
   });
 

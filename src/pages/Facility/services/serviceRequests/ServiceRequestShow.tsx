@@ -59,7 +59,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
-import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
+import {
+  DiagnosticReportForm,
+  type SavedReportSignal,
+} from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
@@ -95,7 +98,8 @@ export default function ServiceRequestShow({
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
-  const [expandedReportId, setExpandedReportId] = useState<string | null>(null);
+  const [expandedReport, setExpandedReport] =
+    useState<SavedReportSignal | null>(null);
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -588,7 +592,7 @@ export default function ServiceRequestShow({
               specimens={request.specimens || []}
               disableEdit={disableEdit}
               serviceRequestStatus={request.status}
-              onReportSaved={setExpandedReportId}
+              onReportSaved={setExpandedReport}
             />
           </div>
           {diagnosticReports.length > 0 && (
@@ -599,7 +603,7 @@ export default function ServiceRequestShow({
               observationDefinitions={observationRequirements}
               serviceRequestId={serviceRequestId}
               disableEdit={disableEdit}
-              expandedReportId={expandedReportId}
+              expandedReport={expandedReport}
             />
           )}
         </div>

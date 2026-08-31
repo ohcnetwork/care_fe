@@ -41,6 +41,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
+import { type SavedReportSignal } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportForm";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -60,7 +61,7 @@ interface DiagnosticReportReviewProps {
   observationDefinitions: ObservationDefinitionRead[];
   serviceRequestId: string;
   disableEdit: boolean;
-  expandedReportId: string | null;
+  expandedReport: SavedReportSignal | null;
 }
 
 export function DiagnosticReportReview({
@@ -70,7 +71,7 @@ export function DiagnosticReportReview({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
-  expandedReportId,
+  expandedReport,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   return (
@@ -90,7 +91,7 @@ export function DiagnosticReportReview({
           serviceRequestId={serviceRequestId}
           observationDefinitions={observationDefinitions}
           disableEdit={disableEdit}
-          expandedReportId={expandedReportId}
+          expandedReport={expandedReport}
         />
       ))}
     </div>
@@ -104,7 +105,7 @@ function DiagnosticReportReviewItem({
   serviceRequestId,
   observationDefinitions,
   disableEdit,
-  expandedReportId,
+  expandedReport,
 }: {
   report: DiagnosticReportRead;
   facilityId: string;
@@ -112,7 +113,7 @@ function DiagnosticReportReviewItem({
   serviceRequestId: string;
   observationDefinitions: ObservationDefinitionRead[];
   disableEdit: boolean;
-  expandedReportId: string | null;
+  expandedReport: SavedReportSignal | null;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -167,10 +168,10 @@ function DiagnosticReportReviewItem({
     });
 
   useEffect(() => {
-    if (expandedReportId?.split(":")[0] === report.id) {
+    if (expandedReport?.id === report.id) {
       setIsExpanded(true);
     }
-  }, [expandedReportId, report.id]);
+  }, [expandedReport, report.id]);
 
   useEffect(() => {
     setConclusion(fullReport?.conclusion || "");
