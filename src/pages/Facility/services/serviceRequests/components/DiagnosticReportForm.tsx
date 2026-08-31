@@ -991,7 +991,7 @@ function DiagnosticReportItem({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="px-2 bg-gray-100">
+          <CardContent className="px-2">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
