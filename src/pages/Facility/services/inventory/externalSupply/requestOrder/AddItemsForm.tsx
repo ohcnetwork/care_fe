@@ -62,6 +62,7 @@ interface AddItemsFormProps {
   showEmptyState: boolean;
 
   supplyRequestsCount: number;
+  isFetchingSupplyRequests: boolean;
 }
 
 export function AddItemsForm({
@@ -71,6 +72,7 @@ export function AddItemsForm({
   disableApproveButton,
   showEmptyState,
   supplyRequestsCount,
+  isFetchingSupplyRequests,
 }: AddItemsFormProps) {
   const { t } = useTranslation();
 
@@ -113,6 +115,8 @@ export function AddItemsForm({
     },
   });
 
+  const disableAddItem = isCreating || isFetchingSupplyRequests;
+
   function onSubmitSupplyRequests(data: SupplyRequestFormValues) {
     if (data.requests.length === 0) {
       toast.error(t("no_items_to_add"));
@@ -146,6 +150,7 @@ export function AddItemsForm({
               className="text-primary-800 border-primary-600"
               placeholder={t("add_from_item_list")}
               disableFavorites
+              disabled={disableAddItem}
             />
           }
         />
@@ -238,6 +243,7 @@ export function AddItemsForm({
                 className="text-secondary-800 border-secondary-600 w-64! h-11 text-md"
                 placeholder={t("add_item")}
                 disableFavorites
+                disabled={disableAddItem}
               />
             )}
 
@@ -258,6 +264,7 @@ export function AddItemsForm({
                     type="submit"
                     disabled={
                       isCreating ||
+                      isFetchingSupplyRequests ||
                       fields.length === 0 ||
                       supplyRequestsCount + fields.length >
                         careConfig.maxDatapointsPerUpsert

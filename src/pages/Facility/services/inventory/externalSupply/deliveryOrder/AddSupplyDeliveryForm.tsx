@@ -242,11 +242,7 @@ export function AddSupplyDeliveryForm({
     name: "items",
   });
 
-  const hasReachedUpsertLimit =
-    supplyDeliveriesCount >= careConfig.maxDatapointsPerUpsert;
-
-  const disableAddItem =
-    isProcessing || hasReachedUpsertLimit || isFetchingSupplyDeliveries;
+  const disableAddItem = isProcessing || isFetchingSupplyDeliveries;
 
   const loadFromSupplyRequests = () => {
     setIsSelectDialogOpen(true);

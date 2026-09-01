@@ -183,17 +183,19 @@ export function RequestOrderShow({
 
   const isRequester = requestOrder?.destination.id === locationId;
 
-  const { data: supplyRequests, isLoading: isLoadingSupplyRequests } = useQuery(
-    {
-      queryKey: ["supplyRequests", requestOrderId],
-      queryFn: query.paginated(supplyRequestApi.listSupplyRequest, {
-        queryParams: {
-          order: requestOrderId,
-        },
-      }),
-      enabled: !!requestOrderId && currentTab === "requested-items",
-    },
-  );
+  const {
+    data: supplyRequests,
+    isLoading: isLoadingSupplyRequests,
+    isFetching: isFetchingSupplyRequests,
+  } = useQuery({
+    queryKey: ["supplyRequests", requestOrderId],
+    queryFn: query.paginated(supplyRequestApi.listSupplyRequest, {
+      queryParams: {
+        order: requestOrderId,
+      },
+    }),
+    enabled: !!requestOrderId && currentTab === "requested-items",
+  });
 
   const qParams = {
     request_order: requestOrderId,
@@ -757,6 +759,9 @@ export function RequestOrderShow({
                               }
                               supplyRequestsCount={
                                 supplyRequests?.results.length || 0
+                              }
+                              isFetchingSupplyRequests={
+                                isFetchingSupplyRequests
                               }
                             />
                           </div>
