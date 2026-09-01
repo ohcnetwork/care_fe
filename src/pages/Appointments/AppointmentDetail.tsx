@@ -630,7 +630,7 @@ const AppointmentDetailsContent = ({
                 <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
                   {appointment.booked_by && (
                     <Avatar
-                      name={formatName(appointment.booked_by)}
+                      name={formatName(appointment.booked_by, true)}
                       imageUrl={appointment.booked_by?.profile_picture_url}
                       className="size-6"
                     />
@@ -650,7 +650,7 @@ const AppointmentDetailsContent = ({
                 <p className="text-gray-600 flex w-fit items-center gap-2 bg-gray-100 p-1 rounded-sm">
                   {appointment.updated_by && (
                     <Avatar
-                      name={formatName(appointment.updated_by)}
+                      name={formatName(appointment.updated_by, true)}
                       imageUrl={appointment.updated_by?.profile_picture_url}
                       className="size-6"
                     />
@@ -734,7 +734,7 @@ const AppointmentDetailsContent = ({
               {appointment.resource_type ===
                 SchedulableResourceType.Practitioner && (
                 <Avatar
-                  name={formatName(appointment.resource)}
+                  name={formatName(appointment.resource, true)}
                   imageUrl={appointment.resource?.profile_picture_url}
                   className="size-6"
                 />

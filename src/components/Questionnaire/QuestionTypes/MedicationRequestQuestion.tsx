@@ -70,7 +70,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { formatDosage } from "@/components/Medicine/utils";
+import { FormattedDosage } from "@/components/Medicine/FormattedDosage";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -149,6 +149,7 @@ export function buildMedicationForTemplate(
   // Remove internal objects that shouldn't be stored in templates
   delete medicationForTemplate.requested_product_internal;
   delete medicationForTemplate.id;
+  delete medicationForTemplate.dispense_status;
 
   return medicationForTemplate;
 }
@@ -191,6 +192,7 @@ async function fetchProductAndBuildMedication(
   return {
     ...med,
     id: undefined,
+    dispense_status: undefined,
     do_not_perform: med.do_not_perform ?? false,
     dosage_instruction: med.dosage_instruction ?? [
       { as_needed_boolean: false },
@@ -645,6 +647,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medication,
+        dispense_status: undefined,
         dirty: true, // Mark new medication as dirty
         create_prescription: {
           status: PrescriptionStatus.active,
@@ -683,6 +686,7 @@ export function MedicationRequestQuestion({
 
         return {
           ...request,
+          dispense_status: undefined,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: currentUser,
@@ -700,6 +704,7 @@ export function MedicationRequestQuestion({
           ...parseMedicationStringToRequest(currentUser, statement.medication),
           authored_on: new Date().toISOString(),
           note: statement.note,
+          dispense_status: undefined,
           requester: currentUser,
           dirty: true, // Mark as dirty since it's being added as new
           create_prescription: {
@@ -797,6 +802,7 @@ export function MedicationRequestQuestion({
       ...medications,
       {
         ...medicationToAdd,
+        dispense_status: undefined,
         create_prescription: {
           status: PrescriptionStatus.active,
           alternate_identifier: "",
@@ -834,6 +840,7 @@ export function MedicationRequestQuestion({
         ...medications,
         ...medicationsWithProductKnowledge.map((med) => ({
           ...med,
+          dispense_status: undefined,
           create_prescription: {
             status: PrescriptionStatus.active,
             alternate_identifier: "",
@@ -966,9 +973,16 @@ export function MedicationRequestQuestion({
                           <DosageInstructionList
                             instructions={instructions}
                             renderItem={(di) => {
-                              const dosage = formatDosage(di) || "";
                               const freq = formatFrequency(di) || "";
-                              return [dosage, freq].filter(Boolean).join("\n");
+                              return (
+                                <div className="flex flex-col">
+                                  <FormattedDosage
+                                    instruction={di}
+                                    fallback=""
+                                  />
+                                  {freq && <span>{freq}</span>}
+                                </div>
+                              );
                             }}
                             gap="sm"
                           />
@@ -1690,7 +1704,12 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div className="lg:p-4 lg:px-2 lg:py-1 flex flex-col justify-between lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
+        <div
+          className={cn(
+            "lg:p-4 lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm",
+            isReadOnly ? "justify-center" : "justify-between",
+          )}
+        >
           <span
             className={cn(
               "wrap-break-word line-clamp-2 hidden lg:block",
@@ -1737,6 +1756,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                         "h-9 text-sm cursor-pointer",
                         hasError(fieldKey) && "border-red-500",
                       )}
+                      disabled={disabled || isReadOnly}
                     />
                   ) : (
                     <>
