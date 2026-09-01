@@ -66,6 +66,18 @@ interface EncounterQuestionProps {
   errors?: QuestionValidationError[];
 }
 
+const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
+  EncounterStatus.DISCHARGED,
+  EncounterStatus.UNKNOWN,
+  EncounterStatus.COMPLETED,
+];
+
+const HOSPITALIZATION_ENCOUNTER_CLASSES: EncounterClass[] = [
+  "imp",
+  "obsenc",
+  "emer",
+];
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -81,7 +93,8 @@ export function validateEncounterQuestion(
 
   if (
     value?.status === EncounterStatus.DISCHARGED &&
-    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
+    value?.hospitalization &&
+    Object.keys(value.hospitalization).length > 0 &&
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
@@ -118,7 +131,6 @@ export function EncounterQuestion({
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: EncounterStatus.UNKNOWN,
-    encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
       end: undefined,
@@ -166,7 +178,6 @@ export function EncounterQuestion({
   ): Partial<EncounterEdit> => {
     return {
       status: read.status,
-      encounter_class: read.encounter_class,
       period: read.period,
       priority: read.priority,
       hospitalization: read.hospitalization,
@@ -198,16 +209,13 @@ export function EncounterQuestion({
   }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
+    if (!encounterData) return;
     clearError();
     const newEncounter = { ...encounter, ...updates };
-    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
+    const encounterClass = encounterData.encounter_class;
+    if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass)) {
       newEncounter.hospitalization = {};
-    }
-
-    if (
-      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
-      newEncounter.status === EncounterStatus.DISCHARGED
-    ) {
+    } else if (newEncounter.status === EncounterStatus.DISCHARGED) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:
@@ -239,9 +247,21 @@ export function EncounterQuestion({
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !encounterData) {
     return <div>{t("loading_encounter")}</div>;
   }
+
+  const isCurrentStatusNonSelectable =
+    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
+
+  const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
+    (encounterStatus) => {
+      if (isCurrentStatusNonSelectable) {
+        return encounterStatus === encounter.status;
+      }
+      return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounterStatus);
+    },
+  );
 
   return (
     <div className="space-y-6">
@@ -265,42 +285,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) =>
-                  encounter.status === EncounterStatus.DISCHARGED
-                    ? encounterStatus === EncounterStatus.DISCHARGED
-                    : encounterStatus !== EncounterStatus.DISCHARGED &&
-                      encounterStatus !== EncounterStatus.UNKNOWN,
-                )
-                .map((encounterStatus: EncounterStatus) => (
+              {selectableEncounterStatuses.map(
+                (encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>{t("encounter_class")}</Label>
-          <Select
-            value={encounter.encounter_class}
-            onValueChange={(value: EncounterClass) =>
-              handleUpdateEncounter({
-                encounter_class: value,
-              })
-            }
-            disabled={disabled}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("select_class")} />
-            </SelectTrigger>
-            <SelectContent>
-              {careConfig.encounterClasses.map((encounterClass) => (
-                <SelectItem key={encounterClass} value={encounterClass}>
-                  {t(`encounter_class__${encounterClass}`)}
-                </SelectItem>
-              ))}
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -342,26 +333,31 @@ export function EncounterQuestion({
         </div>
       </div>
 
-      {/* Mark for discharge button - Show if not already discharged */}
-      {encounter.status !== EncounterStatus.DISCHARGED && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
+      {/* Mark for discharge button - Show if encounter is a hospitalization encounter class and not already discharged  */}
+      {encounter.status !== EncounterStatus.DISCHARGED &&
+        HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+          encounterData.encounter_class,
+        ) && (
+          <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">
+                  {t("discharge_patient")}
+                </h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={disabled}
+                onClick={() =>
+                  handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
+                }
+              >
+                {t("mark_for_discharge")}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() =>
-                handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
-              }
-            >
-              {t("mark_for_discharge")}
-            </Button>
           </div>
-        </div>
-      )}
+        )}
 
       {(encounter.status === EncounterStatus.DISCHARGED ||
         encounter.discharge_summary_advice) && (
@@ -383,7 +379,9 @@ export function EncounterQuestion({
       )}
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
+      {HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounterData.encounter_class,
+      ) && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}
