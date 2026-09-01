@@ -1,4 +1,4 @@
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import query from "@/Utils/request/query";
+import { batchQuery } from "@/Utils/request/batch";
 
 interface InvoiceChargeItemTitleProps {
   item: ChargeItemRead;
@@ -95,22 +95,29 @@ export function useMedicationDispenseData(
     }, []) || [];
 
   // Get medication dispense charge items
-  const dispenseQueries = useQueries({
-    queries: dispenseIds.map((id) => ({
-      queryKey: ["medication_dispense_retrieve", id],
-      queryFn: query(medicationDispenseApi.get, { pathParams: { id } }),
-    })),
+  const {
+    data: batchResponse,
+    isLoading: isLoadingDispenses,
+    isError: hasDispenseErrors,
+  } = useQuery({
+    queryKey: ["medication_dispense_batch", dispenseIds],
+    queryFn: batchQuery<MedicationDispenseRead>(
+      dispenseIds.map((id) => ({
+        api: medicationDispenseApi.get,
+        pathParams: { id },
+        referenceId: id,
+      })),
+    ),
+    enabled: dispenseIds.length > 0,
   });
 
-  const isLoadingDispenses = dispenseQueries.some((result) => result.isLoading);
-  const hasDispenseErrors = dispenseQueries.some((result) => result.isError);
-
+  // Build dispense map from batch response
   const dispenseMap: Record<string, MedicationDispenseRead | undefined> = {};
-  dispenseQueries.forEach((result, index) => {
-    if (result.data) {
-      dispenseMap[dispenseIds[index]] = result.data;
+  for (const result of batchResponse?.results ?? []) {
+    if (result.status_code === 200 && result.data) {
+      dispenseMap[result.reference_id] = result.data;
     }
-  });
+  }
 
   // Show toast on error (only once using ref)
   const hasShownErrorToast = useRef(false);

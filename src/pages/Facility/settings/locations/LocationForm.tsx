@@ -223,7 +223,7 @@ export default function LocationForm({
         (bed) => ({
           api: locationApi.create,
           pathParams: { facility_id: facilityId },
-          referenceId: parentId ? `Location ${parentId}` : "Location",
+          referenceId: bed.name,
           body: {
             ...data,
             name: bed.name,
