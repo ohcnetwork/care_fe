@@ -70,7 +70,7 @@ export default function AppointmentPrint(props: Props) {
   });
 
   // Get charge items for the appointment
-  const { data: chargeItems } = useQuery({
+  const { data: chargeItems, isLoading: isLoadingChargeItems } = useQuery({
     queryKey: ["chargeItems", facilityId, props.appointmentId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: {
@@ -108,7 +108,9 @@ export default function AppointmentPrint(props: Props) {
     .map((q) => q.data)
     .filter((inv): inv is InvoiceRead => !!inv);
 
-  const isLoadingInvoices = invoiceQueries.some((q) => q.isLoading);
+  const isLoadingInvoices =
+    isLoadingChargeItems ||
+    invoiceQueries.some((q) => q.isLoading || q.isFetching);
 
   const patient = appointment?.patient;
   const token = appointment?.token;
