@@ -14,11 +14,9 @@ import {
 } from "@/components/ui/drawer";
 import RadioInput from "@/components/ui/RadioInput";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useUpdateToken } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import mutate from "@/Utils/request/mutate";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -74,7 +72,6 @@ export const ServicePointSelector = ({
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const queryClient = useQueryClient();
 
   const { title, description, successMessage } = ACTION_TO_CONTENT[action];
 
@@ -93,21 +90,8 @@ export const ServicePointSelector = ({
     );
   }, [open, token.sub_queue?.id, token.status, targetStatus]);
 
-  const { mutate: updateToken, isPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token.queue.id,
-        id: token.id,
-      },
-    }),
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token.queue.id],
-      });
       toast.success(t(successMessage));
       onOpenChange(false);
     },

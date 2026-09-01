@@ -6,9 +6,16 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -27,10 +34,7 @@ import {
   TokenRead,
   TokenStatus,
 } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
 import { formatPatientAge } from "@/Utils/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowBigDown,
   ArrowLeftRight,
@@ -50,7 +54,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
-import { useTokenListInfiniteQuery } from "./utils";
+import { useTokenListInfiniteQuery, useUpdateToken } from "./utils";
 
 interface TokenActionItem {
   key: string;
@@ -77,23 +81,9 @@ function useTokenActions({
   onChangeServicePointClick: () => void;
 }): TokenActionItem[] {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
-  const { mutate: updateToken } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token.queue.id,
-        id: token.id,
-      },
-    }),
-    onSuccess: (data: TokenRead) => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token.queue.id],
-      });
+  const { mutate: updateToken } = useUpdateToken(facilityId, token, {
+    onSuccess: (data) => {
       if (data.status === TokenStatus.FULFILLED) {
         toast.success(t("token_has_been_completed"));
       }
@@ -276,14 +266,16 @@ function OngoingQueueTokenCardInner({
           <TokenTrigger token={token} facilityId={facilityId} />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col items-center px-3 pb-2">
-          <TokenContent
-            facilityId={facilityId}
-            token={token}
-            setShowCancelDialog={setShowCancelDialog}
-            setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
-            showCancelDialog={showCancelDialog}
-            showEnteredInErrorDialog={showEnteredInErrorDialog}
-          />
+          <div className="w-full overflow-y-auto max-h-[80dvh]">
+            <TokenContent
+              facilityId={facilityId}
+              token={token}
+              setShowCancelDialog={setShowCancelDialog}
+              setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+              showCancelDialog={showCancelDialog}
+              showEnteredInErrorDialog={showEnteredInErrorDialog}
+            />
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -294,7 +286,7 @@ function OngoingQueueTokenCardInner({
       <DialogTrigger asChild>
         <TokenTrigger token={token} facilityId={facilityId} />
       </DialogTrigger>
-      <DialogContent className="flex flex-col items-center px-3 pb-2">
+      <DialogContent className="flex flex-col items-center px-3 pb-2 max-h-[90dvh] overflow-y-auto">
         <TokenContent
           facilityId={facilityId}
           token={token}
@@ -320,23 +312,9 @@ function EnteredInErrorDialog({
   token: TokenRead;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
-  const { mutate: updateToken, isPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token.queue.id,
-        id: token.id,
-      },
-    }),
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token.queue.id],
-      });
       toast.success(t("token_marked_as_entered_in_error"));
       onOpenChange(false);
     },
@@ -535,6 +513,10 @@ const TokenContent = ({
 }) => {
   const { t } = useTranslation();
 
+  const isMobile = useBreakpoints({ default: true, sm: false });
+  const Header = isMobile ? DrawerHeader : DialogHeader;
+  const Title = isMobile ? DrawerTitle : DialogTitle;
+
   const [servicePointAction, setServicePointAction] =
     useState<ServicePointSelectorAction>("serve");
 
@@ -557,38 +539,21 @@ const TokenContent = ({
   });
 
   const queueStatus = getQueueTokenStatus(token);
-  const queryClient = useQueryClient();
 
   const hasNoAssignedServicePoints =
     assignedServicePoints.length === 0 && !isLoadingSubQueues;
 
-  const { mutate: updateToken, isPending } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token.queue.id,
-        id: token.id,
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token.queue.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token.queue.id],
-      });
-    },
-  });
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token);
 
   return (
     <div className="w-full max-w-md mx-auto space-y-2">
-      <DialogHeader className="flex flex-row items-start justify-between">
+      <Header className="flex flex-row items-start justify-between">
         {queueStatus === QueueTokenStatus.WAITING ||
         queueStatus === QueueTokenStatus.RECALL ? (
           <div className="flex flex-col items-start">
-            <span className="text-gray-950 font-semibold">
+            <Title className="text-gray-950 font-semibold text-base">
               {token.patient ? token.patient.name : renderTokenNumber(token)}
-            </span>
+            </Title>
             {token.patient && (
               <span className="text-sm text-gray-700">
                 {formatPatientAge(token.patient, true)},{" "}
@@ -598,9 +563,9 @@ const TokenContent = ({
           </div>
         ) : (
           <div className="flex gap-2 items-center">
-            <h5 className="text-gray-950 font-semibold">
+            <Title className="text-gray-950 font-semibold text-base">
               {token.sub_queue?.name}
-            </h5>
+            </Title>
             <Badge
               variant={QUEUE_TOKEN_STATUS_COLORS[queueStatus]}
               className="h-2 w-2 rounded-full p-0 border"
@@ -610,7 +575,7 @@ const TokenContent = ({
             </span>
           </div>
         )}
-      </DialogHeader>
+      </Header>
       <Separator className="mb-2" />
       <div className="flex flex-col gap-3">
         {queueStatus === QueueTokenStatus.WAITING ||
@@ -728,6 +693,7 @@ const TokenContent = ({
         ) : queueStatus === QueueTokenStatus.SERVING ? (
           <Button asChild variant="primary">
             <Link
+              basePath="/"
               href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
               className="flex items-center gap-1"
             >
@@ -741,6 +707,7 @@ const TokenContent = ({
           <div className="flex gap-2 w-full">
             <Button asChild variant="outline_primary" className="flex-1 group">
               <Link
+                basePath="/"
                 href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                 className="flex items-center gap-1"
               >
