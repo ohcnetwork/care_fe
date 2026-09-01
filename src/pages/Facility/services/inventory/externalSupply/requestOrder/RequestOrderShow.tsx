@@ -183,19 +183,17 @@ export function RequestOrderShow({
 
   const isRequester = requestOrder?.destination.id === locationId;
 
-  const {
-    data: supplyRequests,
-    isLoading: isLoadingSupplyRequests,
-    isFetching: isFetchingSupplyRequests,
-  } = useQuery({
-    queryKey: ["supplyRequests", requestOrderId],
-    queryFn: query.paginated(supplyRequestApi.listSupplyRequest, {
-      queryParams: {
-        order: requestOrderId,
-      },
-    }),
-    enabled: !!requestOrderId && currentTab === "requested-items",
-  });
+  const { data: supplyRequests, isLoading: isLoadingSupplyRequests } = useQuery(
+    {
+      queryKey: ["supplyRequests", requestOrderId],
+      queryFn: query.paginated(supplyRequestApi.listSupplyRequest, {
+        queryParams: {
+          order: requestOrderId,
+        },
+      }),
+      enabled: !!requestOrderId && currentTab === "requested-items",
+    },
+  );
 
   const qParams = {
     request_order: requestOrderId,
@@ -745,24 +743,12 @@ export function RequestOrderShow({
 
                         {/* Add New Items Form - Always show when in draft mode */}
                         {canAddSupplyRequests && (
-                          <div className="">
+                          <div>
                             <AddItemsForm
                               requestOrderId={requestOrderId}
                               onSuccess={handleSupplyRequestSuccess}
                               updateOrderStatus={updateOrderStatus}
-                              disableApproveButton={
-                                isUpdating ||
-                                supplyRequests?.results.length === 0
-                              }
-                              showEmptyState={
-                                supplyRequests?.results.length === 0
-                              }
-                              supplyRequestsCount={
-                                supplyRequests?.results.length || 0
-                              }
-                              isFetchingSupplyRequests={
-                                isFetchingSupplyRequests
-                              }
+                              isUpdatingOrder={isUpdating}
                             />
                           </div>
                         )}

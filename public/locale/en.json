@@ -3457,6 +3457,7 @@
   "max_applicable_discounts": "Maximum Applicable Discounts",
   "max_applicable_discounts_description": "The maximum number of discount components that can be applied to a single invoice. Set to 0 for no discount.",
   "max_datapoints_per_upsert_limit": "You cannot add more than {{count}} items in a single delivery.",
+  "max_deliveries_selected_limit": "Select at most {{count}} deliveries at a time.",
   "max_dosage_24_hrs": "Max. dosage in 24 hrs.",
   "max_dosage_in_24hrs_gte_base_dosage_error": "Max. dosage in 24 hours must be greater than or equal to base dosage",
   "max_favorites_reached": "You've reached the limit. Only {{count}} forms can be favourited.",

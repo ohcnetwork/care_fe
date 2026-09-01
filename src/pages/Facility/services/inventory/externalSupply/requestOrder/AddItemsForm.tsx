@@ -1,13 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import careConfig from "@careConfig";
-
-import Callout from "@/CAREUI/display/Callout";
 
 import {
   Table,
@@ -31,6 +29,7 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -38,7 +37,8 @@ import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { Box, Check, Trash2, TriangleAlert } from "lucide-react";
+import query from "@/Utils/request/query";
+import { Box, Check, Trash2 } from "lucide-react";
 
 const supplyRequestFormSchema = z.object({
   requests: z.array(
@@ -58,23 +58,33 @@ interface AddItemsFormProps {
   requestOrderId: string;
   onSuccess: () => void;
   updateOrderStatus: (status: RequestOrderStatus) => void;
-  disableApproveButton: boolean;
-  showEmptyState: boolean;
-
-  supplyRequestsCount: number;
-  isFetchingSupplyRequests: boolean;
+  isUpdatingOrder: boolean;
 }
 
 export function AddItemsForm({
   requestOrderId,
   onSuccess,
   updateOrderStatus,
-  disableApproveButton,
-  showEmptyState,
-  supplyRequestsCount,
-  isFetchingSupplyRequests,
+  isUpdatingOrder,
 }: AddItemsFormProps) {
   const { t } = useTranslation();
+
+  const {
+    data: supplyRequestsCountData,
+    isLoading: isLoadingSupplyRequestsCount,
+    isFetching: isFetchingSupplyRequests,
+  } = useQuery({
+    queryKey: ["supplyRequests", requestOrderId, "count-supplyRequests"],
+    queryFn: query(supplyRequestApi.listSupplyRequest, {
+      queryParams: {
+        order: requestOrderId,
+        limit: 1,
+      },
+    }),
+  });
+
+  const supplyRequestsCount = supplyRequestsCountData?.count ?? 0;
+  const disableApproveButton = isUpdatingOrder || supplyRequestsCount === 0;
 
   const form = useForm<SupplyRequestFormValues>({
     resolver: zodResolver(supplyRequestFormSchema),
@@ -139,22 +149,24 @@ export function AddItemsForm({
 
   return (
     <div className="space-y-2">
-      {showEmptyState && fields.length === 0 && (
-        <EmptyState
-          icon={<Box className="text-primary size-5" />}
-          title={t("no_supply_requests_found")}
-          description={t("add_items_to_get_started")}
-          action={
-            <ProductKnowledgeSelect
-              onChange={handleAddItem}
-              className="text-primary-800 border-primary-600"
-              placeholder={t("add_from_item_list")}
-              disableFavorites
-              disabled={disableAddItem}
-            />
-          }
-        />
-      )}
+      {!isLoadingSupplyRequestsCount &&
+        supplyRequestsCount === 0 &&
+        fields.length === 0 && (
+          <EmptyState
+            icon={<Box className="text-primary size-5" />}
+            title={t("no_supply_requests_found")}
+            description={t("add_items_to_get_started")}
+            action={
+              <ProductKnowledgeSelect
+                onChange={handleAddItem}
+                className="text-primary-800 border-primary-600"
+                placeholder={t("add_from_item_list")}
+                disableFavorites
+                disabled={disableAddItem}
+              />
+            }
+          />
+        )}
       <div className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmitSupplyRequests)}>
@@ -224,19 +236,11 @@ export function AddItemsForm({
             )}
 
             {hasReachedUpsertLimit ? (
-              <Callout
-                variant="warning"
-                className="border border-amber-300 bg-amber-50 text-amber-800"
-                badge={
-                  <TriangleAlert className="size-4 shrink-0 text-amber-600" />
-                }
-              >
-                <span className="flex items-center gap-2">
-                  {t("max_datapoints_per_upsert_limit", {
-                    count: careConfig.maxDatapointsPerUpsert,
-                  })}
-                </span>
-              </Callout>
+              <UpsertLimitCallout>
+                {t("max_datapoints_per_upsert_limit", {
+                  count: careConfig.maxDatapointsPerUpsert,
+                })}
+              </UpsertLimitCallout>
             ) : (
               <ProductKnowledgeSelect
                 onChange={handleAddItem}

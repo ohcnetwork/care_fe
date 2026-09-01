@@ -7,7 +7,6 @@ import {
   Hash,
   MoreVertical,
   Printer,
-  TriangleAlert,
   Truck,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
@@ -15,7 +14,6 @@ import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
@@ -55,6 +53,7 @@ import {
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -279,7 +278,6 @@ export function DeliveryOrderShow({
         facility: facilityId,
         ordering: "created_date",
       },
-      pageSize: careConfig.maxDatapointsPerUpsert,
     }),
   });
 
@@ -868,19 +866,11 @@ export function DeliveryOrderShow({
           </CardHeader>
           {!isWithinUpsertLimit && (
             <div className="px-4">
-              <Callout
-                variant="warning"
-                className="border border-amber-300 bg-amber-50 text-amber-800"
-                badge={
-                  <TriangleAlert className="size-4 shrink-0 text-amber-600" />
-                }
-              >
-                <span className="flex items-center gap-2">
-                  {t("max_datapoints_per_upsert_limit", {
-                    count: careConfig.maxDatapointsPerUpsert,
-                  })}
-                </span>
-              </Callout>
+              <UpsertLimitCallout>
+                {t("max_deliveries_selected_limit", {
+                  count: careConfig.maxDatapointsPerUpsert,
+                })}
+              </UpsertLimitCallout>
             </div>
           )}
           <CardContent className="p-2">
@@ -955,19 +945,11 @@ export function DeliveryOrderShow({
                 )}
 
                 {hasReachedUpsertLimit && canAddSupplyDeliveries && (
-                  <Callout
-                    variant="warning"
-                    className="border border-amber-300 bg-amber-50 text-amber-800"
-                    badge={
-                      <TriangleAlert className="size-4 shrink-0 text-amber-600" />
-                    }
-                  >
-                    <span className="flex items-center gap-2">
-                      {t("max_datapoints_per_upsert_limit", {
-                        count: careConfig.maxDatapointsPerUpsert,
-                      })}
-                    </span>
-                  </Callout>
+                  <UpsertLimitCallout>
+                    {t("max_datapoints_per_upsert_limit", {
+                      count: careConfig.maxDatapointsPerUpsert,
+                    })}
+                  </UpsertLimitCallout>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}

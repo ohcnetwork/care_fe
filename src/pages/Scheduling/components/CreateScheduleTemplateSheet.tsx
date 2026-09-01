@@ -276,10 +276,7 @@ export default function CreateScheduleTemplateSheet({
     if (!slotsPerSession || !tokenDuration) return null;
 
     return (
-      <Callout
-        variant="alert"
-        badge={<Info className="size-4 shrink-0 text-purple-500" />}
-      >
+      <Callout variant="alert" badge={<Info className="size-4 shrink-0" />}>
         <Trans
           i18nKey="schedule_slots_allocation_callout"
           values={{

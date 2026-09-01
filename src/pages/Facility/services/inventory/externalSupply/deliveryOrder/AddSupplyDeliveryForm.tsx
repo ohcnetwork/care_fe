@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, Trash2, TriangleAlert } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -43,12 +43,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Callout from "@/CAREUI/display/Callout";
 import {
   getExtensionFieldsWithName,
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
@@ -907,19 +907,11 @@ export function AddSupplyDeliveryForm({
 
                   {supplyDeliveriesCount + fields.length >=
                   careConfig.maxDatapointsPerUpsert ? (
-                    <Callout
-                      variant="warning"
-                      className="border border-amber-300 bg-amber-50 text-amber-800"
-                      badge={
-                        <TriangleAlert className="size-4 shrink-0 text-amber-600" />
-                      }
-                    >
-                      <span className="flex items-center gap-2">
-                        {t("max_datapoints_per_upsert_limit", {
-                          count: careConfig.maxDatapointsPerUpsert,
-                        })}
-                      </span>
-                    </Callout>
+                    <UpsertLimitCallout>
+                      {t("max_datapoints_per_upsert_limit", {
+                        count: careConfig.maxDatapointsPerUpsert,
+                      })}
+                    </UpsertLimitCallout>
                   ) : (
                     <div className="flex flex-row gap-2 mt-4 items-end">
                       <Button
