@@ -37,7 +37,6 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
   EDITABLE_SERVICE_REQUEST_STATUSES,
-  ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
@@ -96,6 +95,7 @@ export default function ServiceRequestShow({
   const [isPrintingAllQRCodes, setIsPrintingAllQRCodes] = useState(false);
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
+  const [completionNote, setCompletionNote] = useState("");
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -154,6 +154,22 @@ export default function ServiceRequestShow({
     }),
     onSuccess: () => {
       toast.success(t("service_request_cancelled"));
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+      });
+    },
+  });
+
+  const {
+    mutate: completeServiceRequest,
+    isPending: isCompletingServiceRequest,
+  } = useMutation({
+    mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
+      pathParams: { facilityId, serviceRequestId },
+    }),
+    onSuccess: () => {
+      toast.success(t("service_request_completed"));
+      setIsCompleteDialogOpen(false);
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
       });
@@ -628,7 +644,11 @@ export default function ServiceRequestShow({
               <Button
                 variant="primary"
                 className="font-semibold shrink-0"
-                onClick={() => setIsCompleteDialogOpen(true)}
+                onClick={() => {
+                  setCompletionNote(request.note ?? "");
+                  setIsCompleteDialogOpen(true);
+                }}
+                disabled={isCompletingServiceRequest}
               >
                 {t("mark_as_complete")}
                 <ShortcutBadge actionId="mark-as-complete" />
@@ -639,7 +659,9 @@ export default function ServiceRequestShow({
           {isMobile ? (
             <Sheet
               open={isCompleteDialogOpen}
-              onOpenChange={setIsCompleteDialogOpen}
+              onOpenChange={(open) => {
+                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
+              }}
             >
               <SheetContent side="bottom">
                 <SheetHeader>
@@ -649,17 +671,26 @@ export default function ServiceRequestShow({
                   </SheetDescription>
                 </SheetHeader>
                 <CompletionNoteContent
-                  facilityId={facilityId}
-                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
+                    })
+                  }
                   onCancel={() => setIsCompleteDialogOpen(false)}
-                  serviceRequest={request}
                 />
               </SheetContent>
             </Sheet>
           ) : (
             <Dialog
               open={isCompleteDialogOpen}
-              onOpenChange={setIsCompleteDialogOpen}
+              onOpenChange={(open) => {
+                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
+              }}
             >
               <DialogContent className="sm:max-w-lg shadow-lg border-white/20">
                 <DialogHeader>
@@ -669,10 +700,17 @@ export default function ServiceRequestShow({
                   </DialogDescription>
                 </DialogHeader>
                 <CompletionNoteContent
-                  facilityId={facilityId}
-                  setIsCompleteDialogOpen={setIsCompleteDialogOpen}
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
+                    })
+                  }
                   onCancel={() => setIsCompleteDialogOpen(false)}
-                  serviceRequest={request}
                 />
               </DialogContent>
             </Dialog>
@@ -684,37 +722,21 @@ export default function ServiceRequestShow({
 }
 
 interface CompletionNoteContentProps {
-  facilityId: string;
+  note: string;
+  isUpdating: boolean;
+  onNoteChange: (note: string) => void;
+  onComplete: () => void;
   onCancel: () => void;
-  setIsCompleteDialogOpen: (open: boolean) => void;
-  serviceRequest: ServiceRequestReadSpec;
 }
 
 const CompletionNoteContent = ({
-  facilityId,
+  note,
+  isUpdating,
+  onNoteChange,
+  onComplete,
   onCancel,
-  setIsCompleteDialogOpen,
-  serviceRequest,
 }: CompletionNoteContentProps) => {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [note, setNote] = useState(serviceRequest.note ?? "");
-
-  const {
-    mutate: completeServiceRequest,
-    isPending: isCompletingServiceRequest,
-  } = useMutation({
-    mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
-      pathParams: { facilityId, serviceRequestId: serviceRequest.id },
-    }),
-    onSuccess: () => {
-      toast.success(t("service_request_completed"));
-      setIsCompleteDialogOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequest.id],
-      });
-    },
-  });
 
   return (
     <>
@@ -724,32 +746,18 @@ const CompletionNoteContent = ({
         </p>
         <Textarea
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => onNoteChange(e.target.value)}
           placeholder={t("enter_note")}
           className="min-h-14"
           aria-label={t("completion_note")}
         />
       </div>
       <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
-        <Button
-          variant="primary"
-          onClick={() =>
-            completeServiceRequest({
-              status: Status.completed,
-              note: note.trim() || null,
-              locations: serviceRequest.locations.map((loc) => loc.id),
-            })
-          }
-          disabled={isCompletingServiceRequest}
-        >
+        <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
           <CheckIcon className="size-4" />
-          {isCompletingServiceRequest ? t("updating") : t("save_and_complete")}
+          {isUpdating ? t("updating") : `${t("save_and_complete")}`}
         </Button>
-        <Button
-          variant="outline"
-          onClick={onCancel}
-          disabled={isCompletingServiceRequest}
-        >
+        <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
           {t("cancel")}
         </Button>
       </div>
