@@ -70,7 +70,7 @@ export default function AppointmentPrint(props: Props) {
   });
 
   // Get charge items for the appointment
-  const { data: chargeItems, isLoading: isLoadingChargeItems } = useQuery({
+  const { data: chargeItems, isFetching: isFetchingChargeItems } = useQuery({
     queryKey: ["chargeItems", facilityId, props.appointmentId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: {
@@ -108,9 +108,8 @@ export default function AppointmentPrint(props: Props) {
     .map((q) => q.data)
     .filter((inv): inv is InvoiceRead => !!inv);
 
-  const isLoadingInvoices =
-    isLoadingChargeItems ||
-    invoiceQueries.some((q) => q.isLoading || q.isFetching);
+  const isFetching =
+    isFetchingChargeItems || invoiceQueries.some((q) => q.isFetching);
 
   const patient = appointment?.patient;
   const token = appointment?.token;
@@ -176,10 +175,10 @@ export default function AppointmentPrint(props: Props) {
       title={t("appointment_details")}
       facility={facility}
       templateSlug={PrintTemplateType.appointment}
-      disabled={isLoadingInvoices}
+      disabled={isFetching}
       className="w-[720px] mx-auto"
     >
-      <DisablingCover disabled={isLoadingInvoices} message={t("loading")}>
+      <DisablingCover disabled={isFetching} message={t("loading")}>
         <div className="max-w-4xl mx-auto text-xs">
           {/* Header */}
           <div className="flex justify-between items-start border-b border-gray-300 pb-1 mb-2">
