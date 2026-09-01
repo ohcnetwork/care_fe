@@ -1,28 +1,24 @@
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Document, Page, pdfjs } from "react-pdf";
-
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
-
 import PrintFooter from "@/components/Common/PrintFooter";
-
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import "@/lib/pdfWorker";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName, formatPatientAge } from "@/Utils/utils";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Loader } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Document, Page } from "react-pdf";
 
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
-
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 // TODO: Replace with PDFViewer or extract this to a component
 function PDFRenderer({ fileUrl }: { fileUrl: string }) {
@@ -98,7 +94,7 @@ export default function DiagnosticReportPrint({
   diagnosticReportId: string;
 }) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
+  const { facility } = useCurrentFacilitySilently();
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],

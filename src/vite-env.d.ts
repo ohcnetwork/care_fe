@@ -30,6 +30,7 @@ interface ImportMetaEnv {
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_DEFAULT_PAYMENT_TERMS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
+  readonly REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
@@ -59,3 +60,5 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare module "@fontsource/*";

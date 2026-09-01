@@ -1,11 +1,21 @@
+import Decimal from "decimal.js";
+
 import {
   computeTotalDoseQuantity,
-  DoseRange,
-  formatDurationLabel,
+  formatTimingBounds,
   getFrequencyDisplayLabel,
+  getTimingBounds,
   MedicationRequestDosageInstruction,
 } from "@/types/emr/medicationRequest/medicationRequest";
-import { round } from "@/Utils/decimal";
+import { decimal, round, roundUp } from "@/Utils/decimal";
+
+/**
+ * Unit codes that can be dispensed as whole, billable items. Any other unit
+ * (e.g. mL, mg) cannot be resolved to a dispensable count from inventory —
+ * there is no way to know how many bottles/vials "520 mL" maps to — so such
+ * doses are treated as unknown.
+ */
+const DISPENSABLE_UNIT_CODES = ["{tbl}", "{count}"];
 
 // Helper function to format dosage in Rx style
 export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
@@ -18,6 +28,22 @@ export function formatDosage(instruction?: MedicationRequestDosageInstruction) {
     return `${round(dose_quantity.value)} ${dose_quantity.unit.display}`;
   }
   return "";
+}
+
+/**
+ * Whether a dosage should be highlighted — true for dose ranges and for
+ * quantities whose rounded display value is not exactly 1.
+ */
+export function isNonUnitDose(
+  instruction?: MedicationRequestDosageInstruction,
+): boolean {
+  const doseAndRate = instruction?.dose_and_rate;
+  if (!doseAndRate) return false;
+
+  const { dose_range, dose_quantity } = doseAndRate;
+  if (dose_range) return true;
+  if (dose_quantity?.value == null) return false;
+  return round(dose_quantity.value) !== round(1);
 }
 
 // Helper function to format dosage instructions in Rx style
@@ -43,11 +69,6 @@ export function formatSig(instruction?: MedicationRequestDosageInstruction) {
   return parts.join(" ");
 }
 
-export function formatDoseRange(range?: DoseRange): string {
-  if (!range?.high?.value) return "";
-  return `${round(range.low.value)} → ${round(range.high?.value)} ${range.high?.unit?.display}`;
-}
-
 /**
  * Standard frequency display for a dosage instruction.
  * Handles M-A-N text, FHIR timing codes, PRN/SOS, and as_needed_for.
@@ -64,48 +85,15 @@ export function formatFrequency(
 }
 
 /**
- * Standard duration display for a dosage instruction.
- * Returns human-readable label like "5 days", "2 weeks".
+ * Standard duration display for a dosage instruction. Handles all three
+ * scheduling bounds — duration ("5 days"), range ("5–7 days"), and period
+ * ("Jun 01, 2026 → Jun 08, 2026").
  */
 export function formatDuration(
   instruction?: MedicationRequestDosageInstruction,
 ): string {
-  const duration = instruction?.timing?.repeat?.bounds_duration;
-  if (!duration?.value || duration.value === "0") return "";
-  return formatDurationLabel(duration);
-}
-
-/**
- * Compact one-line medication summary:
- *   "1 tablet × 1-0-1 (Twice a day) × 5 days = 10 tablets"
- */
-export function formatMedicationLine(
-  instruction?: MedicationRequestDosageInstruction,
-  unitLabel = "units",
-): string {
-  if (!instruction) return "";
-  const parts: string[] = [];
-
-  // Dosage
-  const dosage = formatDosage(instruction);
-  if (dosage) parts.push(dosage);
-
-  // Frequency
-  const freq = formatFrequency(instruction);
-  if (freq) parts.push(freq);
-
-  // Duration
-  const dur = formatDuration(instruction);
-  if (dur) parts.push(dur);
-
-  if (parts.length === 0) return "";
-
-  // Total
-  const total = formatTotalUnits([instruction], unitLabel);
-  if (total) {
-    return `${parts.join(" × ")} = ${total}`;
-  }
-  return parts.join(" × ");
+  const bounds = getTimingBounds(instruction?.timing?.repeat);
+  return bounds ? formatTimingBounds(bounds) : "";
 }
 
 /**
@@ -185,4 +173,55 @@ export function formatTotalUnits(
   if (!hasAnyDose) return "";
 
   return `${round(String(totalValue))} ${doseUnit}${hasTapered ? " (tapered)" : ""}`;
+}
+
+/**
+ * Dispense quantity for a set of dosage instructions — i.e. how many whole,
+ * billable units to hand out. Returns `null` when the quantity cannot be
+ * determined ("unknown").
+ *
+ * A single instruction is unknown when:
+ *  - it is titrated / tapered (has a `dose_range`), or
+ *  - it has no dose quantity value, or
+ *  - its unit is not a dispensable whole-item unit (only `{tbl}` and
+ *    `{count}` can be counted for dispensing).
+ *
+ * If any instruction is unknown, the whole dispense quantity is unknown.
+ * Otherwise the per-instruction totals (each accounting for its own course
+ * duration / day range) are summed and rounded up.
+ */
+export function computeMedicationDispenseQuantity(
+  instructions: MedicationRequestDosageInstruction[] | undefined,
+): string | null {
+  if (!instructions?.length) return null;
+
+  const quantities = instructions.map((instruction): Decimal | null => {
+    const doseAndRate = instruction.dose_and_rate;
+
+    // Titrated / tapered doses have no determinate dispense quantity.
+    if (doseAndRate?.dose_range) return null;
+
+    const doseValue = doseAndRate?.dose_quantity?.value;
+    if (!doseValue) return null;
+
+    // Only whole, countable units can be dispensed.
+    const unitCode = doseAndRate?.dose_quantity?.unit?.code;
+    if (!unitCode || !DISPENSABLE_UNIT_CODES.includes(unitCode)) return null;
+
+    // PRN / as-needed: dispense a single dose worth.
+    if (instruction.as_needed_boolean) return decimal(doseValue);
+
+    // Scheduled: total across the course duration (handles day ranges).
+    return computeTotalDoseQuantity(instruction) ?? decimal(doseValue);
+  });
+
+  // If any instruction is unknown, the total is unknown.
+  if (quantities.some((quantity) => quantity === null)) return null;
+
+  const total = (quantities as Decimal[]).reduce(
+    (sum, quantity) => sum.plus(quantity),
+    decimal(0),
+  );
+
+  return total.greaterThan(0) ? roundUp(total) : null;
 }

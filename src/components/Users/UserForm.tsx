@@ -45,7 +45,7 @@ import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
-import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import { UserCreate, UserReadMinimal, UserUpdate } from "@/types/user/user";
@@ -70,9 +70,10 @@ export default function UserForm({
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
   const queryClient = useQueryClient();
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [selectedGeoOrg, setSelectedGeoOrg] = useState<Organization | null>(
+    null,
+  );
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
-
   const roleOrgSchema = z.object({
     organization: z.string().min(1, t("select_role_organization")),
     role: z.string().min(1, t("please_select_role")),
@@ -99,9 +100,9 @@ export default function UserForm({
       last_name: z.string().min(1, t("field_required")),
       email: isEditMode
         ? z.string().optional()
-        : z.string().email(t("invalid_email_address")),
+        : z.email(t("invalid_email_address")),
       phone_number: validators().phoneNumber.required,
-      gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
+      gender: z.enum(GENDERS, { error: t("gender_is_required") }),
       prefix: z.string().optional(),
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),
@@ -377,16 +378,12 @@ export default function UserForm({
   });
 
   useEffect(() => {
-    const levels: Organization[] = [];
-    if (org && org.org_type === "govt") levels.push(org);
-    setSelectedLevels(levels);
+    setSelectedGeoOrg(org && org.org_type === "govt" ? org : null);
   }, [org, organizationId]);
 
   useEffect(() => {
-    const levels: Organization[] = [];
     if (isEditMode && userData?.geo_organization) {
-      levels.push(userData.geo_organization);
-      setSelectedLevels(levels);
+      setSelectedGeoOrg(userData.geo_organization);
     }
   }, [userData, isEditMode]);
 
@@ -798,19 +795,20 @@ export default function UserForm({
         <FormField
           control={form.control}
           name="geo_organization"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <FormControl>
-                <GovtOrganizationSelector
-                  {...field}
-                  value={form.watch("geo_organization")}
-                  selected={selectedLevels}
-                  onChange={(value) =>
-                    form.setValue("geo_organization", value, {
-                      shouldDirty: true,
-                    })
-                  }
+                <GovtOrganizationPicker
+                  ref={field.ref}
+                  aria-invalid={!!fieldState.error}
                   required={false}
+                  value={selectedGeoOrg}
+                  onChange={(organization) => {
+                    setSelectedGeoOrg(organization);
+                    form.setValue("geo_organization", organization?.id ?? "", {
+                      shouldDirty: true,
+                    });
+                  }}
                 />
               </FormControl>
               <FormMessage />

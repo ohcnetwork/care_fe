@@ -14,19 +14,19 @@ import { MedicationStatementList } from "@/components/Patient/MedicationStatemen
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-interface EmptyStateProps {
+interface MedicationRequestEmptyStateProps {
   searching?: boolean;
   searchQuery?: string;
   message?: string;
   description?: string;
 }
 
-export const EmptyState = ({
+export const MedicationRequestEmptyState = ({
   searching,
   searchQuery,
   message,
   description,
-}: EmptyStateProps) => {
+}: MedicationRequestEmptyStateProps) => {
   const { t } = useTranslation();
 
   return (
