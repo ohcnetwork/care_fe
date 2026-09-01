@@ -171,10 +171,14 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    await page
+    const reportTypeSelect = page
       .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+      .filter({ hasText: "Select Diagnostic Report Type" });
+
+    if (!(await reportTypeSelect.isVisible())) {
+      await page.getByText("Test Results Entry").click();
+    }
+    await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
     const observationCombobox = page

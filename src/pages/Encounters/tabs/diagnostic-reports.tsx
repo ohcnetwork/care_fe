@@ -150,10 +150,11 @@ function DiagnosticReportDetailCard({
   return (
     <Card className="shadow-sm border rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-        <CardTitle className="text-base font-medium">
-          {report.service_request?.title ||
-            report.code?.display ||
-            t("diagnostic_report", { count: 1 })}
+        <CardTitle className="flex items-center gap-2 text-gray-700 text-lg">
+          <span>
+            {report.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
+          </span>
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
@@ -176,6 +177,7 @@ function DiagnosticReportDetailCard({
                     )
                   }
                   data-shortcut-id="print-button"
+                  disabled={!report.service_request?.id}
                 >
                   <Printer className="size-4" />
                 </Button>
@@ -217,8 +219,16 @@ function DiagnosticReportDetailCard({
       <CardContent className="px-4 pb-4 pt-0 space-y-4">
         {/* Report Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          {report.code?.display && (
+            <div>
+              <div className="text-gray-500">{t("report")}</div>
+              <div className="font-medium">
+                <span>{report.code.display}</span>
+              </div>
+            </div>
+          )}
           {report.service_request?.code?.display && (
-            <div className="col-span-full">
+            <div>
               <div className="text-gray-500">{t("procedure")}</div>
               <div className="font-medium">
                 {report.service_request.code.display}

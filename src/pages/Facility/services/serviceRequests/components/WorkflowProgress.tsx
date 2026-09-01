@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -32,7 +33,14 @@ interface WorkflowProgressProps {
   variant?: "sheet" | "card";
 }
 
-function TimelineNode({ event }: { event: TimelineEvent }) {
+function TimelineNode({
+  event,
+  isLatest,
+}: {
+  event: TimelineEvent;
+  isLatest?: boolean;
+}) {
+  const { t } = useTranslation();
   return (
     <div className="relative flex gap-8 pl-8 pt-0.5 group">
       <div className="absolute left-0 top-0 bottom-0 flex flex-col items-center">
@@ -60,16 +68,19 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
       <div className="flex flex-col gap-1 pb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3
-              className={cn(
-                "font-medium text-base",
-                event.status === "completed" && "text-gray-900",
-                event.status === "in_progress" && "text-blue-900",
-                event.status === "pending" && "text-gray-500",
-              )}
-            >
-              {event.title}
-            </h3>
+            <div className="flex items-center gap-6">
+              <h3
+                className={cn(
+                  "font-medium text-base",
+                  event.status === "completed" && "text-gray-900",
+                  event.status === "in_progress" && "text-blue-900",
+                  event.status === "pending" && "text-gray-500",
+                )}
+              >
+                {event.title}
+              </h3>
+              {isLatest && <Badge variant="primary">{t("latest")}</Badge>}
+            </div>
             <p className="text-sm text-gray-500">{event.description}</p>
             <p className="text-sm text-gray-500">{event.additional_info}</p>
             <time className="text-sm text-gray-500 whitespace-nowrap">
@@ -93,7 +104,11 @@ function WorkflowContent({ events }: { events: TimelineEvent[] }) {
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">
           {events.map((event, index) => (
-            <TimelineNode key={index} event={event} />
+            <TimelineNode
+              key={`${event.timestamp}-${event.title}`}
+              event={event}
+              isLatest={index === 0}
+            />
           ))}
         </div>
       </ScrollArea>
@@ -106,6 +121,7 @@ export function WorkflowProgress({
   className,
   variant = "card",
 }: WorkflowProgressProps) {
+  const { t } = useTranslation();
   const events: TimelineEvent[] = [];
   const direction = useBreakpoints({
     default: "bottom" as const,
@@ -115,8 +131,10 @@ export function WorkflowProgress({
   // Add service request creation
   if (request.created_by && request.created_date) {
     events.push({
-      title: "Service Request Created",
-      description: `Request initiated by ${formatName(request.created_by)}`,
+      title: t("service_request_created"),
+      description: t("request_initiated_by", {
+        name: formatName(request.created_by),
+      }),
       timestamp: request.created_date,
       status: "completed",
     });
@@ -126,8 +144,10 @@ export function WorkflowProgress({
   request.specimens?.forEach((specimen: SpecimenRead) => {
     if (specimen.collection?.collected_date_time) {
       events.push({
-        title: "Specimen Collected",
-        description: `${specimen.specimen_type?.display || "Specimen"} collected`,
+        title: t("specimen_collected"),
+        description: t("specimen_collected_description", {
+          specimen: specimen.specimen_type?.display || t("specimen"),
+        }),
         timestamp: specimen.collection.collected_date_time,
         status: "completed",
       });
@@ -139,9 +159,11 @@ export function WorkflowProgress({
     specimen.processing.forEach((processing) => {
       if (processing.time_date_time) {
         events.push({
-          title: "Specimen Processed",
-          description: `${specimen.specimen_type?.display || "Specimen"} processed`,
-          additional_info: `${processing.method?.display || "Method"}`,
+          title: t("specimen_processed"),
+          description: t("specimen_processed_description", {
+            specimen: specimen.specimen_type?.display || t("specimen"),
+          }),
+          additional_info: processing.method?.display || t("method"),
           timestamp: processing.time_date_time,
           status: "completed",
         });
@@ -149,35 +171,39 @@ export function WorkflowProgress({
     });
   });
 
-  // Add diagnostic report events
   request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
+    const diagnosticReportName =
+      report.code?.display ?? report.service_request?.title ?? t("diagnostic");
     events.push({
-      title: "Diagnostic Report Created",
-      description: `${request.title} diagnostic report created`,
+      title: t("diagnostic_report_created"),
+      description: t("diagnostic_report_created_description", {
+        name: diagnosticReportName,
+      }),
       timestamp: report.created_date,
       status: "completed",
     });
-  });
-
-  request.diagnostic_reports?.forEach((report: DiagnosticReportRead) => {
     events.push({
       title:
         report.status === "final"
-          ? "Diagnostic Report Approved"
-          : "Diagnostic Report In Progress",
+          ? t("diagnostic_report_approved")
+          : t("diagnostic_report_in_progress"),
       description:
         report.status === "final"
-          ? `Report approved and finalized`
-          : `Report created and pending approval`,
+          ? t("diagnostic_report_approved_description", {
+              name: diagnosticReportName,
+            })
+          : t("diagnostic_report_in_progress_description", {
+              name: diagnosticReportName,
+            }),
       timestamp:
         report.status === "final" ? report.modified_date : report.created_date,
       status: report.status === "final" ? "completed" : "in_progress",
     });
   });
 
-  // Sort events by timestamp
+  // Sort events by timestamp (latest first)
   events.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
   if (variant === "sheet") {

@@ -59,10 +59,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
-import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
+import {
+  DiagnosticReportForm,
+  type SavedReportSignal,
+} from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
 import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
-import { ObservationHistorySheet } from "./components/ObservationHistorySheet";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
 import { SpecimenForm } from "./components/SpecimenForm";
 import { SpecimenHistorySheet } from "./components/SpecimenHistorySheet";
@@ -96,6 +98,8 @@ export default function ServiceRequestShow({
   const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
+  const [expandedReport, setExpandedReport] =
+    useState<SavedReportSignal | null>(null);
   const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
     useState<SpecimenDefinitionRead | null>(null);
 
@@ -322,11 +326,18 @@ export default function ServiceRequestShow({
     }
   };
 
-  const isFinal =
-    request?.diagnostic_reports?.[0]?.status === DiagnosticReportStatus.final;
+  const hasFinalizedReport = diagnosticReports.some(
+    (report) => report.status === DiagnosticReportStatus.final,
+  );
+
+  const totalReports = diagnosticReports.length;
+  const pendingReports = diagnosticReports.filter(
+    (report) => report.status !== DiagnosticReportStatus.final,
+  ).length;
+  const hasPendingReports = pendingReports > 0;
 
   const canMarkAsComplete =
-    isFinal ||
+    hasFinalizedReport ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
   const canShowCompleteCta =
     !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
@@ -351,17 +362,17 @@ export default function ServiceRequestShow({
               {canShowCompleteCta && (
                 <div className="flex items-center gap-2">
                   <>
-                    {isFinal && (
+                    {hasFinalizedReport && (
                       <Button
                         variant="primary"
                         className="font-semibold"
                         onClick={() =>
                           navigate(
-                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
+                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/service_request/${serviceRequestId}/diagnostic_reports/print`,
                           )
                         }
                       >
-                        {t("view_report")}
+                        {t("view_full_report")}
                         <ShortcutBadge actionId="view-report" />
                       </Button>
                     )}
@@ -568,57 +579,31 @@ export default function ServiceRequestShow({
 
           <div className="space-y-3 pt-5">
             {observationRequirements.length > 0 && (
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">{t("test_results")}</h2>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <ObservationHistorySheet
-                      patientId={request.encounter.patient.id}
-                      diagnosticReportId={
-                        request.diagnostic_reports[0]?.id || ""
-                      }
-                    >
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        {t("view_observation_history")}
-                      </DropdownMenuItem>
-                    </ObservationHistorySheet>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <h2 className="text-xl font-semibold">{t("test_results")}</h2>
             )}
-            {(!diagnosticReports.length ||
-              diagnosticReports[0]?.status !==
-                DiagnosticReportStatus.final) && (
-              <DiagnosticReportForm
-                patientId={request.encounter.patient.id}
-                facilityId={facilityId}
-                serviceRequestId={serviceRequestId}
-                observationDefinitions={observationRequirements}
-                diagnosticReports={diagnosticReports}
-                activityDefinition={activityDefinition}
-                specimens={request.specimens || []}
-                disableEdit={disableEdit}
-              />
-            )}
-          </div>
 
+            <DiagnosticReportForm
+              patientId={request.encounter.patient.id}
+              facilityId={facilityId}
+              serviceRequestId={serviceRequestId}
+              observationDefinitions={observationRequirements}
+              diagnosticReports={diagnosticReports}
+              activityDefinition={activityDefinition}
+              specimens={request.specimens || []}
+              disableEdit={disableEdit}
+              serviceRequestStatus={request.status}
+              onReportSaved={setExpandedReport}
+            />
+          </div>
           {diagnosticReports.length > 0 && (
             <DiagnosticReportReview
               facilityId={facilityId}
               patientId={request.encounter.patient.id}
-              serviceRequestId={serviceRequestId}
               diagnosticReports={diagnosticReports}
+              observationDefinitions={observationRequirements}
+              serviceRequestId={serviceRequestId}
               disableEdit={disableEdit}
+              expandedReport={expandedReport}
             />
           )}
         </div>
@@ -638,7 +623,12 @@ export default function ServiceRequestShow({
                   {t("complete_service_request")}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {t("complete_service_request_help_text")}
+                  {hasPendingReports
+                    ? t("reports_pending_final_review", {
+                        pending: pendingReports,
+                        total: totalReports,
+                      })
+                    : t("complete_service_request_help_text")}
                 </p>
               </div>
               <Button
@@ -648,7 +638,7 @@ export default function ServiceRequestShow({
                   setCompletionNote(request.note ?? "");
                   setIsCompleteDialogOpen(true);
                 }}
-                disabled={isCompletingServiceRequest}
+                disabled={isCompletingServiceRequest || hasPendingReports}
               >
                 {t("mark_as_complete")}
                 <ShortcutBadge actionId="mark-as-complete" />

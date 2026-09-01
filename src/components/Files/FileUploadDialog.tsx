@@ -23,6 +23,7 @@ export default function FileUploadDialog({
   fileUpload,
   associatingId,
   type,
+  instanceId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,9 +35,11 @@ export default function FileUploadDialog({
     | "encounter"
     | "diagnostic_report"
     | "service_request";
+  instanceId?: string;
 }) {
   const { t } = useTranslation();
   const [isPdf, setIsPdf] = useState(false);
+  const idPrefix = instanceId ? `${instanceId}-` : "";
 
   const handleDialogClose = (open: boolean) => {
     if (!open) {
@@ -108,7 +111,7 @@ export default function FileUploadDialog({
               ))}
               <div>
                 <Label
-                  htmlFor="upload-file-name-0"
+                  htmlFor={`${idPrefix}upload-file-name-0`}
                   className="block text-sm font-medium text-gray-700"
                 >
                   {t("enter_file_name")}
@@ -116,7 +119,7 @@ export default function FileUploadDialog({
                 <Input
                   name="file_name_0"
                   type="text"
-                  id="upload-file-name-0"
+                  id={`${idPrefix}upload-file-name-0`}
                   required
                   value={fileUpload.fileNames[0] || ""}
                   disabled={fileUpload.uploading}
@@ -186,7 +189,7 @@ export default function FileUploadDialog({
                       <Input
                         name={`file_name_${index}`}
                         type="text"
-                        id={`upload-file-name-${index}`}
+                        id={`${idPrefix}upload-file-name-${index}`}
                         required
                         value={fileUpload.fileNames[index] || ""}
                         disabled={fileUpload.uploading}
@@ -212,13 +215,16 @@ export default function FileUploadDialog({
         {fileUpload.files.length > 1 && (
           <div className="flex items-center gap-2 mt-4">
             <Checkbox
-              id={`file_upload_${type}`}
+              id={`${idPrefix}combine_files_pdf_${type}`}
               checked={isPdf}
               onCheckedChange={(checked: boolean) => setIsPdf(checked)}
               disabled={fileUpload.uploading}
               className="cursor-pointer"
             />
-            <Label htmlFor={`file_upload_${type}`} className="cursor-pointer">
+            <Label
+              htmlFor={`${idPrefix}combine_files_pdf_${type}`}
+              className="cursor-pointer"
+            >
               {t("combine_files_pdf")}
             </Label>
           </div>
@@ -237,7 +243,7 @@ export default function FileUploadDialog({
             variant="outline_primary"
             onClick={() => fileUpload.handleFileUpload(associatingId, isPdf)}
             disabled={fileUpload.uploading}
-            id="upload_file_button"
+            id={`${idPrefix}upload_file_button`}
           >
             <CareIcon icon="l-check" className="mr-1" />
             {t("upload")}
