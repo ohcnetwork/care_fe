@@ -286,7 +286,12 @@ const ScheduleTemplateEditor = ({
                 {template.is_public && !field.value && (
                   <Callout
                     variant="warning"
-                    badge={<Info className="size-4 shrink-0" />}
+                    badge={
+                      <>
+                        <Info className="size-4 shrink-0" />
+                        <span className="sr-only">{t("note")}</span>
+                      </>
+                    }
                   >
                     <p className="text-sm">
                       {t("template_visibility_change_warning")}
@@ -639,7 +644,15 @@ const NewAvailabilityCard = ({
     if (!slotsPerSession || !tokenDuration) return null;
 
     return (
-      <Callout variant="alert" badge={<Info className="size-4 shrink-0" />}>
+      <Callout
+        variant="alert"
+        badge={
+          <>
+            <Info className="size-4 shrink-0" />
+            <span className="sr-only">{t("info")}</span>
+          </>
+        }
+      >
         <Trans
           i18nKey="schedule_slots_allocation_callout"
           values={{
