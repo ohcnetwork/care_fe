@@ -27,7 +27,8 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
-import TagBadge from "@/components/Tags/TagBadge";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
@@ -38,7 +39,6 @@ import locationApi from "@/types/location/locationApi";
 import LocationSheet from "./LocationSheet";
 import { SettingsLocationCard as LocationCard } from "./components/LocationCard";
 import { LocationTable } from "./components/LocationTable";
-import { LocationTags } from "./components/LocationTags";
 
 interface Props {
   id: string;
@@ -225,9 +225,7 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
-                  {location?.tags?.map((tag) => (
-                    <TagBadge key={tag.id} tag={tag} className="text-xs" />
-                  ))}
+                  <TagBadges tags={location?.tags} />
                 </>
               )}
             </div>
@@ -255,9 +253,19 @@ export default function LocationView({
                     </Button>
                   )}
                 {!isLocationLoading && location && (
-                  <LocationTags
-                    location={location}
+                  <TagAssignmentSheet
+                    entityType="location"
+                    entityId={location.id}
                     facilityId={facilityId}
+                    currentTags={location.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["locations", facilityId],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["location", facilityId],
+                      });
+                    }}
                     trigger={
                       <Button variant="outline" className="w-full md:w-auto">
                         <Hash className="size-4 mr-2" />

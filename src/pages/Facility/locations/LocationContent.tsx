@@ -26,7 +26,7 @@ import PaginationComponent from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
-import { LocationTagBadges } from "@/components/Location/LocationTagBadges";
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import query from "@/Utils/request/query";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
@@ -151,7 +151,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
             {isOccupied ? t("occupied") : t("available")}
           </div>
         </div>
-        <LocationTagBadges className="flex" tags={location.tags} />
+        <TagBadges className="flex" tags={location.tags} />
       </div>
 
       <div className="h-full">
@@ -207,7 +207,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
           <span className="capitalize text-gray-600">
             {t(`location_form__${location.form}`)}
           </span>
-          <LocationTagBadges tags={location.tags} />
+          <TagBadges tags={location.tags} />
         </div>
       </div>
     </div>
@@ -335,9 +335,7 @@ export default function LocationContent({
               <h2 className="text-lg font-semibold whitespace-nowrap">
                 {selectedLocation ? selectedLocation.name : t("locations")}
               </h2>
-              {selectedLocation && (
-                <LocationTagBadges tags={selectedLocation.tags} />
-              )}
+              {selectedLocation && <TagBadges tags={selectedLocation.tags} />}
             </div>
           </div>
           <div className="w-full sm:w-72 shrink-0">

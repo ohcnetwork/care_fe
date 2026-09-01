@@ -26,12 +26,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-import { LocationTags } from "./LocationTags";
 
 interface Props {
   location: LocationRead;
@@ -140,7 +139,20 @@ export function SettingsLocationCard({
                     {t("has_child_locations")}
                   </Badge>
                 )}
-                <LocationTags location={location} facilityId={facilityId} />
+                <TagAssignmentSheet
+                  entityType="location"
+                  entityId={location.id}
+                  facilityId={facilityId}
+                  currentTags={location.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["locations", facilityId],
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ["location", facilityId],
+                    });
+                  }}
+                />
               </div>
             </div>
 

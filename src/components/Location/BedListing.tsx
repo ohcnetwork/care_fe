@@ -13,7 +13,7 @@ import {
   BedUnavailableSelected,
   BedUnavailableUnselected,
 } from "@/CAREUI/icons/CustomIcons";
-import { LocationTagBadges } from "@/components/Location/LocationTagBadges";
+import { TagBadges } from "@/components/Tags/TagBadges";
 import { LocationRead } from "@/types/location/location";
 import { buildLocationPath } from "@/types/location/utils";
 
@@ -99,10 +99,7 @@ export function BedListing({
                 )}
               </div>
               <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
-              <LocationTagBadges
-                tags={bed.tags}
-                className="justify-center mt-1 px-1"
-              />
+              <TagBadges tags={bed.tags} className="justify-center mt-1 px-1" />
               {showParent && segments.length > 1 && (
                 <Tooltip>
                   <TooltipTrigger asChild>

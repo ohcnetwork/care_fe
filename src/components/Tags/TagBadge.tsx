@@ -23,6 +23,7 @@ export default function TagBadge({
   tag,
   className,
   hierarchyDisplay = false,
+  size = "sm",
   variant = "secondary",
   ...props
 }: TagBadgeProps) {
@@ -33,6 +34,7 @@ export default function TagBadge({
       style={{
         ...getTagColorStyles(tag),
       }}
+      size={size}
       className={cn("capitalize", className)}
       {...props}
     >

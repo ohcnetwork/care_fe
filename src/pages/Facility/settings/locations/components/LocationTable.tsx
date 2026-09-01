@@ -32,12 +32,11 @@ import {
 } from "@/components/ui/tooltip";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-
-import { LocationTags } from "./LocationTags";
 
 // Animated version of TableRow
 const AnimatedTableRow = motion.create(TableRow);
@@ -187,7 +186,20 @@ export function LocationTable({
                   </Badge>
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <LocationTags location={location} facilityId={facilityId} />
+                  <TagAssignmentSheet
+                    entityType="location"
+                    entityId={location.id}
+                    facilityId={facilityId}
+                    currentTags={location.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["locations", facilityId],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["location", facilityId],
+                      });
+                    }}
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <div
