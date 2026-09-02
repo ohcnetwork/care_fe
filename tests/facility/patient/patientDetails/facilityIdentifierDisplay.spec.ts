@@ -22,6 +22,10 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 }
 
 test.describe("Facility Patient Identifier - Display", () => {
+  // Both tests share one identifier created in beforeAll; run them in a single
+  // worker so parallel workers don't race on the same patient's identifiers.
+  test.describe.configure({ mode: "serial" });
+
   let facilityId: string;
   let patientId: string;
   let encounterId: string;
