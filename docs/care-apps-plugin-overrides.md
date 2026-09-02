@@ -62,13 +62,16 @@ code. It does not remove the registered wrapper from the React component tree.
 
 ### Supported Export Forms
 
-The plugin can only auto-register components exported in these three forms:
+The plugin can only auto-register components exported in these forms:
 
 - `export function Foo(…) { … }` — named function declaration
+- `export default function Foo(…) { … }` — same, as the module default (the
+  function still needs a PascalCase name)
 - `export const Foo = …` — single-declarator variable whose initializer is an
   arrow function, a function expression, or a call that contains JSX (except
   `memo(…)` / `forwardRef(…)`, which are skipped on purpose)
-- `export default Foo` — default export assignment of a locally declared component
+- `export default Foo` — default export of a locally declared component
+  (`function Foo` or `const Foo` in the same file, then `export default Foo`)
 
 The following forms are **not** transformable and are silently skipped during registration:
 
