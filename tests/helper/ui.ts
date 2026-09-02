@@ -106,11 +106,10 @@ export async function selectFromRequirements(
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      // Wait for the debounced search to settle before reading options
-      const searching = scope.getByText(/searching/i);
-      if (await searching.isVisible().catch(() => false)) {
-        await searching.waitFor({ state: "hidden" });
-      }
+      // Debounced search (~500ms) clears the current options while loading;
+      // wait for that transition so options reflect the query, not the
+      // pre-search list.
+      await expect(scope.getByRole("option")).toHaveCount(0);
     }
   }
 
@@ -179,7 +178,8 @@ export async function selectFromValueSet(
     const starredTab = scope.getByRole("tab", { name: /starred/i });
     if (await starredTab.isVisible().catch(() => false)) {
       await starredTab.click();
-      await expect(starredTab).toHaveAttribute("data-state", "active");
+      // Wait for the starred panel content to mount, not just the tab state.
+      await scope.getByRole("tabpanel").waitFor({ state: "visible" });
     }
   }
 
@@ -275,11 +275,10 @@ export async function selectFromCommand(
       }
     }
 
-    // Wait for the debounced search to settle before reading options
-    const searching = scope.getByText(/searching/i);
-    if (await searching.isVisible().catch(() => false)) {
-      await searching.waitFor({ state: "hidden" });
-    }
+    // Debounced search (~500ms) clears the current options while loading;
+    // wait for that transition so options reflect the query, not the
+    // pre-search list.
+    await expect(scope.getByRole("option")).toHaveCount(0);
   }
 
   // Wait for options to load
