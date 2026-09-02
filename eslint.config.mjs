@@ -238,6 +238,18 @@ const config = [
     },
     rules: {
       ...playwright.configs["flat/recommended"].rules,
+      // Forward gate (no existing usages): disallow test-id selectors in favour
+      // of role/label/text locators.
+      "playwright/no-restricted-locators": [
+        "error",
+        [
+          {
+            type: "getByTestId",
+            message:
+              "Avoid test IDs — use role/label/text locators (getByRole, getByLabel, getByText).",
+          },
+        ],
+      ],
       // Anti-flakiness rules with existing usages: baselined as warn here,
       // migrated then flipped to error in follow-up PRs (QA-39 stack).
       "playwright/no-networkidle": "warn",
