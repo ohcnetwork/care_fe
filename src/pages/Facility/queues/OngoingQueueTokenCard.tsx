@@ -261,42 +261,64 @@ function OngoingQueueTokenCardInner({
 
   if (isMobile) {
     return (
-      <Drawer>
-        <DrawerTrigger asChild>
-          <TokenTrigger token={token} facilityId={facilityId} />
-        </DrawerTrigger>
-        <DrawerContent className="flex flex-col items-center px-3 pb-2">
-          <div className="w-full overflow-y-auto max-h-[80dvh]">
-            <TokenContent
-              facilityId={facilityId}
-              token={token}
-              setShowCancelDialog={setShowCancelDialog}
-              setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
-              showCancelDialog={showCancelDialog}
-              showEnteredInErrorDialog={showEnteredInErrorDialog}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <TokenTrigger token={token} facilityId={facilityId} />
+          </DrawerTrigger>
+          <DrawerContent className="flex flex-col items-center px-3 pb-2">
+            <div className="w-full overflow-y-auto max-h-[80dvh]">
+              <TokenContent
+                facilityId={facilityId}
+                token={token}
+                setShowCancelDialog={setShowCancelDialog}
+                setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+        <CancelTokenDialog
+          open={showCancelDialog}
+          onOpenChange={setShowCancelDialog}
+          token={token}
+        />
+        <EnteredInErrorDialog
+          open={showEnteredInErrorDialog}
+          onOpenChange={setShowEnteredInErrorDialog}
+          facilityId={facilityId}
+          token={token}
+        />
+      </>
     );
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <TokenTrigger token={token} facilityId={facilityId} />
-      </DialogTrigger>
-      <DialogContent className="flex flex-col items-center px-3 pb-2 max-h-[90dvh] overflow-y-auto">
-        <TokenContent
-          facilityId={facilityId}
-          token={token}
-          setShowCancelDialog={setShowCancelDialog}
-          setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
-          showCancelDialog={showCancelDialog}
-          showEnteredInErrorDialog={showEnteredInErrorDialog}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog>
+        <DialogTrigger asChild>
+          <TokenTrigger token={token} facilityId={facilityId} />
+        </DialogTrigger>
+        <DialogContent className="flex flex-col items-center px-3 pb-2 max-h-[90dvh] overflow-y-auto">
+          <TokenContent
+            facilityId={facilityId}
+            token={token}
+            setShowCancelDialog={setShowCancelDialog}
+            setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+          />
+        </DialogContent>
+      </Dialog>
+      <CancelTokenDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        token={token}
+      />
+      <EnteredInErrorDialog
+        open={showEnteredInErrorDialog}
+        onOpenChange={setShowEnteredInErrorDialog}
+        facilityId={facilityId}
+        token={token}
+      />
+    </>
   );
 }
 
@@ -501,15 +523,11 @@ const TokenContent = ({
   facilityId,
   setShowCancelDialog,
   setShowEnteredInErrorDialog,
-  showCancelDialog,
-  showEnteredInErrorDialog,
 }: {
   token: TokenRead;
   facilityId: string;
   setShowCancelDialog: (open: boolean) => void;
   setShowEnteredInErrorDialog: (open: boolean) => void;
-  showCancelDialog: boolean;
-  showEnteredInErrorDialog: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -767,17 +785,6 @@ const TokenContent = ({
           action={servicePointAction}
         />
       </div>
-      <CancelTokenDialog
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        token={token}
-      />
-      <EnteredInErrorDialog
-        open={showEnteredInErrorDialog}
-        onOpenChange={setShowEnteredInErrorDialog}
-        facilityId={facilityId}
-        token={token}
-      />
     </div>
   );
 };

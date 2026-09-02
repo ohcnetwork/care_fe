@@ -34,8 +34,12 @@ export function useQueueServicePoints() {
 
   const allServicePoints = subQueues?.results;
 
+  const storedServicePointIds = assignedServicePoints[servicPointKey];
+
   const assignedServicePointIds =
-    assignedServicePoints[servicPointKey] ??
+    storedServicePointIds?.filter((id) =>
+      allServicePoints?.some((subQueue) => subQueue.id === id),
+    ) ??
     allServicePoints?.map((subQueue) => subQueue.id) ??
     [];
 
