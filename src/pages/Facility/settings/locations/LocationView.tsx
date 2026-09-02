@@ -225,7 +225,7 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
-                  <TagBadges tags={location?.tags} size="xs" />
+                  <TagBadges tags={location?.tags ?? []} size="xs" />
                 </>
               )}
             </div>

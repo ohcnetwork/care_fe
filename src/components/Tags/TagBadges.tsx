@@ -6,7 +6,7 @@ interface TagBadgesProps extends Omit<
   React.ComponentProps<typeof TagBadge>,
   "tag" | "className"
 > {
-  tags?: TagConfig[];
+  tags: TagConfig[] | null;
   className?: string;
   badgeClassName?: string;
 }
