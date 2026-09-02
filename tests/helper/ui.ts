@@ -601,7 +601,6 @@ export async function applyTableFilter(
   await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
 
   await selectFromFilterSelect(page, filterLabel, filterValue);
-  await page.waitForLoadState("networkidle");
 
   const tableBody = page.locator('[data-slot="table-body"]');
   await tableBody.waitFor({ state: "visible" });

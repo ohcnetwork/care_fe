@@ -258,7 +258,7 @@ const config = [
       ],
       // Anti-flakiness rules with existing usages: baselined as warn here,
       // migrated then flipped to error in follow-up PRs (QA-39 stack).
-      "playwright/no-networkidle": "warn",
+      "playwright/no-networkidle": "error",
       "playwright/no-nth-methods": "warn",
       "playwright/no-wait-for-timeout": "error",
       "playwright/no-force-option": "error",

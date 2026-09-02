@@ -70,28 +70,29 @@ test.describe("User Deletion Access Control", () => {
 
       // Wait for successful login
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
-      await page.waitForLoadState("networkidle");
 
       // Navigate directly to facility users page
       const facilityId = getFacilityId();
       await page.goto(`/facility/${facilityId}/users`);
-      await page.waitForLoadState("networkidle");
 
-      // Check if staff can see the users list at all
+      // Check if staff can see the users list at all. waitFor actually waits
+      // for the page to render (previously covered by networkidle); a timeout
+      // means staff cannot see the list.
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
         .first();
       const canSeeUsers = await seeDetailsButton
-        .isVisible({ timeout: 10000 })
+        .waitFor({ state: "visible", timeout: 10000 })
+        .then(() => true)
         .catch(() => false);
 
       if (!canSeeUsers) {
         // Staff cannot access users list — they definitely cannot delete users
         // This is a valid security outcome
-        const deleteButtonCount = await page
-          .getByRole("button", { name: "Delete Account" })
-          .count();
-        expect(deleteButtonCount).toBe(0);
+        const deleteButtonCount = page.getByRole("button", {
+          name: "Delete Account",
+        });
+        await expect(deleteButtonCount).toHaveCount(0);
         return;
       }
 
@@ -101,10 +102,10 @@ test.describe("User Deletion Access Control", () => {
       const deleteButton = page.getByRole("button", { name: "Delete Account" });
       await expect(deleteButton).toBeHidden();
 
-      const deleteButtonCount = await page
-        .getByRole("button", { name: "Delete Account" })
-        .count();
-      expect(deleteButtonCount).toBe(0);
+      const deleteButtonCount = page.getByRole("button", {
+        name: "Delete Account",
+      });
+      await expect(deleteButtonCount).toHaveCount(0);
     });
   });
 });
