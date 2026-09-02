@@ -1,6 +1,9 @@
 ## Plugin Discovery & Setup
 
-- Build-time plugins (every Vite command: `dev`, `build`, preview): `REACT_ENABLED_APPS`.
+- Build-time plugins: `REACT_ENABLED_APPS` is read when Vite **builds** the
+  bundle (`dev` and `build`). `vite preview` serves that already-built bundle;
+  changing the env var only at preview start does not change which plugins are
+  in it.
 - Format: `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
 - Vite `command === "serve"` (includes `npm run dev` and `npm run local` / `vite --mode docker`; not `vite build`): also auto-discovers `apps/*/src/manifest.tsx` and loads that source through the host Vite graph. Local overwrites env only when the directory name equals the env plugin `name` (the repo). A mismatched folder is a second plugin, not a replacement.
 
@@ -96,9 +99,12 @@ re-scan `apps/` into the page.
   If it does not, the `@/` import is left unchanged and Vite's host alias `@` → `src/`
   resolves it (plugin file wins, else host file). That is two steps, not one lookup.
   Plugins can use the same `@/*` convention as the host while living under `apps/`.
-- **`/local-plugins/<slug>` asset serving:** a dev middleware serves files from
-  `apps/<slug>/public/` at `/local-plugins/<slug>/...` (path-traversal guarded, `no-store`),
-  so plugin static assets resolve without a build step.
+- **`/local-plugins/<slug>` asset serving:** in host `vite serve`, files in
+  `apps/<slug>/public/` are available at `/local-plugins/<slug>/...` (not cached).
+  Example: `apps/care_hello_fe/public/logo.png` →
+  `/local-plugins/care_hello_fe/logo.png`. A request whose **file** path would
+  leave that folder is rejected. The **slug** in the URL is not checked against
+  real `apps/` folders.
 - **Tailwind:** the host scans `./apps/**` via the `content:` array in
   `tailwind.config.js` (wired into the v4 pipeline by `@config "../../tailwind.config.js"`
   in `src/style/index.css`), and the plugin's own `@import "tailwindcss"` lines are stripped

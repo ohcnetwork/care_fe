@@ -7,12 +7,18 @@ components overrideable by Care Apps.
 
 - Let Care Apps replace selected core React components.
 - Keep core component call sites unchanged.
-- Preserve context-aware overrides (`page`, and other `OverrideCondition`
-  keys). `stackPath` exists in the runtime but parent matching does not work
-  in CARE today — see Stack-Aware Overrides below.
 - Avoid registering every exported component when deployments only need a small
   override surface.
 - Keep transformed-code debugging usable with source maps.
+
+In CARE as wired today, only `condition.page` matches (derived from the URL).
+`userRole`, `facilityType`, and `custom` never match, because
+`OverrideProvider` is not given a `context` prop. Parent-and-child
+`stackPath` values do not match; a leaf-only path such as
+`["ThatComponent"]` can. Do not rely on parent `stackPath` in a Care App.
+Those fields still exist on the types and in the resolver; they are simply
+unpopulated in `App.tsx` and on `register()` wrappers. See Stack-Aware
+Overrides below and `care-apps-override-architecture.md`.
 
 ## Build-Time Registration
 
@@ -20,7 +26,9 @@ Core components are registered by the Vite plugin in
 `plugins/autoRegisterComponents.ts`.
 
 The plugin scans `src/**/*.tsx`, excluding `src/lib/override`, and transforms
-exported PascalCase React components into registered components.
+exported PascalCase React components into registered components. Which names
+are transformed is still controlled by `REACT_MFE_REGISTERED_COMPONENTS`
+(empty or unset wraps nothing). See Registration Allowlist.
 
 Example source:
 
@@ -57,7 +65,9 @@ code. It does not remove the registered wrapper from the React component tree.
 The plugin can only auto-register components exported in these three forms:
 
 - `export function Foo(…) { … }` — named function declaration
-- `export const Foo = …` — single-declarator variable with a component initializer (arrow function or function expression)
+- `export const Foo = …` — single-declarator variable whose initializer is an
+  arrow function, a function expression, or a call that contains JSX (except
+  `memo(…)` / `forwardRef(…)`, which are skipped on purpose)
 - `export default Foo` — default export assignment of a locally declared component
 
 The following forms are **not** transformable and are silently skipped during registration:
@@ -78,11 +88,11 @@ export first, then **skips** `export default Foo` (the name is already
 transformed).
 
 ```
-named hole    { Foo }     →  wrapped (`register()`)
-default hole  import Foo  →  still the original
+import { Foo } from "…"      →  wrapped (`register()`)
+import Foo from "…"          →  still the original
 ```
 
-Call sites must import the hole that was wrapped. A **default** import of such a
+Call sites must use the import that was wrapped. A **default** import of such a
 file will not be overrideable via the allowlist. Fixes:
 
 - One export only, matching the import (`export function Foo` + `{ Foo }`, or
@@ -105,8 +115,12 @@ REACT_MFE_REGISTERED_COMPONENTS=BookAppointmentDetails,Login,AuthHero
 
 Behavior:
 
-- Empty or unset registers **no** components (no wrapper overhead, no overrides possible).
-- `*` registers every exported component.
+- Empty or unset auto-registers **no** components (no wrapper overhead for those
+  exports). Hand-written `register()` still works; those components remain
+  overrideable.
+- `*` auto-registers every **eligible** PascalCase React component in a
+  supported export form (same skips as Supported Export Forms: re-exports,
+  multi-declarator exports, `memo`, `forwardRef`, and other unlisted shapes).
 - A comma-separated list registers only those exact component names.
 - Unknown names fail the Vite build/dev server startup.
 - Duplicate exported component names are still rejected so registration keys stay
@@ -133,10 +147,11 @@ overrides: [
 ```
 
 `PluginEngine` loads enabled app manifests, reads their `overrides`, and
-calls `addOverride`. That only matters if the **call site imports the
-`register()` wrapper**. A registry entry with no wrapper on the page is a
-no-op. At render time the wrapper chooses the base component or the
-highest-priority matching override.
+calls `addOverride`. That writes to the registry. The screen only changes if
+the call site renders the **auto-wrapped export** for that name. If the
+component was never wrapped, or no wrapper is mounted, the stored override
+does not change the UI. At render time the wrapper chooses the base
+component or the highest-priority matching override.
 
 This keeps dynamic plugin loading safe: overrides can arrive after the app has
 started, and mounted registered components can re-render against the updated
@@ -144,9 +159,10 @@ override registry.
 
 ## Stack-Aware Overrides
 
-`condition.stackPath` is a **filter** on the live render stack (parent
-`register()` wrappers above this component). It is not the URL — that is
-`page`. The Care App only *asks* for a match; it does not fill the stack.
+`stackPath` is not the page URL. That is `page`. It is a list of registered
+component names. At render time CARE checks that list against the live stack:
+this wrapper and the `register()` wrappers above it. The Care App only writes
+the list. Host wrappers are what record names on the stack.
 
 ```ts
 condition: {
@@ -154,25 +170,27 @@ condition: {
 }
 ```
 
-You would expect: override `BookAppointmentDetails` only when it sits under
-`AppointmentPage`. **That does not match in CARE today**, even if both are
-registered and the React tree is correct.
+That list means: override `BookAppointmentDetails` only when it is rendered
+under `AppointmentPage`. **CARE does not match this today**, even if both
+names are registered and the React tree is exactly that.
 
-Why: a wrapper pushes its name onto the stack only if **that** component
-has a `stackPath` override. `AppointmentPage` usually has none, so it never
-pushes. Allowlisting it or calling `register()` by hand is not enough.
+A wrapper writes its name onto the stack only when **that** name has a
+`stackPath` override. `AppointmentPage` almost never does, so it never
+writes its name. Putting it on the allowlist, or calling `register()` by
+hand, does not change that.
 
-`stackPath: ["BookAppointmentDetails"]` can match — that leaf has
-`stackPath`, so it pushes itself. Until parents push too, use `page` or
-omit `condition`.
+A one-name list can work: `stackPath: ["BookAppointmentDetails"]`. That
+leaf has the `stackPath` override, so it writes itself, and the list
+matches. Until parent wrappers also write their names, use `page` or omit
+`condition`.
 
 ## Performance Model
 
 Only registered rendered component instances pay the wrapper cost.
 
-Measured synthetic production-mode overhead for an inactive registered wrapper is
-roughly sub-microsecond per rendered instance. This is negligible for ordinary
-page components, but can compound in dense lists or tables.
+An inactive registered wrapper is cheap for ordinary page components. The extra
+React function still runs on every render of that instance, so the cost can
+compound in dense lists or tables.
 
 The allowlist is the main performance control:
 
