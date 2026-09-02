@@ -54,6 +54,7 @@ test.describe("Facility Location Tags", () => {
           .locator("li[data-sonner-toast]")
           .getByText("Tags updated successfully"),
       ).toBeVisible();
+      await page.keyboard.press("Escape");
     });
 
     await test.step("Verify tag is shown on the location", async () => {
