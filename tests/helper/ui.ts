@@ -106,7 +106,11 @@ export async function selectFromRequirements(
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      await page.waitForTimeout(500); // Wait for debounced search
+      // Wait for the debounced search to settle before reading options
+      const searching = scope.getByText(/searching/i);
+      if (await searching.isVisible().catch(() => false)) {
+        await searching.waitFor({ state: "hidden" });
+      }
     }
   }
 
@@ -126,9 +130,6 @@ export async function selectFromRequirements(
   // Wait for the plus button and click it
   await plusButton.waitFor({ state: "visible" });
   await plusButton.click();
-
-  // Wait for selection to register (multi-select, so it stays open)
-  await page.waitForTimeout(300);
 }
 
 interface SelectFromValueSetOptions {
@@ -178,7 +179,7 @@ export async function selectFromValueSet(
     const starredTab = scope.getByRole("tab", { name: /starred/i });
     if (await starredTab.isVisible().catch(() => false)) {
       await starredTab.click();
-      await page.waitForTimeout(200);
+      await expect(starredTab).toHaveAttribute("data-state", "active");
     }
   }
 
@@ -265,16 +266,19 @@ export async function selectFromCommand(
     if (isInputVisible) {
       await input.fill("");
       await input.fill(search);
-      // Wait for search results to update
-      await page.waitForTimeout(500);
     } else {
       // Fallback for custom inputs
       const placeholderInput = scope.getByPlaceholder(/search/i).first();
       if (await placeholderInput.isVisible().catch(() => false)) {
         await placeholderInput.fill("");
         await placeholderInput.fill(search);
-        await page.waitForTimeout(500);
       }
+    }
+
+    // Wait for the debounced search to settle before reading options
+    const searching = scope.getByText(/searching/i);
+    if (await searching.isVisible().catch(() => false)) {
+      await searching.waitFor({ state: "hidden" });
     }
   }
 

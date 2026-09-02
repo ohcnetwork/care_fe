@@ -260,8 +260,8 @@ const config = [
       // migrated then flipped to error in follow-up PRs (QA-39 stack).
       "playwright/no-networkidle": "warn",
       "playwright/no-nth-methods": "warn",
-      "playwright/no-wait-for-timeout": "warn",
-      "playwright/no-force-option": "warn",
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/no-force-option": "error",
       // General correctness/style rules with existing violations: baselined as
       // warn so CI stays green; clean up incrementally.
       "playwright/expect-expect": "warn",
