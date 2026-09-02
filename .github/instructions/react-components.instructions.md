@@ -29,8 +29,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 - Badge usage: Display patient status, facility capacity, medication dosage with color variants
 
 ## Patient Name Display
-Whenever a patient name (`patient.name` from `PatientRead`) is rendered to the user, it MUST appear in title case (first letter of each word capitalized). Apply this consistently everywhere patient names surface.
-- Preferred: add the Tailwind `capitalize` class to the element that renders the name, e.g. `<span className="capitalize">{patient.name}</span>` or `className="capitalize"` on the existing rendering element. This handles casing via CSS and keeps the stored value untouched.
+ Whenever a patient name (`patient.name` from `PatientRead`) is rendered to the user, it MUST have Tailwind `capitalize` applied (CSS `text-transform: capitalize`) so the first letter of each word is uppercased (it does not force the remaining letters to lowercase).
 - Do NOT mutate or pre-transform the stored name for display (avoid ad-hoc `toUpperCase()`/`properCase()` on patient names) — rely on the `capitalize` class so the underlying data stays intact.
 - `patient.name` is a single free-text field. For user/practitioner names (first/last name objects) use `formatName()` from `@/Utils/utils`, not this rule.
 

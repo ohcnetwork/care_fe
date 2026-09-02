@@ -70,7 +70,7 @@ Medical applications require enhanced accessibility for clinical environments:
 - Performance: Sub-100ms response times for emergency medical workflows
 
 ### Patient Name Display
-Whenever a patient name (`patient.name` from `PatientRead`) is rendered, show it in title case (first letter of each word capitalized).
+Whenever a patient name (`patient.name` from `PatientRead`) is rendered, apply Tailwind `capitalize` (CSS `text-transform: capitalize`) so the first letter of each word is uppercased (it does not force the remaining letters to lowercase).
 - Preferred: add the Tailwind `capitalize` class to the element rendering the name, e.g. `<span className="capitalize">{patient.name}</span>` or `className="capitalize"` on the existing element.
 - Do NOT pre-transform the stored name for display (no ad-hoc `toUpperCase()`/`properCase()`); rely on the `capitalize` class so the underlying data stays intact.
 
