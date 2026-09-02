@@ -95,11 +95,11 @@ export function SelectedFilterBar({
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
+            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm cursor-pointer"
             onClick={onClick}
           >
             {filter?.icon}
-            <span className="truncate text-gray-950 font-medium cursor-pointer">
+            <span className="truncate text-gray-950 font-medium">
               {t(filter.label)}
             </span>
           </div>
