@@ -11,9 +11,7 @@ on:
   push:
     branches: [main, develop, production, playwright-actions]
   pull_request:
-    # TEMP(QA-312): "issues/**" added so Playwright runs on the stacked PRs.
-    # Revert to [develop, production] before merging.
-    branches: [develop, production, "issues/**"]
+    branches: [develop, production]
   workflow_dispatch:
 
 concurrency:
