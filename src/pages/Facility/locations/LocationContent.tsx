@@ -151,7 +151,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
             {isOccupied ? t("occupied") : t("available")}
           </div>
         </div>
-        <TagBadges className="flex" tags={location.tags} />
+        <TagBadges className="pt-1" tags={location.tags} size="xs" />
       </div>
 
       <div className="h-full">
@@ -207,7 +207,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
           <span className="capitalize text-gray-600">
             {t(`location_form__${location.form}`)}
           </span>
-          <TagBadges tags={location.tags} />
+          <TagBadges tags={location.tags} size="xs" />
         </div>
       </div>
     </div>
@@ -335,7 +335,9 @@ export default function LocationContent({
               <h2 className="text-lg font-semibold whitespace-nowrap">
                 {selectedLocation ? selectedLocation.name : t("locations")}
               </h2>
-              {selectedLocation && <TagBadges tags={selectedLocation.tags} />}
+              {selectedLocation && (
+                <TagBadges tags={selectedLocation.tags} size="xs" />
+              )}
             </div>
           </div>
           <div className="w-full sm:w-72 shrink-0">

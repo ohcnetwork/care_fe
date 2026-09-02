@@ -43,7 +43,7 @@ export interface LocationDetail extends LocationBase {
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
-  tags?: TagConfig[];
+  tags: TagConfig[];
 }
 
 export interface LocationRead extends LocationBase {
@@ -53,7 +53,7 @@ export interface LocationRead extends LocationBase {
   current_encounter?: EncounterRead;
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
-  tags?: TagConfig[];
+  tags: TagConfig[];
 }
 
 export type LocationMinSpec = Omit<LocationRead, "current_encounter">;

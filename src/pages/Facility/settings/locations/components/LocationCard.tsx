@@ -148,9 +148,6 @@ export function SettingsLocationCard({
                     queryClient.invalidateQueries({
                       queryKey: ["locations", facilityId],
                     });
-                    queryClient.invalidateQueries({
-                      queryKey: ["location", facilityId],
-                    });
                   }}
                 />
               </div>

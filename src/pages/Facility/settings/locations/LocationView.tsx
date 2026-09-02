@@ -225,7 +225,7 @@ export default function LocationView({
                   >
                     {location?.status}
                   </Badge>
-                  <TagBadges tags={location?.tags} />
+                  <TagBadges tags={location?.tags} size="xs" />
                 </>
               )}
             </div>
@@ -260,10 +260,7 @@ export default function LocationView({
                     currentTags={location.tags ?? []}
                     onUpdate={() => {
                       queryClient.invalidateQueries({
-                        queryKey: ["locations", facilityId],
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: ["location", facilityId],
+                        queryKey: ["location", facilityId, id],
                       });
                     }}
                     trigger={

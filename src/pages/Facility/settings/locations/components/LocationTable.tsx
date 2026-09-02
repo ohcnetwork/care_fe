@@ -195,9 +195,6 @@ export function LocationTable({
                       queryClient.invalidateQueries({
                         queryKey: ["locations", facilityId],
                       });
-                      queryClient.invalidateQueries({
-                        queryKey: ["location", facilityId],
-                      });
                     }}
                   />
                 </TableCell>

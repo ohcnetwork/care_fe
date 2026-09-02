@@ -14,7 +14,7 @@ interface TagBadgesProps extends Omit<
 export function TagBadges({
   tags,
   className,
-  size = "xs",
+  size,
   badgeClassName,
   ...badgeProps
 }: TagBadgesProps) {

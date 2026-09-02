@@ -99,7 +99,11 @@ export function BedListing({
                 )}
               </div>
               <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
-              <TagBadges tags={bed.tags} className="justify-center mt-1 px-1" />
+              <TagBadges
+                tags={bed.tags}
+                className="justify-center mt-1 px-1"
+                size="xs"
+              />
               {showParent && segments.length > 1 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
