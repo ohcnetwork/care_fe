@@ -228,8 +228,8 @@ const config = [
 
   // Playwright-specific rules
   {
-    ...playwright.configs["flat/recommended"],
     files: ["tests/**/*.ts", "playwright.config.ts"],
+    plugins: { playwright },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -238,6 +238,12 @@ const config = [
     },
     rules: {
       ...playwright.configs["flat/recommended"].rules,
+      // Forward gates (no existing usages): promote to error so CI actually
+      // rejects new usages (these are only `warn` in flat/recommended).
+      "playwright/no-wait-for-selector": "error",
+      "playwright/no-element-handle": "error",
+      "playwright/no-eval": "error",
+      "playwright/no-page-pause": "error",
       // Forward gate (no existing usages): disallow test-id selectors in favour
       // of role/label/text locators.
       "playwright/no-restricted-locators": [
