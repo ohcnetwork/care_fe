@@ -4,6 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import i18nextPlugin from "eslint-plugin-i18next";
 import i18nextNoUndefinedTranslationKeysPlugin from "eslint-plugin-i18next-no-undefined-translation-keys";
 import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
+import playwright from "eslint-plugin-playwright";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
@@ -227,12 +228,34 @@ const config = [
 
   // Playwright-specific rules
   {
+    ...playwright.configs["flat/recommended"],
     files: ["tests/**/*.ts", "playwright.config.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tests/tsconfig.json",
       },
+    },
+    rules: {
+      ...playwright.configs["flat/recommended"].rules,
+      // Anti-flakiness rules with existing usages: baselined as warn here,
+      // migrated then flipped to error in follow-up PRs (QA-39 stack).
+      "playwright/no-networkidle": "warn",
+      "playwright/no-nth-methods": "warn",
+      "playwright/no-wait-for-timeout": "warn",
+      "playwright/no-force-option": "warn",
+      // General correctness/style rules with existing violations: baselined as
+      // warn so CI stays green; clean up incrementally.
+      "playwright/expect-expect": "warn",
+      "playwright/no-useless-not": "warn",
+      "playwright/no-conditional-in-test": "warn",
+      "playwright/no-conditional-expect": "warn",
+      "playwright/prefer-to-have-count": "warn",
+      "playwright/no-useless-await": "warn",
+      "playwright/no-unused-locators": "warn",
+      "playwright/prefer-web-first-assertions": "warn",
+      "playwright/no-skipped-test": "warn",
+      "playwright/consistent-spacing-between-blocks": "warn",
     },
   },
 
