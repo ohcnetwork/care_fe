@@ -93,8 +93,6 @@ test.describe("Diagnosis", () => {
   test("should add diagnosis with all fields and verify it appears in diagnosis history", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
     await addDiagnosis(page);
 
     const diagnosisRow = page.getByRole("row", { name: diagnosisName });
@@ -134,8 +132,6 @@ test.describe("Diagnosis", () => {
   });
 
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
-
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Diagnosis/i })
@@ -153,7 +149,6 @@ test.describe("Diagnosis", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
 
     const duplicateDiagnosisName = faker.helpers.arrayElement([
       ...usedDiagnoses,

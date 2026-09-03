@@ -103,9 +103,7 @@ test.describe("Device Organization Association", () => {
     await expect(
       managingOrgSection.getByRole("button", { name: "Change" }),
     ).toBeVisible();
-    await expect(
-      page.getByText("No organization associated"),
-    ).not.toBeVisible();
+    await expect(page.getByText("No organization associated")).toBeHidden();
   });
 
   test("should allow changing organization associated with device", async ({
@@ -130,7 +128,7 @@ test.describe("Device Organization Association", () => {
     await submitAddOrganization(manageOrgSheet);
 
     // After first add, slideover should auto-close.
-    await expect(manageOrgSheet).not.toBeVisible();
+    await expect(manageOrgSheet).toBeHidden();
 
     // Verify default organization is visible beside the Change button.
     await expect(
@@ -185,7 +183,7 @@ test.describe("Device Organization Association", () => {
     }
 
     await submitAddOrganization(manageOrgSheet);
-    await expect(manageOrgSheet).not.toBeVisible();
+    await expect(manageOrgSheet).toBeHidden();
 
     // Final state should show the newly selected organization beside Change.
     await expect(
@@ -194,8 +192,6 @@ test.describe("Device Organization Association", () => {
     await expect(
       managingOrgSection.getByText(selectedDepartment, { exact: false }),
     ).toBeVisible({ timeout: 15_000 });
-    await expect(
-      managingOrgSection.getByText("Administration"),
-    ).not.toBeVisible();
+    await expect(managingOrgSection.getByText("Administration")).toBeHidden();
   });
 });
