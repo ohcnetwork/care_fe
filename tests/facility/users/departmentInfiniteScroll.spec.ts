@@ -68,9 +68,7 @@ test.describe("Department Selector Infinite Scroll", () => {
         page.getByRole("button", { name: "See Details" }).first(),
       ).toBeVisible();
       await page.getByRole("button", { name: "See Details" }).first().click();
-      await page.waitForLoadState("networkidle");
       await page.getByText("Departments", { exact: true }).click();
-      await page.waitForLoadState("networkidle");
     });
 
     await test.step("Open Link Department sheet and switch to All Organizations", async () => {
@@ -78,7 +76,6 @@ test.describe("Department Selector Infinite Scroll", () => {
       await expect(page.getByText("Link User to Department")).toBeVisible();
       // Switch tab before opening dropdown (clicking tab would close popover)
       await page.getByRole("tab", { name: "All Organizations" }).click();
-      await page.waitForLoadState("networkidle");
     });
 
     await test.step("Open department dropdown", async () => {

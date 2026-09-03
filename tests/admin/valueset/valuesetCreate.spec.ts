@@ -118,13 +118,8 @@ test.describe("ValueSet Create", () => {
     await page.getByRole("textbox", { name: "Name *" }).fill(name);
 
     const slugField = page.getByRole("textbox", { name: "Slug *" });
-    const slugValue = await slugField.inputValue();
-    expect(slugValue).toBeTruthy();
-    expect(slugValue.length).toBeGreaterThan(0);
-
     const expectedSlugValue = expectedSlug(name);
-
-    expect(slugValue).toContain(expectedSlugValue);
+    await expect(slugField).toHaveValue(new RegExp(expectedSlugValue));
   });
 
   test("verify excluded rules are not present in preview", async ({ page }) => {
@@ -166,7 +161,7 @@ test.describe("ValueSet Create", () => {
 
     await previewDialog.getByRole("combobox").click();
 
-    await expect(page.getByText(codeName)).not.toBeVisible();
+    await expect(page.getByText(codeName)).toBeHidden();
 
     // Close the preview valueset selector first and then the dialog
     await closeAnyOpenPopovers(page);

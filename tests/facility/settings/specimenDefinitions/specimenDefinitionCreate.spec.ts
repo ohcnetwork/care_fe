@@ -260,16 +260,11 @@ test.describe("Specimen Definitions Create", () => {
     await page.getByRole("textbox", { name: "Title *" }).blur();
 
     const slugField = page.getByRole("textbox", { name: "Slug *" });
-    const slugValue = await slugField.inputValue();
-    expect(slugValue).toBeTruthy();
-    expect(slugValue.length).toBeGreaterThan(0);
-
     const expectedSlugPattern = definitionTitle
       .toLowerCase()
       .replace(/[^a-z0-9_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
-
-    expect(slugValue).toContain(expectedSlugPattern);
+    await expect(slugField).toHaveValue(new RegExp(expectedSlugPattern));
   });
 
   test("verify slug validation of 5 - 25 character", async ({ page }) => {

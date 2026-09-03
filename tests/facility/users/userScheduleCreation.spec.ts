@@ -57,7 +57,7 @@ class ScheduleFormPage {
     await expect(nextMonthBtn).toBeVisible();
 
     for (let i = 0; i < monthsToNavigate; i++) {
-      await nextMonthBtn.click({ force: true });
+      await nextMonthBtn.click();
     }
 
     await this.page

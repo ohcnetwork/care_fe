@@ -13,14 +13,19 @@ test("navigate to an patient - create and save account id", async ({
   const facilityId = getFacilityId();
   const patientId = getPatientId();
 
+  // Wait for the accounts list to load before deciding whether an account
+  // exists (previously covered by networkidle).
+  const accountsLoaded = page.waitForResponse(
+    (resp) =>
+      resp.url().includes("/account/") && resp.request().method() === "GET",
+  );
   // Navigate to patient page
   await page.goto(
     `facility/${facilityId}/patient/${patientId}/accounts?status=active`,
   );
+  await accountsLoaded;
 
   try {
-    await page.waitForLoadState("networkidle");
-
     // Check if an account already exists
     const goToAccountButton = page.getByRole("button", {
       name: "Go to account",

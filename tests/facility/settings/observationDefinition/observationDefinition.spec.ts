@@ -75,7 +75,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
     gender: string = "Male",
   ) {
     await test.step("Add gender condition", async () => {
-      await page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {
@@ -113,9 +112,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     ageType: string = "years",
   ) {
     await test.step("Add age condition", async () => {
-      const conditionSelector = await page.getByTitle(
-        `Condition ${conditionNumber}`,
-      );
+      const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
 
       // Select metric type
       await conditionSelector.getByRole("combobox").nth(0).click();
@@ -238,7 +235,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Verify sheet closes
     await expect(
       page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     // Verify interpretation appears in list
     await expect(
@@ -271,7 +268,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
     // Fill component code
     await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-    await page.waitForLoadState("networkidle");
     await page
       .getByPlaceholder("Search for observation codes")
       .fill("Hemoglobin");
@@ -286,7 +282,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
       .getByRole("combobox")
       .filter({ hasText: "search for units" })
       .click();
-    await page.waitForLoadState("networkidle");
     await page.getByPlaceholder("Search for units").fill(unit);
     await page.getByRole("option", { name: unit }).first().click();
 
@@ -349,7 +344,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -359,7 +353,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
     });
 
@@ -439,7 +432,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -449,7 +441,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 
       // Add component-level interpretation
@@ -623,7 +614,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Verify sheet closes
       await expect(
         page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     // Submit form
@@ -808,7 +799,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Verify sheet closes
       await expect(
         page.getByRole("heading", { name: "Add/Edit Interpretation" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
 
       // Verify original values are preserved (should still show "Normal" in summary)
       await expect(
