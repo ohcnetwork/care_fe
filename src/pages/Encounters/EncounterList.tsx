@@ -219,12 +219,13 @@ export function EncounterList({
       if (savedFilters.selectedCareTeamMember)
         restoredParams.care_team_user =
           savedFilters.selectedCareTeamMember.username;
-      if (savedFilters.selectedTags?.length > 0)
+      if (savedFilters.selectedTags?.length > 0) {
         restoredParams.tags = savedFilters.selectedTags
           .map((t: TagConfig) => t.id)
           .join(",");
-      if (savedFilters.tagsBehavior)
-        restoredParams.tags_behavior = savedFilters.tagsBehavior;
+        if (savedFilters.tagsBehavior)
+          restoredParams.tags_behavior = savedFilters.tagsBehavior;
+      }
       if (savedFilters.dateFrom)
         restoredParams.created_date_after = dateQueryString(
           new Date(savedFilters.dateFrom),
