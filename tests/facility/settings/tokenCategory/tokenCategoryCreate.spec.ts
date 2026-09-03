@@ -164,7 +164,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       await page.getByRole("textbox", { name: /username/i }).fill("care-nurse");
       await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
-      await page.waitForURL(/(?!.*login)/);
+      await page.waitForURL(/^(?!.*login)/);
 
       // Verify we're logged in as nurse
       await expect(

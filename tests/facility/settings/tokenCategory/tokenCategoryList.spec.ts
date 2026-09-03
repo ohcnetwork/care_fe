@@ -78,7 +78,7 @@ test.describe("Token Category List - Permission Tests", () => {
         .fill("care-volunteer");
       await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
-      await page.waitForURL(/(?!.*login)/);
+      await page.waitForURL(/^(?!.*login)/);
 
       // Verify we're logged in as volunteer
       await expect(

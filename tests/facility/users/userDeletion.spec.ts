@@ -25,7 +25,7 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Login" }).click();
 
       // Wait for successful login and navigate to facility
-      await expect(page).toHaveURL(/(?!.*login)/);
+      await expect(page).toHaveURL(/^(?!.*login)/);
 
       // Navigate to first available facility
       const firstFacilityLink = page
@@ -69,7 +69,7 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Login" }).click();
 
       // Wait for successful login
-      await expect(page).toHaveURL(/(?!.*login)/);
+      await expect(page).toHaveURL(/^(?!.*login)/);
 
       // Navigate directly to facility users page
       const facilityId = getFacilityId();
