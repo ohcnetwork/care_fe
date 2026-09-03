@@ -205,7 +205,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         const addButton = page.getByRole("button", {
           name: "Add Token Category",
         });
-        await expect(addButton).not.toBeVisible();
+        await expect(addButton).toBeHidden();
       }
       // If page is not accessible, that's also valid for nurses (access denied)
     });

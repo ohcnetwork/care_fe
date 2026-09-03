@@ -256,24 +256,26 @@ const config = [
           },
         ],
       ],
-      // Anti-flakiness rules with existing usages: baselined as warn here,
-      // migrated then flipped to error in follow-up PRs (QA-39 stack).
+      // Anti-flakiness rules: enforced as errors.
       "playwright/no-networkidle": "error",
-      "playwright/no-nth-methods": "warn",
       "playwright/no-wait-for-timeout": "error",
       "playwright/no-force-option": "error",
-      // General correctness/style rules with existing violations: baselined as
-      // warn so CI stays green; clean up incrementally.
-      "playwright/expect-expect": "warn",
-      "playwright/no-useless-not": "warn",
-      "playwright/no-conditional-in-test": "warn",
-      "playwright/no-conditional-expect": "warn",
-      "playwright/prefer-to-have-count": "warn",
-      "playwright/no-useless-await": "warn",
-      "playwright/no-unused-locators": "warn",
-      "playwright/prefer-web-first-assertions": "warn",
-      "playwright/no-skipped-test": "warn",
-      "playwright/consistent-spacing-between-blocks": "warn",
+      // Correctness/style rules: enforced as errors (auto-fixable / low-noise).
+      "playwright/no-useless-not": "error",
+      "playwright/prefer-to-have-count": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/consistent-spacing-between-blocks": "error",
+      // Disabled: .first()/.last()/.nth() are idiomatic Playwright, and the
+      // rest have many legitimate violations (helper-driven tests, viewport
+      // branches, intentional skips). Preferring semantic locators / adding
+      // assertions stays as review guidance, not a lint gate.
+      "playwright/no-nth-methods": "off",
+      "playwright/expect-expect": "off",
+      "playwright/no-conditional-in-test": "off",
+      "playwright/no-conditional-expect": "off",
+      "playwright/no-skipped-test": "off",
     },
   },
 

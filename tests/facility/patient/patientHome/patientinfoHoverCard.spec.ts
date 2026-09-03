@@ -21,9 +21,7 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
       .click();
 
     // Verify that Patient Home button is NOT visible (because its home page)
-    await expect(
-      page.getByRole("link", { name: "Patient Home" }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("link", { name: "Patient Home" })).toBeHidden();
 
     // But View Profile button should still be visible
     await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
