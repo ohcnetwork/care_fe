@@ -40,6 +40,7 @@ export enum TagResource {
   DELIVERY_ORDER = "supply_delivery_order",
   REQUEST_ORDER = "supply_request_order",
   ACCOUNT = "account",
+  LOCATION = "location",
 }
 
 export interface TagConfigBase {
