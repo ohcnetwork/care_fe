@@ -54,7 +54,7 @@ export function KeyboardShortcutBadge({
   variant = "default",
 }: KeyboardShortcutBadgeProps &
   VariantProps<typeof keyboardShortcutBadgeVariants>) {
-  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
+  const { isOptionPressed } = useKeyboardShortcuts([], {});
 
   const shouldShowVisually = shortcut && (alwaysShow || isOptionPressed);
 
@@ -93,7 +93,7 @@ export function ShortcutBadge({
   variant?: KeyboardShortcutBadgeVariant;
 }) {
   const getShortcutDisplay = useShortcutDisplay();
-  const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
+  const { isOptionPressed } = useKeyboardShortcuts([], {});
 
   return (
     <KeyboardShortcutBadge
