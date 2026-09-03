@@ -304,8 +304,7 @@ export function SupplyDeliveryTable({
                 <TableCell>
                   {delivery?.order?.origin?.name ||
                     delivery?.order?.supplier?.name ||
-                    delivery?.order?.patient?.name ||
-                    "-"}
+                    (delivery?.order?.patient ? t("patient_return") : "-")}
                 </TableCell>
                 <TableCell>
                   {delivery?.order?.destination?.name || "-"}

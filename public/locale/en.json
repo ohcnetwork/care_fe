@@ -4367,6 +4367,7 @@
   "patient_registration__name": "Name",
   "patient_registration_error": "Could not register patient",
   "patient_registration_success": "Patient Registered Successfully",
+  "patient_return": "Patient Return",
   "patient_state": "Patient State",
   "patient_status": "Patient Status",
   "patient_summary": "Patient Summary",
