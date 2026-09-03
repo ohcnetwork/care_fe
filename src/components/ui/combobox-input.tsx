@@ -48,7 +48,7 @@ export interface ComboboxInputProps extends Omit<
    * quantity picker) keep the popover. Off by default.
    */
   drawerOnMobile?: boolean;
-  /** Accessible title for the mobile drawer (vaul requires one). */
+  /** Accessible title for the mobile drawer. */
   title?: string;
   /** Replaces the default summary button that opens the mobile drawer. */
   mobileTrigger?: React.ReactNode;

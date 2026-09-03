@@ -150,6 +150,7 @@
   }
 
   body {
+    position: relative;
     font-family: "Figtree", sans-serif;
     color: #453c52;
     @apply text-secondary-900 size-full font-sans antialiased;

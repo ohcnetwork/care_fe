@@ -57,6 +57,7 @@
     "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
+    "@base-ui/react": "^1.7.0",
     "@fontsource/figtree": "^5.2.10",
     "@fontsource/libre-barcode-128-text": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
@@ -140,7 +141,6 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "use-keyboard-shortcut": "^1.1.6",
-    "vaul": "^1.1.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
