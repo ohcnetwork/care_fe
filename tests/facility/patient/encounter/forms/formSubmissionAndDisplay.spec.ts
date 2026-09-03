@@ -80,16 +80,16 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     const formOption = page.getByRole("option", {
       name: /respiratory status/i,
     });
-    await formOption.waitFor({ state: "visible", timeout: 5000 });
+    await formOption.waitFor({ state: "visible" });
     await formOption.click();
 
     // Wait for navigation to the questionnaire form page
-    await page.waitForURL(/\/questionnaire\//, { timeout: 10000 });
+    await page.waitForURL(/\/questionnaire\//);
 
     // Wait for the form to load by waiting for a key form field to be visible
     await expect(
       page.getByText("Is bilateral air entry present?").nth(0),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Generate random values for form inputs
     const bilateralAirEntry = "yes";
@@ -170,15 +170,15 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Questionnaire submitted successfully"),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
 
     // Wait for navigation back to encounter page
-    await page.waitForURL(/\/encounter\/[^/]+/, { timeout: 10000 });
+    await page.waitForURL(/\/encounter\/[^/]+/);
 
     // Wait for the first expected value to be visible, indicating the page is loaded
     await expect(
       page.getByText(bilateralAirEntry, { exact: true }).first(),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Verify radio button selections with scrolling
     const bilateralAirEntryValue = page

@@ -130,7 +130,7 @@ async function fillAdditionalDetails(
         await geoRegion
           .getByRole("combobox")
           .nth(count)
-          .waitFor({ state: "visible", timeout: 3000 });
+          .waitFor({ state: "visible" });
       } catch {
         // No new combobox appeared — we've filled all required levels
         break;
@@ -146,7 +146,7 @@ async function submitRegistration(page: Page) {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible();
   });
 }
 

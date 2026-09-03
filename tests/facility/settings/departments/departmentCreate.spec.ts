@@ -54,7 +54,7 @@ test.describe("Department/Team Creation", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Organization created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function createOrganization(
