@@ -10,6 +10,7 @@ import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { ReportType } from "@/types/emr/report/report";
 import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 const consultationRoutes: AppRoutes = {
@@ -87,11 +88,19 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
     ({ encounterId, templateSlug }) => (
-      <ReportViewer associatingId={encounterId} templateSlug={templateSlug} />
+      <ReportViewer
+        associatingId={encounterId}
+        templateSlug={templateSlug}
+        reportType={ReportType.DISCHARGE_SUMMARY}
+      />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/:reportId":
     ({ encounterId, reportId }) => (
-      <ReportViewer associatingId={encounterId} reportId={reportId} />
+      <ReportViewer
+        associatingId={encounterId}
+        reportId={reportId}
+        reportType={ReportType.DISCHARGE_SUMMARY}
+      />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire":
     ({ facilityId, encounterId, patientId }) => (

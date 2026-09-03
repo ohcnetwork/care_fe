@@ -30,10 +30,8 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
 import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
-import {
-  GenerateReportDropdown,
-  getReportBasePath,
-} from "@/components/Files/GenerateReportDropdown";
+import { GenerateReportDropdown } from "@/components/Files/GenerateReportDropdown";
+import { getReportBasePath } from "@/components/Files/reportTemplateOptions";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import useFilters from "@/hooks/useFilters";

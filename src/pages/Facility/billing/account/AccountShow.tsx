@@ -62,11 +62,9 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { isPositive } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
-import {
-  ReportTemplateSearchList,
-  useReportTemplateOptions,
-} from "@/components/Files/GenerateReportDropdown";
+import { ReportTemplateSearchList } from "@/components/Files/GenerateReportDropdown";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
+import { useReportTemplateOptions } from "@/components/Files/reportTemplateOptions";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
@@ -438,7 +436,13 @@ function AccountShow({
             </div>
           )}
           {account.status == AccountStatus.active && (
-            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+            <DropdownMenu
+              open={dropdownOpen}
+              onOpenChange={(open) => {
+                setDropdownOpen(open);
+                if (!open) setAccountTemplateSearch("");
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
@@ -478,21 +482,18 @@ function AccountShow({
                   <CareIcon icon="l-exchange" className="mr-2 size-4" />
                   {t("transfer_payment")}
                 </DropdownMenuItem>
-                {canListTemplates &&
-                  (isLoadingTemplates ||
-                    accountTemplates.length > 0 ||
-                    accountTemplateSearch) && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
-                      <ReportTemplateSearchList
-                        templates={accountTemplates}
-                        isLoading={isLoadingTemplates}
-                        search={accountTemplateSearch}
-                        onSearchChange={setAccountTemplateSearch}
-                      />
-                    </>
-                  )}
+                {canListTemplates && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>{t("reports")}</DropdownMenuLabel>
+                    <ReportTemplateSearchList
+                      templates={accountTemplates}
+                      isLoading={isLoadingTemplates}
+                      search={accountTemplateSearch}
+                      onSearchChange={setAccountTemplateSearch}
+                    />
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
