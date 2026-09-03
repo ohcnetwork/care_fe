@@ -24,8 +24,8 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     await expect(page.getByRole("link", { name: "Patient Home" })).toBeHidden();
 
     // But View Profile button should still be visible
-    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(
+      page.getByRole("link", { name: "View Profile" }),
+    ).toBeVisible();
   });
 });

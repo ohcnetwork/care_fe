@@ -23,7 +23,7 @@ test.describe("Healthcare Services Management - Delete", () => {
       .filter({ hasText: "Select locations" })
       .click();
     const plusButton = page.locator("button:has(svg.lucide-plus)").first();
-    await expect(plusButton).toBeVisible({ timeout: 5000 });
+    await expect(plusButton).toBeVisible();
     await plusButton.click();
     await page.getByRole("button", { name: "Create" }).click();
 
@@ -44,7 +44,7 @@ test.describe("Healthcare Services Management - Delete", () => {
     // Verify success toast or message
     await expect(
       page.getByText("Healthcare service deleted successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Search for the deleted service to verify it's not visible
     await page

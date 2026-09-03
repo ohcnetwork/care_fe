@@ -82,12 +82,8 @@ test.describe("Facility Image Settings", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await expect(dialog.getByText("Drag & drop image to upload")).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(dialog.getByText("No image found.")).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(dialog.getByText("Drag & drop image to upload")).toBeVisible();
+    await expect(dialog.getByText("No image found.")).toBeVisible();
 
     await page.getByRole("button", { name: "Cancel" }).click();
   });

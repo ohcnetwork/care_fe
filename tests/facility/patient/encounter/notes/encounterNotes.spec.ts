@@ -169,29 +169,24 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // Wait for a threads list GET response that contains our thread title.
     // This avoids race conditions where User B fetches the list before
     // User A's create has propagated. React Query refetches on tab click.
-    const threadsListPromise = userBPage.waitForResponse(
-      async (resp) => {
-        if (
-          !resp.url().includes("/thread/") ||
-          resp.request().method() !== "GET" ||
-          !resp.ok()
-        ) {
-          return false;
-        }
-        try {
-          const body = await resp.json();
-          return (
-            Array.isArray(body?.results) &&
-            body.results.some(
-              (t: { title?: string }) => t.title === threadTitle,
-            )
-          );
-        } catch {
-          return false;
-        }
-      },
-      { timeout: 30_000 },
-    );
+    const threadsListPromise = userBPage.waitForResponse(async (resp) => {
+      if (
+        !resp.url().includes("/thread/") ||
+        resp.request().method() !== "GET" ||
+        !resp.ok()
+      ) {
+        return false;
+      }
+      try {
+        const body = await resp.json();
+        return (
+          Array.isArray(body?.results) &&
+          body.results.some((t: { title?: string }) => t.title === threadTitle)
+        );
+      } catch {
+        return false;
+      }
+    });
 
     await userBPage.goto(encounterUrl);
     await userBPage.getByRole("tab", { name: "Notes" }).click();

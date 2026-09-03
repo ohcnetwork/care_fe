@@ -30,14 +30,14 @@ test.describe("User Profile Avatar Modification", () => {
 
     // Wait for crop button to be enabled (indicates image is loaded)
     const cropButton = page.getByRole("button", { name: "Crop" });
-    await expect(cropButton).toBeEnabled({ timeout: 10000 });
+    await expect(cropButton).toBeEnabled();
     await cropButton.click();
 
     await expect(
       page
         .getByRole("region", { name: "Notifications alt+T" })
         .getByText(/cropped successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   // Helper function to save the avatar
@@ -47,14 +47,14 @@ test.describe("User Profile Avatar Modification", () => {
 
     // Wait for upload to complete by checking dialog closes
     const dialog = page.getByRole("dialog", { name: "Edit Avatar" });
-    await expect(dialog).not.toBeVisible({ timeout: 10000 });
+    await expect(dialog).toBeHidden();
 
     // Verify no error notification
     const errorNotification = page
       .getByRole("region", { name: "Notifications alt+T" })
       .getByText(/error|failed/i);
     await expect(errorNotification)
-      .not.toBeVisible({ timeout: 1000 })
+      .toBeHidden()
       .catch(() => {});
   }
 
@@ -128,7 +128,6 @@ test.describe("User Profile Avatar Modification", () => {
             .url()
             .includes(`/api/v1/users/${username}/profile_picture/`) &&
           response.request().method() === "DELETE",
-        { timeout: 5000 },
       );
 
       await deleteButton.click();
@@ -137,7 +136,7 @@ test.describe("User Profile Avatar Modification", () => {
       expect(response.status()).toBe(204);
 
       // Verify dialog closes after deletion
-      await expect(dialog).not.toBeVisible({ timeout: 5000 });
+      await expect(dialog).toBeHidden();
     });
   });
 
@@ -168,7 +167,7 @@ test.describe("User Profile Avatar Modification", () => {
 
       // Wait for crop button and check it's disabled (indicates file validation happened)
       const cropButton = page.getByRole("button", { name: "Crop" });
-      await expect(cropButton).toBeDisabled({ timeout: 5000 });
+      await expect(cropButton).toBeDisabled();
     });
   });
 
@@ -224,9 +223,7 @@ test.describe("User Profile Avatar Modification", () => {
         .first()
         .setInputFiles(validImagePath);
 
-      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled({
-        timeout: 10000,
-      });
+      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled();
     });
   });
 });

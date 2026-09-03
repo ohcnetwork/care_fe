@@ -302,7 +302,7 @@ test.describe("Schedule Template Management", () => {
     // Navigate to create template form - wait for button to be visible
     await expect(
       page.getByRole("button", { name: "Create Template" }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
     await page.getByRole("button", { name: "Create Template" }).click();
     await expect(
       page.getByRole("textbox", { name: "Template Name *" }),
@@ -334,7 +334,7 @@ test.describe("Schedule Template Management", () => {
 
     // Navigate to created schedule - wait for Next Month button to be visible
     const nextMonthButton = page.getByRole("button", { name: "Next Month" });
-    await expect(nextMonthButton).toBeVisible({ timeout: 10000 });
+    await expect(nextMonthButton).toBeVisible();
     await nextMonthButton.click();
 
     // Verify schedule card

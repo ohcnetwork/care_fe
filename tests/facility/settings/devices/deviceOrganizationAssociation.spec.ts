@@ -25,7 +25,7 @@ async function submitAddOrganization(
   await addOrganizationButton.scrollIntoViewIfNeeded();
 
   try {
-    await addOrganizationButton.click({ timeout: 5000 });
+    await addOrganizationButton.click();
   } catch {
     await addOrganizationButton.focus();
     await addOrganizationButton.press("Enter");
@@ -191,7 +191,7 @@ test.describe("Device Organization Association", () => {
     ).toBeVisible();
     await expect(
       managingOrgSection.getByText(selectedDepartment, { exact: false }),
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible();
     await expect(managingOrgSection.getByText("Administration")).toBeHidden();
   });
 });
