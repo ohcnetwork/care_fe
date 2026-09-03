@@ -6,7 +6,13 @@ import { cn } from "@/lib/utils";
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
+  return (
+    <DrawerPrimitive.Root
+      data-slot="drawer"
+      repositionInputs={false}
+      {...props}
+    />
+  );
 }
 
 function DrawerTrigger({
@@ -48,46 +54,10 @@ function DrawerContent({
   children,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
-  const contentRef = React.useRef<HTMLDivElement>(null);
-
-  // A descendant with `autoFocus` can grab focus (opening the iOS keyboard) while
-  // this drawer is still sliding in, racing the keyboard against the open transition
-  // and making the sheet jump. Native autofocus isn't synchronous with mount, so we
-  // listen for the real focus event: if it lands before the transition settles, blur
-  // it and refocus once the transition (or a timeout fallback) completes.
-  React.useEffect(() => {
-    const node = contentRef.current;
-    if (!node) return;
-
-    let settled = false;
-    const markSettled = () => {
-      settled = true;
-    };
-    const settleTimer = window.setTimeout(markSettled, 500);
-    node.addEventListener("transitionend", markSettled);
-
-    const onFocusIn = (event: FocusEvent) => {
-      if (settled || !(event.target instanceof HTMLElement)) return;
-      const target = event.target;
-      target.blur();
-      const refocus = () => target.focus();
-      node.addEventListener("transitionend", refocus, { once: true });
-      window.setTimeout(refocus, 500);
-    };
-    node.addEventListener("focusin", onFocusIn, true);
-
-    return () => {
-      window.clearTimeout(settleTimer);
-      node.removeEventListener("transitionend", markSettled);
-      node.removeEventListener("focusin", onFocusIn, true);
-    };
-  }, []);
-
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
       <DrawerPrimitive.Content
-        ref={contentRef}
         data-slot="drawer-content"
         className={cn(
           "group/drawer-content bg-white fixed z-50 flex h-auto flex-col dark:bg-gray-950",
