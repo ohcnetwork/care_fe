@@ -271,7 +271,7 @@ export const PrescriptionPreview = ({
       footer={
         <div className="mt-2 text-xs print:text-[10px] text-gray-900 text-center flex gap-2 justify-center">
           <span>{t("computer_generated_prescription")}</span>|
-          <span>{format(new Date(), "PP p")}</span>
+          <span>{formatDateTime(new Date(), "MMMM D, YYYY [at] h:mm A")}</span>
         </div>
       }
     >
