@@ -26,7 +26,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
-import { regenerateQuestionIds } from "@/components/QuestionnaireV2/shared/questionTree";
+import { remapActionLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
+import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import {
   QuestionnaireRead,
@@ -114,6 +115,9 @@ export function CloneQuestionnaireDialog({
   });
 
   const onSubmit = (values: CloneFormValues) => {
+    const regenerated = regenerateQuestionIdsWithMap(
+      structuredClone(questionnaire.questions),
+    );
     clone({
       title: values.title,
       slug: values.slug,
@@ -122,8 +126,13 @@ export function CloneQuestionnaireDialog({
       code: questionnaire.code,
       status: "draft",
       subject_type: questionnaire.subject_type,
-      questions: regenerateQuestionIds(
-        structuredClone(questionnaire.questions),
+      questions: regenerated.questions,
+      // Actions name answers by link_id, and every link_id was just
+      // regenerated — follow the map so the copy's automations still point
+      // at the copy's questions.
+      actions: remapActionLinkIds(
+        questionnaire.actions ?? [],
+        regenerated.linkIdMap,
       ),
       ...scopeCreateFields(scope),
     });

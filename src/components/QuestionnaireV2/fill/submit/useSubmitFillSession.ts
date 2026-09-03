@@ -15,11 +15,14 @@ import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
+import type { BatchRequestResponse } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
+import type { ActionOutcome } from "@/types/questionnaire/actions";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
 
+import { collectActionOutcomes } from "./actionOutcomes";
 import {
   MissingEncounterError,
   StructuredBuildError,
@@ -27,6 +30,7 @@ import {
 } from "./composeBatch";
 import type { ServerValidationError } from "./mapBatchErrors";
 import { mapBatchErrors } from "./mapBatchErrors";
+import { collectActionReferenceErrors } from "./validateActionReferences";
 import { collectStructuredErrors } from "./validateStructured";
 
 /**
@@ -51,7 +55,10 @@ interface UseSubmitFillSessionArgs {
    *  would clear the draft in `onSuccess` and take those answers with it,
    *  having never been in the batch. */
   blockedFormLabels: string[];
-  onSuccess: () => void;
+  /** Receives what the questionnaires' actions reported back
+   *  (`_actions` on each submit result) — the host shows them once it
+   *  has navigated. */
+  onSuccess: (outcomes: ActionOutcome[]) => void;
 }
 
 /**
@@ -138,13 +145,36 @@ export function useSubmitFillSession({
     // global error toast.
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    onSuccess: () => {
+    onSuccess: (data: BatchRequestResponse) => {
       setServerErrors([]);
       toast.success(t("questionnaire_submitted_successfully"));
-      onSuccess();
+      onSuccess(
+        collectActionOutcomes(
+          data.results,
+          new Set(forms.map((form) => form.questionnaire.id)),
+        ),
+      );
     },
     onError: (error) => {
       if (hasBatchResults(error.cause)) {
+        // An action that failed to evaluate (a reference to an unanswered
+        // question the guard below could not see, a bad expression) is an
+        // unhandled server error on the questionnaire's own request — the
+        // batch rolls back and reports nothing per question. Name the
+        // cause: it is the form's automation, not the clinician's input.
+        const questionnaireIds = new Set(
+          forms.map((form) => form.questionnaire.id),
+        );
+        if (
+          error.cause.results.some(
+            (result) =>
+              result.status_code >= 500 &&
+              questionnaireIds.has(result.reference_id),
+          )
+        ) {
+          toast.error(t("questionnaire_actions_failed"));
+          return;
+        }
         const mapped = mapBatchErrors(
           error.cause.results,
           t("validation_failed"),
@@ -218,6 +248,7 @@ export function useSubmitFillSession({
           renderFailed,
           t,
         ),
+        ...collectActionReferenceErrors(form.questionnaire, responses, t),
       ];
       store.set(errorsAtom, clientErrors);
       if (clientErrors.length > 0 && !firstError) {

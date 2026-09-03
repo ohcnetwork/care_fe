@@ -1,18 +1,34 @@
+import { remapActionLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import {
   findFirstQuestion,
+  freshLinkId,
   regenerateQuestionIds,
 } from "@/components/QuestionnaireV2/shared/questionTree";
 
+import { QuestionnaireAction } from "@/types/questionnaire/actions";
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 
 export interface BuilderState {
   questions: Question[];
+  /** Submit-time automations — questionnaire-level, edited by the studio's
+   *  Actions panel and saved in the same PUT as the question tree. */
+  actions: QuestionnaireAction[];
   selectedId: string | null;
   dirty: boolean;
 }
 
 export type BuilderAction =
-  | { type: "reset"; questions: Question[]; keepSelectedId?: string | null }
+  | {
+      type: "reset";
+      questions: Question[];
+      actions: QuestionnaireAction[];
+      keepSelectedId?: string | null;
+    }
+  | { type: "setActions"; actions: QuestionnaireAction[] }
+  /** Rename one question's link_id and follow the rename through every
+   *  enable_when target and action reference — the Actions panel uses it
+   *  to make a legacy `Q-…` id nameable from an expression. */
+  | { type: "renameLinkId"; id: string; linkId: string }
   | { type: "replaceAll"; questions: Question[] }
   | { type: "select"; id: string | null }
   | {
@@ -37,7 +53,7 @@ export type BuilderAction =
 export function newQuestion(): Question {
   return {
     id: crypto.randomUUID(),
-    link_id: `Q-${crypto.randomUUID().slice(0, 8)}`,
+    link_id: freshLinkId(),
     text: "",
     type: "string",
     questions: [],
@@ -245,6 +261,7 @@ export function builderReducer(
       const questions = migrateLegacyBooleanEnableWhen(action.questions);
       return {
         questions,
+        actions: action.actions,
         // Selection is builder working state — a post-save reset keeps the
         // user's place when the previously selected question still exists.
         selectedId:
@@ -256,8 +273,43 @@ export function builderReducer(
       };
     }
 
+    case "setActions":
+      return { ...state, actions: action.actions, dirty: true };
+
+    case "renameLinkId": {
+      const target = findQuestion(state.questions, action.id);
+      if (!target || target.link_id === action.linkId) return state;
+      const previous = target.link_id;
+      const questions = mapTree(state.questions, (list) =>
+        list.map((question) => {
+          const enableWhen = question.enable_when?.map((condition) =>
+            condition.question === previous
+              ? { ...condition, question: action.linkId }
+              : condition,
+          );
+          const renamed =
+            question.id === action.id
+              ? { ...question, link_id: action.linkId }
+              : question;
+          return enableWhen ? { ...renamed, enable_when: enableWhen } : renamed;
+        }),
+      );
+      return {
+        ...state,
+        questions,
+        actions: remapActionLinkIds(
+          state.actions,
+          new Map([[previous, action.linkId]]),
+        ),
+        dirty: true,
+      };
+    }
+
+    // Import replaces the question tree only — actions are questionnaire
+    // configuration, not part of an imported questions file.
     case "replaceAll":
       return {
+        ...state,
         questions: action.questions,
         selectedId: action.questions[0]?.id ?? null,
         dirty: true,
@@ -273,7 +325,7 @@ export function builderReducer(
         const index = action.index ?? list.length;
         return [...list.slice(0, index), question, ...list.slice(index)];
       });
-      return { questions, selectedId: question.id, dirty: true };
+      return { ...state, questions, selectedId: question.id, dirty: true };
     }
 
     case "duplicateQuestion": {
@@ -285,7 +337,7 @@ export function builderReducer(
         if (index === -1) return list;
         return [...list.slice(0, index + 1), copy, ...list.slice(index + 1)];
       });
-      return { questions, selectedId: copy.id, dirty: true };
+      return { ...state, questions, selectedId: copy.id, dirty: true };
     }
 
     case "updateQuestion": {
@@ -302,6 +354,7 @@ export function builderReducer(
         list.filter((q) => !ids.has(q.id)),
       );
       return {
+        ...state,
         questions,
         selectedId: removedIds.has(state.selectedId ?? "")
           ? (questions[0]?.id ?? null)

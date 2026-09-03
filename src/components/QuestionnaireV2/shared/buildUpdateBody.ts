@@ -1,3 +1,4 @@
+import { normalizeQuestionnaireActions } from "@/types/questionnaire/actions";
 import {
   QuestionnaireRead,
   QuestionnaireUpdate,
@@ -24,6 +25,11 @@ export function buildUpdateBody(
     description: questionnaire.description,
     status: questionnaire.status,
     subject_type: questionnaire.subject_type,
+    // Explicit `[]`, never a pass-through: the read spec can hand back
+    // `null`, which the write spec (`list | MISSING`) rejects, and an
+    // emptied panel must SEND the empty list — omitting the key keeps the
+    // stored actions.
+    actions: normalizeQuestionnaireActions(questionnaire.actions),
   };
   return {
     ...writable,

@@ -41,6 +41,17 @@ export const questionnaireKeys = {
 };
 
 /**
+ * The action registry (`action_configuration/instructions|fields`) — what
+ * the backend can run and what a condition may reference. Static per
+ * deployment, so consumers set a long `staleTime`.
+ */
+export const actionRegistryKeys = {
+  all: ["actionRegistry"] as const,
+  instructions: () => [...actionRegistryKeys.all, "instructions"] as const,
+  fields: () => [...actionRegistryKeys.all, "fields"] as const,
+};
+
+/**
  * Keys for the server-side `form_submission` drafts the fill page saves and
  * resumes (`useSaveServerDraft`, `?continue_draft=`) and the encounter
  * overview lists. Hand-built literals here were a correctness hazard: the

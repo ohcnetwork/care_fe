@@ -98,6 +98,58 @@ questions, that is the bug.
 - `queryKeys.ts` — the only place TanStack Query keys are built; keys
   constructed elsewhere silently opt out of invalidation.
 
+## Actions (submit-time automations)
+
+A questionnaire carries `actions` — rules the backend evaluates when a
+patient/encounter questionnaire is submitted (`POST …/submit/`): each is a
+`condition` (a Python-subset expression run by `evalidate`) over the cleaned
+answers (`q_<link_id>`) and registry context values (`patient["age"]`),
+plus `instructions` (`{slug, params, context}`) executed when it holds.
+Resource-subject questionnaires (location/device/facility) never run them.
+
+- Types and routes: `src/types/questionnaire/actions.ts`,
+  `actionApi.ts` (`action_configuration/instructions|fields`), keys in
+  `queryKeys.ts` (`actionRegistryKeys`). `normalizeQuestionnaireActions`
+  is the wire-shape guard every read goes through.
+- `shared/actionExpression.ts` — the one bridge between the editor and the
+  stored strings: `compileCondition`/`parseCondition` for the canonical
+  rule subset (`ref OP literal` joined by one connective; anything else is
+  a "custom expression" edited as text), message templates
+  (`{answer}` tokens ↔ `{{ f"…" }}`), `lintExpression`, reference
+  extraction and the clone remap. Node-tested; keep it free of component
+  imports.
+- `builder/actionVariables.ts` — what a rule may reference and how each
+  answer compares (see the value-shape notes in the file: quantities are
+  `{value,…}` records, valueset choices compare by `coding.code`,
+  repeating-group children are not top-level names).
+  `builder/actionValidation.ts` — the save rules; `builder/actions/` — the
+  editors the inspector composes.
+- `studio/ActionsPanel.tsx` — the inspector target the outline's Actions
+  row selects; `studio/useActionRegistry.ts` fetches the registry.
+- Fill side: `fill/submit/validateActionReferences.ts` blocks a submission
+  whose action references a visible unanswered question (the backend would
+  500 and roll the batch back); `fill/submit/actionOutcomes.ts` reads
+  `_actions` off the submit results and `FillPageBody` toasts them after
+  the redirect.
+
+Instruction params may carry backend hints (`json_schema_extra`):
+`x-care-picker: tag_config` with `x-care-resource` renders a tag picker
+(`builder/actions/TagConfigParamPicker.tsx`) scoped to the studio mount's
+facility; pydantic Enum params (`$ref` into `$defs`) render as a select.
+The catalog the studio labels (`shared/instructionLabels.ts`) —
+`show_message`, `set_encounter_priority`, `tag_encounter`, `tag_patient`,
+plus the Patient/Encounter context fields — lives on the care branch
+`bodhi/ENG-737-actions-catalog` (stacked on ENG-737); anything the
+registry serves beyond that still works, labelled by its humanized slug.
+
+Backend gaps the UI works around (ENG-737 as of 2026-09-03): an unanswered
+`q_` reference raises at submit (500, whole batch rolled back); condition
+syntax and instruction params are not validated at save time; the registry
+lists fields twice; the questionnaire create/update hooks require `actions`
+to be present (the FE always sends it, `[]` at minimum). Without the
+catalog branch the only instruction is the `logging` smoke test and
+`PatientQuestionnaire` registers no context fields.
+
 ## Mounting and scope
 
 Pages never read route params. The router injects a `QuestionnaireScope`

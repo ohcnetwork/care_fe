@@ -102,14 +102,31 @@ export function countLeafQuestions(questions: Question[]): number {
  * `unmappedConditions` controls whether external references are dropped or
  * preserved for in-questionnaire duplication.
  */
+/** A generated link id. Underscore, not hyphen: `q_<link_id>` must be a
+ *  Python identifier for questionnaire actions to reference the answer
+ *  (see `shared/actionExpression.ts`). */
+export function freshLinkId(): string {
+  return `Q_${crypto.randomUUID().slice(0, 8)}`;
+}
+
 export function regenerateQuestionIds(
+  questions: Question[],
+  options: { unmappedConditions?: "drop" | "keep" } = {},
+): Question[] {
+  return regenerateQuestionIdsWithMap(questions, options).questions;
+}
+
+/**
+ * `regenerateQuestionIds` plus the old → new link_id map it built, for
+ * callers that carry link_id references OUTSIDE the tree (the clone dialog
+ * remaps the questionnaire's actions through it).
+ */
+export function regenerateQuestionIdsWithMap(
   questions: Question[],
   {
     unmappedConditions = "drop",
   }: { unmappedConditions?: "drop" | "keep" } = {},
-): Question[] {
-  const freshLinkId = () => `Q-${crypto.randomUUID().slice(0, 8)}`;
-
+): { questions: Question[]; linkIdMap: Map<string, string> } {
   const linkIdMap = new Map<string, string>();
   const mapLinkIds = (list: Question[]) => {
     for (const question of list) {
@@ -158,5 +175,5 @@ export function regenerateQuestionIds(
       };
     });
 
-  return walk(questions);
+  return { questions: walk(questions), linkIdMap };
 }

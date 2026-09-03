@@ -121,6 +121,9 @@ export function QuestionnaireCreatePage({
       subject_type: values.subject_type,
       version: "1.0",
       questions: [],
+      // Explicit: the backend's create/update hooks iterate `actions` and
+      // choke on the field being absent (pydantic MISSING) on ENG-737.
+      actions: [],
       ...scopeCreateFields(scope),
     });
   };

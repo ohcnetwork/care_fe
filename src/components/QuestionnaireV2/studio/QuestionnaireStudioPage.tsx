@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
 import {
   BuilderState,
@@ -47,6 +48,7 @@ import {
 } from "@/components/QuestionnaireV2/manage/questionnaireFormSchema";
 import { useUpdateQuestionnaire } from "@/components/QuestionnaireV2/manage/useUpdateQuestionnaire";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
 import {
   findQuestionNumber,
@@ -60,6 +62,10 @@ import {
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import {
+  actionContextTypeFor,
+  normalizeQuestionnaireActions,
+} from "@/types/questionnaire/actions";
+import {
   QuestionnaireScope,
   scopeCreateFields,
 } from "@/types/questionnaire/questionnaire";
@@ -68,14 +74,17 @@ import query from "@/Utils/request/query";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
 import { StudioCanvas } from "./StudioCanvas";
 import { StudioOutline } from "./StudioOutline";
 import { StudioTopBar } from "./StudioTopBar";
+import { useActionRegistry } from "./useActionRegistry";
 
 const INITIAL_STATE: BuilderState = {
   questions: [],
+  actions: [],
   selectedId: null,
   dirty: false,
 };
@@ -128,6 +137,7 @@ export function QuestionnaireStudioPage({
       dispatch({
         type: "reset",
         questions: questionnaire.questions,
+        actions: normalizeQuestionnaireActions(questionnaire.actions),
         keepSelectedId: state.selectedId,
       });
     }
@@ -154,9 +164,12 @@ export function QuestionnaireStudioPage({
     mode === "preview" ? "preview" : "edit",
   );
   const [importOpen, setImportOpen] = useState(importParam === "1");
-  const [inspectorTarget, setInspectorTarget] = useState<"form" | "question">(
-    "question",
-  );
+  const [inspectorTarget, setInspectorTarget] = useState<
+    "form" | "question" | "actions"
+  >("question");
+  // The expanded card in the Actions panel — owned here so an issue click
+  // from the top bar can open the right one.
+  const [openActionIndex, setOpenActionIndex] = useState<number | null>(null);
   const [scrollRequest, setScrollRequest] = useState<{
     id: string;
     nonce: number;
@@ -258,6 +271,24 @@ export function QuestionnaireStudioPage({
     [issues],
   );
 
+  // What the backend can run and what an action may read; the actions'
+  // own save rules ride the same deferred tree as the question rules.
+  const registry = useActionRegistry();
+  const actionIssues = useMemo(
+    () =>
+      findActionIssues(state.actions, {
+        questions: deferredQuestions,
+        instructions: registry.instructions,
+      }),
+    [state.actions, deferredQuestions, registry.instructions],
+  );
+  // Questions an action reads — the outline marks them so an author
+  // retitling or deleting one knows something depends on it.
+  const actionLinkIds = useMemo(
+    () => new Set(state.actions.flatMap(actionReferencedLinkIds)),
+    [state.actions],
+  );
+
   // Snapshot of `dispatchSeqRef` taken the instant the save PUT is fired
   // (see `handleSave`) — compared against the live ref in `onSaved` below.
   const saveDispatchSeqRef = useRef(0);
@@ -303,6 +334,7 @@ export function QuestionnaireStudioPage({
       dispatch({
         type: "reset",
         questions: updated.questions,
+        actions: normalizeQuestionnaireActions(updated.actions),
         keepSelectedId: state.selectedId,
       });
     }
@@ -340,6 +372,11 @@ export function QuestionnaireStudioPage({
     }));
   };
 
+  const revealAction = (index: number) => {
+    setInspectorTarget("actions");
+    setOpenActionIndex(index);
+  };
+
   const handleSave = () => {
     if (!questionnaire) return;
 
@@ -350,6 +387,18 @@ export function QuestionnaireStudioPage({
       toast.error(t(invalid.messageKey));
       setView("edit");
       revealQuestion(invalid.question.id);
+      return;
+    }
+
+    // Then the actions' rules — the failing action is opened in the panel.
+    const actionIssue = findActionIssues(state.actions, {
+      questions: state.questions,
+      instructions: registry.instructions,
+    })[0];
+    if (actionIssue) {
+      toast.error(t(actionIssue.messageKey));
+      setView("edit");
+      revealAction(actionIssue.index);
       return;
     }
 
@@ -364,6 +413,7 @@ export function QuestionnaireStudioPage({
         save(
           buildUpdateBody(questionnaire, {
             questions: state.questions,
+            actions: state.actions,
             title: meta.title,
             slug: meta.slug,
             description: meta.description,
@@ -385,6 +435,7 @@ export function QuestionnaireStudioPage({
     dispatch({
       type: "reset",
       questions: questionnaire.questions,
+      actions: normalizeQuestionnaireActions(questionnaire.actions),
       keepSelectedId: state.selectedId,
     });
     form.reset({
@@ -419,7 +470,15 @@ export function QuestionnaireStudioPage({
   const selectedQuestion = state.selectedId
     ? findQuestion(state.questions, state.selectedId)
     : undefined;
-  const formSelected = inspectorTarget === "form" || !selectedQuestion;
+  // Which inspector shows: Actions when asked for; otherwise Form settings
+  // stands in whenever no question is selected.
+  const panel: "form" | "question" | "actions" =
+    inspectorTarget === "actions"
+      ? "actions"
+      : inspectorTarget === "form" || !selectedQuestion
+        ? "form"
+        : "question";
+  const formSelected = panel === "form";
   const editing = view === "edit";
   const topLevelIndex = state.selectedId
     ? findTopLevelIndex(state.questions, state.selectedId)
@@ -456,6 +515,11 @@ export function QuestionnaireStudioPage({
             onSelectIssue={(questionId) => {
               setView("edit");
               revealQuestion(questionId);
+            }}
+            actionIssues={actionIssues}
+            onSelectActionIssue={(index) => {
+              setView("edit");
+              revealAction(index);
             }}
             dirty={dirty}
             isSaving={isPending}
@@ -520,6 +584,15 @@ export function QuestionnaireStudioPage({
               formSelected={editing && formSelected}
               issueKeysByQuestionId={issueKeysByQuestionId}
               onSelectForm={() => setInspectorTarget("form")}
+              actionsRow={
+                actionContextTypeFor(questionnaire.subject_type) !== null ||
+                state.actions.length > 0
+              }
+              actionsSelected={editing && panel === "actions"}
+              actionCount={state.actions.length}
+              actionsHaveIssues={actionIssues.length > 0}
+              actionLinkIds={actionLinkIds}
+              onSelectActions={() => setInspectorTarget("actions")}
               onSelectQuestion={revealQuestion}
               dispatch={studioDispatch}
             />
@@ -530,7 +603,19 @@ export function QuestionnaireStudioPage({
               editor surface regardless of what the canvas renders. */}
           {editing && (
             <aside className="order-2 w-full min-w-0 space-y-4 overflow-y-auto p-3 md:flex-1 lg:order-3 lg:w-[400px] lg:flex-none lg:border-l lg:border-gray-200">
-              {formSelected ? (
+              {panel === "actions" ? (
+                <ActionsPanel
+                  subjectType={questionnaire.subject_type}
+                  questions={state.questions}
+                  actions={state.actions}
+                  issues={actionIssues}
+                  openIndex={openActionIndex}
+                  onOpenIndexChange={setOpenActionIndex}
+                  registry={registry}
+                  facilityId={scope.facilityId}
+                  dispatch={dispatch}
+                />
+              ) : formSelected ? (
                 <FormSettingsPanel
                   scope={scope}
                   questionnaire={questionnaire}
@@ -548,8 +633,8 @@ export function QuestionnaireStudioPage({
                   // Question tab per selection — keeps the "Question Title"
                   // textbox visible when save validation or an issue click
                   // selects a question programmatically.
-                  key={selectedQuestion.id}
-                  question={selectedQuestion}
+                  key={selectedQuestion!.id}
+                  question={selectedQuestion!}
                   number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}
@@ -572,10 +657,12 @@ export function QuestionnaireStudioPage({
           >
             <StudioCanvas
               editing={editing}
-              // Cleared while Form settings is the inspector target so the
-              // ring/toolbar don't advertise a question as "editing" that
-              // the inspector no longer shows.
-              selectedId={editing && formSelected ? null : state.selectedId}
+              // Cleared while Form settings or Actions is the inspector
+              // target so the ring/toolbar don't advertise a question as
+              // "editing" that the inspector no longer shows.
+              selectedId={
+                editing && panel !== "question" ? null : state.selectedId
+              }
               onSelectQuestion={(questionId) => {
                 dispatch({ type: "select", id: questionId });
                 setInspectorTarget("question");

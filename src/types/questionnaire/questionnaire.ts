@@ -1,6 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import { UserReadMinimal } from "@/types/user/user";
 
+import { QuestionnaireAction } from "./actions";
 import { Question } from "./question";
 
 /** Runtime source of truth for `SubjectType` — option lists and zod enums
@@ -109,6 +110,9 @@ export interface QuestionnaireBase {
   description?: string;
   status: QuestionStatus;
   subject_type: SubjectType;
+  /** Submit-time automations (see `./actions`). Omitted on the wire by
+   *  questionnaires that never had any. */
+  actions?: QuestionnaireAction[];
 }
 
 export interface QuestionnaireRead extends Omit<QuestionnaireBase, "version"> {

@@ -11,6 +11,7 @@ import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import {
   buildCondition,
+  builderReducer,
   migrateLegacyBooleanEnableWhen,
   normalizeExistsConditionAnswer,
 } from "./builderReducer";
@@ -272,5 +273,103 @@ describe("migrateLegacyBooleanEnableWhen", () => {
     assert.deepEqual(migrated[1].questions?.[0].enable_when, [
       { question: "target", operator: "exists", answer: true },
     ]);
+  });
+});
+
+describe("actions in the builder state", () => {
+  const fever = q({ id: "Q-fever", type: "boolean" });
+  const followUp = q({
+    id: "followup",
+    type: "string",
+    enable_when: [{ question: "Q-fever", operator: "equals", answer: "Yes" }],
+  });
+  const state = builderReducer(
+    { questions: [], actions: [], selectedId: null, dirty: false },
+    {
+      type: "reset",
+      questions: [fever, followUp],
+      actions: [{ condition: "True", instructions: [] }],
+    },
+  );
+
+  it("reset seeds actions clean; setActions replaces them dirty", () => {
+    assert.equal(state.dirty, false);
+    assert.equal(state.actions.length, 1);
+    const next = builderReducer(state, {
+      type: "setActions",
+      actions: [],
+    });
+    assert.deepEqual(next.actions, []);
+    assert.equal(next.dirty, true);
+  });
+
+  it("question edits carry actions through untouched", () => {
+    const next = builderReducer(state, {
+      type: "addQuestion",
+      parentId: null,
+    });
+    assert.equal(next.actions, state.actions);
+    const removed = builderReducer(next, {
+      type: "removeQuestions",
+      ids: [next.selectedId!],
+    });
+    assert.equal(removed.actions, state.actions);
+    const imported = builderReducer(state, {
+      type: "replaceAll",
+      questions: [fever],
+    });
+    assert.equal(imported.actions, state.actions);
+  });
+
+  it("renameLinkId follows the rename through enable_when and action refs", () => {
+    // The legacy-id case: nothing can reference `q_Q-fever` (not a name),
+    // so only enable_when targets follow the first rename…
+    const renamed = builderReducer(state, {
+      type: "renameLinkId",
+      id: "Q-fever",
+      linkId: "Q_fever",
+    });
+    assert.equal(renamed.questions[0].link_id, "Q_fever");
+    assert.deepEqual(renamed.questions[1].enable_when, [
+      { question: "Q_fever", operator: "equals", answer: "Yes" },
+    ]);
+    assert.equal(renamed.dirty, true);
+    // …while a rename of a referenced id rewrites the action too.
+    const withRef = builderReducer(renamed, {
+      type: "setActions",
+      actions: [
+        {
+          condition: "q_Q_fever == True",
+          instructions: [
+            {
+              slug: "logging",
+              params: { message: "{{ q_Q_fever }}" },
+              context: "self",
+            },
+          ],
+        },
+      ],
+    });
+    const again = builderReducer(withRef, {
+      type: "renameLinkId",
+      id: "Q-fever",
+      linkId: "fever",
+    });
+    assert.equal(again.questions[0].link_id, "fever");
+    assert.equal(again.questions[1].enable_when?.[0].question, "fever");
+    assert.equal(again.actions[0].condition, "q_fever == True");
+    assert.equal(
+      again.actions[0].instructions[0].params.message,
+      "{{ q_fever }}",
+    );
+    // A no-op rename leaves the state identity alone.
+    assert.equal(
+      builderReducer(renamed, {
+        type: "renameLinkId",
+        id: "Q-fever",
+        linkId: "Q_fever",
+      }),
+      renamed,
+    );
   });
 });

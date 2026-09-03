@@ -13,6 +13,10 @@ interface CollapsibleSettingsCardProps {
   subtitle?: string;
   badge?: React.ReactNode;
   defaultOpen?: boolean;
+  /** Controlled open state — the studio's Actions panel keeps one card
+   *  open at a time. Leave both unset for the uncontrolled default. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -21,9 +25,13 @@ export function CollapsibleSettingsCard({
   subtitle,
   badge,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
   children,
 }: CollapsibleSettingsCardProps) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   return (
     <Collapsible
       open={open}
@@ -34,7 +42,9 @@ export function CollapsibleSettingsCard({
         <div className="min-w-0">
           <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
           {subtitle && (
-            <p className="mt-0.5 text-sm text-gray-500">{subtitle}</p>
+            <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
+              {subtitle}
+            </p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
