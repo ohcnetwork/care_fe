@@ -23,7 +23,7 @@ export default function UpsertLimitCallout({
         </>
       }
     >
-      <span className="flex items-center gap-2">{children}</span>
+      {children}
     </Callout>
   );
 }
