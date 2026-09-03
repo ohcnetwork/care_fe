@@ -50,16 +50,37 @@ function DrawerContent({
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  React.useLayoutEffect(() => {
+  // A descendant with `autoFocus` can grab focus (opening the iOS keyboard) while
+  // this drawer is still sliding in, racing the keyboard against the open transition
+  // and making the sheet jump. Native autofocus isn't synchronous with mount, so we
+  // listen for the real focus event: if it lands before the transition settles, blur
+  // it and refocus once the transition (or a timeout fallback) completes.
+  React.useEffect(() => {
     const node = contentRef.current;
-    const focused = document.activeElement;
-    if (!node || !(focused instanceof HTMLElement) || !node.contains(focused)) {
-      return;
-    }
-    focused.blur();
-    const refocus = () => focused.focus();
-    node.addEventListener("transitionend", refocus, { once: true });
-    return () => node.removeEventListener("transitionend", refocus);
+    if (!node) return;
+
+    let settled = false;
+    const markSettled = () => {
+      settled = true;
+    };
+    const settleTimer = window.setTimeout(markSettled, 500);
+    node.addEventListener("transitionend", markSettled);
+
+    const onFocusIn = (event: FocusEvent) => {
+      if (settled || !(event.target instanceof HTMLElement)) return;
+      const target = event.target;
+      target.blur();
+      const refocus = () => target.focus();
+      node.addEventListener("transitionend", refocus, { once: true });
+      window.setTimeout(refocus, 500);
+    };
+    node.addEventListener("focusin", onFocusIn, true);
+
+    return () => {
+      window.clearTimeout(settleTimer);
+      node.removeEventListener("transitionend", markSettled);
+      node.removeEventListener("focusin", onFocusIn, true);
+    };
   }, []);
 
   return (
