@@ -53,7 +53,8 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
     "sort-locales": "node ./scripts/sort-locales.js",
-    "clone-component": "tsx scripts/clone-component.ts"
+    "clone-component": "tsx scripts/clone-component.ts",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.2.10",
