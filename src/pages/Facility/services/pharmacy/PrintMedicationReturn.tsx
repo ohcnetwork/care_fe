@@ -11,7 +11,10 @@ import PrintTable from "@/components/Common/PrintTable";
 
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPatientIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { DeliveryOrderRetrieve } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
@@ -152,18 +155,15 @@ const MedicationReturnPreview = ({
                   : undefined
               }
             />
-            {patient?.instance_identifiers
-              ?.filter(
-                ({ config }) =>
-                  config.config.use === PatientIdentifierUse.official,
-              )
-              .map((identifier) => (
-                <DetailRow
-                  key={identifier.config.id}
-                  label={identifier.config.config.display}
-                  value={identifier.value}
-                />
-              ))}
+            {getPatientIdentifiers(patient, {
+              use: PatientIdentifierUse.official,
+            }).map((identifier) => (
+              <DetailRow
+                key={identifier.config.id}
+                label={identifier.config.config.display}
+                value={identifier.value}
+              />
+            ))}
           </div>
           <div className="space-y-2">
             <DetailRow

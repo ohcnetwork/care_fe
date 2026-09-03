@@ -14,7 +14,10 @@ import { formatValue } from "@/components/Facility/ConsultationDetails/Questionn
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPatientIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
@@ -174,17 +177,15 @@ export function PrintableEncounterDetails({
               : undefined
           }
         />
-        {patient?.instance_identifiers
-          ?.filter(
-            ({ config }) => config.config.use === PatientIdentifierUse.official,
-          )
-          .map((identifier) => (
-            <DetailRow
-              key={identifier.config.id}
-              label={identifier.config.config.display}
-              value={identifier.value}
-            />
-          ))}
+        {getPatientIdentifiers(patient, {
+          use: PatientIdentifierUse.official,
+        }).map((identifier) => (
+          <DetailRow
+            key={identifier.config.id}
+            label={identifier.config.config.display}
+            value={identifier.value}
+          />
+        ))}
         {patient?.address && (
           <DetailRow label={t("address")} value={patient.address} />
         )}

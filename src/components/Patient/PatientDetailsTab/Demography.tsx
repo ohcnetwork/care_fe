@@ -21,6 +21,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import {
   getOrgLabel,
   Organization,
@@ -262,12 +263,10 @@ export const Demography = (props: PatientProps) => {
     {
       id: "identifiers",
       allowEdit: false,
-      details: patientData.instance_identifiers
-        ?.filter(({ config }) => !config.config.auto_maintained)
-        .map((i) => ({
-          label: i.config.config.display,
-          value: i.value,
-        })),
+      details: getPatientIdentifiers(patientData).map((i) => ({
+        label: i.config.config.display,
+        value: i.value,
+      })),
     },
     {
       id: "tags",
