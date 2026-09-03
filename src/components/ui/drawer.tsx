@@ -48,10 +48,25 @@ function DrawerContent({
   children,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    const node = contentRef.current;
+    const focused = document.activeElement;
+    if (!node || !(focused instanceof HTMLElement) || !node.contains(focused)) {
+      return;
+    }
+    focused.blur();
+    const refocus = () => focused.focus();
+    node.addEventListener("transitionend", refocus, { once: true });
+    return () => node.removeEventListener("transitionend", refocus);
+  }, []);
+
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
       <DrawerPrimitive.Content
+        ref={contentRef}
         data-slot="drawer-content"
         className={cn(
           "group/drawer-content bg-white fixed z-50 flex h-auto flex-col dark:bg-gray-950",
