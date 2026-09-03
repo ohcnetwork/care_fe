@@ -130,7 +130,7 @@ export default function PrintTable({
                     className="bg-transparent hover:bg-transparent"
                   >
                     <TableCell
-                      colSpan={headers.length - skippedCount}
+                      colSpan={Math.max(1, headers.length - skippedCount)}
                       className={cn(
                         "wrap-break-word whitespace-normal",
                         cellClassName,
