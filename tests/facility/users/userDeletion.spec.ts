@@ -75,16 +75,16 @@ test.describe("User Deletion Access Control", () => {
       const facilityId = getFacilityId();
       await page.goto(`/facility/${facilityId}/users`);
 
-      // Check if staff can see the users list at all. waitFor actually waits
-      // for the page to render (previously covered by networkidle); a timeout
-      // means staff cannot see the list.
+      // Check if staff can see the users list at all.
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
         .first();
-      const canSeeUsers = await seeDetailsButton
-        .waitFor({ state: "visible", timeout: 10000 })
-        .then(() => true)
-        .catch(() => false);
+      // Wait for the users page to settle (user cards or the empty state)
+      // before the permission check — no fixed timeout.
+      await expect(
+        seeDetailsButton.or(page.getByText(/no users found/i)),
+      ).toBeVisible();
+      const canSeeUsers = await seeDetailsButton.isVisible();
 
       if (!canSeeUsers) {
         // Staff cannot access users list — they definitely cannot delete users
