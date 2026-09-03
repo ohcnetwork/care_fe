@@ -1,158 +1,158 @@
 {
   "global": [
-    { "key": "p", "action": "print-button", "description": "Print", "when": "always" },
-    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
-    { "key": "escape", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
-    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
-    { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
-    { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" },
-    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" },
-    { "key": "e", "action": "edit-button", "description": "Edit", "when": "always" },
-    { "key": "shift+1", "action": "tab-index-1", "description": "Switch to Tab 1", "when": "always" },
-    { "key": "shift+2", "action": "tab-index-2", "description": "Switch to Tab 2", "when": "always" },
-    { "key": "shift+3", "action": "tab-index-3", "description": "Switch to Tab 3", "when": "always" },
-    { "key": "shift+4", "action": "tab-index-4", "description": "Switch to Tab 4", "when": "always" },
-    { "key": "shift+5", "action": "tab-index-5", "description": "Switch to Tab 5", "when": "always" },
-    { "key": "shift+6", "action": "tab-index-6", "description": "Switch to Tab 6", "when": "always" },
-    { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7", "when": "always" },
-    { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8", "when": "always" },
-    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" },
-    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code", "when": "always" },
-    { "key": "arrowDown", "action": "keydown-action", "description": "Move Down", "when": "always" }
+    { "key": "p", "action": "print-button", "description": "Print" },
+    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts" },
+    { "key": "escape", "action": "cancel-action", "description": "Cancel Current Action" },
+    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action" },
+    { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back" },
+    { "key": "enter", "action": "enter-action", "description": "Enter Current Action" },
+    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input" },
+    { "key": "e", "action": "edit-button", "description": "Edit" },
+    { "key": "shift+1", "action": "tab-index-1", "description": "Switch to Tab 1" },
+    { "key": "shift+2", "action": "tab-index-2", "description": "Switch to Tab 2" },
+    { "key": "shift+3", "action": "tab-index-3", "description": "Switch to Tab 3" },
+    { "key": "shift+4", "action": "tab-index-4", "description": "Switch to Tab 4" },
+    { "key": "shift+5", "action": "tab-index-5", "description": "Switch to Tab 5" },
+    { "key": "shift+6", "action": "tab-index-6", "description": "Switch to Tab 6" },
+    { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7" },
+    { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8" },
+    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9" },
+    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code" },
+    { "key": "arrowDown", "action": "keydown-action", "description": "Move Down" }
   ],
 
   "facility": [
-    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" },
-    { "key": "shift+b", "action": "pin-page", "description": "Pin/Unpin Page", "when": "always" }
+    { "key": "t", "action": "generate-token", "description": "Generate Token" },
+    { "key": "shift+b", "action": "pin-page", "description": "Pin/Unpin Page" }
   ],
 
   "facility:general": [
-    { "key": "p", "action": "print-button", "description": "Print anything", "when": "always" }
+    { "key": "p", "action": "print-button", "description": "Print anything" }
   ],
 
   "facility:patient": [
-    { "key": "h", "action": "patient-home", "description": "Go to Patient Home", "when": "always" }
+    { "key": "h", "action": "patient-home", "description": "Go to Patient Home" }
   ],
 
   "patient:search": [
-    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
-    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
-    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" }
+    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts" },
+    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action" },
+    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input" }
   ],
 
   "facility:patient:home": [
-    { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
-    { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "s", "action": "schedule-appointment", "description": "Schedule Appointment", "when": "always" },
-    { "key": "a", "action": "view-the-accounts", "description": "View Accounts", "when": "always" }
+    { "key": "p", "action": "print-token", "description": "Print Token" },
+    { "key": "e", "action": "create-encounter", "description": "Create Encounter" },
+    { "key": "s", "action": "schedule-appointment", "description": "Schedule Appointment" },
+    { "key": "a", "action": "view-the-accounts", "description": "View Accounts" }
   ],
 
   "facility:appointment": [
-    { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
-    { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" },
-    { "key": "4", "action": "goto-account", "description": "Go to Account", "when": "always" },
-    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" },
-    { "key": "i", "action": "create-an-invoice", "description": "Create Invoice", "when": "always" },
-    { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items", "when": "always" }
+    { "key": "2", "action": "create-encounter", "description": "Create Encounter" },
+    { "key": "1", "action": "start-consultation", "description": "Start Consultation" },
+    { "key": "3", "action": "print-appointment", "description": "Print Appointment" },
+    { "key": "4", "action": "goto-account", "description": "Go to Account" },
+    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment" },
+    { "key": "i", "action": "create-an-invoice", "description": "Create Invoice" },
+    { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items" }
   ],
 
   "facility:billing": [
-    { "key": "a", "action": "add-charge-item", "description": "Add Charge Item", "when": "always" }
+    { "key": "a", "action": "add-charge-item", "description": "Add Charge Item" }
   ],
 
   "facility:pharmacy": [
-    { "key": "shift+d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" },
-    { "key": "shift+r", "action": "medication-return", "description": "Return Medication", "when": "always" },
-    { "key": "b", "action": "billing-action", "description": "Billing related action", "when": "always" },
-    { "key": "shift+p", "action": "view-prescriptions", "description": "View Prescription", "when": "always" },
-    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" },
-    { "key": "h", "action": "put-on-hold-action", "description": "Put on Hold", "when": "always" }
+    { "key": "shift+d", "action": "dispense-button", "description": "Dispense Medication" },
+    { "key": "shift+r", "action": "medication-return", "description": "Return Medication" },
+    { "key": "b", "action": "billing-action", "description": "Billing related action" },
+    { "key": "shift+p", "action": "view-prescriptions", "description": "View Prescription" },
+    { "key": "a", "action": "view-account", "description": "View Account" },
+    { "key": "h", "action": "put-on-hold-action", "description": "Put on Hold" }
   ],
 
   "facility:pharmacy:supply-delivery": [
-    { "key": "shift+enter", "action": "mark-as-received", "description": "Mark as Received", "when": "always" },
-    { "key": "w", "action": "proceed-without-marking", "description": "Proceed without Marking", "when": "always" },
-    { "key": "enter", "action": "proceed-with-marking", "description": "Proceed with Marking", "when": "always" }
+    { "key": "shift+enter", "action": "mark-as-received", "description": "Mark as Received" },
+    { "key": "w", "action": "proceed-without-marking", "description": "Proceed without Marking" },
+    { "key": "enter", "action": "proceed-with-marking", "description": "Proceed with Marking" }
 
   ],
 
   "facility:billing:invoice": [
-    { "key": "c", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
-    { "key": "o", "action": "other-charge-items", "description": "Other Charge Items", "when": "always" },
-    { "key": "i", "action": "issue-invoice", "description": "Issue Invoice", "when": "always" },
-    { "key": "b", "action": "mark-as-balanced", "description": "Mark as Balanced", "when": "always" },
-    { "key": "r", "action": "record-payment", "description": "Record Payment", "when": "always" },
-    { "key": "p", "action": "print-invoice", "description": "Print Invoice", "when": "always" },
-    { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source", "when": "always" },
-    { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" }
+    { "key": "c", "action": "create-invoice", "description": "Create Invoice" },
+    { "key": "o", "action": "other-charge-items", "description": "Other Charge Items" },
+    { "key": "i", "action": "issue-invoice", "description": "Issue Invoice" },
+    { "key": "b", "action": "mark-as-balanced", "description": "Mark as Balanced" },
+    { "key": "r", "action": "record-payment", "description": "Record Payment" },
+    { "key": "p", "action": "print-invoice", "description": "Print Invoice" },
+    { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source" },
+    { "key": "v", "action": "view-invoice-payment", "description": "View Invoice" }
   ],
 
   "facility:account:show": [
-    { "key": "s", "action": "settle-close-account", "description": "Settle and Close Account", "when": "always" },
-    { "key": "i", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
-    { "key": "r", "action": "record-payment-account", "description": "Record Payment", "when": "always" },
-    { "key": "c", "action": "credit-payment-account", "description": "Add Credit", "when": "always" },
-    { "key": "e", "action": "edit-account", "description": "Edit Account", "when": "always" },
-    { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
-    { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },
-    { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab", "when": "always" },
-    { "key": "shift+4", "action": "switch-to-reports-tab", "description": "Switch to Reports Tab", "when": "always" },
-    { "key": "shift+5", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
+    { "key": "s", "action": "settle-close-account", "description": "Settle and Close Account" },
+    { "key": "i", "action": "create-invoice", "description": "Create Invoice" },
+    { "key": "r", "action": "record-payment-account", "description": "Record Payment" },
+    { "key": "c", "action": "credit-payment-account", "description": "Add Credit" },
+    { "key": "e", "action": "edit-account", "description": "Edit Account" },
+    { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab" },
+    { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab" },
+    { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab" },
+    { "key": "shift+4", "action": "switch-to-reports-tab", "description": "Switch to Reports Tab" },
+    { "key": "shift+5", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab" }
   ],
 
   "facility:payment": [
-    { "key": "c", "action": "mark-payment-cancelled", "description": "Mark as Cancelled", "when": "always" },
-    { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error", "when": "always" },
-    { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" },
-    { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" },
-    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" }
+    { "key": "c", "action": "mark-payment-cancelled", "description": "Mark as Cancelled" },
+    { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error" },
+    { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt" },
+    { "key": "v", "action": "view-invoice", "description": "View Invoice" },
+    { "key": "a", "action": "view-account", "description": "View Account" }
   ],
   "facility:inventory": [
-    { "key": "r", "action": "raise-stock-request", "description": "Raise Stock Request", "when": "always" },
-    { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
-    { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" },
-    { "key": "e", "action": "edit-order", "description": "Edit Order", "when": "always" },
-    { "key": "d", "action": "all-deliveries", "description": "Print Order", "when": "always" },
-    { "key": "m", "action": "mark-as", "description": "Mark as Approved/Completed", "when": "always" },
-    { "key": "shift+a", "action": "select-all", "description": "Select All Deliveries", "when": "always" }
+    { "key": "r", "action": "raise-stock-request", "description": "Raise Stock Request" },
+    { "key": "c", "action": "create-order", "description": "Create Order" },
+    { "key": "a", "action": "add-item", "description": "Add Item" },
+    { "key": "e", "action": "edit-order", "description": "Edit Order" },
+    { "key": "d", "action": "all-deliveries", "description": "Print Order" },
+    { "key": "m", "action": "mark-as", "description": "Mark as Approved/Completed" },
+    { "key": "shift+a", "action": "select-all", "description": "Select All Deliveries" }
 
   ],
   "facility:inventory:delivery": [
-    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" },
-    { "key": "p", "action": "print-delivery-order", "description": "Print Delivery Order", "when": "always" }
+    { "key": "l", "action": "load-from-order", "description": "Load from Order" },
+    { "key": "p", "action": "print-delivery-order", "description": "Print Delivery Order" }
   ],
   "facility:service": [
-    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" },
-    { "key": "c", "action": "collect-specimen", "description": "Collect Specimen", "when": "always" },
-    { "key": "m", "action": "mark-as-complete", "description": "Mark as Complete", "when": "always" },
-    { "key": "r", "action": "view-report", "description": "View Report", "when": "always" },
-    { "key": "p", "action": "print-report", "description": "Print Report", "when": "always" }
+    { "key": "s", "action": "scan-button", "description": "Scan the QR code" },
+    { "key": "c", "action": "collect-specimen", "description": "Collect Specimen" },
+    { "key": "m", "action": "mark-as-complete", "description": "Mark as Complete" },
+    { "key": "r", "action": "view-report", "description": "View Report" },
+    { "key": "p", "action": "print-report", "description": "Print Report" }
   ],
 
   "encounter": [
-    { "key": "a", "action": "add-allergy", "description": "Add Allergy", "when": "always" },
-    { "key": "s", "action": "add-symptoms", "description": "Add Symptoms", "when": "always" },
-    { "key": "d", "action": "add-diagnosis", "description": "Add Diagnosis", "when": "always" },
-    { "key": "r", "action": "add-service-request", "description": "Add Service Request", "when": "always" },
-    { "key": "k", "action": "add-medication-request", "description": "Add Medication", "when": "always" },
-    { "key": "f", "action": "add-questionnaire", "description": "New Questionnaire/Form", "when": "always" },
-    { "key": "l", "action": "assign-location", "description": "Assign Location", "when": "always" },
-    { "key": "shift+u", "action": "update-encounter", "description": "Update Encounter", "when": "always" },
-    { "key": "h", "action": "clinical-history", "description": "Clinical History", "when": "always" },
-    { "key": "shift+e", "action": "open-command-dialog", "description": "Open Command Dialog", "when": "always" },
-    { "key": "m c", "action": "mark-as-completed", "description": "Mark as Completed", "when": "always" },
-    { "key": "shift+d", "action": "dispense", "description": "Dispense Medication", "when": "always" },
-    { "key": "g g", "action": "encounter-overview", "description": "Go to Updates Tab", "when": "always" },
-    { "key": "g p", "action": "plots", "description": "Go to Plots Tab", "when": "always" },
-    { "key": "g o", "action": "observations", "description": "Go to Observations Tab", "when": "always" },
-    { "key": "g m", "action": "medicines", "description": "Go to Medicines Tab", "when": "always" },
-    { "key": "g r", "action": "responses", "description": "Go to Responses Tab", "when": "always" },
-    { "key": "g s", "action": "service-requests", "description": "Go to Service Requests Tab", "when": "always" },
-    { "key": "g d", "action": "diagnostic-reports", "description": "Go to Diagnostic Reports Tab", "when": "always" },
-    { "key": "g f", "action": "files", "description": "Go to Files Tab", "when": "always" },
-    { "key": "g n", "action": "notes", "description": "Go to Notes Tab", "when": "always" },
-    { "key": "g v", "action": "devices", "description": "Go to Devices Tab", "when": "always" },
-    { "key": "g c", "action": "consents", "description": "Go to Consents Tab", "when": "always" }
+    { "key": "a", "action": "add-allergy", "description": "Add Allergy" },
+    { "key": "s", "action": "add-symptoms", "description": "Add Symptoms" },
+    { "key": "d", "action": "add-diagnosis", "description": "Add Diagnosis" },
+    { "key": "r", "action": "add-service-request", "description": "Add Service Request" },
+    { "key": "k", "action": "add-medication-request", "description": "Add Medication" },
+    { "key": "f", "action": "add-questionnaire", "description": "New Questionnaire/Form" },
+    { "key": "l", "action": "assign-location", "description": "Assign Location" },
+    { "key": "shift+u", "action": "update-encounter", "description": "Update Encounter" },
+    { "key": "h", "action": "clinical-history", "description": "Clinical History" },
+    { "key": "shift+e", "action": "open-command-dialog", "description": "Open Command Dialog" },
+    { "key": "m c", "action": "mark-as-completed", "description": "Mark as Completed" },
+    { "key": "shift+d", "action": "dispense", "description": "Dispense Medication" },
+    { "key": "g g", "action": "encounter-overview", "description": "Go to Updates Tab" },
+    { "key": "g p", "action": "plots", "description": "Go to Plots Tab" },
+    { "key": "g o", "action": "observations", "description": "Go to Observations Tab" },
+    { "key": "g m", "action": "medicines", "description": "Go to Medicines Tab" },
+    { "key": "g r", "action": "responses", "description": "Go to Responses Tab" },
+    { "key": "g s", "action": "service-requests", "description": "Go to Service Requests Tab" },
+    { "key": "g d", "action": "diagnostic-reports", "description": "Go to Diagnostic Reports Tab" },
+    { "key": "g f", "action": "files", "description": "Go to Files Tab" },
+    { "key": "g n", "action": "notes", "description": "Go to Notes Tab" },
+    { "key": "g v", "action": "devices", "description": "Go to Devices Tab" },
+    { "key": "g c", "action": "consents", "description": "Go to Consents Tab" }
   ]
 }
