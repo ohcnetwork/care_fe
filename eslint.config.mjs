@@ -237,15 +237,40 @@ const config = [
       },
     },
     rules: {
-      ...playwright.configs["flat/recommended"].rules,
-      // Forward gates (no existing usages): promote to error so CI actually
-      // rejects new usages (these are only `warn` in flat/recommended).
-      "playwright/no-wait-for-selector": "error",
+      // Explicit allow-list of the Playwright rules we enforce, all as errors.
+      "playwright/consistent-spacing-between-blocks": "error",
+      "playwright/max-nested-describe": "error",
+      "playwright/missing-playwright-await": "error",
+      "playwright/no-duplicate-hooks": "error",
+      "playwright/no-duplicate-slow": "error",
       "playwright/no-element-handle": "error",
       "playwright/no-eval": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/no-force-option": "error",
+      "playwright/no-nested-step": "error",
+      "playwright/no-networkidle": "error",
       "playwright/no-page-pause": "error",
-      // Forward gate (no existing usages): disallow test-id selectors in favour
-      // of role/label/text locators.
+      "playwright/no-standalone-expect": "error",
+      "playwright/no-unnecessary-assertions": "error",
+      "playwright/no-unsafe-references": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-useless-not": "error",
+      "playwright/no-wait-for-navigation": "error",
+      "playwright/no-wait-for-selector": "error",
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/prefer-hooks-in-order": "error",
+      "playwright/prefer-hooks-on-top": "error",
+      "playwright/prefer-locator": "error",
+      "playwright/prefer-to-have-count": "error",
+      "playwright/prefer-to-have-length": "error",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/valid-describe-callback": "error",
+      "playwright/valid-expect": "error",
+      "playwright/valid-expect-in-promise": "error",
+      "playwright/valid-test-tags": "error",
+      "playwright/valid-title": "error",
+      // Disallow test-id selectors in favour of role/label/text locators.
       "playwright/no-restricted-locators": [
         "error",
         [
@@ -256,26 +281,6 @@ const config = [
           },
         ],
       ],
-      // Anti-flakiness rules: enforced as errors.
-      "playwright/no-networkidle": "error",
-      "playwright/no-wait-for-timeout": "error",
-      "playwright/no-force-option": "error",
-      // Correctness/style rules: enforced as errors (auto-fixable / low-noise).
-      "playwright/no-useless-not": "error",
-      "playwright/prefer-to-have-count": "error",
-      "playwright/no-useless-await": "error",
-      "playwright/no-unused-locators": "error",
-      "playwright/prefer-web-first-assertions": "error",
-      "playwright/consistent-spacing-between-blocks": "error",
-      // Disabled: .first()/.last()/.nth() are idiomatic Playwright, and the
-      // rest have many legitimate violations (helper-driven tests, viewport
-      // branches, intentional skips). Preferring semantic locators / adding
-      // assertions stays as review guidance, not a lint gate.
-      "playwright/no-nth-methods": "off",
-      "playwright/expect-expect": "off",
-      "playwright/no-conditional-in-test": "off",
-      "playwright/no-conditional-expect": "off",
-      "playwright/no-skipped-test": "off",
     },
   },
 
