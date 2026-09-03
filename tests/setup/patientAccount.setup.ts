@@ -17,7 +17,9 @@ test("navigate to an patient - create and save account id", async ({
   // exists (previously covered by networkidle).
   const accountsLoaded = page.waitForResponse(
     (resp) =>
-      resp.url().includes("/account/") && resp.request().method() === "GET",
+      resp.url().includes(`/facility/${facilityId}/account/`) &&
+      resp.request().method() === "GET" &&
+      resp.status() === 200,
   );
   // Navigate to patient page
   await page.goto(

@@ -275,10 +275,12 @@ export async function selectFromCommand(
       }
     }
 
-    // Debounced search (~500ms) clears the current options while loading;
-    // wait for that transition so options reflect the query, not the
-    // pre-search list.
-    await expect(scope.getByRole("option")).toHaveCount(0);
+    // Wait for the debounced results to reflect the typed query (some pickers
+    // keep the previous options mounted while fetching, so don't wait for the
+    // list to empty).
+    await expect(
+      scope.getByRole("option").filter({ hasText: search }).first(),
+    ).toBeVisible();
   }
 
   // Wait for options to load

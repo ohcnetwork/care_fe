@@ -243,13 +243,13 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await expect(page.getByText(userAMessage3)).toBeVisible();
 
     // Verify exactly 3 messages are present by counting occurrences
-    const message1Count = page.getByText(userAMessage1);
-    const message2Count = page.getByText(userAMessage2);
-    const message3Count = page.getByText(userAMessage3);
+    const message1 = page.getByText(userAMessage1);
+    const message2 = page.getByText(userAMessage2);
+    const message3 = page.getByText(userAMessage3);
 
-    await expect(message1Count).toHaveCount(1);
-    await expect(message2Count).toHaveCount(1);
-    await expect(message3Count).toHaveCount(1);
+    await expect(message1).toHaveCount(1);
+    await expect(message2).toHaveCount(1);
+    await expect(message3).toHaveCount(1);
   });
 });
 

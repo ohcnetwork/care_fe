@@ -89,10 +89,10 @@ test.describe("User Deletion Access Control", () => {
       if (!canSeeUsers) {
         // Staff cannot access users list — they definitely cannot delete users
         // This is a valid security outcome
-        const deleteButtonCount = page.getByRole("button", {
+        const deleteButtons = page.getByRole("button", {
           name: "Delete Account",
         });
-        await expect(deleteButtonCount).toHaveCount(0);
+        await expect(deleteButtons).toHaveCount(0);
         return;
       }
 
@@ -102,10 +102,10 @@ test.describe("User Deletion Access Control", () => {
       const deleteButton = page.getByRole("button", { name: "Delete Account" });
       await expect(deleteButton).toBeHidden();
 
-      const deleteButtonCount = page.getByRole("button", {
+      const deleteButtons = page.getByRole("button", {
         name: "Delete Account",
       });
-      await expect(deleteButtonCount).toHaveCount(0);
+      await expect(deleteButtons).toHaveCount(0);
     });
   });
 });

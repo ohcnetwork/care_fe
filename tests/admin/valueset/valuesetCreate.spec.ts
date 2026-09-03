@@ -119,7 +119,9 @@ test.describe("ValueSet Create", () => {
 
     const slugField = page.getByRole("textbox", { name: "Slug *" });
     const expectedSlugValue = expectedSlug(name);
-    await expect(slugField).toHaveValue(new RegExp(expectedSlugValue));
+    await expect(slugField).toHaveValue(
+      new RegExp(expectedSlugValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    );
   });
 
   test("verify excluded rules are not present in preview", async ({ page }) => {

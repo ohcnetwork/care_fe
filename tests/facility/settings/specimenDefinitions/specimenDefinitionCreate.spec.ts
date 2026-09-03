@@ -264,7 +264,9 @@ test.describe("Specimen Definitions Create", () => {
       .toLowerCase()
       .replace(/[^a-z0-9_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
-    await expect(slugField).toHaveValue(new RegExp(expectedSlugPattern));
+    await expect(slugField).toHaveValue(
+      new RegExp(expectedSlugPattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    );
   });
 
   test("verify slug validation of 5 - 25 character", async ({ page }) => {
