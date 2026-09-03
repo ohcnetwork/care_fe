@@ -151,7 +151,7 @@ test.describe("Product List", () => {
       // Optionally, check that "No results" is NOT visible
       await expect(
         page.getByText(/no results|not found|no products/i),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
   });
 

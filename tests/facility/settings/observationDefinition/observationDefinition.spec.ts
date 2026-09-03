@@ -75,7 +75,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
     gender: string = "Male",
   ) {
     await test.step("Add gender condition", async () => {
-      page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelector = page.getByTitle(`Condition ${conditionNumber}`);
       const conditionSelectorExists = await conditionSelector.isVisible();
       if (!conditionSelectorExists) {

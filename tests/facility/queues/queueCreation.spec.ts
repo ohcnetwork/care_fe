@@ -20,6 +20,7 @@ async function openQueueEditMenu(page: Page, queueName: string) {
 
 test.describe("Queue Creation & Editing", () => {
   let facilityId: string;
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await page.goto(`/facility/${facilityId}/queues`);

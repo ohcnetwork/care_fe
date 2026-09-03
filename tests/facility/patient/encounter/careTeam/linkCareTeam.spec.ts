@@ -209,7 +209,7 @@ test.describe("Manage care team for an encounter", () => {
       await page.getByRole("button", { name: "Close" }).click();
       await expect(
         page.getByRole("dialog", { name: "Manage Care Team" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     await test.step("Verify member was not added", async () => {
@@ -218,7 +218,7 @@ test.describe("Manage care team for an encounter", () => {
       const dialog = page.getByRole("dialog", { name: "Manage Care Team" });
       await expect(
         dialog.getByText(selectedUsername, { exact: true }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
   });
 
