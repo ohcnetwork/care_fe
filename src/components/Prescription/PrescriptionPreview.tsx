@@ -8,23 +8,25 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Markdown } from "@/components/ui/markdown";
 
 import Loading from "@/components/Common/Loading";
-import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 import {
+  formatAdditionalInstructions,
   formatDosage,
   formatDuration,
-  formatFrequencyWithInstructions,
+  formatFrequency,
   formatSig,
 } from "@/components/Medicine/utils";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
+import { getLocationPath } from "@/types/location/utils";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
 export interface DetailRowProps {
@@ -35,8 +37,12 @@ export interface DetailRowProps {
 
 const PrescriptionContent = ({
   prescription,
+  prescriptionIndex,
+  totalCount,
 }: {
   prescription: PrescriptionRead;
+  prescriptionIndex: number;
+  totalCount: number;
 }) => {
   const medications = prescription.medications;
   const { t } = useTranslation();
@@ -44,67 +50,126 @@ const PrescriptionContent = ({
   return (
     <div>
       {/* Prescription Symbol */}
-      <div className="text-xl font-semibold mb-3 flex items-end gap-4">
-        <p>{t("℞")}</p>
-        <p className="text-sm text-gray-600 font-semibold ">
-          {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
-        </p>
+      <div className="flex justify-between items-center mb-1.5">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-base text-gray-950">{t("℞")}</span>
+          <span className="font-semibold text-sm print:text-xs uppercase text-gray-950">
+            {t("medicine_instructions")}
+          </span>
+          {totalCount > 1 && (
+            <span className="text-sm print:text-xs text-gray-700 font-medium">
+              [
+              {t("x_of_y", {
+                current: prescriptionIndex + 1,
+                total: totalCount,
+              })}
+              ]
+            </span>
+          )}
+        </div>
+        <span className="text-sm print:text-xs text-gray-950">
+          {formatDateTime(
+            prescription.created_date,
+            "DD MMM YYYY, ddd, hh:mm A",
+          )}
+        </span>
       </div>
 
-      {/* Medications Table */}
-      {medications && medications.length > 0 && (
-        <div className="mt-4">
-          <p className="text-base font-semibold mb-2">{t("medicines")}</p>
+      <div className="border border-gray-300 rounded-md">
+        <div className="relative flex justify-between place-items-end px-4 py-3">
+          <div className="absolute top-5 left-0 h-3.5 w-1 bg-gray-400 rounded-r-md"></div>
+          <div>
+            <p className="text-sm print:text-xs">
+              <span className="text-gray-700 font-medium">
+                {t("prescribed_by")}:{" "}
+              </span>
+              <span className="font-semibold text-gray-950">
+                {formatName(prescription.prescribed_by)}
+              </span>
+            </p>
+            {prescription.note && (
+              <div className="text-xs print:text-[11px] text-gray-700 mt-0.5 flex gap-1">
+                {t("note")}:
+                <Markdown content={prescription.note} prose={false} />
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Medications Table */}
+        {medications && medications.length > 0 && (
           <PrintTable
             headers={[
+              { key: "hash_tag" },
               { key: "medicine" },
               { key: "dosage" },
               { key: "frequency" },
               { key: "duration" },
               { key: "instructions" },
             ]}
-            rows={medications.flatMap((medication) => {
-              const instructions = medication.dosage_instruction;
-              const isMulti = instructions.length > 1;
-              return instructions.map((di, idx) => ({
-                _groupedRow:
-                  isMulti && idx < instructions.length - 1 ? "true" : undefined,
-                medicine: idx === 0 ? displayMedicationName(medication) : "",
-                dosage: formatDosage(di) || "-",
-                frequency: formatFrequencyWithInstructions(di) || "-",
-                duration: formatDuration(di) || "-",
-                instructions: [formatSig(di), idx === 0 ? medication.note : ""]
-                  .filter(Boolean)
-                  .join("\n"),
-              }));
-            })}
-            className="text-sm break-words font-semibold whitespace-break-spaces text-gray-950"
+            rows={medications.flatMap(
+              (medication, medIndex): Record<string, string | undefined>[] => {
+                const instructions = medication.dosage_instruction;
+                const isMulti = instructions.length > 1;
+                const noteText = medication.note
+                  ? `${t("note")}: ${medication.note}`
+                  : undefined;
+                const medicationNote =
+                  isMulti && noteText ? [{ _fullspan: noteText }] : [];
+                const totalRows = instructions.length + medicationNote.length;
+                const shouldSpan = totalRows > 1;
+                return [
+                  ...instructions.map((di, idx) => ({
+                    _groupedRow:
+                      isMulti && idx < instructions.length - 1
+                        ? "true"
+                        : undefined,
+                    _span_hash_tag:
+                      idx === 0 && shouldSpan ? String(totalRows) : undefined,
+                    _span_medicine:
+                      idx === 0 && shouldSpan ? String(totalRows) : undefined,
+                    hash_tag: idx === 0 ? String(medIndex + 1) : "",
+                    medicine:
+                      idx === 0 ? displayMedicationName(medication) : "",
+                    dosage: formatDosage(di) || "",
+                    frequency: formatFrequency(di) || "",
+                    duration: formatDuration(di) || "",
+                    instructions: [
+                      formatSig(di),
+                      formatAdditionalInstructions(di),
+                      !isMulti ? noteText : undefined,
+                    ]
+                      .filter(Boolean)
+                      .join("\n\n"),
+                  })),
+                  ...medicationNote,
+                ];
+              },
+            )}
+            cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left border-t border-gray-300"
             cellConfig={{
-              medicine: { className: "text-left wrap-anywhere" },
-              frequency: { className: "text-left" },
+              hash_tag: {
+                className: "text-center text-gray-600 w-8 print:w-[5%]",
+              },
+              medicine: {
+                className: "font-medium max-w-56 min-w-32 print:w-[20%]",
+              },
+              dosage: { className: "w-24 print:w-[12%]" },
+              frequency: { className: "min-w-24 max-w-56 print:w-[18%]" },
+              duration: { className: "border-r w-20 print:w-[10%]" },
+              instructions: { className: "min-w-28 max-w-56 print:w-[30%]" },
             }}
-            rowClassName={(row) => (row._groupedRow ? "border-b-0" : undefined)}
+            headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-y border-gray-300"
+            tableClassName="border-0 rounded-none"
           />
-        </div>
-      )}
-      {prescription?.note && (
-        <div className="mt-6 mb-6 text-sm text-gray-600">
-          <p className="font-semibold mb-1">{t("note")}</p>
-          <Markdown
-            content={prescription.note}
-            prose={false}
-            className="text-sm"
-          />
-        </div>
-      )}
+        )}
+      </div>
+
       {/* Doctor's Signature */}
-      <div className="w-full items-end mt-6 flex flex-row justify-end gap-1">
-        <div className="text-right">
-          <p className="text-sm text-gray-400">{t("prescribed_by")}</p>
-          <p className="text-base text-gray-600 font-semibold">
-            {formatName(prescription.prescribed_by)}
-          </p>
-        </div>
+
+      <div className="text-right mt-20 mb-2">
+        <p className="text-sm print:text-xs font-medium text-gray-950">
+          {formatName(prescription.prescribed_by)}
+        </p>
       </div>
     </div>
   );
@@ -112,10 +177,17 @@ const PrescriptionContent = ({
 
 const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   return (
-    <div className="flex">
-      <span className="text-gray-600 w-32">{label}</span>
-      <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+    <div className="flex gap-1">
+      <span className="text-gray-700 font-medium min-w-24 shrink-0 text-sm print:text-xs">
+        {label}
+      </span>
+      <span className="text-gray-700 text-sm print:text-xs">:</span>
+      <span
+        className={cn(
+          "ml-1 text-sm print:text-xs",
+          isStrong ? "font-semibold text-gray-950" : "text-gray-700",
+        )}
+      >
         {value || "-"}
       </span>
     </div>
@@ -196,49 +268,81 @@ export const PrescriptionPreview = ({
       disabled={!hasMedications}
       facility={facility}
       templateSlug={PrintTemplateType.prescription}
+      footer={
+        <div className="mt-2 text-xs print:text-[10px] text-gray-900 text-center flex gap-2 justify-center">
+          <span>{t("computer_generated_prescription")}</span>|
+          <span>{formatDateTime(new Date(), "MMMM D, YYYY [at] h:mm A")}</span>
+        </div>
+      }
     >
       <div className="max-w-5xl mx-auto">
         <div>
           {/* Patient Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
-            <div className="space-y-1">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-                isStrong
-              />
-              {getPatientIdentifiers(patient, {
-                use: PatientIdentifierUse.official,
-              }).map((identifier) => (
-                <DetailRow
-                  key={identifier.config.id}
-                  label={identifier.config.config.display}
-                  value={identifier.value}
-                  isStrong
-                />
-              ))}
-              {prescriptions.length === 1 && (
-                <DetailRow
-                  label={t("encounter_date")}
-                  value={displayDate}
-                  isStrong
-                />
-              )}
-              <DetailRow
-                label={t("mobile_number")}
-                value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
-              />
+          <div className="flex gap-4 pb-2 mb-2">
+            <div className="flex flex-col flex-1 justify-between gap-3">
+              <div className="flex gap-4">
+                {/* Left column: Patient, Age/Sex, Mobile */}
+                <div className="space-y-1 flex-3">
+                  <DetailRow
+                    label={t("patient")}
+                    value={patient.name}
+                    isStrong
+                  />
+                  <DetailRow
+                    label={`${t("age")} / ${t("sex")}`}
+                    value={
+                      patient
+                        ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                        : undefined
+                    }
+                    isStrong
+                  />
+                  <DetailRow
+                    label={t("mobile_number")}
+                    value={
+                      patient && formatPhoneNumberIntl(patient.phone_number)
+                    }
+                    isStrong
+                  />
+                </div>
+
+                {/* Right column: Identifiers + Encounter Date */}
+                <div className="space-y-1 flex-2">
+                  {getPatientIdentifiers(patient, {
+                    use: PatientIdentifierUse.official,
+                  }).map((identifier) => (
+                    <DetailRow
+                      key={identifier.config.id}
+                      label={identifier.config.config.display}
+                      value={identifier.value}
+                      isStrong
+                    />
+                  ))}
+                  {prescriptions.length === 1 && (
+                    <DetailRow
+                      label={t("encounter_date")}
+                      value={displayDate}
+                      isStrong
+                    />
+                  )}
+                </div>
+              </div>
+
+              {prescriptions.length === 1 &&
+                prescriptions[0].encounter.current_location && (
+                  <DetailRow
+                    label={t("patient_ip_location")}
+                    value={getLocationPath(
+                      prescriptions[0].encounter.current_location,
+                    )}
+                  />
+                )}
             </div>
-            <div className="space-y-1 flex justify-end items-center pr-3">
+
+            <div className="shrink-0">
               <QRCodeSVG
                 value={patient.id}
-                size={70}
+                size={85}
                 level="Q"
                 marginSize={0}
               />
@@ -246,7 +350,7 @@ export const PrescriptionPreview = ({
           </div>
 
           {prescriptions.length > 1 && (
-            <div className="mb-4 text-sm text-gray-500 border-b pb-2">
+            <div className="mb-4 text-sm print:text-xs text-gray-500 border-b pb-2">
               {t("prescriptions_count", { count: prescriptions.length })}
             </div>
           )}
@@ -256,15 +360,13 @@ export const PrescriptionPreview = ({
               {index > 0 && (
                 <div className="border-t border-dashed border-gray-300 my-6" />
               )}
-              <PrescriptionContent prescription={prescription} />
+              <PrescriptionContent
+                prescription={prescription}
+                prescriptionIndex={index}
+                totalCount={prescriptions.length}
+              />
             </div>
           ))}
-
-          {/* Footer */}
-          <PrintFooter
-            leftContent={t("computer_generated_prescription")}
-            className="text-sm"
-          />
         </div>
       </div>
     </PrintPreview>
