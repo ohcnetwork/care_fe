@@ -329,7 +329,7 @@ function ObservationDefinitionFormContent({
     } else {
       form.setValue(
         "component",
-        form.watch("component")?.map((c) => ({
+        form.getValues("component")?.map((c) => ({
           ...c,
           qualified_ranges: [],
         })),
