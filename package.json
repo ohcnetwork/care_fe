@@ -34,6 +34,7 @@
     "build:react": "cross-env NODE_ENV=production vite build",
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
     "build": "npm run build:meta && npm run supported-browsers && npm run build:react",
+    "build:e2e": "cross-env REACT_ENABLE_E2E_CONFIG_OVERRIDES=true npm run build",
     "postinstall": "tsx scripts/install-platform-deps.ts",
     "postbuild": "tsx scripts/generate-headers.ts",
     "test": "snyk test",

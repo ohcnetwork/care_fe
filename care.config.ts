@@ -50,6 +50,73 @@ const resolveApiUrl = (): string => {
   return env.REACT_CARE_API_URL ?? "";
 };
 
+/**
+ * E2E test-only runtime overrides for patient-registration config.
+ *
+ * Build-time `import.meta.env.REACT_*` values are inlined and frozen into the
+ * bundle, so Playwright specs (which run against the production `preview`
+ * build) cannot flip them per test file. To make per-file control possible, a
+ * spec sets `window.__CARE_E2E_CONFIG__` via `page.addInitScript(...)` — which
+ * runs before this module loads — and the values below are consulted first.
+ *
+ * This seam is gated behind the `REACT_ENABLE_E2E_CONFIG_OVERRIDES` build flag
+ * (default off), so it is completely inert in normal production builds. The
+ * affected flags only relax client-side form validation; the backend
+ * independently enforces required fields, so this is not a security boundary.
+ */
+interface E2EConfigOverrides {
+  minGeoOrganizationLevelsRequired?: number;
+  minimalPatientRegistration?: boolean;
+}
+
+/**
+ * Reads E2E overrides from `window.__CARE_E2E_CONFIG__`.
+ *
+ * Because the object is runtime-injected (via `page.addInitScript`), it cannot
+ * be trusted to have the right shape: values may be missing, of the wrong type,
+ * or out of range. Each field is therefore type-checked and coerced, and
+ * anything malformed is ignored (treated as "no override") rather than trusted
+ * blindly. This prevents e.g. a string `"false"` from making a boolean flag
+ * truthy, or an invalid geo-org level from being applied.
+ */
+function readE2EConfigOverrides(): E2EConfigOverrides {
+  if (
+    !booleanFromString(env.REACT_ENABLE_E2E_CONFIG_OVERRIDES, false) ||
+    typeof window === "undefined"
+  ) {
+    return {};
+  }
+
+  // Signal to E2E specs that the seam is active in this build (i.e. built with
+  // `REACT_ENABLE_E2E_CONFIG_OVERRIDES=true`), so they can skip themselves when
+  // run against a build that does not enable it.
+  (
+    window as unknown as { __CARE_E2E_CONFIG_ENABLED__?: boolean }
+  ).__CARE_E2E_CONFIG_ENABLED__ = true;
+
+  const raw = (window as unknown as { __CARE_E2E_CONFIG__?: unknown })
+    .__CARE_E2E_CONFIG__;
+  if (typeof raw !== "object" || raw === null) {
+    return {};
+  }
+
+  const source = raw as Record<string, unknown>;
+  const overrides: E2EConfigOverrides = {};
+
+  if (typeof source.minimalPatientRegistration === "boolean") {
+    overrides.minimalPatientRegistration = source.minimalPatientRegistration;
+  }
+
+  const levels = source.minGeoOrganizationLevelsRequired;
+  if (typeof levels === "number" && Number.isInteger(levels) && levels >= 1) {
+    overrides.minGeoOrganizationLevelsRequired = levels;
+  }
+
+  return overrides;
+}
+
+const e2eConfigOverrides: E2EConfigOverrides = readE2EConfigOverrides();
+
 const careConfig = {
   apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
@@ -288,19 +355,19 @@ const careConfig = {
      * If not set, all levels are required.
      */
     minGeoOrganizationLevelsRequired:
-      env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
+      e2eConfigOverrides.minGeoOrganizationLevelsRequired ??
+      (env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED
         ? Math.max(
             parseInt(env.REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED, 10),
             1,
           )
-        : undefined,
+        : undefined),
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: booleanFromString(
-      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
-      false,
-    ),
+    minimalPatientRegistration:
+      e2eConfigOverrides.minimalPatientRegistration ??
+      booleanFromString(env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION, false),
 
     globalPatientEditAccessEnabled: booleanFromString(
       env.REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED,
