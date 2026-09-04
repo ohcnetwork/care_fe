@@ -187,7 +187,7 @@ export function DispenseOrderViewFooter({
                 disabled={isUpdatingStatus || hasBalancedInvoice}
                 title={
                   hasBalancedInvoice
-                    ? t("put_on_hold_disabled_balanced_invoice")
+                    ? t("put_in_preparation_disabled_balanced_invoice")
                     : undefined
                 }
               >
