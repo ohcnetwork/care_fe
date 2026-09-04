@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import React from "react";
 
@@ -5,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { formatName } from "@/Utils/utils";
 import { LocationNode } from "@/components/Location/LocationTree";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
 import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import {
@@ -42,12 +44,15 @@ function formatSpecimenRequirements(
 interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
+  facilityId: string;
 }
 
 export function ServiceRequestDetails({
   request,
   activityDefinition,
+  facilityId,
 }: ServiceRequestDetailsProps) {
+  const queryClient = useQueryClient();
   const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
     activityDefinition?.observation_result_requirements ?? [];
@@ -64,6 +69,20 @@ export function ServiceRequestDetails({
           </div>
           <div className="font-medium px-3">
             {t("request id")}: {request.id}
+          </div>
+          <div className="px-3 mt-2 flex flex-wrap gap-1">
+            <TagAssignmentSheet
+              entityType="service_request"
+              entityId={request.id}
+              facilityId={facilityId}
+              currentTags={request.tags}
+              onUpdate={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["serviceRequest", facilityId, request.id],
+                });
+              }}
+              patientId={request.encounter.patient.id}
+            />
           </div>
         </div>
         <div className="flex gap-2 items-center mr-4">
