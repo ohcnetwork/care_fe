@@ -7,6 +7,7 @@ import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
@@ -23,6 +24,7 @@ interface QuestionGroupProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   errors: QuestionValidationError[];
   clearError: (questionId: string) => void;
   disabled?: boolean;
@@ -107,6 +109,7 @@ export const QuestionGroup = memo(function QuestionGroup({
   encounterId,
   questionnaireResponses,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   errors,
   clearError,
   disabled,
@@ -148,6 +151,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         questionnaireResponses={questionnaireResponses}
         encounterId={encounterId}
         updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+        setResponseContext={setResponseContext}
         errors={errors}
         clearError={() => clearError(question.id)}
         disabled={disabled}
@@ -195,6 +199,7 @@ export const QuestionGroup = memo(function QuestionGroup({
             question={subQuestion}
             questionnaireResponses={questionnaireResponses}
             updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+            setResponseContext={setResponseContext}
             errors={errors}
             clearError={clearError}
             disabled={disabled}

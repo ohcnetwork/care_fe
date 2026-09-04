@@ -38,6 +38,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -58,6 +59,7 @@ interface EncounterQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -107,6 +109,7 @@ export function EncounterQuestion({
   question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   clearError,
   encounterId,
@@ -194,6 +197,7 @@ export function EncounterQuestion({
         updates.status = EncounterStatus.DISCHARGED;
       }
       handleUpdateEncounter(updates);
+      setResponseContext(questionnaireResponse.question_id, [encounterData]);
     }
   }, [encounterData]);
 
