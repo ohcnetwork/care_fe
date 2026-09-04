@@ -91,10 +91,11 @@ export function AppSidebar({
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
 
+  const userOrganizations = user?.organizations;
   const selectedOrganization = React.useMemo(() => {
-    if (!user?.organizations || !organizationId) return undefined;
-    return user.organizations.find((org) => org.id === organizationId);
-  }, [user?.organizations, organizationId]);
+    if (!userOrganizations || !organizationId) return undefined;
+    return userOrganizations.find((org) => org.id === organizationId);
+  }, [userOrganizations, organizationId]);
 
   React.useEffect(() => {
     if (!user?.facilities || !facilityId || !facilitySidebar) {
