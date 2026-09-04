@@ -285,8 +285,7 @@ function AccountShow({
     );
   }
 
-  const isAccountBillableAndActive =
-    !!account && isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const tabs = {
     invoices: {

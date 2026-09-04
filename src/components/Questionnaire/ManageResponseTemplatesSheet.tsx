@@ -1027,26 +1027,25 @@ export default function ManageResponseTemplatesSheet({
             )}
           />
 
-          {facilityId &&
-            (!editingTemplate || (editingTemplate && templateDetails)) && (
-              <div className="space-y-1.5">
-                <FacilityOrganizationSelector
-                  key={editingTemplate?.id || "new"}
-                  facilityId={facilityId}
-                  value={selectedOrganizations}
-                  onChange={setSelectedOrganizations}
-                  currentOrganizations={
-                    editingTemplate && templateDetails
-                      ? templateDetails.facility_organizations
-                      : undefined
-                  }
-                  optional
-                />
-                <FormDescription className="text-xs">
-                  {t("select_departments_to_share_template")}
-                </FormDescription>
-              </div>
-            )}
+          {facilityId && (!editingTemplate || templateDetails) && (
+            <div className="space-y-1.5">
+              <FacilityOrganizationSelector
+                key={editingTemplate?.id || "new"}
+                facilityId={facilityId}
+                value={selectedOrganizations}
+                onChange={setSelectedOrganizations}
+                currentOrganizations={
+                  editingTemplate && templateDetails
+                    ? templateDetails.facility_organizations
+                    : undefined
+                }
+                optional
+              />
+              <FormDescription className="text-xs">
+                {t("select_departments_to_share_template")}
+              </FormDescription>
+            </div>
+          )}
 
           <div className="flex gap-2 justify-end pt-2">
             <Button
