@@ -39,7 +39,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { ReportReadList } from "@/types/emr/report/report";
+import { ReportReadList, ReportType } from "@/types/emr/report/report";
 import reportApi from "@/types/emr/report/reportApi";
 import { TemplateBaseRead } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
@@ -52,15 +52,17 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
 
 interface ReportViewerProps {
-  encounterId: string;
+  associatingId: string;
   templateSlug?: string;
   reportId?: string;
+  reportType?: ReportType;
 }
 
 export default function ReportViewer({
-  encounterId,
+  associatingId,
   templateSlug,
   reportId,
+  reportType = ReportType.DISCHARGE_SUMMARY,
 }: ReportViewerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -89,7 +91,7 @@ export default function ReportViewer({
     facility?.permissions,
   );
 
-  const { data: initialReport } = useQuery({
+  const { data: initialReport, isLoading: isLoadingInitialReport } = useQuery({
     queryKey: ["report", reportId],
     queryFn: query(reportApi.retrieveReport, {
       pathParams: { id: reportId! },
@@ -114,18 +116,24 @@ export default function ReportViewer({
     isLoading: isLoadingReports,
     refetch: refetchReports,
   } = useQuery({
-    queryKey: ["reports", encounterId, "template", effectiveTSlug],
+    queryKey: [
+      "reports",
+      associatingId,
+      "template",
+      effectiveTSlug,
+      reportType,
+    ],
     queryFn: query(reportApi.listReports, {
       queryParams: {
-        associating_id: encounterId,
+        associating_id: associatingId,
         upload_completed: "true",
-        report_type: "discharge_summary",
+        report_type: reportType,
         is_archived: "false",
         template: effectiveTSlug,
         limit: 50,
       },
     }),
-    enabled: !!encounterId && !!effectiveTSlug,
+    enabled: !!associatingId && !!effectiveTSlug,
   });
 
   const reports = useMemo(
@@ -149,7 +157,11 @@ export default function ReportViewer({
     }
   }, [reports, selectedReportId]);
 
-  const { data: reportDetail, isLoading: isLoadingDetail } = useQuery({
+  const {
+    data: reportDetail,
+    isLoading: isLoadingDetail,
+    isError: isReportDetailError,
+  } = useQuery({
     queryKey: ["report", selectedReportId],
     queryFn: query(reportApi.retrieveReport, {
       pathParams: { id: selectedReportId! },
@@ -157,12 +169,17 @@ export default function ReportViewer({
     enabled: !!selectedReportId,
   });
 
+  const reportMismatch =
+    !!reportDetail &&
+    (reportDetail.associating_id !== associatingId ||
+      reportDetail.report_type !== reportType);
+
   useEffect(() => {
     setPdfUrl(null);
-    if (reportDetail?.read_signed_url) {
+    if (reportDetail?.read_signed_url && !reportMismatch) {
       setPdfUrl(reportDetail.read_signed_url);
     }
-  }, [selectedReportId, reportDetail]);
+  }, [selectedReportId, reportDetail, reportMismatch]);
 
   const stopPolling = useCallback(() => {
     if (pollIntervalRef.current) {
@@ -184,7 +201,7 @@ export default function ReportViewer({
         const response = await callApi(reportApi.createReport, {
           body: {
             template_id: tmpl.id,
-            associating_id: encounterId,
+            associating_id: associatingId,
             output_format: tmpl.default_format,
             options: JSON.stringify({}),
             force: false,
@@ -200,16 +217,17 @@ export default function ReportViewer({
         const freshData = await queryClient.fetchQuery({
           queryKey: [
             "reports",
-            encounterId,
+            associatingId,
             "template",
             effectiveTSlug,
+            reportType,
             "fresh",
           ],
           queryFn: query(reportApi.listReports, {
             queryParams: {
-              associating_id: encounterId,
+              associating_id: associatingId,
               upload_completed: "true",
-              report_type: "discharge_summary",
+              report_type: reportType,
               is_archived: "false",
               template: effectiveTSlug,
               limit: 1,
@@ -236,7 +254,15 @@ export default function ReportViewer({
         // Continue polling on transient errors
       }
     },
-    [encounterId, effectiveTSlug, stopPolling, queryClient, refetchReports, t],
+    [
+      associatingId,
+      reportType,
+      effectiveTSlug,
+      stopPolling,
+      queryClient,
+      refetchReports,
+      t,
+    ],
   );
 
   const startPolling = useCallback(
@@ -279,7 +305,7 @@ export default function ReportViewer({
       triggerGeneration(
         {
           template_id: tmpl.id,
-          associating_id: encounterId,
+          associating_id: associatingId,
           output_format: tmpl.default_format,
           options: JSON.stringify({}),
           force: false,
@@ -292,7 +318,7 @@ export default function ReportViewer({
         },
       );
     },
-    [isGenerating, encounterId, triggerGeneration, startPolling, t],
+    [isGenerating, associatingId, triggerGeneration, startPolling, t],
   );
 
   // Auto-generate report on first load if none exist
@@ -370,7 +396,7 @@ export default function ReportViewer({
     }
   }, [pdfUrl, t]);
 
-  if (isLoadingTemplate || isLoadingReports) {
+  if (isLoadingInitialReport || isLoadingTemplate || isLoadingReports) {
     return <Loading />;
   }
 
@@ -571,6 +597,18 @@ export default function ReportViewer({
                 className="size-full"
               />
             )}
+
+            {!isGenerating &&
+              !isLoadingDetail &&
+              !!selectedReportId &&
+              (isReportDetailError || reportMismatch) && (
+                <EmptyState
+                  icon={<FileText className="size-6 text-destructive" />}
+                  title={t("report_unavailable")}
+                  description={t("report_unavailable_description")}
+                  className="size-full"
+                />
+              )}
 
             {pdfUrl && !isLoadingDetail && (
               <object
