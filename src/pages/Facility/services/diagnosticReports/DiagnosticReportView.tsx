@@ -234,6 +234,8 @@ export default function DiagnosticReportView({
                 observations={report.observations.filter(
                   (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
                 )}
+                patientId={report.encounter.patient.id}
+                encounterId={report.encounter.id}
               />
             </CardContent>
           </Card>

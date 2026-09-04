@@ -96,27 +96,27 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
 }
 
 interface DiagnosticReportDetailCardProps {
-  reportId: string;
+  diagnosticReport: DiagnosticReportRead;
   patientId: string;
   facilityId?: string;
 }
 
 function DiagnosticReportDetailCard({
-  reportId,
+  diagnosticReport,
   patientId,
   facilityId,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
   const { data: report, isLoading: isReportLoading } = useQuery({
-    queryKey: ["diagnosticReport", reportId],
+    queryKey: ["diagnosticReport", diagnosticReport.id],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
         patient_external_id: patientId,
-        external_id: reportId,
+        external_id: diagnosticReport.id,
       },
     }),
-    enabled: !!reportId && !!patientId,
+    enabled: !!diagnosticReport.id && !!patientId,
   });
 
   // Query to fetch files for the diagnostic report
@@ -151,9 +151,11 @@ function DiagnosticReportDetailCard({
     <Card className="shadow-sm border rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
         <CardTitle className="text-base font-medium">
-          {report.service_request?.title ||
-            report.code?.display ||
-            t("diagnostic_report", { count: 1 })}
+          <span>
+            {report.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
+          </span>
+          {report.code?.display && <span> - {report.code.display}</span>}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
@@ -271,7 +273,11 @@ function DiagnosticReportDetailCard({
             <h4 className="text-sm font-semibold text-gray-700">
               {t("test_results")}
             </h4>
-            <DiagnosticReportResultsTable observations={filteredObservations} />
+            <DiagnosticReportResultsTable
+              observations={filteredObservations}
+              patientId={report.encounter.patient.id}
+              encounterId={report.encounter.id}
+            />
           </div>
         )}
 
@@ -551,7 +557,7 @@ export const DiagnosticReportsTab = ({
             ) : (
               selectedReport && (
                 <DiagnosticReportDetailCard
-                  reportId={selectedReport.id}
+                  diagnosticReport={selectedReport}
                   patientId={patientId}
                   facilityId={facilityId}
                 />

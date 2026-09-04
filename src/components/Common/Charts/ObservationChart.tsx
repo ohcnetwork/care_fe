@@ -37,6 +37,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 
 import observationApi from "@/types/emr/observation/observationApi";
+import { ObservationDetailSheet } from "./ObservationDetailSheet";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
   codes: Code[];
@@ -234,7 +235,16 @@ export const ObservationVisualizer = ({
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-1">
-              <h3 className="text-sm font-medium">{group.title}</h3>
+              <ObservationDetailSheet
+                codes={group.codes}
+                title={group.title}
+                patientId={patientId}
+                encounterId={encounterId}
+              >
+                <span className="cursor-pointer text-sm font-medium text-left hover:underline">
+                  {group.title}
+                </span>
+              </ObservationDetailSheet>
               <Popover>
                 <PopoverTrigger className="!px-0">
                   <CareIcon
