@@ -74,13 +74,13 @@ import query from "@/Utils/request/query";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/useActionRegistry";
 import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
 import { StudioCanvas } from "./StudioCanvas";
 import { StudioOutline } from "./StudioOutline";
 import { StudioTopBar } from "./StudioTopBar";
-import { useActionRegistry } from "./useActionRegistry";
 
 const INITIAL_STATE: BuilderState = {
   questions: [],

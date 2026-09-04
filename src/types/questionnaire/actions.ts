@@ -89,7 +89,10 @@ export interface ActionContextField {
   target_context_type?: string;
 }
 
-/** One entry of the submit response's `_actions` — `do_evaluate` output. */
+/** One entry of a write response's `_actions` — `do_evaluate` output. Every
+ *  viewset that evaluates actions attaches the list (questionnaire submit,
+ *  appointment creation; batch sub-results carry it on `data`); see
+ *  `Utils/actions/actionOutcomes.ts` for how it is read. */
 export interface ActionOutcome {
   slug: string;
   instruction_type: ActionInstructionType | (string & {});

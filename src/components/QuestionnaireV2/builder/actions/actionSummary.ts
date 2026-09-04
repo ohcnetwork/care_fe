@@ -12,7 +12,7 @@ import {
   instructionLabel,
   operatorLabel,
   questionLabel,
-} from "@/components/QuestionnaireV2/builder/actions/labels";
+} from "./labels";
 
 import type { QuestionnaireAction } from "@/types/questionnaire/actions";
 

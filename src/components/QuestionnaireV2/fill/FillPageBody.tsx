@@ -2,19 +2,16 @@ import { History, Plus, X } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-import { instructionLabel } from "@/components/QuestionnaireV2/shared/instructionLabels";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
-import type { ActionOutcome } from "@/types/questionnaire/actions";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type {
   QuestionnaireRead,
@@ -39,51 +36,9 @@ import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillSubject } from "./subject";
 import { rendererSubjectOf } from "./subject";
-import { outcomeMessage } from "./submit/actionOutcomes";
 import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
-
-/** Long enough to read after the page underneath has changed — a
- *  clinical instruction produced by an action must not vanish with the
- *  default four seconds. */
-const ACTION_TOAST_DURATION = 15_000;
-const ACTION_TOASTS_BEFORE_SUMMARY = 3;
-
-/**
- * What the questionnaire's actions reported: one toast per outcome titled
- * by the instruction's plain name, or a single summary when there are
- * many. Fired AFTER the redirect so they stack above the success toast on
- * the page the clinician lands on.
- */
-function showActionOutcomes(
-  outcomes: ActionOutcome[],
-  t: ReturnType<typeof useTranslation>["t"],
-) {
-  const readable = outcomes.flatMap((outcome) => {
-    const message = outcomeMessage(outcome);
-    return message
-      ? [{ title: instructionLabel(outcome.slug, t), message }]
-      : [];
-  });
-  if (readable.length === 0) return;
-  if (readable.length > ACTION_TOASTS_BEFORE_SUMMARY) {
-    toast.message(t("questionnaire_actions_ran", { count: readable.length }), {
-      description: readable
-        .slice(0, 5)
-        .map((entry) => `${entry.title}: ${entry.message}`)
-        .join("\n"),
-      duration: ACTION_TOAST_DURATION,
-    });
-    return;
-  }
-  for (const entry of readable) {
-    toast.info(entry.title, {
-      description: entry.message,
-      duration: ACTION_TOAST_DURATION,
-    });
-  }
-}
 
 /** The canvas title and its unsaved-work badge. One fragment shared by the
  *  two header branches (tab strip where a patient gives us a clinical
@@ -320,12 +275,11 @@ export function FillPageBody({
       subject,
       continueDraftId,
       blockedFormLabels,
-      onSuccess: (outcomes) => {
+      onSuccess: () => {
         // Order matters: finishDraft flushes the pristine state before the
         // redirect so useNavigationPrompt doesn't block it.
         autosave.finishDraft();
         navigate(exitTarget);
-        showActionOutcomes(outcomes, t);
       },
     },
   );

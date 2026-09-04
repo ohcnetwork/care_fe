@@ -13,6 +13,8 @@ import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
 import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
+import { ActionConfigurationForm } from "@/pages/Admin/actions/ActionConfigurationForm";
+import { ActionConfigurationList } from "@/pages/Admin/actions/ActionConfigurationList";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
@@ -49,6 +51,10 @@ const AdminRoutes: AppRoutes = {
   "/admin/questionnaires/:id": ({ id }) => (
     <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
   ),
+  "/admin/actions": () => <ActionConfigurationList />,
+  // Before "/admin/actions/:id" — raviger matches in object order.
+  "/admin/actions/new": () => <ActionConfigurationForm />,
+  "/admin/actions/:id": ({ id }) => <ActionConfigurationForm id={id} />,
   "/admin/valuesets": () => <ValueSetList />,
   "/admin/valuesets/create": () => (
     <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />

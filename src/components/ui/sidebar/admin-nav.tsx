@@ -19,6 +19,11 @@ function generateAdminLinks(
       icon: <CareIcon icon="d-book-open" />,
     },
     {
+      name: t("action_configurations"),
+      url: `${baseUrl}/actions`,
+      icon: <CareIcon icon="l-setting" />,
+    },
+    {
       name: "Valuesets",
       url: `${baseUrl}/valuesets`,
       icon: <CareIcon icon="l-list-ol-alt" />,

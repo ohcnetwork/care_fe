@@ -15,14 +15,11 @@ import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
-import type { BatchRequestResponse } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
-import type { ActionOutcome } from "@/types/questionnaire/actions";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
 
-import { collectActionOutcomes } from "./actionOutcomes";
 import {
   MissingEncounterError,
   StructuredBuildError,
@@ -55,10 +52,7 @@ interface UseSubmitFillSessionArgs {
    *  would clear the draft in `onSuccess` and take those answers with it,
    *  having never been in the batch. */
   blockedFormLabels: string[];
-  /** Receives what the questionnaires' actions reported back
-   *  (`_actions` on each submit result) — the host shows them once it
-   *  has navigated. */
-  onSuccess: (outcomes: ActionOutcome[]) => void;
+  onSuccess: () => void;
 }
 
 /**
@@ -145,15 +139,12 @@ export function useSubmitFillSession({
     // global error toast.
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    onSuccess: (data: BatchRequestResponse) => {
+    // What the questionnaires' actions reported (`_actions` on each submit
+    // result) is toasted by the mutation cache, like every other write.
+    onSuccess: () => {
       setServerErrors([]);
       toast.success(t("questionnaire_submitted_successfully"));
-      onSuccess(
-        collectActionOutcomes(
-          data.results,
-          new Set(forms.map((form) => form.questionnaire.id)),
-        ),
-      );
+      onSuccess();
     },
     onError: (error) => {
       if (hasBatchResults(error.cause)) {

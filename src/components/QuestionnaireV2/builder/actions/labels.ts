@@ -8,7 +8,7 @@ import {
   UnusableReason,
 } from "@/components/QuestionnaireV2/builder/actionVariables";
 import type { ActionRuleOperator } from "@/components/QuestionnaireV2/shared/actionExpression";
-import { humanize } from "@/components/QuestionnaireV2/shared/instructionLabels";
+import { humanize } from "@/Utils/actions/instructionLabels";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -24,7 +24,7 @@ export {
   humanize,
   instructionLabel,
   instructionTypeLabel,
-} from "@/components/QuestionnaireV2/shared/instructionLabels";
+} from "@/Utils/actions/instructionLabels";
 
 const OPERATOR_LABEL_KEYS: Record<ActionRuleOperator, string> = {
   "==": "equals",

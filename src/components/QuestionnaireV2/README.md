@@ -123,20 +123,23 @@ Resource-subject questionnaires (location/device/facility) never run them.
   `{value,…}` records, valueset choices compare by `coding.code`,
   repeating-group children are not top-level names).
   `builder/actionValidation.ts` — the save rules; `builder/actions/` — the
-  editors the inspector composes.
+  editors: `ActionListEditor` (the cards, shared with the admin action
+  configurations under `src/pages/Admin/actions/`), the condition and
+  instruction editors, `useActionRegistry`, and the plain-words summary.
 - `studio/ActionsPanel.tsx` — the inspector target the outline's Actions
-  row selects; `studio/useActionRegistry.ts` fetches the registry.
+  row selects: `ActionListEditor` over the builder reducer.
 - Fill side: `fill/submit/validateActionReferences.ts` blocks a submission
   whose action references a visible unanswered question (the backend would
-  500 and roll the batch back); `fill/submit/actionOutcomes.ts` reads
-  `_actions` off the submit results and `FillPageBody` toasts them after
-  the redirect.
+  500 and roll the batch back). What the actions reported (`_actions` on
+  the submit results) is toasted by the mutation cache like every other
+  write — `src/Utils/actions/` holds the collector, the presenter and the
+  instruction labels; nothing in `fill/` handles outcomes.
 
 Instruction params may carry backend hints (`json_schema_extra`):
 `x-care-picker: tag_config` with `x-care-resource` renders a tag picker
 (`builder/actions/TagConfigParamPicker.tsx`) scoped to the studio mount's
 facility; pydantic Enum params (`$ref` into `$defs`) render as a select.
-The catalog the studio labels (`shared/instructionLabels.ts`) —
+The catalog the studio labels (`src/Utils/actions/instructionLabels.ts`) —
 `show_message`, `set_encounter_priority`, `tag_encounter`, `tag_patient`,
 plus the Patient/Encounter context fields — lives on the care branch
 `bodhi/ENG-737-actions-catalog` (stacked on ENG-737); anything the
