@@ -62,9 +62,16 @@ function DrawerContent({
           "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm",
           className,
         )}
-        onPointerDown={(event) => {
-          (document.activeElement as HTMLElement | null)?.blur();
+onPointerDown={(event) => {
           onPointerDown?.(event);
+          const activeElement = document.activeElement;
+          if (
+            !event.defaultPrevented &&
+            activeElement instanceof HTMLElement &&
+            !activeElement.contains(event.target as Node)
+          ) {
+            activeElement.blur();
+          }
         }}
         {...props}
       >
