@@ -484,9 +484,13 @@ export function DeliveryOrderShow({
     anyCompletedSupplyDeliveries,
   );
 
+  const inprogressSupplyDeliveries =
+    supplyDeliveries?.results?.filter(
+      (delivery) => delivery.status === SupplyDeliveryStatus.in_progress,
+    ) ?? [];
+
   const hasReachedUpsertLimit =
-    supplyDeliveries &&
-    supplyDeliveries.results.length >= careConfig.maxDatapointsPerUpsert;
+    inprogressSupplyDeliveries.length >= careConfig.maxDatapointsPerUpsert;
 
   const isWithinUpsertLimit =
     selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
@@ -960,9 +964,7 @@ export function DeliveryOrderShow({
                     origin={deliveryOrder.origin?.id}
                     destination={deliveryOrder.destination.id}
                     onSuccess={handleSupplyDeliverySuccess}
-                    supplyDeliveriesCount={
-                      supplyDeliveries?.results.length || 0
-                    }
+                    supplyDeliveriesCount={inprogressSupplyDeliveries.length}
                     isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
                   />
                 )}

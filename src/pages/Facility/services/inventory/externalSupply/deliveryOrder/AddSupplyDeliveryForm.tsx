@@ -547,6 +547,10 @@ export function AddSupplyDeliveryForm({
     await createSupplyDelivery(deliveryPayload);
   }
 
+  const hasExceedLoad =
+    selectedItems.length + supplyDeliveriesCount >
+    careConfig.maxDatapointsPerUpsert;
+
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
       return;
@@ -1058,6 +1062,13 @@ export function AddSupplyDeliveryForm({
                   </div>
                 ))}
               </div>
+              {hasExceedLoad && (
+                <UpsertLimitCallout>
+                  {t("max_items_selected_limit_warning", {
+                    count: careConfig.maxDatapointsPerUpsert,
+                  })}
+                </UpsertLimitCallout>
+              )}
             </div>
             <DialogFooter>
               <Button
@@ -1068,7 +1079,7 @@ export function AddSupplyDeliveryForm({
               </Button>
               <Button
                 onClick={handleSelectRequests}
-                disabled={selectedItems.length === 0}
+                disabled={selectedItems.length === 0 || hasExceedLoad}
               >
                 {t("done")}
                 <ShortcutBadge actionId="enter-action" />
