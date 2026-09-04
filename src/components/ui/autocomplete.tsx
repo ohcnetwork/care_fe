@@ -59,6 +59,9 @@ interface AutocompleteProps {
   shortcutId?: string;
 }
 
+/**
+ * @deprecated Use GenericAutocomplete instead
+ */
 export default function Autocomplete({
   options,
   isLoading = false,
