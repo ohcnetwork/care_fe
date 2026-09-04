@@ -6,6 +6,8 @@ import { useInView } from "react-intersection-observer";
 
 import { Card } from "@/components/ui/card";
 
+import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
+
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -158,9 +160,24 @@ export const EncounterObservationsTab = () => {
                         </div>
                       )}
                       <div className="font-medium text-sm text-gray-600">
-                        {item.main_code?.display ||
-                          item.main_code?.code ||
-                          t("unknown")}
+                        {item.main_code ? (
+                          <ObservationDetailSheet
+                            codes={[item.main_code]}
+                            title={
+                              item.main_code.display ||
+                              item.main_code.code ||
+                              t("observation")
+                            }
+                            patientId={patientId}
+                            encounterId={encounterId}
+                          >
+                            <span className="cursor-pointer text-left hover:underline">
+                              {item.main_code.display || item.main_code.code}
+                            </span>
+                          </ObservationDetailSheet>
+                        ) : (
+                          t("unknown")
+                        )}
                       </div>
                       {item.data_entered_by && (
                         <div className="text-gray-600 text-sm">

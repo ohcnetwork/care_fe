@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/table";
 
 import { Separator } from "@/components/ui/separator";
+
+import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
+
 import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   Interpretation,
@@ -26,10 +29,14 @@ import { BaseObservationDefinition } from "@/types/emr/observationDefinition/obs
 
 interface DiagnosticReportResultsTableProps {
   observations: ObservationRead[];
+  patientId?: string;
+  encounterId?: string;
 }
 
 export function DiagnosticReportResultsTable({
   observations,
+  patientId,
+  encounterId,
 }: DiagnosticReportResultsTableProps) {
   const hasInterpretation = observations.some(
     (observation) => observation.interpretation?.display,
@@ -185,6 +192,10 @@ export function DiagnosticReportResultsTable({
     const hasComponents =
       observation.component && observation.component.length > 0;
     const highlight = observation.interpretation?.highlight ?? false;
+    const observationTitle =
+      observation.observation_definition?.title ||
+      observation.observation_definition?.code?.display;
+    const canOpenDetail = !!observation.main_code && !!patientId;
 
     return (
       <>
@@ -196,8 +207,20 @@ export function DiagnosticReportResultsTable({
           )}
         >
           <TableCell className="whitespace-normal wrap-break-word align-top">
-            {observation.observation_definition?.title ||
-              observation.observation_definition?.code?.display}
+            {canOpenDetail && observation.main_code && patientId ? (
+              <ObservationDetailSheet
+                codes={[observation.main_code]}
+                title={observationTitle || t("observation")}
+                patientId={patientId}
+                encounterId={encounterId}
+              >
+                <span className="cursor-pointer text-left font-medium hover:underline">
+                  {observationTitle}
+                </span>
+              </ObservationDetailSheet>
+            ) : (
+              observationTitle
+            )}
           </TableCell>
           <TableCell className="whitespace-normal wrap-break-word align-top">
             {!hasComponents && (
