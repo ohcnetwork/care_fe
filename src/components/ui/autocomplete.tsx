@@ -212,14 +212,14 @@ export default function Autocomplete({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full truncate justify-between border-gray-300 shadow-xs py-4.5! font-normal",
+                "w-full min-w-0 justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
                 selectedOption && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
             >
-              <span className="overflow-hidden">
+              <span className="overflow-hidden truncate">
                 {value
                   ? freeInput
                     ? inputValue || value
