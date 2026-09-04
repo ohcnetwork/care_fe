@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp } from "lucide-react";
+import { TriangleAlertIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -25,22 +25,36 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import { isLessThan, round } from "@/Utils/decimal";
+import { getExpiryBadgeVariant, getExpiryStatus } from "@/Utils/inventory";
 import query from "@/Utils/request/query";
-import { FilterSelect } from "@/components/ui/filter-select";
+import { dateQueryString, parseValidISO } from "@/Utils/utils";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import {
+  inventoryStatusFilter,
+  productExpirationDateFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
-import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
-import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
+import { INVENTORY_STATUS_COLORS } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 
 const SORT_OPTIONS = {
-  low_to_high: "net_content",
-  high_to_low: "-net_content",
+  net_content: "sort_by_lowest_net_content",
+  "-net_content": "sort_by_highest_net_content",
+  product__expiration_date: "sort_by_earliest_expiry",
+  "-product__expiration_date": "sort_by_latest_expiry",
 } as const;
-
-type SortOptionKey = keyof typeof SORT_OPTIONS;
 
 interface InventoryListProps {
   facilityId: string;
@@ -65,6 +79,51 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     }
   }, [qParams.product_knowledge_id]);
 
+  const filters = useMemo(
+    () => [
+      inventoryStatusFilter(),
+      productExpirationDateFilter(
+        "product_expiration_date",
+        t("expiration_date"),
+      ),
+    ],
+    [t],
+  );
+
+  const onFilterUpdate = ({
+    product_expiration_date,
+    ...params
+  }: Record<string, unknown>) => {
+    const dateRange = product_expiration_date as FilterDateRange | null;
+    updateQuery({
+      ...params,
+      product_expiration_date_after: dateRange?.from
+        ? dateQueryString(dateRange.from)
+        : undefined,
+      product_expiration_date_before: dateRange?.to
+        ? dateQueryString(dateRange.to)
+        : undefined,
+    });
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    product_expiration_date:
+      qParams.product_expiration_date_after ||
+      qParams.product_expiration_date_before
+        ? {
+            from: parseValidISO(qParams.product_expiration_date_after),
+            to: parseValidISO(qParams.product_expiration_date_before),
+          }
+        : undefined,
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["inventory", facilityId, locationId, qParams],
     queryFn: query.debounced(inventoryApi.list, {
@@ -75,68 +134,60 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
+        product_expiration_date_after: qParams.product_expiration_date_after,
+        product_expiration_date_before: qParams.product_expiration_date_before,
         ordering: qParams.ordering,
       },
     }),
   });
 
   return (
-    <Page
-      title={t("inventory")}
-      options={
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
-          <div className="w-full sm:w-auto">
-            <ProductKnowledgeSelect
-              value={selectedProductKnowledge}
-              onChange={(
-                productKnowledge: ProductKnowledgeBase | undefined,
-              ) => {
-                setSelectedProductKnowledge(productKnowledge);
-                updateQuery({
-                  product_knowledge_id: productKnowledge?.id || undefined,
-                });
-              }}
-              placeholder={t("search_product_knowledge")}
-              disableFavorites
-            />
-          </div>
-
-          <div className="w-full sm:w-auto">
-            <FilterSelect
-              value={qParams.status || ""}
-              onValueChange={(value) => updateQuery({ status: value })}
-              options={Object.values(InventoryStatusOptions)}
-              label={t("status")}
-              onClear={() => updateQuery({ status: undefined })}
-              className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder={t("filter_by_status")}
-            />
-          </div>
-          <div className="w-full sm:w-auto">
-            <FilterSelect
-              icon={<ArrowDownUp className="size-4" />}
-              value={
-                (Object.keys(SORT_OPTIONS) as Array<SortOptionKey>).find(
-                  (key) => SORT_OPTIONS[key] === qParams.ordering,
-                ) || ""
-              }
-              onValueChange={(value) =>
-                updateQuery({
-                  ordering: value
-                    ? SORT_OPTIONS[value as SortOptionKey]
-                    : undefined,
-                })
-              }
-              options={Object.keys(SORT_OPTIONS)}
-              label={t("net_content")}
-              onClear={() => updateQuery({ ordering: undefined })}
-              className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder={t("sort_by_net_content")}
-            />
-          </div>
+    <Page title={t("inventory")}>
+      <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-start gap-2 w-full sm:w-auto">
+          <ProductKnowledgeSelect
+            value={selectedProductKnowledge}
+            onChange={(productKnowledge: ProductKnowledgeBase | undefined) => {
+              setSelectedProductKnowledge(productKnowledge);
+              updateQuery({
+                product_knowledge_id: productKnowledge?.id || undefined,
+              });
+            }}
+            placeholder={t("search_product_knowledge")}
+            disableFavorites
+          />
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            placeholder={t("filters")}
+            className="flex flex-row flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-start"
+            facilityId={facilityId}
+          />
         </div>
-      }
-    >
+        <div className="w-full sm:w-fit">
+          <Select
+            value={qParams.ordering || ""}
+            onValueChange={(ordering) => updateQuery({ ordering })}
+          >
+            <SelectTrigger className="w-full border-gray-400 text-gray-950 rounded-sm">
+              <SelectValue placeholder={t("sort_by")} />
+            </SelectTrigger>
+            <SelectContent align="end">
+              {Object.entries(SORT_OPTIONS).map(([ordering, label]) => (
+                <SelectItem key={ordering} value={ordering}>
+                  {t(label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="mt-3">
         {isLoading ? (
           <div className="rounded-md border">
@@ -189,16 +240,25 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                     </span>
                   </TableCell>
                   <TableCell className="font-medium">
-                    <Badge variant={ACCOUNT_STATUS_COLORS[inventory.status]}>
+                    <Badge variant={INVENTORY_STATUS_COLORS[inventory.status]}>
                       {t(inventory.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {inventory.product.expiration_date
-                      ? new Date(
-                          inventory.product.expiration_date,
-                        ).toLocaleDateString()
-                      : "-"}
+                    {inventory.product.expiration_date ? (
+                      <div className="flex items-center gap-2">
+                        <span>
+                          {new Date(
+                            inventory.product.expiration_date,
+                          ).toLocaleDateString()}
+                        </span>
+                        <ExpiryStatusBadge
+                          expirationDate={inventory.product.expiration_date}
+                        />
+                      </div>
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                   <TableCell>
                     {inventory.product.batch?.lot_number || "-"}
@@ -227,5 +287,22 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         <Pagination totalCount={data?.count || 0} />
       </div>
     </Page>
+  );
+}
+
+function ExpiryStatusBadge({ expirationDate }: { expirationDate: string }) {
+  const { t } = useTranslation();
+  const status = getExpiryStatus(expirationDate);
+
+  if (status === "valid") return null;
+
+  return (
+    <Badge
+      variant={getExpiryBadgeVariant(expirationDate)}
+      className="whitespace-nowrap"
+    >
+      <TriangleAlertIcon className="size-3.5" />
+      {t(status)}
+    </Badge>
   );
 }
