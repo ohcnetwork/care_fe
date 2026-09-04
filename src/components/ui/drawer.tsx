@@ -46,6 +46,7 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   return (
@@ -61,6 +62,10 @@ function DrawerContent({
           "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm",
           className,
         )}
+        onPointerDown={(event) => {
+          (document.activeElement as HTMLElement | null)?.blur();
+          onPointerDown?.(event);
+        }}
         {...props}
       >
         <div className="bg-gray-100 mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block dark:bg-gray-800" />
