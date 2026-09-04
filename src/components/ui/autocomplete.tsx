@@ -230,7 +230,7 @@ export default function Autocomplete({
           </DrawerTrigger>
           <DrawerContent
             aria-describedby={undefined}
-            className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg"
+            className="min-h-[65vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg"
           >
             <DrawerTitle className="sr-only">
               {t("autocomplete_options")}

@@ -25,7 +25,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { isIOSDevice } from "@/Utils/utils";
 
 type ButtonProps = Omit<
   React.ComponentProps<typeof Button>,
@@ -92,7 +91,7 @@ function ListContent({
                 : t("search_options")
             }
             className="outline-hidden text-base sm:text-sm border-none ring-0 shadow-none -ml-3"
-            autoFocus={!isIOSDevice}
+            autoFocus
           />
         </div>
         <CommandList className="max-h-none">
@@ -258,7 +257,7 @@ export function MultiSelect({
               </div>
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 flex flex-col min-h-[60vh]">
+          <DrawerContent className="px-0 pt-2 flex flex-col min-h-[65vh]">
             <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
               <ListContent
                 translationBasekey={translationBasekey}
