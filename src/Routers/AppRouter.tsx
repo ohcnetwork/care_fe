@@ -7,12 +7,17 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
+import {
+  useCareAppsLoading,
+  useOrganizationRoutes,
+  usePluginRoutes,
+} from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import { routes as publicRoutes } from "@/Routers/PublicRouter";
@@ -103,6 +108,7 @@ const publicRedirects = Object.fromEntries(
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
   const organizationRoutes = useOrganizationRoutes();
+  const arePluginsLoading = useCareAppsLoading();
   let routes = Routes;
 
   useRedirect("/user", "/users");
@@ -123,7 +129,11 @@ export default function AppRouter() {
 
   const sidebarFor = isAdminPage ? SidebarFor.ADMIN : SidebarFor.FACILITY;
 
-  const pages = appPages || adminPages || publicRedirectsPages || <ErrorPage />;
+  const pages =
+    appPages ||
+    adminPages ||
+    publicRedirectsPages ||
+    (arePluginsLoading ? <Loading /> : <ErrorPage />);
 
   const user = useAuthUser();
 
