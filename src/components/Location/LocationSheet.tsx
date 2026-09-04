@@ -18,6 +18,7 @@ import {
   LocationAssociationStatus,
 } from "@/types/location/association";
 import { LocationRead } from "@/types/location/location";
+import { BatchRequestObject } from "@/Utils/request/batch";
 
 import { useLocationAssignment } from "@/components/Location/hooks/useLocationAssignment";
 import { useLocationDialogs } from "@/components/Location/hooks/useLocationDialogs";
@@ -163,7 +164,7 @@ export function LocationSheet({
   const handleConfirmDelete = async () => {
     if (!dialogs.locationToDelete) return;
 
-    const requests = [];
+    const requests: BatchRequestObject[] = [];
 
     // Find the location being deleted from history
     const locationBeingDeleted = history.find(
@@ -191,7 +192,7 @@ export function LocationSheet({
     );
 
     // Execute all requests in batch
-    await mutations.executeBatch.mutateAsync({ requests });
+    await mutations.executeBatch.mutateAsync(requests);
 
     dialogs.closeDeleteDialog();
   };
@@ -200,7 +201,7 @@ export function LocationSheet({
   const handleConfirmTime = async (
     existingLocation?: LocationAssociationRead,
   ) => {
-    const requests = [];
+    const requests: BatchRequestObject[] = [];
     const selectedBed = navigation.selectedBed;
     const action = assignment.sheetState.action;
 
@@ -284,14 +285,14 @@ export function LocationSheet({
     }
 
     if (requests.length > 0) {
-      await mutations.executeBatch.mutateAsync({ requests });
+      await mutations.executeBatch.mutateAsync(requests);
       resetAll();
     }
   };
 
   // Confirm edit for existing location
   const handleConfirmEdit = async (location: LocationAssociationRead) => {
-    const requests = [];
+    const requests: BatchRequestObject[] = [];
 
     const isUpdatingActiveLocation =
       currentLocation && currentLocation.id === location.id;
@@ -382,7 +383,7 @@ export function LocationSheet({
     }
 
     if (requests.length > 0) {
-      await mutations.executeBatch.mutateAsync({ requests });
+      await mutations.executeBatch.mutateAsync(requests);
       resetAll();
     }
   };

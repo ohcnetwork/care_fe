@@ -6,14 +6,13 @@ import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { BatchRequest } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   ChargeItemRead,
   ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
-import query from "@/Utils/request/query";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { batchQuery } from "@/Utils/request/batch";
 
 interface InvoiceChargeItemTitleProps {
   item: ChargeItemRead;
@@ -83,46 +82,40 @@ export function useMedicationDispenseData(
 ): UseMedicationDispenseDataResult {
   const { t } = useTranslation();
 
-  // Get medication dispense charge items
-  const medicationDispenseItems =
-    chargeItems?.filter(
-      (item) =>
+  const dispenseIds =
+    chargeItems?.reduce((ids: string[], item) => {
+      if (
         item.service_resource ===
           ChargeItemServiceResource.medication_dispense &&
-        item.service_resource_id,
-    ) || [];
+        item.service_resource_id
+      ) {
+        ids.push(item.service_resource_id);
+      }
+      return ids;
+    }, []) || [];
 
-  // Build batch requests for all medication dispenses
-  const batchRequests: BatchRequest[] = medicationDispenseItems.map((item) => ({
-    url: `/api/v1/medication/dispense/${item.service_resource_id}/`,
-    method: "GET",
-    reference_id: item.service_resource_id!,
-    body: {},
-  }));
-
+  // Get medication dispense charge items
   const {
     data: batchResponse,
     isLoading: isLoadingDispenses,
     isError: hasDispenseErrors,
   } = useQuery({
-    queryKey: [
-      "medication_dispense_batch",
-      ...medicationDispenseItems.map((item) => item.service_resource_id),
-    ],
-    queryFn: query(batchApi.batchRequest, {
-      body: { requests: batchRequests },
-    }),
-    enabled: batchRequests.length > 0,
+    queryKey: ["medication_dispense_batch", dispenseIds],
+    queryFn: batchQuery<MedicationDispenseRead>(
+      dispenseIds.map((id) => ({
+        api: medicationDispenseApi.get,
+        pathParams: { id },
+        referenceId: id,
+      })),
+    ),
+    enabled: dispenseIds.length > 0,
   });
 
   // Build dispense map from batch response
   const dispenseMap: Record<string, MedicationDispenseRead | undefined> = {};
-  if (batchResponse?.results) {
-    for (const result of batchResponse.results) {
-      if (result.status_code === 200 && result.data) {
-        dispenseMap[result.reference_id] =
-          result.data as MedicationDispenseRead;
-      }
+  for (const result of batchResponse?.results ?? []) {
+    if (result.status_code === 200 && result.data) {
+      dispenseMap[result.reference_id] = result.data;
     }
   }
 
