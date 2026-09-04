@@ -78,8 +78,8 @@ test.describe("Department User Management", () => {
     await page.getByRole("button", { name: "Edit" }).first().click();
   }
 
-  async function updateRole(page: Page, newRole: string) {
-    await page.getByRole("combobox").filter({ hasText: "Select Role" }).click();
+  async function updateRole(page: Page, initialRole: string, newRole: string) {
+    await page.getByRole("combobox").filter({ hasText: initialRole }).click();
     await page.getByPlaceholder("Search Roles").fill(newRole);
     await page.getByRole("option", { name: newRole }).first().click();
     await page.getByRole("button", { name: "Update Role" }).click();
@@ -184,7 +184,7 @@ test.describe("Department User Management", () => {
 
     // Update user role
     await openEditRoleDialog(page);
-    await updateRole(page, updatedRole);
+    await updateRole(page, initialRole, updatedRole);
     await verifyRoleUpdateSuccess(page);
 
     // Verify role was updated
