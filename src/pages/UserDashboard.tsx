@@ -151,7 +151,12 @@ export default function UserDashboard() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-auto"
+                  aria-label={t("more_options")}
+                >
                   <CareIcon icon="l-ellipsis-v" className="text-inherit" />
                 </Button>
               </DropdownMenuTrigger>
