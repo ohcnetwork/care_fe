@@ -4,6 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import i18nextPlugin from "eslint-plugin-i18next";
 import i18nextNoUndefinedTranslationKeysPlugin from "eslint-plugin-i18next-no-undefined-translation-keys";
 import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
+import playwright from "eslint-plugin-playwright";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
@@ -228,11 +229,58 @@ const config = [
   // Playwright-specific rules
   {
     files: ["tests/**/*.ts", "playwright.config.ts"],
+    plugins: { playwright },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tests/tsconfig.json",
       },
+    },
+    rules: {
+      // Explicit allow-list of the Playwright rules we enforce, all as errors.
+      "playwright/consistent-spacing-between-blocks": "error",
+      "playwright/max-nested-describe": "error",
+      "playwright/missing-playwright-await": "error",
+      "playwright/no-duplicate-hooks": "error",
+      "playwright/no-duplicate-slow": "error",
+      "playwright/no-element-handle": "error",
+      "playwright/no-eval": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/no-force-option": "error",
+      "playwright/no-nested-step": "error",
+      "playwright/no-networkidle": "error",
+      "playwright/no-page-pause": "error",
+      "playwright/no-standalone-expect": "error",
+      "playwright/no-unnecessary-assertions": "error",
+      "playwright/no-unsafe-references": "error",
+      "playwright/no-unused-locators": "error",
+      "playwright/no-useless-await": "error",
+      "playwright/no-useless-not": "error",
+      "playwright/no-wait-for-navigation": "error",
+      "playwright/no-wait-for-selector": "error",
+      "playwright/no-wait-for-timeout": "error",
+      "playwright/prefer-hooks-in-order": "error",
+      "playwright/prefer-hooks-on-top": "error",
+      "playwright/prefer-locator": "error",
+      "playwright/prefer-to-have-count": "error",
+      "playwright/prefer-to-have-length": "error",
+      "playwright/prefer-web-first-assertions": "error",
+      "playwright/valid-describe-callback": "error",
+      "playwright/valid-expect": "error",
+      "playwright/valid-expect-in-promise": "error",
+      "playwright/valid-test-tags": "error",
+      "playwright/valid-title": "error",
+      // Disallow test-id selectors in favour of role/label/text locators.
+      "playwright/no-restricted-locators": [
+        "error",
+        [
+          {
+            type: "getByTestId",
+            message:
+              "Avoid test IDs — use role/label/text locators (getByRole, getByLabel, getByText).",
+          },
+        ],
+      ],
     },
   },
 

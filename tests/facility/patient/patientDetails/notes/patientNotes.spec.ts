@@ -82,15 +82,13 @@ test.describe("Patient Notes - Isolation from Encounter Notes", () => {
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes to load by checking for the "New" button
-    await expect(page.getByRole("button", { name: /^New$/i })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: /^New$/i })).toBeVisible();
 
     // Verify patient note does NOT appear in encounter notes
     await expect(
       page.getByRole("button").filter({ hasText: patientNoteTitle }),
-    ).not.toBeVisible();
-    await expect(page.getByText(patientNoteMessage)).not.toBeVisible();
+    ).toBeHidden();
+    await expect(page.getByText(patientNoteMessage)).toBeHidden();
   });
 });
 
@@ -173,9 +171,7 @@ test.describe("Patient Notes - Thread Messaging (Multi-user & Single-user)", () 
     await userBPage.getByRole("button", { name: "Send message" }).click();
 
     // Wait for message to be sent by checking if it appears
-    await expect(userBPage.getByText(userBMessage)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(userBPage.getByText(userBMessage)).toBeVisible();
 
     // Refresh User A's view and verify both messages appear
     await page.reload();
@@ -212,13 +208,13 @@ test.describe("Patient Notes - Thread Messaging (Multi-user & Single-user)", () 
     await expect(page.getByText(userAMessage3)).toBeVisible();
 
     // Count each message individually to verify exactly one of each appears
-    const message1Count = await page.getByText(userAMessage1).count();
-    const message2Count = await page.getByText(userAMessage2).count();
-    const message3Count = await page.getByText(userAMessage3).count();
+    const message1 = page.getByText(userAMessage1);
+    const message2 = page.getByText(userAMessage2);
+    const message3 = page.getByText(userAMessage3);
 
-    expect(message1Count).toBe(1);
-    expect(message2Count).toBe(1);
-    expect(message3Count).toBe(1);
+    await expect(message1).toHaveCount(1);
+    await expect(message2).toHaveCount(1);
+    await expect(message3).toHaveCount(1);
   });
 });
 
@@ -281,8 +277,8 @@ test.describe("Patient Notes - Thread Creation", () => {
     // Verify no duplication - each thread should appear exactly once
     for (const title of threadTitles) {
       const threadButtons = page.getByRole("button").filter({ hasText: title });
-      const count = await threadButtons.count();
-      expect(count).toBe(1);
+      const count = threadButtons;
+      await expect(count).toHaveCount(1);
     }
   });
 });
@@ -336,7 +332,7 @@ test.describe("Patient Notes - Thread Visibility & Switching", () => {
       await threadTitleInput.fill(thread.title);
 
       await page.getByRole("button", { name: /Create/i }).click();
-      await expect(page.getByRole("dialog")).not.toBeVisible();
+      await expect(page.getByRole("dialog")).toBeHidden();
 
       await messageInput.fill(thread.message);
 
@@ -352,26 +348,26 @@ test.describe("Patient Notes - Thread Visibility & Switching", () => {
     // Click Thread 1 and verify only its message is visible
     await page.getByRole("button").filter({ hasText: thread1Title }).click();
     await expect(page.getByText(thread1Message)).toBeVisible();
-    await expect(page.getByText(thread2Message)).not.toBeVisible();
-    await expect(page.getByText(thread3Message)).not.toBeVisible();
+    await expect(page.getByText(thread2Message)).toBeHidden();
+    await expect(page.getByText(thread3Message)).toBeHidden();
 
     // Click Thread 2 and verify only its message is visible
     await page.getByRole("button").filter({ hasText: thread2Title }).click();
     await expect(page.getByText(thread2Message)).toBeVisible();
-    await expect(page.getByText(thread1Message)).not.toBeVisible();
-    await expect(page.getByText(thread3Message)).not.toBeVisible();
+    await expect(page.getByText(thread1Message)).toBeHidden();
+    await expect(page.getByText(thread3Message)).toBeHidden();
 
     // Click Thread 3 and verify only its message is visible
     await page.getByRole("button").filter({ hasText: thread3Title }).click();
     await expect(page.getByText(thread3Message)).toBeVisible();
-    await expect(page.getByText(thread1Message)).not.toBeVisible();
-    await expect(page.getByText(thread2Message)).not.toBeVisible();
+    await expect(page.getByText(thread1Message)).toBeHidden();
+    await expect(page.getByText(thread2Message)).toBeHidden();
 
     // Click back to Thread 1 to verify persistence of messages
     await page.getByRole("button").filter({ hasText: thread1Title }).click();
     await expect(page.getByText(thread1Message)).toBeVisible();
-    await expect(page.getByText(thread2Message)).not.toBeVisible();
-    await expect(page.getByText(thread3Message)).not.toBeVisible();
+    await expect(page.getByText(thread2Message)).toBeHidden();
+    await expect(page.getByText(thread3Message)).toBeHidden();
   });
 
   test("should allow sending messages in different threads and confirm messages stay in respective threads", async ({
@@ -402,15 +398,15 @@ test.describe("Patient Notes - Thread Visibility & Switching", () => {
     // Verify Thread 2 messages are visible and Thread 1 messages are not visible
     await expect(page.getByText(newThread2Message)).toBeVisible();
     await expect(page.getByText(thread2Message)).toBeVisible();
-    await expect(page.getByText(newThread1Message)).not.toBeVisible();
-    await expect(page.getByText(thread1Message)).not.toBeVisible();
+    await expect(page.getByText(newThread1Message)).toBeHidden();
+    await expect(page.getByText(thread1Message)).toBeHidden();
 
     // Click back to Thread 1 to verify isolation
     await page.getByRole("button").filter({ hasText: thread1Title }).click();
     // Verify Thread 1 messages are visible and Thread 2 messages are not visible
     await expect(page.getByText(newThread1Message)).toBeVisible();
     await expect(page.getByText(thread1Message)).toBeVisible();
-    await expect(page.getByText(newThread2Message)).not.toBeVisible();
-    await expect(page.getByText(thread2Message)).not.toBeVisible();
+    await expect(page.getByText(newThread2Message)).toBeHidden();
+    await expect(page.getByText(thread2Message)).toBeHidden();
   });
 });

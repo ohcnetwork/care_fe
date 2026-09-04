@@ -32,7 +32,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -53,7 +53,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Wait for the creation page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Create Token Category" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the creation page
       await expect(page).toHaveURL(
@@ -80,7 +80,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Verify the created token category appears in the list
       // Wait for table to be visible instead of networkidle
       const tableBody = page.locator("tbody");
-      await expect(tableBody).toBeVisible({ timeout: 10000 });
+      await expect(tableBody).toBeVisible();
 
       // Search for the created token category
       await page
@@ -102,7 +102,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       const nonExistentName = "NonExistentTokenCategory12345";
 
@@ -125,7 +125,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Wait for the creation page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Create Token Category" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the creation page
       await expect(page).toHaveURL(
@@ -164,7 +164,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       await page.getByRole("textbox", { name: /username/i }).fill("care-nurse");
       await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
-      await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+      await page.waitForURL(/^(?!.*login)/);
 
       // Verify we're logged in as nurse
       await expect(
@@ -180,11 +180,11 @@ test.describe("Token Category Create - Permission Tests", () => {
       await Promise.race([
         page
           .getByText("Access Denied to Token Category")
-          .waitFor({ timeout: 5000 })
+          .waitFor()
           .catch(() => null),
         page
           .getByRole("heading", { name: "Token Categories" })
-          .waitFor({ timeout: 5000 })
+          .waitFor()
           .catch(() => null),
       ]);
 
@@ -205,7 +205,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         const addButton = page.getByRole("button", {
           name: "Add Token Category",
         });
-        await expect(addButton).not.toBeVisible();
+        await expect(addButton).toBeHidden();
       }
       // If page is not accessible, that's also valid for nurses (access denied)
     });

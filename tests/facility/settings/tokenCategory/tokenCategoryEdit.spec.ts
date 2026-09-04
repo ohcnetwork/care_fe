@@ -42,7 +42,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -127,7 +127,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -157,9 +157,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
       await viewButton.click();
 
       // Wait for the view page to load by checking for Edit button
-      await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
 
       // Step 4: Verify Edit button is visible on the view page
       const editButtonOnViewPage = page.getByRole("link", { name: "Edit" });

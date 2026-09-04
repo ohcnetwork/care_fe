@@ -56,7 +56,7 @@ test.describe("Assign users to a patient", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User added to patient successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function verifyUserInList(page: Page, userName: string) {
@@ -78,7 +78,7 @@ test.describe("Assign users to a patient", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User removed successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function verifyNoUsersAssigned(page: Page) {

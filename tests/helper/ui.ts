@@ -106,7 +106,10 @@ export async function selectFromRequirements(
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      await page.waitForTimeout(500); // Wait for debounced search
+      // Debounced search (~500ms) clears the current options while loading;
+      // wait for that transition so options reflect the query, not the
+      // pre-search list.
+      await expect(scope.getByRole("option")).toHaveCount(0);
     }
   }
 
@@ -126,9 +129,6 @@ export async function selectFromRequirements(
   // Wait for the plus button and click it
   await plusButton.waitFor({ state: "visible" });
   await plusButton.click();
-
-  // Wait for selection to register (multi-select, so it stays open)
-  await page.waitForTimeout(300);
 }
 
 interface SelectFromValueSetOptions {
@@ -178,7 +178,8 @@ export async function selectFromValueSet(
     const starredTab = scope.getByRole("tab", { name: /starred/i });
     if (await starredTab.isVisible().catch(() => false)) {
       await starredTab.click();
-      await page.waitForTimeout(200);
+      // Wait for the starred panel content to mount, not just the tab state.
+      await scope.getByRole("tabpanel").waitFor({ state: "visible" });
     }
   }
 
@@ -265,17 +266,21 @@ export async function selectFromCommand(
     if (isInputVisible) {
       await input.fill("");
       await input.fill(search);
-      // Wait for search results to update
-      await page.waitForTimeout(500);
     } else {
       // Fallback for custom inputs
       const placeholderInput = scope.getByPlaceholder(/search/i).first();
       if (await placeholderInput.isVisible().catch(() => false)) {
         await placeholderInput.fill("");
         await placeholderInput.fill(search);
-        await page.waitForTimeout(500);
       }
     }
+
+    // Wait for the debounced results to reflect the typed query (some pickers
+    // keep the previous options mounted while fetching, so don't wait for the
+    // list to empty).
+    await expect(
+      scope.getByRole("option").filter({ hasText: search }).first(),
+    ).toBeVisible();
   }
 
   // Wait for options to load
@@ -598,7 +603,6 @@ export async function applyTableFilter(
   await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
 
   await selectFromFilterSelect(page, filterLabel, filterValue);
-  await page.waitForLoadState("networkidle");
 
   const tableBody = page.locator('[data-slot="table-body"]');
   await tableBody.waitFor({ state: "visible" });

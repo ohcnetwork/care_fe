@@ -14,7 +14,7 @@ setup("authenticate as staff", async ({ page }) => {
   await page.getByRole("button", { name: /login/i }).click();
 
   // Wait for successful login
-  await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+  await page.waitForURL(/^(?!.*login)/);
 
   // Verify we're logged in by checking for user-specific elements
   await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();

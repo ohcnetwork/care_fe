@@ -99,9 +99,7 @@ test.describe("OTP password reset", () => {
     await page.getByRole("button", { name: /^reset password$/i }).click();
 
     await expectToast(page, /invalid otp/i);
-    await expect(
-      page.getByRole("textbox", { name: /username/i }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("textbox", { name: /username/i })).toBeHidden();
 
     await page.close();
   });
