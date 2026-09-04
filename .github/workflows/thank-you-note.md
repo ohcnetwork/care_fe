@@ -26,8 +26,7 @@ Create personalized thank-you messages for community contributors when their pul
 1. **Verify the PR was merged** using GitHub API tools:
    - Get PR details via GitHub API
    - If `merged` is `false`, call `noop` with: "PR was closed without merging"
-   - If automated PR (Dependabot, Renovate), call `noop`
-   - If core team member with write access, call `noop`
+   - If automated PR (Dependabot, Renovate, or other bots), call `noop` with: "Skipping automated PR"
 
 2. **Analyze the PR** using GitHub API tools:
    - Get PR title, description, and files changed
