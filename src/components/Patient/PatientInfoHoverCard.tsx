@@ -44,7 +44,7 @@ export const PatientInfoHoverCard = ({
             <Avatar name={patient.name} />
           </div>
           <div className="flex flex-col">
-            <h5 className="text-lg font-semibold">{patient.name}</h5>
+            <h5 className="text-lg font-semibold capitalize">{patient.name}</h5>
             <span className="text-gray-700 text-sm font-medium">
               <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
             </span>

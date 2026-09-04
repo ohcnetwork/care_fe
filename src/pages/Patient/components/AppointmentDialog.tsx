@@ -101,7 +101,7 @@ function AppointmentDialog({
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">{t("patient_name")}</Label>
-                <p className="font-semibold text-base">
+                <p className="font-semibold text-base capitalize">
                   {appointment.patient.name}
                 </p>
                 <p className="text-sm text-gray-600 font-medium">

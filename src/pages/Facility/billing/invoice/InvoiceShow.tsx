@@ -380,7 +380,7 @@ function InvoiceShow({
                   },
                 ).toString()}`}
               >
-                <div className="font-semibold text-gray-950 underline">
+                <div className="font-semibold text-gray-950 underline capitalize">
                   {invoice.account.patient.name}
                   <SquareArrowOutUpRight className="ml-1 size-4 inline" />
                 </div>
@@ -736,7 +736,7 @@ function InvoiceShow({
                     {t("bill_to")}:
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-950 text-base ml-2">
+                    <p className="font-semibold text-gray-950 text-base ml-2 capitalize">
                       {invoice.account.patient.name}
                     </p>
                     <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">

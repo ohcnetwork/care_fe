@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -156,11 +156,15 @@ export function CreateMedicationReturnSheet({
         <SheetHeader>
           <SheetTitle>{t("create_medication_return")}</SheetTitle>
           <SheetDescription>
-            {selectedPatient
-              ? t("create_medication_return_description", {
-                  patientName: selectedPatient.name,
-                })
-              : t("select_patient_to_create_return")}
+            {selectedPatient ? (
+              <Trans
+                i18nKey="create_medication_return_description"
+                values={{ patientName: selectedPatient.name }}
+                components={{ name: <span className="capitalize" /> }}
+              />
+            ) : (
+              t("select_patient_to_create_return")
+            )}
           </SheetDescription>
         </SheetHeader>
 

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -122,9 +122,11 @@ export function MedicationReturnSheet({
         <SheetHeader>
           <SheetTitle>{t("create_medication_return")}</SheetTitle>
           <SheetDescription>
-            {t("create_medication_return_description", {
-              patientName: patient.name,
-            })}
+            <Trans
+              i18nKey="create_medication_return_description"
+              values={{ patientName: patient.name }}
+              components={{ name: <span className="capitalize" /> }}
+            />
           </SheetDescription>
         </SheetHeader>
 

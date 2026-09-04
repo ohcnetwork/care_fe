@@ -30,19 +30,20 @@ import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 
 interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
 }
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span className={cn("ml-1 font-semibold", valueClassName)}>
         {value || "-"}
       </span>
     </div>
@@ -133,7 +134,7 @@ const DispenseOrderPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("dispense_order")} - ${patient.name}`}
+      title={t("dispense_order")}
       disabled={!dispenses?.length}
       facility={facility}
       templateSlug={PrintTemplateType.dispense_order}
@@ -146,7 +147,11 @@ const DispenseOrderPreview = ({
         {/* Patient Details */}
         <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
           <div className="space-y-2">
-            <DetailRow label={t("patient")} value={patient.name} isStrong />
+            <DetailRow
+              label={t("patient")}
+              valueClassName="capitalize"
+              value={patient.name}
+            />
             <DetailRow
               label={`${t("age")} / ${t("sex")}`}
               value={
@@ -154,7 +159,6 @@ const DispenseOrderPreview = ({
                   ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
                   : undefined
               }
-              isStrong
             />
             {getPatientIdentifiers(patient, {
               use: PatientIdentifierUse.official,
@@ -163,7 +167,6 @@ const DispenseOrderPreview = ({
                 key={identifier.config.id}
                 label={identifier.config.config.display}
                 value={identifier.value}
-                isStrong
               />
             ))}
           </div>
@@ -171,17 +174,14 @@ const DispenseOrderPreview = ({
             <DetailRow
               label={t("date")}
               value={format(new Date(), "dd MMM yyyy, EEEE")}
-              isStrong
             />
             <DetailRow
               label={t("mobile_number")}
               value={patient && formatPhoneNumberIntl(patient.phone_number)}
-              isStrong
             />
             <DetailRow
               label={t("location")}
               value={dispenseOrder.location.name}
-              isStrong
             />
           </div>
         </div>

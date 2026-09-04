@@ -195,7 +195,9 @@ export default function CreateEncounterForm({
               i18nKey="begin_clinical_encounter"
               values={{ patientName }}
               components={{
-                strong: <strong className="font-semibold text-gray-950" />,
+                strong: (
+                  <strong className="font-semibold text-gray-950 capitalize" />
+                ),
               }}
             />
           </SheetDescription>

@@ -38,7 +38,7 @@ function EncounterNode({
           <Link
             href={`/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
             basePath={`/facility/${encounter.facility.id}`}
-            className="flex gap-1"
+            className="flex gap-1 capitalize"
           >
             {encounter.patient.name}
             <CareIcon

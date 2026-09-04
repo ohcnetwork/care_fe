@@ -69,6 +69,11 @@ Medical applications require enhanced accessibility for clinical environments:
 - Print compatibility: Medical forms and reports must render correctly in print media
 - Performance: Sub-100ms response times for emergency medical workflows
 
+### Patient Name Display
+Whenever a patient name (`patient.name` from `PatientRead`) is rendered, apply Tailwind `capitalize` (CSS `text-transform: capitalize`) so the first letter of each word is uppercased (it does not force the remaining letters to lowercase).
+- Preferred: add the Tailwind `capitalize` class to the element rendering the name, e.g. `<span className="capitalize">{patient.name}</span>` or `className="capitalize"` on the existing element.
+- Do NOT pre-transform the stored name for display (no ad-hoc `toUpperCase()`/`properCase()`); rely on the `capitalize` class so the underlying data stays intact.
+
 ### Component Interface Patterns
 Healthcare components should follow consistent prop patterns:
 ```typescript

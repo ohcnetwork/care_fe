@@ -185,7 +185,7 @@ function PaymentReconciliationShow({
                     <div className="text-sm text-gray-500 mb-1">
                       {t("patient_name")}
                     </div>
-                    <div className="font-semibold text-lg">
+                    <div className="font-semibold text-lg capitalize">
                       {payment.account.patient.name || "-"}
                     </div>
                   </div>

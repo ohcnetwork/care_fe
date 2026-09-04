@@ -223,7 +223,7 @@ export default function DiagnosticReportPrint({
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">{t("patient")}</span>
               <span className="text-gray-600">:</span>
-              <span className="font-semibold ml-2 wrap-break-word">
+              <span className="font-semibold ml-2 wrap-break-word capitalize">
                 {report.encounter?.patient?.name}
               </span>
             </div>

@@ -155,7 +155,8 @@ export function PrintAppointments({
               )}
               {qParams.patient && (
                 <p className="text-gray-600">
-                  {t("patient")}: {selectedPatient?.name}
+                  {t("patient")}:{" "}
+                  <span className="capitalize">{selectedPatient?.name}</span>
                 </p>
               )}
               {practitioners.length === 1 && (
@@ -212,7 +213,7 @@ export function PrintAppointments({
                     >
                       <TableCell className="p-2 align-top break-words whitespace-normal">
                         <div>
-                          <p className="font-medium">
+                          <p className="font-medium capitalize">
                             {appointment.patient.name}
                           </p>
                           <p className="text-sm text-gray-600 flex items-center gap-1">
