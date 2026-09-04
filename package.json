@@ -37,7 +37,9 @@
     "postinstall": "tsx scripts/install-platform-deps.ts",
     "postbuild": "tsx scripts/generate-headers.ts",
     "test": "snyk test",
-    "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\"",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "typecheck": "npm run supported-browsers && tsc --noEmit -p tsconfig.json",
     "playwright:test": "playwright test",
     "playwright:test:ui": "playwright test --ui",
     "playwright:test:headed": "playwright test --headed",
@@ -186,7 +188,8 @@
     "uuid": "^14.0.0",
     "vite": "^8.0.14",
     "vite-plugin-checker": "^0.14.1",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^3.2.7"
   },
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",

@@ -102,10 +102,11 @@ export async function getResponseBody<TData>(res: Response): Promise<TData> {
     return (await res.text()) as TData;
   }
 
+  const text = await res.text();
   try {
-    return await res.json();
+    return JSON.parse(text) as TData;
   } catch {
-    return (await res.text()) as TData;
+    return text as TData;
   }
 }
 

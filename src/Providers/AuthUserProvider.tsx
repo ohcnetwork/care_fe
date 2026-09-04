@@ -12,6 +12,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { userAtom } from "@/atoms/user-atom";
 import {
   JwtTokenObtainPair,
@@ -163,6 +164,7 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    await clearQueryPersistenceCache();
     setAccessToken(null);
     setPatientToken(null);
 

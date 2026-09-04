@@ -179,6 +179,12 @@ const paginatedQuery = <
       count = res.count;
       items.push(...res.results);
 
+      // Defensive: if the server reports more rows (count > items.length) but
+      // returns an empty page, stop instead of refetching forever.
+      if (res.results.length === 0) {
+        hasNextPage = false;
+      }
+
       if (options?.maxPages && page >= options.maxPages - 1) {
         hasNextPage = false;
       }
