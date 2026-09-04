@@ -1,15 +1,18 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { CodeConceptMinimal } from "@/types/base/code/code";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 import {
   ExpandRequest,
   ExpandSlugRequest,
   ExpandSlugResponse,
+  SetSlugPreferenceRequest,
   ValueSetBase,
   ValueSetCreate,
   ValueSetLookupRequest,
   ValueSetLookupResponse,
   ValueSetRead,
+  ValueSetSetFacilityOrganizations,
   ValueSetUpdate,
 } from "@/types/valueSet/valueSet";
 
@@ -59,6 +62,26 @@ export default {
     method: HttpMethod.POST,
     TBody: Type<ValueSetBase>(),
     TRes: Type<{ results: CodeConceptMinimal[] }>(),
+  },
+  // The chosen set becomes what `slug` resolves to for this user inside
+  // `facility` (expand_slug, favourites_by_slug, recent_views_by_slug).
+  setSlugPreference: {
+    path: "/api/v1/valueset/{id}/set_slug_preference/",
+    method: HttpMethod.POST,
+    TBody: Type<SetSlugPreferenceRequest>(),
+    TRes: Type<Record<string, never>>(),
+  },
+  // Facility-context sets only; the backend 403s for every other context.
+  getFacilityOrganizations: {
+    path: "/api/v1/valueset/{id}/get_facility_organizations/",
+    method: HttpMethod.GET,
+    TRes: Type<{ count: number; results: FacilityOrganizationRead[] }>(),
+  },
+  setFacilityOrganizations: {
+    path: "/api/v1/valueset/{id}/set_facility_organizations/",
+    method: HttpMethod.POST,
+    TBody: Type<ValueSetSetFacilityOrganizations>(),
+    TRes: Type<Record<string, never>>(),
   },
   favourites: {
     path: "/api/v1/valueset/{id}/favourites/",

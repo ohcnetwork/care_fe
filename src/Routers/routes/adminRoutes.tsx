@@ -1,5 +1,3 @@
-import { navigate } from "raviger";
-
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
@@ -20,6 +18,7 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
 
 const INSTANCE_SCOPE = {
   authContext: "instance",
@@ -55,11 +54,13 @@ const AdminRoutes: AppRoutes = {
   // Before "/admin/actions/:id" — raviger matches in object order.
   "/admin/actions/new": () => <ActionConfigurationForm />,
   "/admin/actions/:id": ({ id }) => <ActionConfigurationForm id={id} />,
-  "/admin/valuesets": () => <ValueSetList />,
+  "/admin/valuesets": () => <ValueSetList scope={INSTANCE_VALUESET_SCOPE} />,
   "/admin/valuesets/create": () => (
-    <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
+    <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} />
   ),
-  "/admin/valuesets/:id/edit": ({ id }) => <ValueSetEditor id={id} />,
+  "/admin/valuesets/:id/edit": ({ id }) => (
+    <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} id={id} />
+  ),
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,
   "/admin/patient_identifier_config/:id": ({ id }) => (

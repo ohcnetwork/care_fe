@@ -144,6 +144,10 @@ function generateFacilityLinks(
           url: `${baseUrl}/settings/questionnaires`,
         },
         {
+          name: t("valuesets"),
+          url: `${baseUrl}/settings/valuesets`,
+        },
+        {
           name: t("locations"),
           url: `${baseUrl}/settings/locations`,
         },

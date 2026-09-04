@@ -28,7 +28,7 @@ import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/Questio
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
-import { ValueSetCreateContext } from "@/components/ValueSet/ValueSetEditor";
+import { ValueSetScope } from "@/types/valueSet/valueSet";
 import { BehaviourToggles } from "./BehaviourToggles";
 
 import { Question } from "@/types/questionnaire/question";
@@ -56,7 +56,7 @@ interface QuestionInspectorProps {
   subjectType: SubjectType;
   /** Auth context for valuesets authored from the options editor — the
    *  mount's own, so a facility admin's create isn't rejected. */
-  valueSetContext: ValueSetCreateContext;
+  valueSetScope: ValueSetScope;
   dispatch: Dispatch<BuilderAction>;
 }
 
@@ -73,7 +73,7 @@ export function QuestionInspector({
   number,
   allQuestions,
   subjectType,
-  valueSetContext,
+  valueSetScope,
   dispatch,
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
@@ -236,7 +236,7 @@ export function QuestionInspector({
               <AnswerOptionsEditor
                 question={question}
                 onChange={onChange}
-                valueSetContext={valueSetContext}
+                valueSetScope={valueSetScope}
               />
             )}
 

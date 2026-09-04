@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import { ValueSetConfig } from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
@@ -32,6 +33,11 @@ interface ValueSetExpansion {
 export function useValueSetExpansion(
   config?: ValueSetConfig,
 ): ValueSetExpansion {
+  // Slug references resolve per facility (override / user preference), the
+  // same way the search popover reads them; outside a facility route this
+  // is undefined and the backend falls back to the instance set.
+  const { facilityId } = useCurrentFacilitySilently();
+
   const byId = useQuery({
     queryKey: ["qv2-valueset-expansion", "id", config?.external_id],
     queryFn: query(valueSetApi.expand, {
@@ -43,9 +49,14 @@ export function useValueSetExpansion(
   });
 
   const bySlug = useQuery({
-    queryKey: ["qv2-valueset-expansion", "slug", config?.slug],
+    queryKey: ["qv2-valueset-expansion", "slug", config?.slug, facilityId],
     queryFn: query(valueSetApi.expandSlug, {
-      body: { slug: config?.slug ?? "", search: "", count: PROBE_COUNT },
+      body: {
+        slug: config?.slug ?? "",
+        facility: facilityId,
+        search: "",
+        count: PROBE_COUNT,
+      },
       silent: true,
     }),
     enabled: !config?.external_id && !!config?.slug,

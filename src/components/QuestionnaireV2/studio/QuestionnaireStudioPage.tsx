@@ -65,11 +65,9 @@ import {
   actionContextTypeFor,
   normalizeQuestionnaireActions,
 } from "@/types/questionnaire/actions";
-import {
-  QuestionnaireScope,
-  scopeCreateFields,
-} from "@/types/questionnaire/questionnaire";
+import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import query from "@/Utils/request/query";
 
 import { useQuery } from "@tanstack/react-query";
@@ -361,7 +359,10 @@ export function QuestionnaireStudioPage({
   // Valuesets created from the inspector are filed under the mount's own auth
   // context: instance-context creation is superuser-only, so a facility mount
   // authoring an instance valueset would 403 for every facility admin.
-  const valueSetContext = useMemo(() => scopeCreateFields(scope), [scope]);
+  const valueSetScope = useMemo(
+    () => valueSetScopeForFacility(scope.facilityId),
+    [scope.facilityId],
+  );
 
   const revealQuestion = (questionId: string) => {
     dispatch({ type: "select", id: questionId });
@@ -638,7 +639,7 @@ export function QuestionnaireStudioPage({
                   number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}
-                  valueSetContext={valueSetContext}
+                  valueSetScope={valueSetScope}
                   dispatch={studioDispatch}
                 />
               )}

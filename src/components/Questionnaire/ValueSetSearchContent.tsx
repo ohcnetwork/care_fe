@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { ValueSetVariantChooser } from "@/components/Questionnaire/ValueSetVariantChooser";
 
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
@@ -503,6 +504,17 @@ export default function ValueSetSearchContent({
           </div>
         </div>
       </CommandList>
+
+      {/* Slug-addressed pickers inside a facility may have more than one
+          candidate set (the instance one, a facility override); the user's
+          pick is saved server-side and applies to every read of the slug. */}
+      {!pinnedValuesetId && facilityId && system && (
+        <ValueSetVariantChooser
+          slug={system}
+          facilityId={facilityId}
+          current={resolveQuery.data?.valueset}
+        />
+      )}
 
       {/* Individual Item Removal Confirmation */}
       <ConfirmActionDialog

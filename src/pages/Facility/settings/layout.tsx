@@ -7,6 +7,8 @@ import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/Que
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
 import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
 import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
+import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
+import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -17,6 +19,7 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
@@ -336,6 +339,16 @@ const getRoutes = (facilityId: string) => ({
       }}
       id={id}
     />
+  ),
+  "/valuesets": () => (
+    <ValueSetList scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  // Before "/valuesets/:id/edit" — raviger matches routes in object order.
+  "/valuesets/create": () => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  "/valuesets/:id/edit": ({ id }: { id: string }) => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} id={id} />
   ),
   "*": () => <ErrorPage />,
 });
