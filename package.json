@@ -95,7 +95,7 @@
     "@yudiel/react-qr-scanner": "^2.6.0",
     "bowser": "^2.14.1",
     "browser-image-compression": "^2.0.2",
-    "browserslist": "^4.28.2",
+    "browserslist": "^4.28.8",
     "browserslist-useragent-regexp": "^4.1.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
