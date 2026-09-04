@@ -3,19 +3,10 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
-import { isIOSDevice } from "@/Utils/utils";
-
 function Drawer({
-  repositionInputs = !isIOSDevice,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-  return (
-    <DrawerPrimitive.Root
-      data-slot="drawer"
-      repositionInputs={repositionInputs}
-      {...props}
-    />
-  );
+  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
 function DrawerTrigger({
