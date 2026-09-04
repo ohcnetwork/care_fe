@@ -808,9 +808,11 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
+                type="button"
                 className={cn(
                   "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
                   disabled && "opacity-50 cursor-not-allowed",
+                  value && !shouldHideClearButton && "rounded-r-none",
                   className,
                 )}
                 disabled={disabled}
@@ -831,7 +833,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 variant="outline"
                 type="button"
                 onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 h-auto"
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-auto"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -931,6 +933,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                   "hover:bg-gray-50 hover:text-gray-900",
                   "transition-all duration-200",
                   disabled && "opacity-50 cursor-not-allowed",
+                  value && !shouldHideClearButton && "rounded-r-none",
                   className,
                 )}
                 disabled={disabled}
@@ -961,9 +964,9 @@ export function ResourceDefinitionCategoryPicker<T>({
             {value && !shouldHideClearButton && (
               <Button
                 variant="outline"
-                onClick={handleClearSelection}
-                className="rounded-l-none -ml-1 shadow-none text-gray-400 border-gray-300 h-auto"
                 type="button"
+                onClick={handleClearSelection}
+                className="rounded-l-none shadow-none text-gray-400 border-gray-300 border-l-0 h-auto"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
