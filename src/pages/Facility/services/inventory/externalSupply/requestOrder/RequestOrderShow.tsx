@@ -743,18 +743,12 @@ export function RequestOrderShow({
 
                         {/* Add New Items Form - Always show when in draft mode */}
                         {canAddSupplyRequests && (
-                          <div className="">
+                          <div>
                             <AddItemsForm
                               requestOrderId={requestOrderId}
                               onSuccess={handleSupplyRequestSuccess}
                               updateOrderStatus={updateOrderStatus}
-                              disableApproveButton={
-                                isUpdating ||
-                                supplyRequests?.results.length === 0
-                              }
-                              showEmptyState={
-                                supplyRequests?.results.length === 0
-                              }
+                              isUpdatingOrder={isUpdating}
                             />
                           </div>
                         )}

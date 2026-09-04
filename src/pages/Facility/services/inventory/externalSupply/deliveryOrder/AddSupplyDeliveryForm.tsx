@@ -48,6 +48,7 @@ import {
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
@@ -129,6 +130,8 @@ interface Props {
   origin?: string;
   destination: string;
   onSuccess: () => void;
+  supplyDeliveriesCount: number;
+  isFetchingSupplyDeliveries: boolean;
 }
 
 export function AddSupplyDeliveryForm({
@@ -137,6 +140,8 @@ export function AddSupplyDeliveryForm({
   origin,
   destination,
   onSuccess,
+  supplyDeliveriesCount,
+  isFetchingSupplyDeliveries,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -237,6 +242,8 @@ export function AddSupplyDeliveryForm({
     name: "items",
   });
 
+  const disableAddItem = isProcessing || isFetchingSupplyDeliveries;
+
   const loadFromSupplyRequests = () => {
     setIsSelectDialogOpen(true);
     handleSelectAll(true);
@@ -269,6 +276,7 @@ export function AddSupplyDeliveryForm({
       noOptionsMessage={t("no_orders_found")}
       className="px-10"
       popoverContentClassName="w-auto"
+      disabled={disableAddItem}
     />
   );
 
@@ -538,6 +546,10 @@ export function AddSupplyDeliveryForm({
 
     await createSupplyDelivery(deliveryPayload);
   }
+
+  const hasExceedLoad =
+    selectedItems.length + supplyDeliveriesCount >
+    careConfig.maxDatapointsPerUpsert;
 
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
@@ -897,29 +909,38 @@ export function AddSupplyDeliveryForm({
                     </div>
                   </div>
 
-                  <div className="flex flex-row gap-2 mt-4 items-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleAddAnotherItem}
-                    >
-                      <PlusCircle className="mr-2 size-4" />
-                      {t("add_another")}
-                    </Button>
-                    {supplyRequests?.results?.length &&
-                      supplyRequests?.results?.length > 0 && (
+                  {supplyDeliveriesCount + fields.length >=
+                  careConfig.maxDatapointsPerUpsert ? (
+                    <UpsertLimitCallout>
+                      {t("max_datapoints_per_upsert_limit", {
+                        count: careConfig.maxDatapointsPerUpsert,
+                      })}
+                    </UpsertLimitCallout>
+                  ) : (
+                    <div className="flex flex-row gap-2 mt-4 items-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddAnotherItem}
+                        disabled={disableAddItem}
+                      >
+                        <PlusCircle className="mr-2 size-4" />
+                        {t("add_another")}
+                      </Button>
+                      {!!supplyRequests?.results?.length && (
                         <Button
                           type="button"
                           variant="secondary"
                           onClick={loadFromSupplyRequests}
+                          disabled={disableAddItem}
                         >
-                          {t("load_from_order")} ({supplyRequests?.count}{" "}
-                          {t("items")}
-                          )
+                          {t("load_from_order")} ({supplyRequests.count}{" "}
+                          {t("items")})
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
                       )}
-                  </div>
+                    </div>
+                  )}
 
                   <div className="flex justify-between">
                     <Button
@@ -931,7 +952,14 @@ export function AddSupplyDeliveryForm({
                       {t("cancel")}
                     </Button>
                     <div className="flex space-x-3">
-                      <Button type="submit" disabled={isProcessing}>
+                      <Button
+                        type="submit"
+                        disabled={
+                          isProcessing ||
+                          supplyDeliveriesCount + fields.length >
+                            careConfig.maxDatapointsPerUpsert
+                        }
+                      >
                         {isProcessing ? t("saving") : t("save")}
                         <ShortcutBadge actionId="submit-action" />
                       </Button>
@@ -945,17 +973,16 @@ export function AddSupplyDeliveryForm({
                 <p>{t("add_items_to_delivery_description")}</p>
                 <div className="flex flex-row gap-2 items-center mt-2">
                   {qParams.supplyOrder ? (
-                    supplyRequests?.results?.length &&
-                    supplyRequests?.results?.length > 0 && (
+                    !!supplyRequests?.results?.length && (
                       <>
                         <Button
                           type="button"
                           variant="outline_primary"
                           onClick={loadFromSupplyRequests}
+                          disabled={disableAddItem}
                         >
-                          {t("load_from_order")} ({supplyRequests?.count}{" "}
-                          {t("items")}
-                          )
+                          {t("load_from_order")} ({supplyRequests.count}{" "}
+                          {t("items")})
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
                         <p>- {t("or")} -</p>
@@ -971,6 +998,7 @@ export function AddSupplyDeliveryForm({
                     type="button"
                     variant="outline_primary"
                     onClick={() => handleAddAnotherItem()}
+                    disabled={disableAddItem}
                   >
                     <PlusCircle className="mr-2 size-4" />
                     {t("add_item")}
@@ -1007,7 +1035,7 @@ export function AddSupplyDeliveryForm({
                   {t("select_all")}
                 </label>
               </div>
-              <div className="border rounded-md divide-y">
+              <div className="border rounded-md divide-y max-h-[50vh] overflow-y-auto">
                 {supplyRequests.results.map((request) => (
                   <div
                     key={request.id}
@@ -1034,6 +1062,13 @@ export function AddSupplyDeliveryForm({
                   </div>
                 ))}
               </div>
+              {hasExceedLoad && (
+                <UpsertLimitCallout>
+                  {t("max_items_selected_limit_warning", {
+                    count: careConfig.maxDatapointsPerUpsert,
+                  })}
+                </UpsertLimitCallout>
+              )}
             </div>
             <DialogFooter>
               <Button
@@ -1044,7 +1079,7 @@ export function AddSupplyDeliveryForm({
               </Button>
               <Button
                 onClick={handleSelectRequests}
-                disabled={selectedItems.length === 0}
+                disabled={selectedItems.length === 0 || hasExceedLoad}
               >
                 {t("done")}
                 <ShortcutBadge actionId="enter-action" />
