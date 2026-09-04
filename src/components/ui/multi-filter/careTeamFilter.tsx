@@ -275,9 +275,9 @@ export const SelectedCareTeamBadge = ({
   const user = selected[0];
 
   return (
-    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+    <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
       <User className="h-3 w-3 text-gray-600 shrink-0" />
-      <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
+      <span className="block min-w-0 flex-1 truncate text-sm whitespace-nowrap">
         {formatName(user)}
       </span>
     </div>

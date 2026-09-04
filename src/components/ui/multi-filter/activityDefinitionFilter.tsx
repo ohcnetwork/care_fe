@@ -468,11 +468,11 @@ export function SelectedActivityDefinitionBadge({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+    <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
       {selected.length === 1 ? (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="text-sm whitespace-nowrap truncate max-w-[150px]">
+            <span className="block min-w-0 flex-1 truncate text-sm whitespace-nowrap">
               {selected[0].title}
             </span>
           </TooltipTrigger>
