@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -15,7 +16,7 @@ test.describe("Charge Item Definition Delete operations", () => {
     facilityId = getFacilityId();
     const chargeItemName = faker.string.alphanumeric(10);
     title = chargeItemName;
-    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    slug = expectedSlug(chargeItemName);
     basePrice = faker.commerce.price({ dec: 0 });
     categoryName = "Consumables";
 

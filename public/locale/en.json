@@ -5888,7 +5888,7 @@
   "slot_configuration": "Slot Configuration",
   "slots": "Slots",
   "slug": "Slug",
-  "slug_format_message": "Slug must only contain letters, numbers, underscores, and hyphens",
+  "slug_format_message": "Slug must only contain letters, numbers, underscores, and hyphens, and must start and end with a letter or number",
   "slug_input_placeholder": "Enter a unique slug",
   "sno": "S.No",
   "social_history": "Social History",
