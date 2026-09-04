@@ -1,10 +1,56 @@
-import { LucideIcon } from "lucide-react";
+import { type ComponentType } from "react";
+
+import {
+  AppointmentDuoIcon,
+  BoxDuoIcon,
+  CalendarDuoIcon,
+  ChartDuoIcon,
+  DatabaseDuoIcon,
+  HeartDuoIcon,
+  StethoscopeDuoIcon,
+  UsersDuoIcon,
+} from "@/CAREUI/icons/CustomIcons";
+
+export type DashboardShortcutIcon = ComponentType<{ className?: string }>;
+
+export const DASHBOARD_SHORTCUT_ICONS = {
+  Appointment: AppointmentDuoIcon,
+  Calendar: CalendarDuoIcon,
+  Stethoscope: StethoscopeDuoIcon,
+  Heart: HeartDuoIcon,
+  Chart: ChartDuoIcon,
+  User: UsersDuoIcon,
+  /** @deprecated Use `User`. Kept so existing REACT_CUSTOM_SHORTCUTS configs keep working. */
+  Users: UsersDuoIcon,
+  Box: BoxDuoIcon,
+  Database: DatabaseDuoIcon,
+} as const satisfies Record<string, DashboardShortcutIcon>;
+
+export type DashboardShortcutIconName = keyof typeof DASHBOARD_SHORTCUT_ICONS;
+
+export const DEFAULT_DASHBOARD_SHORTCUT_ICON = BoxDuoIcon;
+
+export function isDashboardShortcutIconName(
+  name: string,
+): name is DashboardShortcutIconName {
+  return Object.hasOwn(DASHBOARD_SHORTCUT_ICONS, name);
+}
+
+/** Resolves an env/config icon name; unknown names fall back to Box. */
+export function resolveDashboardShortcutIcon(
+  name?: DashboardShortcutIconName | string,
+): DashboardShortcutIcon {
+  if (name && isDashboardShortcutIconName(name)) {
+    return DASHBOARD_SHORTCUT_ICONS[name];
+  }
+  return DEFAULT_DASHBOARD_SHORTCUT_ICON;
+}
 
 export interface CustomDashboardLink {
   title: string;
   description: string;
   href: string;
-  icon?: string; // Icon name from lucide-react
+  icon?: DashboardShortcutIconName;
   visible?: boolean;
 }
 
@@ -34,18 +80,16 @@ export function replacePlaceholders(
  * Processes custom dashboard links by replacing placeholders in href only and mapping icons
  * @param links - Array of custom dashboard links from environment
  * @param context - Context object for placeholder replacement
- * @param iconMap - Map of icon names to Lucide React components
  * @returns Processed dashboard links ready for rendering
  */
 export function processCustomDashboardLinks(
   links: CustomDashboardLink[],
   context: DashboardLinkContext,
-  iconMap: Record<string, LucideIcon>,
 ): Array<{
   title: string;
   description: string;
   href: string;
-  icon: LucideIcon;
+  icon: DashboardShortcutIcon;
   visible: boolean;
 }> {
   return links
@@ -53,7 +97,7 @@ export function processCustomDashboardLinks(
       ...link,
       // Only replace placeholders in href, keep title and description as-is
       href: replacePlaceholders(link.href, context),
-      icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : iconMap.Box, // Default to Box icon
+      icon: resolveDashboardShortcutIcon(link.icon),
       visible: link.visible !== false, // Default to true unless explicitly false
     }))
     .filter((link) => link.visible);
