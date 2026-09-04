@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { Check } from "lucide-react";
-import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import {
   Command,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -32,8 +33,8 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
-  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
@@ -65,12 +66,6 @@ interface EncounterListProps {
   facilityId: string;
   encounterClass?: EncounterClass;
 }
-
-const SEARCH_WITH_NAME = "name" as const;
-const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
-
-type SearchWith =
-  typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
 
 const buildQueryParams = (
   facilityId: string,
@@ -139,28 +134,19 @@ export function EncounterList({
     limit: 15,
     disableCache: true,
     cacheBlacklist: [
-      "name",
+      "search_by",
+      "search_text",
       "encounter_id",
-      "external_identifier",
       "tags",
       "patient_filter",
     ],
   });
   const { t } = useTranslation();
-  const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
+  const [savedFilters, setSavedFilters] = useAtom(encounterListFiltersAtom);
   const hasRestoredFilters = useRef(false);
   const hasAppliedDefaultStatus = useRef(false);
-  const [searchWith, setSearchWith] = useState<SearchWith>(
-    qParams.external_identifier
-      ? SEARCH_WITH_EXTERNAL_IDENTIFIER
-      : SEARCH_WITH_NAME,
-  );
-  const [searchText, setSearchText] = useState(
-    qParams.external_identifier || qParams.name || "",
-  );
+
   const [searchOptionsOpen, setSearchOptionsOpen] = useState(false);
-  const [activeSearchOptionIndex, setActiveSearchOptionIndex] = useState(0);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const {
     status,
@@ -186,101 +172,26 @@ export function EncounterList({
 
   const searchWithOptions = [
     {
-      key: SEARCH_WITH_NAME,
+      key: "name",
       label: t("patient_name"),
       placeholder: t("search_by_patient_name"),
     },
     {
-      key: SEARCH_WITH_EXTERNAL_IDENTIFIER,
+      key: "external_identifier",
       label: t("external_identifier"),
       placeholder: t("search_by_external_id"),
     },
   ];
 
-  useEffect(() => {
-    if (qParams.external_identifier) {
-      setSearchWith(SEARCH_WITH_EXTERNAL_IDENTIFIER);
-      setSearchText(qParams.external_identifier);
-    } else if (qParams.name) {
-      setSearchWith(SEARCH_WITH_NAME);
-      setSearchText(qParams.name);
-    } else {
-      setSearchText("");
-    }
-  }, [qParams.name, qParams.external_identifier]);
+  const searchWith = searchWithOptions.find(
+    (option) => option.key === qParams.search_by,
+  )?.key;
+  const searchValue = qParams.search_text || "";
 
   const selectedSearchType =
     searchWithOptions.find((option) => option.key === searchWith) ||
     searchWithOptions[0];
-  const showSearchOptions = searchText.trim() !== "";
-
-  const searchQueryParams =
-    searchWith === SEARCH_WITH_NAME
-      ? { name: searchText || undefined, external_identifier: undefined }
-      : { name: undefined, external_identifier: searchText || undefined };
-
-  const updateSearchQuery = (
-    nextSearchWith: SearchWith,
-    nextSearchText: string,
-  ) => {
-    if (nextSearchWith === SEARCH_WITH_NAME) {
-      updateQuery({
-        name: nextSearchText,
-        external_identifier: "",
-      });
-    } else {
-      updateQuery({
-        name: "",
-        external_identifier: nextSearchText,
-      });
-    }
-  };
-
-  const handleSearchWithChange = (nextSearchWith: SearchWith) => {
-    setSearchWith(nextSearchWith);
-    updateSearchQuery(nextSearchWith, searchText);
-    setSearchOptionsOpen(false);
-    searchInputRef.current?.focus();
-  };
-
-  const handleSearchInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && !searchOptionsOpen) {
-      event.preventDefault();
-      updateSearchQuery(searchWith, searchText);
-      return;
-    }
-
-    if (!showSearchOptions) {
-      return;
-    }
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setSearchOptionsOpen(true);
-      setActiveSearchOptionIndex((prev) =>
-        prev < searchWithOptions.length - 1 ? prev + 1 : prev,
-      );
-      return;
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActiveSearchOptionIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      return;
-    }
-
-    if (event.key === "Enter" && searchOptionsOpen) {
-      event.preventDefault();
-      handleSearchWithChange(
-        searchWithOptions[activeSearchOptionIndex]?.key || SEARCH_WITH_NAME,
-      );
-      return;
-    }
-
-    if (event.key === "Escape") {
-      setSearchOptionsOpen(false);
-    }
-  };
+  const showSearchOptions = searchValue.trim() !== "";
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
@@ -300,35 +211,29 @@ export function EncounterList({
       patient_filter;
 
     if (!hasUrlFilters) {
-      try {
-        const stored = sessionStorage.getItem("encounter_list_filters");
-        if (stored) {
-          const filters = JSON.parse(stored);
-          if (filters.status) restoredParams.status = filters.status;
-          if (filters.priority) restoredParams.priority = filters.priority;
-          if (filters.selectedOrg)
-            restoredParams.organization = filters.selectedOrg.id;
-          if (filters.selectedCareTeamMember)
-            restoredParams.care_team_user =
-              filters.selectedCareTeamMember.username;
-          if (filters.selectedTags?.length > 0)
-            restoredParams.tags = filters.selectedTags
-              .map((t: TagConfig) => t.id)
-              .join(",");
-          if (filters.tagsBehavior)
-            restoredParams.tags_behavior = filters.tagsBehavior;
-          if (filters.dateFrom)
-            restoredParams.created_date_after = dateQueryString(
-              new Date(filters.dateFrom),
-            );
-          if (filters.dateTo)
-            restoredParams.created_date_before = dateQueryString(
-              new Date(filters.dateTo),
-            );
-        }
-      } catch {
-        // Ignore parsing errors
+      if (savedFilters.status) restoredParams.status = savedFilters.status;
+      if (savedFilters.priority)
+        restoredParams.priority = savedFilters.priority;
+      if (savedFilters.selectedOrg)
+        restoredParams.organization = savedFilters.selectedOrg.id;
+      if (savedFilters.selectedCareTeamMember)
+        restoredParams.care_team_user =
+          savedFilters.selectedCareTeamMember.username;
+      if (savedFilters.selectedTags?.length > 0) {
+        restoredParams.tags = savedFilters.selectedTags
+          .map((t: TagConfig) => t.id)
+          .join(",");
+        if (savedFilters.tagsBehavior)
+          restoredParams.tags_behavior = savedFilters.tagsBehavior;
       }
+      if (savedFilters.dateFrom)
+        restoredParams.created_date_after = dateQueryString(
+          new Date(savedFilters.dateFrom),
+        );
+      if (savedFilters.dateTo)
+        restoredParams.created_date_before = dateQueryString(
+          new Date(savedFilters.dateTo),
+        );
     }
 
     const hasAnyDates =
@@ -349,7 +254,7 @@ export function EncounterList({
   }, []);
 
   const { data: queryEncounters, isFetching } = useQuery({
-    queryKey: ["encounters", facilityId, qParams, encounterClass],
+    queryKey: ["encounters", facilityId, encounterClass, qParams],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
         ...buildQueryParams(
@@ -362,13 +267,12 @@ export function EncounterList({
           care_team_user,
         ),
         encounter_class: encounterClass,
-        external_identifier: searchQueryParams.external_identifier,
+        ...(searchWith && { [searchWith]: searchValue || undefined }),
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         patient_filter: patient_filter,
-        name: searchQueryParams.name,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -624,61 +528,66 @@ export function EncounterList({
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-full sm:w-auto sm:min-w-60">
-                  <Popover
-                    open={searchOptionsOpen && showSearchOptions}
-                    onOpenChange={setSearchOptionsOpen}
+                  <Command
+                    shouldFilter={false}
+                    className="overflow-visible bg-transparent"
                   >
-                    <PopoverTrigger asChild>
-                      <div className="relative">
-                        <input
-                          ref={searchInputRef}
-                          value={searchText}
-                          onChange={(event) => {
-                            const value = event.target.value;
-                            setSearchText(value);
-                            setSearchOptionsOpen(value.trim() !== "");
-                            setActiveSearchOptionIndex(0);
-                          }}
-                          onFocus={() => {
-                            if (showSearchOptions) {
-                              setSearchOptionsOpen(true);
-                            }
-                          }}
-                          onKeyDown={handleSearchInputKeyDown}
-                          placeholder={selectedSearchType.placeholder}
-                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus-visible:outline-none"
-                        />
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-(--radix-popover-trigger-width) p-0"
-                      align="start"
-                      onOpenAutoFocus={(event) => {
-                        event.preventDefault();
-                        searchInputRef.current?.focus();
-                      }}
+                    <Popover
+                      open={searchOptionsOpen && showSearchOptions}
+                      onOpenChange={setSearchOptionsOpen}
                     >
-                      <Command>
+                      <PopoverAnchor asChild>
+                        <div className="w-full">
+                          <CommandInput
+                            hideSearchIcon
+                            aria-label={selectedSearchType.placeholder}
+                            value={searchValue}
+                            onValueChange={(value) => {
+                              updateQuery({ search_text: value });
+                              setSearchOptionsOpen(value.trim() !== "");
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") {
+                                setSearchOptionsOpen(false);
+                                return;
+                              }
+                              if (event.key === "Enter" && !searchOptionsOpen) {
+                                event.preventDefault();
+                                if (!searchValue.trim()) {
+                                  updateQuery({
+                                    search_by: undefined,
+                                    search_text: undefined,
+                                  });
+                                }
+                              }
+                            }}
+                            placeholder={selectedSearchType.placeholder}
+                            className="h-9 pl-2 bg-white"
+                          />
+                        </div>
+                      </PopoverAnchor>
+                      <PopoverContent
+                        className="w-(--radix-popover-trigger-width) p-0"
+                        align="start"
+                        onOpenAutoFocus={(event) => event.preventDefault()}
+                        onCloseAutoFocus={(event) => event.preventDefault()}
+                      >
                         <CommandList>
                           <CommandGroup>
-                            {searchWithOptions.map((option, index) => (
+                            {searchWithOptions.map((option) => (
                               <CommandItem
                                 key={option.key}
                                 value={option.key}
-                                onSelect={() =>
-                                  handleSearchWithChange(option.key)
-                                }
-                                className={`flex items-center gap-2 ${
-                                  activeSearchOptionIndex === index
-                                    ? "bg-gray-100"
-                                    : ""
-                                }`}
-                                onMouseEnter={() =>
-                                  setActiveSearchOptionIndex(index)
-                                }
+                                onSelect={() => {
+                                  updateQuery({
+                                    search_by: option.key,
+                                  });
+                                  setSearchOptionsOpen(false);
+                                }}
+                                className="flex items-center gap-2"
                               >
                                 <div>
-                                  {searchText}{" "}
+                                  {searchValue}{" "}
                                   <span className="text-gray-500">
                                     {option.label}
                                   </span>
@@ -694,9 +603,9 @@ export function EncounterList({
                             ))}
                           </CommandGroup>
                         </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                      </PopoverContent>
+                    </Popover>
+                  </Command>
                 </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
