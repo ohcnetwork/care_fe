@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFieldErrorMessage } from "tests/helper/error";
-import { closeAnyOpenPopovers, expectToast } from "tests/helper/ui";
+import { expectToast } from "tests/helper/ui";
 import { expectedSlug } from "tests/helper/utils";
 import {
   LOINC_CODE_NAME,
@@ -76,7 +76,7 @@ test.describe("ValueSet Create", () => {
 
     // Verify the code name is present in the display value
     const displayValue = await page
-      .getByRole("textbox", { name: "Unverified" })
+      .getByRole("textbox", { name: "Display name" })
       .inputValue();
     expect(displayValue).toContain(codeName);
 
@@ -92,10 +92,14 @@ test.describe("ValueSet Create", () => {
       name: /valueset preview/i,
     });
 
-    // TODO: Temporarily disabled - preview feature is broken
-    // await previewDialog.getByRole("combobox").click();
-    // await expect(page.getByText(codeName)).toBeVisible();
-    // await closeAnyOpenPopovers(page);
+    await expect(previewDialog.getByRole("status")).toHaveText(
+      /^Showing \d+ concepts?$/,
+    );
+    const previewConcept = previewDialog
+      .getByRole("listitem")
+      .filter({ hasText: codeName });
+    await expect(previewConcept).toBeVisible();
+    await expect(previewConcept.getByText(code, { exact: true })).toBeVisible();
     await previewDialog.getByRole("button", { name: "Close" }).click();
 
     await page.getByRole("button", { name: "Save ValueSet" }).click();
@@ -148,7 +152,7 @@ test.describe("ValueSet Create", () => {
 
     // Verify the code name is present in the display value
     const displayValue = await page
-      .getByRole("textbox", { name: "Unverified" })
+      .getByRole("textbox", { name: "Display name" })
       .inputValue();
     expect(displayValue).toContain(codeName);
 
@@ -164,12 +168,15 @@ test.describe("ValueSet Create", () => {
       name: /valueset preview/i,
     });
 
-    await previewDialog.getByRole("combobox").click();
-
-    await expect(page.getByText(codeName)).not.toBeVisible();
-
-    // Close the preview valueset selector first and then the dialog
-    await closeAnyOpenPopovers(page);
+    await previewDialog
+      .getByRole("textbox", { name: "Search for a concept in this valueset" })
+      .fill(code);
+    await expect(previewDialog.getByRole("status")).toHaveText(
+      /^Showing \d+ concepts?$/,
+    );
+    await expect(
+      previewDialog.getByRole("listitem").getByText(code, { exact: true }),
+    ).toHaveCount(0);
     await previewDialog.getByRole("button", { name: "Close" }).click();
   });
 

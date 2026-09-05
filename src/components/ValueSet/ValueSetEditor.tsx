@@ -3,8 +3,6 @@ import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Card, CardContent } from "@/components/ui/card";
-
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import {
@@ -20,7 +18,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 import { useCanWriteValueSet } from "./useCanWriteValueSet";
-import { ValueSetForm, ValueSetFormSubmit } from "./ValueSetForm";
+import {
+  ValueSetForm,
+  ValueSetFormSubmit,
+  type ValueSetFormState,
+} from "./ValueSetForm";
 import { ValueSetOrganizationsField } from "./ValueSetOrganizationsField";
 
 interface ValueSetEditorProps {
@@ -29,6 +31,10 @@ interface ValueSetEditorProps {
   /** Overrides the default post-save navigation (an inline sheet closes
    *  itself instead of leaving the page). */
   onSuccess?: (data: ValueSetRead) => void;
+  /** Lets an embedded editor close its host instead of navigating away. */
+  onCancel?: () => void;
+  /** Reports whether closing the host could discard an edit or active save. */
+  onStateChange?: (state: ValueSetFormState) => void;
 }
 
 function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
@@ -47,7 +53,13 @@ function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
   };
 }
 
-export function ValueSetEditor({ id, scope, onSuccess }: ValueSetEditorProps) {
+export function ValueSetEditor({
+  id,
+  scope,
+  onSuccess,
+  onCancel,
+  onStateChange,
+}: ValueSetEditorProps) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   // Hold the form until permissions are known — otherwise a facility mount
@@ -123,6 +135,9 @@ export function ValueSetEditor({ id, scope, onSuccess }: ValueSetEditorProps) {
       const updateData: ValueSetUpdate = {
         ...payload,
         id: existingValueset.id,
+        // Slugs are stable references, not editable metadata. Preserve the
+        // fetched identifier even if form state is changed programmatically.
+        slug: existingValueset.slug,
       };
       updateMutation.mutate(updateData);
     } else {
@@ -137,27 +152,7 @@ export function ValueSetEditor({ id, scope, onSuccess }: ValueSetEditorProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">
-        {id
-          ? existingValueset?.is_system_defined
-            ? t("preview_value_set")
-            : t("edit_value_set")
-          : t("create_new_value_set")}
-      </h1>
-
-      {id && scope.authContext === "facility" && (
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <ValueSetOrganizationsField
-              facilityId={scope.facilityId}
-              valuesetId={id}
-              canWrite={canWrite}
-            />
-          </CardContent>
-        </Card>
-      )}
-
+    <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       {(id && isLoading) ||
       (initialParentId && isLoadingParent) ||
       isPermissionLoading ? (
@@ -168,8 +163,19 @@ export function ValueSetEditor({ id, scope, onSuccess }: ValueSetEditorProps) {
           initialData={existingValueset}
           initialParent={initialParent}
           onSubmit={handleSubmit}
+          onCancel={onCancel}
+          onStateChange={onStateChange}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          isReadOnly={!canWrite}
+          isReadOnly={!canWrite || !!existingValueset?.is_system_defined}
+          accessControl={
+            id && scope.authContext === "facility" ? (
+              <ValueSetOrganizationsField
+                facilityId={scope.facilityId}
+                valuesetId={id}
+                canWrite={canWrite}
+              />
+            ) : undefined
+          }
         />
       )}
     </div>

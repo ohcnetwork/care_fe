@@ -13,6 +13,7 @@ import {
   useScopedValueSets,
 } from "@/components/ValueSet/useScopedValueSets";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
+import type { ValueSetFormState } from "@/components/ValueSet/ValueSetForm";
 
 import {
   INSTANCE_VALUESET_SCOPE,
@@ -41,6 +42,10 @@ export function SelectOrCreateValueset({
   scope = INSTANCE_VALUESET_SCOPE,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editorState, setEditorState] = useState<ValueSetFormState>({
+    isDirty: false,
+    isSubmitting: false,
+  });
   const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -107,6 +112,19 @@ export function SelectOrCreateValueset({
     }
   };
 
+  const handleSheetOpenChange = (open: boolean) => {
+    if (open) {
+      setEditorState({ isDirty: false, isSubmitting: false });
+      setIsSheetOpen(true);
+      return;
+    }
+    if (editorState.isSubmitting) return;
+    if (editorState.isDirty && !window.confirm(t("unsaved_changes_warning"))) {
+      return;
+    }
+    setIsSheetOpen(false);
+  };
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-2 flex-col sm:flex-row">
@@ -129,7 +147,7 @@ export function SelectOrCreateValueset({
             noOptionsMessage={t("no_valuesets_found")}
           />
         </div>
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
           <SheetTrigger asChild>
             <Button variant="outline" className="gap-2 w-full sm:w-auto">
               <CareIcon icon="l-plus" />
@@ -138,10 +156,12 @@ export function SelectOrCreateValueset({
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-full sm:max-w-2xl overflow-y-auto"
+            className="w-full overflow-y-auto p-0 sm:max-w-4xl"
           >
             <ValueSetEditor
               scope={scope}
+              onCancel={() => handleSheetOpenChange(false)}
+              onStateChange={setEditorState}
               onSuccess={(data) => {
                 setIsSheetOpen(false);
                 setCurrentValueSet(data);
