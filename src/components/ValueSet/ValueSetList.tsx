@@ -279,7 +279,7 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
         </>
       );
     }
-    const readOnly = valueset.is_system_defined || !canWrite;
+    const readOnly = !canWrite;
     return (
       <Button
         variant="outline"

@@ -1003,11 +1003,17 @@ export function ValueSetForm({
           initialData?.compose?.include.map((rule) => ({
             ...rule,
             version: rule.version ?? "",
+            // Field arrays initialize missing lists as empty. Match that shape
+            // in the defaults so opening a saved rule is not itself an edit.
+            concept: rule.concept ?? [],
+            filter: rule.filter ?? [],
           })) || [],
         exclude:
           initialData?.compose?.exclude.map((rule) => ({
             ...rule,
             version: rule.version ?? "",
+            concept: rule.concept ?? [],
+            filter: rule.filter ?? [],
           })) || [],
       },
       parent: initialParent?.id,
@@ -1031,7 +1037,7 @@ export function ValueSetForm({
     }
   }, [form, sharedSlugs, showBasedOn]);
   const pageTitle = initialData
-    ? initialData.is_system_defined
+    ? isReadOnly
       ? t("preview_value_set")
       : t("edit_value_set")
     : t("create_valueset");
@@ -1440,11 +1446,7 @@ export function ValueSetForm({
 
           {isReadOnly && (
             <div className="rounded-lg border border-gray-200 bg-gray-100 p-3 text-sm text-gray-700">
-              {t(
-                initialData?.is_system_defined
-                  ? "saving_is_disabled_for_system_valuesets"
-                  : "no_permission_to_edit_valueset",
-              )}
+              {t("no_permission_to_edit_valueset")}
             </div>
           )}
         </div>

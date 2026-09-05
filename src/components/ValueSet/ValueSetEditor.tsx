@@ -166,7 +166,7 @@ export function ValueSetEditor({
           onCancel={onCancel}
           onStateChange={onStateChange}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          isReadOnly={!canWrite || !!existingValueset?.is_system_defined}
+          isReadOnly={!canWrite}
           accessControl={
             id && scope.authContext === "facility" ? (
               <ValueSetOrganizationsField
