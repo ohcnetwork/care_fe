@@ -1,5 +1,5 @@
 import { callApi } from "@/Utils/request/query";
-import { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
+import { ApiCallOptions, ApiRoute, QueryParams } from "@/Utils/request/types";
 
 /**
  * Creates a TanStack Query compatible mutation function.
@@ -16,10 +16,9 @@ import { ApiCallOptions, ApiRoute } from "@/Utils/request/types";
  * });
  * ```
  */
-export default function mutate<Route extends ApiRoute<unknown, unknown>>(
-  route: Route,
-  options?: ApiCallOptions<Route>,
-) {
+export default function mutate<
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
+>(route: Route, options?: ApiCallOptions<Route>) {
   return (variables: Route["TBody"]) => {
     return callApi(route, { ...options, body: variables });
   };
