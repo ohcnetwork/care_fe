@@ -45,7 +45,12 @@ questions, that is the bug.
   clinical history). The outline is an OVERLAY, not a column
   (`FillOutlineOverlay`): a slim tick rail on the canvas' left edge opens
   the panel over the full-width canvas on hover/focus/click; scroll-spy
-  (`useFillOutlineNav`) tracks the block topping the viewport. Each form
+  (`useFillOutlineNav`) tracks the block topping the viewport. `FillCanvas`
+  constrains regular questions to a centered `max-w-3xl` column and structured
+  questions to `max-w-5xl`, except medication requests and medication statements,
+  whose tables use the full canvas.
+  Ancestor groups containing medication sections also span the canvas;
+  other structured questions remain constrained within those groups. Each form
   portals its rows (`FillOutline`) and ticks (`FillOutlineRail`) into the
   overlay's hosts — they must render inside that form's provider. What it
   is filling FOR is `subject.ts`'s `FillSubject`
@@ -68,13 +73,13 @@ questions, that is the bug.
   `resolveStructuredType` in; keep it that way so the gates stay testable
   under `node --test`; schema v2), debounced writes with pagehide/unmount flush
   (`useFillSessionAutosave`), and the dependency-free sweep module
-  (`fillDraftCache`) that the auth provider and the app-update path
-  import — an OTHER user's login clears every OTHER-user draft
+  (`fillDraftCache`) that the auth provider imports — an OTHER user's login clears every OTHER-user draft
   (`clearOtherUsersFillDrafts`, keyed off the just-authenticated user's id;
-  the same user's own draft survives re-login on purpose), signOut and an
-  app update clear everything (`clearQuestionnaireFillDrafts`), and expired
+  the same user's own draft survives re-login on purpose), signOut clears
+  everything (`clearQuestionnaireFillDrafts`), and expired
   drafts are swept at boot regardless of auth outcome
-  (`sweepExpiredFillDrafts`) — a new session boundary must join this list.
+  (`sweepExpiredFillDrafts`). Software updates and Clear Cache preserve these
+  drafts because they contain unsaved work, not disposable cached data.
   Two kinds of draft coexist
   and must not be confused: that local one is the crash safety net, while
   `useSaveServerDraft` is the deliberate "Save as draft" — a

@@ -128,7 +128,7 @@ describe("clearOtherUsersFillDrafts — shared-device protection at login", () =
   });
 });
 
-describe("clearQuestionnaireFillDrafts — deliberate sign-out and app update", () => {
+describe("clearQuestionnaireFillDrafts — deliberate sign-out", () => {
   it("removes every fill draft and nothing else", () => {
     store[draftKey("me")] = "{}";
     store[draftKey("other")] = "{}";

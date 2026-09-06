@@ -3,8 +3,9 @@ import { fillDraftScopeKey } from "./fillDraftCore";
 
 /**
  * Dependency-free local draft cache helpers: key prefix, expiry and sweeps.
- * Other-user login removes unrelated drafts on shared devices; sign-out and
- * app update remove all drafts; expired or corrupt entries are swept at boot.
+ * Other-user login removes unrelated drafts on shared devices; sign-out
+ * removes all drafts; expired or corrupt entries are swept at boot.
+ * Software updates and cache maintenance preserve unsaved questionnaire work.
  */
 export const FILL_DRAFT_PREFIX = "care_qn_fill_draft--";
 
@@ -102,8 +103,7 @@ export function isFillDraftExpired(savedAt: string): boolean {
   return isNaN(saved) || Date.now() - saved > FILL_DRAFT_TTL_MS;
 }
 
-/** Prefix sweep — registered at signOut and app update so draft data
- *  never outlives a deliberately-ended session. */
+/** Prefix sweep on sign-out, when the user deliberately ends their session. */
 export function clearQuestionnaireFillDrafts(): void {
   removeMatchingDrafts(() => true);
 }

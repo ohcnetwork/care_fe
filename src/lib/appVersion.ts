@@ -1,6 +1,5 @@
 import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
 import { clearScheduleServiceTypeCache } from "@/atoms/scheduleServiceTypeAtom";
-import { clearQuestionnaireFillDrafts } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
 import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 
 import queryClient from "@/Utils/request/queryClient";
@@ -82,7 +81,8 @@ export async function fetchBuildMeta(): Promise<BuildMeta> {
 }
 
 /**
- * Clear all caches including browser caches, service workers, and query cache
+ * Clear browser caches, service workers and query caches. Questionnaire
+ * drafts are unsaved user work and must survive cache maintenance/updates.
  */
 export async function clearAllCaches(): Promise<void> {
   // Clear browser caches
@@ -102,7 +102,6 @@ export async function clearAllCaches(): Promise<void> {
   clearQueryPersistenceCache();
   clearScheduleServiceTypeCache();
   clearQueuePractitionerCache();
-  clearQuestionnaireFillDrafts();
 }
 
 /**
