@@ -23,13 +23,13 @@ export function FillShell({
       {/* min-w-0 + overflow on the strip: a long questionnaire title (or
           the two tabs) scrolls within its own row on narrow screens
           instead of pushing the close button off-viewport. */}
-      <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-3 md:px-6">
+      <div className="flex shrink-0 items-end justify-between gap-2 bg-gray-200 px-4 pt-3 md:px-6">
         <div className="min-w-0 flex-1 overflow-x-auto">{tabs ?? <div />}</div>
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="shrink-0"
+          className="mb-2 shrink-0 border-gray-300 shadow-xs"
           aria-label={t("close")}
           onClick={onClose}
         >

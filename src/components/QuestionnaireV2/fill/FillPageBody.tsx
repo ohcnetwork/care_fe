@@ -40,6 +40,9 @@ import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
+const FILL_TAB_TRIGGER_CLASSES =
+  "h-11 shrink-0 rounded-t-lg rounded-b-none border-gray-300 bg-gray-50 px-2.5 py-2 text-xs data-[state=inactive]:text-gray-700! data-[state=inactive]:hover:bg-white data-[state=active]:border-b-white data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-none focus-visible:z-10 focus-visible:ring-inset sm:px-4 sm:text-sm";
+
 /** The canvas title and its unsaved-work badge. One fragment shared by the
  *  two header branches (tab strip where a patient gives us a clinical
  *  history tab, plain label otherwise) so the chip can never drift out of
@@ -50,7 +53,10 @@ function QuestionnaireTitleWithDraftBadge({ dirty }: { dirty: boolean }) {
     <>
       {t("questionnaire_one")}
       {dirty && (
-        <Badge className="ml-2 bg-indigo-100 text-indigo-900">
+        <Badge
+          size="xs"
+          className="ml-1 rounded-sm border-transparent bg-indigo-100 px-1.5 py-0 text-indigo-900"
+        >
           {t("draft")}
         </Badge>
       )}
@@ -344,11 +350,14 @@ export function FillPageBody({
           // — a location/device/facility fill gets the plain title in the
           // same slot, draft badge included.
           patientId ? (
-            <TabsList>
-              <TabsTrigger value="questionnaire">
+            <TabsList className="flex h-auto items-end justify-start gap-1 rounded-none bg-transparent p-0 sm:gap-1.5">
+              <TabsTrigger
+                value="questionnaire"
+                className={FILL_TAB_TRIGGER_CLASSES}
+              >
                 <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
               </TabsTrigger>
-              <TabsTrigger value="history">
+              <TabsTrigger value="history" className={FILL_TAB_TRIGGER_CLASSES}>
                 {t("patient_clinical_history")}
               </TabsTrigger>
             </TabsList>
@@ -366,9 +375,9 @@ export function FillPageBody({
         <TabsContent
           value="questionnaire"
           forceMount
-          className="mt-3 flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
+          className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
-          <div className="mx-2 flex min-h-0 flex-1 flex-col rounded-t-xl border border-gray-200 bg-white md:mx-4">
+          <div className="flex min-h-0 flex-1 flex-col bg-white">
             <FillHeader
               patient={patient}
               encounter={encounter}
@@ -475,7 +484,7 @@ export function FillPageBody({
           <TabsContent
             value="history"
             forceMount={historyMounted || undefined}
-            className="mt-3 min-h-0 flex-1 overflow-y-auto px-4 pb-6 data-[state=inactive]:hidden md:px-6"
+            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-[state=inactive]:hidden md:px-6"
           >
             {historyMounted && (
               <ClinicalHistoryTab

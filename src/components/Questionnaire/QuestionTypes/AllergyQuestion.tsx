@@ -116,7 +116,10 @@ function CategorySelect({
       onValueChange={onValueChange}
       disabled={disabled || hasId}
     >
-      <SelectTrigger className="h-9 w-full lg:h-8 lg:w-[2rem] lg:px-0 lg:[&>svg]:hidden lg:flex lg:items-center lg:justify-center">
+      <SelectTrigger
+        aria-label={t("select_category")}
+        className="h-9 w-full lg:size-8! lg:px-0 lg:[&>svg]:hidden lg:flex lg:items-center lg:justify-center"
+      >
         <SelectValue
           placeholder={t("select_category")}
           className="lg:text-center lg:h-full lg:flex lg:items-center lg:justify-center lg:m-0 lg:p-0"
@@ -686,8 +689,8 @@ export function AllergyQuestion({
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[10%] max-w-[3rem]"></TableHead>
-                  <TableHead className="w-[40%]">{t("substance")}</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>{t("substance")}</TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("criticality")}
                   </TableHead>
