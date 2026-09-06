@@ -22,13 +22,16 @@
  *   tsx scripts/clone-component.ts @/components/ui/button care_ask_fe --force
  */
 import fs from "node:fs";
+import { builtinModules } from "node:module";
 import path from "node:path";
 import process from "node:process";
+import ts from "typescript";
 
 const ROOT = path.resolve(__dirname, "..");
 const SRC_ROOT = path.join(ROOT, "src");
 const APPS_ROOT = path.join(ROOT, "apps");
 const CARE_CONFIG = path.join(ROOT, "care.config.ts");
+const ROOT_PACKAGE_JSON = path.join(ROOT, "package.json");
 
 const CODE_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const RESOLVE_EXTS = [
@@ -49,6 +52,27 @@ const RESOLVE_EXTS = [
   ".gif",
   ".lottie",
 ];
+
+const DEPENDENCY_FIELDS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+] as const;
+
+type DependencyField = (typeof DEPENDENCY_FIELDS)[number];
+
+const BUILTIN_PACKAGES = new Set(
+  builtinModules.flatMap((name) => [name, `node:${name}`]),
+);
+
+interface PackageJson {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  [key: string]: unknown;
+}
 
 interface Args {
   source: string;
@@ -156,36 +180,67 @@ interface ImportRef {
   quoteEnd: number;
 }
 
-function findImports(code: string): ImportRef[] {
+function findImports(code: string, filePath?: string): ImportRef[] {
+  const fileName = filePath ? path.basename(filePath) : "file.tsx";
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+  );
   const refs: ImportRef[] = [];
-  // Matches: import ... from "x"; import "x"; export ... from "x";
-  // dynamic import("x"); require("x").
-  const patterns: RegExp[] = [
-    /(?:^|[\s;{}()])import\s+(?:[\s\S]*?from\s+)?(["'])([^"']+)\1/g,
-    /(?:^|[\s;{}()])export\s+[\s\S]*?\sfrom\s+(["'])([^"']+)\1/g,
-    /\bimport\s*\(\s*(["'])([^"']+)\1\s*\)/g,
-    /\brequire\s*\(\s*(["'])([^"']+)\1\s*\)/g,
-  ];
-  for (const re of patterns) {
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(code)) !== null) {
-      const quote = m[1];
-      const spec = m[2];
-      const quoteStart = m.index + m[0].lastIndexOf(quote + spec + quote);
-      const quoteEnd = quoteStart + spec.length + 2;
-      refs.push({ spec, quoteStart, quoteEnd });
-    }
+
+  function addSpecifier(node: ts.StringLiteral) {
+    // node.getStart() includes the quote character
+    refs.push({
+      spec: node.text,
+      quoteStart: node.getStart(sourceFile),
+      quoteEnd: node.getEnd(),
+    });
   }
-  // De-dupe overlapping matches and sort by position.
-  const seen = new Set<string>();
-  return refs
-    .filter((r) => {
-      const key = `${r.quoteStart}:${r.spec}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort((a, b) => a.quoteStart - b.quoteStart);
+
+  function visit(node: ts.Node) {
+    // import "x"; import foo from "x"; import { foo } from "x";
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      addSpecifier(node.moduleSpecifier);
+      return;
+    }
+    // export { foo } from "x"; export * from "x";
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      addSpecifier(node.moduleSpecifier);
+      return;
+    }
+    // import("x")
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      addSpecifier(node.arguments[0]);
+    }
+    // require("x")
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "require" &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      addSpecifier(node.arguments[0]);
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  ts.forEachChild(sourceFile, visit);
+  return refs.sort((a, b) => a.quoteStart - b.quoteStart);
 }
 
 /**
@@ -227,6 +282,101 @@ interface Report {
   skippedExisting: string[];
   unresolved: { from: string; spec: string }[];
   external: Set<string>;
+  syncedPackages: string[];
+  existingPackages: string[];
+  missingPackages: string[];
+  skippedBuiltins: string[];
+}
+
+function readJsonFile<T>(filePath: string): T {
+  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+}
+
+function writeJsonFile(filePath: string, data: PackageJson) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + "\n");
+}
+
+function sortDependencyMap(record?: Record<string, string>) {
+  if (!record) return record;
+  return Object.fromEntries(
+    Object.entries(record).sort(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+function normalizePackageJson(pkg: PackageJson): PackageJson {
+  for (const field of DEPENDENCY_FIELDS) {
+    if (pkg[field]) {
+      pkg[field] = sortDependencyMap(pkg[field]);
+    }
+  }
+  return pkg;
+}
+
+function getPackageName(spec: string): string {
+  return spec.startsWith("@")
+    ? spec.split("/").slice(0, 2).join("/")
+    : spec.split("/")[0];
+}
+
+function findDependency(
+  pkg: PackageJson,
+  dependencyName: string,
+): { field: DependencyField; version: string } | null {
+  for (const field of DEPENDENCY_FIELDS) {
+    const version = pkg[field]?.[dependencyName];
+    if (version) {
+      return { field, version };
+    }
+  }
+  return null;
+}
+
+function syncExternalPackages(
+  appDir: string,
+  args: Args,
+  report: Report,
+): void {
+  const targetPackageJsonPath = path.join(appDir, "package.json");
+  const rootPackageJson = readJsonFile<PackageJson>(ROOT_PACKAGE_JSON);
+  const targetPackageJson = readJsonFile<PackageJson>(targetPackageJsonPath);
+  let changed = false;
+
+  for (const dependencyName of [...report.external].sort()) {
+    if (BUILTIN_PACKAGES.has(dependencyName)) {
+      report.skippedBuiltins.push(dependencyName);
+      continue;
+    }
+
+    const existing = findDependency(targetPackageJson, dependencyName);
+    if (existing) {
+      report.existingPackages.push(
+        `${dependencyName}@${existing.version} (${existing.field})`,
+      );
+      continue;
+    }
+
+    const source = findDependency(rootPackageJson, dependencyName);
+    if (!source) {
+      report.missingPackages.push(dependencyName);
+      continue;
+    }
+
+    const section =
+      (targetPackageJson[source.field] as Record<string, string> | undefined) ??
+      {};
+    section[dependencyName] = source.version;
+    targetPackageJson[source.field] = section;
+    report.syncedPackages.push(
+      `${dependencyName}@${source.version} (${source.field})${args.dryRun ? " (dry-run)" : ""}`,
+    );
+    changed = true;
+  }
+
+  if (!changed || args.dryRun) {
+    return;
+  }
+
+  writeJsonFile(targetPackageJsonPath, normalizePackageJson(targetPackageJson));
 }
 
 function isCodeFile(file: string): boolean {
@@ -251,6 +401,10 @@ function clone(args: Args): Report {
     skippedExisting: [],
     unresolved: [],
     external: new Set(),
+    syncedPackages: [],
+    existingPackages: [],
+    missingPackages: [],
+    skippedBuiltins: [],
   };
 
   while (queue.length) {
@@ -270,15 +424,11 @@ function clone(args: Args): Report {
     const code = isCodeFile(abs) ? fs.readFileSync(abs, "utf8") : null;
 
     if (code !== null) {
-      const refs = findImports(code);
+      const refs = findImports(code, abs);
       for (const ref of refs) {
         const aliased = resolveAlias(ref.spec, abs);
         if (!aliased) {
-          // External package – capture root package name.
-          const pkg = ref.spec.startsWith("@")
-            ? ref.spec.split("/").slice(0, 2).join("/")
-            : ref.spec.split("/")[0];
-          report.external.add(pkg);
+          report.external.add(getPackageName(ref.spec));
           continue;
         }
         const resolved = resolveToFile(aliased);
@@ -303,12 +453,14 @@ function clone(args: Args): Report {
         if (!visited.has(resolved)) queue.push(resolved);
       }
 
-      writeFile(dest, rewriteCode(code, findImports(code)), args, report);
+      writeFile(dest, rewriteCode(code, findImports(code, abs)), args, report);
     } else {
       // Binary asset – copy bytes verbatim.
       writeFile(dest, fs.readFileSync(abs), args, report);
     }
   }
+
+  syncExternalPackages(appDir, args, report);
 
   return report;
 }
@@ -343,10 +495,28 @@ function printReport(report: Report) {
     for (const f of report.skippedExisting) console.log(`  = ${f}`);
   }
   if (report.external.size) {
-    console.log(
-      `\n• External packages referenced (ensure they exist in the plugin's package.json):`,
-    );
+    console.log(`\n• External packages referenced:`);
     for (const p of [...report.external].sort()) console.log(`  - ${p}`);
+  }
+  if (report.syncedPackages.length) {
+    console.log(
+      `\n✓ Synced ${report.syncedPackages.length} package(s) into the target app's package.json:`,
+    );
+    for (const p of report.syncedPackages) console.log(`  + ${p}`);
+  }
+  if (report.existingPackages.length) {
+    console.log(
+      `\n• Packages already present in the target app's package.json:`,
+    );
+    for (const p of report.existingPackages) console.log(`  = ${p}`);
+  }
+  if (report.skippedBuiltins.length) {
+    console.log(`\n• Skipped Node builtins:`);
+    for (const p of report.skippedBuiltins) console.log(`  = ${p}`);
+  }
+  if (report.missingPackages.length) {
+    console.log(`\n! External packages missing from the root package.json:`);
+    for (const p of report.missingPackages) console.log(`  ? ${p}`);
   }
   if (report.unresolved.length) {
     console.log(`\n! Unresolved imports:`);

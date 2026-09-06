@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,18 @@ interface EncounterQuestionProps {
   errors?: QuestionValidationError[];
 }
 
+const NON_SELECTABLE_ENCOUNTER_STATUSES: EncounterStatus[] = [
+  EncounterStatus.DISCHARGED,
+  EncounterStatus.UNKNOWN,
+  EncounterStatus.COMPLETED,
+];
+
+const HOSPITALIZATION_ENCOUNTER_CLASSES: EncounterClass[] = [
+  "imp",
+  "obsenc",
+  "emer",
+];
+
 const ENCOUNTER_FIELDS: FieldDefinitions = {
   DISCHARGE_DISPOSITION: {
     key: "hospitalization.discharge_disposition",
@@ -80,7 +92,8 @@ export function validateEncounterQuestion(
 
   if (
     value?.status === EncounterStatus.DISCHARGED &&
-    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
+    value?.hospitalization &&
+    Object.keys(value.hospitalization).length > 0 &&
     !value?.hospitalization?.discharge_disposition
   ) {
     errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
@@ -114,12 +127,14 @@ export function EncounterQuestion({
     questionnaireResponse.question_id,
     errors,
   );
+  const responseBeforeInitializationRef = useRef<QuestionnaireResponse | null>(
+    null,
+  );
 
   const encounter = (
     questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
   )?.[0] ?? {
     status: EncounterStatus.UNKNOWN,
-    encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
       end: undefined,
@@ -136,12 +151,9 @@ export function EncounterQuestion({
   };
 
   // Transform EncounterRead to EncounterEdit format
-  const transformEncounterForUpdate = (
-    read: EncounterRead,
-  ): Partial<EncounterEdit> => {
+  const transformEncounterForUpdate = (read: EncounterRead): EncounterEdit => {
     return {
       status: read.status,
-      encounter_class: read.encounter_class,
       period: read.period,
       priority: read.priority,
       hospitalization: read.hospitalization,
@@ -154,10 +166,7 @@ export function EncounterQuestion({
   // reported as a clinician edit or replace a response retained on remount.
   useEffect(() => {
     if (!encounterData) return;
-    const initialEncounter: EncounterEdit = {
-      ...encounter,
-      ...transformEncounterForUpdate(encounterData),
-    };
+    const initialEncounter = transformEncounterForUpdate(encounterData);
     if (toDischarge === "true") {
       initialEncounter.status = EncounterStatus.DISCHARGED;
       initialEncounter.period = {
@@ -171,17 +180,65 @@ export function EncounterQuestion({
           careConfig.defaultDischargeDisposition,
       };
     }
+    if (
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterData.encounter_class)
+    ) {
+      initialEncounter.hospitalization = {};
+    }
     const values: ResponseValue[] = [
       { type: "encounter", value: [initialEncounter] },
     ];
     if (initializeQuestionnaireResponseCB) {
+      responseBeforeInitializationRef.current = questionnaireResponse;
       initializeQuestionnaireResponseCB(values);
     } else if (questionnaireResponse.values.length === 0) {
       updateQuestionnaireResponseCB(values, questionnaireResponse.question_id);
     }
   }, [encounterData]);
 
+  // Older drafts could change encounter class. Normalize their values after
+  // reconciliation so hidden hospitalization edits cannot survive an immutable
+  // non-hospitalization class. Skip the pre-initialization response to avoid
+  // replacing refreshed server fields with the previous render's values.
+  useEffect(() => {
+    if (
+      !encounterData ||
+      questionnaireResponse === responseBeforeInitializationRef.current
+    ) {
+      return;
+    }
+    const current = (
+      questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+    )?.[0];
+    if (!current) return;
+
+    const hasIncompatibleHospitalization =
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounterData.encounter_class,
+      ) && Object.keys(current.hospitalization ?? {}).length > 0;
+    if (!("encounter_class" in current) && !hasIncompatibleHospitalization) {
+      return;
+    }
+
+    const normalized: EncounterEdit & { encounter_class?: EncounterClass } = {
+      ...current,
+    };
+    delete normalized.encounter_class;
+    if (hasIncompatibleHospitalization) normalized.hospitalization = {};
+    updateQuestionnaireResponseCB(
+      [
+        {
+          ...questionnaireResponse.values[0],
+          type: "encounter",
+          value: [normalized],
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+  }, [encounterData, questionnaireResponse, updateQuestionnaireResponseCB]);
+
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
+    if (!encounterData) return;
     clearError();
     const newEncounter = { ...encounter, ...updates };
     const hasEnded = [
@@ -197,25 +254,21 @@ export function EncounterQuestion({
         ? newEncounter.period.end || new Date().toISOString()
         : undefined,
     };
-    if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
+    const encounterClass = encounterData.encounter_class;
+    if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass)) {
       newEncounter.hospitalization = {};
-    }
-
-    if (
-      ["imp", "obsenc", "emer"].includes(newEncounter.encounter_class) &&
-      newEncounter.status === EncounterStatus.DISCHARGED
-    ) {
+    } else if (newEncounter.status === EncounterStatus.DISCHARGED) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:
           newEncounter.hospitalization?.discharge_disposition ??
           careConfig.defaultDischargeDisposition,
       };
-    } else if (!["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
+    } else if ("hospitalization" in newEncounter) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:
-          encounterData?.hospitalization?.discharge_disposition,
+          encounterData.hospitalization?.discharge_disposition,
       };
     }
 
@@ -236,9 +289,21 @@ export function EncounterQuestion({
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !encounterData) {
     return <div>{t("loading_encounter")}</div>;
   }
+
+  const isCurrentStatusNonSelectable =
+    NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounter.status);
+
+  const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
+    (encounterStatus) => {
+      if (isCurrentStatusNonSelectable) {
+        return encounterStatus === encounter.status;
+      }
+      return !NON_SELECTABLE_ENCOUNTER_STATUSES.includes(encounterStatus);
+    },
+  );
 
   return (
     <div className="space-y-6">
@@ -261,42 +326,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(EncounterStatus)
-                .filter((encounterStatus: EncounterStatus) =>
-                  encounter.status === EncounterStatus.DISCHARGED
-                    ? encounterStatus === EncounterStatus.DISCHARGED
-                    : encounterStatus !== EncounterStatus.DISCHARGED &&
-                      encounterStatus !== EncounterStatus.UNKNOWN,
-                )
-                .map((encounterStatus: EncounterStatus) => (
+              {selectableEncounterStatuses.map(
+                (encounterStatus: EncounterStatus) => (
                   <SelectItem key={encounterStatus} value={encounterStatus}>
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>{t("encounter_class")}</Label>
-          <Select
-            value={encounter.encounter_class}
-            onValueChange={(value: EncounterClass) =>
-              handleUpdateEncounter({
-                encounter_class: value,
-              })
-            }
-            disabled={disabled}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("select_class")} />
-            </SelectTrigger>
-            <SelectContent>
-              {careConfig.encounterClasses.map((encounterClass) => (
-                <SelectItem key={encounterClass} value={encounterClass}>
-                  {t(`encounter_class__${encounterClass}`)}
-                </SelectItem>
-              ))}
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -338,26 +374,31 @@ export function EncounterQuestion({
         </div>
       </div>
 
-      {/* Mark for discharge button - Show if not already discharged */}
-      {encounter.status !== EncounterStatus.DISCHARGED && (
-        <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">{t("discharge_patient")}</h3>
+      {/* Mark for discharge button - Show if encounter is a hospitalization encounter class and not already discharged  */}
+      {encounter.status !== EncounterStatus.DISCHARGED &&
+        HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+          encounterData.encounter_class,
+        ) && (
+          <div className="col-span-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">
+                  {t("discharge_patient")}
+                </h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={disabled}
+                onClick={() =>
+                  handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
+                }
+              >
+                {t("mark_for_discharge")}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() =>
-                handleUpdateEncounter({ status: EncounterStatus.DISCHARGED })
-              }
-            >
-              {t("mark_for_discharge")}
-            </Button>
           </div>
-        </div>
-      )}
+        )}
 
       {(encounter.status === EncounterStatus.DISCHARGED ||
         encounter.discharge_summary_advice) && (
@@ -379,7 +420,9 @@ export function EncounterQuestion({
       )}
 
       {/* Hospitalization Details - Only show for relevant encounter classes */}
-      {["imp", "obsenc", "emer"].includes(encounter.encounter_class) && (
+      {HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounterData.encounter_class,
+      ) && (
         <div className="col-span-2 border border-gray-200 rounded-lg p-4 space-y-4">
           <h3 className="text-lg font-semibold break-words">
             {t("hospitalization_details")}

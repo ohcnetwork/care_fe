@@ -292,6 +292,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }),
     onSuccess: () => {
       toast.success(t("patient_update_success"));
+      form.reset(form.getValues());
       goBack();
     },
   });

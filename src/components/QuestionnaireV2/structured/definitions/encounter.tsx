@@ -51,7 +51,6 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
       method: "PUT",
       body: {
         status: encounter.status,
-        encounter_class: encounter.encounter_class,
         period: encounter.period,
         hospitalization: encounter.hospitalization,
         priority: encounter.priority,

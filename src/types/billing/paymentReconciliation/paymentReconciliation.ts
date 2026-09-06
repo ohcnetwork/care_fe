@@ -1,5 +1,5 @@
 import { AccountRead } from "@/types/billing/account/Account";
-import { InvoiceRead } from "@/types/billing/invoice/invoice";
+import { InvoiceList } from "@/types/billing/invoice/invoice";
 import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -104,7 +104,7 @@ export interface PaymentReconciliationCreate extends Omit<
 export type PaymentReconciliationUpdate = Omit<PaymentReconciliationBase, "id">;
 
 export interface PaymentReconciliationRead extends PaymentReconciliationBase {
-  target_invoice: InvoiceRead;
+  target_invoice: InvoiceList;
   account: AccountRead;
   is_credit_note: boolean;
   location: LocationRead | null;

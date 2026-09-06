@@ -92,18 +92,218 @@ test("file names and selections survive conditional remount and adding another f
   await expect(section.getByText("second.txt", { exact: true })).toBeVisible();
 });
 
-test("encounter edits survive conditional remount without resetting from the cached encounter", async ({
+for (const encounterClass of ["amb", "imp"]) {
+  test(`encounter edits survive remount with immutable class and preserved terminal period (${encounterClass})`, async ({
+    page,
+  }) => {
+    const periodEnd = "2025-01-02T00:00:00Z";
+    const response = await page.request.get(
+      `${apiBaseUrl()}/api/v1/encounter/${getEncounterId()}/`,
+      {
+        headers: adminApiHeaders(),
+        params: { facility: getFacilityId() },
+      },
+    );
+    expect(response.ok()).toBe(true);
+    const encounter = await response.json();
+    await page.route(
+      (url) => url.pathname === `/api/v1/encounter/${getEncounterId()}/`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...encounter,
+            encounter_class: encounterClass,
+            status: "cancelled",
+            period: { start: "2025-01-01T00:00:00Z", end: periodEnd },
+          },
+        }),
+    );
+    // Assert the merged update contract without changing the fixture encounter.
+    await page.route("**/api/v1/batch_requests/", (route) =>
+      route.fulfill({ json: { results: [] } }),
+    );
+    await openConditionalSection(page, "encounter");
+    const section = questionBlock(page, SECTION_LABEL);
+    await expect(
+      section.getByText("Encounter Class", { exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      section.getByText("Hospitalization Details", { exact: true }),
+    ).toHaveCount(encounterClass === "imp" ? 1 : 0);
+    await expect(
+      section.getByRole("button", { name: "Mark for discharge", exact: true }),
+    ).toHaveCount(encounterClass === "imp" ? 1 : 0);
+
+    await section
+      .getByRole("combobox")
+      .filter({ hasText: "Cancelled" })
+      .click();
+    for (const unavailableStatus of ["Completed", "Unknown", "Discharged"]) {
+      await expect(
+        page.getByRole("option", { name: unavailableStatus, exact: true }),
+      ).toHaveCount(0);
+    }
+    await page.getByRole("option", { name: "Cancelled", exact: true }).click();
+
+    const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
+      exact: true,
+    });
+    const editedIdentifier = `REMOUNT-${faker.string.alphanumeric(8)}`;
+    await identifier.fill(editedIdentifier);
+    await remountSection(page);
+    await expect(identifier).toHaveValue(editedIdentifier);
+
+    const batchRequest = page.waitForRequest(
+      (request) =>
+        request.url().includes("/api/v1/batch_requests/") &&
+        request.method() === "POST",
+    );
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    const body = (await batchRequest).postDataJSON() as {
+      requests: { url: string; body: Record<string, unknown> }[];
+    };
+    const encounterRequest = body.requests.find(
+      (request) => request.url === `/api/v1/encounter/${getEncounterId()}/`,
+    );
+    expect(encounterRequest?.body).toMatchObject({
+      status: "cancelled",
+      period: { end: periodEnd },
+      external_identifier: editedIdentifier,
+    });
+    expect(encounterRequest?.body).not.toHaveProperty("encounter_class");
+    if (encounterClass === "amb") {
+      expect(encounterRequest?.body.hospitalization).toEqual({});
+    }
+    await page.waitForURL(/\/updates$/);
+  });
+}
+
+test("old encounter drafts drop incompatible class edits while retaining clinician edits and refreshed server fields", async ({
   page,
 }) => {
-  await openConditionalSection(page, "encounter");
-  const identifier = questionBlock(page, SECTION_LABEL).getByPlaceholder(
-    "Ip/op/obs/emr number",
-    { exact: true },
+  const response = await page.request.get(
+    `${apiBaseUrl()}/api/v1/encounter/${getEncounterId()}/`,
+    { headers: adminApiHeaders(), params: { facility: getFacilityId() } },
   );
-  const editedIdentifier = `REMOUNT-${faker.string.alphanumeric(8)}`;
-  await identifier.fill(editedIdentifier);
+  expect(response.ok()).toBe(true);
+  const encounter = await response.json();
+  let serverPriority = "routine";
+  await page.route(
+    (url) => url.pathname === `/api/v1/encounter/${getEncounterId()}/`,
+    (route) =>
+      route.fulfill({
+        json: {
+          ...encounter,
+          encounter_class: "amb",
+          status: "in_progress",
+          priority: serverPriority,
+          hospitalization: {},
+          external_identifier: "Server identifier",
+          discharge_summary_advice: null,
+        },
+      }),
+  );
+  await page.route("**/api/v1/batch_requests/", (route) =>
+    route.fulfill({ json: { results: [] } }),
+  );
+  page.on("dialog", (dialog) => dialog.accept());
+  await openConditionalSection(page, "encounter");
+  const fillUrl = page.url();
+  const questionnaireId = new URL(fillUrl).pathname.split("/").at(-1)!;
+  const section = questionBlock(page, SECTION_LABEL);
+  const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
+    exact: true,
+  });
+  const draftedIdentifier = `OLD-DRAFT-${faker.string.alphanumeric(8)}`;
+  const draftedAdvice = "Retain this clinician discharge advice";
+  await identifier.fill(draftedIdentifier);
+  const findDraftKey = () =>
+    page.evaluate(
+      (id) =>
+        Object.keys(localStorage).find(
+          (key) =>
+            key.startsWith("care_qn_fill_draft--") && key.endsWith(`--${id}`),
+        ),
+      questionnaireId,
+    );
+  await expect.poll(findDraftKey).toBeTruthy();
+  const draftKey = (await findDraftKey())!;
+
+  // Let the provider flush before rewriting the saved snapshot to the old
+  // editable-class shape. Returning to the form uses the actual Resume path.
+  const updatesUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/updates`;
+  await page.goto(updatesUrl);
+  await page.evaluate(
+    ({ key, advice }) => {
+      const draft = JSON.parse(localStorage.getItem(key)!);
+      for (const form of draft.forms) {
+        for (const saved of Object.values(form.responses) as {
+          structured_type?: string;
+          values: { value: Record<string, unknown>[] }[];
+          draft_context: { value: Record<string, unknown>[] }[];
+        }[]) {
+          if (saved.structured_type !== "encounter") continue;
+          saved.draft_context[0].value[0].encounter_class = "amb";
+          Object.assign(saved.values[0].value[0], {
+            encounter_class: "imp",
+            hospitalization: { diet_preference: "vegetarian" },
+            discharge_summary_advice: advice,
+          });
+        }
+      }
+      localStorage.setItem(key, JSON.stringify(draft));
+    },
+    { key: draftKey, advice: draftedAdvice },
+  );
+  serverPriority = "urgent";
+  await page.goto(fillUrl);
+  await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+  await page.getByRole("button", { name: /resume/i }).click();
+  await expect(identifier).toHaveValue(draftedIdentifier);
+  await expect(
+    section.getByPlaceholder("Enter the discharge summary advice"),
+  ).toHaveValue(draftedAdvice);
+  await expect(
+    section.getByRole("combobox").filter({ hasText: "Urgent" }),
+  ).toBeVisible();
+  await expect(
+    section.getByText("Hospitalization Details", { exact: true }),
+  ).toHaveCount(0);
   await remountSection(page);
-  await expect(identifier).toHaveValue(editedIdentifier);
+  await expect(identifier).toHaveValue(draftedIdentifier);
+
+  // Rebased server context must also be clean; otherwise a later remount can
+  // interpret the removed class as a new clinician edit and resurrect it.
+  await expect
+    .poll(() =>
+      page.evaluate((key) => {
+        const raw = localStorage.getItem(key);
+        return raw ? raw.includes('"encounter_class"') : true;
+      }, draftKey),
+    )
+    .toBe(false);
+  const batchRequest = page.waitForRequest(
+    (request) =>
+      request.url().includes("/api/v1/batch_requests/") &&
+      request.method() === "POST",
+  );
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  const body = (await batchRequest).postDataJSON() as {
+    requests: { url: string; body: Record<string, unknown> }[];
+  };
+  const encounterRequest = body.requests.find(
+    (request) => request.url === `/api/v1/encounter/${getEncounterId()}/`,
+  );
+  expect(encounterRequest?.body).toMatchObject({
+    external_identifier: draftedIdentifier,
+    discharge_summary_advice: draftedAdvice,
+    priority: "urgent",
+  });
+  expect(encounterRequest?.body.hospitalization).toEqual({});
+  expect(encounterRequest?.body).not.toHaveProperty("encounter_class");
+  await page.waitForURL(/\/updates$/);
 });
 
 test("diagnosis edits survive remount and local draft recovery while fresh server fields are reconciled", async ({
@@ -213,6 +413,9 @@ test("charge rows and quantities survive remount and local draft recovery", asyn
 test("prescription drafts stay isolated across A, B, and new-prescription query changes", async ({
   page,
 }) => {
+  // Production asks before leaving a dirty form. Accept the navigation so
+  // each query-only change actually opens the next prescription's scope.
+  page.on("dialog", (dialog) => dialog.accept());
   const prescriptionA = faker.string.uuid();
   const prescriptionB = faker.string.uuid();
   const medicationA = faker.string.uuid();

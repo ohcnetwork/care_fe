@@ -79,8 +79,7 @@ const careConfig = {
       : undefined),
 
   defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
-    | EncounterDischargeDisposition
-    | undefined,
+    EncounterDischargeDisposition | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -249,6 +248,21 @@ const careConfig = {
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
+
+  pagination: {
+    limitOffset: {
+      /**
+       * The maximum limit allowed for pagination in limit-offset style
+       * pagination. This is a safeguard to prevent excessive data fetching if
+       * the frontend accidentally requests too much data. This should match the
+       * maximum limit enforced by the backend API for limit-offset pagination.
+       */
+      maxLimit: parseInt(
+        env.REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT || "200",
+        10,
+      ),
+    },
+  },
 
   /**
    * Disable patient login if set to "true"
