@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,7 @@ interface EncounterQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -91,6 +92,7 @@ export function validateEncounterQuestion(
 export function EncounterQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   clearError,
   encounterId,
@@ -113,7 +115,9 @@ export function EncounterQuestion({
     errors,
   );
 
-  const [encounter, setEncounter] = useState<EncounterEdit>({
+  const encounter = (
+    questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+  )?.[0] ?? {
     status: EncounterStatus.UNKNOWN,
     encounter_class: careConfig.defaultEncounterType,
     period: {
@@ -129,33 +133,7 @@ export function EncounterQuestion({
       diet_preference: "none",
     },
     discharge_summary_advice: null,
-  });
-
-  useEffect(() => {
-    if (
-      encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
-    }
-  }, [encounter.status]);
+  };
 
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
@@ -172,37 +150,59 @@ export function EncounterQuestion({
     };
   };
 
-  // Update encounter state when data is loaded
+  // A refetch provides context for draft reconciliation; it must never be
+  // reported as a clinician edit or replace a response retained on remount.
   useEffect(() => {
-    if (encounterData) {
-      const updates = transformEncounterForUpdate(encounterData);
-      if (toDischarge === "true") {
-        updates.status = EncounterStatus.DISCHARGED;
-      }
-      handleUpdateEncounter(updates);
+    if (!encounterData) return;
+    const initialEncounter: EncounterEdit = {
+      ...encounter,
+      ...transformEncounterForUpdate(encounterData),
+    };
+    if (toDischarge === "true") {
+      initialEncounter.status = EncounterStatus.DISCHARGED;
+      initialEncounter.period = {
+        ...initialEncounter.period,
+        end: initialEncounter.period.end || new Date().toISOString(),
+      };
+      initialEncounter.hospitalization = {
+        ...initialEncounter.hospitalization,
+        discharge_disposition:
+          initialEncounter.hospitalization?.discharge_disposition ??
+          careConfig.defaultDischargeDisposition,
+      };
+    }
+    const values: ResponseValue[] = [
+      { type: "encounter", value: [initialEncounter] },
+    ];
+    if (initializeQuestionnaireResponseCB) {
+      initializeQuestionnaireResponseCB(values);
+    } else if (questionnaireResponse.values.length === 0) {
+      updateQuestionnaireResponseCB(values, questionnaireResponse.question_id);
     }
   }, [encounterData]);
-
-  useEffect(() => {
-    const formStateValue = (
-      questionnaireResponse.values[0]?.value as EncounterEdit[]
-    )?.[0];
-    if (formStateValue) {
-      setEncounter(() => ({
-        ...formStateValue,
-      }));
-    }
-  }, [questionnaireResponse]);
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    const hasEnded = [
+      EncounterStatus.DISCHARGED,
+      EncounterStatus.COMPLETED,
+      EncounterStatus.CANCELLED,
+      EncounterStatus.DISCONTINUED,
+      EncounterStatus.ENTERED_IN_ERROR,
+    ].includes(newEncounter.status);
+    newEncounter.period = {
+      ...newEncounter.period,
+      end: hasEnded
+        ? newEncounter.period.end || new Date().toISOString()
+        : undefined,
+    };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
       newEncounter.hospitalization = {};
     }
 
     if (
-      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
+      ["imp", "obsenc", "emer"].includes(newEncounter.encounter_class) &&
       newEncounter.status === EncounterStatus.DISCHARGED
     ) {
       newEncounter.hospitalization = {
@@ -211,7 +211,7 @@ export function EncounterQuestion({
           newEncounter.hospitalization?.discharge_disposition ??
           careConfig.defaultDischargeDisposition,
       };
-    } else if ("hospitalization" in newEncounter) {
+    } else if (!["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:

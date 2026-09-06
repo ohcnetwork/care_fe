@@ -28,7 +28,7 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   component: ChargeItemInput,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
+  draftPolicy: "serialize",
   buildRequests: async (chargeItems, { facilityId, questionId }) => {
     if (chargeItems.length === 0) return [];
     return [
@@ -36,7 +36,18 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
         url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
         method: "POST",
         body: {
-          requests: chargeItems,
+          // Display objects stay with the response so rows survive remounts.
+          // The API receives only its request fields.
+          requests: chargeItems.map((item) => ({
+            charge_item_definition: item.charge_item_definition,
+            encounter: item.encounter,
+            patient: item.patient,
+            service_resource: item.service_resource,
+            service_resource_id: item.service_resource_id,
+            account: item.account,
+            quantity: item.quantity,
+            performer_actor: item.performer_actor,
+          })),
         },
         reference_id: structuredReferenceId("charge_item", questionId),
       },

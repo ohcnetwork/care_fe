@@ -21,6 +21,7 @@ function MedicationRequestInput(props: StructuredInputProps) {
       question={props.question}
       questionnaireResponse={props.response}
       updateQuestionnaireResponseCB={updateResponse}
+      initializeQuestionnaireResponseCB={props.onInitializeResponse}
       disabled={props.disabled}
       errors={props.errors}
       questionnaireId={props.questionnaireId}
@@ -35,7 +36,7 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
     component: MedicationRequestInput,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    draftPolicy: "exclude",
+    draftPolicy: "serialize",
     validate: (medications, questionId) =>
       validateMedicationRequestQuestion(medications, questionId),
     buildRequests: async (

@@ -87,10 +87,10 @@ export function structuredReferenceId(
 export interface StructuredInputProps {
   question: Question;
   response: QuestionnaireResponse;
-  /** Memoized by the slot; adapters must keep their derived callbacks
-   *  referentially stable too (ChargeItemQuestion lists its callback in
-   *  an effect dependency array). */
+  /** Memoized by the slot; adapters preserve this callback identity. */
   onChange: (values: ResponseValue[], note?: string) => void;
+  /** Record server-prefilled values separately from clinician edits. */
+  onInitializeResponse?: (values: ResponseValue[]) => void;
   disabled: boolean;
   errors: QuestionValidationError[];
   clearError: () => void;
@@ -122,11 +122,10 @@ export interface StructuredTypeDefinition<
   /**
    * `"serialize"` — values are plain user input, safe to store in a local
    * draft and restore later.
-   * `"exclude"` — values conflate prefetched server rows with user input
-   * (every adapted legacy component seeds responses from server fetches
-   * in effects) or hold non-serializable data (`files` carries raw
-   * `File`s); restoring a stale snapshot and re-upserting it could
-   * clobber edits made elsewhere, so drafts skip these questions.
+   * Server-backed values retain their initial context so draft recovery
+   * can reconcile clinician edits with fresh clinical records.
+   * `"exclude"` — values cannot round-trip through JSON (for example,
+   * `files` carries raw `File` objects).
    */
   draftPolicy: "serialize" | "exclude";
   /** Submit-time validation over the recorded entries (already narrowed

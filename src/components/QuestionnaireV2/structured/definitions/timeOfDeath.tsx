@@ -25,7 +25,7 @@ export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
     component: TimeOfDeathInput,
     requires: [],
     subjects: ["patient", "encounter"],
-    draftPolicy: "exclude",
+    draftPolicy: "serialize",
     buildRequests: async (timeOfDeaths, { patientId, questionId }) => {
       // `subjects` is patient/encounter, so a patient is always in scope
       // here — narrowed rather than asserted (the context type is optional

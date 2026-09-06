@@ -268,37 +268,19 @@ export function FillPageBody({
     [retainedSnapshots],
   );
 
-  const { submit, isPending, isComposing, serverErrors } = useSubmitFillSession(
-    {
-      forms,
-      getStore,
-      subject,
-      continueDraftId,
-      blockedFormLabels,
-      onSuccess: () => {
-        // Order matters: finishDraft flushes the pristine state before the
-        // redirect so useNavigationPrompt doesn't block it.
-        autosave.finishDraft();
-        navigate(exitTarget);
-      },
+  const { submit, isPending, serverErrors } = useSubmitFillSession({
+    forms,
+    getStore,
+    subject,
+    continueDraftId,
+    blockedFormLabels,
+    onSuccess: () => {
+      // Order matters: finishDraft flushes the pristine state before the
+      // redirect so useNavigationPrompt doesn't block it.
+      autosave.finishDraft();
+      navigate(exitTarget);
     },
-  );
-
-  // The fill session stays fully editable during an in-flight submit
-  // unless every input-bearing surface reads this. "composing" covers the
-  // click-to-mutate gap (client validation + batch compose) and
-  // "submitting" the request itself; either one means an edit typed right
-  // now would diverge from the payload already built/sent. `isPending` is
-  // the hook's own OR of the two (see useSubmitFillSession.ts). Releases
-  // the moment the mutation settles (success navigates away; an error
-  // flips isPending back to false), so a failed submit leaves the form
-  // editable again for a retry.
-  const sessionPhase: "editing" | "composing" | "submitting" = isComposing
-    ? "composing"
-    : isPending
-      ? "submitting"
-      : "editing";
-  const frozen = sessionPhase !== "editing";
+  });
 
   // The deliberate server draft (feature-flagged). Same exit as a
   // submission: the server copy supersedes the local autosave one, so
@@ -314,6 +296,11 @@ export function FillPageBody({
     },
   });
 
+  // Both saves capture the current answers and clear the local draft on
+  // success. Freeze editing until either request settles so later edits
+  // cannot be discarded with a payload that did not contain them.
+  const frozen = isPending || serverDraftSave.isSavingDraft;
+
   useNavigationPrompt(
     autosave.dirty && !import.meta.env.DEV,
     t("unsaved_changes"),
@@ -322,7 +309,12 @@ export function FillPageBody({
   // What a federated agent (Scribe) may do to this session, and the one
   // validated path for doing it. Nothing is registered for a session with
   // no patient in scope, so those mounts hand the plugin an empty list.
-  const { descriptors, invoke } = useFillActions({ subject, forms, getStore });
+  const { descriptors, invoke } = useFillActions({
+    subject,
+    forms,
+    getStore,
+    frozen,
+  });
 
   return (
     // Tabs wraps the shell so its Radix context reaches both the strip in

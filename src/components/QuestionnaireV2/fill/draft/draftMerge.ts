@@ -9,6 +9,8 @@ import type {
 } from "@/types/questionnaire/form";
 import type { Question, QuestionType } from "@/types/questionnaire/question";
 
+import { structuredResponseHasEdits } from "./structuredDraft";
+
 /**
  * Compatibility-aware draft merge: when the live questionnaire has changed
  * since a draft was stored, restore every answer that still fits and NAME
@@ -143,6 +145,9 @@ function filterAvailableEntries(
 export function draftResponseHasContent(
   response: QuestionnaireResponse,
 ): boolean {
+  if (response.draft_context !== undefined) {
+    return structuredResponseHasEdits(response) || !!response.note;
+  }
   if (response.values.some(entryHasContent)) return true;
   return !!response.note;
 }

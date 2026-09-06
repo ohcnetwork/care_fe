@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
-import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
+import {
+  initializeResponses,
+  responsesAtom,
+} from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 
+import { fillDraftScopeKey } from "./fillDraftCore";
 import type {
   DraftFormSnapshot,
   FillDraftScope,
@@ -75,6 +79,9 @@ export function useFillSessionAutosave({
 }: UseFillSessionAutosaveArgs) {
   const [dirty, setDirty] = useState(false);
   const [restoreDismissed, setRestoreDismissed] = useState(false);
+  // StoreRegistrar unregisters in a child effect cleanup. Keep the store
+  // available until this hook's cleanup has flushed the final keystroke.
+  const registeredStores = useRef(new Map<string, FormStore>());
 
   // The subscription effect reads these without re-subscribing.
   const scopeRef = useRef(scope);
@@ -100,20 +107,21 @@ export function useFillSessionAutosave({
   const restorePendingRef = useRef(false);
   restorePendingRef.current = !!restoredDraft && !restoreDismissed;
 
-  const scopeKey = scope
-    ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
-    : undefined;
+  const scopeKey = scope ? fillDraftScopeKey(scope) : undefined;
 
-  /** One snapshot per REGISTERED form — a form whose section hasn't
-   *  mounted yet simply doesn't contribute. */
+  /** Include each form, using its creation seed until its store registers. */
   const snapshotAll = useCallback((): FillSessionFormState[] => {
     const snapshots: FillSessionFormState[] = [];
     for (const form of forms) {
-      const store = getStore(form.key);
-      if (!store) continue;
+      const store =
+        getStore(form.key) ?? registeredStores.current.get(form.key);
+      if (store) registeredStores.current.set(form.key, store);
       snapshots.push({
         questionnaire: form.questionnaire,
-        responses: store.get(responsesAtom),
+        responses:
+          store?.get(responsesAtom) ??
+          form.initialResponses ??
+          initializeResponses(form.questionnaire.questions),
       });
     }
     return snapshots;
@@ -197,6 +205,7 @@ export function useFillSessionAutosave({
     for (const form of forms) {
       const store = getStore(form.key);
       if (!store) continue;
+      registeredStores.current.set(form.key, store);
       formSignatures.set(form.key, formSignature(form, store));
     }
 
@@ -208,19 +217,9 @@ export function useFillSessionAutosave({
       return [
         store.sub(responsesAtom, () => {
           if (finishedRef.current) return;
-          // An edit is a change to the draft-safe partition OR to the note
-          // on a draft-EXCLUDED question: those answers never reach the
-          // stored draft, but abandoning them is still losing the
-          // clinician's work, so they must arm the prompt and the chip.
-          // What is deliberately NOT an edit is an excluded question's
-          // `values`: structured widgets write prefetched server rows there
-          // from mount effects, and treating those as edits marked
-          // untouched clinical forms dirty and persisted a phantom draft
-          // over the clinician's real one.
-          //
-          // Only THIS form's part is re-serialized — the fired store is
-          // the only one that could have changed — and compared against
-          // this form's own cached entry.
+          // Compare this form's clinician input only. Prefill values are
+          // normalized against draft_context; file metadata still marks
+          // unsaved work even though the attachment cannot be drafted.
           const signature = formSignature(form, store);
           if (formSignatures.get(form.key) === signature) return;
           formSignatures.set(form.key, signature);
@@ -284,7 +283,11 @@ export function useFillSessionAutosave({
     persistNow();
   }, [persistNow]);
 
-  const dismissRestoreBar = useCallback(() => setRestoreDismissed(true), []);
+  const dismissRestoreBar = useCallback(() => {
+    restorePendingRef.current = false;
+    setRestoreDismissed(true);
+    persistNow();
+  }, [persistNow]);
 
   /** Apply the restored draft — the prompt bar's Resume affordance. The
    *  primary form's snapshot lands in the live store through the shared

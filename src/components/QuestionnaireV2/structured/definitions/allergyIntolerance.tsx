@@ -16,6 +16,7 @@ function AllergyIntoleranceInput(props: StructuredInputProps) {
       question={props.question}
       questionnaireResponse={props.response}
       updateQuestionnaireResponseCB={updateResponse}
+      initializeQuestionnaireResponseCB={props.onInitializeResponse}
       disabled={props.disabled}
     />
   );
@@ -27,7 +28,7 @@ export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_int
     component: AllergyIntoleranceInput,
     requires: ["patientId", "encounterId"],
     subjects: ["encounter"],
-    draftPolicy: "exclude",
+    draftPolicy: "serialize",
     buildRequests: async (
       allergies,
       { patientId, encounterId, questionId },

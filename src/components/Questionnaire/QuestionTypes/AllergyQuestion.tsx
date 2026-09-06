@@ -77,6 +77,7 @@ interface AllergyQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
 }
 
@@ -553,6 +554,7 @@ const AllergyItem = ({
 export function AllergyQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
 }: AllergyQuestionProps) {
@@ -582,8 +584,12 @@ export function AllergyQuestion({
   });
 
   useEffect(() => {
-    if (patientAllergies?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      patientAllergies?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "allergy_intolerance",

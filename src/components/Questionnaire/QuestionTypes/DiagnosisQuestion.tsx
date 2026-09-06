@@ -84,6 +84,7 @@ interface DiagnosisQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -347,6 +348,7 @@ export function DiagnosisQuestion({
   encounterId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
 }: DiagnosisQuestionProps) {
   const { t } = useTranslation();
@@ -390,8 +392,12 @@ export function DiagnosisQuestion({
   });
 
   useEffect(() => {
-    if (patientDiagnoses?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      patientDiagnoses?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "diagnosis",
@@ -538,12 +544,7 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<DiagnosisRequest>
           title={t("past_diagnoses")}

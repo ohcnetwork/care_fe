@@ -22,6 +22,7 @@ function EncounterInput(props: StructuredInputProps) {
       patientId={props.patientId}
       questionnaireResponse={props.response}
       updateQuestionnaireResponseCB={updateResponse}
+      initializeQuestionnaireResponseCB={props.onInitializeResponse}
       disabled={props.disabled}
       errors={props.errors}
       clearError={props.clearError}
@@ -34,7 +35,7 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   component: EncounterInput,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
+  draftPolicy: "serialize",
   validate: (encounters, questionId) =>
     validateEncounterQuestion(encounters[0], questionId),
   buildRequests: async (

@@ -129,25 +129,35 @@ export function FilesQuestion(props: FilesQuestionProps) {
   });
 
   useEffect(() => {
-    (async () => {
+    if (fileUpload.files.length === 0) return;
+    // The uploader holds only newly selected files. The response owns the
+    // complete list, including files retained while navigating the form.
+    const additions = fileUpload.files.filter(
+      (file) => !values.some((value) => value.file_data === file),
+    );
+    if (additions.length > 0) {
       updateQuestionnaireResponseCB(
         [
           {
             type: "files",
-            value: fileUpload.files.map((file, i) => ({
-              name: values[i]?.name || "",
-              file_data: file,
-              original_name: file.name,
-              file_type: FileType.ENCOUNTER,
-              file_category: FileCategory.UNSPECIFIED,
-              associating_id: encounterId,
-            })),
+            value: [
+              ...values,
+              ...additions.map((file) => ({
+                name: "",
+                file_data: file,
+                original_name: file.name,
+                file_type: FileType.ENCOUNTER,
+                file_category: FileCategory.UNSPECIFIED,
+                associating_id: encounterId,
+              })),
+            ],
           },
         ],
         questionnaireResponse.question_id,
         questionnaireResponse.note,
       );
-    })();
+    }
+    fileUpload.clearFiles();
   }, [fileUpload.files]);
 
   return (
@@ -157,6 +167,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
           <Input
             placeholder={t("file_name")}
             className="flex-1"
+            disabled={props.disabled}
             value={value.name}
             onChange={(e) => handleUpdate({ name: e.target.value }, index)}
           />
@@ -164,10 +175,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
             <span className="text-sm truncate">{value.original_name}</span>
           </div>
           <Button
+            disabled={props.disabled}
             variant={"outline"}
             className="border border-secondary-300"
             onClick={() => {
-              fileUpload.removeFile(index);
               updateQuestionnaireResponseCB(
                 [
                   {
@@ -186,6 +197,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
       ))}
       <FileUploadDropdown
         fileUpload={fileUpload}
+        disabled={props.disabled}
         buttonVariant="secondary"
         buttonClassName="border border-secondary-300"
       />

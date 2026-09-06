@@ -17,6 +17,7 @@ function DiagnosisInput(props: StructuredInputProps) {
       question={props.question}
       questionnaireResponse={props.response}
       updateQuestionnaireResponseCB={updateResponse}
+      initializeQuestionnaireResponseCB={props.onInitializeResponse}
       disabled={props.disabled}
     />
   );
@@ -27,7 +28,7 @@ export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   component: DiagnosisInput,
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
+  draftPolicy: "serialize",
   buildRequests: async (diagnoses, { patientId, encounterId, questionId }) => {
     // Only edited rows submit — prefetched server rows ride along in the
     // response values and must not re-upsert untouched.

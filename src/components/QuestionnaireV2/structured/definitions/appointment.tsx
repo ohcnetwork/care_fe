@@ -30,7 +30,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   component: AppointmentInput,
   requires: ["facilityId"],
   subjects: ["patient", "encounter"],
-  draftPolicy: "exclude",
+  draftPolicy: "serialize",
   validate: (appointments, questionId, required) =>
     validateAppointmentQuestion(appointments[0], questionId, required),
   buildRequests: async (
@@ -42,6 +42,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
     // for plugin types that declare a resource subject).
     if (!patientId || appointments.length === 0) return [];
     const { note, slot_id, tags } = appointments[0];
+    if (!slot_id) return [];
     return [
       {
         url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,

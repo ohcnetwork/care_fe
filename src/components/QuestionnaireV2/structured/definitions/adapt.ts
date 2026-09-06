@@ -5,8 +5,7 @@ import type { ResponseValue } from "@/types/questionnaire/form";
 /** Legacy structured components call
  *  `updateQuestionnaireResponseCB(values, questionId, note?)`. The slot's
  *  `onChange` drops the redundant questionId (the slot already knows its
- *  question). Memoized because ChargeItemQuestion lists the callback in an
- *  effect dependency array — a fresh arrow per render is a loop hazard. */
+ *  question). Memoized so adapters preserve the slot callback identity across renders. */
 export function useLegacyResponseCallback(
   onChange: (values: ResponseValue[], note?: string) => void,
 ) {

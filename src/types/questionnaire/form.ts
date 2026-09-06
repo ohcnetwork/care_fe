@@ -46,6 +46,9 @@ export interface QuestionnaireResponse {
   structured_type: StructuredTypeValue | null;
   link_id: string;
   values: ResponseValue[];
+  /** Last server-prefilled values. Draft-only baseline used to distinguish
+   * clinician edits and reconcile them with freshly fetched records. */
+  draft_context?: ResponseValue[];
   note?: string;
   taken_at?: string;
   body_site?: Code;

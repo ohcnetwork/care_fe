@@ -82,6 +82,7 @@ interface SymptomQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -650,6 +651,7 @@ export function SymptomQuestion({
   patientId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   encounterId,
 }: SymptomQuestionProps) {
@@ -678,8 +680,12 @@ export function SymptomQuestion({
   });
 
   useEffect(() => {
-    if (patientSymptoms?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      patientSymptoms?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "symptom",

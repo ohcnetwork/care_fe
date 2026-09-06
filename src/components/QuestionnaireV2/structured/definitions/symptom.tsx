@@ -17,6 +17,7 @@ function SymptomInput(props: StructuredInputProps) {
       question={props.question}
       questionnaireResponse={props.response}
       updateQuestionnaireResponseCB={updateResponse}
+      initializeQuestionnaireResponseCB={props.onInitializeResponse}
       disabled={props.disabled}
     />
   );
@@ -27,7 +28,7 @@ export const symptomDefinition: StructuredTypeDefinition<"symptom"> = {
   component: SymptomInput,
   requires: ["patientId", "encounterId"],
   subjects: ["encounter"],
-  draftPolicy: "exclude",
+  draftPolicy: "serialize",
   buildRequests: async (symptoms, { patientId, encounterId, questionId }) => {
     // `subjects` is encounter-only, so a patient is always in scope here —
     // narrowed rather than asserted (the context type is optional for

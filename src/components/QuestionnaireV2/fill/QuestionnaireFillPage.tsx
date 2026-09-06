@@ -28,6 +28,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
 import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
+import { fillDraftScopeKey } from "./draft/fillDraftCore";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { loadFillDraft } from "./draft/fillDraftStore";
 import type { ServerDraftState } from "./draft/serverDraft";
@@ -63,7 +64,8 @@ export function QuestionnaireFillPage({
   pickerSubjectType = subject.type,
 }: FillPageProps) {
   const { t } = useTranslation();
-  const [{ continue_draft: continueDraftParam }] = useQueryParams();
+  const [{ continue_draft: continueDraftParam, prescription, toDischarge }] =
+    useQueryParams();
   const user = useAuthUser();
 
   const patientBound = isPatientBound(subject) ? subject : undefined;
@@ -146,20 +148,24 @@ export function QuestionnaireFillPage({
     [continueDraftId, serverDraft, questionnaire],
   );
 
+  // These query parameters change the record or workflow a widget edits,
+  // even when the encounter and questionnaire remain the same.
+  const contextParams = new URLSearchParams();
+  if (prescription) contextParams.set("prescription", prescription);
+  if (toDischarge === "true") contextParams.set("toDischarge", "true");
+  const contextKey = contextParams.toString() || undefined;
   const scope: FillDraftScope | undefined = questionnaire
     ? {
         userId: user.id,
         subjectKey: subjectKeyOf(subject),
         entryQuestionnaireId: questionnaire.id,
+        contextKey,
       }
     : undefined;
 
-  // Loaded once per (user, subject, entry questionnaire) — reruns of this
-  // memo after autosave writes don't happen because the deps are stable.
-  // The primary form's version gates the whole session draft.
-  const scopeKey = scope
-    ? `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`
-    : undefined;
+  // Load once per user, subject, questionnaire and editing context.
+  // Autosave writes do not change these dependencies.
+  const scopeKey = scope ? fillDraftScopeKey(scope) : undefined;
   const localDraft = useMemo<LoadedFillDraft | undefined>(
     () =>
       scopeKey && scope && questionnaire && !continueDraftId
@@ -314,7 +320,7 @@ export function QuestionnaireFillPage({
     // under the NEW draft scope, and the next autosave would file one
     // questionnaire's answers under the other's draft key.
     <FillPageBody
-      key={`${subjectKeyOf(subject)}--${questionnaire.id}--${continueDraftId ?? ""}`}
+      key={`${scopeKey}--${continueDraftId ?? ""}`}
       questionnaire={questionnaire}
       patient={patient}
       encounter={encounter}

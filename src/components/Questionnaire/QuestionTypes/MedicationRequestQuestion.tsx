@@ -210,6 +210,7 @@ interface MedicationRequestQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
@@ -342,6 +343,7 @@ export function validateMedicationRequestQuestion(
 export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
@@ -385,8 +387,13 @@ export function MedicationRequestQuestion({
   });
 
   useEffect(() => {
-    if (prescriptionId && patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      prescriptionId &&
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "medication_request",

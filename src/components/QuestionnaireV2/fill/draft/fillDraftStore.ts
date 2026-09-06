@@ -7,8 +7,21 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import type { DroppedDraftAnswer } from "./draftMerge";
 import { draftResponseHasContent, mergeDraftResponses } from "./draftMerge";
-import { FILL_DRAFT_PREFIX, isFillDraftExpired } from "./fillDraftCache";
-import { reviveDraftResponses } from "./fillDraftCore";
+import {
+  fillDraftStorageKey,
+  isFillDraftExpired,
+  removeFillDraftCache,
+  writeFillDraftCache,
+} from "./fillDraftCache";
+import type { FillDraftScope } from "./fillDraftCore";
+import {
+  FILL_DRAFT_SCHEMA_VERSION,
+  reviveDraftResponses,
+} from "./fillDraftCore";
+import {
+  draftIntentResponse,
+  initializeStructuredResponse,
+} from "./structuredDraft";
 
 /**
  * Local fill drafts — the crash/reload safety net. Draft data lives in
@@ -23,15 +36,7 @@ import { reviveDraftResponses } from "./fillDraftCore";
  * One key holds the WHOLE fill session: the route-mounted questionnaire
  * plus every questionnaire added to the same submission.
  */
-const SCHEMA_VERSION = 2;
-
-export interface FillDraftScope {
-  userId: string;
-  /** encounterId when encounter-bound, else patientId. */
-  subjectKey: string;
-  /** The route-mounted questionnaire's id — the session key. */
-  entryQuestionnaireId: string;
-}
+export type { FillDraftScope } from "./fillDraftCore";
 
 export interface DraftFormSnapshot {
   questionnaireId: string;
@@ -53,6 +58,7 @@ interface StoredFillDraft {
   userId: string;
   subjectKey: string;
   entryQuestionnaireId: string;
+  contextKey?: string;
   forms: DraftFormSnapshot[];
 }
 
@@ -70,30 +76,16 @@ export interface LoadedFillDraft {
   dropped: DroppedDraftAnswer[];
 }
 
-function draftKey(scope: FillDraftScope): string {
-  return `${FILL_DRAFT_PREFIX}${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`;
-}
-
-/** Is this response one the draft deliberately leaves behind? Types with
- *  `draftPolicy: "exclude"` (every adapted legacy type: their values
- *  conflate prefetched server rows with user input, and `files` holds raw
- *  File objects) never enter the draft — restoring stale clinical rows and
- *  re-upserting them could clobber edits made elsewhere. An unresolvable
- *  type (its plugin isn't loaded) is treated as "exclude": nothing here
- *  knows whether its values are serializable, and a restore would hand
- *  them to a component that may never come back. */
+/** File payloads and plugin types that opt out cannot round-trip through
+ * JSON. Unknown plugin types are excluded until their definition is loaded. */
 function isDraftExcluded(response: QuestionnaireResponse): boolean {
   if (!response.structured_type) return false;
   const resolved = resolveStructuredType(response.structured_type);
   return !resolved || resolved.draftPolicy === "exclude";
 }
 
-/**
- * Split responses into draft-safe entries and skipped structured content.
- * `isDraftExcluded` responses never enter the draft; everything else is
- * stored verbatim (a `draftPolicy: "serialize"` structured type's values
- * are plain request objects and round-trip through JSON).
- */
+/** Keep serializable responses and all notes; annotate omitted file/plugin
+ * values so recovery can explain which sections need re-entry. */
 function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   safe: Record<string, QuestionnaireResponse>;
   structuredSkipped: boolean;
@@ -103,6 +95,9 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   for (const [id, response] of Object.entries(responses)) {
     if (isDraftExcluded(response)) {
       if (response.values.some(entryHasContent)) structuredSkipped = true;
+      // Files/plugin values may be unsafe to serialize, but their notes
+      // are ordinary clinician input and must survive reloads.
+      safe[id] = { ...response, values: [], draft_context: undefined };
       continue;
     }
     safe[id] = response;
@@ -110,30 +105,28 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   return { safe, structuredSkipped };
 }
 
-/**
- * Overlay the draft-excluded structured entries a store already holds onto
- * a record that is about to REPLACE it.
- *
- * Resume and Discard both swap a form's whole responses record. Structured
- * types with `draftPolicy: "exclude"` are by definition not in the draft,
- * and the adapted widgets seed them once from a server prefetch in a mount
- * effect that never re-runs — so a plain replacement blanks the patient's
- * existing allergies/medications/diagnoses on screen, and re-entering them
- * upserts DUPLICATE clinical records. The live values are the only copy;
- * they carry across untouched.
- */
+/** Restore structured answers against live server baselines. Values that
+ * cannot be drafted (files and excluded plugins) remain in the live store;
+ * serializable edits rebase onto freshly fetched clinical records. */
 export function preserveExcludedStructured(
   current: Record<string, QuestionnaireResponse>,
   next: Record<string, QuestionnaireResponse>,
 ): Record<string, QuestionnaireResponse> {
   const merged = { ...next };
   for (const [id, response] of Object.entries(current)) {
-    if (!isDraftExcluded(response)) continue;
+    if (!response.structured_type) continue;
     const fresh = merged[id];
     // Same guard the draft overlay uses: only where the question still
     // exists with the same structured_type.
     if (fresh && fresh.structured_type === response.structured_type) {
-      merged[id] = response;
+      if (isDraftExcluded(response)) {
+        merged[id] = { ...response, note: fresh.note ?? response.note };
+      } else if (response.draft_context !== undefined) {
+        merged[id] = initializeStructuredResponse(
+          fresh,
+          response.draft_context,
+        );
+      }
     }
   }
   return merged;
@@ -167,12 +160,8 @@ function snapshotSession(forms: FillSessionFormState[]): {
   for (const form of forms) {
     const { safe, structuredSkipped } = partitionForDraft(form.responses);
     const hasContent = Object.values(safe).some(draftResponseHasContent);
-    // `structuredSkipped` ANNOTATES a draft (the restore bar warns about
-    // it); it never creates one on its own. Adapted structured widgets
-    // seed prefetched server rows into the store in mount effects, so
-    // counting the flag as content wrote a phantom draft for a session the
-    // clinician never touched — and let that phantom overwrite a real
-    // stored draft on the very next visit.
+    // Skipped values annotate an existing draft; only recoverable edits
+    // create one. Server-prefilled rows are not clinician input.
     if (hasContent) anyContent = true;
     snapshots.push({
       questionnaireId: form.questionnaire.id,
@@ -185,48 +174,45 @@ function snapshotSession(forms: FillSessionFormState[]): {
   return { snapshots, anyContent };
 }
 
-/** What the clinician changed on responses the draft deliberately leaves
- *  behind. Their `values` are read by nothing here on purpose — that is
- *  where excluded widgets park prefetched server rows from mount
- *  effects — but the note is the clinician's own typing. */
-function excludedNoteIntent(
+/** Files cannot be restored, but choosing/replacing a file must still arm
+ * the navigation prompt. Fingerprint file metadata without serializing blobs. */
+function excludedEditIntent(
   responses: Record<string, QuestionnaireResponse>,
-): Array<[string, string | undefined]> {
-  const intent: Array<[string, string | undefined]> = [];
-  for (const [id, response] of Object.entries(responses)) {
-    if (!isDraftExcluded(response)) continue;
-    intent.push([id, response.note]);
-  }
-  return intent;
+): unknown[] {
+  return Object.values(responses).flatMap((response) => {
+    if (response.structured_type !== "files") return [];
+    return response.values.flatMap((entry) => {
+      if (entry.type !== "files") return [];
+      return (entry.value ?? []).map((file) => [
+        response.question_id,
+        file.name,
+        file.file_data.name,
+        file.file_data.size,
+        file.file_data.lastModified,
+      ]);
+    });
+  });
 }
 
-/**
- * Stable fingerprint of the clinician's un-submitted work across the whole
- * session: the draft-safe partition plus the note on draft-EXCLUDED
- * responses. Autosave compares it against the last value it saw, so a
- * structured widget writing its prefetched server rows (draftPolicy
- * "exclude" — never part of a draft) cannot register as a clinician edit.
- * Without this the mere act of opening a clinical form lit the Draft chip,
- * armed the unsaved-changes prompt and persisted a draft nobody asked for.
- */
+/** Fingerprint clinician input, ignoring server-prefill values and their
+ * baseline metadata. The same baseline also drives draft content detection. */
 export function sessionEditSignature(forms: FillSessionFormState[]): string {
   return JSON.stringify(
     forms.map((form) => [
       form.questionnaire.id,
-      partitionForDraft(form.responses).safe,
-      excludedNoteIntent(form.responses),
+      Object.fromEntries(
+        Object.entries(partitionForDraft(form.responses).safe).map(
+          ([id, response]) => [id, draftIntentResponse(response)],
+        ),
+      ),
+      excludedEditIntent(form.responses),
     ]),
   );
 }
 
-/** Persist the working state of every form in the session. A session with
- *  no draft-SAFE content removes the key instead (never store empty
- *  drafts — FiltersCache's clean() convention); draft-excluded structured
- *  answers alone are not content, only an annotation on a draft some
- *  plain answer already earned.
- *
- *  Returns whether a draft is stored under this scope afterwards, which is
- *  what a caller tracks to decide its own `mayClear` on later saves. */
+/** Persist all forms in one session. Only recoverable user input earns a
+ * draft; clearing that input removes a draft this session previously wrote.
+ * Returns whether this write stored a draft successfully. */
 export function saveFillDraft(
   scope: FillDraftScope,
   forms: FillSessionFormState[],
@@ -240,7 +226,7 @@ export function saveFillDraft(
    *  key. Only a session that has already stored a draft of its own may:
    *  emptiness means "the clinician removed their answers" solely for a
    *  session whose answers were ever in there. An edit the draft excludes
-   *  (a note on a structured question) drives a save while leaving the
+   *  (a file attachment) drives a save while leaving the
    *  safe partition empty, and that emptiness is nobody's deletion —
    *  clearing on it destroys an earlier session's recoverable answers and
    *  trades them for work that cannot be drafted at all. */
@@ -259,16 +245,16 @@ export function saveFillDraft(
     return false;
   }
   const draft: StoredFillDraft = {
-    schemaVersion: SCHEMA_VERSION,
+    schemaVersion: FILL_DRAFT_SCHEMA_VERSION,
     savedAt: new Date().toISOString(),
     userId: scope.userId,
     subjectKey: scope.subjectKey,
     entryQuestionnaireId: scope.entryQuestionnaireId,
+    contextKey: scope.contextKey,
     forms: [...snapshots, ...carried],
   };
   try {
-    localStorage.setItem(draftKey(scope), JSON.stringify(draft));
-    return true;
+    return writeFillDraftCache(scope, JSON.stringify(draft));
   } catch {
     // Quota exceeded / storage disabled — autosave is best-effort, and a
     // write that never landed earns no authority to delete later.
@@ -285,23 +271,23 @@ export function loadFillDraft(
   scope: FillDraftScope,
   questions: Question[],
 ): LoadedFillDraft | undefined {
-  const key = draftKey(scope);
-  const raw = localStorage.getItem(key);
-  if (!raw) return undefined;
   try {
+    const raw = localStorage.getItem(fillDraftStorageKey(scope));
+    if (!raw) return undefined;
     const draft = JSON.parse(raw) as StoredFillDraft;
     const primary = draft.forms?.find(
       (form) => form.questionnaireId === scope.entryQuestionnaireId,
     );
     if (
-      draft.schemaVersion !== SCHEMA_VERSION ||
+      draft.schemaVersion !== FILL_DRAFT_SCHEMA_VERSION ||
       draft.userId !== scope.userId ||
       draft.subjectKey !== scope.subjectKey ||
       draft.entryQuestionnaireId !== scope.entryQuestionnaireId ||
+      draft.contextKey !== scope.contextKey ||
       isFillDraftExpired(draft.savedAt) ||
       !primary
     ) {
-      localStorage.removeItem(key);
+      removeFillDraftCache(scope);
       return undefined;
     }
     for (const form of draft.forms) {
@@ -315,11 +301,11 @@ export function loadFillDraft(
       dropped,
     };
   } catch {
-    localStorage.removeItem(key);
+    removeFillDraftCache(scope);
     return undefined;
   }
 }
 
 export function clearFillDraft(scope: FillDraftScope): void {
-  localStorage.removeItem(draftKey(scope));
+  removeFillDraftCache(scope);
 }

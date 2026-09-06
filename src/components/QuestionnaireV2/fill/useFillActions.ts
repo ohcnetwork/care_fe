@@ -10,7 +10,7 @@
  * against the schema and re-checks the scope before any `run` below is
  * reached.
  */
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { z } from "zod";
 
 import type {
@@ -433,14 +433,20 @@ export function useFillActions({
   subject,
   forms,
   getStore,
+  frozen = false,
 }: {
   subject: FillSubject;
   forms: FillFormEntry[];
   getStore: GetStore;
+  frozen?: boolean;
 }): {
   descriptors: ActionDescriptor[];
   invoke: (actionId: string, input: unknown) => Promise<ActionRunResult>;
 } {
+  // Registered actions can outlive the render that supplied them. Check
+  // the live save state when an asynchronous Scribe result reaches us.
+  const frozenRef = useRef(frozen);
+  frozenRef.current = frozen;
   const patientId = isPatientBound(subject) ? subject.patientId : undefined;
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;
@@ -480,7 +486,10 @@ export function useFillActions({
         },
         schema: setResponseSchema,
         scope,
-        run: (input) => applySetResponse(input, forms, getStore),
+        run: (input) =>
+          frozenRef.current
+            ? { ok: false, error: "The questionnaire is currently being saved" }
+            : applySetResponse(input, forms, getStore),
       };
     }, [patientId, scope, forms, getStore]);
 

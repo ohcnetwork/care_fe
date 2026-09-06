@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import {
+  draftFormNoteText,
   fillDraftCount,
   settleAutosaveDebounce,
 } from "tests/helper/fillDrafts";
@@ -16,6 +17,68 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page local autosave", () => {
+  test("leaving before the debounce completes saves the final edit after form stores unregister", async ({
+    page,
+  }) => {
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+    await page.goto(fillUrl);
+    const input = questionBlock(page, "Note on Bilateral Air Entry").getByRole(
+      "textbox",
+    );
+    await input.fill("Initial saved note");
+    await expect
+      .poll(() => draftFormNoteText(page, questionnaireId))
+      .toBe("Initial saved note");
+
+    await input.fill("Final edit before leaving");
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await page.waitForURL(/\/updates$/);
+    await expect
+      .poll(() => draftFormNoteText(page, questionnaireId))
+      .toBe("Final edit before leaving");
+
+    await page.goto(fillUrl);
+    await page.getByRole("button", { name: "Resume", exact: true }).click();
+    await expect(input).toHaveValue("Final edit before leaving");
+  });
+
+  test("dismissing the restore prompt persists work typed while autosave was paused", async ({
+    page,
+  }) => {
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    const fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+    await page.goto(fillUrl);
+    const input = questionBlock(page, "Note on Bilateral Air Entry").getByRole(
+      "textbox",
+    );
+    await input.fill("Previous session");
+    await page.reload();
+    await expect(page.getByText(/unsaved entry from/i)).toBeVisible();
+    await input.fill("New work while the prompt is visible");
+    await settleAutosaveDebounce(page);
+    await expect
+      .poll(() => draftFormNoteText(page, questionnaireId))
+      .toBe("Previous session");
+
+    await page
+      .getByRole("button", { name: "Close", exact: true })
+      .last()
+      .click();
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect
+      .poll(() => draftFormNoteText(page, questionnaireId))
+      .toBe("New work while the prompt is visible");
+    await page.reload();
+    await page.getByRole("button", { name: "Resume", exact: true }).click();
+    await expect(input).toHaveValue("New work while the prompt is visible");
+  });
+
   test("reload prompts to resume, Resume applies the draft, submit clears it", async ({
     page,
   }) => {

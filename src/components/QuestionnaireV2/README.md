@@ -61,7 +61,8 @@ questions, that is the bug.
   ONE batch behind `useSubmitFillSession`, with reference_id-keyed error
   mapping routed back to the owning form's store. `draft/` is the local
   autosave layer: one localStorage entry per user/subject/entry
-  questionnaire covering every form of the session (`fillDraftCore` holds
+  questionnaire and prescription/discharge context covering every form of
+  the session (`fillDraftCore` holds
   the registry-free decision logic — load/save gates, the merge and the
   dirty signature — behind `fillDraftStore`, which wires
   `resolveStructuredType` in; keep it that way so the gates stay testable
@@ -79,10 +80,16 @@ questions, that is the bug.
   `useSaveServerDraft` is the deliberate "Save as draft" — a
   `form_submission` record (feature flag `enableQuestionnaireDraft`,
   ENCOUNTER-subject + single-form + structured-free) that ends the
-  session, survives the device, and is what the encounter overview's
-  drafts card lists and `?continue_draft=` resumes. Encounter-only is a
-  deliberate narrowing, not a straight port: that card is the sole listing
-  of server drafts and it filters `form_submission` by `encounter`, so a
+  session, survives the device, and resumes through `?continue_draft=`.
+  The encounter overview combines both sources as compact rows, newest
+  first. `fillDraftList` reads only the current user's matching encounter
+  entries into metadata summaries without importing the structured registry;
+  `useLocalFillDrafts` keeps them current through cache notifications,
+  cross-tab storage events and expiry timers. Local Continue preserves the
+  saved query context and opens the usual Resume prompt. Discard targets
+  either that exact local scope or the selected server record.
+  Encounter-only is a deliberate narrowing for server drafts: the overview
+  is their sole listing and filters `form_submission` by `encounter`, so a
   patient-mount draft — which legacy did allow — POSTs without one and
   becomes an unreachable orphan.
 - `structured/` — the one registration point for structured question

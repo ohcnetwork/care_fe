@@ -1,10 +1,13 @@
+import { useStore } from "jotai";
 import { Suspense, useCallback, useEffect, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { initializeStructuredResponse } from "@/components/QuestionnaireV2/fill/draft/structuredDraft";
 import {
+  responsesAtom,
   useClearQuestionErrors,
   useClearStructuredRenderFailed,
   useMarkStructuredRenderFailed,
@@ -66,14 +69,23 @@ export function StructuredSlot({
     getStructuredTypesVersion,
   );
   const [response, updateResponse] = useQuestionResponse(question.id);
+  const store = useStore();
   const errors = useQuestionErrors(question.id);
   const clearErrors = useClearQuestionErrors(question.id);
   const markRenderFailed = useMarkStructuredRenderFailed(question.id);
 
   const handleChange = useCallback(
     (values: ResponseValue[], note?: string) =>
-      updateResponse({ values, note }),
+      updateResponse(note === undefined ? { values } : { values, note }),
     [updateResponse],
+  );
+  const handleInitializeResponse = useCallback(
+    (values: ResponseValue[]) => {
+      const current = store.get(responsesAtom)[question.id];
+      if (current)
+        updateResponse(initializeStructuredResponse(current, values));
+    },
+    [question.id, store, updateResponse],
   );
 
   // The same resolution submit-time enforcement runs — see
@@ -197,6 +209,7 @@ export function StructuredSlot({
           question={question}
           response={response}
           onChange={handleChange}
+          onInitializeResponse={handleInitializeResponse}
           disabled={disabled}
           errors={errors}
           clearError={clearErrors}

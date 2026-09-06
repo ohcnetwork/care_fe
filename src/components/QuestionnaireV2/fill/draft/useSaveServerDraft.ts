@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import careConfig from "@careConfig";
 
+import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 import {
@@ -51,6 +52,7 @@ export function useSaveServerDraft({
 }: UseSaveServerDraftArgs) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const savingRef = useRef(false);
 
   const encounterBound = subject.type === "encounter" ? subject : undefined;
   const primary = forms.find((form) => form.isPrimary);
@@ -71,6 +73,9 @@ export function useSaveServerDraft({
     if (!careConfig.enableQuestionnaireDraft) return false;
     if (!encounterBound || !primary) return false;
     if (forms.length !== 1) return false;
+    // Built-in quick forms have no questionnaire record to reference in a
+    // server draft. They still participate in local autosave.
+    if (FIXED_QUESTIONNAIRES[primary.questionnaire.id]) return false;
     // The MOUNT being an encounter is not enough: a patient-subject
     // questionnaire filled from an encounter route submits without an
     // `encounter` (see `composeBatch`'s submit target), while the draft
@@ -134,6 +139,9 @@ export function useSaveServerDraft({
     mutationFn: mutate(formSubmissionApi.create),
     onSuccess: handleSaved,
     onError: handleFailed,
+    onSettled: () => {
+      savingRef.current = false;
+    },
   });
 
   const { mutate: updateDraft, isPending: isUpdating } = useMutation({
@@ -142,12 +150,17 @@ export function useSaveServerDraft({
     }),
     onSuccess: handleSaved,
     onError: handleFailed,
+    onSettled: () => {
+      savingRef.current = false;
+    },
   });
 
   const saveDraft = useCallback(() => {
-    if (!canSaveDraft || !primary || !encounterBound) return;
+    if (savingRef.current || !canSaveDraft || !primary || !encounterBound)
+      return;
     const store = getStore(primary.key);
     if (!store) return;
+    savingRef.current = true;
 
     // Exactly the shape this page's own `?continue_draft=` restore parses,
     // and the one `composeBatch` finalizes on submit.
@@ -165,7 +178,7 @@ export function useSaveServerDraft({
     }
     createDraft({
       patient: encounterBound.patientId,
-      questionnaire: primary.questionnaire.slug,
+      questionnaire: primary.questionnaire.id,
       encounter: encounterBound.encounterId,
       status: "draft",
       response_dump,

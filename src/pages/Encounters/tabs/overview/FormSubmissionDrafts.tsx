@@ -1,22 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowUpRight, Trash2 } from "lucide-react";
 import { navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { reviveDraftResponses } from "@/components/QuestionnaireV2/fill/draft/fillDraftCore";
-import { QuestionnaireFormRenderer } from "@/components/QuestionnaireV2/form/FormCanvas";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import type { LocalFillDraftSummary } from "@/components/QuestionnaireV2/fill/draft/fillDraftList";
+import { discardLocalFillDraft } from "@/components/QuestionnaireV2/fill/draft/fillDraftList";
+import { useLocalFillDrafts } from "@/components/QuestionnaireV2/fill/draft/useLocalFillDrafts";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
-import { QuestionnaireResponse } from "@/types/questionnaire/form";
-import { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
-import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
-import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
+import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
+import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 
 interface FormSubmissionDraftsProps {
   facilityId: string;
@@ -24,31 +28,38 @@ interface FormSubmissionDraftsProps {
   encounterId: string;
 }
 
-interface DraftQuestionnaireResponse {
-  questionnaire: QuestionnaireRead;
-  responses: QuestionnaireResponse[];
+interface DraftRowDetails {
+  id: string;
+  title: string;
+  savedAt: string;
+  url: string;
+  formCount: number;
 }
 
-/**
- * The dump stores responses as an array; the renderer seeds from a
- * `question_id → response` record. JSON round-tripping flattened Dates to
- * strings, so revive them the same way the `?continue_draft=` restore path
- * does.
- *
- * The clone is load-bearing: `reviveDraftResponses` rewrites entries IN
- * PLACE, and these objects belong to the TanStack Query cache — the same
- * `submission` this component spreads back into the discard PUT. Without
- * it, rendering the preview would silently rewrite the dump we later send
- * (dates re-serialized, unparseable ones dropped).
- */
-function draftResponsesRecord(
-  responses: QuestionnaireResponse[],
-): Record<string, QuestionnaireResponse> {
-  const record: Record<string, QuestionnaireResponse> = {};
-  for (const response of structuredClone(responses)) {
-    record[response.question_id] = response;
+type DraftRow = DraftRowDetails &
+  (
+    | { source: "local"; draft: LocalFillDraftSummary }
+    | { source: "server"; draft: FormSubmissionRead }
+  );
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** A server dump is untyped. List only entries that can open a questionnaire. */
+function serverQuestionnaire(submission: FormSubmissionRead) {
+  const response = submission.response_dump?.questionnaireResponses;
+  if (!isRecord(response) || !Array.isArray(response.responses)) return;
+  const questionnaire = response.questionnaire;
+  if (
+    !isRecord(questionnaire) ||
+    typeof questionnaire.id !== "string" ||
+    !questionnaire.id ||
+    typeof questionnaire.title !== "string"
+  ) {
+    return;
   }
-  return reviveDraftResponses(record);
+  return { id: questionnaire.id, title: questionnaire.title };
 }
 
 export function FormSubmissionDrafts({
@@ -57,17 +68,11 @@ export function FormSubmissionDrafts({
   encounterId,
 }: FormSubmissionDraftsProps) {
   const { t } = useTranslation();
+  const user = useAuthUser();
   const queryClient = useQueryClient();
-  const [submissionToDiscard, setSubmissionToDiscard] =
-    useState<FormSubmissionRead | null>(null);
-
-  // Stable identity — the renderer's context value is keyed on it, so an
-  // inline literal would re-render every consumer of every preview's form
-  // context on each render of this list.
-  const subject = useMemo(
-    () => ({ facilityId, patientId, encounterId }),
-    [facilityId, patientId, encounterId],
-  );
+  const [draftToDiscard, setDraftToDiscard] = useState<DraftRow | null>(null);
+  const localDrafts = useLocalFillDrafts(user.id, `encounter:${encounterId}`);
+  const fillBase = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire`;
 
   const { data: formSubmissions } = useQuery({
     queryKey: formSubmissionKeys.list(encounterId),
@@ -80,12 +85,10 @@ export function FormSubmissionDrafts({
   const { mutate: discardSubmission, isPending: isDiscarding } = useMutation({
     mutationFn: (submission: FormSubmissionRead) =>
       mutate(formSubmissionApi.update, {
-        pathParams: {
-          external_id: submission.id,
-        },
+        pathParams: { external_id: submission.id },
       })({
-        ...submission,
         status: "entered_in_error",
+        response_dump: submission.response_dump,
       }),
     onSuccess: () => {
       toast.success(t("form_submission_discarded"));
@@ -98,102 +101,140 @@ export function FormSubmissionDrafts({
     },
   });
 
-  if (!formSubmissions || formSubmissions.results.length === 0) {
-    return null;
+  const rows: DraftRow[] = localDrafts.map((draft) => ({
+    source: "local",
+    id: draft.key,
+    title: draft.title || t("questionnaire_one"),
+    savedAt: draft.savedAt,
+    formCount: draft.formCount,
+    url: `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}${
+      draft.scope.contextKey ? `?${draft.scope.contextKey}` : ""
+    }`,
+    draft,
+  }));
+  for (const draft of formSubmissions?.results ?? []) {
+    const questionnaire = serverQuestionnaire(draft);
+    if (!questionnaire || draft.status !== "draft") continue;
+    rows.push({
+      source: "server",
+      id: draft.id,
+      title: questionnaire.title,
+      savedAt: draft.modified_date || draft.created_date,
+      formCount: 1,
+      url: `${fillBase}/${encodeURIComponent(questionnaire.id)}?continue_draft=${encodeURIComponent(draft.id)}`,
+      draft,
+    });
   }
+  rows.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
+
+  if (rows.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <section aria-label={t("draft_forms")} className="min-w-0 space-y-3">
       <h2 className="text-lg font-semibold">{t("draft_forms")}</h2>
-      <div className="flex flex-col gap-4">
-        {formSubmissions.results.map((submission) => {
-          const questionnaireResponses = submission.response_dump
-            ?.questionnaireResponses as DraftQuestionnaireResponse | undefined;
-          const questionnaire = questionnaireResponses?.questionnaire;
-          const questions = questionnaire?.questions;
-          const responses = questionnaireResponses?.responses;
-
-          // `response_dump` is an untyped blob written by whoever saved the
-          // draft (this app, a plugin, an older release) — shape-check it
-          // instead of trusting the cast above.
-          if (
-            !questionnaire ||
-            !Array.isArray(questions) ||
-            !Array.isArray(responses)
-          ) {
-            return null;
-          }
-
+      <ul className="min-w-0 divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white">
+        {rows.map((row) => {
+          const savedAt = formatDateTime(row.savedAt);
           return (
-            <Card key={submission.id}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center justify-between">
-                  <span className="text-muted-foreground text-sm">
-                    {questionnaire.title} - {t("saved_on")}{" "}
-                    {new Date(
-                      submission.modified_date || submission.created_date,
-                    ).toLocaleString()}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSubmissionToDiscard(submission)}
-                      disabled={isDiscarding}
-                    >
-                      {t("discard")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}?continue_draft=${submission.id}`,
-                        )
-                      }
-                    >
-                      {t("continue")}
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-4">
-                {/* `initialResponses` seeds the renderer's store once, at
-                    creation — by design, so a live questionnaire edit can't
-                    wipe in-progress answers. A re-saved draft therefore
-                    needs a NEW store, which the timestamped key forces;
-                    without it this preview would keep showing the answers
-                    it first mounted with. */}
-                <QuestionnaireFormRenderer
-                  key={`${submission.id}-${submission.modified_date ?? submission.created_date}`}
-                  questionnaire={questionnaire}
-                  mode="readonly"
-                  subject={subject}
-                  initialResponses={draftResponsesRecord(responses)}
-                  hideHeader
-                />
-              </CardContent>
-            </Card>
+            <li
+              key={`${row.source}-${row.id}`}
+              data-draft-source={row.source}
+              data-draft-id={row.id}
+              className="flex min-w-0 items-center gap-2 px-3 py-2 sm:gap-3"
+            >
+              <span
+                className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900"
+                title={row.title}
+              >
+                {row.title}
+              </span>
+              {row.formCount > 1 && (
+                <span
+                  className="shrink-0 text-xs text-gray-500"
+                  title={t("fill_draft_includes_added_forms", {
+                    count: row.formCount - 1,
+                  })}
+                  aria-label={t("fill_draft_includes_added_forms", {
+                    count: row.formCount - 1,
+                  })}
+                >
+                  +{row.formCount - 1}
+                </span>
+              )}
+              <Badge
+                variant={row.source === "local" ? "yellow" : "secondary"}
+                className="shrink-0 px-1.5 text-xs"
+                title={t(
+                  row.source === "local"
+                    ? "draft_source_local_description"
+                    : "draft_source_server_description",
+                )}
+              >
+                {t(
+                  row.source === "local"
+                    ? "draft_source_local"
+                    : "draft_source_server",
+                )}
+              </Badge>
+              <time
+                dateTime={row.savedAt}
+                title={savedAt}
+                aria-label={`${t("saved_on")} ${savedAt}`}
+                className="hidden shrink-0 whitespace-nowrap text-xs text-gray-500 md:block"
+              >
+                {formatDateTime(row.savedAt, "DD MMM, hh:mm A")}
+              </time>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="shrink-0 gap-1 px-2 text-primary-800"
+                aria-label={t("continue_draft_named", { title: row.title })}
+                title={t("continue_draft_named", { title: row.title })}
+                disabled={isDiscarding}
+                onClick={() => navigate(row.url)}
+              >
+                <span className="hidden sm:inline">{t("continue")}</span>
+                <ArrowUpRight className="size-4" aria-hidden />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 shrink-0 text-gray-500 hover:text-red-600"
+                aria-label={t("discard_draft_named", { title: row.title })}
+                title={t("discard_draft_named", { title: row.title })}
+                disabled={isDiscarding}
+                onClick={() => setDraftToDiscard(row)}
+              >
+                <Trash2 className="size-4" aria-hidden />
+              </Button>
+            </li>
           );
         })}
-      </div>
-
+      </ul>
       <ConfirmActionDialog
-        open={!!submissionToDiscard}
+        open={!!draftToDiscard}
         onOpenChange={(open) => {
-          if (!open) setSubmissionToDiscard(null);
+          if (!open) setDraftToDiscard(null);
         }}
         title={t("confirm_discard")}
         description={t("confirm_discard_draft_form")}
         onConfirm={() => {
-          if (submissionToDiscard) {
-            discardSubmission(submissionToDiscard);
-            setSubmissionToDiscard(null);
+          if (!draftToDiscard) return;
+          if (draftToDiscard.source === "server") {
+            discardSubmission(draftToDiscard.draft);
+          } else if (discardLocalFillDraft(draftToDiscard.draft.scope)) {
+            toast.success(t("form_submission_discarded"));
+          } else {
+            toast.error(t("form_submission_discard_failed"));
           }
+          setDraftToDiscard(null);
         }}
         confirmText={t("discard")}
         variant="destructive"
         disabled={isDiscarding}
       />
-    </div>
+    </section>
   );
 }

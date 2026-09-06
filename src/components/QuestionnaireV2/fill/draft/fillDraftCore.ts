@@ -1,5 +1,22 @@
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 
+export const FILL_DRAFT_SCHEMA_VERSION = 2;
+
+export interface FillDraftScope {
+  userId: string;
+  subjectKey: string;
+  entryQuestionnaireId: string;
+  /** Query context that changes which record the structured widgets edit. */
+  contextKey?: string;
+}
+
+export function fillDraftScopeKey(scope: FillDraftScope): string {
+  const base = `${scope.userId}--${scope.subjectKey}--${scope.entryQuestionnaireId}`;
+  return scope.contextKey
+    ? `${base}--context=${encodeURIComponent(scope.contextKey)}`
+    : base;
+}
+
 // This module must stay free of `structured/registry` (directly or
 // transitively): `serverDraft.test.ts` runs under plain `node --test`, and
 // the registry pulls every core definition's component tree.

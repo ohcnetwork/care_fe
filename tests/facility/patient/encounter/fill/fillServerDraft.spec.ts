@@ -55,21 +55,155 @@ async function openFillPage(page: Page, fillUrl: string) {
   return { airEntry, saveDraft };
 }
 
-/** The draft id the overview card's Continue action deep-links to. */
+/** The draft id the overview row's Continue action deep-links to. */
 function draftIdFromUrl(url: string): string {
   const id = new URL(url).searchParams.get("continue_draft");
   expect(id, "continue_draft missing from the resumed URL").toBeTruthy();
   return id as string;
 }
 
+function serverDraftRow(page: Page, draftId: string) {
+  return page.locator(
+    `[data-draft-source="server"][data-draft-id="${draftId}"]`,
+  );
+}
+
+function createdDraftResponse(page: Page) {
+  return page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v1/form_submission/") &&
+      response.request().method() === "POST" &&
+      response.ok(),
+  );
+}
+
 test.describe("Fill page server draft", () => {
-  // Serial: these tests share ONE encounter, and the overview's drafts card
-  // lists every open `form_submission` on it. Run in parallel they see each
-  // other's Continue buttons; each test here leaves the card empty when it
-  // finishes, so serialising is enough to keep them independent.
+  // Serial: these tests share one encounter. Scope every row assertion to
+  // its created record so unrelated clinician drafts remain untouched.
   test.describe.configure({ mode: "serial" });
 
-  test("saved draft lists on the overview, previews readonly, resumes, and re-saves onto the same record", async ({
+  for (const operation of ["create", "update"] as const) {
+    test(`${operation} draft freezes edits, prevents duplicate saves, and releases after failure`, async ({
+      page,
+    }) => {
+      const questionnaireId = await getQuestionnaireIdBySlug(
+        "respiratory_status-v3",
+      );
+      const draftId = crypto.randomUUID();
+      const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+      const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}${operation === "update" ? `?continue_draft=${draftId}` : ""}`;
+      const saveMethod = operation === "create" ? "POST" : "PUT";
+      const saveUrl = `**/api/v1/form_submission/${operation === "update" ? `${draftId}/` : ""}`;
+
+      let releaseRequest: (() => void) | undefined;
+      const pendingResponse = new Promise<void>((resolve) => {
+        releaseRequest = resolve;
+      });
+      const savedBodies: {
+        questionnaire?: string;
+        response_dump: {
+          questionnaireResponses: {
+            responses: { values: { value?: string }[] }[];
+          };
+        };
+      }[] = [];
+      await page.route(saveUrl, async (route) => {
+        if (operation === "update" && route.request().method() === "GET") {
+          return route.fulfill({
+            json: {
+              id: draftId,
+              status: "draft",
+              response_dump: {
+                questionnaireResponses: {
+                  questionnaire: { id: questionnaireId },
+                  responses: [],
+                },
+              },
+            },
+          });
+        }
+        if (route.request().method() !== saveMethod) return route.fallback();
+        savedBodies.push(route.request().postDataJSON());
+        await pendingResponse;
+        // Keep this test independent of the encounter's persisted drafts.
+        await route.fulfill({ status: 500, json: {} });
+      });
+
+      try {
+        const { saveDraft } = await openFillPage(page, fillUrl);
+        const noteBox = questionBlock(
+          page,
+          "Note on Bilateral Air Entry",
+        ).getByRole("textbox");
+        const note = `Captured ${operation} draft`;
+        await noteBox.fill(note);
+
+        // Two immediate activations exercise a rapid repeated Save click.
+        await saveDraft.evaluate((button) => {
+          (button as HTMLButtonElement).click();
+          (button as HTMLButtonElement).click();
+        });
+        await expect.poll(() => savedBodies.length).toBe(1);
+        await expect(noteBox).toBeDisabled();
+        await expect(saveDraft).toBeDisabled();
+        await expect(
+          page.getByRole("button", { name: "Save Changes" }),
+        ).toBeDisabled();
+        await expect(
+          questionBlock(page, "Note on Bilateral Air Entry").getByRole(
+            "button",
+            { name: "Add note", exact: true },
+          ),
+        ).toBeDisabled();
+        if (operation === "create") {
+          expect(savedBodies[0].questionnaire).toBe(questionnaireId);
+          await expect(
+            page.getByRole("button", { name: "Add questionnaire" }),
+          ).toBeDisabled();
+        }
+        await expect(noteBox).toHaveValue(note);
+        expect(
+          savedBodies[0].response_dump.questionnaireResponses.responses.flatMap(
+            (response) => response.values.map((value) => value.value),
+          ),
+        ).toContain(note);
+        expect(savedBodies).toHaveLength(1);
+
+        releaseRequest?.();
+        await expectToast(page, "Failed to save draft");
+        await expect(noteBox).toBeEnabled();
+        await expect(saveDraft).toBeEnabled();
+        await noteBox.fill(`${note} after failure`);
+
+        // The failed request must release the synchronous save guard too.
+        await saveDraft.click();
+        await expect.poll(() => savedBodies.length).toBe(2);
+        expect(
+          savedBodies[1].response_dump.questionnaireResponses.responses.flatMap(
+            (response) => response.values.map((value) => value.value),
+          ),
+        ).toContain(`${note} after failure`);
+        await expect(noteBox).toBeEnabled();
+      } finally {
+        releaseRequest?.();
+      }
+    });
+  }
+
+  test("fixed structured forms do not offer server drafts for synthetic questionnaire ids", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/symptom`,
+    );
+    await expect(questionBlock(page, "Symptom")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Save Changes" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: SAVE_DRAFT })).toHaveCount(0);
+  });
+
+  test("saved draft lists as a compact overview row, resumes, and re-saves onto the same record", async ({
     page,
   }) => {
     test.slow();
@@ -84,29 +218,37 @@ test.describe("Fill page server draft", () => {
     const { airEntry, saveDraft } = await openFillPage(page, fillUrl);
     const noteBox = () =>
       questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
-
     await airEntry.getByRole("radio", { name: "yes", exact: true }).click();
     await noteBox().fill(note);
 
     // POST branch — no draft to continue yet.
+    const createdDraft = createdDraftResponse(page);
     await saveDraft.click();
+    const createdResponse = await createdDraft;
+    expect(createdResponse.request().postDataJSON().questionnaire).toBe(
+      questionnaireId,
+    );
+    const { id: draftId } = (await createdResponse.json()) as { id: string };
+    const savedRow = serverDraftRow(page, draftId);
     await expectToast(page, "Draft saved successfully");
     await page.waitForURL(/\/updates$/);
 
-    // The encounter overview's drafts card is the server draft's consumer:
-    // it previews the saved answers through the v2 renderer, readonly. The
-    // only questionnaire block on this page belongs to that preview.
+    // The overview exposes one compact row; saved answers are shown only
+    // after Continue, and the row retains this exact server record's id.
     await expect(
       page.getByRole("heading", { name: "Draft Forms" }),
     ).toBeVisible();
-    await expect(noteBox()).toHaveValue(note);
-    await expect(noteBox()).toBeDisabled();
+    await expect(savedRow).toBeVisible();
+    await expect(savedRow).toContainText("Shared");
+    await expect(
+      savedRow.locator("input, textarea, [data-question-id]"),
+    ).toHaveCount(0);
 
     // Continue deep-links back with ?continue_draft= and the server copy
     // seeds the store.
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await savedRow.getByRole("button", { name: /^Continue/ }).click();
     await page.waitForURL(/continue_draft=/);
-    const draftId = draftIdFromUrl(page.url());
+    expect(draftIdFromUrl(page.url())).toBe(draftId);
     await expect(noteBox()).toHaveValue(note);
     await expect(
       questionBlock(page, "Is bilateral air entry present?").getByRole(
@@ -125,17 +267,19 @@ test.describe("Fill page server draft", () => {
     await expectToast(page, "Draft saved successfully");
     await page.waitForURL(/\/updates$/);
     await expect(
-      page.getByRole("button", { name: "Continue", exact: true }),
+      savedRow.getByRole("button", { name: /^Continue/ }),
     ).toHaveCount(1);
-    await expect(noteBox()).toHaveValue(editedNote);
+    await expect(
+      savedRow.locator("input, textarea, [data-question-id]"),
+    ).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await savedRow.getByRole("button", { name: /^Continue/ }).click();
     await page.waitForURL(/continue_draft=/);
     expect(draftIdFromUrl(page.url())).toBe(draftId);
     await expect(noteBox()).toHaveValue(editedNote);
 
-    // Submitting a resumed draft completes that same record, so the card
-    // empties out again.
+    // Submitting a resumed draft completes that same record and removes
+    // just its row, regardless of other local or server drafts.
     await questionBlock(page, "Is bilateral air entry present?")
       .getByRole("radio", { name: "no", exact: true })
       .click();
@@ -145,9 +289,13 @@ test.describe("Fill page server draft", () => {
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
-    await expect(
-      page.getByRole("heading", { name: "Draft Forms" }),
-    ).not.toBeVisible();
+    const completedDraft = await fetch(
+      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+      { headers: adminApiHeaders() },
+    );
+    expect(completedDraft.ok).toBe(true);
+    expect((await completedDraft.json()).status).toBe("submitted");
+    await expect(savedRow).toHaveCount(0);
   });
 
   test("editing a resumed server draft marks the session dirty and guards navigation", async ({
@@ -167,11 +315,17 @@ test.describe("Fill page server draft", () => {
       questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
 
     await noteBox().fill(note);
+    const createdDraft = createdDraftResponse(page);
     await saveDraft.click();
+    const { id: draftId } = (await (await createdDraft).json()) as {
+      id: string;
+    };
     await expectToast(page, "Draft saved successfully");
     await page.waitForURL(/\/updates$/);
 
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await serverDraftRow(page, draftId)
+      .getByRole("button", { name: /^Continue/ })
+      .click();
     await page.waitForURL(/continue_draft=/);
     await expect(noteBox()).toHaveValue(note);
 
@@ -200,8 +354,7 @@ test.describe("Fill page server draft", () => {
     await expect.poll(() => dialogMessage).toContain("unsaved changes");
     await expect(noteBox()).toHaveValue(editedNote);
 
-    // Complete the record so the drafts card is empty again for whatever
-    // runs next (see the serial note on this describe).
+    // Complete this record without assuming the encounter has no other drafts.
     await questionBlock(page, "Is bilateral air entry present?")
       .getByRole("radio", { name: "no", exact: true })
       .click();
@@ -211,9 +364,7 @@ test.describe("Fill page server draft", () => {
     await page.getByRole("button", { name: "Save Changes" }).click();
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
-    await expect(
-      page.getByRole("heading", { name: "Draft Forms" }),
-    ).not.toBeVisible();
+    await expect(serverDraftRow(page, draftId)).toHaveCount(0);
   });
 
   test("a form_submission that is no longer a draft refuses to resume", async ({
@@ -231,8 +382,7 @@ test.describe("Fill page server draft", () => {
       method: "POST",
       headers: adminApiHeaders(),
       body: JSON.stringify({
-        // The create serializer resolves the questionnaire by SLUG.
-        questionnaire: "respiratory_status-v3",
+        questionnaire: questionnaireId,
         patient: getPatientId(),
         encounter: getEncounterId(),
         status: "submitted",
@@ -276,13 +426,19 @@ test.describe("Fill page server draft", () => {
 
     // A bare draft is enough to resume from — its content isn't the point
     // of this case, only that a form_submission id exists to link to.
+    const createdDraft = createdDraftResponse(page);
     await saveDraft.click();
+    const { id: draftId } = (await (await createdDraft).json()) as {
+      id: string;
+    };
     await expectToast(page, "Draft saved successfully");
     await page.waitForURL(/\/updates$/);
 
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await serverDraftRow(page, draftId)
+      .getByRole("button", { name: /^Continue/ })
+      .click();
     await page.waitForURL(/continue_draft=/);
-    const draftId = draftIdFromUrl(page.url());
+    expect(draftIdFromUrl(page.url())).toBe(draftId);
 
     // Satisfy required fields so the submit clears client validation and
     // actually reaches the batch compose this case is pinning.
@@ -321,8 +477,6 @@ test.describe("Fill page server draft", () => {
     // same cleanup contract every test in this describe leaves behind.
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
-    await expect(
-      page.getByRole("heading", { name: "Draft Forms" }),
-    ).not.toBeVisible();
+    await expect(serverDraftRow(page, draftId)).toHaveCount(0);
   });
 });

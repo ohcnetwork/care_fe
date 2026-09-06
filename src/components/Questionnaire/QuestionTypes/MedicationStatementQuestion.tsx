@@ -82,6 +82,7 @@ interface MedicationStatementQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
 }
@@ -144,6 +145,7 @@ export function validateMedicationStatementQuestion(
 export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
@@ -180,8 +182,12 @@ export function MedicationStatementQuestion({
   });
 
   useEffect(() => {
-    if (patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,
       );

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormCanvas";
 import type { QuestionShellProps } from "@/components/QuestionnaireV2/form/chrome";
+import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
 /**
  * Width policy per the reference: regular questions read best in a
@@ -10,12 +11,16 @@ import type { QuestionShellProps } from "@/components/QuestionnaireV2/form/chrom
  * the renderer itself stays layout-agnostic.
  */
 function FillQuestionShell({ question, depth, children }: QuestionShellProps) {
-  if (depth > 0) return <>{children}</>;
+  const containsStructured = !!findFirstQuestion(
+    [question],
+    (item) => item.type === "structured",
+  );
+  if (depth > 0 && !containsStructured) return <>{children}</>;
   return (
     <div
       className={cn(
-        "w-full",
-        question.type !== "structured" && "mx-auto max-w-3xl",
+        "min-w-0 w-full",
+        containsStructured ? "col-span-full" : "mx-auto max-w-3xl",
       )}
     >
       {children}
