@@ -309,12 +309,7 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -698,7 +693,7 @@ export function MedicationStatementQuestion({
       )}
 
       {desktopLayout ? (
-        <div className="max-w-4xl">
+        <div className="min-w-0 w-full">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}

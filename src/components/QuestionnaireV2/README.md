@@ -46,12 +46,10 @@ questions, that is the bug.
   (`FillOutlineOverlay`): a slim tick rail on the canvas' left edge opens
   the panel over the full-width canvas on hover/focus/click; scroll-spy
   (`useFillOutlineNav`) tracks the block topping the viewport. `FillCanvas`
-  constrains regular questions to a centered `max-w-3xl` column and structured
-  questions to `max-w-5xl`, except medication requests and medication statements,
-  whose tables use the full canvas.
-  Ancestor groups containing medication sections also span the canvas;
-  other structured questions remain constrained within those groups. Each form
-  portals its rows (`FillOutline`) and ticks (`FillOutlineRail`) into the
+  uses one centered `max-w-5xl` column for every question, including medication
+  requests and medication statements. Nested structured sections span their
+  group's grid columns; ordinary questions retain their authored grid layout.
+  Each form portals its rows (`FillOutline`) and ticks (`FillOutlineRail`) into the
   overlay's hosts — they must render inside that form's provider. What it
   is filling FOR is `subject.ts`'s `FillSubject`
   union (encounter/patient/location/device…); `rendererSubjectOf` flattens
