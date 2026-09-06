@@ -53,6 +53,8 @@ interface UseFillSessionAutosaveArgs {
   storesVersion: number;
   /** The draft this page instance detected, if any. */
   restoredDraft: LoadedFillDraft | undefined;
+  /** The encounter's draft action already requested restoration. */
+  resumeAutomatically?: boolean;
   /** Snapshots the host could not turn back into live forms (a resume
    *  whose re-fetch failed). They stay in the persisted draft so a
    *  transient error cannot destroy their answers. */
@@ -74,11 +76,13 @@ export function useFillSessionAutosave({
   getStore,
   storesVersion,
   restoredDraft,
+  resumeAutomatically = false,
   retainedSnapshots,
   onResumeAddedForms,
 }: UseFillSessionAutosaveArgs) {
   const [dirty, setDirty] = useState(false);
   const [restoreDismissed, setRestoreDismissed] = useState(false);
+  const restoredAppliedRef = useRef(false);
   // StoreRegistrar unregisters in a child effect cleanup. Keep the store
   // available until this hook's cleanup has flushed the final keystroke.
   const registeredStores = useRef(new Map<string, FormStore>());
@@ -289,30 +293,32 @@ export function useFillSessionAutosave({
     persistNow();
   }, [persistNow]);
 
-  /** Apply the restored draft — the prompt bar's Resume affordance. The
+  /** Apply the restored draft — from the overview or restore prompt. The
    *  primary form's snapshot lands in the live store through the shared
    *  overlay rule; every other snapshot goes back to the host, which
    *  re-adds those questionnaires seeded from their snapshots. */
   const resumeRestoredDraft = useCallback(() => {
     const draft = restoredDraftRef.current;
-    if (!draft) return;
+    if (!draft || restoredAppliedRef.current) return;
     const primary = forms.find((form) => form.isPrimary);
+    const store = primary && getStore(primary.key);
+    // Automatic restoration can run during mount. Wait for registration
+    // instead of dismissing the draft before its answers reach the form.
+    if (!primary || !store) return;
+    restoredAppliedRef.current = true;
     const addedSnapshots: DraftFormSnapshot[] = [];
     for (const snapshot of draft.forms) {
-      if (primary && snapshot.questionnaireId === primary.key) {
-        const store = getStore(primary.key);
-        if (store) {
-          store.set(
-            responsesAtom,
-            preserveExcludedStructured(
-              store.get(responsesAtom),
-              mergeDraftIntoSeed(
-                primary.questionnaire.questions,
-                snapshot.responses,
-              ),
+      if (snapshot.questionnaireId === primary.key) {
+        store.set(
+          responsesAtom,
+          preserveExcludedStructured(
+            store.get(responsesAtom),
+            mergeDraftIntoSeed(
+              primary.questionnaire.questions,
+              snapshot.responses,
             ),
-          );
-        }
+          ),
+        );
         continue;
       }
       addedSnapshots.push(snapshot);
@@ -321,6 +327,10 @@ export function useFillSessionAutosave({
     setDirty(true);
     setRestoreDismissed(true);
   }, [forms, getStore, onResumeAddedForms]);
+
+  useEffect(() => {
+    if (resumeAutomatically) resumeRestoredDraft();
+  }, [resumeAutomatically, storesVersion, resumeRestoredDraft]);
 
   return {
     /** Any edit since mount — drives the Draft chip. A merely-detected

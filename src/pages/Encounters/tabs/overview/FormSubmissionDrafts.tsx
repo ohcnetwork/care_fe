@@ -101,17 +101,19 @@ export function FormSubmissionDrafts({
     },
   });
 
-  const rows: DraftRow[] = localDrafts.map((draft) => ({
-    source: "local",
-    id: draft.key,
-    title: draft.title || t("questionnaire_one"),
-    savedAt: draft.savedAt,
-    formCount: draft.formCount,
-    url: `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}${
-      draft.scope.contextKey ? `?${draft.scope.contextKey}` : ""
-    }`,
-    draft,
-  }));
+  const rows: DraftRow[] = localDrafts.map((draft) => {
+    const params = new URLSearchParams(draft.scope.contextKey);
+    params.set("resume_local_draft", "true");
+    return {
+      source: "local",
+      id: draft.key,
+      title: draft.title || t("questionnaire_one"),
+      savedAt: draft.savedAt,
+      formCount: draft.formCount,
+      url: `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}?${params}`,
+      draft,
+    };
+  });
   for (const draft of formSubmissions?.results ?? []) {
     const questionnaire = serverQuestionnaire(draft);
     if (!questionnaire || draft.status !== "draft") continue;

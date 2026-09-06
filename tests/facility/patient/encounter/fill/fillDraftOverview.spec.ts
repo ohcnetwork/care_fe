@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { draftFormNoteText } from "tests/helper/fillDrafts";
 import {
   adminApiHeaders,
   apiBaseUrl,
@@ -295,13 +296,128 @@ test("local Continue preserves the saved prescription and discharge context and 
   expect(url.pathname).toBe(
     `${fixture.encounterUrl}/questionnaire/${questionnaire.id}`,
   );
+  expect(url.searchParams.get("resume_local_draft")).toBe("true");
+  url.searchParams.delete("resume_local_draft");
   expect(url.searchParams.toString()).toBe(fixture.contextKey);
   expect(url.searchParams.has("continue_draft")).toBe(false);
-  await page.getByRole("button", { name: "Resume", exact: true }).click();
   await expect(
     questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox"),
   ).toHaveValue(`Saved note for ${fixture.contextTitle}`);
+  await expect(
+    page.getByRole("button", { name: "Resume", exact: true }),
+  ).toHaveCount(0);
 });
+
+test("Continue restores an actual autosaved multi-form session and keeps subsequent edits", async ({
+  page,
+}) => {
+  const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+  const addedId = await getQuestionnaireIdBySlug("patient_feedback");
+  const draftKey = `care_qn_fill_draft--${userId}--encounter:${getEncounterId()}--${questionnaire.id}`;
+  const localRow = draftRow(page, "local", draftKey);
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.goto(`${encounterUrl}/questionnaire/${questionnaire.id}`);
+  const primaryNote = () =>
+    questionBlock(page, "Note on Bilateral Air Entry").getByRole("textbox");
+  const addedNote = () =>
+    questionBlock(page, "Any Suggestions for Improvement").getByRole("textbox");
+  await primaryNote().fill("Original primary note from real form filling");
+  await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await page.getByPlaceholder("Search Forms").fill("Feedback");
+  await page.getByRole("option", { name: /Feedback Form/ }).click();
+  await addedNote().fill("Original added form note from real form filling");
+  await expect
+    .poll(() => draftFormNoteText(page, questionnaire.id))
+    .toBe("Original primary note from real form filling");
+  await expect
+    .poll(() => draftFormNoteText(page, addedId))
+    .toBe("Original added form note from real form filling");
+
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.waitForURL(/\/updates$/);
+  await expect(localRow).toContainText("+1");
+  await localRow.getByRole("button", { name: /^Continue / }).click();
+  await expect(primaryNote()).toHaveValue(
+    "Original primary note from real form filling",
+  );
+  await expect(addedNote()).toHaveValue(
+    "Original added form note from real form filling",
+  );
+  await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await expect(
+    page.getByRole("button", { name: "Resume", exact: true }),
+  ).toHaveCount(0);
+
+  await primaryNote().fill("Edited primary note after Continue");
+  await addedNote().fill("Edited added form note after Continue");
+  // Close before another debounce; the live edit must be flushed on exit.
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.waitForURL(/\/updates$/);
+  await localRow.getByRole("button", { name: /^Continue / }).click();
+  await expect(primaryNote()).toHaveValue("Edited primary note after Continue");
+  await expect(addedNote()).toHaveValue(
+    "Edited added form note after Continue",
+  );
+  await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await expect(
+    page.getByRole("button", { name: "Resume", exact: true }),
+  ).toHaveCount(0);
+});
+
+test("Continue restores an actual structured encounter edit over its server prefill", async ({
+  page,
+}) => {
+  const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+  const draftKey = `care_qn_fill_draft--${userId}--encounter:${getEncounterId()}--encounter`;
+  const identifier = "LOCAL-DRAFT-OVERVIEW-RESUME";
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.goto(`${encounterUrl}/questionnaire/encounter`);
+  await page.getByPlaceholder("Ip/op/obs/emr number").fill(identifier);
+  await expect
+    .poll(() => page.evaluate((key) => localStorage.getItem(key), draftKey))
+    .toContain(identifier);
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.waitForURL(/\/updates$/);
+  await draftRow(page, "local", draftKey)
+    .getByRole("button", { name: /^Continue / })
+    .click();
+  await expect(page.getByPlaceholder("Ip/op/obs/emr number")).toHaveValue(
+    identifier,
+  );
+  await expect(
+    page.getByRole("button", { name: "Resume", exact: true }),
+  ).toHaveCount(0);
+});
+
+for (const state of ["missing", "malformed"] as const) {
+  test(`an explicitly requested ${state} local draft reports failure instead of opening a blank form`, async ({
+    page,
+  }) => {
+    const encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+    if (state === "malformed") {
+      await page.addInitScript(
+        (key) =>
+          localStorage.setItem(
+            key,
+            JSON.stringify({ savedAt: new Date().toISOString(), forms: null }),
+          ),
+        `care_qn_fill_draft--${userId}--encounter:${getEncounterId()}--${questionnaire.id}`,
+      );
+    }
+    await page.goto(
+      `${encounterUrl}/questionnaire/${questionnaire.id}?resume_local_draft=true`,
+    );
+    await expect(
+      page.getByText("Couldn't load this draft. Go back and try again."),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Save Changes" }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("textbox", { name: "Note on Bilateral Air Entry" }),
+    ).toHaveCount(0);
+  });
+}
 
 test("discard confirms and removes only the selected local or server draft", async ({
   page,

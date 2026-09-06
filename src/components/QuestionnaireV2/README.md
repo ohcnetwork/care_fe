@@ -86,7 +86,8 @@ questions, that is the bug.
   entries into metadata summaries without importing the structured registry;
   `useLocalFillDrafts` keeps them current through cache notifications,
   cross-tab storage events and expiry timers. Local Continue preserves the
-  saved query context and opens the usual Resume prompt. Discard targets
+  saved query context and restores the answers directly; opening the form
+  normally still offers the recovery prompt. Discard targets
   either that exact local scope or the selected server record.
   Encounter-only is a deliberate narrowing for server drafts: the overview
   is their sole listing and filters `form_submission` by `encounter`, so a

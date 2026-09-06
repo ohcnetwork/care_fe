@@ -101,24 +101,26 @@ function QuestionnaireUpdatedBanner({
 }
 
 /**
- * What a RESUMED SERVER draft lost to questionnaire changes. The local-draft
- * equivalent lives in the restore bar, which can name the drops before the
- * clinician accepts; a server draft is seeded at creation with no such gate,
- * so the same facts arrive as a dismissible notice instead of silence.
+ * What a directly resumed draft could not restore. Ordinary local recovery
+ * shows these details in the restore prompt; direct resume still needs to
+ * account for omitted answers without asking the clinician to resume twice.
  */
-function ServerDraftDropNotice({
+function DraftDropNotice({
   dropped,
+  structuredSkipped = false,
   onDismiss,
 }: {
   dropped: DroppedDraftAnswer[];
+  structuredSkipped?: boolean;
   onDismiss: () => void;
 }) {
   const { t } = useTranslation();
   return (
     <div className="mx-auto mb-4 flex w-full max-w-3xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
       <History aria-hidden className="mt-0.5 size-4 shrink-0" />
-      <div className="min-w-0 flex-1">
-        <DroppedAnswersList dropped={dropped} />
+      <div className="min-w-0 flex-1 space-y-1">
+        {structuredSkipped && <p>{t("fill_draft_structured_skipped")}</p>}
+        {dropped.length > 0 && <DroppedAnswersList dropped={dropped} />}
       </div>
       <Button
         type="button"
@@ -142,6 +144,8 @@ interface FillPageBodyProps {
   pickerSubjectType: SubjectType;
   scope: FillDraftScope | undefined;
   localDraft: LoadedFillDraft | undefined;
+  /** The overview's Continue action explicitly selected the local draft. */
+  resumeLocalDraft?: boolean;
   /** Resumed server draft, seeded into the primary form at creation. */
   serverDraftResponses?: Record<string, QuestionnaireResponse>;
   /** Answers that resumed draft could not carry onto the current
@@ -165,6 +169,7 @@ export function FillPageBody({
   pickerSubjectType,
   scope,
   localDraft,
+  resumeLocalDraft = false,
   serverDraftResponses,
   serverDraftDropped,
   continueDraftId,
@@ -252,6 +257,7 @@ export function FillPageBody({
     getStore,
     storesVersion,
     restoredDraft: localDraft,
+    resumeAutomatically: resumeLocalDraft,
     retainedSnapshots,
     onResumeAddedForms,
   });
@@ -300,6 +306,11 @@ export function FillPageBody({
   // success. Freeze editing until either request settles so later edits
   // cannot be discarded with a payload that did not contain them.
   const frozen = isPending || serverDraftSave.isSavingDraft;
+
+  const draftDropped =
+    serverDraftDropped ?? (resumeLocalDraft ? localDraft?.dropped : undefined);
+  const draftStructuredSkipped =
+    resumeLocalDraft && localDraft?.structuredSkipped;
 
   useNavigationPrompt(
     autosave.dirty && !import.meta.env.DEV,
@@ -390,15 +401,15 @@ export function FillPageBody({
                       frozen={frozen}
                     />
                   )}
-                  {serverDraftDropped &&
-                    serverDraftDropped.length > 0 &&
+                  {(!!draftDropped?.length || draftStructuredSkipped) &&
                     !dropNoticeDismissed && (
-                      <ServerDraftDropNotice
-                        dropped={serverDraftDropped}
+                      <DraftDropNotice
+                        dropped={draftDropped ?? []}
+                        structuredSkipped={draftStructuredSkipped}
                         onDismiss={() => setDropNoticeDismissed(true)}
                       />
                     )}
-                  {autosave.restoredDraft && (
+                  {autosave.restoredDraft && !resumeLocalDraft && (
                     <DraftRestoreBar
                       draft={autosave.restoredDraft}
                       onResume={autosave.resumeRestoredDraft}

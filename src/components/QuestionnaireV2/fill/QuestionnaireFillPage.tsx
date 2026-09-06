@@ -64,14 +64,21 @@ export function QuestionnaireFillPage({
   pickerSubjectType = subject.type,
 }: FillPageProps) {
   const { t } = useTranslation();
-  const [{ continue_draft: continueDraftParam, prescription, toDischarge }] =
-    useQueryParams();
+  const [
+    {
+      continue_draft: continueDraftParam,
+      resume_local_draft: resumeLocalDraftParam,
+      prescription,
+      toDischarge,
+    },
+  ] = useQueryParams();
   const user = useAuthUser();
 
   const patientBound = isPatientBound(subject) ? subject : undefined;
   // Server drafts are patient/encounter records — a resource subject can
   // only have local drafts, so the query param is ignored there.
   const continueDraftId = patientBound ? continueDraftParam : undefined;
+  const resumeLocalDraft = resumeLocalDraftParam === "true" && !continueDraftId;
 
   useEffect(() => {
     sweepExpiredFillDrafts();
@@ -172,7 +179,7 @@ export function QuestionnaireFillPage({
         ? loadFillDraft(scope, questionnaire.questions)
         : undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [scopeKey, continueDraftId],
+    [scopeKey, continueDraftId, resumeLocalDraft],
   );
 
   const exitTarget = exitTargetOf(subject);
@@ -292,6 +299,14 @@ export function QuestionnaireFillPage({
     );
   }
 
+  // A selected draft may have expired or been removed in another tab.
+  // Do not present an empty form as though its answers were restored.
+  if (resumeLocalDraft && !localDraft) {
+    return (
+      <FillErrorPage message={t("draft_load_failed")} exitTarget={exitTarget} />
+    );
+  }
+
   // The route's patientId and encounterId disagree on whose encounter this
   // is (a hand-edited or stale URL) — mounting would show patient B's
   // identity banner and clinical history beside patient A's structured
@@ -320,7 +335,7 @@ export function QuestionnaireFillPage({
     // under the NEW draft scope, and the next autosave would file one
     // questionnaire's answers under the other's draft key.
     <FillPageBody
-      key={`${scopeKey}--${continueDraftId ?? ""}`}
+      key={`${scopeKey}--${continueDraftId ?? ""}--${resumeLocalDraft}`}
       questionnaire={questionnaire}
       patient={patient}
       encounter={encounter}
@@ -328,6 +343,7 @@ export function QuestionnaireFillPage({
       pickerSubjectType={pickerSubjectType}
       scope={scope}
       localDraft={localDraft}
+      resumeLocalDraft={resumeLocalDraft}
       serverDraftResponses={
         serverDraftState && !serverDraftState.mismatch
           ? serverDraftState.responses
