@@ -1,4 +1,4 @@
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
@@ -21,6 +21,7 @@ import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfi
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 
+import { FacilityResponses } from "./FacilityResponses";
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
 import ActivityDefinitionView from "./activityDefinition/ActivityDefinitionView";
@@ -56,7 +57,22 @@ interface SettingsLayoutProps {
 }
 
 const getRoutes = (facilityId: string) => ({
+  "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
+  "/responses": () => <FacilityResponses facilityId={facilityId} />,
+  "/questionnaire": () => (
+    <QuestionnaireFillPage subject={{ type: "facility", facilityId }} />
+  ),
+  "/questionnaire/:questionnaireId": ({
+    questionnaireId,
+  }: {
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "facility", facilityId }}
+      questionnaireId={questionnaireId}
+    />
+  ),
   "/departments": () => <FacilityOrganizationList />,
   "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
     <FacilityOrganizationList organizationId={id} currentTab={tab} />
@@ -86,6 +102,9 @@ const getRoutes = (facilityId: string) => ({
       subject={{ type: "device", facilityId, deviceId: id }}
       questionnaireId={questionnaireId}
     />
+  ),
+  "/devices/:id/responses": ({ id }: { id: string }) => (
+    <DeviceDetail facilityId={facilityId} deviceId={id} tab="responses" />
   ),
   "/devices/:id": ({ id }: { id: string }) => (
     <DeviceDetail facilityId={facilityId} deviceId={id} />
@@ -362,5 +381,5 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  return <div className="container mx-auto p-4">{routeResult}</div>;
+  return <div className="min-w-0 p-4">{routeResult}</div>;
 }

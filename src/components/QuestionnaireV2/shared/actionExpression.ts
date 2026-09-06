@@ -39,17 +39,6 @@ export interface ParsedCondition {
   behavior: ActionRuleBehavior;
 }
 
-export const ACTION_RULE_OPERATORS: readonly ActionRuleOperator[] = [
-  "==",
-  "!=",
-  ">",
-  ">=",
-  "<",
-  "<=",
-  "in",
-  "not in",
-];
-
 /** The literal the backend's `Action.condition` needs to fire on every
  *  submission — an EMPTY condition never fires. */
 export const ALWAYS_CONDITION = "True";

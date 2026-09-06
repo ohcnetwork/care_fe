@@ -35,7 +35,7 @@ import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillSubject } from "./subject";
-import { rendererSubjectOf } from "./subject";
+import { isPatientBound, rendererSubjectOf } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
@@ -449,6 +449,9 @@ export function FillPageBody({
                     <div className="mx-auto flex w-full max-w-3xl justify-center">
                       <QuestionnaireSearch
                         subjectType={pickerSubjectType}
+                        facilityId={
+                          isPatientBound(subject) ? undefined : facilityId
+                        }
                         onSelect={addQuestionnaireFromPicker}
                         // The default trigger is a `role="combobox"` button,
                         // and combobox takes no name from its contents — it

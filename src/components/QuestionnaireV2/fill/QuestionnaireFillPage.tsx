@@ -201,6 +201,7 @@ export function QuestionnaireFillPage({
               from aria-label. */}
           <QuestionnaireSearch
             subjectType={pickerSubjectType}
+            facilityId={patientBound ? undefined : subject.facilityId}
             trigger={
               <Button
                 type="button"

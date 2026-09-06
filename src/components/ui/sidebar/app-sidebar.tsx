@@ -1,7 +1,9 @@
 import { DashboardIcon } from "@radix-ui/react-icons";
-import { Link, useLocationChange } from "raviger";
+import { Link, useLocationChange, usePath } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -20,6 +22,8 @@ import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-swit
 import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
 import { LocationSwitcher } from "@/components/ui/sidebar/facility/location/location-switcher";
 import { ServiceNav } from "@/components/ui/sidebar/facility/service/service-nav";
+import { FacilitySettingsNav } from "@/components/ui/sidebar/facility/settings/facility-settings-nav";
+import { FacilitySettingsSidebarHeader } from "@/components/ui/sidebar/facility/settings/facility-settings-sidebar-header";
 import {
   FacilityNavUser,
   PatientNavUser,
@@ -36,6 +40,7 @@ import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
+import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
@@ -68,10 +73,17 @@ export function AppSidebar({
     "/facility/:facilityId/services/:serviceId",
   );
 
+  const path = usePath() ?? "";
+  const facilitySettingsSidebar =
+    !!facilityId &&
+    isFacilitySettingsPath(path) &&
+    sidebarFor === SidebarFor.FACILITY;
+
   const facilitySidebar =
     !!facilityId &&
     !locationId &&
     !serviceId &&
+    !facilitySettingsSidebar &&
     sidebarFor === SidebarFor.FACILITY;
   const facilityLocationSidebar =
     !!facilityId &&
@@ -83,6 +95,8 @@ export function AppSidebar({
     !!serviceId &&
     !locationId &&
     sidebarFor === SidebarFor.FACILITY;
+
+  const innerPageSidebar = facilityLocationSidebar || facilitySettingsSidebar;
 
   const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
@@ -97,14 +111,18 @@ export function AppSidebar({
   }, [user?.organizations, organizationId]);
 
   React.useEffect(() => {
-    if (!user?.facilities || !facilityId || !facilitySidebar) {
+    if (
+      !user?.facilities ||
+      !facilityId ||
+      !(facilitySidebar || facilitySettingsSidebar)
+    ) {
       setSelectedFacility(null);
       return;
     }
 
     const facility = user.facilities.find((f) => f.id === facilityId) || null;
     setSelectedFacility(facility);
-  }, [facilityId, user?.facilities, facilitySidebar]);
+  }, [facilityId, user?.facilities, facilitySidebar, facilitySettingsSidebar]);
 
   const hasFacilities = user?.facilities && user.facilities.length > 0;
   const hasOrganizations = user?.organizations && user.organizations.length > 0;
@@ -120,9 +138,20 @@ export function AppSidebar({
       collapsible="icon"
       variant="sidebar"
       {...props}
-      className="group-data-[side=left]:border-r-0"
+      className={cn(
+        innerPageSidebar
+          ? "border-neutral-200 [&_[data-sidebar=sidebar]]:bg-neutral-100 [&_[data-sidebar=sidebar]]:text-neutral-950"
+          : "group-data-[side=left]:border-r-0",
+        props.className,
+      )}
     >
-      <SidebarHeader>
+      <SidebarHeader
+        className={
+          innerPageSidebar
+            ? "border-b border-neutral-200 bg-neutral-100 text-neutral-950"
+            : undefined
+        }
+      >
         {responsibilityId && (
           <ResponsibilitySwitcher selectedResponsibilityId={responsibilityId} />
         )}
@@ -132,7 +161,8 @@ export function AppSidebar({
             selectedOrganization={selectedOrganization}
           />
         )}
-        {facilityId && selectedFacility && hasFacilities && (
+        {facilitySettingsSidebar && <FacilitySettingsSidebarHeader />}
+        {facilitySidebar && selectedFacility && hasFacilities && (
           <FacilitySwitcher
             facilities={user?.facilities || []}
             selectedFacility={selectedFacility}
@@ -143,6 +173,7 @@ export function AppSidebar({
         {!locationId &&
           !serviceId &&
           !selectedFacility &&
+          !facilitySettingsSidebar &&
           !selectedOrganization &&
           !responsibilityId && (
             <SidebarMenu>
@@ -168,8 +199,13 @@ export function AppSidebar({
           )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent
+        className={
+          innerPageSidebar ? "gap-0 bg-neutral-100 text-neutral-950" : undefined
+        }
+      >
         {facilityLocationSidebar && <LocationNav />}
+        {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
         {facilitySidebar &&
           !facilityLocationSidebar &&
@@ -186,16 +222,25 @@ export function AppSidebar({
         {(facilitySidebar ||
           facilityLocationSidebar ||
           facilityServiceSidebar ||
+          facilitySettingsSidebar ||
           adminSidebar) && <PinPageDialog />}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter
+        className={
+          innerPageSidebar
+            ? "border-t border-neutral-200 bg-neutral-100 text-neutral-950"
+            : undefined
+        }
+      >
         {patientSidebar ? (
           <PatientNavUser />
         ) : (
           <FacilityNavUser
             selectedFacilityId={
-              facilitySidebar ? selectedFacility?.id : undefined
+              facilitySidebar || facilitySettingsSidebar
+                ? selectedFacility?.id
+                : undefined
             }
           />
         )}

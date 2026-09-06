@@ -28,9 +28,6 @@ function generateFacilityLinks(
     canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canReadEncounter: boolean;
-    canListTokenCategories: boolean;
-    canReadPatientIdentifierConfig: boolean;
-    canListTemplate: boolean;
   },
   pluginLinks: NavigationLink[],
   pluginBillingLinks: NavigationLink[],
@@ -131,83 +128,6 @@ function generateFacilityLinks(
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
       icon: <CareIcon icon="l-setting" />,
-      children: [
-        {
-          name: t("general"),
-          url: `${baseUrl}/settings/general`,
-        },
-        {
-          name: t("departments"),
-          url: `${baseUrl}/settings/departments`,
-        },
-        {
-          name: t("questionnaire_other"),
-          url: `${baseUrl}/settings/questionnaires`,
-        },
-        {
-          name: t("valuesets"),
-          url: `${baseUrl}/settings/valuesets`,
-        },
-        {
-          name: t("locations"),
-          url: `${baseUrl}/settings/locations`,
-        },
-        {
-          name: t("devices"),
-          url: `${baseUrl}/settings/devices`,
-        },
-        {
-          name: t("specimen_definitions"),
-          url: `${baseUrl}/settings/specimen_definitions`,
-        },
-        {
-          name: t("observation_definitions"),
-          url: `${baseUrl}/settings/observation_definitions`,
-        },
-        {
-          name: t("activity_definitions"),
-          url: `${baseUrl}/settings/activity_definitions`,
-        },
-        {
-          name: t("billing"),
-          url: `${baseUrl}/settings/billing`,
-        },
-        {
-          name: t("charge_item_definitions"),
-          url: `${baseUrl}/settings/charge_item_definitions`,
-        },
-        {
-          name: t("healthcare_services"),
-          url: `${baseUrl}/settings/healthcare_services`,
-        },
-        {
-          name: t("product_knowledge"),
-          url: `${baseUrl}/settings/product_knowledge`,
-        },
-        {
-          name: t("product"),
-          url: `${baseUrl}/settings/product`,
-        },
-        {
-          name: t("token_category"),
-          url: `${baseUrl}/settings/token_category`,
-          visibility: permissions.canListTokenCategories,
-        },
-        {
-          name: t("patient_identifier_config"),
-          url: `${baseUrl}/settings/patient_identifier_config`,
-          visibility: permissions.canReadPatientIdentifierConfig,
-        },
-        {
-          name: t("tag_config"),
-          url: `${baseUrl}/settings/tag_config`,
-        },
-        {
-          name: t("templates"),
-          url: `${baseUrl}/template`,
-          visibility: permissions.canListTemplate,
-        },
-      ],
     },
   ];
 
@@ -240,9 +160,6 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canReadEncounter,
-    canListTokenCategories,
-    canReadPatientIdentifierConfig,
-    canListTemplate,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
@@ -250,9 +167,6 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canReadEncounter,
-    canListTokenCategories,
-    canReadPatientIdentifierConfig,
-    canListTemplate,
   };
   return (
     <NavMain

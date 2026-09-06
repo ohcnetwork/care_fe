@@ -1,5 +1,8 @@
 import careConfig from "@careConfig";
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { CSSProperties } from "react";
+
+import { cn } from "@/lib/utils";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -29,6 +32,9 @@ import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDial
 import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
+import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
+import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
+import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { LicensesPage } from "@/pages/Licenses/Licenses";
 import UserDashboard from "@/pages/UserDashboard";
 
@@ -57,6 +63,7 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/questionnaire(\/[^/]+)?$/,
   /^\/facility\/[^/]+\/settings\/devices\/[^/]+\/questionnaire(\/[^/]+)?$/,
+  /^\/facility\/[^/]+\/settings\/questionnaire(\/[^/]+)?$/,
   // Questionnaire studio (fullscreen builder) routes
   /^\/facility\/[^/]+\/settings\/questionnaires\/[^/]+\/edit$/,
   /^\/admin\/questionnaires\/[^/]+\/edit$/,
@@ -143,9 +150,27 @@ export default function AppRouter() {
     );
   const { commandDialogOpen, setCommandDialogOpen } = useShortcuts();
   const sidebarOpen = useSidebarState();
+  const isLocationWorkspace =
+    shouldShowSidebar &&
+    /^\/facility\/[^/]+\/locations\/[^/]+/.test(currentPath);
+  const isSettingsWorkspace =
+    shouldShowSidebar && isFacilitySettingsPath(currentPath);
+  const isInnerWorkspace = isLocationWorkspace || isSettingsWorkspace;
+  const isLocationFormPage =
+    isLocationWorkspace && /\/(overview|responses|forms)\/?$/.test(currentPath);
 
   return (
-    <SidebarProvider defaultOpen={sidebarOpen}>
+    <SidebarProvider
+      defaultOpen={sidebarOpen}
+      className={
+        isInnerWorkspace ? "bg-neutral-100 text-neutral-950" : undefined
+      }
+      style={
+        isInnerWorkspace
+          ? ({ "--sidebar-width": "14rem" } as CSSProperties)
+          : undefined
+      }
+    >
       <PermissionProvider
         userPermissions={user?.permissions || []}
         isSuperAdmin={user?.is_superuser || false}
@@ -155,7 +180,12 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
-          className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
+          className={cn(
+            "flex min-w-0 max-w-full flex-1 flex-col focus:outline-hidden",
+            isInnerWorkspace
+              ? "min-h-svh bg-white text-neutral-950"
+              : "min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50",
+          )}
         >
           <Button onClick={() => setCommandDialogOpen(true)} className="hidden">
             <ShortcutBadge actionId="show-shortcuts" />
@@ -166,19 +196,38 @@ export default function AppRouter() {
             onOpenChange={setCommandDialogOpen}
           />
           <BrowserWarning />
-          <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
-            <div className="flex items-center">
-              {shouldShowSidebar && <SidebarTrigger />}
+          {isLocationWorkspace ? (
+            <LocationPageHeader />
+          ) : isSettingsWorkspace ? (
+            <FacilitySettingsPageHeader />
+          ) : (
+            <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
+              <div className="flex items-center">
+                {shouldShowSidebar && <SidebarTrigger />}
+              </div>
+              <a className="flex items-center w-full h-full px-4 md:hidden">
+                <img
+                  className="w-auto h-8"
+                  src={careConfig.mainLogo?.dark}
+                  alt="care logo"
+                />
+              </a>
             </div>
-            <a className="flex items-center w-full h-full px-4 md:hidden">
-              <img
-                className="w-auto h-8"
-                src={careConfig.mainLogo?.dark}
-                alt="care logo"
-              />
-            </a>
-          </div>
-          <div className="p-3 mt-4" data-cui-page>
+          )}
+          <div
+            className={
+              isLocationWorkspace
+                ? isLocationFormPage
+                  ? "min-w-0"
+                  : "min-w-0 p-4"
+                : isSettingsWorkspace
+                  ? /\/settings(\/|$)/.test(currentPath)
+                    ? "min-w-0"
+                    : "min-w-0 p-4"
+                  : "p-3 mt-4"
+            }
+            data-cui-page
+          >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

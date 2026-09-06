@@ -22,7 +22,6 @@ import { serviceRequestDefinition } from "./definitions/serviceRequest";
 import { symptomDefinition } from "./definitions/symptom";
 import { timeOfDeathDefinition } from "./definitions/timeOfDeath";
 import type {
-  DataTypeFor,
   StructuredBatchEntry,
   StructuredContextKey,
   StructuredInputProps,
@@ -59,21 +58,6 @@ export function structuredDefinitionFor<K extends StructuredQuestionType>(
   type: K,
 ): StructuredTypeDefinition<K> {
   return STRUCTURED_TYPE_REGISTRY[type];
-}
-
-/**
- * The recorded entries for a structured question — `values[0].value` is
- * the array that question's own component wrote. The cast is the module's
- * single sanctioned narrowing: the registry's key-correlation guarantees
- * the component that produced the value matches `type`.
- */
-export function structuredDataOf<K extends StructuredQuestionType>(
-  type: K,
-  response: QuestionnaireResponse | undefined,
-): DataTypeFor<K>[] {
-  if (response?.structured_type !== type) return [];
-  const raw = response.values?.[0]?.value;
-  return Array.isArray(raw) ? (raw as DataTypeFor<K>[]) : [];
 }
 
 /**

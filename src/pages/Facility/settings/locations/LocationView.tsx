@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, Hash } from "lucide-react";
+import { Hash } from "lucide-react";
 import { Link, navigate } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -252,18 +252,6 @@ export default function LocationView({
                       {t("add_location")}
                     </Button>
                   )}
-                <Button
-                  variant="outline"
-                  className="w-full md:w-auto"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/locations/${id}/questionnaire`,
-                    )
-                  }
-                >
-                  <ClipboardList className="size-4 mr-2" />
-                  {t("fill_questionnaire")}
-                </Button>
                 {!isLocationLoading && location && (
                   <TagAssignmentSheet
                     entityType="location"

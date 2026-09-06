@@ -83,10 +83,10 @@ export function exitTargetOf(subject: FillSubject): string {
         ? `/facility/${subject.facilityId}/patient/${subject.patientId}/updates`
         : `/patient/${subject.patientId}/updates`;
     case "location":
-      return `/facility/${subject.facilityId}/settings/locations/${subject.locationId}`;
+      return `/facility/${subject.facilityId}/locations/${subject.locationId}/responses`;
     case "device":
-      return `/facility/${subject.facilityId}/settings/devices/${subject.deviceId}`;
+      return `/facility/${subject.facilityId}/settings/devices/${subject.deviceId}/responses`;
     case "facility":
-      return `/facility/${subject.facilityId}`;
+      return `/facility/${subject.facilityId}/settings/responses`;
   }
 }
