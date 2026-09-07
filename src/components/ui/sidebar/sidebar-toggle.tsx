@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { TooltipComponent } from "@/components/ui/tooltip";
+import careConfig from "@careConfig";
 
 export function AppSidebarToggle({
   className,
@@ -26,7 +27,7 @@ export function AppSidebarToggle({
     handleToggleMouseEnter,
     scheduleClose,
   } = useAppSidebar();
-  const showLogoMark = isMobile ? !openMobile : !pinned;
+  const showLogo = isMobile ? !openMobile : !pinned;
 
   const button = (
     <Button
@@ -38,6 +39,7 @@ export function AppSidebarToggle({
       aria-expanded={isMobile ? openMobile : pinned || isOverlay}
       className={cn(
         "relative -ml-1 size-7 shrink-0 text-neutral-700 after:absolute after:-inset-3 after:content-[''] hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
+        showLogo && "h-9 w-auto px-1",
         className,
       )}
       onClick={(event) => {
@@ -60,13 +62,13 @@ export function AppSidebarToggle({
       }}
       {...props}
     >
-      {showLogoMark ? (
+      {showLogo ? (
         <img
-          src="/images/care_logo_mark.svg"
+          src={careConfig.mainLogo?.dark ?? "/images/care_logo.svg"}
           alt=""
           aria-hidden="true"
           draggable={false}
-          className="size-6 shrink-0 object-contain"
+          className="h-9 w-auto max-w-28 shrink-0 object-contain"
         />
       ) : (
         <PanelLeft className="size-4" aria-hidden="true" />
