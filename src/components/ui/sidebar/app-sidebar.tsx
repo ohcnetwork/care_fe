@@ -96,13 +96,14 @@ export function AppSidebar({
   const { isMobile, setOpenMobile } = useSidebar();
   const {
     pinned,
+    isOverlay,
     innerWorkspace,
     cancelClose,
     scheduleClose,
     handleSidebarFocus,
     handleSidebarBlur,
   } = useAppSidebar();
-  const showHeader = pinned || isMobile;
+  const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
 

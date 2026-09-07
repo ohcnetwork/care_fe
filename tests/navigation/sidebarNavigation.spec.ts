@@ -314,6 +314,130 @@ test.describe("Shared workspace navigation", () => {
     );
   });
 
+  for (const workspace of [
+    {
+      name: "service",
+      endpoint: "healthcare_service",
+      route: "services",
+      page: "locations",
+      query: "limit=1",
+    },
+    {
+      name: "location",
+      endpoint: "location",
+      route: "locations",
+      page: "overview",
+      query: "mode=kind&mine=true&limit=1&ordering=sort_index",
+    },
+  ]) {
+    test(`${workspace.name} sidebar preview retains its context picker and Home navigation`, async ({
+      page,
+      request,
+    }) => {
+      const apiPath = `/api/v1${facilityPath}/${workspace.endpoint}/`;
+      const response = await request.get(
+        `${apiBaseUrl()}${apiPath}?${workspace.query}`,
+        { headers: adminApiHeaders() },
+      );
+      expect(response.ok()).toBe(true);
+      const { results } = (await response.json()) as {
+        results: { id: string; name: string }[];
+      };
+      expect(
+        results.length,
+        `An existing ${workspace.name} fixture is required`,
+      ).toBeGreaterThan(0);
+      const fixture = results[0];
+      const workspacePath = `${facilityPath}/${workspace.route}/${fixture.id}/${workspace.page}`;
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(workspacePath);
+      const navigation = sidebar(page);
+      const header = navigation.locator('[data-sidebar="header"]');
+      const picker = header.getByRole("button", {
+        name: fixture.name,
+        exact: true,
+      });
+      const home = header.getByRole("button", { name: "Home", exact: true });
+      const toggle = sidebarToggle(page);
+      const state = sidebarState(page);
+
+      await test.step("hover restores an accessible context header without pinning", async () => {
+        await expect(picker).toBeVisible();
+        await toggle.click();
+        await page.mouse.move(900, 700);
+        await expect(navigation).not.toBeVisible();
+        await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+        const closedLeft = await mainLeft(page);
+        await toggle.hover();
+        await expect(navigation).toBeInViewport({ ratio: 1 });
+        await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
+        await expect(header).not.toHaveAttribute("inert", "");
+        await expect(header).not.toHaveAttribute("aria-hidden", "true");
+        await expect(header).toBeInViewport({ ratio: 1 });
+        await expect(home).toBeVisible();
+        await expect(picker).toBeVisible();
+        await expect(picker).toHaveAttribute("aria-haspopup", "dialog");
+        await expect
+          .poll(async () => Math.abs((await mainLeft(page)) - closedLeft))
+          .toBeLessThan(1);
+        await home.hover();
+        await test.info().attach(`${workspace.name}-sidebar-preview`, {
+          body: await page.screenshot({
+            path: test
+              .info()
+              .outputPath(`${workspace.name}-sidebar-preview.png`),
+            animations: "disabled",
+          }),
+          contentType: "image/png",
+        });
+      });
+
+      await test.step("the picker can search in its dialog while the preview stays open", async () => {
+        await picker.click();
+        const dialog = page.getByRole("dialog");
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByRole("heading")).toContainText(fixture.name);
+        await dialog.hover();
+        const searchResponse = page.waitForResponse((result) => {
+          const url = new URL(result.url());
+          return (
+            url.pathname === apiPath &&
+            url.searchParams.get("name") === fixture.name
+          );
+        });
+        await dialog
+          .getByPlaceholder("Search", { exact: true })
+          .fill(fixture.name);
+        expect((await searchResponse).ok()).toBe(true);
+        await expect(
+          dialog.getByRole("option").filter({ hasText: fixture.name }).first(),
+        ).toBeVisible();
+        await expect(navigation).toBeInViewport({ ratio: 1 });
+        await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
+        await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+        await dialog
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(dialog).not.toBeVisible();
+        // Closing a dialog leaves the pointer outside the preview; reopen it
+        // through the normal hover target before continuing navigation.
+        await toggle.hover();
+        await expect(navigation).toBeInViewport({ ratio: 1 });
+        await home.hover();
+        await expect(home).toBeVisible();
+        await expect(picker).toBeVisible();
+        await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+      });
+
+      await test.step("Home returns to the facility overview without pinning the sidebar", async () => {
+        await home.click();
+        await expect(page).toHaveURL(`${facilityPath}/overview`);
+        await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+        await expect(navigation).not.toBeVisible();
+      });
+    });
+  }
+
   test("admin navigation keeps its groups and active links in the full sidebar preview", async ({
     page,
   }) => {

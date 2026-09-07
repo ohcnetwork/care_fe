@@ -182,6 +182,12 @@ test.describe("Facility settings navigation", () => {
       await expect(
         sidebar.getByRole("link", { name: "General", exact: true }),
       ).toBeVisible();
+      await expect(
+        sidebar.getByRole("link", { name: "Back to facility", exact: true }),
+      ).toBeVisible();
+      await expect(
+        sidebar.locator('[data-sidebar="header"]'),
+      ).not.toHaveAttribute("inert", "");
       const billing = sidebar.getByRole("button", {
         name: "Billing",
         exact: true,
