@@ -50,6 +50,7 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface CategoryBreadcrumb {
   slug: string;
@@ -467,7 +468,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         value={searchQuery}
         onValueChange={setSearchQuery}
         className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
-        autoFocus
+        autoFocus={!isIOSDevice}
       />
     </div>
   );
@@ -890,7 +891,11 @@ export function ResourceDefinitionCategoryPicker<T>({
                 </div>
 
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <TabsContent value="search" className="h-full mt-0" autoFocus>
+                  <TabsContent
+                    value="search"
+                    className="h-full mt-0"
+                    autoFocus={!isIOSDevice}
+                  >
                     {renderMainContent()}
                   </TabsContent>
                   <TabsContent value="recent" className="h-full mt-0">

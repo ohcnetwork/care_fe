@@ -4741,6 +4741,7 @@
   "purpose": "Purpose",
   "put_dispense_on_hold": "Put this dispense on hold?",
   "put_in_preparation": "Put in Preparation",
+  "put_in_preparation_disabled_balanced_invoice": "Cannot resume preparation once an invoice has been fully paid.",
   "put_on_hold": "Put on hold",
   "put_on_hold_confirmation": "This will pause the dispense order. In-progress items will be marked as on hold. You can resume from the prescriptions queue.",
   "put_on_hold_disabled_balanced_invoice": "Cannot put on hold once an invoice has been fully paid.",
