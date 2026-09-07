@@ -33,4 +33,60 @@ test.describe("Invoice Creation", () => {
       page.getByRole("button", { name: /create invoice/i }),
     ).toBeDisabled();
   });
+
+  test("should render the account invoices tab", async ({ page }) => {
+    await page.goto(
+      `/facility/${facilityId}/billing/account/${accountId}/invoices`,
+    );
+
+    // The invoices tab owns the invoice search box.
+    await expect(
+      page.getByRole("textbox", { name: /search invoices/i }),
+    ).toBeVisible();
+  });
+
+  test("should render the account charge items tab", async ({ page }) => {
+    await page.goto(
+      `/facility/${facilityId}/billing/account/${accountId}/charge_items`,
+    );
+
+    // "Print charge items" is always rendered by the charge items tab.
+    await expect(
+      page.getByRole("button", { name: /print charge items/i }),
+    ).toBeVisible();
+  });
+
+  test("should render the account payments tab", async ({ page }) => {
+    await page.goto(
+      `/facility/${facilityId}/billing/account/${accountId}/payments`,
+    );
+
+    // Genuine either/or: the payments tab shows its empty state when there are
+    // no reconciliations, or the payments table when there are.
+    await expect(
+      page
+        .getByText(/no payments/i)
+        .or(page.getByRole("table"))
+        .first(),
+    ).toBeVisible();
+  });
+
+  test("should render the facility invoices list", async ({ page }) => {
+    await page.goto(`/facility/${facilityId}/billing/invoices`);
+
+    await expect(
+      page.getByRole("heading", { name: /invoice management/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: /search invoices/i }),
+    ).toBeVisible();
+  });
+
+  test("should render the facility payments list", async ({ page }) => {
+    await page.goto(`/facility/${facilityId}/billing/payments`);
+
+    await expect(
+      page.getByRole("heading", { name: /payment reconciliations/i }),
+    ).toBeVisible();
+  });
 });
