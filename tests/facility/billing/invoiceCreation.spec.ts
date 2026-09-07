@@ -25,9 +25,17 @@ test.describe("Invoice Creation", () => {
     // The create form opens a fresh draft.
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
 
-    // The account has no billable charge items, so the form shows its empty
-    // state and keeps the submit button disabled — the real guard that stops
-    // empty invoices from being created.
+    // Wait for the charge-items fetch to settle before asserting the guard:
+    // while loading, the form renders a skeleton, so the empty state and the
+    // disabled button below would otherwise pass on the first paint. The table
+    // column headers only render once the query resolves.
+    await expect(
+      page.getByRole("columnheader", { name: /actions/i }),
+    ).toBeVisible();
+
+    // With the fetch settled and no billable charge items, the form shows its
+    // empty state and keeps the submit button disabled — the real guard that
+    // stops empty invoices from being created.
     await expect(page.getByText(/no billable items found/i)).toBeVisible();
     await expect(
       page.getByRole("button", { name: /create invoice/i }),
