@@ -93,7 +93,10 @@ function ObservationDetailContent({
   const chartData = results
     .map((obs) => {
       if (!obs.effective_datetime) return null;
-      const value = Number(obs.value?.value);
+      const rawValue = obs.value?.value;
+      if (rawValue === null || rawValue === undefined || rawValue === "")
+        return null;
+      const value = Number(rawValue);
       if (isNaN(value)) return null;
       return { time: new Date(obs.effective_datetime).getTime(), value };
     })
@@ -256,7 +259,7 @@ function ObservationDetailContent({
               return (
                 <TableRow key={obs.id}>
                   <TableCell className="whitespace-nowrap">
-                    {formatDateTime(obs.effective_datetime, "HH:mm DD/MM/YYYY")}
+                    {formatDateTime(obs.effective_datetime)}
                   </TableCell>
                   <TableCell>
                     {obs.value?.value ?? "-"}
@@ -312,12 +315,18 @@ export function ObservationDetailSheet({
           {encounterId && (
             <div className="flex items-center gap-2 text-sm">
               <Checkbox
+                id="current-encounter-only"
                 checked={currentEncounterOnly}
                 onCheckedChange={(checked) =>
                   setCurrentEncounterOnly(checked === true)
                 }
               />
-              <span>{t("show_current_encounter_recordings")}</span>
+              <label
+                htmlFor="current-encounter-only"
+                className="cursor-pointer"
+              >
+                {t("show_current_encounter_recordings")}
+              </label>
             </div>
           )}
 

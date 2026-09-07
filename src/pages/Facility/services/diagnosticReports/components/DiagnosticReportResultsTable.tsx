@@ -215,7 +215,7 @@ export function DiagnosticReportResultsTable({
                 encounterId={encounterId}
               >
                 <span className="cursor-pointer text-left font-medium hover:underline">
-                  {observationTitle}
+                  {observationTitle || t("observation")}
                 </span>
               </ObservationDetailSheet>
             ) : (
