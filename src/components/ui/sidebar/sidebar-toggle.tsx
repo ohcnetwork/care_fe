@@ -26,6 +26,7 @@ export function AppSidebarToggle({
     handleToggleMouseEnter,
     scheduleClose,
   } = useAppSidebar();
+  const showLogoMark = isMobile ? !openMobile : !pinned;
 
   const button = (
     <Button
@@ -59,7 +60,17 @@ export function AppSidebarToggle({
       }}
       {...props}
     >
-      <PanelLeft className="size-4" aria-hidden="true" />
+      {showLogoMark ? (
+        <img
+          src="/images/care_logo_mark.svg"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="size-6 shrink-0 object-contain"
+        />
+      ) : (
+        <PanelLeft className="size-4" aria-hidden="true" />
+      )}
     </Button>
   );
 
