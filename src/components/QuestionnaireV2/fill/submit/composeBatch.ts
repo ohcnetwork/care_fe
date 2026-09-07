@@ -2,13 +2,13 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
-import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 import {
   resolveStructuredSlotState,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
 import type {
   StructuredBatchEntry,
+  StructuredRequestBuilder,
   StructuredRequestContext,
 } from "@/components/QuestionnaireV2/structured/types";
 
@@ -88,12 +88,12 @@ export class StructuredBuildError extends Error {
  *  synchronous throw and a rejected promise both become one
  *  `StructuredBuildError`, pinned to the question that produced it. */
 async function buildStructuredRequests(
-  definition: ResolvedStructuredType,
+  buildRequests: StructuredRequestBuilder,
   data: unknown[],
   context: StructuredRequestContext,
 ): Promise<StructuredBatchEntry[]> {
   try {
-    return await definition.buildRequests(data, context);
+    return await buildRequests(data, context);
   } catch (error) {
     throw new StructuredBuildError(context.questionId, error);
   }
@@ -116,11 +116,13 @@ export interface ComposeBatchArgs {
 
 /**
  * Assemble the one-batch submission. Structured answers become raw
- * domain-API requests via each type's `buildRequests`; plain answers POST to
- * the patient-bound or resource-subject questionnaire submit endpoint; a
- * resumed server draft also gets its completion PUT. Only questions
- * currently enabled by enable_when contribute, including structured leaves,
- * and a disabled group's subtree is skipped together with its parent.
+ * domain-API requests via each type's `buildRequests` — except a plugin
+ * type persisted on the response, whose entries join the plain answers as
+ * that question's `values`; plain answers POST to the patient-bound or
+ * resource-subject questionnaire submit endpoint; a resumed server draft
+ * also gets its completion PUT. Only questions currently enabled by
+ * enable_when contribute, including structured leaves, and a disabled
+ * group's subtree is skipped together with its parent.
  *
  * Pure with respect to UI state: everything it needs arrives as arguments.
  */
@@ -141,7 +143,10 @@ export async function composeBatch({
 
   const requests: StructuredBatchEntry[] = [];
   const structuredWork: Promise<StructuredBatchEntry[]>[] = [];
-  const answeredLeaves: QuestionnaireResponse[] = [];
+  // Everything the questionnaire submit itself records, in walk order:
+  // plain leaves (serialized below) and response-persisted structured
+  // answers (submitted as recorded).
+  const results: SubmitResult[] = [];
 
   const walk = (questions: Question[]) => {
     for (const question of questions) {
@@ -172,6 +177,22 @@ export async function composeBatch({
         );
         if (state.kind !== "ready") continue;
         const definition = state.definition;
+        const data = structuredDataAny(response);
+        if (data.length === 0) continue;
+        if (definition.persistence === "response") {
+          // The entries are the answer (`PluginStructuredPersistence`):
+          // they go out on the questionnaire submit as ONE value, the
+          // entries array as JSON — the backend's submit value is a plain
+          // string. `parseStoredStructuredValue` is the inverse the
+          // response viewers apply before handing the answer back to the
+          // type's component.
+          results.push({
+            question_id: question.id,
+            values: [{ value: JSON.stringify(data) }],
+            note: response.note,
+          });
+          continue;
+        }
         // Core types are patient-bound by construction: every core request
         // hangs off a patient id. A plugin type may declare a resource
         // subject; if the slot renders and validates there, its requests
@@ -179,10 +200,8 @@ export async function composeBatch({
         // questionnaire's subject_type, not the session's runtime subject,
         // so the explicit runtime gate stays on top of it.
         if (!patientBound && definition.source !== "plugin") continue;
-        const data = structuredDataAny(response);
-        if (data.length === 0) continue;
         structuredWork.push(
-          buildStructuredRequests(definition, data, {
+          buildStructuredRequests(definition.buildRequests, data, {
             patientId: patientBound?.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,
@@ -200,7 +219,19 @@ export async function composeBatch({
       // required check (which scans every entry) reported the question
       // answered.
       if (!response.structured_type) {
-        answeredLeaves.push(response);
+        const values = serializeResponseValues(response.values);
+        // Every entry turned out content-free (a repeats row cleared in
+        // place leaves `value: undefined` at its index) — there is nothing
+        // to record for this question, and an empty `values` is a server
+        // error rather than an omission.
+        if (values.length === 0) continue;
+        results.push({
+          question_id: response.question_id,
+          values,
+          note: response.note,
+          body_site: response.body_site,
+          method: response.method,
+        });
       }
     }
   };
@@ -210,20 +241,6 @@ export async function composeBatch({
   for (const entries of await Promise.all(structuredWork)) {
     requests.push(...entries);
   }
-
-  const results: SubmitResult[] = answeredLeaves
-    .map((response) => ({
-      question_id: response.question_id,
-      values: serializeResponseValues(response.values),
-      note: response.note,
-      body_site: response.body_site,
-      method: response.method,
-    }))
-    // Every entry turned out content-free (a repeats row cleared in place
-    // leaves `value: undefined` at its index) — there is nothing to record
-    // for this question, and an empty `values` is a server error rather
-    // than an omission.
-    .filter((result) => result.values.length > 0);
 
   if (results.length > 0) {
     // Endpoint and body come from the questionnaire's subject_type, not the

@@ -101,7 +101,16 @@ questions, that is the bug.
   over the legacy QuestionTypes UI), context `requires`, submit-time
   `validate`, `buildRequests` and `draftPolicy`; `registry.ts` is total
   and key-correlated over `StructuredQuestionType`, so a new union member
-  refuses to compile until its definition exists.
+  refuses to compile until its definition exists. Plugins contribute
+  types at runtime (`pluginRegistry.ts`, manifest
+  `structuredQuestionTypes`, ids namespaced `{plugin_slug}.{type}`). A
+  plugin type may declare `persistence: "response"` instead of
+  `buildRequests`: `composeBatch` then submits its entries as the
+  question's one value (JSON — the backend's submit value is a string),
+  and the response viewers decode it (`storedAnswer.ts`) and mount the
+  type's `component` disabled (`StructuredAnswerView.tsx`) — a
+  frontend-only plugin can persist a type of its own this way, with no
+  backend endpoint.
 - `shared/` — presentation primitives and the pure tree utilities
   (`questionTree.ts`), plus `buildUpdateBody.ts` and
   `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on

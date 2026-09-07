@@ -22,10 +22,9 @@ import { serviceRequestDefinition } from "./definitions/serviceRequest";
 import { symptomDefinition } from "./definitions/symptom";
 import { timeOfDeathDefinition } from "./definitions/timeOfDeath";
 import type {
-  StructuredBatchEntry,
   StructuredContextKey,
   StructuredInputProps,
-  StructuredRequestContext,
+  StructuredRequestBuilder,
   StructuredTypeDefinition,
 } from "./types";
 
@@ -82,7 +81,7 @@ export function structuredDataAny(
  * interprets them, and for core those are still authored against
  * `DataTypeFor<K>` in their own files.
  */
-export interface ResolvedStructuredType {
+export type ResolvedStructuredType = {
   type: string;
   component: ComponentType<StructuredInputProps>;
   requires: readonly StructuredContextKey[];
@@ -93,15 +92,19 @@ export interface ResolvedStructuredType {
     questionId: string,
     required: boolean,
   ) => QuestionValidationError[];
-  buildRequests: (
-    data: unknown[],
-    context: StructuredRequestContext,
-  ) => Promise<StructuredBatchEntry[]>;
   source: "core" | "plugin";
   /** Plugin only — core labels come from `t("structured_type__<type>")`. */
   label?: string;
   icon?: ComponentType<{ className?: string }>;
-}
+} &
+  /** Core, and plugins by default: entries become domain-API requests. */
+  (
+    | { persistence: "batch"; buildRequests: StructuredRequestBuilder }
+    /** Plugin opt-in: entries are submitted as the question's own `values`
+     *  and stored on the questionnaire response — see
+     *  `PluginStructuredPersistence`. */
+    | { persistence: "response" }
+  );
 
 // Caches for the wrapped view `resolveStructuredType` returns below, keyed
 // on the underlying registration — so a caller keying off the returned
@@ -138,6 +141,7 @@ export function resolveStructuredType(
     const resolved = {
       ...definition,
       source: "core",
+      persistence: "batch",
     } as unknown as ResolvedStructuredType;
     coreResolvedCache.set(type, resolved);
     return resolved;
@@ -146,7 +150,18 @@ export function resolveStructuredType(
   if (!plugin) return undefined;
   const cached = pluginResolvedCache.get(plugin);
   if (cached) return cached;
-  const resolved: ResolvedStructuredType = { ...plugin, source: "plugin" };
+  // Split on the discriminator so each branch is a complete member of the
+  // union — a plugin that omits `persistence` is a batch type, and one
+  // that opts into "response" never carries a `buildRequests`.
+  const resolved: ResolvedStructuredType =
+    plugin.persistence === "response"
+      ? { ...plugin, source: "plugin", persistence: "response" }
+      : {
+          ...plugin,
+          source: "plugin",
+          persistence: "batch",
+          buildRequests: plugin.buildRequests,
+        };
   pluginResolvedCache.set(plugin, resolved);
   return resolved;
 }

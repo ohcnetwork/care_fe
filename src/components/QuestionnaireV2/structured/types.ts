@@ -74,6 +74,13 @@ export interface StructuredRequestContext {
   questionId: string;
 }
 
+/** `buildRequests` as every consumer calls it — plugin data is opaque to
+ *  the host, so the entries arrive as `unknown[]`. */
+export type StructuredRequestBuilder = (
+  data: unknown[],
+  context: StructuredRequestContext,
+) => Promise<StructuredBatchEntry[]>;
+
 export function structuredReferenceId(
   type: StructuredQuestionType,
   questionId: string,

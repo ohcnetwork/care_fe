@@ -5,11 +5,32 @@ import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import { PLUGIN_STRUCTURED_TYPE_PATTERN } from "@/types/questionnaire/structured";
 
 import type {
-  StructuredBatchEntry,
   StructuredContextKey,
   StructuredInputProps,
-  StructuredRequestContext,
+  StructuredRequestBuilder,
 } from "./types";
+
+/**
+ * Where a type's recorded entries go at submit.
+ *
+ * `"batch"` — the default, and what every core type does: `buildRequests`
+ * turns the entries into domain-API requests that ride the submit batch;
+ * the questionnaire response itself never carries them.
+ *
+ * `"response"` — the entries ARE the answer. `composeBatch` submits them as
+ * the question's one value, the entries array serialized to JSON (the
+ * backend's submit value is a plain string), and the backend stores that
+ * verbatim on the questionnaire response — it validates nothing for
+ * structured questions and creates no observation unless the question
+ * carries a code. No domain endpoint is involved, so a frontend-only plugin
+ * can persist a type of its own; the response viewers parse the stored
+ * string back into the entries array (`parseStoredStructuredValue`) and
+ * hand it to the same `component`, disabled, wherever the response is
+ * shown — the plugin never sees the wire format.
+ */
+export type PluginStructuredPersistence =
+  | { persistence?: "batch"; buildRequests: StructuredRequestBuilder }
+  | { persistence: "response"; buildRequests?: undefined };
 
 /**
  * What a federation plugin contributes to make a structured question type
@@ -21,7 +42,7 @@ import type {
  * Plugins own their i18n — `label` is a plain display string from the
  * manifest, never an i18n key the host resolves.
  */
-export interface PluginStructuredTypeDefinition {
+export type PluginStructuredTypeDefinition = {
   /** Namespaced `{plugin_slug}.{type_name}` — bare names are reserved for core. */
   type: string;
   component: ComponentType<StructuredInputProps>;
@@ -38,11 +59,7 @@ export interface PluginStructuredTypeDefinition {
     questionId: string,
     required: boolean,
   ) => QuestionValidationError[];
-  buildRequests: (
-    data: unknown[],
-    context: StructuredRequestContext,
-  ) => Promise<StructuredBatchEntry[]>;
-}
+} & PluginStructuredPersistence;
 
 /**
  * Module-level store — same mechanics as `lib/override/registry.ts`: a Map

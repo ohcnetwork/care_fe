@@ -12,7 +12,11 @@ import {
 // that varies.
 function makeDefinition(
   type: string,
-  overrides: Partial<PluginStructuredTypeDefinition> = {},
+  // The persistence half is a discriminated union; overriding it would
+  // make the spread below ambiguous, and no test here needs to.
+  overrides: Partial<
+    Omit<PluginStructuredTypeDefinition, "persistence" | "buildRequests">
+  > = {},
 ): PluginStructuredTypeDefinition {
   return {
     type,
@@ -122,4 +126,32 @@ test("getPluginStructuredType returns a new identity after a re-register", () =>
     afterFix,
     "a boundary keyed on this identity must see a change on re-register",
   );
+});
+
+// ---------------------------------------------------------------------------
+// Persistence: a plugin may opt out of `buildRequests` entirely by declaring
+// `persistence: "response"` — the entries then ride the questionnaire
+// submit as the question's own values. The registry stores the definition
+// as declared; `resolveStructuredType` (registry.ts) reads the
+// discriminator, so what matters here is that the shape registers and
+// round-trips untouched.
+// ---------------------------------------------------------------------------
+
+test("a response-persisted definition registers without buildRequests", () => {
+  const { buildRequests: _batchOnly, ...base } =
+    makeDefinition("plugin_d.chart");
+  const definition: PluginStructuredTypeDefinition = {
+    ...base,
+    persistence: "response",
+  };
+  const cleanup = registerPluginStructuredType(definition, "plugin_d");
+  try {
+    const registered = getPluginStructuredType("plugin_d.chart");
+    assert.equal(registered, definition);
+    assert.equal(registered?.persistence, "response");
+    assert.equal(registered?.buildRequests, undefined);
+  } finally {
+    cleanup();
+  }
+  assert.equal(getPluginStructuredType("plugin_d.chart"), undefined);
 });

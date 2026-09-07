@@ -237,8 +237,10 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
+  // Any import options ride along — `layer(theme)`, and `theme(reference)`
+  // for a plugin that compiles its utilities against the host's tokens.
   const stripped = code.replace(
-    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+layer\([^)]*\))?\s*;?/g,
+    /@import\s+["']tailwindcss(?:\/[^"']*)?["'](?:\s+\w+\([^)]*\))*\s*;?/g,
     "",
   );
 
