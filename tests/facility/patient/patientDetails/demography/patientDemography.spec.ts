@@ -24,23 +24,30 @@ test.describe("Patient Demography View", () => {
   });
 
   test("should display demographic fields", async ({ page }) => {
-    // Verify key demographic labels are visible. These are rendered as
-    // label-value pairs in the Demography component.
-    await expect(page.getByText(/full name/i).first()).toBeVisible();
+    // Exact label matches: an unanchored /sex/i would also match "Unisex" or
+    // "Sexual history", so it could pass on unrelated text. Exact text makes
+    // each assertion fail if that specific field disappears.
+    await expect(
+      page.getByText("Full Name", { exact: true }).first(),
+    ).toBeVisible();
 
-    await expect(page.getByText(/phone number/i).first()).toBeVisible();
+    await expect(
+      page.getByText("Phone Number", { exact: true }).first(),
+    ).toBeVisible();
 
     // Genuine either/or: patients store an exact date of birth or just a year.
     await expect(
       page
-        .getByText(/date of birth/i)
-        .or(page.getByText(/year of birth/i))
+        .getByText("Date of Birth", { exact: true })
+        .or(page.getByText("Year of Birth", { exact: true }))
         .first(),
     ).toBeVisible();
 
-    await expect(page.getByText(/sex/i).first()).toBeVisible();
+    await expect(page.getByText("Sex", { exact: true }).first()).toBeVisible();
 
-    await expect(page.getByText(/emergency contact/i).first()).toBeVisible();
+    await expect(
+      page.getByText("Emergency Contact", { exact: true }).first(),
+    ).toBeVisible();
   });
 
   test("should have edit button for general info section", async ({ page }) => {
@@ -59,6 +66,10 @@ test.describe("Patient Demography View", () => {
   });
 
   test("should display address information", async ({ page }) => {
-    await expect(page.getByText(/current address/i).first()).toBeVisible();
+    await expect(
+      page
+        .getByText("Current Address and Route to Home", { exact: true })
+        .first(),
+    ).toBeVisible();
   });
 });
