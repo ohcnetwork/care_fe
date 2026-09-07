@@ -80,7 +80,7 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await expect(
       page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
@@ -118,7 +118,7 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await expect(
       page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}?status=active`,
@@ -142,7 +142,7 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await expect(
       page.getByRole("heading", { name: /create category/i }),
-    ).not.toBeVisible();
+    ).toBeHidden();
   });
 
   test("should edit category", async ({ page }) => {
@@ -175,10 +175,10 @@ test.describe("Activity Definition Resource Category List", () => {
 
     await expect(
       page.getByRole("heading", { name: /edit category/i }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await expect(page.getByText(updatedData.title)).toBeVisible();
-    await expect(page.getByText(testData.title)).not.toBeVisible();
+    await expect(page.getByText(testData.title)).toBeHidden();
   });
 
   test("should navigate to activity definitions list when clicking on category card", async ({
@@ -223,7 +223,7 @@ test.describe("Activity Definition Resource Category List", () => {
     await searchInput.clear();
     await searchInput.fill(faker.string.uuid());
 
-    await expect(page.getByText(testData.title)).not.toBeVisible();
+    await expect(page.getByText(testData.title)).toBeHidden();
 
     await searchInput.clear();
 

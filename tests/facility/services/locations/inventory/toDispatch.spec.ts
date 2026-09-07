@@ -35,9 +35,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
-    await page
-      .getByRole("button", { name: "Mark as Approved" })
-      .click({ timeout: 5000 });
+    await page.getByRole("button", { name: "Mark as Approved" }).click();
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     // verify item appears in table

@@ -45,9 +45,7 @@ function adminOrgDetailUrlRegex(type: OrganizationType) {
 }
 
 async function gotoOrgTypeList(page: Page, type: OrganizationType) {
-  await page.goto(`/admin/organizations/${type}`, {
-    waitUntil: "networkidle",
-  });
+  await page.goto(`/admin/organizations/${type}`);
   await expect(searchInput(page, type)).toBeVisible();
 }
 

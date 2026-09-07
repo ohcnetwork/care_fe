@@ -72,8 +72,6 @@ test.describe("Symptom Questionnaire", () => {
   });
 
   test("should add symptom with all fields", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
-
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Symptom/i })
@@ -132,7 +130,6 @@ test.describe("Symptom Questionnaire", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
 
     const duplicateSymptomName = faker.helpers.arrayElement([...usedSymptoms]);
 

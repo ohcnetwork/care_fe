@@ -58,6 +58,6 @@ test.describe("Product Knowledge Delete operations", () => {
     ).toBeVisible();
 
     await page.getByRole("textbox", { name: "Search products" }).fill(name);
-    await expect(page.getByRole("table").getByText(name)).not.toBeVisible();
+    await expect(page.getByRole("table").getByText(name)).toBeHidden();
   });
 });

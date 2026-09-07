@@ -160,7 +160,6 @@ test.describe("Charge Item Definition Creation", () => {
     if (await switchElement.isChecked()) {
       await switchElement.click();
     }
-    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Add Condition" }).click();
     // To do: make this metric agnostic/otherwise might have to adjust everytime we add a new metric
     await page

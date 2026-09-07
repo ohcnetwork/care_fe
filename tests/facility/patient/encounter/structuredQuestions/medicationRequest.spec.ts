@@ -136,8 +136,6 @@ test.describe("Medication Request Questionnaire", () => {
   test("should add medication filling all fields and verify it appears in medication history", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add Medication/i })
@@ -246,8 +244,6 @@ test.describe("Medication Request Questionnaire", () => {
   test("add medication with only required fields and verify it appears in medication history", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add Medication/i })
@@ -305,8 +301,6 @@ test.describe("Medication Request Questionnaire", () => {
   test("should show validation errors when required fields are missing", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add Medication/i })

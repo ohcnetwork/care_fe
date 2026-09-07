@@ -116,7 +116,7 @@ test.describe("Encounter Future Date Restriction", () => {
       .click();
 
     // Wait for encounter to be created and dialog to close
-    await expect(encounterDialog).not.toBeVisible();
+    await expect(encounterDialog).toBeHidden();
 
     // Verify Encounter Actions button is visible after encounter creation
     await expect(

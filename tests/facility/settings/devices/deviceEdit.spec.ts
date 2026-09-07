@@ -237,7 +237,7 @@ test.describe("Facility Device Edit", () => {
     if (originalDeviceName !== newDeviceName) {
       await expect(
         page.getByRole("heading", { name: newDeviceName }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
   });
 });

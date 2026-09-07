@@ -57,7 +57,7 @@ test.describe("Questionnaire Visibility by Status and Subject Type", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Questionnaire created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     return name;
   }

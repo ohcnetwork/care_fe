@@ -84,12 +84,12 @@ test.describe("User Management in Departments", () => {
         page
           .getByRole("region", { name: "Notifications" })
           .getByText("User added successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
       await expect(
         page
           .getByRole("region", { name: "Notifications" })
           .getByText("User added to organization successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify user appears in department users list", async () => {

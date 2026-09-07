@@ -65,7 +65,7 @@ test.describe("Payment Reconciliation", () => {
       // For non-cash payments, Amount Received field should not be visible
       await expect(
         page.getByRole("textbox", { name: "Amount Received" }),
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
 
     // Fill Payment Date

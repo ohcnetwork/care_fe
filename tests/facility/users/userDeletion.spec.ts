@@ -25,14 +25,14 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Login" }).click();
 
       // Wait for successful login and navigate to facility
-      await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
+      await expect(page).toHaveURL(/^(?!.*login)/);
 
       // Navigate to first available facility
       const firstFacilityLink = page
         .getByRole("link")
         .filter({ hasText: "View" })
         .first();
-      await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
+      await expect(firstFacilityLink).toBeVisible();
       await firstFacilityLink.click();
       await page.getByRole("button", { name: "Toggle Sidebar" }).click();
       await page.getByRole("link", { name: "Users" }).click();
@@ -41,14 +41,14 @@ test.describe("User Deletion Access Control", () => {
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
         .first();
-      await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
+      await expect(seeDetailsButton).toBeVisible();
 
       // Click on the first user's "See Details" button
       await seeDetailsButton.click();
 
       // Verify that delete account button is visible for admin
       const deleteButton = page.getByRole("button", { name: "Delete Account" });
-      await expect(deleteButton).toBeVisible({ timeout: 10000 });
+      await expect(deleteButton).toBeVisible();
 
       // Verify the button is clickable (not disabled)
       await expect(deleteButton).toBeEnabled();
@@ -69,29 +69,30 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Login" }).click();
 
       // Wait for successful login
-      await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
-      await page.waitForLoadState("networkidle");
+      await expect(page).toHaveURL(/^(?!.*login)/);
 
       // Navigate directly to facility users page
       const facilityId = getFacilityId();
       await page.goto(`/facility/${facilityId}/users`);
-      await page.waitForLoadState("networkidle");
 
-      // Check if staff can see the users list at all
+      // Check if staff can see the users list at all.
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
         .first();
-      const canSeeUsers = await seeDetailsButton
-        .isVisible({ timeout: 10000 })
-        .catch(() => false);
+      // Wait for the users page to settle (user cards or the empty state)
+      // before the permission check — no fixed timeout.
+      await expect(
+        seeDetailsButton.or(page.getByText(/no users found/i)),
+      ).toBeVisible();
+      const canSeeUsers = await seeDetailsButton.isVisible();
 
       if (!canSeeUsers) {
         // Staff cannot access users list — they definitely cannot delete users
         // This is a valid security outcome
-        const deleteButtonCount = await page
-          .getByRole("button", { name: "Delete Account" })
-          .count();
-        expect(deleteButtonCount).toBe(0);
+        const deleteButtons = page.getByRole("button", {
+          name: "Delete Account",
+        });
+        await expect(deleteButtons).toHaveCount(0);
         return;
       }
 
@@ -101,10 +102,10 @@ test.describe("User Deletion Access Control", () => {
       const deleteButton = page.getByRole("button", { name: "Delete Account" });
       await expect(deleteButton).toBeHidden();
 
-      const deleteButtonCount = await page
-        .getByRole("button", { name: "Delete Account" })
-        .count();
-      expect(deleteButtonCount).toBe(0);
+      const deleteButtons = page.getByRole("button", {
+        name: "Delete Account",
+      });
+      await expect(deleteButtons).toHaveCount(0);
     });
   });
 });

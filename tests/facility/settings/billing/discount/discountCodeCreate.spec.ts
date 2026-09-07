@@ -13,7 +13,6 @@ test.describe("Discount Code Settings", () => {
     await page.goto(
       `/facility/${facilityId}/settings/billing/discount_configuration`,
     );
-    await page.waitForLoadState("networkidle");
 
     // Enter edit mode
     const editButton = page.getByRole("button", { name: /edit/i });
@@ -38,7 +37,6 @@ test.describe("Discount Code Settings", () => {
     const saveButton = page.getByRole("button", { name: /save/i });
     await expect(saveButton).toBeVisible();
     await saveButton.click();
-    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByText(/discount configuration saved successfully/i),
@@ -52,7 +50,6 @@ test.describe("Discount Code Settings", () => {
     discountName = faker.commerce.productName();
     discountCode = discountName.replace(/\s+/g, "-").slice(0, 20).toLowerCase();
     await page.goto(`/facility/${facilityId}/settings/billing/discount_codes`);
-    await page.waitForLoadState("networkidle");
 
     await expect(
       page.getByRole("button", { name: /create discount code/i }),

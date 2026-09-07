@@ -16,7 +16,7 @@ setup("authenticate", async ({ page }) => {
 
   // Wait for successful login - adjust based on your app's behavior
   // This could be checking for a redirect, a user menu, etc.
-  await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+  await page.waitForURL(/^(?!.*login)/);
 
   // Verify we're logged in by checking for user-specific elements
   // Adjust this selector based on your application

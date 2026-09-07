@@ -25,15 +25,13 @@ test.describe("Patient Files", () => {
     await page.getByRole("button", { name: "Add Files" }).click();
 
     // Wait for file input to be attached
-    await expect(page.locator('input[type="file"]')).toBeAttached({
-      timeout: 5000,
-    });
+    await expect(page.locator('input[type="file"]')).toBeAttached();
     await page.locator('input[type="file"]').setInputFiles(filePath);
 
     // Wait for file name input to be visible
     await expect(
       page.getByRole("textbox", { name: "File Name" }).first(),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
     await page
       .getByRole("textbox", { name: "File Name" })
       .first()
@@ -43,15 +41,12 @@ test.describe("Patient Files", () => {
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "POST",
-      { timeout: 15000 },
     );
 
     await page.getByRole("button", { name: "Upload" }).click();
     const response = await uploadPromise;
     expect(response.status()).toBe(200);
-    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible();
     await page.getByRole("button", { name: "Close toast" }).click();
     return response;
   };
@@ -101,11 +96,11 @@ test.describe("Patient Files", () => {
     const viewEncounterLink = page
       .getByRole("link", { name: "View Encounter" })
       .first();
-    await expect(viewEncounterLink).toBeVisible({ timeout: 10000 });
+    await expect(viewEncounterLink).toBeVisible();
     await viewEncounterLink.click();
 
     // Wait for encounter page to load and get URL
-    await expect(page).toHaveURL(/\/encounter\//, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/encounter\//);
     const currentUrl = page.url();
     const patientUrl = currentUrl.split("/encounter/")[0];
 
@@ -114,13 +109,11 @@ test.describe("Patient Files", () => {
 
     // Wait for Files tab to be visible and click it
     const filesTab = page.getByRole("tab", { name: "Files" });
-    await expect(filesTab).toBeVisible({ timeout: 10000 });
+    await expect(filesTab).toBeVisible();
     await filesTab.click();
 
     // Wait for the Files section to load by checking for Add Files button
-    await expect(page.getByRole("button", { name: "Add Files" })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: "Add Files" })).toBeVisible();
   });
 
   test("Add multiple patient files", async ({ page }) => {
@@ -135,9 +128,7 @@ test.describe("Patient Files", () => {
     await page.getByRole("button", { name: "Add Files" }).click();
 
     // Wait for the file upload dialog to be visible
-    await expect(page.locator('input[type="file"]')).toBeAttached({
-      timeout: 5000,
-    });
+    await expect(page.locator('input[type="file"]')).toBeAttached();
 
     // Upload multiple files directly to the file input (bypassing system dialog)
     await page
@@ -153,15 +144,13 @@ test.describe("Patient Files", () => {
     // Wait for files to be loaded in the UI
     await expect(
       page.getByRole("textbox", { name: "File Name" }).first(),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
 
     // Try to upload without names - should show validation error
     await page.getByRole("button", { name: "Upload" }).click();
 
     // Verify validation error is shown
-    await expect(page.getByText(validationMessage).first()).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.getByText(validationMessage).first()).toBeVisible();
 
     // Fill in file names for all files
     for (let i = 0; i < inputFileNames.length; i++) {
@@ -176,7 +165,6 @@ test.describe("Patient Files", () => {
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "POST",
-      { timeout: 15000 },
     );
 
     // Click upload button
@@ -188,7 +176,7 @@ test.describe("Patient Files", () => {
 
     // Verify at least one success message is shown
     const successToast = page.locator(`text=${fileUploadSuccessToast}`).first();
-    await expect(successToast).toBeVisible({ timeout: 10000 });
+    await expect(successToast).toBeVisible();
   });
 
   test("File Uploaded by one user is accessible to another user", async ({
@@ -234,31 +222,26 @@ test.describe("Patient Files", () => {
     await page.getByRole("button", { name: "Filter" }).click();
     await expect(
       page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
     await page.getByRole("menuitem", { name: "Active Files" }).click();
 
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "GET",
-      { timeout: 15000 },
     );
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
 
     // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText("Active Files")).toBeVisible();
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
 
     // Wait for the file row to be visible
-    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible();
 
     await page
       .getByRole("row", { name: inputFileName1 })
@@ -268,16 +251,13 @@ test.describe("Patient Files", () => {
     await page.getByRole("menuitem", { name: /rename/i }).click();
 
     // Wait for rename dialog to appear
-    await expect(page.locator("#edit-file-name")).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.locator("#edit-file-name")).toBeVisible();
     await page.locator("#edit-file-name").fill(newFileName);
 
     const renamePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "PUT",
-      { timeout: 15000 },
     );
 
     await page.getByRole("button", { name: "Proceed" }).click();
@@ -285,9 +265,7 @@ test.describe("Patient Files", () => {
     const renameResponse = await renamePromise;
     expect(renameResponse.status()).toBe(200);
 
-    await expect(page.getByText(fileRenameSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(fileRenameSuccessToast)).toBeVisible();
   });
 
   test("Add a new patient file and archive it", async ({ page }) => {
@@ -298,31 +276,26 @@ test.describe("Patient Files", () => {
     await page.getByRole("button", { name: "Filter" }).click();
     await expect(
       page.getByRole("menuitem", { name: "Active Files" }),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
     await page.getByRole("menuitem", { name: "Active Files" }).click();
 
     const filterPromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "GET",
-      { timeout: 15000 },
     );
 
     const filterResponse = await filterPromise;
     expect(filterResponse.status()).toBe(200);
 
     // Wait for filter to be applied and active files badge to appear
-    await expect(page.getByText("Active Files")).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText("Active Files")).toBeVisible();
 
     // Upload a single file using helper
     await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
 
     // Wait for the file row to be visible
-    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.getByRole("row", { name: inputFileName1 })).toBeVisible();
 
     await page
       .getByRole("row", { name: inputFileName1 })
@@ -332,16 +305,13 @@ test.describe("Patient Files", () => {
     await page.getByRole("menuitem", { name: /archive/i }).click();
 
     // Wait for archive dialog to appear
-    await expect(page.getByRole("textbox", { name: /reason/i })).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(page.getByRole("textbox", { name: /reason/i })).toBeVisible();
     await page.getByRole("textbox", { name: /reason/i }).fill(archiveReason);
 
     const archivePromise = page.waitForResponse(
       (response) =>
         response.url().includes("/api/v1/files/") &&
         response.request().method() === "POST",
-      { timeout: 15000 },
     );
 
     // Click proceed button
@@ -350,8 +320,6 @@ test.describe("Patient Files", () => {
     const archiveResponse = await archivePromise;
     expect(archiveResponse.status()).toBe(200);
 
-    await expect(page.getByText(fileArchiveSuccessToast)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(fileArchiveSuccessToast)).toBeVisible();
   });
 });

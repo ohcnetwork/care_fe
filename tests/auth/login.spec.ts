@@ -49,8 +49,6 @@ test.describe("Login", () => {
     await page.getByRole("button", { name: /login/i }).click();
 
     // Wait for error notification
-    await expect(page.getByText(/no active account found/i)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(/no active account found/i)).toBeVisible();
   });
 });

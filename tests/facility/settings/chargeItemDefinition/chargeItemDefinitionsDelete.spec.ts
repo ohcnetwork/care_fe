@@ -55,6 +55,6 @@ test.describe("Charge Item Definition Delete operations", () => {
     ).toBeVisible();
 
     await page.getByRole("textbox", { name: /search/i }).fill(title);
-    await expect(page.getByRole("table").getByText(title)).not.toBeVisible();
+    await expect(page.getByRole("table").getByText(title)).toBeHidden();
   });
 });

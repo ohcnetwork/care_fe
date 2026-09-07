@@ -51,9 +51,7 @@ test.describe("Facility Device Delete", () => {
       .fill(deviceName);
 
     // Verify device is not found in the list
-    await expect(
-      page.getByRole("link", { name: deviceName }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("link", { name: deviceName })).toBeHidden();
 
     // Verify "No devices found" message or empty state
     await expect(

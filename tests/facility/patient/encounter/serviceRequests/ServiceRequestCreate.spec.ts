@@ -141,12 +141,10 @@ test.describe("Patient Service Request Tab", () => {
       .first()
       .getByRole("button", { name: "See Details" })
       .click();
-    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Collect Specimen" }).click();
     await expect(
       page.getByText("QR code generated successfully"),
     ).toBeVisible();
-    await page.waitForLoadState("networkidle");
     await expect(page.getByText("Sample Identification")).toBeVisible();
     await page.getByPlaceholder("Value", { exact: true }).fill("2");
     await expect(page.getByPlaceholder("Value", { exact: true })).toHaveValue(
@@ -207,12 +205,10 @@ test("should fill result value, capture a photo and save results", async ({
     .first()
     .getByRole("button", { name: "See Details" })
     .click();
-  await page.waitForLoadState("networkidle");
 
   // Collect the specimen so a diagnostic report can be created
   await page.getByRole("button", { name: "Collect Specimen" }).click();
   await expect(page.getByText("QR code generated successfully")).toBeVisible();
-  await page.waitForLoadState("networkidle");
   await expect(page.getByText("Sample Identification")).toBeVisible();
   await page.getByPlaceholder("Value", { exact: true }).fill("2");
   await page

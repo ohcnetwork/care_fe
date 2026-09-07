@@ -296,7 +296,7 @@ test.describe("Activity Definition List", () => {
 
     await expect(
       page.locator('[data-slot="table-row"]', { hasText: testAD.title }),
-    ).not.toBeVisible();
+    ).toBeHidden();
 
     await searchInput.clear();
 

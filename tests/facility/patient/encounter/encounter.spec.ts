@@ -84,7 +84,7 @@ test.describe("Create an Encounter", () => {
       .locator('a[href^="tel:"]')
       .first()
       .textContent();
-    const dobLabel = await page.getByText("Date of Birth");
+    const dobLabel = page.getByText("Date of Birth");
     const dobText = await dobLabel
       .locator("xpath=following-sibling::*[1]")
       .textContent();

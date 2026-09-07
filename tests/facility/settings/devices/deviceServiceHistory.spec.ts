@@ -25,16 +25,14 @@ test.describe("Device Service History", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Add Service Record button
     await expect(
       page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -54,16 +52,14 @@ test.describe("Device Service History", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Add Service Record button
     await expect(
       page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -127,16 +123,14 @@ test.describe("Device Service History", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Add Service Record button
     await expect(
       page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -171,16 +165,14 @@ test.describe("Device Service History", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Add Service Record button
     await expect(
       page.getByRole("button", { name: "Add Service Record" }),
-    ).toBeVisible({
-      timeout: 10000,
-    });
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 

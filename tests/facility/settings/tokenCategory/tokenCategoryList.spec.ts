@@ -22,7 +22,7 @@ test.describe("Token Category List - Permission Tests", () => {
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -78,7 +78,7 @@ test.describe("Token Category List - Permission Tests", () => {
         .fill("care-volunteer");
       await page.getByLabel(/password/i).fill("Ohcn@123");
       await page.getByRole("button", { name: /login/i }).click();
-      await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+      await page.waitForURL(/^(?!.*login)/);
 
       // Verify we're logged in as volunteer
       await expect(
@@ -96,19 +96,19 @@ test.describe("Token Category List - Permission Tests", () => {
       const accessDeniedMessage = page.getByText(
         "Access Denied to Token Category",
       );
-      await expect(accessDeniedMessage).toBeVisible({ timeout: 10000 });
+      await expect(accessDeniedMessage).toBeVisible();
 
       // Step 2: Verify access denied message is shown
 
       // Step 3: Verify table and data are NOT visible
       const table = page.locator("table");
-      await expect(table).not.toBeVisible();
+      await expect(table).toBeHidden();
 
       // Verify action buttons are NOT visible
       const viewButtons = page.getByRole("link", { name: "View", exact: true });
       const editButtons = page.getByRole("link", { name: "Edit", exact: true });
-      expect(await viewButtons.count()).toBe(0);
-      expect(await editButtons.count()).toBe(0);
+      await expect(viewButtons).toHaveCount(0);
+      await expect(editButtons).toHaveCount(0);
 
       // Step 4: Verify Token Category link is NOT visible in sidebar
       const sidebarToggle = page.getByRole("button", {
@@ -125,7 +125,7 @@ test.describe("Token Category List - Permission Tests", () => {
         const tokenCategoryLink = page.getByRole("link", {
           name: "Token Category",
         });
-        await expect(tokenCategoryLink).not.toBeVisible();
+        await expect(tokenCategoryLink).toBeHidden();
       }
       // If Settings section itself isn't visible, Token Category is also not accessible
     });

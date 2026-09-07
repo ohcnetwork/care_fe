@@ -86,7 +86,7 @@ test.describe("Device Location Association", () => {
     ).toBeVisible();
 
     // Location should now be displayed
-    await expect(page.getByText("No location associated")).not.toBeVisible();
+    await expect(page.getByText("No location associated")).toBeHidden();
   });
 
   test("should display current location and allow disassociation", async ({

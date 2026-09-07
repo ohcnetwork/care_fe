@@ -49,7 +49,7 @@ export async function checkVisibility(
   if (shouldBeVisible) {
     await expect(label).toBeVisible();
   } else {
-    await expect(label).not.toBeVisible();
+    await expect(label).toBeHidden();
   }
 }
 
@@ -90,7 +90,6 @@ export async function verifySubmittedValues(
   excludedValues: string[] = [],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
 
   for (const val of expectedValues) {
     const locator = page.getByText(val, { exact: true }).first();
@@ -99,7 +98,7 @@ export async function verifySubmittedValues(
   }
 
   for (const val of excludedValues) {
-    await expect(page.getByText(val, { exact: true })).not.toBeVisible();
+    await expect(page.getByText(val, { exact: true })).toBeHidden();
   }
 }
 
@@ -113,7 +112,6 @@ export async function verifyLabelledValues(
   pairs: [label: string, value: string][],
 ) {
   await page.waitForURL(/\/encounter\/[^/]+\/updates/);
-  await page.waitForLoadState("networkidle");
 
   for (const [label, value] of pairs) {
     const row = page

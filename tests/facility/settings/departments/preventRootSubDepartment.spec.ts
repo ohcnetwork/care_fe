@@ -28,7 +28,6 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();
@@ -47,7 +46,7 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
       page
         .locator("li[data-sonner-toast]")
         .getByText("Cannot create organizations under root organization"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("Backend should reject creating sub-team under Administration department", async ({
@@ -55,7 +54,6 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();
@@ -78,6 +76,6 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
       page
         .locator("li[data-sonner-toast]")
         .getByText("Cannot create organizations under root organization"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 });
