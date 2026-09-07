@@ -3229,6 +3229,7 @@
   "load_from_order": "Load from order",
   "load_more": "Load More",
   "loading": "Loading...",
+  "loading_animation_text": "loading",
   "loading_appointment_details": "Loading appointment details...",
   "loading_categories": "Loading categories...",
   "loading_encounter": "Loading encounter...",
