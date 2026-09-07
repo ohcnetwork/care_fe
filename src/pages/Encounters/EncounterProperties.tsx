@@ -39,7 +39,7 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
       <PopoverContent align={"start"} className="w-auto p-2">
         <div className="space-y-2">
           <h4 className="font-medium text-sm">{t("status_history")}</h4>
-          {encounter.status_history.history.map((history, index) => (
+          {encounter.status_history?.history.map((history, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">
                 {formatDateTime(history.moved_at)}
@@ -83,7 +83,7 @@ export const EncounterClassBadge = ({
       <PopoverContent align={"start"} className="w-auto p-2">
         <div className="space-y-2">
           <h4 className="font-medium text-sm">{t("class_history")}</h4>
-          {encounter.encounter_class_history.history.map((history, index) => (
+          {encounter.encounter_class_history?.history.map((history, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               <span className="text-gray-500">
                 {formatDateTime(history.moved_at)}

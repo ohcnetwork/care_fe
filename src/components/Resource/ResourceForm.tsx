@@ -39,11 +39,13 @@ import BecknFlow from "@/components/Resource/beckn/BecknFlow";
 import { cn } from "@/lib/utils";
 import {
   becknPatientFrom,
+  clinicalUrgencyTierForPriority,
   healthServiceTypeForCategory,
 } from "@/types/beckn/becknModels";
 import patientApi from "@/types/emr/patient/patientApi";
 import {
   getResourceRequestCategoryEnum,
+  RESOURCE_REQUEST_PRIORITY_OPTIONS,
   RESOURCE_REQUEST_STATUS_OPTIONS,
   ResourceRequestCategory,
   ResourceRequestRead,
@@ -83,6 +85,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     status: z.enum(ResourceRequestStatus),
     category: z.enum(ResourceRequestCategory),
     title: z.string().min(1, { message: t("field_required") }),
+    priority: z.coerce.number(),
   });
 
   type ResourceFormValues = z.infer<typeof resourceFormSchema>;
@@ -108,6 +111,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     defaultValues: {
       status: ResourceRequestStatus.PENDING,
       title: "",
+      priority: 1,
     },
   });
 
@@ -117,6 +121,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         status: resourceData.status,
         category: getResourceRequestCategoryEnum(resourceData.category),
         title: resourceData.title,
+        priority: resourceData.priority ?? 1,
       });
     }
   }, [resourceData, form]);
@@ -130,6 +135,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     textSearch?: string;
     healthServiceType?: string;
     title?: string;
+    clinicalUrgencyTier?: string;
   } | null>(null);
 
   const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
@@ -144,33 +150,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     },
   });
 
-  // Clinical Care and Social Support (`patient_care`) is fulfilled by the
-  // facility itself, so it posts the request directly — no network referral.
-  const { mutate: createResource, isPending: isCreatePending } = useMutation({
-    mutationFn: mutate(resourceRequestApi.create),
-    onSuccess: (data: ResourceRequestRead) => {
-      toast.success(t("resource_created_successfully"));
-      navigate(
-        related_patient
-          ? `/facility/${facilityId}/patient/${related_patient}/resource_requests`
-          : `/facility/${facilityId}/resource/${data.id}`,
-        { replace: true },
-      );
-    },
-  });
+  const isPending = isUpdatePending;
 
-  const isPending = isUpdatePending || isCreatePending;
-
-  // New network-referral requests continue into the coordination-desk flow
-  // after submit, so the button says Continue; direct creates and updates
-  // finish in one step.
+  // New referral requests continue into the coordination-desk flow after
+  // submit, so the button says Continue; updates finish in one step.
   const watchedCategory = form.watch("category");
-  const submitLabel =
-    !id &&
-    watchedCategory &&
-    watchedCategory !== ResourceRequestCategory.PATIENT_CARE
-      ? t("continue")
-      : t("submit");
+  const submitLabel = !id && watchedCategory ? t("continue") : t("submit");
 
   const onSubmit = (data: ResourceFormValues) => {
     const resourcePayload = {
@@ -181,23 +166,22 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       assigned_facility: null,
       assigned_to: null,
       approving_facility: null,
-      emergency: false,
+      emergency: data.priority >= 3,
       reason: "",
       referring_facility_contact_name: "",
       referring_facility_contact_number: "",
       related_patient: related_patient ?? null,
-      priority: 1,
+      priority: data.priority,
     };
 
     if (id) {
       updateResource({ ...resourcePayload });
-    } else if (data.category === ResourceRequestCategory.PATIENT_CARE) {
-      createResource(resourcePayload);
     } else {
       setFlowIntent({
         textSearch: COORDINATION_DESK_SEARCH,
         healthServiceType: healthServiceTypeForCategory(data.category),
         title: data.title,
+        clinicalUrgencyTier: clinicalUrgencyTierForPriority(data.priority),
       });
     }
   };
@@ -218,6 +202,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
           patient={becknPatientFrom(patientData)}
           discover={flowIntent}
           title={flowIntent.title}
+          clinicalUrgencyTier={flowIntent.clinicalUrgencyTier}
           autoStart
           onConfirmed={() => {
             toast.success(t("resource_created_successfully"));
@@ -299,17 +284,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 </div>
                 {!id && field.value ? (
                   <FormDescription className="flex items-center gap-1.5">
-                    <CareIcon
-                      icon={
-                        field.value === ResourceRequestCategory.PATIENT_CARE
-                          ? "l-building"
-                          : "l-globe"
-                      }
-                      className="size-3.5 shrink-0"
-                    />
-                    {field.value === ResourceRequestCategory.PATIENT_CARE
-                      ? t("resource_category_direct_hint")
-                      : t("resource_category_network_hint")}
+                    <CareIcon icon="l-globe" className="size-3.5 shrink-0" />
+                    {t("resource_category_network_hint")}
                   </FormDescription>
                 ) : null}
                 <FormMessage />
@@ -351,6 +327,39 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     {RESOURCE_REQUEST_STATUS_OPTIONS.map((option) => (
                       <SelectItem key={option.text} value={option.text}>
                         {t(`resource_request_status__${option.text}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="priority"
+            render={({ field }) => (
+              <FormItem className="sm:max-w-xs">
+                <FormLabel aria-required>
+                  {t("resource_request_priority")}
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={field.value ? String(field.value) : undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger ref={field.ref}>
+                      <SelectValue placeholder={t("select_priority")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {RESOURCE_REQUEST_PRIORITY_OPTIONS.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={String(option.value)}
+                      >
+                        {t(option.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
