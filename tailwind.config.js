@@ -68,6 +68,10 @@ module.exports = {
         "170mm": "170mm",
       },
       keyframes: {
+        blink: {
+          "0%, 100%": { opacity: "0" },
+          "50%": { opacity: "1" },
+        },
         "caret-blink": {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
@@ -82,6 +86,7 @@ module.exports = {
         },
       },
       animation: {
+        blink: "blink 1.5s infinite",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
         "collapsible-down": "collapsible-down 0.2s ease-out",
         "collapsible-up": "collapsible-up 0.2s ease-out",
