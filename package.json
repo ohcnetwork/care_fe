@@ -49,6 +49,7 @@
     "playwright:db-status": "bash scripts/playwright-db.sh status",
     "prepare": "husky",
     "lint": "eslint ./src",
+    "typecheck": "tsc --noEmit",
     "knip": "knip",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
