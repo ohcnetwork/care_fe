@@ -20,15 +20,13 @@ test.describe("Patient Demography View", () => {
     // The patient detail page renders its "Patient Details" header once loaded.
     await expect(
       page.getByRole("heading", { name: "Patient Details" }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should display demographic fields", async ({ page }) => {
     // Verify key demographic labels are visible. These are rendered as
     // label-value pairs in the Demography component.
-    await expect(page.getByText(/full name/i).first()).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(/full name/i).first()).toBeVisible();
 
     await expect(page.getByText(/phone number/i).first()).toBeVisible();
 
@@ -48,7 +46,7 @@ test.describe("Patient Demography View", () => {
   test("should have edit button for general info section", async ({ page }) => {
     await expect(
       page.getByRole("button", { name: /edit/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should navigate to patient update page when edit is clicked", async ({
@@ -61,8 +59,6 @@ test.describe("Patient Demography View", () => {
   });
 
   test("should display address information", async ({ page }) => {
-    await expect(page.getByText(/current address/i).first()).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(/current address/i).first()).toBeVisible();
   });
 });
