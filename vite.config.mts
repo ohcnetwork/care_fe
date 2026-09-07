@@ -15,7 +15,6 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
@@ -452,17 +451,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ],
       }),
       react(),
-      checker({
-        typescript: true,
-        eslint: {
-          useFlatConfig: true,
-          lintCommand: "eslint ./src",
-          dev: {
-            logLevel: ["error"],
-          },
-        },
-        enableBuild: false,
-      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
