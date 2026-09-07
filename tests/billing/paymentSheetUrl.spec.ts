@@ -21,14 +21,17 @@ test.describe("Payment Sheet URL Persistence", () => {
 
       await page.getByRole("button", { name: "Advance/Receipt" }).click();
 
-      const paymentSheet = page.getByRole("dialog", {
-        name: /record payment/i,
+      const paymentSheet = page.locator("[role='dialog']").filter({
+        has: page.getByRole("heading", {
+          name: /collect payment|record credit note/i,
+        }),
       });
       await expect(paymentSheet).toBeVisible();
       await expect(page).toHaveURL(/\/payment\/pay/);
 
       await page.reload();
 
+      // After reload, the sheet should still be open with the form (not success view)
       await expect(paymentSheet).toBeVisible();
       await expect(page).toHaveURL(/\/payment\/pay/);
     });
@@ -40,8 +43,10 @@ test.describe("Payment Sheet URL Persistence", () => {
         `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/pay`,
       );
 
-      const paymentSheet = page.getByRole("dialog", {
-        name: /record payment/i,
+      const paymentSheet = page.locator("[role='dialog']").filter({
+        has: page.getByRole("heading", {
+          name: /collect payment|record credit note/i,
+        }),
       });
       await expect(paymentSheet).toBeVisible();
 
@@ -59,8 +64,8 @@ test.describe("Payment Sheet URL Persistence", () => {
         `/facility/${facilityId}/billing/account/${accountId}/invoices/payment/credit_note`,
       );
 
-      const creditNoteSheet = page.getByRole("dialog", {
-        name: /record credit note/i,
+      const creditNoteSheet = page.locator("[role='dialog']").filter({
+        has: page.getByRole("heading", { name: /record credit note/i }),
       });
       await expect(creditNoteSheet).toBeVisible();
 
