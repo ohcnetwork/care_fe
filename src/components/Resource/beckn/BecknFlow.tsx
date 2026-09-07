@@ -35,6 +35,8 @@ interface BecknFlowProps {
   discover: { textSearch?: string; healthServiceType?: string };
   /** Consultation only: resource-request title → `contract.descriptor.name`. */
   title?: string;
+  /** Consultation only: NFH urgency tier from the request priority. */
+  clinicalUrgencyTier?: string;
   /** Appointment only: link the originating referral. */
   coordinationRef?: string;
   /** Consultation (RR form): kick off discover as soon as the flow mounts. */
@@ -61,6 +63,7 @@ export default function BecknFlow({
   patient,
   discover,
   title,
+  clinicalUrgencyTier,
   coordinationRef,
   autoStart,
   onConfirmed,
@@ -106,6 +109,8 @@ export default function BecknFlow({
           patient,
           facilityId,
           title,
+          healthServiceType,
+          clinicalUrgencyTier,
         }),
       );
       return;
@@ -130,6 +135,7 @@ export default function BecknFlow({
     facilityId,
     title,
     healthServiceType,
+    clinicalUrgencyTier,
     flow.slices,
   ]);
 
@@ -149,6 +155,7 @@ export default function BecknFlow({
         coordinationRef,
         contractId: flow.initResult.contractId,
         coordinationId,
+        clinicalUrgencyTier,
       }),
     );
   }, [
@@ -163,6 +170,7 @@ export default function BecknFlow({
     coordinationRef,
     flow.initResult.contractId,
     coordinationId,
+    clinicalUrgencyTier,
   ]);
 
   // Both flows terminate at ON_CONFIRM: the origin facility confirms its own

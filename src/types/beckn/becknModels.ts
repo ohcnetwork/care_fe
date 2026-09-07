@@ -364,6 +364,10 @@ const ATTR_CONTEXT = {
   coordination: `${SCHEMA_BASE}/ServiceCoordination/v2.1/context.jsonld`,
 } as const;
 
+// DHP coded-value container (targetCriteria.serviceCategory).
+const CODED_VALUE_CONTEXT =
+  "https://raw.githubusercontent.com/beckn/DHP-Specs/main/devkit/stub/context.jsonld";
+
 /** Map a Care resource category to the Beckn `healthServiceType` code. */
 export function healthServiceTypeForCategory(
   category: string | undefined,
@@ -388,6 +392,15 @@ export function healthServiceTypeLabel(value: string | undefined): string {
   if (!value) return "";
   const match = HEALTH_SERVICE_TYPES.find((o) => o.value === value);
   return match ? t(match.labelKey) : value;
+}
+
+/** Map a Care resource-request priority integer to an NFH urgency tier. */
+export function clinicalUrgencyTierForPriority(
+  priority: number | undefined,
+): string {
+  if (priority && priority >= 3) return "EMERGENCY";
+  if (priority && priority >= 2) return "URGENT";
+  return "ROUTINE";
 }
 
 /**
@@ -499,21 +512,47 @@ function buildPatientParticipant(
 }
 
 /**
+ * `targetCriteria` for the referral flow, derived from the requested
+ * `healthServiceType`. A lab test is an upward investigation referral; every
+ * other service is a downward consultation (home-visit) referral.
+ */
+function buildTargetCriteria(
+  healthServiceType: string | undefined,
+): Record<string, unknown> {
+  const isLab = healthServiceType === "LAB_TEST";
+  return pruneUndefined({
+    serviceCategory: {
+      "@context": CODED_VALUE_CONTEXT,
+      "@type": "ServiceCategory",
+      code: isLab ? "INVESTIGATION" : "CONSULTATION",
+      display: isLab ? "Investigation" : "Consultation",
+    },
+    procedureNeeds: isLab ? undefined : ["HOME_VISIT"],
+    consultationModality: "IN_PERSON",
+  });
+}
+
+/**
  * `contractAttributes` for the ServiceCoordination (CC referral) flow, shared by
  * init and confirm. `coordinationId` is FE-generated once and reused; the
- * selected coordinator's provider id becomes `assignedFacilityId`.
+ * selected coordinator's provider id becomes `assignedFacilityId`. The CC reads
+ * `targetCriteria.serviceCategory` to tell a consultation from a lab referral.
  */
 function buildCoordinationAttributes(
   option: CatalogOption,
   coordinationId: string | undefined,
   facilityId: string | undefined,
+  healthServiceType: string | undefined,
+  clinicalUrgencyTier: string | undefined,
 ): Record<string, unknown> {
   return pruneUndefined({
-    "@context": ATTR_CONTEXT.coordination,
-    "@type": "scoord:ServiceCoordination",
+    "@context": ATTR_CONTEXT.referral,
+    "@type": "hrf:HealthReferral",
     coordinationId,
     lifecycleState: "ACTIVE",
-    targetCriteria: { modality: "IN_PERSON", urgencyTier: "ROUTINE" },
+    clinicalUrgencyTier: clinicalUrgencyTier ?? "ROUTINE",
+    healthServiceType,
+    targetCriteria: buildTargetCriteria(healthServiceType),
     facilityId,
     assignedFacilityId: option.providerId,
   });
@@ -574,6 +613,10 @@ export interface InitParams {
   facilityId?: string;
   /** Resource-request title → `contract.descriptor.name`. */
   title?: string;
+  /** Drives the referral service category (consultation vs investigation). */
+  healthServiceType?: string;
+  /** NFH urgency tier derived from the request priority. */
+  clinicalUrgencyTier?: string;
 }
 
 /**
@@ -582,12 +625,20 @@ export interface InitParams {
  * BPP; the BE fills bapId/bapUri/action/messageId/timestamp.
  */
 export function buildInitBody(params: InitParams): Record<string, unknown> {
-  const { transactionId, option, coordinationId, patient, facilityId, title } =
-    params;
+  const {
+    transactionId,
+    option,
+    coordinationId,
+    patient,
+    facilityId,
+    title,
+    healthServiceType,
+    clinicalUrgencyTier,
+  } = params;
   return {
     transactionId,
     context: buildContext(option, [
-      ATTR_CONTEXT.coordination,
+      ATTR_CONTEXT.referral,
       ATTR_CONTEXT.participant,
     ]),
     message: {
@@ -602,6 +653,8 @@ export function buildInitBody(params: InitParams): Record<string, unknown> {
           option,
           coordinationId,
           facilityId,
+          healthServiceType,
+          clinicalUrgencyTier,
         ),
       }),
     },
@@ -697,6 +750,8 @@ export interface ConfirmParams {
   contractId?: string;
   /** Coordination flow: FE-generated id from init, reused unchanged here. */
   coordinationId?: string;
+  /** NFH urgency tier derived from the request priority. */
+  clinicalUrgencyTier?: string;
 }
 
 export function buildConfirmBody(
@@ -713,13 +768,14 @@ export function buildConfirmBody(
     coordinationRef,
     contractId,
     coordinationId,
+    clinicalUrgencyTier,
   } = params;
 
   if (serviceType === "consultation") {
     return {
       transactionId,
       context: buildContext(option, [
-        ATTR_CONTEXT.coordination,
+        ATTR_CONTEXT.referral,
         ATTR_CONTEXT.participant,
       ]),
       message: {
@@ -734,6 +790,8 @@ export function buildConfirmBody(
             option,
             coordinationId,
             facilityId,
+            healthServiceType,
+            clinicalUrgencyTier,
           ),
         }),
       },
