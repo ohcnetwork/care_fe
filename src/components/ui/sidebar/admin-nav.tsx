@@ -1,7 +1,15 @@
 import { TFunction } from "i18next";
+import {
+  Blocks,
+  Building2,
+  ClipboardList,
+  IdCard,
+  ListOrdered,
+  Settings2,
+  ShieldCheck,
+  Tags,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
 
@@ -14,70 +22,75 @@ function generateAdminLinks(
   const baseUrl = "/admin";
   const links: NavigationLink[] = [
     {
+      section: t("configuration"),
       name: t("questionnaire_other"),
       url: `${baseUrl}/questionnaires`,
-      icon: <CareIcon icon="d-book-open" />,
+      icon: <ClipboardList />,
     },
     {
       name: t("action_configurations"),
       url: `${baseUrl}/actions`,
-      icon: <CareIcon icon="l-setting" />,
+      icon: <Settings2 />,
     },
     {
-      name: "Valuesets",
+      name: t("admin_nav_valuesets"),
       url: `${baseUrl}/valuesets`,
-      icon: <CareIcon icon="l-list-ol-alt" />,
+      icon: <ListOrdered />,
     },
     {
-      name: "Patient Identifier Config",
+      name: t("patient_identifier_config"),
       url: `${baseUrl}/patient_identifier_config`,
-      icon: <CareIcon icon="l-setting" />,
+      icon: <IdCard />,
     },
     {
-      name: "Tag Config",
+      name: t("admin_nav_tag_config"),
       url: `${baseUrl}/tag_config`,
-      icon: <CareIcon icon="l-tag-alt" />,
+      icon: <Tags />,
     },
     {
-      name: "RBAC",
+      section: t("administration"),
+      name: t("admin_nav_rbac"),
       url: `${baseUrl}/rbac`,
-      icon: <CareIcon icon="l-shield-check" />,
+      icon: <ShieldCheck />,
       children: [
         {
-          name: "Permissions",
+          name: t("permissions"),
           url: `${baseUrl}/rbac/permissions`,
         },
         {
-          name: "Roles",
+          name: t("roles"),
           url: `${baseUrl}/rbac/roles`,
         },
       ],
     },
     {
-      name: "Organizations",
+      name: t("organizations"),
       url: `${baseUrl}/organizations`,
-      icon: <CareIcon icon="l-building" />,
+      icon: <Building2 />,
       children: [
         {
-          name: "Governance",
+          name: t("admin_nav_governance"),
           url: `${baseUrl}/organizations/govt`,
         },
         {
-          name: "Suppliers",
+          name: t("suppliers"),
           url: `${baseUrl}/organizations/product_supplier`,
         },
         {
-          name: "Responsibilities",
+          name: t("responsibilities"),
           url: `${baseUrl}/organizations/role`,
         },
       ],
     },
     {
-      name: "Apps",
+      name: t("admin_nav_apps"),
       url: `${baseUrl}/apps`,
-      icon: <CareIcon icon="l-apps" />,
+      icon: <Blocks />,
     },
-    ...pluginNavItems,
+    ...pluginNavItems.map((item, index) => ({
+      ...item,
+      section: index === 0 ? (item.section ?? null) : item.section,
+    })),
   ];
 
   return links;

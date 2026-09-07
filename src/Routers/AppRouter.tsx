@@ -1,13 +1,12 @@
-import careConfig from "@careConfig";
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
-import { CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
+import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
@@ -155,21 +154,21 @@ export default function AppRouter() {
     /^\/facility\/[^/]+\/locations\/[^/]+/.test(currentPath);
   const isSettingsWorkspace =
     shouldShowSidebar && isFacilitySettingsPath(currentPath);
-  const isInnerWorkspace = isLocationWorkspace || isSettingsWorkspace;
+  const isServiceWorkspace =
+    !!shouldShowSidebar &&
+    /^\/facility\/[^/]+\/services\/[^/]+/.test(currentPath);
+  const isInnerWorkspace = !!(
+    isLocationWorkspace ||
+    isSettingsWorkspace ||
+    isServiceWorkspace
+  );
   const isLocationFormPage =
     isLocationWorkspace && /\/(overview|responses|forms)\/?$/.test(currentPath);
 
   return (
-    <SidebarProvider
+    <AppSidebarProvider
       defaultOpen={sidebarOpen}
-      className={
-        isInnerWorkspace ? "bg-neutral-100 text-neutral-950" : undefined
-      }
-      style={
-        isInnerWorkspace
-          ? ({ "--sidebar-width": "14rem" } as CSSProperties)
-          : undefined
-      }
+      innerWorkspace={isInnerWorkspace}
     >
       <PermissionProvider
         userPermissions={user?.permissions || []}
@@ -180,11 +179,12 @@ export default function AppRouter() {
         )}
         <main
           id="pages"
+          data-slot="sidebar-inset"
           className={cn(
             "flex min-w-0 max-w-full flex-1 flex-col focus:outline-hidden",
             isInnerWorkspace
               ? "min-h-svh bg-white text-neutral-950"
-              : "min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50",
+              : "min-h-svh bg-white text-neutral-950 md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2",
           )}
         >
           <Button onClick={() => setCommandDialogOpen(true)} className="hidden">
@@ -200,20 +200,12 @@ export default function AppRouter() {
             <LocationPageHeader />
           ) : isSettingsWorkspace ? (
             <FacilitySettingsPageHeader />
-          ) : (
-            <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
-              <div className="flex items-center">
-                {shouldShowSidebar && <SidebarTrigger />}
-              </div>
-              <a className="flex items-center w-full h-full px-4 md:hidden">
-                <img
-                  className="w-auto h-8"
-                  src={careConfig.mainLogo?.dark}
-                  alt="care logo"
-                />
-              </a>
-            </div>
-          )}
+          ) : shouldShowSidebar ? (
+            <WorkspaceHeader
+              user={user}
+              onSearch={() => setCommandDialogOpen(true)}
+            />
+          ) : null}
           <div
             className={
               isLocationWorkspace
@@ -224,7 +216,7 @@ export default function AppRouter() {
                   ? /\/settings(\/|$)/.test(currentPath)
                     ? "min-w-0"
                     : "min-w-0 p-4"
-                  : "p-3 mt-4"
+                  : "min-w-0 p-4"
             }
             data-cui-page
           >
@@ -234,6 +226,6 @@ export default function AppRouter() {
           </div>
         </main>
       </PermissionProvider>
-    </SidebarProvider>
+    </AppSidebarProvider>
   );
 }

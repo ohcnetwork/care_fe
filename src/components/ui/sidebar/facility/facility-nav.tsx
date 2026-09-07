@@ -1,7 +1,16 @@
 import { TFunction } from "i18next";
+import {
+  Box,
+  CalendarDays,
+  CreditCard,
+  House,
+  Package,
+  Search,
+  Settings2,
+  UserCog,
+  Users,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
@@ -13,7 +22,6 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import careConfig from "@careConfig";
-import { Logs } from "lucide-react";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -42,24 +50,25 @@ function generateFacilityLinks(
     {
       name: t("overview"),
       url: `${baseUrl}/overview`,
-      icon: <CareIcon icon="d-hospital" />,
+      icon: <House />,
     },
     {
+      section: t("patient_management"),
       name: t("appointments"),
       url: `${baseUrl}/appointments`,
-      icon: <CareIcon icon="d-calendar" />,
+      icon: <CalendarDays />,
       visibility: permissions.canViewAppointments,
     },
     {
       name: t("queues"),
       url: `${baseUrl}/queues`,
-      icon: <Logs />,
+      icon: <Users />,
       visibility: permissions.canViewAppointments,
     },
     {
       name: t("patients"),
       url: `${baseUrl}/patients`,
-      icon: <CareIcon icon="d-patient" />,
+      icon: <Search />,
       visibility:
         permissions.canWriteAppointment ||
         permissions.canListEncounters ||
@@ -87,24 +96,26 @@ function generateFacilityLinks(
       ],
     },
     {
+      section: t("services"),
       name: t("services"),
       url: `${baseUrl}/services`,
-      icon: <CareIcon icon="d-microscope" />,
+      icon: <Package />,
     },
     {
       name: t("resource"),
       url: `${baseUrl}/resource`,
-      icon: <CareIcon icon="d-book-open" />,
+      icon: <Box />,
     },
     {
+      section: t("administration"),
       name: t("users"),
       url: `${baseUrl}/users`,
-      icon: <CareIcon icon="d-people" />,
+      icon: <UserCog />,
     },
     {
       name: t("billing"),
       url: `${baseUrl}/billing`,
-      icon: <CareIcon icon="d-notice-board" />,
+      icon: <CreditCard />,
       children: [
         {
           name: t("accounts"),
@@ -127,14 +138,15 @@ function generateFacilityLinks(
     {
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
-      icon: <CareIcon icon="l-setting" />,
+      icon: <Settings2 />,
     },
   ];
 
   return [
     ...links,
-    ...pluginLinks.map((l) => ({
+    ...pluginLinks.map((l, index) => ({
       ...l,
+      section: index === 0 ? (l.section ?? null) : l.section,
       url: `${baseUrl}/${l.url}`,
     })),
   ];

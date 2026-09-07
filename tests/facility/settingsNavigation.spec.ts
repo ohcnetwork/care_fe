@@ -160,36 +160,65 @@ test.describe("Facility settings navigation", () => {
       await expectCurrentSettingsPage(page, "General");
     });
 
-    await test.step("collapsed settings controls retain usable accessible names", async () => {
+    await test.step("settings navigation hides fully and previews without moving the page", async () => {
       const toggle = settingsHeader(page).getByRole("button", {
         name: "Toggle Sidebar",
         exact: true,
       });
-      const container = page.locator('[data-side="left"][data-collapsible]');
+      const state = page.locator("[data-app-sidebar-pinned]");
+      const main = page.locator("#pages");
       await toggle.click();
-      await expect(container).toHaveAttribute("data-state", "collapsed");
+      await page.mouse.move(900, 700);
+      await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await expect(sidebar).not.toBeVisible();
+      await expect(sidebar).not.toBeInViewport();
+      const closedLeft = await main.evaluate(
+        (element) => element.getBoundingClientRect().left,
+      );
+      await toggle.hover();
+      await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
+      await expect(sidebar).toBeInViewport({ ratio: 1 });
       await expect(
         sidebar.getByRole("link", { name: "General", exact: true }),
-      ).toBeVisible();
-      await expect(
-        sidebar.getByRole("link", { name: "Back to facility", exact: true }),
       ).toBeVisible();
       const billing = sidebar.getByRole("button", {
         name: "Billing",
         exact: true,
       });
-      await billing.click();
-      const menu = page.getByRole("dialog", { name: "Billing", exact: true });
+      if ((await billing.getAttribute("aria-expanded")) !== "true") {
+        await billing.click();
+      }
       await expect(
-        menu.getByRole("link", { name: "Tax Codes", exact: true }),
+        sidebar.getByRole("link", { name: "Tax Codes", exact: true }),
       ).toBeVisible();
+      await expect
+        .poll(async () =>
+          Math.abs(
+            (await main.evaluate(
+              (element) => element.getBoundingClientRect().left,
+            )) - closedLeft,
+          ),
+        )
+        .toBeLessThan(1);
       await page.keyboard.press("Escape");
-      await expect(menu).not.toBeVisible();
-      await expect(billing).toBeFocused();
+      await expect(sidebar).not.toBeVisible();
+      await page.mouse.move(900, 700);
+      await toggle.hover();
+      await expect(sidebar).toBeInViewport({ ratio: 1 });
       await toggle.click();
-      await expect(container).toHaveAttribute("data-state", "expanded");
+      await page.mouse.move(900, 700);
+      await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
+      await expect(sidebar).toBeInViewport({ ratio: 1 });
+      await expect(
+        sidebar.getByRole("link", { name: "Back to facility", exact: true }),
+      ).toBeVisible();
+      await expect
+        .poll(() =>
+          main.evaluate((element) => element.getBoundingClientRect().left),
+        )
+        .toBeGreaterThan(closedLeft + 100);
     });
 
     await test.step("billing pages and reload retain the selected setting", async () => {

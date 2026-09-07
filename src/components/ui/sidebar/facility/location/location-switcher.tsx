@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
@@ -47,8 +48,14 @@ export function LocationSwitcher() {
   const { t } = useTranslation();
   const { facilityId, location: extractedLocation } = useCurrentLocation();
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const { handleMenuOpenChange } = useAppSidebar();
+  const handleDialogOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    handleMenuOpenChange(open);
+  };
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
@@ -63,29 +70,32 @@ export function LocationSwitcher() {
         location={location}
         setLocation={setLocation}
         open={openDialog}
-        setOpen={setOpenDialog}
+        setOpen={handleDialogOpenChange}
         myLocations={true}
       />
       <div
         className={cn(
           "flex min-w-0 flex-col gap-2 py-2",
-          state === "expanded" && "px-2",
+          !isCollapsed && "px-2",
         )}
       >
         <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size={state === "collapsed" ? "icon" : "sm"}
-            onClick={() => navigate(fallbackUrl)}
+            size={isCollapsed ? "icon" : "sm"}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+              navigate(fallbackUrl);
+            }}
             className={cn(
               "gap-1.5 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
-              state === "collapsed" ? "size-8" : "-ml-1 h-8 px-2",
+              isCollapsed ? "size-8" : "-ml-1 h-8 px-2",
             )}
             aria-label={t("home")}
-            title={state === "collapsed" ? t("home") : undefined}
+            title={isCollapsed ? t("home") : undefined}
           >
             <ChevronLeft className="size-4" />
-            {state === "expanded" && <span>{t("home")}</span>}
+            {!isCollapsed && <span>{t("home")}</span>}
           </Button>
           {isMobile && (
             <Button
@@ -106,25 +116,18 @@ export function LocationSwitcher() {
               variant="ghost"
               className={cn(
                 "flex h-auto w-full items-center justify-between gap-2 overflow-hidden rounded-[10px] border border-neutral-300 bg-white text-neutral-950 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-indigo-400",
-                state === "collapsed"
-                  ? "size-8 justify-center p-0"
-                  : "px-3 py-2.5",
+                isCollapsed ? "size-8 justify-center p-0" : "px-3 py-2.5",
               )}
               aria-label={location?.name ?? t("select_location")}
               aria-haspopup="dialog"
               aria-expanded={openDialog}
-              onClick={() => setOpenDialog(true)}
+              onClick={() => handleDialogOpenChange(true)}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                {state === "collapsed" && (
+                {isCollapsed && (
                   <MapPinIcon className="mx-auto size-4 text-neutral-600" />
                 )}
-                <div
-                  className={cn(
-                    "min-w-0 flex-1",
-                    state === "collapsed" && "hidden",
-                  )}
-                >
+                <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
                     <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
                       {t("current_location")}
@@ -135,7 +138,7 @@ export function LocationSwitcher() {
                   </div>
                 </div>
               </div>
-              {state === "expanded" && (
+              {!isCollapsed && (
                 <ChevronsUpDown className="size-4 shrink-0 text-neutral-600" />
               )}
             </Button>

@@ -1,26 +1,26 @@
 import React from "react";
 
-import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 interface Options {
   restore?: boolean;
 }
 
 export const useSidebarAutoCollapse = ({ restore = true }: Options = {}) => {
-  const sidebar = useSidebar();
+  const sidebar = useAppSidebar();
 
   React.useEffect(() => {
-    const initialState = sidebar.open;
+    const initialState = sidebar.pinned;
 
     // Collapse the sidebar on mount if it is open
-    if (sidebar.open) {
-      sidebar.setOpen(false);
+    if (sidebar.pinned) {
+      sidebar.setPinned(false);
     }
 
     return () => {
       // Restore to the initial state when the component unmounts if necessary
       if (restore) {
-        sidebar.setOpen(initialState);
+        sidebar.setPinned(initialState);
       }
     };
 

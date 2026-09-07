@@ -1,8 +1,8 @@
-import careConfig from "@careConfig";
 import { useRoutes } from "raviger";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
+import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
@@ -97,38 +97,22 @@ export default function PatientRouter() {
 
   return (
     <PatientUserProvider>
-      <SidebarProvider defaultOpen={sidebarOpen}>
+      <AppSidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
         <main
           id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-hidden md:pb-2 md:pr-2"
+          data-slot="sidebar-inset"
+          className="flex min-w-0 flex-1 flex-col bg-white text-neutral-950 focus:outline-hidden md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2"
         >
           <BrowserWarning />
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow-sm md:hidden">
-            <div className="flex items-center">
-              <SidebarTrigger className="px-2" />
-            </div>
-            <a
-              href="/"
-              className="flex h-full w-full items-center px-4 md:hidden"
-            >
-              <img
-                className="h-8 w-auto"
-                src={careConfig.mainLogo?.dark}
-                alt="care logo"
-              />
-            </a>
-          </div>
-          <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
-            data-cui-page
-          >
+          <WorkspaceHeader patient />
+          <div className="min-w-0 p-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>
           </div>
         </main>
-      </SidebarProvider>
+      </AppSidebarProvider>
     </PatientUserProvider>
   );
 }

@@ -1,7 +1,5 @@
-import { PanelLeft } from "lucide-react";
 import { Link } from "raviger";
 import { Fragment } from "react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -13,9 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
-import { TooltipComponent } from "@/components/ui/tooltip";
+import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
 interface InnerPageBreadcrumb {
   label: string;
@@ -29,27 +25,12 @@ interface InnerPageHeaderProps {
 }
 
 export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
-  const { t } = useTranslation();
-  const { toggleSidebar, isMobile, open, openMobile } = useSidebar();
-
   return (
     <header
       data-cy={dataCy}
       className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 text-neutral-950"
     >
-      <TooltipComponent content={t("toggle_sidebar")}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={t("toggle_sidebar")}
-          aria-expanded={isMobile ? openMobile : open}
-          onClick={toggleSidebar}
-          className="relative -ml-1 size-7 shrink-0 rounded-md text-neutral-700 after:absolute after:-inset-2 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-        >
-          <PanelLeft className="size-4" aria-hidden="true" />
-        </Button>
-      </TooltipComponent>
+      <AppSidebarToggle />
       <span aria-hidden="true" className="h-5 w-px bg-neutral-200" />
       <Breadcrumb className="min-w-0">
         <BreadcrumbList className="flex-nowrap text-neutral-600">

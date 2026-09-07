@@ -219,7 +219,6 @@ export function FacilitySettingsNav() {
               <Separator className="mx-4 bg-neutral-200 data-[orientation=horizontal]:w-auto group-data-[collapsible=icon]:mx-2" />
             )}
             <NavMain
-              appearance="careui"
               label={group.label ? t(group.label) : undefined}
               links={links}
             />
