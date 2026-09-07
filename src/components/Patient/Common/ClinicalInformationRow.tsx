@@ -111,7 +111,7 @@ export default function ClinicalInformationRow({
               <div className="text-gray-500">{t("reported_by")}:</div>
               <div className="mt-1 flex items-center gap-2">
                 <Avatar
-                  name={formatName(createdBy)}
+                  name={formatName(createdBy, true)}
                   className="size-6"
                   imageUrl={createdBy.profile_picture_url}
                 />

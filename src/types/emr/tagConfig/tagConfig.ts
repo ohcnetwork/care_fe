@@ -53,7 +53,7 @@ export interface TagConfigBase {
 }
 
 export interface TagConfig extends TagConfigBase {
-  meta: TagConfigMeta;
+  metadata: TagConfigMeta;
   priority: number;
   status: TagStatus;
   system_generated: boolean;
@@ -78,6 +78,7 @@ export interface TagConfigRequest {
   organization?: string;
   facility?: string;
   facility_organization?: string;
+  metadata?: TagConfigMeta;
 }
 
 export function getTagHierarchyDisplay(

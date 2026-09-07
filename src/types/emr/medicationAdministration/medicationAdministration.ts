@@ -1,5 +1,8 @@
 import { Code } from "@/types/base/code/code";
-import { DosageQuantity } from "@/types/emr/medicationRequest/medicationRequest";
+import {
+  DosageQuantity,
+  MedicationCategory,
+} from "@/types/emr/medicationRequest/medicationRequest";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { Quantity } from "@/types/questionnaire/quantity";
 import { UserReadMinimal } from "@/types/user/user";
@@ -21,7 +24,7 @@ export interface MedicationAdministration {
   readonly id?: string;
   status: MedicationAdministrationStatus;
   status_reason?: Code;
-  category?: "inpatient" | "outpatient" | "community";
+  category?: MedicationCategory;
 
   medication?: Code;
   administered_product?: string;

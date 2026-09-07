@@ -150,7 +150,6 @@ export const PrintChargeItems = (props: {
         status: selectedStatuses.join(","),
         ordering: qParams.ordering,
       },
-      pageSize: 100,
     }),
   });
 
@@ -164,7 +163,6 @@ export const PrintChargeItems = (props: {
           account: accountId,
           ordering: "-payment_datetime",
         },
-        pageSize: 100,
       },
     ),
   });

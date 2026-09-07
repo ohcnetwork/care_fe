@@ -1,7 +1,7 @@
 import TagAssignmentSheet, {
   TagEntityType,
 } from "@/components/Tags/TagAssignmentSheet";
-import { Badge } from "@/components/ui/badge";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
@@ -10,10 +10,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import {
-  getTagHierarchyDisplay,
-  TagConfig,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { SettingsIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -51,10 +48,13 @@ export const PatientInfoCard = ({
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               {tags.length > 0 ? (
-                tags.map((t) => (
-                  <Badge key={t.id} variant="outline">
-                    {getTagHierarchyDisplay(t)}
-                  </Badge>
+                tags.map((tag) => (
+                  <TagBadge
+                    key={tag.id}
+                    tag={tag}
+                    hierarchyDisplay
+                    variant="outline"
+                  />
                 ))
               ) : (
                 <span className="text-sm text-gray-500 px-2">

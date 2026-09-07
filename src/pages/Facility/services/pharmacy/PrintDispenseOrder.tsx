@@ -238,7 +238,7 @@ export const PrintDispenseOrder = ({
 
   if (!dispenseOrder) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("dispense_order_not_found")}
       </div>
     );
@@ -246,7 +246,7 @@ export const PrintDispenseOrder = ({
 
   if (!medicationDispenses?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medication_dispenses_found")}
       </div>
     );
