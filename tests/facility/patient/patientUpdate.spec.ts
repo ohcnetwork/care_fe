@@ -37,9 +37,13 @@ test.describe("Patient Update/Edit", () => {
   });
 
   test("should display the gender pre-selected", async ({ page }) => {
-    // The patient's saved gender should be pre-selected on load.
+    // Scope to the gender option labels (not any radio on the page) so another
+    // radio group's default can't satisfy this and it fails if gender is unset.
     await expect(
-      page.getByRole("radio", { checked: true }).first(),
+      page.getByRole("radio", {
+        name: /^(Female|Male|Non-binary|Transgender)$/,
+        checked: true,
+      }),
     ).toBeVisible();
   });
 
