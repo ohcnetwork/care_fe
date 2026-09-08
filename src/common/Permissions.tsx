@@ -98,6 +98,12 @@ export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
 export const PERMISSION_WRITE_TOKEN = "can_write_token";
 export const PERMISSION_LIST_TOKENS = "can_list_token";
 
+// Patient Identifier Config Permissions
+export const PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG =
+  "can_write_patient_identifier_config";
+export const PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG =
+  "can_read_patient_identifier_config";
+
 // Healthcare Permissions
 export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
   "can_write_healthcare_service";
@@ -257,6 +263,12 @@ export interface Permissions {
   canWriteToken: boolean;
   /** Permission slug: "can_list_token" */
   canListTokens: boolean;
+
+  // Patient Identifier Config Permissions
+  /** Permission slug: "can_write_patient_identifier_config" */
+  canWritePatientIdentifierConfig: boolean;
+  /** Permission slug: "can_read_patient_identifier_config" */
+  canReadPatientIdentifierConfig: boolean;
 
   /** Permission slug: "can_write_healthcare_service" */
   canWriteHealthcareService: boolean;
@@ -475,6 +487,16 @@ export function getPermissions(
     ),
     canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
     canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+
+    // Patient Identifier Config
+    canWritePatientIdentifierConfig: hasPermission(
+      PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
+    canReadPatientIdentifierConfig: hasPermission(
+      PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
 
     //Healthcare Services
     canWriteHealthcareService: hasPermission(

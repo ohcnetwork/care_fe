@@ -200,17 +200,12 @@ export type History = {
   moved_at: string;
 };
 
-export type EncounterClassHistory = {
-  history: History[];
-};
-
 export type StatusHistory = {
   history: History[];
 };
 
 export interface EncounterBase {
   status: EncounterStatus;
-  encounter_class: EncounterClass;
   period: Period;
   hospitalization?: Hospitalization | null;
   priority: EncounterPriority;
@@ -223,12 +218,12 @@ export interface EncounterListRead extends EncounterBase {
   patient: PatientListRead;
   facility: FacilityBareMinimum;
   status_history: StatusHistory;
-  encounter_class_history: EncounterClassHistory;
   created_date: string;
   modified_date: string;
   tags: TagConfig[];
   current_location: LocationMinSpec | null;
   care_team: CareTeamResponse[];
+  encounter_class: EncounterClass;
 }
 
 export interface EncounterRead
@@ -254,6 +249,7 @@ export interface EncounterCreate extends Omit<
   appointment?: string;
   external_identifier?: string;
   discharge_summary_advice?: string;
+  encounter_class: EncounterClass;
 }
 
 export type EncounterEdit = EncounterBase;
