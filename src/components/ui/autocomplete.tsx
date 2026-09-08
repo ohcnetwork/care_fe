@@ -29,6 +29,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -149,7 +150,7 @@ export default function Autocomplete({
         disabled={disabled}
         onValueChange={handleInputChange}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
-        autoFocus
+        autoFocus={!isIOSDevice}
       />
       <CommandList className="overflow-y-auto">
         {isLoading ? (
@@ -212,7 +213,7 @@ export default function Autocomplete({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full justify-between",
+                "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
                 selectedOption && "rounded-r-none",
               )}
@@ -271,7 +272,7 @@ export default function Autocomplete({
             aria-invalid={props["aria-invalid"]}
             aria-expanded={open}
             className={cn(
-              "w-full justify-between",
+              "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
               className,
               selectedOption && "rounded-r-none",
             )}
@@ -292,7 +293,7 @@ export default function Autocomplete({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]",
+            "p-0 pointer-events-auto w-(--radix-popover-trigger-width)",
             popoverContentClassName,
           )}
           align={align}

@@ -49,11 +49,13 @@
     "playwright:db-status": "bash scripts/playwright-db.sh status",
     "prepare": "husky",
     "lint": "eslint ./src",
+    "typecheck": "tsc --noEmit",
     "knip": "knip",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./tests --write",
     "sort-locales": "node ./scripts/sort-locales.js",
-    "clone-component": "tsx scripts/clone-component.ts"
+    "clone-component": "tsx scripts/clone-component.ts",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.2.10",
@@ -184,7 +186,6 @@
     "typescript": "^6.0.3",
     "uuid": "^14.0.0",
     "vite": "^8.0.14",
-    "vite-plugin-checker": "^0.14.1",
     "vite-plugin-pwa": "^1.3.0"
   },
   "optionalDependencies": {

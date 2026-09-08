@@ -44,6 +44,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import { MEDICATION_DISPENSE_CANCELLED_STATUSES } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -161,6 +162,7 @@ export default function MedicationReturnShow({
           location: locationId,
           limit: 100,
           order: orderId,
+          exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
         },
       }),
       enabled: !!orderId && !!locationId,

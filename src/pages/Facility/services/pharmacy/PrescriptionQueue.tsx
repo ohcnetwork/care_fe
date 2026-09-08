@@ -1,17 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowUpRightSquare,
-  CheckCircle,
-  MoreVertical,
-  ReceiptTextIcon,
-} from "lucide-react";
-import { Link, navigate } from "raviger";
-import React, { useMemo } from "react";
+import { ArrowRightIcon, CheckCircle, MoreVertical } from "lucide-react";
+import { Link } from "raviger";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import careConfig from "@careConfig";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FilterTabs } from "@/components/ui/filter-tabs";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
@@ -48,7 +46,7 @@ import {
   FilterDateRange,
   longDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import { CreateDispenseSheet } from "@/pages/Facility/services/pharmacy/CreateDispenseSheet";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -73,9 +71,8 @@ import {
   formatDateTime,
   formatName,
 } from "@/Utils/utils";
-import careConfig from "@careConfig";
 
-export default function MedicationRequestList({
+export default function PrescriptionQueue({
   facilityId,
   locationId,
 }: {
@@ -86,13 +83,12 @@ export default function MedicationRequestList({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    cacheBlacklist: ["patient_external_id", "patient_name"],
+    cacheBlacklist: ["patient_external_id", "patient_name", "status"],
   });
-  const encounterClassFilterVisibleTabs = useBreakpoints({
-    default: 2,
-    md: 3,
-    xl: 4,
-  });
+
+  const currentTab: PrescriptionStatus =
+    qParams.status || PrescriptionStatus.active;
+
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
   const selectedTags = tagQueries
@@ -167,8 +163,7 @@ export default function MedicationRequestList({
     queryFn: query.debounced(prescriptionApi.summary, {
       pathParams: { facilityId },
       queryParams: {
-        patient: qParams.search,
-        status: qParams.status || "active",
+        status: currentTab,
         patient_external_id: qParams.patient_external_id,
         encounter_class: qParams.encounter_class,
         tags: qParams.tags,
@@ -185,6 +180,52 @@ export default function MedicationRequestList({
     }),
   });
 
+  const isFilteredByPatient = !!qParams.patient_external_id;
+  const showBillingSelection =
+    isFilteredByPatient && currentTab === PrescriptionStatus.active;
+
+  // State for selected prescription IDs
+  const [selectedPrescriptionIds, setSelectedPrescriptionIds] = useState<
+    string[]
+  >([]);
+
+  // Auto-select all prescriptions when billing selection is shown and data loads
+  useEffect(() => {
+    if (showBillingSelection && prescriptionQueue?.results) {
+      setSelectedPrescriptionIds(
+        prescriptionQueue.results.map((item) => item.id),
+      );
+    } else {
+      setSelectedPrescriptionIds([]);
+    }
+  }, [showBillingSelection, prescriptionQueue?.results, qParams.page]);
+
+  // Handle select all toggle
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPrescriptionIds(
+        prescriptionQueue?.results?.map((item) => item.id) || [],
+      );
+    } else {
+      setSelectedPrescriptionIds([]);
+    }
+  };
+
+  // Handle individual checkbox toggle
+  const handleSelectPrescription = (prescriptionId: string) => {
+    setSelectedPrescriptionIds((prev) =>
+      prev.includes(prescriptionId)
+        ? prev.filter((id) => id !== prescriptionId)
+        : [...prev, prescriptionId],
+    );
+  };
+
+  const allSelected =
+    (prescriptionQueue?.results?.length ?? 0) > 0 &&
+    prescriptionQueue?.results?.every((item) =>
+      selectedPrescriptionIds.includes(item.id),
+    );
+
   const { mutate: completePrescription } = useMutation({
     mutationFn: ({
       patientId,
@@ -195,15 +236,12 @@ export default function MedicationRequestList({
     }) =>
       mutate(prescriptionApi.update, {
         pathParams: { patientId, id: prescriptionId },
-      })({ status: "completed" }),
+      })({ status: PrescriptionStatus.completed }),
     onSuccess: () => {
       toast.success(t("prescription_marked_as_completed"));
       queryClient.invalidateQueries({
         queryKey: ["prescriptionQueue", facilityId, qParams],
       });
-    },
-    onError: () => {
-      toast.error(t("prescription_marking_complete_failed"));
     },
   });
 
@@ -221,7 +259,7 @@ export default function MedicationRequestList({
       {/* Priority tabs with original styling */}
       <div className="mb-4 pt-6">
         <Tabs
-          value={qParams.status || "active"}
+          value={currentTab}
           onValueChange={(value) => updateQuery({ status: value })}
           className="w-full"
         >
@@ -234,9 +272,15 @@ export default function MedicationRequestList({
               <TabsTrigger
                 key={key}
                 value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="relative px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none font-semibold transition-colors whitespace-nowrap ease-in-out"
               >
                 {t(`prescription_status__${key}`)}
+                <div
+                  className={cn(
+                    "absolute inset-x-0 bg-primary-700 h-0.75 rounded-t-md -bottom-px transition-opacity duration-200 ease-in-out",
+                    currentTab === key ? "opacity-100" : "opacity-0",
+                  )}
+                />
               </TabsTrigger>
             ))}
           </TabsList>
@@ -251,12 +295,12 @@ export default function MedicationRequestList({
               patient_name: patientName,
             })
           }
-          placeholder={t("filter_by_identifier")}
+          placeholder={t("or_search_by_id")}
           className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
           patientId={qParams.patient_external_id}
           patientName={qParams.patient_name}
         />
-        <FilterTabs
+        <FilterSelect
           value={
             qParams.encounter_class
               ? `encounter_class__${qParams.encounter_class}`
@@ -264,24 +308,14 @@ export default function MedicationRequestList({
           }
           onValueChange={(value) =>
             updateQuery({
-              encounter_class: value
-                ? value.replace("encounter_class__", "")
-                : "",
+              encounter_class: value?.replace("encounter_class__", ""),
             })
           }
-          options={[...careConfig.encounterClasses].map(
-            (ec) => `encounter_class__${ec}`,
+          options={careConfig.encounterClasses.map(
+            (c) => `encounter_class__${c}`,
           )}
-          showAllOption={true}
-          allOptionLabel="all"
-          variant="background"
-          showMoreDropdown={true}
-          maxVisibleTabs={encounterClassFilterVisibleTabs}
-          defaultVisibleOptions={[
-            "encounter_class__imp",
-            "encounter_class__amb",
-            "encounter_class__emer",
-          ]}
+          label={t("encounter_class")}
+          onClear={() => updateQuery({ encounter_class: undefined })}
         />
         <MultiFilter
           selectedFilters={selectedFilters}
@@ -293,20 +327,65 @@ export default function MedicationRequestList({
           className="flex flex-wrap md:flex-row items-start"
           facilityId={facilityId}
         />
-
-        {qParams.patient_external_id && (
-          <div className="ml-auto items-end">
-            <Button variant="outline_primary" asChild>
-              <Link
-                href={`/medication_requests/patient/${qParams.patient_external_id}/bill`}
-              >
-                <ReceiptTextIcon strokeWidth={1.5} />
-                {t("bill_all_pending_prescriptions")}
-              </Link>
-            </Button>
-          </div>
-        )}
       </div>
+
+      {/* Selection bar when filtered by patient with active status */}
+      {showBillingSelection && (
+        <div className="mt-4 border border-gray-300 bg-white rounded-lg p-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-semibold text-gray-950">
+                {t("select_prescriptions_to_bill")}
+              </span>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                  aria-label={t("select_all")}
+                  id="select-all-prescriptions"
+                />
+                <label
+                  htmlFor="select-all-prescriptions"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {t("select_all")}
+                </label>
+              </div>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="link"
+                className={cn(
+                  "underline",
+                  selectedPrescriptionIds.length === 0
+                    ? "pointer-events-none opacity-50"
+                    : "",
+                )}
+                asChild
+              >
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
+                >
+                  {t("preview_selected_rx")}
+                </Link>
+              </Button>
+              <Button variant="outline_primary" asChild>
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
+                  className={
+                    selectedPrescriptionIds.length === 0
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                >
+                  {t("bill_selected_prescriptions")}
+                  <ArrowRightIcon />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table section */}
       <div className="mt-4">
@@ -327,35 +406,56 @@ export default function MedicationRequestList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("patient_name")}</TableHead>
-                <TableHead>{t("by")}</TableHead>
-                <TableHead>{t("tags", { count: 2 })}</TableHead>
-                <TableHead>{t("action")}</TableHead>
+                {showBillingSelection && <TableHead className="min-w-8" />}
+                <TableHead className="w-1/3">{t("patient_name")}</TableHead>
+                <TableHead className="w-1/3">
+                  {t("encounter_status_location")}
+                </TableHead>
+                <TableHead className="w-1/3">
+                  {t("tags", { count: 2 })}
+                </TableHead>
+                <TableHead>{t("actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
                 <TableRow key={item.id} className="group">
+                  {showBillingSelection && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPrescriptionIds.includes(item.id)}
+                        onCheckedChange={() =>
+                          handleSelectPrescription(item.id)
+                        }
+                        aria-label={t("select_prescription")}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell
-                    className="font-semibold group-hover:underline cursor-pointer"
-                    onClick={() =>
-                      updateQuery({
-                        patient_external_id: item.encounter.patient.id,
-                        patient_name: item.encounter.patient.name,
-                      })
-                    }
+                    className="cursor-pointer min-h-15"
+                    onClick={() => {
+                      if (showBillingSelection) {
+                        handleSelectPrescription(item.id);
+                      } else {
+                        updateQuery({
+                          patient_external_id: item.encounter.patient.id,
+                          patient_name: item.encounter.patient.name,
+                        });
+                      }
+                    }}
                   >
-                    {item.encounter.patient.name}
-                    <div className="text-xs text-gray-500">
-                      {t("by")}: {formatName(item.prescribed_by)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {t("at")}: {formatDateTime(item.created_date)}
+                    <span className="underline decoration-1 underline-offset-2 font-semibold">
+                      {item.encounter.patient.name}
+                    </span>
+                    <div className="text-sm font-medium text-gray-700 whitespace-pre-wrap">
+                      <span>{formatName(item.prescribed_by)}</span>
+                      <span> · </span>
+                      <span>{formatDateTime(item.created_date)}</span>
                     </div>
                   </TableCell>
 
                   <TableCell className="text-sm">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-2">
                       <div className="space-x-1">
                         <Badge
                           size="sm"
@@ -389,8 +489,8 @@ export default function MedicationRequestList({
                         </Badge>
                       </div>
                       {item.encounter.current_location && (
-                        <div className="flex items-center gap-1 text-sm text-gray-700">
-                          <span>
+                        <div className="bg-gray-100 py-1 px-3">
+                          <span className="text-gray-800">
                             {getLocationPath(item.encounter.current_location)}
                           </span>
                         </div>
@@ -419,31 +519,30 @@ export default function MedicationRequestList({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2 self-center">
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}/bill`,
-                          );
-                        }}
-                      >
-                        <ReceiptTextIcon strokeWidth={1.5} />
-                        {t("bill")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
-                          );
-                        }}
-                      >
-                        <ArrowUpRightSquare strokeWidth={1.5} />
-                        {t("see_prescription")}
-                      </Button>
+                    <div className="flex gap-4 items-center">
+                      <span className="font-semibold underline">
+                        <Button variant="link" className="underline">
+                          <Link
+                            href={`/medication_requests/patient/${item.encounter.patient.id}/prescriptions/${item.id}`}
+                          >
+                            {t("view_rx")}
+                          </Link>
+                        </Button>
+                      </span>
+                      {item.status === PrescriptionStatus.active &&
+                        !isFilteredByPatient && (
+                          <Button
+                            variant="outline"
+                            className="font-semibold text-sm text-gray-950"
+                            asChild
+                          >
+                            <Link
+                              href={`/medication_requests/patient/${item.encounter.patient.id}/bill/prescriptions/${item.id}`}
+                            >
+                              {t("bill_now")}
+                            </Link>
+                          </Button>
+                        )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
