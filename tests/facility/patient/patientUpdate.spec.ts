@@ -53,10 +53,9 @@ test.describe("Patient Update/Edit", () => {
     // The update action is disabled until the form is dirtied. Verify editing a
     // field enables it, without submitting (which would mutate the shared
     // fixture patient other specs depend on).
-    const updateButton = page.getByRole("button", {
-      name: "Update",
-      exact: true,
-    });
+    // The submit button's accessible name includes the shortcut badge
+    // ("Update ⇧ + ENTER"), so match the leading label rather than exact text.
+    const updateButton = page.getByRole("button", { name: /^update/i });
     await expect(updateButton).toBeDisabled();
 
     const nameField = page.getByRole("textbox", {
