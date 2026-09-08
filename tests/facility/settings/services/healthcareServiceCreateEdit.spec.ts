@@ -58,7 +58,7 @@ test.describe("Healthcare Service Create & Edit", () => {
 
       // Search for the created service
       await page
-        .getByRole("textbox", { name: /search healthcare services/i })
+        .getByPlaceholder(/search healthcare services/i)
         .fill(serviceName);
 
       // Verify the service link is visible
@@ -93,7 +93,7 @@ test.describe("Healthcare Service Create & Edit", () => {
     // Navigate to the created service
     await test.step("Navigate to the service", async () => {
       await page
-        .getByRole("textbox", { name: /search healthcare services/i })
+        .getByPlaceholder(/search healthcare services/i)
         .fill(originalName);
       await page.getByRole("link", { name: originalName }).click();
     });
