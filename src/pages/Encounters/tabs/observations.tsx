@@ -163,16 +163,12 @@ export const EncounterObservationsTab = () => {
                         {item.main_code ? (
                           <ObservationDetailSheet
                             codes={[item.main_code]}
-                            title={
-                              item.main_code.display ||
-                              item.main_code.code ||
-                              t("observation")
-                            }
+                            title={item.main_code.display}
                             patientId={patientId}
                             encounterId={encounterId}
                           >
                             <span className="cursor-pointer text-left hover:underline">
-                              {item.main_code.display || item.main_code.code}
+                              {item.main_code.display}
                             </span>
                           </ObservationDetailSheet>
                         ) : (

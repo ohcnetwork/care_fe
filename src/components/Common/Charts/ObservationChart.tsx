@@ -126,6 +126,7 @@ export const ObservationVisualizer = ({
       },
     }),
   });
+
   if (isLoading) {
     return (
       <div
