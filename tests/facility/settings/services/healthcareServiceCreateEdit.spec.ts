@@ -49,7 +49,7 @@ test.describe("Healthcare Service Create & Edit", () => {
 
       await expect(
         page.getByText(/healthcare service created successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify service appears in list", async () => {
@@ -62,9 +62,7 @@ test.describe("Healthcare Service Create & Edit", () => {
         .fill(serviceName);
 
       // Verify the service link is visible
-      await expect(page.getByRole("link", { name: serviceName })).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(page.getByRole("link", { name: serviceName })).toBeVisible();
     });
   });
 
@@ -89,7 +87,7 @@ test.describe("Healthcare Service Create & Edit", () => {
       await page.getByRole("button", { name: "Create", exact: true }).click();
       await expect(
         page.getByText(/healthcare service created successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     // Navigate to the created service
@@ -114,7 +112,7 @@ test.describe("Healthcare Service Create & Edit", () => {
       await page.getByRole("button", { name: "Save" }).click();
       await expect(
         page.getByText(/healthcare service updated successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     // Verify the updated name
