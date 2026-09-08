@@ -32,7 +32,7 @@ test.describe("Healthcare Service View", () => {
     // Should find the Pathology Lab service (the assertion auto-waits for the
     // debounced search results).
     const serviceLink = page.getByRole("link", { name: /pathology lab/i });
-    await expect(serviceLink).toBeVisible({ timeout: 10000 });
+    await expect(serviceLink).toBeVisible();
   });
 
   test("should view healthcare service details", async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe("Healthcare Service View", () => {
 
     // Click on the service (the assertion below auto-waits for the result).
     const pharmacyLink = page.getByRole("link", { name: /main pharmacy/i });
-    await expect(pharmacyLink).toBeVisible({ timeout: 10000 });
+    await expect(pharmacyLink).toBeVisible();
     await pharmacyLink.click();
 
     // Verify pharmacy service details
