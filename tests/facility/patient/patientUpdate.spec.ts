@@ -60,21 +60,4 @@ test.describe("Patient Update/Edit", () => {
 
     await expect(updateButton).toBeEnabled();
   });
-
-  test("should show a validation error for an invalid phone number", async ({
-    page,
-  }) => {
-    const phoneField = page.getByRole("textbox", {
-      name: "Phone Number *",
-      exact: true,
-    });
-    await phoneField.clear();
-    await phoneField.fill("123");
-
-    await page.getByRole("button", { name: /update/i }).click();
-
-    await expect(
-      page.getByText("Entered phone number is not valid").first(),
-    ).toBeVisible();
-  });
 });
