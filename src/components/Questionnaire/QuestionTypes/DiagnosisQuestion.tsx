@@ -46,6 +46,7 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import { hasDuplicateClinicalCode } from "@/components/Questionnaire/QuestionTypes/conditionValidation";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -330,13 +331,7 @@ function checkForDuplicateDiagnosis(
   const codeValue =
     typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
 
-  const isDuplicate = existingDiagnoses.some(
-    (diagnosis) =>
-      diagnosis.code.code === codeValue &&
-      diagnosis.verification_status !== "entered_in_error",
-  );
-
-  if (isDuplicate) {
+  if (hasDuplicateClinicalCode(existingDiagnoses, codeValue)) {
     toast.warning(t("diagnosis_already_exist_warning"));
     return true;
   }

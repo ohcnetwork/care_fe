@@ -47,6 +47,7 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
+import { hasDuplicateClinicalCode } from "@/components/Questionnaire/QuestionTypes/conditionValidation";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -635,12 +636,7 @@ function checkForDuplicateSymptom(
   const codeValue =
     typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
 
-  const isDuplicate = existingSymptoms.some(
-    (symptom) =>
-      symptom.code.code === codeValue &&
-      symptom.verification_status !== "entered_in_error",
-  );
-  if (isDuplicate) {
+  if (hasDuplicateClinicalCode(existingSymptoms, codeValue)) {
     toast.warning(t("symptom_already_exist_warning"));
     return true;
   }

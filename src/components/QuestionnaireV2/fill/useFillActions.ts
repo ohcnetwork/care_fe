@@ -33,8 +33,10 @@ import {
   entryHasContent,
   isQuestionEnabledInState,
   responsesAtom,
+  structuredRenderFailedAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
 
+import type { StructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 import type {
   QuestionnaireResponse,
   ResponseValue,
@@ -43,22 +45,13 @@ import type { Question } from "@/types/questionnaire/question";
 
 import type { FormStore } from "./StoreRegistrar";
 import type { FillFormEntry } from "./formSession";
+import { coerceStructuredFillValue } from "./structuredFillValue";
 import type { FillSubject } from "./subject";
 import { isPatientBound } from "./subject";
 
 type GetStore = (key: string) => FormStore | undefined;
 
-/**
- * Size bounds on what an agent may write. `applySetResponse`'s only count
- * check is `values.length > 1 && !question.repeats`, so a repeats question
- * would otherwise accept an unbounded array — a looping or prompt-injected
- * agent could ask for 50,000 entries, the store would take them, the block
- * would render one input each, and the autosave layer would try to
- * serialize the multi-MB result into localStorage on every debounce (the
- * quota failure is swallowed, so the crash-safety draft would silently
- * stop covering the session). No clinical repeat runs to three digits, and
- * no free-text answer to five.
- */
+/** Bound writes so repeated answers and structured rows fit in drafts. */
 const MAX_RESPONSE_ENTRIES = 100;
 const MAX_RESPONSE_TEXT_LENGTH = 10_000;
 const MAX_LINK_ID_LENGTH = 256;
@@ -73,6 +66,12 @@ const setResponseSchema = z.object({
         z.string().max(MAX_RESPONSE_TEXT_LENGTH),
         z.number(),
         z.boolean(),
+        z
+          .record(z.string(), z.json())
+          .refine(
+            (value) => JSON.stringify(value).length <= MAX_RESPONSE_TEXT_LENGTH,
+            "Structured entries must be at most 10000 characters",
+          ),
       ]),
     )
     .max(MAX_RESPONSE_ENTRIES),
@@ -95,10 +94,7 @@ type CoercionResult =
  *  (and therefore `TimeInput`) round-trips. */
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
-/** Question types an action may write. Everything else — groups, display
- *  blocks, structured questions (which carry request payloads, not
- *  scalars), and the types with no unambiguous primitive form — is
- *  rejected rather than guessed at. */
+/** Convert scalar answers to the same values their inputs store. */
 function coerceResponseValue(
   question: Question,
   raw: string | number | boolean,
@@ -135,18 +131,32 @@ function coerceResponseValue(
       return { ok: true, value: { type: "boolean", value } };
     }
 
-    case "date":
-    case "dateTime": {
-      const value = new Date(String(raw));
-      if (Number.isNaN(value.getTime())) {
+    case "date": {
+      if (typeof raw !== "string" || !z.iso.date().safeParse(raw).success) {
         return {
           ok: false,
-          error: `"${String(raw)}" is not a valid ${question.type} for question "${question.link_id}"`,
+          error: `Question "${question.link_id}" expects a date in YYYY-MM-DD format`,
         };
       }
-      return question.type === "date"
-        ? { ok: true, value: { type: "date", value } }
-        : { ok: true, value: { type: "dateTime", value } };
+      // Date-only ISO strings otherwise parse as UTC and can display the
+      // previous calendar day. The date picker stores local midnight.
+      return {
+        ok: true,
+        value: { type: "date", value: new Date(`${raw}T00:00:00`) },
+      };
+    }
+
+    case "dateTime": {
+      if (
+        typeof raw !== "string" ||
+        !z.iso.datetime({ local: true, offset: true }).safeParse(raw).success
+      ) {
+        return {
+          ok: false,
+          error: `Question "${question.link_id}" expects an ISO datetime (YYYY-MM-DDTHH:mm, optionally with seconds and a timezone)`,
+        };
+      }
+      return { ok: true, value: { type: "dateTime", value: new Date(raw) } };
     }
 
     case "time": {
@@ -266,11 +276,15 @@ function isPathEnabled(
  * already validated the input's SHAPE — everything checked here is about
  * the input's meaning against the live session.
  */
-export function applySetResponse(
+export async function applySetResponse(
   input: SetResponseInput,
   forms: FillFormEntry[],
   getStore: GetStore,
-): ActionRunResult {
+  {
+    subject,
+    isFrozen,
+  }: { subject?: FillSubject; isFrozen?: () => boolean } = {},
+): Promise<ActionRunResult> {
   const form = input.questionnaire_id
     ? forms.find((entry) => entry.key === input.questionnaire_id)
     : (forms.find((entry) => entry.isPrimary) ?? forms[0]);
@@ -291,12 +305,7 @@ export function applySetResponse(
     };
   }
   const question = path[path.length - 1];
-  if (
-    question.type === "group" ||
-    question.type === "display" ||
-    question.type === "structured" ||
-    question.structured_type
-  ) {
+  if (question.type === "group" || question.type === "display") {
     return {
       ok: false,
       error: `Question "${input.link_id}" is a ${question.type} question and cannot be answered with plain values`,
@@ -305,11 +314,45 @@ export function applySetResponse(
   if (question.read_only) {
     return { ok: false, error: `Question "${input.link_id}" is read-only` };
   }
-  if (input.values.length > 1 && !question.repeats) {
+  if (
+    question.type !== "structured" &&
+    input.values.length > 1 &&
+    !question.repeats
+  ) {
     return {
       ok: false,
       error: `Question "${input.link_id}" takes a single value`,
     };
+  }
+
+  let structuredSlot: StructuredSlotState | undefined;
+  if (question.type === "structured") {
+    if (!question.structured_type || !subject || !isPatientBound(subject)) {
+      return {
+        ok: false,
+        error:
+          "Structured answers require a supported type and patient context",
+      };
+    }
+    // Load the component registry only for structured writes. Read the live
+    // store and save lock after loading so pending writes cannot overwrite
+    // an intervening edit or run while the form is being saved.
+    const { resolveStructuredSlotState } =
+      await import("@/components/QuestionnaireV2/structured/registry");
+    structuredSlot = resolveStructuredSlotState(
+      question.structured_type,
+      form.questionnaire.subject_type,
+      subject,
+    );
+    if (structuredSlot.kind !== "ready") {
+      return {
+        ok: false,
+        error: `Structured question "${input.link_id}" is unavailable (${structuredSlot.kind})`,
+      };
+    }
+  }
+  if (isFrozen?.()) {
+    return { ok: false, error: "The questionnaire is currently being saved" };
   }
 
   const store = getStore(form.key);
@@ -317,6 +360,15 @@ export function applySetResponse(
     return {
       ok: false,
       error: `Form "${form.questionnaire.title}" is not ready yet`,
+    };
+  }
+  if (
+    question.type === "structured" &&
+    store.get(structuredRenderFailedAtom).has(question.id)
+  ) {
+    return {
+      ok: false,
+      error: `Structured question "${input.link_id}" is unavailable`,
     };
   }
   const previous = store.get(responsesAtom);
@@ -342,10 +394,28 @@ export function applySetResponse(
   }
 
   const values: ResponseValue[] = [];
-  for (const raw of input.values) {
-    const coerced = coerceResponseValue(question, raw);
+  if (structuredSlot?.kind === "ready" && subject) {
+    const coerced = coerceStructuredFillValue(
+      question,
+      input.values,
+      current,
+      structuredSlot.definition,
+      subject,
+    );
     if (!coerced.ok) return coerced;
     values.push(coerced.value);
+  } else {
+    for (const raw of input.values) {
+      if (typeof raw === "object") {
+        return {
+          ok: false,
+          error: `Question "${input.link_id}" expects plain values`,
+        };
+      }
+      const coerced = coerceResponseValue(question, raw);
+      if (!coerced.ok) return coerced;
+      values.push(coerced.value);
+    }
   }
 
   store.set(responsesAtom, {
@@ -367,6 +437,9 @@ interface FormQuestionSummary {
   link_id: string;
   text: string;
   type: string;
+  structured_type?: string;
+  /** Existing rows let agents preserve record ids when replacing a section. */
+  values?: unknown[];
   required: boolean;
   options?: string[];
   answered: boolean;
@@ -404,6 +477,17 @@ export function listFormsSummary(
               link_id: question.link_id,
               text: question.text,
               type: question.type,
+              ...(question.structured_type
+                ? { structured_type: question.structured_type }
+                : {}),
+              ...(question.type === "structured" &&
+              question.structured_type !== "files"
+                ? {
+                    values: structuredClone(
+                      responses[question.id]?.values[0]?.value ?? [],
+                    ) as unknown[],
+                  }
+                : {}),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
               answered: !!responses[question.id]?.values.some(entryHasContent),
@@ -450,6 +534,7 @@ export function useFillActions({
   const patientId = isPatientBound(subject) ? subject.patientId : undefined;
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;
+  const facilityId = subject.facilityId;
   // Memoized on the primitives: the subject union arrives as a fresh
   // object literal from the route element on every render.
   const scope = useMemo<ActionScope>(
@@ -463,7 +548,7 @@ export function useFillActions({
       return {
         id: "questionnaire.response.set",
         description:
-          "Set the answer values for a non-structured question in the open questionnaire session, addressed by link_id.",
+          "Replace a question's answers in the open questionnaire session, addressed by link_id. Structured questions accept request objects, one per row; include existing rows and their ids when updating. File uploads are not supported.",
         parameters: {
           questionnaire_id: {
             type: "string",
@@ -475,8 +560,9 @@ export function useFillActions({
             required: true,
           },
           values: {
-            type: "array of string|number|boolean",
-            description: "One entry per repeat",
+            type: "array of string|number|boolean|object",
+            description:
+              "One scalar per repeat, or one request object per structured row (time_of_death uses ISO datetime strings). Date: YYYY-MM-DD; dateTime: YYYY-MM-DDTHH:mm[:ss] with optional timezone; time: HH:mm[:ss]. Empty array clears the answer.",
             required: true,
           },
           note: {
@@ -489,9 +575,15 @@ export function useFillActions({
         run: (input) =>
           frozenRef.current
             ? { ok: false, error: "The questionnaire is currently being saved" }
-            : applySetResponse(input, forms, getStore),
+            : applySetResponse(input, forms, getStore, {
+                subject:
+                  encounterId && facilityId
+                    ? { type: "encounter", patientId, encounterId, facilityId }
+                    : { type: "patient", patientId, facilityId },
+                isFrozen: () => frozenRef.current,
+              }),
       };
-    }, [patientId, scope, forms, getStore]);
+    }, [patientId, encounterId, facilityId, scope, forms, getStore]);
 
   const listFormsDefinition =
     useMemo<ActionDefinition<ListFormsInput> | null>(() => {
@@ -499,7 +591,7 @@ export function useFillActions({
       return {
         id: "questionnaire.forms.list",
         description:
-          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled (a disabled question is off the canvas and cannot be set).",
+          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids, to preserve when replacing answers.",
         parameters: {},
         schema: listFormsSchema,
         scope,
