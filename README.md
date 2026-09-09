@@ -47,6 +47,8 @@ npm run dev
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
 
+Alternatively, run [`portless`](https://www.npmjs.com/package/portless) instead of `npm run dev` to serve the app at a stable `https://<name>.localhost` URL on a free port — handy when running multiple branches or git worktrees at once.
+
 #### 🔑 Local Backend Setup and Credentials
 
 First, set up the CARE local backend by following the instructions in the [CARE Backend Documentation](https://care-be-docs.ohc.network/).
