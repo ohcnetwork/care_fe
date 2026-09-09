@@ -8,7 +8,7 @@ import {
   DatabaseDuoIcon,
   HeartDuoIcon,
   StethoscopeDuoIcon,
-  UsersDuoIcon,
+  UserDuoIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
 export type DashboardShortcutIcon = ComponentType<{ className?: string }>;
@@ -19,9 +19,9 @@ export const DASHBOARD_SHORTCUT_ICONS = {
   Stethoscope: StethoscopeDuoIcon,
   Heart: HeartDuoIcon,
   Chart: ChartDuoIcon,
-  User: UsersDuoIcon,
+  User: UserDuoIcon,
   /** @deprecated Use `User`. Kept so existing REACT_CUSTOM_SHORTCUTS configs keep working. */
-  Users: UsersDuoIcon,
+  Users: UserDuoIcon,
   Box: BoxDuoIcon,
   Database: DatabaseDuoIcon,
 } as const satisfies Record<string, DashboardShortcutIcon>;

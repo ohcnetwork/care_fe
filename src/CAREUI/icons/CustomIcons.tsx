@@ -1452,7 +1452,7 @@ export const AppointmentDuoIcon: React.FC<IconProps> = ({
   );
 };
 
-export const UsersDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
+export const UserDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
   const uid = React.useId().replace(/:/g, "");
 
   return (
