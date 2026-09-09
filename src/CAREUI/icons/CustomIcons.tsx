@@ -584,7 +584,7 @@ export const CalendarDuoIcon: React.FC<IconProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Calendar Duo"
+      aria-hidden="true"
     >
       <mask
         id={`${uid}-mask0_29668_173255`}
@@ -818,7 +818,7 @@ export const HeartDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Heart Duo"
+      aria-hidden="true"
     >
       <g clipPath={`url(#${uid}-clip0_29668_173301)`}>
         <path
@@ -926,7 +926,7 @@ export const ChartDuoIcon: React.FC<IconProps> = ({ className = "size-8" }) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Chart Duo"
+      aria-hidden="true"
     >
       <g clipPath={`url(#${uid}-clip0_29668_173318)`}>
         <mask
@@ -1053,7 +1053,7 @@ export const StethoscopeDuoIcon: React.FC<IconProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Stethoscope Duo"
+      aria-hidden="true"
     >
       <mask
         id={`${uid}-mask0_29668_173279`}
