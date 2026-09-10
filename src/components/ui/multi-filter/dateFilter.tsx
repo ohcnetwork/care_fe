@@ -59,11 +59,9 @@ function CustomDateRange({
         <Calendar
           mode="range"
           selected={{ from: dateFrom, to: dateTo }}
-          onSelect={(date) => {
-            if (date) {
-              handleDateChange(date);
-            }
-          }}
+          onSelect={(range, triggerDate) =>
+            handleDateChange(range ?? { from: triggerDate, to: undefined })
+          }
           styles={{
             day: {
               width: "40px",
