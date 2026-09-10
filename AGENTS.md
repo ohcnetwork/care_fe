@@ -20,13 +20,28 @@ Detailed guidance is split into focused files so agents only load what's relevan
 
 ## Quick Commands
 
-- `npm run dev` — Start dev server at http://localhost:4000
+- `portless` — **Preferred** way to start the dev server (see [Dev Servers](#dev-servers-portless))
+- `npm run dev` — Start dev server directly at http://localhost:4000 (only if portless is unavailable)
 - `npm run build` — Production build (takes 2+ minutes, set timeout to 180s+)
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
 - `npm run format` — Prettier formatting
 
 See [`docs/local-development.md`](docs/local-development.md) for the full local setup and [`docs/testing.md`](docs/testing.md) for E2E testing.
+
+## Dev Servers (portless)
+
+Start dev servers with [`portless`](https://www.npmjs.com/package/portless) instead of `npm run dev`. It picks a free port and serves the app at a stable `https://<name>.localhost` URL (namespaced per git worktree), so parallel agents don't clash on ports or share cookies/storage across branches.
+
+```bash
+portless               # start the dev server; prints its URL
+portless list          # show active routes and URLs
+portless prune         # kill orphaned dev servers
+```
+
+- Keep `portless` running in the background; Vite HMR handles changes.
+- For `curl`, pass `--cacert ~/.portless/ca.pem`.
+- If portless is unavailable, fall back to `npm run dev`.
 
 ## Code Style Guidelines
 
@@ -51,12 +66,13 @@ Path-specific rules live in [`.github/instructions/`](.github/instructions/) (au
 When working autonomously on this codebase, follow this sequence:
 
 1. **Before coding:** Read relevant source files and understand existing patterns
-2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files (pre-commit hooks also run these automatically)
-3. **Verify:** Run relevant Playwright tests against the local backend to validate changes (see [`docs/testing.md`](docs/testing.md))
-4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
-5. **For new features:** Add Playwright tests in `tests/` following [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md)
-6. **For i18n:** Add English strings to `public/locale/en.json`
-7. **For writing tests:** Read [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — it contains complete patterns for all form interactions, selectors, assertions, and helpers
+2. **To preview changes:** Start the dev server with `portless` (see [Dev Servers](#dev-servers-portless)) and use the URL it prints for browser tooling
+3. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files (pre-commit hooks also run these automatically)
+4. **Verify:** Run relevant Playwright tests against the local backend to validate changes (see [`docs/testing.md`](docs/testing.md))
+5. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
+6. **For new features:** Add Playwright tests in `tests/` following [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md)
+7. **For i18n:** Add English strings to `public/locale/en.json`
+8. **For writing tests:** Read [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — it contains complete patterns for all form interactions, selectors, assertions, and helpers
 
 ### Quick verification cycle
 

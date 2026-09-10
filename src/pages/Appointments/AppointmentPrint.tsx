@@ -39,6 +39,7 @@ import {
   PAYMENT_RECONCILIATION_METHOD_MAP,
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
@@ -234,19 +235,15 @@ export default function AppointmentPrint(props: Props) {
                       : undefined
                   }
                 />
-                {patient?.instance_identifiers
-                  ?.filter(
-                    (identifier) =>
-                      identifier.config.config.use ===
-                      PatientIdentifierUse.official,
-                  )
-                  .map((identifier) => (
-                    <DetailRow
-                      key={identifier.config.id}
-                      label={identifier.config.config.display}
-                      value={identifier.value}
-                    />
-                  ))}
+                {getPatientIdentifiers(patient, {
+                  use: PatientIdentifierUse.official,
+                }).map((identifier) => (
+                  <DetailRow
+                    key={identifier.config.id}
+                    label={identifier.config.config.display}
+                    value={identifier.value}
+                  />
+                ))}
                 {patient?.address?.trim() && (
                   <DetailRow label={t("address")} value={patient.address} />
                 )}
