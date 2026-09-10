@@ -1,17 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { format, isToday } from "date-fns";
 import {
   ArrowDownRight,
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
-  Loader,
   Pin,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 import {
+  CartesianGrid,
   LabelList,
+  Legend,
   Line,
   LineChart,
   ReferenceArea,
@@ -22,7 +24,6 @@ import {
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -39,14 +40,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
-import { ObservationListRead } from "@/types/emr/observation/observation";
+import {
+  ObservationListRead,
+  ObservationReferenceRange,
+} from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface ObservationDetailSheetProps {
@@ -57,65 +64,153 @@ interface ObservationDetailSheetProps {
   encounterId?: string;
 }
 
-interface ObservationDetailContentProps {
+const DEFAULT_COLORS = [
+  "#2563eb", // blue-600
+  "#dc2626", // red-600
+  "#16a34a", // green-600
+  "#ea580c", // orange-600
+  "#9333ea", // purple-600
+  "#0d9488", // teal-600
+  "#c026d3", // fuchsia-600
+  "#ca8a04", // yellow-600
+  "#0891b2", // cyan-600
+] as const;
+
+const POINT_WIDTH = 56;
+
+interface ResolvedObservationEntry {
   code: Code;
-  patientId: string;
-  encounterId?: string;
-  currentEncounterOnly: boolean;
+  time: number;
+  value?: string | null;
+  unit?: Code;
+  referenceRange?: ObservationReferenceRange[];
+  enteredBy: string;
+  note?: string | null;
+}
+
+function resolveObservationEntries(
+  results: ObservationListRead[],
+): Record<string, ResolvedObservationEntry[]> {
+  const groupedObj: Record<string, ResolvedObservationEntry[]> = {};
+
+  for (const obs of results) {
+    if (!obs.effective_datetime) continue;
+
+    const time = new Date(obs.effective_datetime).getTime();
+    const enteredBy = formatName(obs.data_entered_by);
+
+    const entries = obs.component?.length
+      ? obs.component
+          .filter((component) => component.code?.code)
+          .map((component) => ({
+            code: component.code!,
+            value: component.value?.value,
+            unit: component.value?.unit,
+            referenceRange: component.reference_range,
+            time,
+            enteredBy,
+            note: component.note ?? obs.note,
+          }))
+      : obs.main_code?.code
+        ? [
+            {
+              code: obs.main_code,
+              value: obs.value?.value,
+              unit: obs.value?.unit,
+              referenceRange: obs.reference_range,
+              time,
+              enteredBy,
+              note: obs.note,
+            },
+          ]
+        : [];
+
+    for (const entry of entries) {
+      const key = entry.code.code;
+      (groupedObj[key] ??= []).push(entry);
+    }
+  }
+
+  for (const entries of Object.values(groupedObj)) {
+    entries.sort((a, b) => a.time - b.time);
+  }
+
+  return groupedObj;
+}
+
+function getRecordingSummary(results: ObservationListRead[]) {
+  const dated = results.filter((obs) => obs.effective_datetime);
+  if (dated.length === 0) return { count: 0, range: "" };
+
+  const times = dated.map((obs) => new Date(obs.effective_datetime).getTime());
+  const buckets = new Set(
+    dated.map((obs) =>
+      minuteBucketKey(new Date(obs.effective_datetime).getTime()),
+    ),
+  );
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const range =
+    format(min, "d MMM") === format(max, "d MMM")
+      ? format(min, "d MMM")
+      : `${format(min, "d MMM")} → ${format(max, "d MMM")}`;
+  return { count: buckets.size, range };
+}
+
+// Parse a stored observation value into a finite number, or null when it is
+// blank or non-numeric.
+function parseNumericValue(value?: string | null): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = Number(value);
+  return isNaN(numeric) ? null : numeric;
+}
+
+// Group readings to the minute so values recorded seconds apart share a slot.
+function minuteBucketKey(time: number): string {
+  return format(new Date(time), "yyyy-MM-dd'T'HH:mm");
+}
+
+function getEntryUnitAndRange(entries: ResolvedObservationEntry[]) {
+  const unitEntry = entries.find((entry) => entry.unit);
+  const unit = unitEntry?.unit?.display || unitEntry?.unit?.code || "";
+  const range = entries.find((entry) => entry.referenceRange?.length)
+    ?.referenceRange?.[0];
+  return { unit, refMin: range?.min, refMax: range?.max };
+}
+
+interface ObservationDetailContentProps {
+  entries: ResolvedObservationEntry[];
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
 }
 
 function ObservationDetailContent({
-  code,
-  patientId,
-  encounterId,
-  currentEncounterOnly,
+  entries,
+  hasNextPage,
+  fetchNextPage,
 }: ObservationDetailContentProps) {
   const { t } = useTranslation();
 
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "observation-detail",
-      patientId,
-      encounterId,
-      code.code,
-      currentEncounterOnly,
-    ],
-    queryFn: query(observationApi.list, {
-      pathParams: { patientId },
-      queryParams: {
-        codes: code.code,
-        limit: "1000",
-        ...(currentEncounterOnly && encounterId
-          ? { encounter: encounterId }
-          : {}),
-      },
-    }),
-  });
+  const { ref: loadMoreRef, inView } = useInView();
 
-  const results: ObservationListRead[] = data?.results ?? [];
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const didInitialScroll = useRef(false);
 
-  const unitObs = results.find((obs) => obs.value?.unit);
-  const unit =
-    unitObs?.value?.unit?.display || unitObs?.value?.unit?.code || "";
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage?.();
+  }, [inView, hasNextPage, fetchNextPage]);
 
-  const range = results.find((obs) => obs.reference_range?.length)
-    ?.reference_range?.[0];
-  const refMin = range?.min;
-  const refMax = range?.max;
+  const { unit, refMin, refMax } = getEntryUnitAndRange(entries);
 
-  const chartData = results
-    .map((obs) => {
-      if (!obs.effective_datetime) return null;
-      const rawValue = obs.value?.value;
-      if (rawValue === null || rawValue === undefined || rawValue === "")
-        return null;
-      const value = Number(rawValue);
-      if (isNaN(value)) return null;
+  const chartData = entries
+    .map((entry) => {
+      const value = parseNumericValue(entry.value);
+      if (value === null) return null;
       return {
-        time: new Date(obs.effective_datetime).getTime(),
+        time: entry.time,
         value,
-        enteredBy: formatName(obs.data_entered_by),
-        note: obs.note,
+        enteredBy: entry.enteredBy,
+        note: entry.note,
       };
     })
     .filter(
@@ -127,21 +222,19 @@ function ObservationDetailContent({
         enteredBy: string;
         note: string | null | undefined;
       } => entry !== null,
-    )
-    .sort((a, b) => a.time - b.time);
-
-  // One tick per reading so each recorded time is shown individually.
-  const timeTicks = chartData.map((d) => d.time);
-
-  const tableRows = [...results]
-    .filter((obs) => obs.effective_datetime)
-    .sort(
-      (a, b) =>
-        new Date(b.effective_datetime).getTime() -
-        new Date(a.effective_datetime).getTime(),
     );
 
   const lastIndex = chartData.length - 1;
+
+  const isDense = chartData.length > 12;
+  const chartMinWidth = chartData.length * POINT_WIDTH;
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el || didInitialScroll.current || chartData.length === 0) return;
+    el.scrollLeft = el.scrollWidth;
+    didInitialScroll.current = true;
+  }, [chartData.length]);
 
   const renderValueLabel = (props: {
     x?: number | string;
@@ -179,8 +272,6 @@ function ObservationDetailContent({
     );
   };
 
-  // Only the first/last ticks get a label; anchor them inward so the edge
-  // labels aren't clipped by the chart bounds.
   const renderXAxisTick = ({
     x,
     y,
@@ -191,9 +282,6 @@ function ObservationDetailContent({
     payload?: { value: number | string };
   }): React.ReactElement => {
     const value = Number(payload?.value);
-    const isFirst = value === timeTicks[0];
-    const isLast = value === timeTicks[timeTicks.length - 1];
-    if (!isFirst && !isLast) return <g />;
     const dateLabel = isToday(new Date(value))
       ? t("today")
       : format(new Date(value), "d MMM");
@@ -202,7 +290,7 @@ function ObservationDetailContent({
       <text
         x={x}
         y={Number(y) + 14}
-        textAnchor={isFirst ? "start" : "end"}
+        textAnchor="middle"
         fontSize={12}
         fill="#6b7280"
       >
@@ -221,20 +309,6 @@ function ObservationDetailContent({
   const yMax = Math.max(dataMax, refMax ?? dataMax);
   const pad = (yMax - yMin || 1) * 0.2;
 
-  if (isLoading) {
-    return (
-      <Loader className="mx-auto my-16 h-6 w-6 animate-spin text-gray-500" />
-    );
-  }
-
-  if (chartData.length === 0 && tableRows.length === 0) {
-    return (
-      <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-        {t("no_data_available")}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-8">
       {chartData.length > 0 && (
@@ -245,82 +319,175 @@ function ObservationDetailContent({
           <div className="pointer-events-none absolute right-4 top-1 z-10 text-xs text-gray-500">
             {t("newest")} →
           </div>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{ top: 32, right: 72, left: 20, bottom: 8 }}
+          <div className="h-full overflow-x-auto" ref={scrollContainerRef}>
+            <div
+              className="relative h-full"
+              style={{ minWidth: chartMinWidth }}
             >
-              {refMin !== undefined && refMax !== undefined && (
-                <ReferenceArea
-                  y1={refMin}
-                  y2={refMax}
-                  fill="#eff6ff"
-                  fillOpacity={1}
-                  ifOverflow="extendDomain"
+              {hasNextPage && (
+                <div
+                  ref={loadMoreRef}
+                  aria-hidden="true"
+                  className="absolute inset-y-0 left-0 w-2"
                 />
               )}
-              <Tooltip
-                cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }}
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  const point = payload[0].payload as {
-                    time: number;
-                    value: number;
-                    enteredBy: string;
-                    note?: string | null;
-                  };
-                  return (
-                    <div className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
-                      <div className="font-medium text-gray-900">
-                        {point.value}
-                        {unit ? ` ${unit}` : ""}
-                      </div>
-                      <div className="text-gray-500">
-                        {formatDateTime(point.time)}
-                      </div>
-                      <div className="text-gray-500">{point.enteredBy}</div>
-                      {point.note && (
-                        <div className="mt-1 max-w-48 text-gray-500">
-                          {point.note}
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 32, right: 72, left: 40, bottom: 8 }}
+                >
+                  {refMin !== undefined && refMax !== undefined && (
+                    <ReferenceArea
+                      y1={refMin}
+                      y2={refMax}
+                      fill="#eff6ff"
+                      fillOpacity={1}
+                      ifOverflow="extendDomain"
+                    />
+                  )}
+                  <Tooltip
+                    cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const point = payload[0].payload as {
+                        time: number;
+                        value: number;
+                        enteredBy: string;
+                        note?: string | null;
+                      };
+                      return (
+                        <div className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-sm">
+                          <div className="font-medium text-gray-900">
+                            {point.value}
+                            {unit ? ` ${unit}` : ""}
+                          </div>
+                          <div className="text-gray-500">
+                            {formatDateTime(point.time)}
+                          </div>
+                          <div className="text-gray-500">{point.enteredBy}</div>
+                          {point.note && (
+                            <div className="mt-1 max-w-48 text-gray-500">
+                              {point.note}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                }}
-              />
-              <XAxis
-                dataKey="time"
-                type="category"
-                scale="point"
-                interval={0}
-                tickLine={{ stroke: "#374151" }}
-                axisLine={{ stroke: "#6b7280" }}
-                tick={renderXAxisTick}
-              />
-              <YAxis
-                domain={[yMin - pad, yMax + pad]}
-                tick={false}
-                tickLine={false}
-                axisLine={{ stroke: "#6b7280" }}
-                width={1}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#9ca3af"
-                strokeWidth={1.5}
-                dot={{ r: 4, fill: "#16a34a", stroke: "#16a34a" }}
-                activeDot={{ r: 5, fill: "#16a34a" }}
-                isAnimationActive={true}
-                animationDuration={1000}
-                animationEasing="ease-in-out"
-              >
-                <LabelList dataKey="value" content={renderValueLabel} />
-              </Line>
-            </LineChart>
-          </ResponsiveContainer>
+                      );
+                    }}
+                  />
+                  <XAxis
+                    dataKey="time"
+                    type="category"
+                    scale="point"
+                    interval={0}
+                    tickLine={{ stroke: "#374151" }}
+                    axisLine={{ stroke: "#6b7280" }}
+                    tick={renderXAxisTick}
+                  />
+                  <YAxis
+                    domain={[yMin - pad, yMax + pad]}
+                    tick={false}
+                    tickLine={false}
+                    axisLine={{ stroke: "#6b7280" }}
+                    width={1}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#9ca3af"
+                    strokeWidth={1.5}
+                    dot={{
+                      r: isDense ? 2.5 : 4,
+                      fill: "#16a34a",
+                      stroke: "#16a34a",
+                    }}
+                    activeDot={{ r: 5, fill: "#16a34a" }}
+                    isAnimationActive={chartData.length <= 50}
+                    animationDuration={1000}
+                    animationEasing="ease-in-out"
+                  >
+                    <LabelList dataKey="value" content={renderValueLabel} />
+                  </Line>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       )}
+    </div>
+  );
+}
+
+interface AllValuesChartProps {
+  codeList: Code[];
+  entriesByCode: Record<string, ResolvedObservationEntry[]>;
+}
+
+function AllValuesChart({ codeList, entriesByCode }: AllValuesChartProps) {
+  const { t } = useTranslation();
+
+  const rowsByTime = new Map<
+    number,
+    { time: number } & Record<string, number>
+  >();
+
+  for (const code of codeList) {
+    for (const entry of entriesByCode[code.code] ?? []) {
+      const numeric = parseNumericValue(entry.value);
+      if (numeric === null) continue;
+      const row = rowsByTime.get(entry.time) ?? { time: entry.time };
+      row[code.code] = numeric;
+      rowsByTime.set(entry.time, row);
+    }
+  }
+
+  const chartData = Array.from(rowsByTime.values()).sort(
+    (a, b) => a.time - b.time,
+  );
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+        {t("no_data_available")}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2" style={{ height: 320 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={chartData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="time"
+            type="number"
+            domain={["dataMin", "dataMax"]}
+            scale="time"
+            tickFormatter={(value) => format(new Date(value), "d MMM, h:mm a")}
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip
+            labelFormatter={(value) =>
+              typeof value === "number" ? formatDateTime(value) : value
+            }
+          />
+          <Legend />
+          {codeList.map((code, index) => (
+            <Line
+              key={code.code}
+              type="monotone"
+              name={code.display || code.code}
+              dataKey={code.code}
+              stroke={DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+              dot
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -336,16 +503,26 @@ export function ObservationDetailSheet({
   const [open, setOpen] = useState(false);
   const [currentEncounterOnly, setCurrentEncounterOnly] = useState(false);
 
-  const validCodes = Array.from(
-    new Map(
-      codes.filter((code) => !!code?.code).map((code) => [code.code, code]),
-    ).values(),
+  const validCodes = Object.values(
+    codes
+      .filter((code) => !!code?.code)
+      .reduce(
+        (acc, code) => {
+          acc[code.code] = code;
+          return acc;
+        },
+        {} as Record<string, (typeof codes)[0]>,
+      ),
   );
 
   const codesParam = validCodes.map((c) => c.code).join(",");
 
-  // Shares the history table's query key so React Query dedupes the request.
-  const { data: summaryData } = useQuery({
+  const {
+    data: historyData,
+    isLoading: isHistoryLoading,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: [
       "observation-history",
       patientId,
@@ -353,40 +530,44 @@ export function ObservationDetailSheet({
       codesParam,
       currentEncounterOnly,
     ],
-    queryFn: query(observationApi.list, {
-      pathParams: { patientId },
-      queryParams: {
-        codes: codesParam,
-        limit: "1000",
-        ...(currentEncounterOnly && encounterId
-          ? { encounter: encounterId }
-          : {}),
-      },
-    }),
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const res = await query(observationApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          codes: codesParam,
+          limit: String(RESULTS_PER_PAGE_LIMIT),
+          offset: pageParam,
+          ...(currentEncounterOnly && encounterId
+            ? { encounter: encounterId }
+            : {}),
+        },
+      })({ signal });
+      return res as PaginatedResponse<ObservationListRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
     enabled: open && validCodes.length > 0,
   });
 
-  const summary = useMemo(() => {
-    const results = summaryData?.results ?? [];
-    const dated = results.filter((obs) => obs.effective_datetime);
-    if (dated.length === 0) return { count: 0, range: "" };
+  const allResults = useMemo(
+    () => historyData?.pages.flatMap((page) => page.results) ?? [],
+    [historyData],
+  );
 
-    const times = dated.map((obs) =>
-      new Date(obs.effective_datetime).getTime(),
-    );
-    const buckets = new Set(
-      dated.map((obs) =>
-        format(new Date(obs.effective_datetime), "yyyy-MM-dd'T'HH:mm"),
-      ),
-    );
-    const min = Math.min(...times);
-    const max = Math.max(...times);
-    const range =
-      format(min, "d MMM") === format(max, "d MMM")
-        ? format(min, "d MMM")
-        : `${format(min, "d MMM")} → ${format(max, "d MMM")}`;
-    return { count: buckets.size, range };
-  }, [summaryData]);
+  const entriesByCode = useMemo(
+    () => resolveObservationEntries(allResults),
+    [allResults],
+  );
+
+  const summary = useMemo(() => getRecordingSummary(allResults), [allResults]);
+
+  const codeList = useMemo(
+    () => Object.values(entriesByCode).map((list) => list[0].code),
+    [entriesByCode],
+  );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -398,7 +579,13 @@ export function ObservationDetailSheet({
           <SheetTitle className="pr-8 text-xl font-bold text-gray-950">
             {title}{" "}
           </SheetTitle>
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-gray-500">
+
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-gray-500",
+              summary.count === 0 && "hidden",
+            )}
+          >
             <span>
               {currentEncounterOnly && encounterId
                 ? t("current_encounter")
@@ -419,165 +606,149 @@ export function ObservationDetailSheet({
           </div>
         </SheetHeader>
 
-        <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0">
-          {encounterId && (
-            <div className="flex items-center gap-2 text-sm ml-auto">
-              <Checkbox
-                id="current-encounter-only"
-                checked={currentEncounterOnly}
-                onCheckedChange={(checked) =>
-                  setCurrentEncounterOnly(checked === true)
-                }
-              />
-              <label
-                htmlFor="current-encounter-only"
-                className="cursor-pointer"
-              >
-                {t("show_current_encounter_recordings")}
-              </label>
-            </div>
-          )}
+        {isHistoryLoading ? (
+          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0">
+            <TableSkeleton count={3} />
+          </div>
+        ) : summary.count === 0 ? (
+          <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+            {t("no_data_available")}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0">
+            {encounterId && (
+              <div className="flex items-center gap-2 text-sm ml-auto">
+                <Checkbox
+                  id="current-encounter-only"
+                  checked={currentEncounterOnly}
+                  onCheckedChange={(checked) =>
+                    setCurrentEncounterOnly(checked === true)
+                  }
+                />
+                <label
+                  htmlFor="current-encounter-only"
+                  className="cursor-pointer"
+                >
+                  {t("show_current_encounter_recordings")}
+                </label>
+              </div>
+            )}
 
-          {validCodes.length > 1 ? (
-            <Tabs defaultValue={validCodes[0].code} className="w-full">
-              <TabsList className="bg-gray-100 max-w-full justify-start overflow-x-auto">
-                {validCodes.map((code) => (
+            {codeList.length > 1 ? (
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="bg-gray-100 max-w-full justify-start overflow-x-auto">
                   <TabsTrigger
-                    key={code.code}
-                    value={code.code}
+                    value="all"
                     className="shrink-0 whitespace-nowrap"
                   >
-                    {code.display || code.code}
+                    {t("all_values")}
                   </TabsTrigger>
-                ))}
-              </TabsList>
-              {validCodes.map((code) => (
-                <TabsContent key={code.code} value={code.code}>
-                  <ObservationDetailContent
-                    code={code}
-                    patientId={patientId}
-                    encounterId={encounterId}
-                    currentEncounterOnly={currentEncounterOnly}
+                  {codeList.map((code) => (
+                    <TabsTrigger
+                      key={code.code}
+                      value={code.code}
+                      className="shrink-0 whitespace-nowrap"
+                    >
+                      {code.display || code.code}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <TabsContent value="all">
+                  <AllValuesChart
+                    codeList={codeList}
+                    entriesByCode={entriesByCode}
                   />
                 </TabsContent>
-              ))}
-            </Tabs>
-          ) : validCodes.length === 1 ? (
-            <ObservationDetailContent
-              code={validCodes[0]}
-              patientId={patientId}
-              encounterId={encounterId}
-              currentEncounterOnly={currentEncounterOnly}
+                {codeList.map((code) => (
+                  <TabsContent key={code.code} value={code.code}>
+                    <ObservationDetailContent
+                      entries={entriesByCode[code.code] ?? []}
+                      hasNextPage={hasNextPage}
+                      fetchNextPage={fetchNextPage}
+                    />
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : codeList.length === 1 ? (
+              <ObservationDetailContent
+                entries={entriesByCode[codeList[0].code] ?? []}
+                hasNextPage={hasNextPage}
+                fetchNextPage={fetchNextPage}
+              />
+            ) : (
+              <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+                {t("no_data_available")}
+              </div>
+            )}
+            <ObservationHistoryMatrix
+              title={t("observation_history")}
+              codes={codeList}
+              entriesByCode={entriesByCode}
+              hasNextPage={hasNextPage}
+              fetchNextPage={fetchNextPage}
             />
-          ) : (
-            <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-              {t("no_data_available")}
-            </div>
-          )}
-          <ObservationHistoryTable
-            title={t("observation_history")}
-            validCodes={validCodes}
-            patientId={patientId}
-            encounterId={encounterId}
-            currentEncounterOnly={currentEncounterOnly}
-          />
-        </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
 }
 
-const ObservationHistoryTable = ({
+const ObservationHistoryMatrix = ({
   title,
-  validCodes,
-  patientId,
-  encounterId,
-  currentEncounterOnly,
+  codes,
+  entriesByCode,
+  hasNextPage,
+  fetchNextPage,
 }: {
   title: string;
-  validCodes: Code[];
-  patientId: string;
-  encounterId?: string;
-  currentEncounterOnly: boolean;
+  codes: Code[];
+  entriesByCode: Record<string, ResolvedObservationEntry[]>;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
 }) => {
   const { t } = useTranslation();
 
   const [abnormalOnly, setAbnormalOnly] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const firstColRef = useRef<HTMLTableCellElement>(null);
+  const [pinnedOffset, setPinnedOffset] = useState(0);
+
+  const { ref: loadMoreRef, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage?.();
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const scrollBy = (offset: number) => {
-    // shadcn's Table wraps the <table> in its own horizontally scrollable
-    // container, so scroll that element rather than the outer wrapper.
     const container = scrollRef.current?.querySelector<HTMLElement>(
       '[data-slot="table-container"]',
     );
     container?.scrollBy({ left: offset, behavior: "smooth" });
   };
 
-  const codes = useMemo(
-    () => validCodes.filter((code) => !!code?.code),
-    [validCodes],
-  );
-
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "observation-history",
-      patientId,
-      encounterId,
-      codes.map((c) => c.code).join(","),
-      currentEncounterOnly,
-    ],
-    queryFn: query(observationApi.list, {
-      pathParams: { patientId },
-      queryParams: {
-        codes: codes.map((c) => c.code).join(","),
-        limit: "1000",
-        ...(currentEncounterOnly && encounterId
-          ? { encounter: encounterId }
-          : {}),
-      },
-    }),
-  });
-
   const { columns, rows } = useMemo(() => {
-    const results: ObservationListRead[] = data?.results ?? [];
-
-    // Bucket readings by the minute so values recorded at the same time share
-    // one column instead of splitting on differing seconds/milliseconds.
-    const bucketKey = (iso: string) =>
-      format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
-
     // One column per minute bucket, most recent first.
-    const columnMap = new Map<string, number>();
-    for (const result of results) {
-      if (result.effective_datetime) {
-        const time = new Date(result.effective_datetime).getTime();
-        const key = bucketKey(result.effective_datetime);
-        const existing = columnMap.get(key);
-        if (existing === undefined || time > existing) {
-          columnMap.set(key, time);
+    const columnMap: Record<string, number> = {};
+    for (const list of Object.values(entriesByCode)) {
+      for (const entry of list) {
+        const key = minuteBucketKey(entry.time);
+        const existing = columnMap[key];
+        if (existing === undefined || entry.time > existing) {
+          columnMap[key] = entry.time;
         }
       }
     }
-    const columns = Array.from(columnMap.entries())
+    const columns = Object.entries(columnMap)
       .map(([key, time]) => ({ key, time }))
       .sort((a, b) => b.time - a.time);
 
     const rows = codes.map((code) => {
-      const codeResults = results.filter(
-        (obs) => obs.main_code?.code === code.code,
-      );
-
-      const withUnit = codeResults.find((obs) => obs.value?.unit);
-      const unit =
-        withUnit?.value?.unit?.display || withUnit?.value?.unit?.code || "";
-      const refRange = codeResults.find((obs) => obs.reference_range?.length)
-        ?.reference_range?.[0];
-      const refMin = refRange?.min;
-      const refMax = refRange?.max;
+      const codeEntries = entriesByCode[code.code] ?? [];
+      const { unit, refMin, refMax } = getEntryUnitAndRange(codeEntries);
 
       // Index each reading by its minute bucket, keeping the latest per bucket.
-      const valuesByTime = new Map<
+      const valuesByTime: Record<
         string,
         {
           time: number;
@@ -585,28 +756,26 @@ const ObservationHistoryTable = ({
           abnormal: boolean;
           direction: "up" | "down" | null;
         }
-      >();
-      for (const result of codeResults) {
-        if (!result.effective_datetime) continue;
-        const time = new Date(result.effective_datetime).getTime();
-        const key = bucketKey(result.effective_datetime);
-        const existing = valuesByTime.get(key);
-        if (existing && time <= existing.time) continue;
+      > = {};
+      for (const entry of codeEntries) {
+        const key = minuteBucketKey(entry.time);
+        const existing = valuesByTime[key];
+        if (existing && entry.time <= existing.time) continue;
 
         // Abnormal = value falls outside the reference range.
-        const numeric = Number(result.value?.value);
+        const numeric = parseNumericValue(entry.value);
         let direction: "up" | "down" | null = null;
-        if (!isNaN(numeric)) {
+        if (numeric !== null) {
           if (refMax != null && numeric > refMax) direction = "up";
           else if (refMin != null && numeric < refMin) direction = "down";
         }
 
-        valuesByTime.set(key, {
-          time,
-          value: result.value?.value,
+        valuesByTime[key] = {
+          time: entry.time,
+          value: entry.value,
           abnormal: direction !== null,
           direction,
-        });
+        };
       }
 
       return {
@@ -616,12 +785,12 @@ const ObservationHistoryTable = ({
         refMin,
         refMax,
         valuesByTime,
-        hasAbnormal: Array.from(valuesByTime.values()).some((e) => e.abnormal),
+        hasAbnormal: Object.values(valuesByTime).some((e) => e.abnormal),
       };
     });
 
     return { columns, rows };
-  }, [data, codes]);
+  }, [entriesByCode, codes]);
 
   const visibleRows = useMemo(
     () => (abnormalOnly ? rows.filter((row) => row.hasAbnormal) : rows),
@@ -633,15 +802,23 @@ const ObservationHistoryTable = ({
     () =>
       abnormalOnly
         ? columns.filter((col) =>
-            visibleRows.some((row) => row.valuesByTime.get(col.key)?.abnormal),
+            visibleRows.some((row) => row.valuesByTime[col.key]?.abnormal),
           )
         : columns,
     [abnormalOnly, columns, visibleRows],
   );
 
-  if (isLoading) {
-    return <TableSkeleton count={3} />;
-  }
+  // Dock the pinned column to the first column's real width so it never
+  // overlaps when long content stretches the first column past its base width.
+  useEffect(() => {
+    const el = firstColRef.current;
+    if (!el) return;
+    const update = () => setPinnedOffset(el.getBoundingClientRect().width);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleColumns, abnormalOnly]);
 
   if (columns.length === 0) {
     return (
@@ -697,14 +874,14 @@ const ObservationHistoryTable = ({
       </div>
 
       {/* Table */}
-      <div
-        ref={scrollRef}
-        className="overflow-x-auto border-t border-gray-200 overflow-y-auto"
-      >
-        <Table>
+      <div ref={scrollRef} className="border-t border-gray-200 overflow-y-auto">
+        <Table className="border-separate border-spacing-0 [&_td]:border-b [&_td]:border-gray-200 [&_th]:border-b [&_th]:border-gray-200">
           <TableHeader>
             <TableRow className="bg-gray-100 hover:bg-gray-50">
-              <TableHead className="w-64 min-w-64 max-w-64 border-r border-gray-200 bg-gray-50 text-gray-600">
+              <TableHead
+                ref={firstColRef}
+                className="sticky left-0 z-20 w-32 min-w-32 max-w-32 sm:w-64 sm:min-w-64 sm:max-w-64 border-r border-gray-200 bg-gray-50 text-gray-600"
+              >
                 {t("component")}
               </TableHead>
               {visibleColumns.map((col, index) => {
@@ -713,9 +890,10 @@ const ObservationHistoryTable = ({
                 return (
                   <TableHead
                     key={col.key}
+                    style={isLatest ? { left: pinnedOffset } : undefined}
                     className={cn(
                       "whitespace-nowrap border-r border-gray-200 bg-gray-100 text-center font-normal text-gray-600 last:border-r-0",
-                      isLatest && "bg-indigo-50",
+                      isLatest && "sticky z-20 bg-indigo-100",
                     )}
                   >
                     <div className="flex flex-col items-center leading-tight">
@@ -735,18 +913,25 @@ const ObservationHistoryTable = ({
                   </TableHead>
                 );
               })}
+              {hasNextPage && (
+                <TableHead
+                  ref={loadMoreRef}
+                  aria-hidden="true"
+                  className="w-2 min-w-2 border-r-0 bg-gray-100"
+                />
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {visibleRows.map((row) => (
               <TableRow key={row.id} className="hover:bg-transparent">
-                <TableCell className="border-r border-gray-200">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-semibold text-gray-950">
+                <TableCell className="sticky left-0 z-10 w-32 max-w-32 sm:w-64 sm:max-w-64 border-r border-gray-200 bg-white">
+                  <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
+                    <span className="truncate font-semibold text-gray-950">
                       {row.title}
                     </span>
                     {(row.refMin != null || row.refMax != null) && (
-                      <span className="whitespace-nowrap text-xs text-gray-500">
+                      <span className="shrink-0 whitespace-nowrap text-xs text-gray-500">
                         ({row.refMin ?? "-"} &ndash; {row.refMax ?? "-"}
                         {row.unit ? ` ${row.unit}` : ""})
                       </span>
@@ -754,15 +939,15 @@ const ObservationHistoryTable = ({
                   </div>
                 </TableCell>
                 {visibleColumns.map((col, index) => {
-                  const entry = row.valuesByTime.get(col.key);
+                  const entry = row.valuesByTime[col.key];
                   const isLatest = index === 0;
                   return (
                     <TableCell
                       key={col.key}
+                      style={isLatest ? { left: pinnedOffset } : undefined}
                       className={cn(
-                        "whitespace-nowrap border-r border-gray-200 text-center last:border-r-0",
-                        isLatest &&
-                          "border-x border-primary-100 bg-primary-50/60",
+                        "whitespace-nowrap border-r border-gray-200 text-center last:border-r-0 bg-white",
+                        isLatest && "sticky z-10",
                         entry?.abnormal &&
                           "bg-orange-100 font-medium text-orange-700",
                       )}
