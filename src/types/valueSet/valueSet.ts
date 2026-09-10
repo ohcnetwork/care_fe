@@ -55,6 +55,7 @@ export interface ValueSetBase {
   name: string;
   description: string;
   compose: ValueSetCompose;
+  disable_composition: boolean;
   status: ValueSetStatus;
   is_system_defined: boolean;
 }

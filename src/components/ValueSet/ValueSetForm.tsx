@@ -55,6 +55,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import {
@@ -841,11 +842,6 @@ function BasedOnFields({
                 </Label>
               </RadioGroup>
             </FormControl>
-            {parent && (
-              <p className="text-sm leading-5 text-gray-600">
-                {t("valueset_parent_rules_hint")}
-              </p>
-            )}
             {field.value && (
               <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-950">
                 {t("valueset_customization_resolution_hint")}
@@ -951,6 +947,7 @@ export function ValueSetForm({
         ValueSetStatus.UNKNOWN,
       ]),
       is_system_defined: z.boolean(),
+      disable_composition: z.boolean(),
       compose: z.object({
         include: z.array(ruleSchema),
         exclude: z.array(ruleSchema),
@@ -998,6 +995,7 @@ export function ValueSetForm({
       description: initialData?.description || "",
       status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
+      disable_composition: initialData?.disable_composition ?? false,
       compose: {
         include:
           initialData?.compose?.include.map((rule) => ({
@@ -1172,7 +1170,9 @@ export function ValueSetForm({
             <ValueSetPreview
               valueset={values}
               definitionNotice={
-                parent ? t("valueset_parent_preview_hint") : undefined
+                parent && !values.disable_composition
+                  ? t("valueset_parent_preview_hint")
+                  : undefined
               }
               trigger={
                 <Button
@@ -1421,6 +1421,38 @@ export function ValueSetForm({
                   </p>
                 )}
               </div>
+              {(initialData || parent) && (
+                <FormField
+                  control={form.control}
+                  name="disable_composition"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 p-4">
+                      <div className="space-y-1">
+                        <FormLabel>{t("valueset_use_parent_rules")}</FormLabel>
+                        <FormDescription>
+                          {t(
+                            field.value
+                              ? "valueset_own_rules_hint"
+                              : "valueset_parent_rules_hint",
+                          )}
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          ref={field.ref}
+                          name={field.name}
+                          onBlur={field.onBlur}
+                          checked={!field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(!checked)
+                          }
+                          disabled={isReadOnly || isSubmitting}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
               <div className="grid items-start gap-7">
                 <RuleFields
                   type="include"

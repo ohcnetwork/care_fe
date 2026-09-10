@@ -69,7 +69,18 @@ test.describe("Facility value sets", () => {
     });
 
     await test.step("Save lands on the edit page, where departments are set", async () => {
-      await page.getByRole("button", { name: "Save ValueSet" }).click();
+      const [createRequest] = await Promise.all([
+        page.waitForRequest(
+          (request) =>
+            request.method() === "POST" &&
+            new URL(request.url()).pathname === "/api/v1/valueset/",
+        ),
+        page.getByRole("button", { name: "Save ValueSet" }).click(),
+      ]);
+      expect(createRequest.postDataJSON()).toMatchObject({
+        disable_composition: false,
+        inherited: false,
+      });
       await expectToast(page, /valueset created successfully/i);
       await page.waitForURL(/\/settings\/valuesets\/[0-9a-f-]+\/edit$/);
       await expect(page.getByText("Departments with access")).toBeVisible();
@@ -136,6 +147,13 @@ test.describe("Facility value sets", () => {
       });
 
       await test.step("Switching modes preserves a manually authored separate slug", async () => {
+        const useParentRules = page.getByRole("switch", {
+          name: "Use parent rules",
+          exact: true,
+        });
+        await expect(useParentRules).toBeChecked();
+        await useParentRules.click();
+        await expect(useParentRules).not.toBeChecked();
         const slug = page.getByRole("textbox", { name: "Slug *" });
         const separate = page.getByRole("radio", {
           name: "Separate value set",
@@ -149,6 +167,7 @@ test.describe("Facility value sets", () => {
 
         await separate.click();
         await expect(separate).toBeChecked();
+        await expect(useParentRules).not.toBeChecked();
         await expect(slug).toBeEnabled();
         await page.getByRole("textbox", { name: "Name *" }).fill(name);
         await expect(slug).toHaveValue(expectedSlug(name));
@@ -156,6 +175,7 @@ test.describe("Facility value sets", () => {
 
         await customization.click();
         await expect(customization).toBeChecked();
+        await expect(useParentRules).not.toBeChecked();
         await expect(slug).toBeDisabled();
         await expect(slug).toHaveValue(parentSlug);
 
@@ -173,7 +193,19 @@ test.describe("Facility value sets", () => {
         await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
           parentSlug,
         );
-        await page.getByRole("button", { name: "Save ValueSet" }).click();
+        const [createRequest] = await Promise.all([
+          page.waitForRequest(
+            (request) =>
+              request.method() === "POST" &&
+              new URL(request.url()).pathname === "/api/v1/valueset/",
+          ),
+          page.getByRole("button", { name: "Save ValueSet" }).click(),
+        ]);
+        expect(createRequest.postDataJSON()).toMatchObject({
+          disable_composition: true,
+          inherited: true,
+          slug: parentSlug,
+        });
         await expectToast(page, /valueset created successfully/i);
         await page.waitForURL(/\/settings\/valuesets\/[0-9a-f-]+\/edit$/);
         await expect(
@@ -182,6 +214,9 @@ test.describe("Facility value sets", () => {
         await expect(page.getByRole("textbox", { name: "Slug *" })).toHaveValue(
           parentSlug,
         );
+        await expect(
+          page.getByRole("switch", { name: "Use parent rules", exact: true }),
+        ).not.toBeChecked();
       });
 
       await test.step("The override is listed for this facility under the parent's slug", async () => {
@@ -208,6 +243,7 @@ const RETIRED_SHARED_VALUE_SET = {
   description: "A retired identifier still participates in slug resolution.",
   status: "retired",
   is_system_defined: false,
+  disable_composition: false,
   compose: { include: [], exclude: [] },
   created_by: null,
   updated_by: null,

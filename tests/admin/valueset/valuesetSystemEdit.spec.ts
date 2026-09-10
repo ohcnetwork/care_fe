@@ -18,6 +18,7 @@ const SYSTEM_VALUE_SET: ValueSetRead = {
   description: "System-defined instructions for prescriptions.",
   status: ValueSetStatus.ACTIVE,
   is_system_defined: true,
+  disable_composition: true,
   compose: {
     // The API can omit the unused concept list. Opening this rule must
     // not make the form dirty or prevent saving an unchanged long slug.
@@ -108,6 +109,9 @@ test("admins can edit a system value set while its existing slug stays locked", 
   await expect(slug).toBeDisabled();
   await expect(slug).toHaveValue(SYSTEM_VALUE_SET.slug);
   await expect(
+    page.getByRole("switch", { name: "Use parent rules", exact: true }),
+  ).not.toBeChecked();
+  await expect(
     page.getByRole("combobox", { name: "System", exact: true }),
   ).toBeEnabled();
   await expect(
@@ -147,6 +151,7 @@ test("admins can edit a system value set while its existing slug stays locked", 
     status: ValueSetStatus.DRAFT,
     slug: SYSTEM_VALUE_SET.slug,
     is_system_defined: true,
+    disable_composition: true,
     compose: {
       include: [
         {

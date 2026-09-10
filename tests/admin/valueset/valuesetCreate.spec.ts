@@ -102,7 +102,17 @@ test.describe("ValueSet Create", () => {
     await expect(previewConcept.getByText(code, { exact: true })).toBeVisible();
     await previewDialog.getByRole("button", { name: "Close" }).click();
 
-    await page.getByRole("button", { name: "Save ValueSet" }).click();
+    const [createRequest] = await Promise.all([
+      page.waitForRequest(
+        (request) =>
+          request.method() === "POST" &&
+          new URL(request.url()).pathname === "/api/v1/valueset/",
+      ),
+      page.getByRole("button", { name: "Save ValueSet" }).click(),
+    ]);
+    expect(createRequest.postDataJSON()).toMatchObject({
+      disable_composition: false,
+    });
 
     await expectToast(page, /valueset created successfully/i);
 

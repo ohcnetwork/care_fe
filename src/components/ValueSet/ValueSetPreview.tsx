@@ -63,6 +63,10 @@ export function ValueSetPreview({
   const hasDefinition = [...compose.include, ...compose.exclude].some(
     (rule) => !!rule.system,
   );
+  const definition = {
+    compose,
+    disable_composition: valueset.disable_composition,
+  };
 
   const {
     data: searchQuery,
@@ -70,7 +74,7 @@ export function ValueSetPreview({
     isError,
     refetch,
   } = useQuery<typeof valueSetApi.previewSearch.TRes>({
-    queryKey: ["valueset", "previewSearch", search, compose],
+    queryKey: ["valueset", "previewSearch", search, definition],
     queryFn: query.debounced(valueSetApi.previewSearch, {
       queryParams: { search, count: PREVIEW_RESULT_LIMIT },
       body: {
@@ -83,7 +87,7 @@ export function ValueSetPreview({
     // Keep the list stable while searching, but never show results from an
     // earlier definition after its include/exclude rules have changed.
     placeholderData: (previousData, previousQuery) =>
-      JSON.stringify(previousQuery?.queryKey[3]) === JSON.stringify(compose)
+      JSON.stringify(previousQuery?.queryKey[3]) === JSON.stringify(definition)
         ? previousData
         : undefined,
     enabled: open && hasDefinition,

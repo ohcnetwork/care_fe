@@ -76,6 +76,7 @@ export async function createFacilityOverride({
       facility: facilityId,
       parent: parentId,
       inherited: true,
+      disable_composition: false,
       name,
       slug: parentSlug,
       description: "Playwright facility override",
