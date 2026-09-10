@@ -1,12 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format, isToday } from "date-fns";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-  Pin,
-} from "lucide-react";
+import { Pin } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -16,14 +10,12 @@ import {
   Legend,
   Line,
   LineChart,
-  ReferenceArea,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -31,7 +23,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -49,11 +40,11 @@ import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import {
   ObservationListRead,
-  ObservationReferenceRange,
+  ObservationStatus,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
+import { toNumber } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface ObservationDetailSheetProps {
@@ -83,7 +74,6 @@ interface ResolvedObservationEntry {
   time: number;
   value?: string | null;
   unit?: Code;
-  referenceRange?: ObservationReferenceRange[];
   enteredBy: string;
   note?: string | null;
 }
@@ -94,7 +84,11 @@ function resolveObservationEntries(
   const groupedObj: Record<string, ResolvedObservationEntry[]> = {};
 
   for (const obs of results) {
-    if (!obs.effective_datetime) continue;
+    if (
+      !obs.effective_datetime ||
+      obs.status === ObservationStatus.ENTERED_IN_ERROR
+    )
+      continue;
 
     const time = new Date(obs.effective_datetime).getTime();
     const enteredBy = formatName(obs.data_entered_by);
@@ -106,7 +100,6 @@ function resolveObservationEntries(
             code: component.code!,
             value: component.value?.value,
             unit: component.value?.unit,
-            referenceRange: component.reference_range,
             time,
             enteredBy,
             note: component.note ?? obs.note,
@@ -117,7 +110,6 @@ function resolveObservationEntries(
               code: obs.main_code,
               value: obs.value?.value,
               unit: obs.value?.unit,
-              referenceRange: obs.reference_range,
               time,
               enteredBy,
               note: obs.note,
@@ -145,7 +137,7 @@ function getRecordingSummary(results: ObservationListRead[]) {
   const times = dated.map((obs) => new Date(obs.effective_datetime).getTime());
   const buckets = new Set(
     dated.map((obs) =>
-      minuteBucketKey(new Date(obs.effective_datetime).getTime()),
+      format(new Date(obs.effective_datetime).getTime(), "yyyy-MM-dd'T'HH:mm"),
     ),
   );
   const min = Math.min(...times);
@@ -155,27 +147,6 @@ function getRecordingSummary(results: ObservationListRead[]) {
       ? format(min, "d MMM")
       : `${format(min, "d MMM")} → ${format(max, "d MMM")}`;
   return { count: buckets.size, range };
-}
-
-// Parse a stored observation value into a finite number, or null when it is
-// blank or non-numeric.
-function parseNumericValue(value?: string | null): number | null {
-  if (value === null || value === undefined || value === "") return null;
-  const numeric = Number(value);
-  return isNaN(numeric) ? null : numeric;
-}
-
-// Group readings to the minute so values recorded seconds apart share a slot.
-function minuteBucketKey(time: number): string {
-  return format(new Date(time), "yyyy-MM-dd'T'HH:mm");
-}
-
-function getEntryUnitAndRange(entries: ResolvedObservationEntry[]) {
-  const unitEntry = entries.find((entry) => entry.unit);
-  const unit = unitEntry?.unit?.display || unitEntry?.unit?.code || "";
-  const range = entries.find((entry) => entry.referenceRange?.length)
-    ?.referenceRange?.[0];
-  return { unit, refMin: range?.min, refMax: range?.max };
 }
 
 interface ObservationDetailContentProps {
@@ -200,17 +171,15 @@ function ObservationDetailContent({
     if (inView && hasNextPage) fetchNextPage?.();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const { unit, refMin, refMax } = getEntryUnitAndRange(entries);
+  const unit = entries[0]?.unit?.display || entries[0]?.unit?.code || "";
 
   const chartData = entries
     .map((entry) => {
-      const value = parseNumericValue(entry.value);
+      const value = !!entry.value === true ? toNumber(entry.value) : null;
       if (value === null) return null;
       return {
         time: entry.time,
         value,
-        enteredBy: entry.enteredBy,
-        note: entry.note,
       };
     })
     .filter(
@@ -219,8 +188,6 @@ function ObservationDetailContent({
       ): entry is {
         time: number;
         value: number;
-        enteredBy: string;
-        note: string | null | undefined;
       } => entry !== null,
     );
 
@@ -303,19 +270,14 @@ function ObservationDetailContent({
   };
 
   const values = chartData.map((d) => d.value);
-  const dataMin = values.length ? Math.min(...values) : 0;
-  const dataMax = values.length ? Math.max(...values) : 0;
-  const yMin = Math.min(dataMin, refMin ?? dataMin);
-  const yMax = Math.max(dataMax, refMax ?? dataMax);
+  const yMin = values.length ? Math.min(...values) : 0;
+  const yMax = values.length ? Math.max(...values) : 0;
   const pad = (yMax - yMin || 1) * 0.2;
 
   return (
     <div className="flex flex-col gap-8">
       {chartData.length > 0 && (
         <div className="relative mt-2" style={{ height: 320 }}>
-          <div className="pointer-events-none absolute left-3 top-1 z-10 text-xs text-gray-500">
-            ({t("ref")} {refMin ?? "-"}-{refMax ?? "-"} {unit})
-          </div>
           <div className="pointer-events-none absolute right-4 top-1 z-10 text-xs text-gray-500">
             {t("newest")} →
           </div>
@@ -336,15 +298,6 @@ function ObservationDetailContent({
                   data={chartData}
                   margin={{ top: 32, right: 72, left: 40, bottom: 8 }}
                 >
-                  {refMin !== undefined && refMax !== undefined && (
-                    <ReferenceArea
-                      y1={refMin}
-                      y2={refMax}
-                      fill="#eff6ff"
-                      fillOpacity={1}
-                      ifOverflow="extendDomain"
-                    />
-                  )}
                   <Tooltip
                     cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }}
                     content={({ active, payload }) => {
@@ -432,7 +385,7 @@ function AllValuesChart({ codeList, entriesByCode }: AllValuesChartProps) {
 
   for (const code of codeList) {
     for (const entry of entriesByCode[code.code] ?? []) {
-      const numeric = parseNumericValue(entry.value);
+      const numeric = !!entry.value === true ? toNumber(entry.value) : null;
       if (numeric === null) continue;
       const row = rowsByTime.get(entry.time) ?? { time: entry.time };
       row[code.code] = numeric;
@@ -531,18 +484,18 @@ export function ObservationDetailSheet({
       currentEncounterOnly,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
-      const res = await query(observationApi.list, {
+      const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           codes: codesParam,
           limit: String(RESULTS_PER_PAGE_LIMIT),
-          offset: pageParam,
+          offset: String(pageParam),
           ...(currentEncounterOnly && encounterId
             ? { encounter: encounterId }
             : {}),
         },
       })({ signal });
-      return res as PaginatedResponse<ObservationListRead>;
+      return response;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -563,6 +516,10 @@ export function ObservationDetailSheet({
   );
 
   const summary = useMemo(() => getRecordingSummary(allResults), [allResults]);
+
+  // Total recordings reported by the backend across all pages, not just the
+  // pages loaded so far.
+  const totalCount = historyData?.pages?.[0]?.count ?? 0;
 
   const codeList = useMemo(
     () => Object.values(entriesByCode).map((list) => list[0].code),
@@ -591,10 +548,10 @@ export function ObservationDetailSheet({
                 ? t("current_encounter")
                 : t("all_encounters")}
             </span>
-            {summary.count > 0 && (
+            {totalCount > 0 && (
               <>
                 <span aria-hidden="true">•</span>
-                <span>{t("recordings_count", { count: summary.count })}</span>
+                <span>{t("recordings_count", { count: totalCount })}</span>
               </>
             )}
             {summary.range && (
@@ -684,6 +641,7 @@ export function ObservationDetailSheet({
               title={t("observation_history")}
               codes={codeList}
               entriesByCode={entriesByCode}
+              totalCount={totalCount}
               hasNextPage={hasNextPage}
               fetchNextPage={fetchNextPage}
             />
@@ -698,19 +656,19 @@ const ObservationHistoryMatrix = ({
   title,
   codes,
   entriesByCode,
+  totalCount,
   hasNextPage,
   fetchNextPage,
 }: {
   title: string;
   codes: Code[];
   entriesByCode: Record<string, ResolvedObservationEntry[]>;
+  totalCount: number;
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
 }) => {
   const { t } = useTranslation();
 
-  const [abnormalOnly, setAbnormalOnly] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const firstColRef = useRef<HTMLTableCellElement>(null);
   const [pinnedOffset, setPinnedOffset] = useState(0);
 
@@ -720,19 +678,12 @@ const ObservationHistoryMatrix = ({
     if (inView && hasNextPage) fetchNextPage?.();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const scrollBy = (offset: number) => {
-    const container = scrollRef.current?.querySelector<HTMLElement>(
-      '[data-slot="table-container"]',
-    );
-    container?.scrollBy({ left: offset, behavior: "smooth" });
-  };
-
   const { columns, rows } = useMemo(() => {
     // One column per minute bucket, most recent first.
     const columnMap: Record<string, number> = {};
     for (const list of Object.values(entriesByCode)) {
       for (const entry of list) {
-        const key = minuteBucketKey(entry.time);
+        const key = format(new Date(entry.time), "yyyy-MM-dd'T'HH:mm");
         const existing = columnMap[key];
         if (existing === undefined || entry.time > existing) {
           columnMap[key] = entry.time;
@@ -745,68 +696,32 @@ const ObservationHistoryMatrix = ({
 
     const rows = codes.map((code) => {
       const codeEntries = entriesByCode[code.code] ?? [];
-      const { unit, refMin, refMax } = getEntryUnitAndRange(codeEntries);
 
       // Index each reading by its minute bucket, keeping the latest per bucket.
       const valuesByTime: Record<
         string,
-        {
-          time: number;
-          value?: string | null;
-          abnormal: boolean;
-          direction: "up" | "down" | null;
-        }
+        { time: number; value?: string | null }
       > = {};
       for (const entry of codeEntries) {
-        const key = minuteBucketKey(entry.time);
+        const key = format(new Date(entry.time), "yyyy-MM-dd'T'HH:mm");
         const existing = valuesByTime[key];
         if (existing && entry.time <= existing.time) continue;
-
-        // Abnormal = value falls outside the reference range.
-        const numeric = parseNumericValue(entry.value);
-        let direction: "up" | "down" | null = null;
-        if (numeric !== null) {
-          if (refMax != null && numeric > refMax) direction = "up";
-          else if (refMin != null && numeric < refMin) direction = "down";
-        }
 
         valuesByTime[key] = {
           time: entry.time,
           value: entry.value,
-          abnormal: direction !== null,
-          direction,
         };
       }
 
       return {
         id: code.code,
         title: code.display || code.code,
-        unit,
-        refMin,
-        refMax,
         valuesByTime,
-        hasAbnormal: Object.values(valuesByTime).some((e) => e.abnormal),
       };
     });
 
     return { columns, rows };
   }, [entriesByCode, codes]);
-
-  const visibleRows = useMemo(
-    () => (abnormalOnly ? rows.filter((row) => row.hasAbnormal) : rows),
-    [abnormalOnly, rows],
-  );
-
-  // When filtering, drop columns that hold no abnormal reading for any row.
-  const visibleColumns = useMemo(
-    () =>
-      abnormalOnly
-        ? columns.filter((col) =>
-            visibleRows.some((row) => row.valuesByTime[col.key]?.abnormal),
-          )
-        : columns,
-    [abnormalOnly, columns, visibleRows],
-  );
 
   // Dock the pinned column to the first column's real width so it never
   // overlaps when long content stretches the first column past its base width.
@@ -818,18 +733,10 @@ const ObservationHistoryMatrix = ({
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [visibleColumns, abnormalOnly]);
-
-  if (columns.length === 0) {
-    return (
-      <div className="flex h-24 items-center justify-center text-sm text-gray-500">
-        {t("no_data_available")}
-      </div>
-    );
-  }
+  }, [columns]);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div className="rounded-xl border border-gray-200 bg-white mt-5">
       <div className="relative flex items-center gap-3 p-4">
         <span
           aria-hidden="true"
@@ -837,44 +744,16 @@ const ObservationHistoryMatrix = ({
         />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-base font-semibold text-gray-950">
-            {title} ({t("recordings_count", { count: columns.length })})
+            {title} ({t("recordings_count", { count: totalCount })})
           </h3>
           <p className="text-sm text-gray-700">
-            {abnormalOnly
-              ? t("showing_abnormal_readings")
-              : t("showing_all_readings", { count: columns.length })}
+            {t("showing_all_readings", { count: totalCount })}
           </p>
-        </div>
-        <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-sm font-medium text-gray-700">
-          <Switch checked={abnormalOnly} onCheckedChange={setAbnormalOnly} />
-          {t("abnormal_only")}
-        </label>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => scrollBy(-240)}
-            aria-label={t("scroll_left")}
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-8"
-            onClick={() => scrollBy(240)}
-            aria-label={t("scroll_right")}
-          >
-            <ChevronRight className="size-4" />
-          </Button>
         </div>
       </div>
 
       {/* Table */}
-      <div ref={scrollRef} className="border-t border-gray-200 overflow-y-auto">
+      <div className="border-t border-gray-200 overflow-y-auto">
         <Table className="border-separate border-spacing-0 [&_td]:border-b [&_td]:border-gray-200 [&_th]:border-b [&_th]:border-gray-200">
           <TableHeader>
             <TableRow className="bg-gray-100 hover:bg-gray-50">
@@ -884,7 +763,7 @@ const ObservationHistoryMatrix = ({
               >
                 {t("component")}
               </TableHead>
-              {visibleColumns.map((col, index) => {
+              {columns.map((col, index) => {
                 const isLatest = index === 0;
                 const isTodayCol = isToday(new Date(col.time));
                 return (
@@ -923,22 +802,16 @@ const ObservationHistoryMatrix = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleRows.map((row) => (
+            {rows.map((row) => (
               <TableRow key={row.id} className="hover:bg-transparent">
                 <TableCell className="sticky left-0 z-10 w-32 max-w-32 sm:w-64 sm:max-w-64 border-r border-gray-200 bg-white">
                   <div className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
                     <span className="truncate font-semibold text-gray-950">
                       {row.title}
                     </span>
-                    {(row.refMin != null || row.refMax != null) && (
-                      <span className="shrink-0 whitespace-nowrap text-xs text-gray-500">
-                        ({row.refMin ?? "-"} &ndash; {row.refMax ?? "-"}
-                        {row.unit ? ` ${row.unit}` : ""})
-                      </span>
-                    )}
                   </div>
                 </TableCell>
-                {visibleColumns.map((col, index) => {
+                {columns.map((col, index) => {
                   const entry = row.valuesByTime[col.key];
                   const isLatest = index === 0;
                   return (
@@ -948,36 +821,16 @@ const ObservationHistoryMatrix = ({
                       className={cn(
                         "whitespace-nowrap border-r border-gray-200 text-center last:border-r-0 bg-white",
                         isLatest && "sticky z-10",
-                        entry?.abnormal &&
-                          "bg-orange-100 font-medium text-orange-700",
                       )}
                     >
                       <span className="inline-flex items-center gap-1">
-                        {abnormalOnly && !entry?.abnormal
-                          ? "-"
-                          : (entry?.value ?? "-")}
-                        {entry?.abnormal && entry.direction === "up" && (
-                          <ArrowUpRight className="size-3.5" />
-                        )}
-                        {entry?.abnormal && entry.direction === "down" && (
-                          <ArrowDownRight className="size-3.5" />
-                        )}
+                        {entry?.value ?? "-"}
                       </span>
                     </TableCell>
                   );
                 })}
               </TableRow>
             ))}
-            {visibleRows.length === 0 && (
-              <TableRow className="hover:bg-transparent">
-                <TableCell
-                  colSpan={visibleColumns.length + 1}
-                  className="h-24 text-center text-sm text-gray-500"
-                >
-                  {t("no_abnormal_readings")}
-                </TableCell>
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       </div>
