@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import {
+  applyCareConfig,
+  isCareConfigOverrideActive,
+} from "tests/helper/careConfig";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -147,6 +151,34 @@ async function submitRegistration(page: Page) {
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
     ).toBeVisible({ timeout: 15000 });
+  });
+}
+
+/**
+ * Verifies the newly registered patient is shown on the patients home card.
+ * After registration the app navigates to `/patients/home`, where
+ * `PatientHoverCard` renders the patient name (heading) and an
+ * "{age} Y, {gender}" line.
+ */
+async function verifyPatientCard(
+  page: Page,
+  data: { name: string; gender: string },
+) {
+  await test.step("Verify patient details in the card", async () => {
+    await page.waitForURL("**/patients/home**");
+    // Scope to the specific patient's card so the age/gender assertion cannot
+    // match another patient's line elsewhere on the page. Using `has` with the
+    // name heading also excludes the hidden (mobile) hover-card trigger.
+    const patientCard = page.locator(
+      '[data-slot="patient-info-hover-card-trigger"]',
+      { has: page.getByRole("heading", { name: data.name }) },
+    );
+    await expect(
+      patientCard.getByRole("heading", { name: data.name }),
+    ).toBeVisible();
+    await expect(
+      patientCard.getByText(new RegExp(`Y,\\s*${data.gender}`, "i")),
+    ).toBeVisible();
   });
 }
 
@@ -408,5 +440,100 @@ test.describe("DOB timezone validation", () => {
         .locator("li[data-sonner-toast]")
         .getByText(/patient registered successfully/i),
     ).not.toBeVisible();
+  });
+});
+
+/**
+ * Demonstrates controlling patient-registration config flags per test file,
+ * without editing `.env.local`.
+ *
+ * `applyCareConfig` uses `page.addInitScript`, which runs before any app script
+ * loads, so `care.config.ts` picks up the values for this spec only (see the
+ * E2E override seam in that file).
+ *
+ * Requires the preview build to be built with `REACT_ENABLE_E2E_CONFIG_OVERRIDES=true`
+ * so the seam is active — e.g. `npm run build:e2e`.
+ */
+test.describe("Patient Registration config overrides (per-file)", () => {
+  // The override is set on each test's own isolated browser context, so it
+  // applies to that test only and Playwright discards it automatically when the
+  // context is torn down — no manual teardown needed.
+  test("minimal registration lets a patient be registered without address or geo org", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    await applyCareConfig(page, { minimalPatientRegistration: true });
+    await page.goto(`/facility/${facilityId}/patient/create`);
+
+    test.skip(
+      !(await isCareConfigOverrideActive(page)),
+      "E2E config override seam not enabled; build with `npm run build:e2e`",
+    );
+
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, patientData.dateOfBirth);
+    await selectBloodGroup(page, patientData.bloodGroup);
+
+    // No address / geo org filled — minimal mode makes them optional.
+    await submitRegistration(page);
+    await verifyPatientCard(page, patientData);
+  });
+
+  test("lowering required geo org levels to 1 accepts a single selected level", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    await applyCareConfig(page, { minGeoOrganizationLevelsRequired: 1 });
+    await page.goto(`/facility/${facilityId}/patient/create`);
+
+    test.skip(
+      !(await isCareConfigOverrideActive(page)),
+      "E2E config override seam not enabled; build with `npm run build:e2e`",
+    );
+
+    const patientData = generatePatientData();
+    await fillBasicInfo(page, patientData);
+    await fillDateOfBirth(page, patientData.dateOfBirth);
+    await selectBloodGroup(page, patientData.bloodGroup);
+
+    await test.step("Open additional details and select only the first geo org level", async () => {
+      const additionalDetailsSection = page.getByRole("button", {
+        name: "Additional Details",
+      });
+      const additionalDetailsSectionText =
+        await additionalDetailsSection.textContent();
+
+      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
+        await additionalDetailsSection.click();
+      }
+
+      await page
+        .getByRole("textbox", { name: "Address" })
+        .fill(patientData.address);
+      await page
+        .getByRole("spinbutton", { name: "PIN Code" })
+        .fill(patientData.pincode);
+
+      await page
+        .getByRole("button", { name: /register patient/i })
+        .scrollIntoViewIfNeeded();
+
+      const geoRegion = page.getByRole("region", {
+        name: "Additional Details",
+      });
+      const firstCombobox = geoRegion.getByRole("combobox").first();
+      await firstCombobox.waitFor({ state: "visible" });
+      await firstCombobox.click();
+
+      const option = page.getByRole("option").first();
+      await option.waitFor({ state: "visible" });
+      await option.click();
+    });
+
+    // With only 1 level required, a single selection must NOT raise the
+    // geo-org validation error and registration should succeed.
+    await submitRegistration(page);
+    await verifyPatientCard(page, patientData);
   });
 });
