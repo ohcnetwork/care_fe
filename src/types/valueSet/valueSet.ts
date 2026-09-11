@@ -41,7 +41,7 @@ export interface ValueSetConcept {
 export interface ValueSetInclude {
   filter?: ValueSetFilter[];
   system: string;
-  version: string | null;
+  version?: string;
   concept?: ValueSetConcept[];
 }
 
@@ -99,12 +99,18 @@ export interface ValueSetLookupResponse {
 export interface ValueSetLookupRequest {
   system: string;
   code: string;
+  version?: string;
 }
 
 export const TERMINOLOGY_SYSTEMS = {
   LOINC: "http://loinc.org",
   SNOMED: "http://snomed.info/sct",
   UCUM: "http://unitsofmeasure.org",
+} as const;
+
+export const SNOMED_VERSIONS = {
+  INDIAN: "http://snomed.info/sct/1121000189102/version/20241129",
+  INTERNATIONAL: "http://snomed.info/sct/900000000000207008/version/20241101",
 } as const;
 
 export type TerminologySystem = keyof typeof TERMINOLOGY_SYSTEMS;
