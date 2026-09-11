@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 
 import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
@@ -58,6 +56,7 @@ interface EncounterQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   clearError: () => void;
   organizations?: string[];
@@ -104,9 +103,9 @@ export function validateEncounterQuestion(
 }
 
 export function EncounterQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   clearError,
   encounterId,
@@ -128,8 +127,13 @@ export function EncounterQuestion({
     questionnaireResponse.question_id,
     errors,
   );
+  const responseBeforeInitializationRef = useRef<QuestionnaireResponse | null>(
+    null,
+  );
 
-  const [encounter, setEncounter] = useState<EncounterEdit>({
+  const encounter = (
+    questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+  )?.[0] ?? {
     status: EncounterStatus.UNKNOWN,
     period: {
       start: new Date().toISOString(),
@@ -144,38 +148,10 @@ export function EncounterQuestion({
       diet_preference: "none",
     },
     discharge_summary_advice: null,
-  });
-
-  useEffect(() => {
-    if (
-      encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
-    }
-  }, [encounter.status]);
+  };
 
   // Transform EncounterRead to EncounterEdit format
-  const transformEncounterForUpdate = (
-    read: EncounterRead,
-  ): Partial<EncounterEdit> => {
+  const transformEncounterForUpdate = (read: EncounterRead): EncounterEdit => {
     return {
       status: read.status,
       period: read.period,
@@ -186,32 +162,98 @@ export function EncounterQuestion({
     };
   };
 
-  // Update encounter state when data is loaded
+  // A refetch provides context for draft reconciliation; it must never be
+  // reported as a clinician edit or replace a response retained on remount.
   useEffect(() => {
-    if (encounterData) {
-      const updates = transformEncounterForUpdate(encounterData);
-      if (toDischarge === "true") {
-        updates.status = EncounterStatus.DISCHARGED;
-      }
-      handleUpdateEncounter(updates);
+    if (!encounterData) return;
+    const initialEncounter = transformEncounterForUpdate(encounterData);
+    if (toDischarge === "true") {
+      initialEncounter.status = EncounterStatus.DISCHARGED;
+      initialEncounter.period = {
+        ...initialEncounter.period,
+        end: initialEncounter.period.end || new Date().toISOString(),
+      };
+      initialEncounter.hospitalization = {
+        ...initialEncounter.hospitalization,
+        discharge_disposition:
+          initialEncounter.hospitalization?.discharge_disposition ??
+          careConfig.defaultDischargeDisposition,
+      };
+    }
+    if (
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterData.encounter_class)
+    ) {
+      initialEncounter.hospitalization = {};
+    }
+    const values: ResponseValue[] = [
+      { type: "encounter", value: [initialEncounter] },
+    ];
+    if (initializeQuestionnaireResponseCB) {
+      responseBeforeInitializationRef.current = questionnaireResponse;
+      initializeQuestionnaireResponseCB(values);
+    } else if (questionnaireResponse.values.length === 0) {
+      updateQuestionnaireResponseCB(values, questionnaireResponse.question_id);
     }
   }, [encounterData]);
 
+  // Older drafts could change encounter class. Normalize their values after
+  // reconciliation so hidden hospitalization edits cannot survive an immutable
+  // non-hospitalization class. Skip the pre-initialization response to avoid
+  // replacing refreshed server fields with the previous render's values.
   useEffect(() => {
-    const formStateValue = (
-      questionnaireResponse.values[0]?.value as EncounterEdit[]
-    )?.[0];
-    if (formStateValue) {
-      setEncounter(() => ({
-        ...formStateValue,
-      }));
+    if (
+      !encounterData ||
+      questionnaireResponse === responseBeforeInitializationRef.current
+    ) {
+      return;
     }
-  }, [questionnaireResponse]);
+    const current = (
+      questionnaireResponse.values[0]?.value as EncounterEdit[] | undefined
+    )?.[0];
+    if (!current) return;
+
+    const hasIncompatibleHospitalization =
+      !HOSPITALIZATION_ENCOUNTER_CLASSES.includes(
+        encounterData.encounter_class,
+      ) && Object.keys(current.hospitalization ?? {}).length > 0;
+    if (!("encounter_class" in current) && !hasIncompatibleHospitalization) {
+      return;
+    }
+
+    const normalized: EncounterEdit & { encounter_class?: EncounterClass } = {
+      ...current,
+    };
+    delete normalized.encounter_class;
+    if (hasIncompatibleHospitalization) normalized.hospitalization = {};
+    updateQuestionnaireResponseCB(
+      [
+        {
+          ...questionnaireResponse.values[0],
+          type: "encounter",
+          value: [normalized],
+        },
+      ],
+      questionnaireResponse.question_id,
+    );
+  }, [encounterData, questionnaireResponse, updateQuestionnaireResponseCB]);
 
   const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     if (!encounterData) return;
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    const hasEnded = [
+      EncounterStatus.DISCHARGED,
+      EncounterStatus.COMPLETED,
+      EncounterStatus.CANCELLED,
+      EncounterStatus.DISCONTINUED,
+      EncounterStatus.ENTERED_IN_ERROR,
+    ].includes(newEncounter.status);
+    newEncounter.period = {
+      ...newEncounter.period,
+      end: hasEnded
+        ? newEncounter.period.end || new Date().toISOString()
+        : undefined,
+    };
     const encounterClass = encounterData.encounter_class;
     if (!HOSPITALIZATION_ENCOUNTER_CLASSES.includes(encounterClass)) {
       newEncounter.hospitalization = {};
@@ -226,7 +268,7 @@ export function EncounterQuestion({
       newEncounter.hospitalization = {
         ...newEncounter.hospitalization,
         discharge_disposition:
-          encounterData?.hospitalization?.discharge_disposition,
+          encounterData.hospitalization?.discharge_disposition,
       };
     }
 
@@ -265,7 +307,6 @@ export function EncounterQuestion({
 
   return (
     <div className="space-y-6">
-      <QuestionLabel question={question} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">

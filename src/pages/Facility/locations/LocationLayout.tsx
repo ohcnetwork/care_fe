@@ -1,12 +1,15 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import BedsList from "@/pages/Facility/locations/BedsList";
+import { LocationOverview } from "@/pages/Facility/locations/LocationOverview";
+import LocationResponses from "@/pages/Facility/locations/LocationResponses";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
@@ -43,6 +46,24 @@ interface LocationLayoutProps {
 }
 
 const getRoutes = (facilityId: string, locationId: string) => ({
+  "/": () => (
+    <Redirect to={`/facility/${facilityId}/locations/${locationId}/overview`} />
+  ),
+  "/overview": () => (
+    <LocationOverview facilityId={facilityId} locationId={locationId} />
+  ),
+  "/forms": () => (
+    <Redirect
+      to={`/facility/${facilityId}/locations/${locationId}/responses`}
+    />
+  ),
+  "/responses": () => (
+    <LocationResponses
+      key={locationId}
+      facilityId={facilityId}
+      locationId={locationId}
+    />
+  ),
   // Beds
   "/beds": () => <BedsList facilityId={facilityId} locationId={locationId} />,
   // Pharmacy
@@ -430,6 +451,24 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       resourceId={locationId}
       queueId={queueId}
       tab="completed"
+    />
+  ),
+
+  // Questionnaire fill for the location subject (fullscreen shell — see
+  // PATHS_WITHOUT_SIDEBAR in AppRouter).
+  "/questionnaire": () => (
+    <QuestionnaireFillPage
+      subject={{ type: "location", facilityId, locationId }}
+    />
+  ),
+  "/questionnaire/:questionnaireId": ({
+    questionnaireId,
+  }: {
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "location", facilityId, locationId }}
+      questionnaireId={questionnaireId}
     />
   ),
 

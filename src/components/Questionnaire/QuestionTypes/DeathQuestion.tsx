@@ -2,8 +2,6 @@ import { format } from "date-fns";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
-
 import {
   QuestionnaireResponse,
   ResponseValue,
@@ -22,8 +20,7 @@ interface TimeOfDeathQuestionProps {
 }
 
 export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
-  const { question, questionnaireResponse, updateQuestionnaireResponseCB } =
-    props;
+  const { questionnaireResponse, updateQuestionnaireResponseCB } = props;
 
   const values = (questionnaireResponse.values?.[0]?.value as string[]) || [];
 
@@ -42,7 +39,6 @@ export function TimeOfDeathQuestion(props: TimeOfDeathQuestionProps) {
 
   return (
     <div className="space-y-4">
-      <QuestionLabel question={question} />
       <DateTimeInput
         value={values[0]}
         onDateChange={(val) => val !== undefined && handleUpdate(val)}

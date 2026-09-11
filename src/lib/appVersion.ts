@@ -81,7 +81,8 @@ export async function fetchBuildMeta(): Promise<BuildMeta> {
 }
 
 /**
- * Clear all caches including browser caches, service workers, and query cache
+ * Clear browser caches, service workers and query caches. Questionnaire
+ * drafts are unsaved user work and must survive cache maintenance/updates.
  */
 export async function clearAllCaches(): Promise<void> {
   // Clear browser caches

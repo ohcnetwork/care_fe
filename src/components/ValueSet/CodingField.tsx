@@ -1,5 +1,7 @@
-import { CheckIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
+import { CheckCircle2, LoaderCircle, SearchCheck, Trash2 } from "lucide-react";
+import { useEffect, useId, useRef } from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -10,110 +12,245 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { ValueSetLookupResponse } from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
-import mutate from "@/Utils/request/mutate";
+import { callApi } from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 
-type CodingFieldProps = {
+import type { ValueSetFormData } from "./ValueSetForm";
+
+type ConceptFieldName =
+  `compose.${"include" | "exclude"}.${number}.concept.${number}`;
+
+interface CodeLookup {
+  code: string;
   system: string;
-  name: string;
-  form: any;
+  name: ConceptFieldName;
+  signal: AbortSignal;
+}
+
+interface CodingFieldProps {
+  system: string;
+  name: ConceptFieldName;
+  form: UseFormReturn<ValueSetFormData>;
   className?: string;
+  disabled?: boolean;
   onRemove?: () => void;
   removeDisabled?: boolean;
-};
+}
 
 export const CodingField = ({
   system,
   name,
   form,
   className,
+  disabled,
   onRemove,
   removeDisabled,
 }: CodingFieldProps) => {
   const { t } = useTranslation();
+  const errorId = useId();
+  const requestController = useRef<AbortController | null>(null);
+  const code = useWatch({ control: form.control, name: `${name}.code` });
+  const display = useWatch({ control: form.control, name: `${name}.display` });
+  const isVerified = Boolean(display?.trim());
   const {
     mutate: lookup,
-    isSuccess: isVerified,
-    isPending: isLookupPending,
-    reset: resetVerified,
+    isPending,
+    isError,
+    variables,
+    reset: resetLookup,
   } = useMutation({
-    mutationFn: mutate(valueSetApi.lookup, { silent: true }),
-    onSuccess: (response: ValueSetLookupResponse) => {
-      if (response.metadata) {
-        form.setValue(`${name}.display`, response.metadata.display, {
-          shouldValidate: true,
+    mutationFn: async ({ code, system, signal }: CodeLookup) => {
+      try {
+        const response = await callApi(valueSetApi.lookup, {
+          body: { system, code: code.trim() },
+          signal,
+          silent: true,
         });
-        toast.success(t("code_verified_successfully"));
+        if (!response.metadata?.display?.trim()) {
+          throw new Error("The terminology service returned no display name");
+        }
+        return response;
+      } catch (error) {
+        // Network errors and cancelled fetches are plain Errors in callApi.
+        // Keep their feedback in this row instead of showing a global toast.
+        if (error instanceof HTTPError) throw error;
+        throw new HTTPError({
+          message:
+            error instanceof Error ? error.message : "Code lookup failed",
+          status: 0,
+          silent: true,
+        });
       }
     },
-    onError: () => {
-      resetVerified();
-
-      toast.error(t("failed_to_verify_code"));
+    onSuccess: (response, request) => {
+      // A removed row, changed system, or edited code must never receive the
+      // display name from an earlier lookup (including an earlier row index).
+      if (
+        request.signal.aborted ||
+        form.getValues(`${request.name}.code`) !== request.code
+      ) {
+        return;
+      }
+      form.setValue(`${request.name}.code`, request.code.trim(), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      form.setValue(`${request.name}.display`, response.metadata.display, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      toast.success(t("code_verified_successfully"));
     },
   });
 
-  const handleVerify = () => {
-    const code = form.getValues(`${name}.code`);
+  useEffect(() => {
+    return () => requestController.current?.abort();
+  }, [code, disabled, name, system]);
 
-    if (!system || !code) {
-      toast.error(t("select_system_first"));
+  const isCurrentLookup =
+    variables?.name === name &&
+    variables?.code === code &&
+    variables?.system === system &&
+    !variables.signal.aborted;
+  const isLookupPending = isPending && isCurrentLookup;
+  const lookupFailed = isError && isCurrentLookup && !isVerified;
+
+  const handleVerify = () => {
+    const currentCode = form.getValues(`${name}.code`);
+    if (
+      disabled ||
+      isVerified ||
+      isLookupPending ||
+      !system ||
+      !currentCode?.trim()
+    ) {
       return;
     }
 
-    lookup({ system, code });
+    requestController.current?.abort();
+    requestController.current = new AbortController();
+    lookup({
+      system,
+      code: currentCode,
+      name,
+      signal: requestController.current.signal,
+    });
   };
 
   const handleCodeChange = () => {
-    resetVerified();
-    form.setValue(`${name}.display`, "", { shouldValidate: true });
+    requestController.current?.abort();
+    resetLookup();
+    form.setValue(`${name}.display`, "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
   return (
-    <div className={cn("flex flex-col sm:flex-row gap-2 sm:gap-4", className)}>
-      <div className="flex gap-2 items-start flex-1">
-        <FormField
-          control={form.control}
-          name={`${name}.code`}
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder={t("code")}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleCodeChange();
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div
+      className={cn(
+        "grid gap-2 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)_auto_auto] sm:items-start",
+        className,
+      )}
+    >
+      <FormField
+        control={form.control}
+        name={`${name}.code`}
+        render={({ field, fieldState }) => (
+          <FormItem>
+            <FormLabel className="sr-only">{t("code")}</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder={t("code")}
+                disabled={disabled}
+                aria-invalid={lookupFailed || fieldState.invalid}
+                aria-errormessage={lookupFailed ? errorId : undefined}
+                onChange={(event) => {
+                  field.onChange(event);
+                  handleCodeChange();
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleVerify();
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name={`${name}.display`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="sr-only">{t("display_name")}</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder={t("unverified")}
+                className={cn("bg-gray-50", !field.value && "text-gray-500")}
+                readOnly
+                disabled={disabled}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className="flex justify-end gap-2 sm:contents">
         <Button
+          aria-label={
+            isVerified
+              ? t("code_verified")
+              : `${t("verify")} ${t("code").toLocaleLowerCase()}`
+          }
           type="button"
           variant="outline"
-          size="icon"
-          onClick={isVerified ? undefined : handleVerify}
-          disabled={isLookupPending || isVerified}
+          size="sm"
+          onClick={handleVerify}
+          disabled={
+            disabled ||
+            isLookupPending ||
+            isVerified ||
+            !system ||
+            !code?.trim()
+          }
           className={cn(
-            "shrink-0 sm:hidden",
+            "h-11 shrink-0 bg-white sm:h-10",
             isVerified
-              ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
+              ? "border-primary-200 bg-primary-100/60 text-primary-800 disabled:opacity-100"
               : "hover:border-gray-400 hover:bg-gray-100",
           )}
         >
           {isVerified ? (
-            <CheckIcon className="size-4 text-green-600 transition-colors duration-300" />
+            <>
+              <CheckCircle2 className="size-4" />
+              <span>{t("code_verified")}</span>
+            </>
           ) : (
-            <UpdateIcon
-              className={cn("size-4", isLookupPending && "animate-spin")}
-            />
+            <>
+              {isLookupPending ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <SearchCheck className="size-4" />
+              )}
+              <span>
+                {isLookupPending
+                  ? t("verifying")
+                  : lookupFailed
+                    ? t("try_again")
+                    : t("verify")}
+              </span>
+            </>
           )}
         </Button>
         {onRemove && (
@@ -121,64 +258,23 @@ export const CodingField = ({
             type="button"
             variant="ghost"
             size="icon"
+            aria-label={t("remove")}
             onClick={onRemove}
-            disabled={removeDisabled}
-            className="shrink-0 sm:hidden"
+            disabled={disabled || removeDisabled}
+            className="size-11 shrink-0 text-gray-500 hover:text-red-600 sm:size-10"
           >
-            <TrashIcon className="size-4" />
+            <Trash2 className="size-4" />
           </Button>
         )}
       </div>
-      <FormField
-        control={form.control}
-        name={`${name}.display`}
-        render={({ field }) => (
-          <FormItem className="flex-1">
-            <FormControl>
-              <Input
-                {...field}
-                placeholder={t("unverified")}
-                className={!field.value ? "text-gray-500" : ""}
-                readOnly
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <Button
-        aria-label="Verify code"
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={isVerified ? undefined : handleVerify}
-        disabled={isLookupPending || isVerified}
-        className={cn(
-          "hidden sm:flex shrink-0 items-center",
-          isVerified
-            ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
-            : "hover:border-gray-400 hover:bg-gray-100",
-        )}
-      >
-        {isVerified ? (
-          <CheckIcon className="size-4 text-green-600 transition-colors duration-300" />
-        ) : (
-          <UpdateIcon
-            className={cn("size-4", isLookupPending && "animate-spin")}
-          />
-        )}
-      </Button>
-      {onRemove && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          disabled={removeDisabled}
-          className="hidden sm:flex shrink-0 items-center"
+      {lookupFailed && (
+        <p
+          id={errorId}
+          role="alert"
+          className="text-sm text-red-600 sm:col-span-4"
         >
-          <TrashIcon className="size-4" />
-        </Button>
+          {t("valueset_code_verification_failed")}
+        </p>
       )}
     </div>
   );

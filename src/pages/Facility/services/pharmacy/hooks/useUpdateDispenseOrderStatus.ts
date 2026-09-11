@@ -1,18 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DefaultError,
+  MutateOptions,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import batchApi from "@/types/base/batch/batchApi";
+import { BatchRequestResponse } from "@/types/base/batch/batch";
 import {
   DispenseOrderRead,
   DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import {
   MEDICATION_DISPENSE_CANCELLED_STATUSES,
   MedicationDispenseRead,
   MedicationDispenseStatus,
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
-import mutate from "@/Utils/request/mutate";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { HttpMethod } from "@/Utils/request/types";
 
 interface Options {
@@ -27,11 +33,35 @@ export interface UpdateDispenseOrderStatusArgs {
   newStatus: DispenseOrderStatus;
 }
 
-interface BatchRequest {
-  url: string;
-  method: string;
-  reference_id: string;
-  body: unknown;
+type StatusMutationOptions = MutateOptions<
+  BatchRequestResponse,
+  DefaultError,
+  UpdateDispenseOrderStatusArgs
+>;
+
+function statusArgs(
+  requests: BatchRequestObject[],
+): UpdateDispenseOrderStatusArgs {
+  return {
+    newStatus: (requests[0].body as { status: DispenseOrderStatus }).status,
+  };
+}
+
+function adaptMutationOptions(
+  args: UpdateDispenseOrderStatusArgs,
+  options?: StatusMutationOptions,
+):
+  | MutateOptions<BatchRequestResponse, DefaultError, BatchRequestObject[]>
+  | undefined {
+  if (!options) return undefined;
+  return {
+    onSuccess: (data, _requests, ...context) =>
+      options.onSuccess?.(data, args, ...context),
+    onError: (error, _requests, ...context) =>
+      options.onError?.(error, args, ...context),
+    onSettled: (data, error, _requests, ...context) =>
+      options.onSettled?.(data, error, args, ...context),
+  };
 }
 
 /**
@@ -51,7 +81,7 @@ const DISPENSE_STATUS_BY_ORDER_STATUS: Partial<
 function buildDispenseUpdate(
   { newStatus }: UpdateDispenseOrderStatusArgs,
   dispenses: MedicationDispenseRead[],
-): BatchRequest | null {
+): BatchRequestObject | null {
   const targetStatus = DISPENSE_STATUS_BY_ORDER_STATUS[newStatus];
 
   // Final corrections (abandoned / entered_in_error) don't touch dispenses.
@@ -80,9 +110,8 @@ function buildDispenseUpdate(
   }));
 
   return {
-    url: `/api/v1/medication/dispense/upsert/`,
-    method: HttpMethod.POST,
-    reference_id: `update_medication_dispenses`,
+    api: medicationDispenseApi.upsert,
+    referenceId: `update_medication_dispenses`,
     body: { datapoints },
   };
 }
@@ -96,32 +125,48 @@ export default function useUpdateDispenseOrderStatus({
 }: Options) {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (args: UpdateDispenseOrderStatusArgs) => {
-      const requests: BatchRequest[] = [
-        {
-          url: `/api/v1/facility/${facilityId}/order/dispense/${dispenseOrder.id}/`,
-          method: HttpMethod.PATCH,
-          reference_id: `update_dispense_order_${dispenseOrder.id}`,
-          body: { status: args.newStatus },
-        },
-      ];
-
-      const dispenseUpdate = buildDispenseUpdate(args, dispenses);
-      if (dispenseUpdate) {
-        requests.push(dispenseUpdate);
-      }
-
-      return mutate(batchApi.batchRequest)({ requests });
-    },
-    onSuccess: (_, { newStatus }) => {
+  const mutation = useBatchRequest({
+    onSuccess: (_, requests) => {
       queryClient.invalidateQueries({
         queryKey: ["dispenseOrder", facilityId, dispenseOrder.id],
       });
       queryClient.invalidateQueries({
         queryKey: ["medication_dispense", dispenseOrder.id, locationId],
       });
-      onSuccess?.(newStatus);
+      onSuccess?.(statusArgs(requests).newStatus);
     },
   });
+
+  const buildRequests = (args: UpdateDispenseOrderStatusArgs) => {
+    const requests: BatchRequestObject[] = [
+      {
+        api: { ...dispenseOrderApi.update, method: HttpMethod.PATCH },
+        pathParams: { facilityId, id: dispenseOrder.id },
+        referenceId: `update_dispense_order_${dispenseOrder.id}`,
+        body: { status: args.newStatus },
+      },
+    ];
+
+    const dispenseUpdate = buildDispenseUpdate(args, dispenses);
+    if (dispenseUpdate) requests.push(dispenseUpdate);
+    return requests;
+  };
+
+  return {
+    ...mutation,
+    variables: mutation.variables ? statusArgs(mutation.variables) : undefined,
+    mutate: (
+      args: UpdateDispenseOrderStatusArgs,
+      options?: StatusMutationOptions,
+    ) =>
+      mutation.mutate(buildRequests(args), adaptMutationOptions(args, options)),
+    mutateAsync: (
+      args: UpdateDispenseOrderStatusArgs,
+      options?: StatusMutationOptions,
+    ) =>
+      mutation.mutateAsync(
+        buildRequests(args),
+        adaptMutationOptions(args, options),
+      ),
+  };
 }

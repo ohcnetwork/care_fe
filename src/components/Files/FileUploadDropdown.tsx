@@ -20,6 +20,15 @@ interface FileUploadDropdownProps {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
   buttonClassName?: string;
   buttonText?: string;
+  /** Withholds the whole add-files affordance (file picker, camera, audio)
+   *  without unmounting it — a real capability gap this component had no
+   *  way to express before: the trigger `Button` stayed clickable even
+   *  while a consuming section was frozen (e.g. a structured question mid-
+   *  submit), so a pick made during that window reached a `disabled`
+   *  mutator that silently no-opped, with no visible reason. Defaults to
+   *  `false` so every existing caller (`FileQuestion.tsx`, `FileSubTab.tsx`,
+   *  `ConsentFormSheet.tsx`, `ConsentDetail.tsx`) is unaffected. */
+  disabled?: boolean;
 }
 
 export default function FileUploadDropdown({
@@ -29,6 +38,7 @@ export default function FileUploadDropdown({
   buttonVariant = "outline",
   buttonClassName = "flex flex-row items-center",
   buttonText,
+  disabled = false,
 }: FileUploadDropdownProps) {
   const { t } = useTranslation();
   const internalInputRef = useRef<HTMLInputElement | null>(null);
@@ -42,6 +52,7 @@ export default function FileUploadDropdown({
           type="button"
           variant={buttonVariant}
           className={buttonClassName}
+          disabled={disabled}
         >
           <CareIcon icon="l-file-upload" className="mr-1" />
           <span>{buttonText ?? t("add_files")}</span>

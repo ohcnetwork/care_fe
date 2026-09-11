@@ -11,11 +11,17 @@ import {
   verifyLabelledValues,
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
+import { getQuestionnaireId } from "tests/support/questionnaireId";
 
-const QUESTIONNAIRE_SLUG = "enable-when-test";
+// Every test in this file submits responses to the same shared encounter and
+// several assert that a hidden dependent is ABSENT from the response
+// overview — running them in parallel lets another test's submission leak
+// into that overview. Opt out of fullyParallel to keep the file sequential.
+test.describe.configure({ mode: "default" });
 
 test.describe("Enable When — Boolean Operators", () => {
   test.use({ storageState: "tests/.auth/user.json" });
@@ -24,13 +30,19 @@ test.describe("Enable When — Boolean Operators", () => {
     const facilityId = getFacilityId();
     const patientId = getPatientId();
     const encounterId = getEncounterId();
+    // The fill route fetches by external_id (slug lookup is not supported).
+    const questionnaireId = await getQuestionnaireId();
 
     await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${QUESTIONNAIRE_SLUG}`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaireId}`,
     );
-    await expect(
-      page.getByText("Has Allergies", { exact: true }),
-    ).toBeVisible();
+    await expect(questionBlock(page, "Has Allergies")).toBeVisible();
+
+    // "Self-Pay Reason" (exists.spec.ts) is required whenever "Insurance
+    // Provider" is unanswered — none of this file's tests touch that field,
+    // so it would otherwise become a visible, required, empty question and
+    // every submission below would fail validation.
+    await fillStringField(page, "Insurance Provider", "N/A");
   });
 
   // ──────────────────────────────────────────────

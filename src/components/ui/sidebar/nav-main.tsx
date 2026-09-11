@@ -1,7 +1,13 @@
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
-import { ActiveLink, useFullPath, usePath } from "raviger";
-import { Fragment, ReactNode, useMemo, useState } from "react";
+import { Link, usePath } from "raviger";
+import {
+  ComponentProps,
+  Fragment,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 
 import { navExpansionAtom } from "@/atoms/navExpansionAtom";
 import { cn } from "@/lib/utils";
@@ -16,8 +22,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -29,22 +37,31 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-const isChildActive = (link: NavigationLink) => {
-  if (!link.children) return false;
-  const currentPath = window.location.pathname;
-  return link.children.some((child) => currentPath.startsWith(child.url));
+const CAREUI_NAV_CLASSES =
+  "relative h-10 rounded-md px-2.5 py-2 text-base font-normal text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400 data-[state=open]:hover:bg-neutral-200 data-[state=open]:hover:text-neutral-950 data-[active=true]:bg-white data-[active=true]:font-medium data-[active=true]:text-emerald-800 data-[active=true]:shadow data-[active=true]:ring-1 data-[active=true]:ring-emerald-800/20 data-[active=true]:hover:bg-white data-[active=true]:hover:text-emerald-800 data-[active=true]:focus-visible:ring-2 data-[active=true]:focus-visible:ring-indigo-400 data-[active=true]:after:absolute data-[active=true]:after:right-0 data-[active=true]:after:top-1/2 data-[active=true]:after:h-6 data-[active=true]:after:w-1 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-l-full data-[active=true]:after:bg-emerald-600 data-[active=true]:after:content-[''] [&_svg]:size-4 [&_svg]:shrink-0 md:text-sm";
+
+const normalizeNavigationPath = (url: string) =>
+  url.split(/[?#]/)[0].replace(/\/+$/, "");
+
+const isNavigationActive = (path: string | null, url: string) => {
+  if (path === null) return false;
+  const currentPath = normalizeNavigationPath(path);
+  const targetPath = normalizeNavigationPath(url);
+  return (
+    currentPath === targetPath ||
+    (targetPath !== "" && currentPath.startsWith(`${targetPath}/`))
+  );
 };
 
-const useNavExpansionState = (linkName: string, link: NavigationLink) => {
-  const [storedState, setStoredState] = useAtom(navExpansionAtom(linkName));
-
-  // If no stored state, default to whether a child is active
-  const isOpen = storedState ?? isChildActive(link);
-
-  return [isOpen, setStoredState] as const;
-};
+const hasActiveChild = (link: NavigationLink, path: string | null) =>
+  !!link.children?.some(
+    (child) =>
+      child.visibility !== false && isNavigationActive(path, child.url),
+  );
 
 export interface NavigationLink {
+  /** Start a section before this item; null starts an unlabeled section. */
+  section?: string | null;
   header?: string;
   headerIcon?: ReactNode;
   name: string;
@@ -54,135 +71,183 @@ export interface NavigationLink {
   children?: NavigationLink[];
 }
 
+interface NavLinkProps extends ComponentProps<typeof Link> {
+  href: string;
+  ariaLabel: string;
+  isActive: boolean;
+  children: ReactNode;
+}
+
 function NavLink({
   href,
-  isSelected,
-  activeClass,
-  exactActiveClass,
+  ariaLabel,
+  isActive,
   className,
   onClick,
   children,
-}: {
-  href: string;
-  isSelected: boolean;
-  activeClass?: string;
-  exactActiveClass?: string;
-  className?: string;
-  onClick?: (e: React.MouseEvent) => void;
-  children: ReactNode;
-}) {
-  const resolvedExact = exactActiveClass ?? activeClass;
-  const { toggleSidebar, isMobile } = useSidebar();
+  ...props
+}: NavLinkProps) {
+  const { isMobile, setOpenMobile } = useSidebar();
 
   return (
-    <ActiveLink
+    <Link
+      {...props}
       href={href}
+      basePath="/"
+      aria-label={ariaLabel}
+      aria-current={isActive ? "page" : undefined}
+      data-active={isActive}
       className={className}
-      activeClass={activeClass}
-      exactActiveClass={resolvedExact}
-      onClick={(e) => {
-        if (isSelected) {
-          e.preventDefault();
-          if (isMobile) {
-            toggleSidebar();
-          }
+      onClick={(event) => {
+        // Preserve native open-in-new-tab/window behavior.
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
         }
-        onClick?.(e);
+
+        onClick?.(event);
+        if (event.defaultPrevented) return;
+
+        const current = window.location;
+        const isSelected = /[?#]/.test(href)
+          ? href === `${current.pathname}${current.search}${current.hash}`
+          : normalizeNavigationPath(href) ===
+            normalizeNavigationPath(current.pathname);
+
+        if (isSelected) {
+          event.preventDefault();
+          if (isMobile) setOpenMobile(false);
+        }
       }}
     >
       {children}
-    </ActiveLink>
+    </Link>
   );
 }
 
-export function NavMain({ links }: { links: NavigationLink[] }) {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+interface NavMainProps {
+  links: NavigationLink[];
+  label?: string;
+}
+
+interface NavigationSection {
+  label?: string | null;
+  links: NavigationLink[];
+}
+
+function groupNavigationLinks(links: NavigationLink[], label?: string) {
+  const sections: NavigationSection[] = [];
+  let currentSection: NavigationSection = { label, links: [] };
+
+  for (const link of links) {
+    if (link.section !== undefined) {
+      if (currentSection.links.length) sections.push(currentSection);
+      currentSection = { label: link.section, links: [] };
+    }
+
+    if (
+      link.visibility !== false &&
+      (!link.children ||
+        link.children.some((child) => child.visibility !== false))
+    ) {
+      currentSection.links.push(link);
+    }
+  }
+
+  if (currentSection.links.length) sections.push(currentSection);
+  return sections;
+}
+
+export function NavMain({ links, label }: NavMainProps) {
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const path = usePath();
-
-  const fullPath = useFullPath();
-  const fullPathMap = useMemo(
-    () =>
-      fullPath.split("/").reduce(
-        (acc, part) => ({
-          ...acc,
-          [part]: true,
-        }),
-        {} as Record<string, boolean>,
-      ),
-    [fullPath],
-  );
-
-  const isSelected = (url: string) => {
-    return path === url;
-  };
+  const sections = groupNavigationLinks(links, label);
 
   return (
-    <SidebarGroup>
-      <SidebarMenu>
-        {links
-          .filter((link) => link.visibility !== false)
-          .map((link) => (
-            <Fragment key={link.name}>
-              {link.children ? (
-                isCollapsed ? (
-                  <PopoverMenu link={link} />
+    <>
+      {sections.map((section, index) => (
+        <Fragment key={section.links[0].url}>
+          {index > 0 && (
+            <Separator className="mx-3 bg-neutral-200 shadow-[0_1px_0_0_white] data-[orientation=horizontal]:w-auto group-data-[collapsible=icon]:mx-2" />
+          )}
+          <SidebarGroup className={cn("gap-0.5 p-2", index > 0 && "pt-0")}>
+            {section.label && (
+              <SidebarGroupLabel className="h-8 px-2 text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+                {section.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarMenu className="gap-0.5">
+              {section.links.map((link) =>
+                link.children ? (
+                  isCollapsed ? (
+                    <SidebarMenuItem key={link.name}>
+                      <PopoverMenu link={link} path={path} />
+                    </SidebarMenuItem>
+                  ) : (
+                    <CollapsibleNavItem
+                      key={link.name}
+                      link={link}
+                      path={path}
+                    />
+                  )
                 ) : (
-                  <CollapsibleNavItem
-                    link={link}
-                    fullPathMap={fullPathMap}
-                    path={path}
-                  />
-                )
-              ) : (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={link.name}
-                    className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                    }
-                  >
-                    <NavLink
-                      href={link.url}
-                      isSelected={isSelected(link.url)}
-                      activeClass="bg-white text-green-700 shadow-sm"
+                  <SidebarMenuItem key={link.name}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={link.name}
+                      isActive={isNavigationActive(path, link.url)}
+                      className={CAREUI_NAV_CLASSES}
                     >
-                      {link.icon ? (
-                        link.icon
-                      ) : (
-                        <Avatar
-                          name={link.name}
-                          className="size-6 -m-1 rounded-sm"
-                        />
-                      )}
-
-                      <span className="group-data-[collapsible=icon]:hidden ml-1">
-                        {link.name}
-                      </span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                      <NavLink
+                        href={link.url}
+                        ariaLabel={link.name}
+                        isActive={isNavigationActive(path, link.url)}
+                      >
+                        {link.icon ?? (
+                          <Avatar
+                            name={link.name}
+                            className="size-6 -m-1 rounded-sm"
+                          />
+                        )}
+                        <span
+                          className="group-data-[collapsible=icon]:hidden"
+                          title={link.name}
+                        >
+                          {link.name}
+                        </span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ),
               )}
-            </Fragment>
-          ))}
-      </SidebarMenu>
-    </SidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
+        </Fragment>
+      ))}
+    </>
   );
 }
 
-function CollapsibleNavItem({
-  link,
-  fullPathMap,
-  path,
-}: {
+interface NavGroupProps {
   link: NavigationLink;
-  fullPathMap: Record<string, boolean>;
   path: string | null;
-}) {
-  const [isOpen, handleOpenChange] = useNavExpansionState(link.name, link);
+}
 
-  const isSubItemSelected = (url: string) => path === url;
+function CollapsibleNavItem({ link, path }: NavGroupProps) {
+  const childActive = hasActiveChild(link, path);
+  const [storedState, handleOpenChange] = useAtom(navExpansionAtom(link.name));
+  const isOpen = storedState ?? childActive;
+
+  useEffect(() => {
+    if (childActive) handleOpenChange(true);
+  }, [path, childActive, handleOpenChange]);
 
   return (
     <Collapsible
@@ -194,58 +259,48 @@ function CollapsibleNavItem({
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
+            aria-label={link.name}
             tooltip={link.name}
-            className="cursor-pointer hover:bg-gray-200 hover:text-green-700"
+            isActive={childActive && !isOpen}
+            className={cn(
+              CAREUI_NAV_CLASSES,
+              "cursor-pointer",
+              childActive && isOpen && "font-medium text-emerald-800",
+            )}
           >
-            {link.icon ? (
-              link.icon
-            ) : (
+            {link.icon ?? (
               <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
             )}
-            <span className="group-data-[collapsible=icon]:hidden ml-1">
+            <span className="truncate" title={link.name}>
               {link.name}
             </span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 motion-reduce:transition-none" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <SidebarMenuSub className="border-l border-gray-300">
+          <SidebarMenuSub className="ml-2 mr-0 gap-0.5 border-l border-neutral-300 pl-1 pr-0">
             {link.children
-              ?.filter((link) => link.visibility !== false)
+              ?.filter((child) => child.visibility !== false)
               .map((subItem) => (
-                <Fragment key={subItem.name}>
-                  {subItem.header && (
-                    <div className="flex items-center gap-2 mt-2">
-                      {subItem.headerIcon}
-                      <span className="text-gray-400 uppercase text-xs font-bold">
-                        {subItem.header}
-                      </span>
-                    </div>
-                  )}
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      asChild
-                      className={
-                        "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                      }
+                <SidebarMenuSubItem key={subItem.name}>
+                  <NavGroupHeading item={subItem} />
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={isNavigationActive(path, subItem.url)}
+                    className={cn(CAREUI_NAV_CLASSES, "md:h-9 md:py-1.5")}
+                  >
+                    <NavLink
+                      href={subItem.url}
+                      ariaLabel={subItem.name}
+                      isActive={isNavigationActive(path, subItem.url)}
+                      className="w-full"
                     >
-                      <NavLink
-                        href={subItem.url}
-                        isSelected={isSubItemSelected(subItem.url)}
-                        className="w-full"
-                        activeClass={cn(
-                          subItem.url
-                            .split("/")
-                            .every((part) => fullPathMap[part]) &&
-                            "bg-white text-green-700 shadow",
-                        )}
-                        exactActiveClass="bg-white text-green-700 shadow"
-                      >
+                      <span className="truncate" title={subItem.name}>
                         {subItem.name}
-                      </NavLink>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </Fragment>
+                      </span>
+                    </NavLink>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
               ))}
           </SidebarMenuSub>
         </CollapsibleContent>
@@ -254,47 +309,31 @@ function CollapsibleNavItem({
   );
 }
 
-function NavItem({
-  item,
-  setOpen,
-}: {
-  item: NavigationLink;
-  setOpen: (open: boolean) => void;
-}) {
-  const path = usePath();
-  const selected = path === item.url;
-
+function NavGroupHeading({ item }: { item: NavigationLink }) {
+  if (!item.header) return null;
   return (
-    <NavLink
-      href={item.url}
-      isSelected={selected}
-      className="w-full rounded-md px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-      activeClass="bg-gray-100 text-green-700"
-      onClick={() => setOpen(false)}
-    >
-      {item.name}
-    </NavLink>
+    <div className="mt-2 flex min-h-8 items-center gap-2 px-2">
+      {item.headerIcon}
+      <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+        {item.header}
+      </span>
+    </div>
   );
 }
 
-function PopoverMenu({ link }: { link: NavigationLink }) {
+function PopoverMenu({ link, path }: NavGroupProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <SidebarMenuButton
+          aria-label={link.name}
           tooltip={link.name}
-          className={cn(
-            "cursor-pointer hover:bg-gray-200 hover:text-green-700",
-            {
-              "bg-white text-green-700 shadow": isChildActive(link),
-            },
-          )}
+          isActive={hasActiveChild(link, path)}
+          className={cn(CAREUI_NAV_CLASSES, "cursor-pointer")}
         >
-          {link.icon ? (
-            link.icon
-          ) : (
+          {link.icon ?? (
             <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
           )}
         </SidebarMenuButton>
@@ -302,13 +341,31 @@ function PopoverMenu({ link }: { link: NavigationLink }) {
       <PopoverContent
         side="right"
         align="start"
-        className="w-48 p-1"
-        onCloseAutoFocus={(e) => e.preventDefault()}
+        className="w-60 max-h-(--radix-popover-content-available-height) overflow-y-auto rounded-xl border-neutral-200 bg-white p-1 text-neutral-950 shadow-md"
+        aria-label={link.name}
       >
-        <div className="flex flex-col gap-1">
-          {link.children?.map((subItem) => (
-            <NavItem key={subItem.name} item={subItem} setOpen={setOpen} />
-          ))}
+        <div className="flex flex-col gap-0.5">
+          {link.children
+            ?.filter((item) => item.visibility !== false)
+            .map((subItem) => (
+              <Fragment key={subItem.name}>
+                <NavGroupHeading item={subItem} />
+                <NavLink
+                  href={subItem.url}
+                  ariaLabel={subItem.name}
+                  isActive={isNavigationActive(path, subItem.url)}
+                  className={cn(
+                    CAREUI_NAV_CLASSES,
+                    "flex w-full shrink-0 items-center outline-hidden",
+                  )}
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="truncate" title={subItem.name}>
+                    {subItem.name}
+                  </span>
+                </NavLink>
+              </Fragment>
+            ))}
         </div>
       </PopoverContent>
     </Popover>

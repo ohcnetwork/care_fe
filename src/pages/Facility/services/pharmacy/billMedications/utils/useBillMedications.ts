@@ -1,5 +1,4 @@
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
-import batchApi from "@/types/base/batch/batchApi";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
 import {
   ChargeItemBatchResponse,
@@ -15,10 +14,12 @@ import {
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
-import { HttpMethod } from "@/Utils/request/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -46,8 +47,7 @@ export default function useBillMedications({
       facilityId,
     });
 
-  const dispenseMutation = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+  const dispenseMutation = useBatchRequest({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["prescription", patientId],
@@ -93,7 +93,7 @@ export default function useBillMedications({
           : []),
       ];
 
-      const response = await dispenseMutation.mutateAsync({ requests });
+      const response = await dispenseMutation.mutateAsync(requests);
 
       const dispenseOrder = (response as DispenseOrderBatchResponse).results
         .map((item) => item.data?.order)
@@ -181,9 +181,8 @@ const getDispenseCreateRequests = ({
       };
 
       requests.push({
-        url: "/api/v1/medication/dispense/",
-        method: HttpMethod.POST,
-        reference_id: `dispense_${item.reference_id}_lot_${lot.item.id}`,
+        api: medicationDispenseApi.create,
+        referenceId: `dispense_${item.reference_id}_lot_${lot.item.id}`,
         body,
       } as const);
     }
@@ -199,9 +198,9 @@ const getPrescriptionCompletionRequest = (ids: string[], patientId: string) => {
 
   return [
     {
-      url: `/api/v1/patient/${patientId}/medication/prescription/upsert/`,
-      method: HttpMethod.POST,
-      reference_id: `prescription_completion_upsert`,
+      api: prescriptionApi.upsert,
+      pathParams: { patientId },
+      referenceId: `prescription_completion_upsert`,
       body: {
         datapoints: ids.map((id) => ({
           id,

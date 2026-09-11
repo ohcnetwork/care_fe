@@ -1,16 +1,20 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Printer } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, ChevronDown, ImageIcon, Printer } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -36,6 +40,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { FeatureBadge } from "@/pages/Facility/Utils";
+import { FacilitySettingsOverview } from "@/pages/Facility/settings/general/FacilitySettingsOverview";
 import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
 import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
@@ -43,18 +48,34 @@ import { renderGeoOrganizations } from "@/types/organization/organization";
 
 import { FacilityMapsLink } from "./FacilityMapLink";
 
-type Props = {
+interface FacilityHomeProps {
   facilityId: string;
-};
+  appearance?: "default" | "settings";
+  renderSettingsActions?: (disabled: boolean) => ReactNode;
+}
 
-export const FacilityHome = ({ facilityId }: Props) => {
+const settingsButtonClassName =
+  "h-12 border-neutral-400 text-sm text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10 [&_svg]:size-5";
+
+export const FacilityHome = ({
+  facilityId,
+  appearance = "default",
+  renderSettingsActions,
+}: FacilityHomeProps) => {
+  const isSettings = appearance === "settings";
   const { t } = useTranslation();
   const user = useAuthUser();
   const [editCoverImage, setEditCoverImage] = useState(false);
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
 
-  const { data: facilityData, isLoading } = useQuery({
+  const {
+    data: facilityData,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["facility", facilityId],
     queryFn: query(facilityApi.get, {
       pathParams: { facilityId },
@@ -118,7 +139,47 @@ export const FacilityHome = ({ facilityId }: Props) => {
   };
 
   if (isLoading) {
-    return <Loading />;
+    return isSettings ? (
+      <div role="status" className="space-y-6">
+        <span className="sr-only">{t("loading")}</span>
+        <div className="flex items-center gap-4 border-b border-neutral-200 pb-6">
+          <Skeleton className="size-16 rounded-[10px]" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-56 max-w-[60vw]" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <Skeleton className="h-64 rounded-[10px]" />
+          <Skeleton className="h-48 rounded-[10px]" />
+        </div>
+      </div>
+    ) : (
+      <Loading />
+    );
+  }
+
+  const facilityError = (
+    <Alert variant="destructive" className="mb-4">
+      <AlertCircle />
+      <AlertDescription>
+        <p>
+          {t(facilityData ? "facility_refresh_error" : "facility_load_error")}
+        </p>
+        <Button
+          variant="outline"
+          className={cn("mt-3", settingsButtonClassName)}
+          disabled={isFetching}
+          onClick={() => void refetch()}
+        >
+          {t("try_again")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+
+  if (isSettings && !facilityData) {
+    return facilityError;
   }
 
   const coverImageHint = (
@@ -136,18 +197,124 @@ export const FacilityHome = ({ facilityId }: Props) => {
     return <ErrorPage />;
   }
 
+  const coverImageDialog = (
+    <AvatarEditModal
+      title={t("edit_cover_photo")}
+      open={editCoverImage}
+      imageUrl={facilityData?.read_cover_image_url}
+      handleUpload={handleCoverImageUpload}
+      handleDelete={handleCoverImageDelete}
+      onOpenChange={(open) => setEditCoverImage(open)}
+      hint={coverImageHint}
+      aspectRatio={16 / 9}
+    />
+  );
+  const editAction = (
+    <EditFacilitySheet
+      facilityId={facilityId}
+      trigger={
+        <Button
+          className={cn(
+            "cursor-pointer font-semibold",
+            isSettings && settingsButtonClassName,
+            isSettings &&
+              "col-span-2 border-emerald-950 bg-emerald-800 text-white hover:bg-emerald-900 hover:text-white sm:col-span-1",
+          )}
+          variant="outline"
+          size="sm"
+        >
+          <CareIcon icon="l-pen" />
+          {t("edit_facility_details")}
+        </Button>
+      }
+    />
+  );
+  const configurationAction = (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "cursor-pointer font-semibold",
+            isSettings && settingsButtonClassName,
+          )}
+          aria-label={isSettings ? t("configurations") : "More Options"}
+          type="button"
+        >
+          {t("configurations")}
+          <ChevronDown className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className={cn(
+          "w-full min-w-48",
+          isSettings && "rounded-lg border-neutral-200 shadow-md",
+        )}
+      >
+        <DropdownMenuGroup className="flex flex-col gap-1">
+          <PrintTemplateSheet
+            facility={facilityData}
+            trigger={
+              <button
+                type="button"
+                className={cn(
+                  "hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+                  isSettings &&
+                    "min-h-12 text-neutral-950 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-indigo-500 md:min-h-10",
+                )}
+              >
+                <Printer className="size-4 text-gray-500" />
+                {t("print_templates")}
+              </button>
+            }
+          />
+          <PLUGIN_Component
+            __name="FacilityHomeActions"
+            facility={facilityData}
+            className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
+          />
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+  const facilityActions = canUpdateFacility ? (
+    <>
+      {isSettings && editAction}
+      {isSettings && (
+        <Button
+          variant="outline"
+          className={settingsButtonClassName}
+          onClick={() => setEditCoverImage(true)}
+        >
+          <ImageIcon className="size-5" />
+          {t("edit_cover_photo")}
+        </Button>
+      )}
+      {configurationAction}
+      {!isSettings && editAction}
+    </>
+  ) : null;
+
+  if (isSettings) {
+    return (
+      <>
+        {coverImageDialog}
+        {isError && facilityError}
+        <FacilitySettingsOverview
+          facility={facilityData}
+          actions={facilityActions}
+          settingsActions={renderSettingsActions?.(isError)}
+          canDelete={user.is_superuser}
+        />
+      </>
+    );
+  }
+
   return (
     <div>
-      <AvatarEditModal
-        title={t("edit_cover_photo")}
-        open={editCoverImage}
-        imageUrl={facilityData?.read_cover_image_url}
-        handleUpload={handleCoverImageUpload}
-        handleDelete={handleCoverImageDelete}
-        onOpenChange={(open) => setEditCoverImage(open)}
-        hint={coverImageHint}
-        aspectRatio={16 / 9}
-      />
+      {coverImageDialog}
       <div className="container mx-auto pt-2">
         <div className="mx-auto max-w-3xl space-y-6">
           <Card className="border-none bg-transparent shadow-none">
@@ -220,57 +387,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
               {canUpdateFacility && (
                 <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="cursor-pointer font-semibold"
-                        aria-label="More Options"
-                        type="button"
-                      >
-                        {t("configurations")}
-                        <ChevronDown className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-full min-w-48"
-                    >
-                      <DropdownMenuGroup className="flex flex-col gap-1">
-                        <PrintTemplateSheet
-                          facility={facilityData}
-                          trigger={
-                            <button
-                              type="button"
-                              className="hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-                            >
-                              <Printer className="size-4 text-gray-500" />
-                              {t("print_templates")}
-                            </button>
-                          }
-                        />
-                        <PLUGIN_Component
-                          __name="FacilityHomeActions"
-                          facility={facilityData}
-                          className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
-                        />
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <EditFacilitySheet
-                    facilityId={facilityId}
-                    trigger={
-                      <Button
-                        className="cursor-pointer font-semibold"
-                        variant="outline"
-                        size="sm"
-                      >
-                        <CareIcon icon="l-pen" />
-                        {t("edit_facility_details")}
-                      </Button>
-                    }
-                  />
+                  {facilityActions}
                 </div>
               )}
             </div>

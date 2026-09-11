@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { submitAndExpectSuccess } from "tests/helper/questionnaire";
 import { getFacilityId } from "tests/support/facilityId";
 import {
   frequencies,
@@ -87,12 +88,9 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Submit prescription", async () => {
-      await page.getByRole("button", { name: "Submit" }).click();
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible();
+      // Prescriptions are authored on the v2 fill page — its primary action
+      // is "Save Changes" (see fill/FillHeader.tsx).
+      await submitAndExpectSuccess(page);
     });
 
     await test.step("Verify medication in table", async () => {
@@ -180,12 +178,9 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Submit prescription", async () => {
-      await page.getByRole("button", { name: "Submit" }).click();
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible();
+      // Prescriptions are authored on the v2 fill page — its primary action
+      // is "Save Changes" (see fill/FillHeader.tsx).
+      await submitAndExpectSuccess(page);
     });
 
     await test.step("Verify medication is not highlighted in table", async () => {

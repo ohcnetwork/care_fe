@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -40,6 +41,29 @@ const symptomOptions = [
   "Allergy to hydrogen peroxide",
 ];
 const usedSymptoms = new Set<string>(); // To track used symptoms across tests so we don't add duplicate symptoms
+
+interface SymptomRecord {
+  code: { display: string };
+}
+
+/** The symptoms truly on this encounter right now, by display text — read
+ *  from the backend rather than trusted from an in-memory Set, which
+ *  reflects only what THIS worker has picked and says nothing about a
+ *  dirty encounter or what a sibling worker did under fullyParallel. */
+async function fetchExistingSymptomDisplays(
+  patientId: string,
+  encounterId: string,
+): Promise<Set<string>> {
+  const res = await fetch(
+    `${getApiUrl()}/api/v1/patient/${patientId}/symptom/?encounter=${encounterId}&limit=100`,
+    { headers: getApiHeaders() },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to list symptoms: ${res.status}`);
+  }
+  const { results } = (await res.json()) as { results: SymptomRecord[] };
+  return new Set(results.map((s) => s.code.display));
+}
 
 test.describe("Symptom Questionnaire", () => {
   let facilityId: string;
@@ -91,7 +115,7 @@ test.describe("Symptom Questionnaire", () => {
     await symptomRow.getByRole("cell").nth(4).click();
     await page.getByRole("option", { name: verification, exact: true }).click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -105,27 +129,55 @@ test.describe("Symptom Questionnaire", () => {
     });
     await symptomHistoryDialog.waitFor({ state: "visible" });
 
-    const tableBody = symptomHistoryDialog.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(symptomName);
-
+    // Each date group renders its OWN <tbody data-slot="table-body">
+    // (HistoricalRecordSelector/index.tsx) — a locator over that selector
+    // alone strict-mode-violates the moment records span more than one
+    // day. Target the specific row for the symptom JUST added instead.
     const symptomHistoryRow = symptomHistoryDialog
-      .locator('[data-slot="table-body"] tr')
+      .locator("tr")
       .filter({ hasText: symptomName })
       .filter({ hasText: status });
 
+    await expect(symptomHistoryRow.first()).toBeVisible();
+    await expect(symptomHistoryRow.first()).toContainText(symptomName);
     await expect(symptomHistoryRow.first()).toContainText(status);
     await expect(symptomHistoryRow.first()).toContainText(severity);
     await expect(symptomHistoryRow.first()).toContainText(verification);
   });
 
   test("verify duplicate symptom cannot be added", async ({ page }) => {
+    // Pick data-aware rather than trusting the module-level `usedSymptoms`
+    // Set: that Set only reflects picks made by THIS worker, so it's blind
+    // to a dirty encounter (leftover symptoms from an earlier run) and to
+    // whatever a sibling worker is doing under fullyParallel — either way
+    // it can hand back a name that's already on the encounter for the
+    // "add" step (turning it into an accidental duplicate) or a name that
+    // was never actually added (turning the "duplicate" step into a false
+    // negative). Ask the encounter itself instead.
+    const existingDisplays = await fetchExistingSymptomDisplays(
+      patientId,
+      encounterId,
+    );
+    const availableOptions = symptomOptions.filter(
+      (s) => !existingDisplays.has(s),
+    );
+    if (availableOptions.length === 0) {
+      throw new Error(
+        "No unused symptom option left to add — every candidate is already on this encounter",
+      );
+    }
+    const newSymptomName = faker.helpers.arrayElement(availableOptions);
+    usedSymptoms.add(newSymptomName);
+
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Symptom/i })
       .click();
-    await page.getByPlaceholder(/Add (another )?Symptom/i).fill(symptomName);
-    await page.getByRole("option", { name: symptomName, exact: true }).click();
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByPlaceholder(/Add (another )?Symptom/i).fill(newSymptomName);
+    await page
+      .getByRole("option", { name: newSymptomName, exact: true })
+      .click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -134,16 +186,14 @@ test.describe("Symptom Questionnaire", () => {
     await page.goto(questionnaireUrl);
     await page.waitForLoadState("networkidle");
 
-    const duplicateSymptomName = faker.helpers.arrayElement([...usedSymptoms]);
-
+    // `newSymptomName` is now guaranteed present on the encounter — no
+    // need to guess a second one, and no reliance on any other test (in
+    // this worker or another) having run first.
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Symptom/i })
       .click();
-    await page
-      .getByRole("option")
-      .filter({ hasText: duplicateSymptomName })
-      .click();
+    await page.getByRole("option").filter({ hasText: newSymptomName }).click();
 
     await expect(
       page

@@ -116,7 +116,7 @@ export default function UserDashboard() {
               asChild
             >
               <Link
-                href="/admin/questionnaire"
+                href="/admin/questionnaires"
                 className="gap-2 text-inherit flex items-center"
               >
                 <User2Icon className="size-4" />
