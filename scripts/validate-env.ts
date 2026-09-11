@@ -135,7 +135,7 @@ const envSchema = z
       booleanAsStringSchema.optional(),
     REACT_ENABLE_QUESTIONNAIRE_DRAFT: booleanAsStringSchema.optional(),
     REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
-    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: numberAsString.optional(),
+    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: positiveNumberAsString.optional(),
     REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION:
       booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.url().optional(),
