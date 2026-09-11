@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { TFunction } from "i18next";
 import { useQueryParams } from "raviger";
-import { useForm } from "react-hook-form";
+import { Control, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -55,36 +56,8 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
-interface Props {
-  facilityId: string;
-  resourceType: SchedulableResourceType;
-  resourceId: string;
-  trigger?: React.ReactNode;
-}
-
-type QueryParams = {
-  sheet?: "create_template" | null;
-};
-
-export default function CreateScheduleTemplateSheet({
-  facilityId,
-  resourceType,
-  resourceId,
-  trigger,
-}: Props) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
-  const [qParams, _setQParams] = useQueryParams<QueryParams>();
-  const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
-
-  const weekdayFormat = useBreakpoints({
-    default: "alphabet",
-    md: "short",
-  } as const);
-
-  const formSchema = z
+const buildTemplateFormSchema = (t: TFunction) =>
+  z
     .object({
       name: z.string().trim().min(1, t("field_required")),
       valid_from: z
@@ -189,6 +162,101 @@ export default function CreateScheduleTemplateSheet({
       },
     );
 
+type TemplateFormSchema = ReturnType<typeof buildTemplateFormSchema>;
+
+type TemplateFormControl = Control<
+  z.input<TemplateFormSchema>,
+  unknown,
+  z.output<TemplateFormSchema>
+>;
+
+interface Props {
+  facilityId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
+  trigger?: React.ReactNode;
+}
+
+type QueryParams = {
+  sheet?: "create_template" | null;
+};
+
+/**
+ * Shows the slot allocation summary for one availability row.
+ *
+ * Each row keeps its own subscription. `useWatch` releases the subscription
+ * when the row unmounts, so a removed row leaves no live subscription.
+ */
+function TimeAllocationCallout({
+  control,
+  index,
+}: {
+  control: TemplateFormControl;
+  index: number;
+}) {
+  const startTime = useWatch({
+    control,
+    name: `availabilities.${index}.start_time`,
+  });
+  const endTime = useWatch({
+    control,
+    name: `availabilities.${index}.end_time`,
+  });
+  const slotSizeInMinutes = useWatch({
+    control,
+    name: `availabilities.${index}.slot_size_in_minutes`,
+  });
+  const tokensPerSlot = useWatch({
+    control,
+    name: `availabilities.${index}.tokens_per_slot`,
+  });
+
+  if (!startTime || !endTime || !slotSizeInMinutes || !tokensPerSlot) {
+    return null;
+  }
+
+  const slotsPerSession = getSlotsPerSession(
+    startTime,
+    endTime,
+    slotSizeInMinutes,
+  );
+  const tokenDuration = getTokenDuration(slotSizeInMinutes, tokensPerSlot);
+
+  if (!slotsPerSession || !tokenDuration) return null;
+
+  return (
+    <Callout variant="alert" badge="Info">
+      <Trans
+        i18nKey="schedule_slots_allocation_callout"
+        values={{
+          slots: Math.floor(slotsPerSession),
+          token_duration: tokenDuration.toFixed(1).replace(".0", ""),
+        }}
+      />
+    </Callout>
+  );
+}
+
+export default function CreateScheduleTemplateSheet({
+  facilityId,
+  resourceType,
+  resourceId,
+  trigger,
+}: Props) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
+  const [qParams, _setQParams] = useQueryParams<QueryParams>();
+  const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
+
+  const weekdayFormat = useBreakpoints({
+    default: "alphabet",
+    md: "short",
+  } as const);
+
+  const formSchema = buildTemplateFormSchema(t);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -253,46 +321,12 @@ export default function CreateScheduleTemplateSheet({
     });
   }
 
-  const timeAllocationCallout = (index: number) => {
-    const startTime = form.watch(`availabilities.${index}.start_time`);
-    const endTime = form.watch(`availabilities.${index}.end_time`);
-    const slotSizeInMinutes = form.watch(
-      `availabilities.${index}.slot_size_in_minutes`,
-    );
-    const tokensPerSlot = form.watch(`availabilities.${index}.tokens_per_slot`);
-
-    if (!startTime || !endTime || !slotSizeInMinutes || !tokensPerSlot) {
-      return null;
-    }
-
-    const slotsPerSession = getSlotsPerSession(
-      startTime,
-      endTime,
-      slotSizeInMinutes,
-    );
-    const tokenDuration = getTokenDuration(slotSizeInMinutes, tokensPerSlot);
-
-    if (!slotsPerSession || !tokenDuration) return null;
-
-    return (
-      <Callout variant="alert" badge="Info">
-        <Trans
-          i18nKey="schedule_slots_allocation_callout"
-          values={{
-            slots: Math.floor(slotsPerSession),
-            token_duration: tokenDuration.toFixed(1).replace(".0", ""),
-          }}
-        />
-      </Callout>
-    );
-  };
-
   const updateSlotDuration = (index: number) => {
-    const isAutoFill = form.watch(`availabilities.${index}.is_auto_fill`);
+    const isAutoFill = form.getValues(`availabilities.${index}.is_auto_fill`);
     if (isAutoFill) {
-      const start = form.watch(`availabilities.${index}.start_time`);
-      const end = form.watch(`availabilities.${index}.end_time`);
-      const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
+      const start = form.getValues(`availabilities.${index}.start_time`);
+      const end = form.getValues(`availabilities.${index}.end_time`);
+      const numOfSlots = form.getValues(`availabilities.${index}.num_of_slots`);
       if (!start || !end) return;
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
@@ -720,7 +754,10 @@ export default function CreateScheduleTemplateSheet({
                             />
                           </div>
                           <div className="col-span-2 mb-2">
-                            {timeAllocationCallout(index)}
+                            <TimeAllocationCallout
+                              control={form.control}
+                              index={index}
+                            />
                           </div>
                         </>
                       )}

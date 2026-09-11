@@ -421,13 +421,17 @@ function GroupSubmenu({
   });
 
   useEffect(() => {
-    if (!open) {
-      setTimeout(() => {
-        onSubMenuOpen(false);
-      }, 100);
-    } else {
+    if (open) {
       onSubMenuOpen(true);
+      return;
     }
+
+    // Clear the timer if the menu opens again or the component unmounts.
+    const timeoutId = setTimeout(() => {
+      onSubMenuOpen(false);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [open, onSubMenuOpen]);
 
   const hasActiveChildren = (children?.results?.length ?? 0) > 0;

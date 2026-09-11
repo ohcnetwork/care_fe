@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -602,6 +602,17 @@ const NewAvailabilityCard = ({
     },
   });
 
+  const startTime = useWatch({ control: form.control, name: "start_time" });
+  const endTime = useWatch({ control: form.control, name: "end_time" });
+  const slotSizeInMinutes = useWatch({
+    control: form.control,
+    name: "slot_size_in_minutes",
+  });
+  const tokensPerSlot = useWatch({
+    control: form.control,
+    name: "tokens_per_slot",
+  });
+
   const { mutate: createAvailability, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.create, {
       pathParams: { facilityId, scheduleId },
@@ -617,11 +628,6 @@ const NewAvailabilityCard = ({
   });
 
   const timeAllocationCallout = () => {
-    const startTime = form.watch("start_time");
-    const endTime = form.watch("end_time");
-    const slotSizeInMinutes = form.watch("slot_size_in_minutes");
-    const tokensPerSlot = form.watch("tokens_per_slot");
-
     if (!startTime || !endTime || !slotSizeInMinutes || !tokensPerSlot) {
       return null;
     }
@@ -687,11 +693,11 @@ const NewAvailabilityCard = ({
     );
   }
   const updateSlotDuration = () => {
-    const isAutoFill = form.watch("is_auto_fill");
+    const isAutoFill = form.getValues("is_auto_fill");
     if (isAutoFill) {
-      const start = form.watch("start_time");
-      const end = form.watch("end_time");
-      const numOfSlots = form.watch("num_of_slots");
+      const start = form.getValues("start_time");
+      const end = form.getValues("end_time");
+      const numOfSlots = form.getValues("num_of_slots");
       if (!start || !end) return;
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue("slot_size_in_minutes", duration);

@@ -112,17 +112,16 @@ export default function CreateTokenForm({
 
   // Set default category when categories of resource type are loaded
   useEffect(() => {
-    form.setValue("categoryId", "");
+    const options = categories?.filter(
+      (category) => category.resource_type === selectedResource.resource_type,
+    );
 
-    if (categories?.length && !form.watch("categoryId")) {
-      const options = categories.filter(
-        (category) => category.resource_type === selectedResource.resource_type,
-      );
-      form.setValue(
-        "categoryId",
-        options.find((category) => category.default)?.id ?? options[0].id,
-      );
-    }
+    form.setValue(
+      "categoryId",
+      options?.find((category) => category.default)?.id ??
+        options?.[0]?.id ??
+        "",
+    );
   }, [categories, form, selectedResource.resource_type]);
 
   const { mutate: createToken, isPending } = useMutation({

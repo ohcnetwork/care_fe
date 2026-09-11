@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Info, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useCallback, useEffect } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -122,25 +122,34 @@ export default function LocationForm({
     name: "bedNames",
   });
 
-  const resetToDefaultNames = () => {
-    if (form.watch("name") && form.watch("numberOfBeds")) {
+  const formType = useWatch({ control: form.control, name: "form" });
+  const bulkCreationEnabled = useWatch({
+    control: form.control,
+    name: "enableBulkCreation",
+  });
+  const numberOfBeds = useWatch({
+    control: form.control,
+    name: "numberOfBeds",
+  });
+  const locationName = useWatch({ control: form.control, name: "name" });
+  const customizeNames = useWatch({
+    control: form.control,
+    name: "customizeNames",
+  });
+
+  const resetToDefaultNames = useCallback(() => {
+    if (locationName && numberOfBeds) {
       const defaultNames = Array.from(
-        { length: Number.parseInt(form.watch("numberOfBeds") ?? "0") },
+        { length: Number.parseInt(numberOfBeds ?? "0") },
         (_, index) => ({
-          name: `${form.watch("name")} ${index + 1}`,
+          name: `${locationName} ${index + 1}`,
         }),
       );
       replaceBedFields(defaultNames);
     }
-  };
+  }, [locationName, numberOfBeds, replaceBedFields]);
 
   useEffect(() => {
-    const formType = form.watch("form");
-    const bulkCreationEnabled = form.watch("enableBulkCreation");
-    const numberOfBeds = form.watch("numberOfBeds");
-    const locationName = form.watch("name");
-    const customizeNames = form.watch("customizeNames");
-
     if (
       formType === "bd" &&
       bulkCreationEnabled &&
@@ -164,12 +173,15 @@ export default function LocationForm({
       }
     }
   }, [
-    form.watch("form"),
-    form.watch("enableBulkCreation"),
-    form.watch("numberOfBeds"),
-    form.watch("name"),
-    form.watch("customizeNames"),
+    formType,
+    bulkCreationEnabled,
+    numberOfBeds,
+    locationName,
+    customizeNames,
     bedFields.length,
+    form,
+    replaceBedFields,
+    resetToDefaultNames,
   ]);
 
   useEffect(() => {
