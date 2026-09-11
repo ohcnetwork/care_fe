@@ -6,6 +6,8 @@ import { useInView } from "react-intersection-observer";
 
 import { Card } from "@/components/ui/card";
 
+import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
+
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -143,7 +145,7 @@ export const EncounterObservationsTab = () => {
                   <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
                     {formatDisplayTime(item.effective_datetime)}:
                   </div>
-                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
+                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer">
                     <div>
                       <div className="flex items-center gap-2">
                         {item.value.value && (
@@ -158,9 +160,20 @@ export const EncounterObservationsTab = () => {
                         </div>
                       )}
                       <div className="font-medium text-sm text-gray-600">
-                        {item.main_code?.display ||
-                          item.main_code?.code ||
-                          t("unknown")}
+                        {item.main_code ? (
+                          <ObservationDetailSheet
+                            codes={[item.main_code]}
+                            title={item.main_code.display}
+                            patientId={patientId}
+                            encounterId={encounterId}
+                          >
+                            <span className="cursor-pointer text-left hover:underline">
+                              {item.main_code.display}
+                            </span>
+                          </ObservationDetailSheet>
+                        ) : (
+                          t("unknown")
+                        )}
                       </div>
                       {item.data_entered_by && (
                         <div className="text-gray-600 text-sm">

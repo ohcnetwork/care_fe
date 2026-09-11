@@ -245,6 +245,8 @@ export function DiagnosticReportReview({
                         (obs) =>
                           obs.status !== ObservationStatus.ENTERED_IN_ERROR,
                       )}
+                      patientId={fullReport.encounter.patient.id}
+                      encounterId={fullReport.encounter.id}
                     />
                   </CardContent>
                 </Card>
