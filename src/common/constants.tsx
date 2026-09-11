@@ -8,6 +8,7 @@ export const LocalStorageKeys = {
   refreshToken: "care_refresh_token",
   patientTokenKey: "care_patient_token",
   loginPreference: "care_login_preference",
+  selectedPatient: "care_selected_patient",
 };
 
 export const GENDER_TYPES = [

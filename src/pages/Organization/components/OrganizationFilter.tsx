@@ -141,7 +141,7 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
             });
           }}
         >
-          <SelectTrigger className="sm:max-w-56 h-[38px]">
+          <SelectTrigger className="sm:max-w-56 [&>span]:pl-4 [&>svg]:mr-3">
             <SelectValue placeholder={t("select_facility_type")} />
           </SelectTrigger>
           <SelectContent>

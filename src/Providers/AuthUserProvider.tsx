@@ -163,10 +163,13 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
+    localStorage.removeItem(LocalStorageKeys.selectedPatient);
     setAccessToken(null);
     setPatientToken(null);
 
-    await queryClient.resetQueries({ queryKey: ["currentUser"] });
+    // Wipe all cached data so a subsequent sign-in with the same credentials
+    // cannot receive stale data from the previous session.
+    queryClient.clear();
 
     const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");

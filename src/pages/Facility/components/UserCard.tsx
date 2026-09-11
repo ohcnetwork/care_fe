@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useMemo } from "react";
@@ -30,7 +31,9 @@ export function FacilityUserCard({ user, className, facilityId }: Props) {
     if (
       tokenData &&
       Object.keys(tokenData).length > 0 &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+      dayjs(tokenData.createdAt).isAfter(
+        dayjs().subtract(careConfig.patientTokenFreshnessMinutes, "minutes"),
+      )
     ) {
       return `/facility/${facilityId}/appointments/${user.id}/book-appointment`;
     }
