@@ -332,11 +332,13 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DateTimeInput
-                        {...field}
-                        value={field.value}
-                        onDateChange={(val) => field.onChange(val ?? null)}
-                      />
+                      <FormControl>
+                        <DateTimeInput
+                          {...field}
+                          value={field.value}
+                          onDateChange={(val) => field.onChange(val ?? null)}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -349,13 +351,15 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DateTimeInput
-                          {...field}
-                          value={field.value ?? ""}
-                          onDateChange={(val) => {
-                            field.onChange(val ?? null);
-                          }}
-                        />
+                        <FormControl>
+                          <DateTimeInput
+                            {...field}
+                            value={field.value ?? ""}
+                            onDateChange={(val) => {
+                              field.onChange(val ?? null);
+                            }}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -367,13 +371,15 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DateTimeInput
-                          {...field}
-                          value={field.value ?? ""}
-                          onDateChange={(val) => {
-                            field.onChange(val ?? null);
-                          }}
-                        />
+                        <FormControl>
+                          <DateTimeInput
+                            {...field}
+                            value={field.value ?? ""}
+                            onDateChange={(val) => {
+                              field.onChange(val ?? null);
+                            }}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

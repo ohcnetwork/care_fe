@@ -1,18 +1,11 @@
-import { useAtom } from "jotai";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-
+import { developerModeAtom } from "@/atoms/developerMode";
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import LanguageSelector from "@/components/Common/LanguageSelector";
+import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-
-import { developerModeAtom } from "@/atoms/developerMode";
-
-import LanguageSelector from "@/components/Common/LanguageSelector";
-import UserColumns, { userChildProps } from "@/components/Common/UserColumns";
 import ServiceTokenSection from "@/components/Users/ServiceTokenSection";
 import { TwoFactorAuth } from "@/components/Users/TwoFactorAuth";
 import UserAvatar from "@/components/Users/UserAvatar";
@@ -25,10 +18,12 @@ import {
   ContactInfoDetails,
   GeoOrgDetails,
 } from "@/components/Users/UserViewDetails";
-
 import useAuthUser from "@/hooks/useAuthUser";
-
 import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { useAtom } from "jotai";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function UserSummaryTab({
   userData,
@@ -205,6 +200,11 @@ export default function UserSummaryTab({
             />
           </>
         )}
+        <PLUGIN_Component
+          __name="UserProfileSections"
+          user={userData}
+          isOwnProfile={isOwnAccount}
+        />
         {authUser.is_superuser && (
           <Card className="border-red-500">
             <CardHeader className="px-4 sm:px-6">

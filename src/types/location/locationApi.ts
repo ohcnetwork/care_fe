@@ -57,6 +57,18 @@ export default {
     TRes: Type<LocationDetail>(),
     TBody: Type<{ organization: string }>(),
   },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/location/{external_id}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<LocationRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/location/{external_id}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<LocationRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
   listAssociations: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",
     method: HttpMethod.GET,
