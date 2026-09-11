@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -46,7 +47,7 @@ test.describe("Product Knowledge Creation", () => {
     const productName = faker.commerce.productName();
 
     name = productName;
-    slug = productName.replace(/\s+/g, "-").slice(0, 25);
+    slug = expectedSlug(productName);
     productType = faker.helpers.arrayElement(productTypeOptions);
     baseUnit = faker.helpers.arrayElement(baseUnitOptions);
     dosageForm = faker.helpers.arrayElement(dosageFormOptions);
