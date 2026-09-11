@@ -1816,6 +1816,7 @@
   "deliveries": "Deliveries",
   "deliveries_approved": "Deliveries approved successfully",
   "deliveries_created": "Deliveries Created",
+  "deliveries_for": "Deliveries for {{product}}",
   "deliveries_received": "Deliveries Received",
   "deliveries_will_appear_here": "Deliveries will appear here when they are created",
   "delivery": "Delivery",
