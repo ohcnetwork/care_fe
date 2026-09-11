@@ -451,7 +451,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onClearAll={handleClearAll}
             onClearFilter={handleClearFilter}
             placeholder={t("filter")}
+            className="w-full min-w-0"
             triggerButtonClassName="self-start"
+            selectedBarClassName="md:w-full"
+            selectedValueClassName="w-0 flex-1 md:w-0 md:flex-1 md:max-w-none lg:max-w-none xl:max-w-none"
             facilityId={facilityId}
           />
         </div>
@@ -540,9 +543,9 @@ export default function EncounterHistorySelector() {
           </DrawerContent>
         </Drawer>
       </div>
-      <div className="hidden lg:block pr-3">
+      <div className="hidden lg:block shrink-0 pr-3">
         <RailPanel open={isRailOpen} onOpenChange={setIsRailOpen}>
-          <ScrollArea className="pr-3 h-[calc(100vh-9rem-var(--encounter-header-offset))]">
+          <ScrollArea className="w-84 min-w-0 pr-3 h-[calc(100vh-9rem-var(--encounter-header-offset))]">
             <EncounterHistoryList />
           </ScrollArea>
         </RailPanel>

@@ -637,7 +637,7 @@ function AccountShow({
           </div>
         </div>
 
-        <div className="flex gap-2 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center justify-between">
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
@@ -679,7 +679,7 @@ function AccountShow({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-gray-500">
               {t("billing_status")}
             </span>
