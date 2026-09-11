@@ -126,6 +126,7 @@ export function FormSubmissionDrafts({
                   responses={responses}
                   patientId={patientId}
                   onResponseChange={() => {}}
+                  setResponseContext={() => {}}
                   errors={[]}
                   clearError={() => {}}
                   disabled
