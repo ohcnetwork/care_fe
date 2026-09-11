@@ -146,7 +146,7 @@ function MessageItem({
         </TooltipComponent>
         <div
           className={cn(
-            "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
+            "p-3 rounded-lg break-words whitespace-pre-wrap min-w-0 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
             isCurrentUser
               ? "bg-white text-black rounded-tr-none border border-gray-200"
               : "bg-gray-100 rounded-tl-none border border-gray-200",
@@ -489,9 +489,9 @@ export function NoteManager({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-15rem)] overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
+      <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200 min-w-0 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -512,7 +512,7 @@ export function NoteManager({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-2 p-4">
             {threadsData?.results.length === 0 ? (
               <div className="text-center py-6">
@@ -532,7 +532,7 @@ export function NoteManager({
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
 
       {/* Mobile Sheet */}
@@ -566,7 +566,7 @@ export function NoteManager({
               </div>
             </div>
 
-            <ScrollArea className="flex-1">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
               <div className="space-y-2 p-4">
                 {threadsData?.results.length === 0 ? (
                   <div className="text-center py-6">
@@ -589,14 +589,14 @@ export function NoteManager({
                   ))
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="flex flex-col h-full relative">
+        <div className="flex flex-col h-full relative max-lg:pb-14">
           {/* Header */}
           <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-1">
             {selectedThread ? (
@@ -639,7 +639,7 @@ export function NoteManager({
                 <>
                   {/* Messages List */}
                   {isMobile ? (
-                    <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
+                    <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain -mx-2 px-2">
                       <div className="flex flex-col-reverse py-2 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
@@ -650,7 +650,7 @@ export function NoteManager({
                                 ? recentMessageRef
                                 : undefined
                             }
-                            className={cn(i === 0 && "mb-14")}
+                            className={cn(i === 0 && "mb-2")}
                           />
                         ))}
                         {isFetchingNextPage && (
@@ -664,7 +664,7 @@ export function NoteManager({
                       </div>
                     </div>
                   ) : (
-                    <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
+                    <ScrollArea className="flex-1 min-h-0 px-4">
                       <div className="flex flex-col-reverse py-4 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
@@ -692,7 +692,7 @@ export function NoteManager({
 
                   {/* Message Input */}
                   {canWrite && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0 max-lg:bottom-14">
+                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white relative z-10 shrink-0">
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
