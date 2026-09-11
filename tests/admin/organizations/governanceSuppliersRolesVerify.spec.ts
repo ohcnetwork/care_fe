@@ -16,10 +16,15 @@ function isFlatOrgType(type: OrganizationType) {
 function typeHeadingPattern(type: OrganizationType) {
   if (type === "govt") return /gov(?:t|ernance|erence)/i;
   if (type === "product_supplier") return /^suppliers$/i;
-  return /responsibilit/i;
+  // Anchored so it doesn't also match the detail panel's nested
+  // "What responsibilities can X manage?" section heading.
+  return /^responsibilities$/i;
 }
 
 function searchInput(page: Page, type: OrganizationType) {
+  if (type === "role") {
+    return page.getByRole("textbox", { name: /search responsibilities/i });
+  }
   if (isFlatOrgType(type)) {
     return page.getByRole("textbox", { name: /^search$/i });
   }
@@ -37,6 +42,11 @@ function firstResizablePanel(page: Page) {
 }
 
 function adminOrgListUrlRegex(type: OrganizationType) {
+  if (type === "role") {
+    // Responsibilities auto-selects and redirects to the first responsibility's
+    // detail route on wide screens, so the list URL may carry a trailing id.
+    return new RegExp(`.*\\/admin\\/organizations\\/role(\\/[^/]+)?$`);
+  }
   return new RegExp(`.*\\/admin\\/organizations\\/${type}$`);
 }
 
@@ -150,15 +160,25 @@ test.describe("Admin organization lists", () => {
         continue;
       }
 
+      if (type === "role") {
+        const orgRow = page
+          .locator('[data-slot="responsibility-list"]')
+          .locator('[data-slot="responsibility-row"]')
+          .first();
+        const emptyState = page.getByText(/no organizations found/i);
+        await expect(orgRow.or(emptyState)).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: /new responsibility/i }),
+        ).toBeVisible();
+        continue;
+      }
+
       const sidebar = firstResizablePanel(page);
       const orgRow = sidebar.getByRole("button").first();
       const emptyState = page.getByText(/no organizations found/i);
       await expect(orgRow.or(emptyState)).toBeVisible();
 
-      const createCta =
-        type === "role"
-          ? page.getByRole("button", { name: /create responsibility/i })
-          : page.getByRole("button", { name: /add organization/i });
+      const createCta = page.getByRole("button", { name: /add organization/i });
       await expect(createCta).toBeVisible();
     }
   });
