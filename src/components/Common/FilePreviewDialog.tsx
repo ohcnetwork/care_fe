@@ -88,6 +88,32 @@ function getRotationClass(rotation: number) {
   }
 }
 
+function ImageToolbarButton({
+  icon,
+  label,
+  onClick,
+  className,
+}: {
+  icon?: IconName;
+  label: string;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={onClick}
+      className={cn(
+        "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
+        className,
+      )}
+    >
+      {icon && <CareIcon icon={icon} className="mr-2 text-lg" />}
+      {label}
+    </Button>
+  );
+}
+
 export default function FilePreviewDialog(props: FilePreviewProps) {
   const {
     show,
@@ -147,6 +173,11 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
       const newRotation = (prev + angle + 360) % 360;
       return newRotation;
     });
+  };
+
+  const handleReset = () => {
+    setRotation(0);
+    transformRef.current?.resetTransform();
   };
 
   const fileName = file_state?.name
@@ -429,61 +460,33 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
             <div className="flex items-center justify-center">
               {file_state.isImage && (
                 <div className="mt-2 grid grid-cols-3 md:grid-cols-5 gap-4">
-                  {[
-                    {
-                      label: t("zoom_in"),
-                      icon: "l-search-plus",
-                      action: handleZoomIn,
-                      disabled: false,
-                    },
-                    {
-                      label: t("reset"),
-                      icon: "l-refresh",
-                      action: () => {
-                        setRotation(0);
-                        transformRef.current?.resetTransform();
-                      },
-                      disabled: false,
-                    },
-                    {
-                      label: t("zoom_out"),
-                      icon: "l-search-minus",
-                      action: handleZoomOut,
-                      disabled: false,
-                    },
-                    {
-                      label: t("rotate_left"),
-                      icon: "l-corner-up-left",
-                      action: () => handleRotate(-90),
-                      disabled: false,
-                    },
-                    {
-                      label: t("rotate_right"),
-                      icon: "l-corner-up-right",
-                      action: () => handleRotate(90),
-                      disabled: false,
-                    },
-                  ].map((button, index) => (
-                    <Button
-                      variant="ghost"
-                      key={index}
-                      onClick={button.action}
-                      className={cn(
-                        "z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur-sm transition hover:bg-white/70",
-                        index === 3 && "col-start-1 md:col-auto",
-                        index === 4 && "col-start-3 md:col-auto",
-                      )}
-                      disabled={button.disabled}
-                    >
-                      {button.icon && (
-                        <CareIcon
-                          icon={button.icon as IconName}
-                          className="mr-2 text-lg"
-                        />
-                      )}
-                      {button.label}
-                    </Button>
-                  ))}
+                  <ImageToolbarButton
+                    icon="l-search-plus"
+                    label={t("zoom_in")}
+                    onClick={handleZoomIn}
+                  />
+                  <ImageToolbarButton
+                    icon="l-refresh"
+                    label={t("reset")}
+                    onClick={handleReset}
+                  />
+                  <ImageToolbarButton
+                    icon="l-search-minus"
+                    label={t("zoom_out")}
+                    onClick={handleZoomOut}
+                  />
+                  <ImageToolbarButton
+                    icon="l-corner-up-left"
+                    label={t("rotate_left")}
+                    onClick={() => handleRotate(-90)}
+                    className="col-start-1 md:col-auto"
+                  />
+                  <ImageToolbarButton
+                    icon="l-corner-up-right"
+                    label={t("rotate_right")}
+                    onClick={() => handleRotate(90)}
+                    className="col-start-3 md:col-auto"
+                  />
                 </div>
               )}
               {file_state.extension === "pdf" && (
