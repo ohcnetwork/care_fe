@@ -65,4 +65,5 @@ export const encounterListFiltersAtom = atomWithStorage<EncounterListFilters>(
   "encounter_list_filters",
   defaultListFilters,
   createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
 );
