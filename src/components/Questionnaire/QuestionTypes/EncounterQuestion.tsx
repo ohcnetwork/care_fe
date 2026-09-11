@@ -281,7 +281,7 @@ export function EncounterQuestion({
               disabled || encounter.status === EncounterStatus.DISCHARGED
             }
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label={t("encounter_status")}>
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
@@ -307,7 +307,7 @@ export function EncounterQuestion({
             }
             disabled={disabled}
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label={t("priority")}>
               <SelectValue placeholder={t("select_priority")} />
             </SelectTrigger>
             <SelectContent>

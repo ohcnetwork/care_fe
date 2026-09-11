@@ -1,0 +1,57 @@
+import { expect, test } from "@playwright/test";
+import {
+  clickTabOrMenuItem,
+  openFixtureEncounter,
+  selectFromCommand,
+} from "tests/helper/ui";
+
+test.use({ storageState: "tests/.auth/user.json" });
+
+test.describe("Encounter Devices Tab", () => {
+  // The associate test mutates the shared fixture encounter, so run this file's
+  // tests serially in one worker for deterministic ordering.
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await openFixtureEncounter(page);
+    await clickTabOrMenuItem(page, "Devices");
+    await expect(page).toHaveURL(/\/devices$/);
+  });
+
+  test("should display the devices tab with an associate action", async ({
+    page,
+  }) => {
+    await expect(page.getByRole("tabpanel", { name: "Devices" })).toBeVisible();
+    await expect(
+      page.getByRole("button", {
+        name: "Associate a device to this encounter",
+      }),
+    ).toBeVisible();
+  });
+
+  test("should associate a device with the encounter", async ({ page }) => {
+    await page
+      .getByRole("button", { name: "Associate a device to this encounter" })
+      .click();
+
+    const dialog = page.getByRole("dialog", { name: "Associate device" });
+    await expect(dialog).toBeVisible();
+
+    // The device options render in a popover portalled outside the dialog, so
+    // scope the selection through the shared command helper.
+    await selectFromCommand(
+      page,
+      dialog.getByRole("combobox", { name: /select device/i }),
+    );
+
+    const associate = dialog.getByRole("button", {
+      name: "Associate",
+      exact: true,
+    });
+    await expect(associate).toBeEnabled();
+    await associate.click();
+
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText("No devices available")).toBeHidden();
+  });
+});

@@ -1,4 +1,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 export async function selectFromLocationMultiSelect(
   page: Page,
@@ -692,4 +695,33 @@ export async function clickTabOrMenuItem(
   throw new Error(
     `Tab "${tabName}" not found as visible tab or in dropdown menu`,
   );
+}
+
+/**
+ * Opens the fixture encounter's Overview tab (served at the `/updates` route),
+ * using the facility, patient, and encounter IDs saved during setup
+ * (`tests/setup/patient.setup.ts`).
+ *
+ * The encounter is selected once during setup (which targets a writable
+ * planned/in-progress encounter) and reused here, instead of each spec
+ * re-querying a filtered listing. One selection point, consistent across specs,
+ * matching the `encounterShortcuts.spec.ts` convention.
+ *
+ * @param page - Playwright page instance
+ */
+export async function openFixtureEncounter(page: Page): Promise<void> {
+  const facilityId = getFacilityId();
+  const patientId = getPatientId();
+  const encounterId = getEncounterId();
+
+  await page.goto(
+    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+  );
+  // `Encounter Actions` only renders once the encounter itself resolves
+  // (`EncounterShow.tsx`), so this doubles as the readiness gate — a stale or
+  // deleted fixture id fails here with a clear reason instead of a blank page.
+  await expect(
+    page.getByRole("button", { name: /encounter actions/i }).first(),
+    `Fixture encounter ${encounterId} did not load — the saved encounterMeta.json id may be stale or deleted; re-run the patient setup.`,
+  ).toBeVisible();
 }
