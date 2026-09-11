@@ -245,6 +245,29 @@ const careConfig = {
     ? parseInt(env.REACT_APP_RESEND_OTP_TIMEOUT, 10)
     : 30,
 
+  /**
+   * Number of digits in the OTP sent for patient login and password reset.
+   * Must match the backend's `OTP_LENGTH` setting, which defaults to 5.
+   */
+  otpLength: env.REACT_OTP_LENGTH ? parseInt(env.REACT_OTP_LENGTH, 10) : 5,
+
+  /**
+   * How long a patient login token is treated as still valid without hitting
+   * the API, so a returning patient can skip straight past the OTP screen.
+   * Must stay under the backend's `PatientToken.lifetime` (currently 1 hour,
+   * see `config/patient_otp_token.py`) — kept well under to leave a safety
+   * margin, since the real expiry is only enforced server-side.
+   */
+  patientTokenFreshnessMinutes: env.REACT_PATIENT_TOKEN_FRESHNESS_MINUTES
+    ? parseInt(env.REACT_PATIENT_TOKEN_FRESHNESS_MINUTES, 10)
+    : 15,
+
+  /**
+   * Health helpline shown to patients who cannot sign in. Deployment specific,
+   * so the prompt is hidden entirely when this is unset.
+   */
+  patientSupportPhone: env.REACT_PATIENT_SUPPORT_PHONE,
+
   imageUploadMaxSizeInMB: env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
