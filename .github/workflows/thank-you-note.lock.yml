@@ -94,7 +94,7 @@ jobs:
           sparse-checkout: |
             .github
             .agents
-          depth: 1
+          fetch-depth: 1
           persist-credentials: false
       - name: Create gh-aw temp directory
         run: bash /opt/gh-aw/actions/create_gh_aw_tmp_dir.sh
@@ -913,7 +913,7 @@ jobs:
   pre_activation:
     runs-on: ubuntu-slim
     outputs:
-      activated: ${{ steps.check_membership.outputs.is_team_member == 'true' }}
+      activated: ${{ steps.check_membership.outputs.is_team_member == 'false' }}
     steps:
       - name: Setup Scripts
         uses: github/gh-aw/actions/setup@2f705cfe9b68ab64d9ac2ac92faee9b7c7890c0d # v0.42.14
