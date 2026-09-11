@@ -107,6 +107,8 @@ const Login = (props: LoginProps) => {
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
+  const activeMode =
+    !disablePatientLogin && mode === "patient" ? "patient" : "staff";
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -125,6 +127,16 @@ const Login = (props: LoginProps) => {
   useEffect(() => {
     localStorage.setItem(LocalStorageKeys.loginPreference, mode);
   }, [mode]);
+
+  // Autofocuses when switching tabs
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      document
+        .getElementById(activeMode === "staff" ? "username" : "phone")
+        ?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [activeMode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
