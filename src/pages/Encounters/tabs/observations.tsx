@@ -145,7 +145,7 @@ export const EncounterObservationsTab = () => {
                   <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
                     {formatDisplayTime(item.effective_datetime)}:
                   </div>
-                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
+                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer">
                     <div>
                       <div className="flex items-center gap-2">
                         {item.value.value && (

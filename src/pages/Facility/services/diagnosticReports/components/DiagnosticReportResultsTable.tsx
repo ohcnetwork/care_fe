@@ -195,7 +195,6 @@ export function DiagnosticReportResultsTable({
     const observationTitle =
       observation.observation_definition?.title ||
       observation.observation_definition?.code?.display;
-    const canOpenDetail = !!observation.main_code && !!patientId;
 
     return (
       <>
@@ -207,7 +206,7 @@ export function DiagnosticReportResultsTable({
           )}
         >
           <TableCell className="whitespace-normal wrap-break-word align-top">
-            {canOpenDetail && observation.main_code && patientId ? (
+            {!!observation.main_code && !!patientId ? (
               <ObservationDetailSheet
                 codes={[observation.main_code]}
                 title={observationTitle || t("observation")}
@@ -219,7 +218,7 @@ export function DiagnosticReportResultsTable({
                 </span>
               </ObservationDetailSheet>
             ) : (
-              observationTitle
+              observationTitle || t("observation")
             )}
           </TableCell>
           <TableCell className="whitespace-normal wrap-break-word align-top">
