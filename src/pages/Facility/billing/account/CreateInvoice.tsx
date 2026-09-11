@@ -432,7 +432,7 @@ export function CreateInvoicePage({
                   <span className="text-gray-700 text-sm font-medium">
                     {t("patient_name")}
                   </span>
-                  <div className="font-semibold text-gray-950">
+                  <div className="font-semibold text-gray-950 capitalize">
                     {account.patient.name}
                   </div>
                 </div>

@@ -197,7 +197,9 @@ export default function CreateTokenForm({
                 i18nKey="create_token_for_patient"
                 values={{ patientName: patient?.name }}
                 components={{
-                  strong: <strong className="font-semibold text-gray-950" />,
+                  strong: (
+                    <strong className="font-semibold text-gray-950 capitalize" />
+                  ),
                 }}
               />
             ) : (

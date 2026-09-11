@@ -19,6 +19,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import { getPatientIdentifiers } from "@/types/emr/patient/patient";
@@ -30,7 +31,7 @@ import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/pa
 export interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
 }
 
 const PrescriptionContent = ({
@@ -110,12 +111,12 @@ const PrescriptionContent = ({
   );
 };
 
-const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
+const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+      <span className={cn("ml-1 font-semibold", valueClassName)}>
         {value || "-"}
       </span>
     </div>
@@ -192,7 +193,7 @@ export const PrescriptionPreview = ({
 
   return (
     <PrintPreview
-      title={`${t("prescriptions")} - ${patient.name}`}
+      title={t("prescriptions")}
       disabled={!hasMedications}
       facility={facility}
       templateSlug={PrintTemplateType.prescription}
@@ -202,7 +203,11 @@ export const PrescriptionPreview = ({
           {/* Patient Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-6 pb-3">
             <div className="space-y-1">
-              <DetailRow label={t("patient")} value={patient.name} isStrong />
+              <DetailRow
+                label={t("patient")}
+                value={patient.name}
+                valueClassName="capitalize"
+              />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
                 value={
@@ -210,7 +215,6 @@ export const PrescriptionPreview = ({
                     ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
                     : undefined
                 }
-                isStrong
               />
               {getPatientIdentifiers(patient, {
                 use: PatientIdentifierUse.official,
@@ -219,20 +223,14 @@ export const PrescriptionPreview = ({
                   key={identifier.config.id}
                   label={identifier.config.config.display}
                   value={identifier.value}
-                  isStrong
                 />
               ))}
               {prescriptions.length === 1 && (
-                <DetailRow
-                  label={t("encounter_date")}
-                  value={displayDate}
-                  isStrong
-                />
+                <DetailRow label={t("encounter_date")} value={displayDate} />
               )}
               <DetailRow
                 label={t("mobile_number")}
                 value={patient && formatPhoneNumberIntl(patient.phone_number)}
-                isStrong
               />
             </div>
             <div className="space-y-1 flex justify-end items-center pr-3">

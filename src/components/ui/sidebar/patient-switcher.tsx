@@ -75,7 +75,7 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
                         className="size-5"
                       />
                       <div className="flex flex-row items-center justify-between w-full gap-2">
-                        <span className="font-semibold truncate max-w-32">
+                        <span className="font-semibold truncate max-w-32 capitalize">
                           {patientUserContext.selectedPatient?.name}
                         </span>
                         <span className="text-xs text-secondary-600">
@@ -100,14 +100,16 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           </TooltipTrigger>
           {!open && !isMobile && (
             <TooltipContent side="right" align="center">
-              <p>{patientUserContext.selectedPatient?.name}</p>
+              <p className="capitalize">
+                {patientUserContext.selectedPatient?.name}
+              </p>
             </TooltipContent>
           )}
         </Tooltip>
         <SelectContent>
           {patientUserContext.patients?.map((patient) => (
             <SelectItem key={patient.id} value={patient.id}>
-              <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 capitalize">
                 <Avatar name={patient.name} className="size-5" />
                 {patient.name}
               </div>

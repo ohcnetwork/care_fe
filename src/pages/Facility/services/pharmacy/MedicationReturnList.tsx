@@ -193,7 +193,9 @@ function MedicationReturnTable({
         {deliveries.map((delivery: DeliveryOrderRetrieve) => (
           <TableRow key={delivery.id}>
             <TableCell className="font-medium">{delivery.name}</TableCell>
-            <TableCell>{delivery.patient?.name}</TableCell>
+            <TableCell className="capitalize">
+              {delivery.patient?.name}
+            </TableCell>
             <TableCell>{delivery.destination.name}</TableCell>
             <TableCell className="text-sm text-gray-600">
               {formatDateTime(delivery.created_date)}

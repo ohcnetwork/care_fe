@@ -30,6 +30,11 @@ applyTo: "src/pages/**/*.{ts,tsx}"
 - Handle pagination and infinite scroll patterns
 - Cache data appropriately based on usage patterns
 
+### Patient Name Display
+ Whenever a patient name (`patient.name` from `PatientRead`) is shown to the user, apply Tailwind `capitalize` (CSS `text-transform: capitalize`) so the first letter of each word is uppercased (it does not force the remaining letters to lowercase).
+- Preferred: add the Tailwind `capitalize` class to the element rendering the name, e.g. `<span className="capitalize">{patient.name}</span>` or `className="capitalize"` on the existing element.
+- Do NOT pre-transform the stored name (no ad-hoc `toUpperCase()`/`properCase()` for display); rely on the `capitalize` class so the data stays intact.
+
 ### Form Handling
 - Use controlled components for form inputs
 - Implement proper form validation with `zod` schemas

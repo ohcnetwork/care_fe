@@ -95,7 +95,7 @@ function PatientHoverCardTrigger({
         <div className="flex flex-row gap-2 items-center">
           <h5
             className={cn(
-              "text-lg font-semibold whitespace-nowrap",
+              "text-lg font-semibold whitespace-nowrap capitalize",
               !disabled && "underline",
             )}
           >

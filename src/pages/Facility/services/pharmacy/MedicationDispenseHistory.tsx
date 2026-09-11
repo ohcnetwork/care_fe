@@ -335,7 +335,7 @@ export default function MedicationDispenseHistory({
                         })
                       }
                     >
-                      {item.patient.name}
+                      <span className="capitalize">{item.patient.name}</span>
                       <div className="text-xs text-gray-500">
                         {t("created_at")}: {formatDateTime(item.created_date)}
                       </div>

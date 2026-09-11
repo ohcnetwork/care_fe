@@ -79,7 +79,7 @@ export default function ServiceRequestTable({
                   )}
                   onClick={() => onPatientClick?.(request)}
                 >
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-gray-900 capitalize">
                     {request.encounter.patient.name}
                   </div>
                   <div className="text-xs text-gray-500">

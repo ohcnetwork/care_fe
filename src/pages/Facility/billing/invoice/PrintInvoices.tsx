@@ -193,7 +193,9 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                     {t("bill_to")}:
                   </div>
                   <p className="font-semibold text-base">
-                    {firstInvoice.account.patient.name}
+                    <span className="capitalize">
+                      {firstInvoice.account.patient.name}
+                    </span>
                     <span className="text-gray-600 ml-2 font-normal">
                       ({t(`GENDER__${firstInvoice.account.patient.gender}`)},{" "}
                       {formatPatientAge(firstInvoice.account.patient, true)})

@@ -73,7 +73,9 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
           <h2 className="text-sm font-medium text-gray-500 mb-1">
             {t("patient")}:
           </h2>
-          <p className="text-lg font-medium">{appointmentData?.patient.name}</p>
+          <p className="text-lg font-medium capitalize">
+            {appointmentData?.patient.name}
+          </p>
         </div>
 
         <div>
