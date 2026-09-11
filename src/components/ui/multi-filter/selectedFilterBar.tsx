@@ -105,7 +105,7 @@ export function SelectedFilterBar({
           </div>
         </DropdownMenuTrigger>
         <SubMenuFilter
-          selectedOption={selectedOperation ?? null}
+          selectedOption={selectedOperation}
           setSelectedOption={(operation) =>
             onOperationChange(filter.key, operation.value || operation.label)
           }

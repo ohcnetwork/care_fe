@@ -401,7 +401,7 @@ export function ReportSubTab({
         archivedLabel="archived_reports"
       />
 
-      {!reportsLoading && filteredReports.length === 0 ? (
+      {filteredReports.length === 0 ? (
         <EmptyState
           icon={<CareIcon icon="l-file-alt" className="text-primary size-6" />}
           title={t("no_reports_found")}

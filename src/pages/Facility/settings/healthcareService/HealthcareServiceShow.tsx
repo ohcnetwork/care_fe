@@ -223,7 +223,7 @@ export default function SettingsHealthcareServiceShow({
           </Card>
 
           {/* Managing Organization Section */}
-          {!isLoading && healthcareService?.managing_organization && (
+          {healthcareService?.managing_organization && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-900">
                 {t("managing_organization")}
