@@ -62,7 +62,7 @@ function InputWithNotes({
 
   return (
     <div className="flex items-stretch">
-      <div className="flex-1 min-w-0 [&_input]:border-r-0 [&_input]:rounded-r-none [&_input]:shadow-none [&_input]:focus-visible:ring-0 [&_textarea]:border-r-0 [&_textarea]:rounded-r-none [&_textarea]:shadow-none [&_textarea]:focus-visible:ring-0 [&_button[role=combobox]]:border-r-0 [&_button[role=combobox]]:rounded-r-none [&_button[role=combobox]]:shadow-none">
+      <div className="flex-1 min-w-0 [&_input]:border-r-0 [&_input]:rounded-r-none [&_input]:shadow-none [&_input]:focus-visible:ring-0 [&_textarea]:border-r-0 [&_textarea]:rounded-r-none [&_textarea]:shadow-none [&_textarea]:focus-visible:ring-0 [&_button[role=combobox]]:border-r-0 [&_button[role=combobox]]:rounded-r-none [&_button[role=combobox]]:shadow-none [&_button[role=combobox]+button]:border-r-0 [&_button[role=combobox]+button]:rounded-r-none [&_button[role=combobox]+button]:shadow-none">
         {children}
       </div>
       <Popover open={notesOpen} onOpenChange={setNotesOpen}>
