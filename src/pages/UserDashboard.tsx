@@ -1,6 +1,12 @@
-import { ChevronRight, LogOut, SquarePen, User2Icon } from "lucide-react";
+import {
+  ChevronRight,
+  LogOut,
+  Search,
+  SquarePen,
+  User2Icon,
+} from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,6 +28,8 @@ import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { formatName } from "@/Utils/utils";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { Organization, getOrgLabel } from "@/types/organization/organization";
 
@@ -184,7 +192,7 @@ export default function UserDashboard() {
       {availableTabs.length > 0 && (
         <div className="w-full">
           <div
-            className="flex border-b border-gray-200"
+            className="flex border-b border-gray-200 overflow-auto"
             role="tablist"
             aria-label="Dashboard Sections"
           >
@@ -333,6 +341,13 @@ const TabContent = ({
   renderChild,
   isLoading,
 }: TabContentProps) => {
+  const { t } = useTranslation();
+  const [search, setSearch] = useState("");
+  const filteredItems = useMemo(() => {
+    if (tabItems.length <= 1) return tabItems;
+    const query = search.trim().toLowerCase();
+    return tabItems.filter((item) => item.name.toLowerCase().includes(query));
+  }, [tabItems, search]);
   return (
     <section
       className="space-y-3 md:space-y-4"
@@ -341,6 +356,18 @@ const TabContent = ({
       aria-labelledby={tabId}
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
+      {tabItems.length > 1 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Input
+            placeholder={t("search")}
+            aria-label={t("search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -356,9 +383,15 @@ const TabContent = ({
             </Card>
           ))}
         </div>
+      ) : filteredItems.length === 0 ? (
+        <EmptyState
+          icon={<Search className="size-5 text-primary" />}
+          title={t("no_results_found")}
+          className="border-solid"
+        />
       ) : (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {tabItems.map((item: FacilityBareMinimum | Organization) => {
+          {filteredItems.map((item: FacilityBareMinimum | Organization) => {
             return renderChild(item);
           })}
         </div>
