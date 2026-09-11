@@ -1,6 +1,6 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
-import { Diagnosis } from "./diagnosis";
+import { Diagnosis, DiagnosisRequest } from "./diagnosis";
 
 export default {
   listDiagnosis: {
@@ -15,5 +15,11 @@ export default {
     path: "/api/v1/patient/{patientId}/diagnosis/{diagnosisId}/",
     method: HttpMethod.GET,
     TRes: Type<Diagnosis>(),
+  },
+  upsertDiagnosis: {
+    path: "/api/v1/patient/{patientId}/diagnosis/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<Diagnosis[]>(),
+    TBody: Type<{ datapoints: DiagnosisRequest[] }>(),
   },
 };

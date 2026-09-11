@@ -22,14 +22,6 @@ export interface BatchResponseBase {
   status_code: number;
 }
 
-// Request/Response types
-export interface BatchRequest {
-  url: string;
-  method: string;
-  reference_id: string;
-  body: any; // Using any since the body type varies based on the request type
-}
-
 export interface BatchSuccessResponse<T = unknown> extends BatchResponseBase {
   data: T;
 }

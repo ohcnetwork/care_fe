@@ -1,12 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import batchApi from "@/types/base/batch/batchApi";
 import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-import mutate from "@/Utils/request/mutate";
+import { useBatchRequest } from "@/Utils/request/batch";
 import query from "@/Utils/request/query";
 
 interface UseLocationManagementProps {
@@ -65,115 +64,12 @@ export function useLocationManagement({
     page === 1 ? itemsPerPage : itemsPerPage + 1,
   );
 
-  const { mutate: updateLocationOrder } = useMutation({
-    mutationFn: (params: {
-      locations: { locationId: string; data: any }[];
-      previousData?: any;
-      onSuccess?: () => void;
-    }) => {
-      const batchRequests = params.locations.map(
-        ({ locationId, data }, index) => ({
-          url: locationApi.update.path
-            .replace("{facility_id}", facilityId)
-            .replace("{id}", locationId),
-          method: locationApi.update.method,
-          reference_id: `location_${index}`,
-          body: {
-            ...data,
-            id: locationId,
-            location_type: {
-              code: data.location_type?.code || "OTHER",
-            },
-          },
-        }),
-      );
+  const { mutateAsync: updateLocationOrder } = useBatchRequest({});
 
-      return mutate(batchApi.batchRequest, { silent: true })({
-        requests: batchRequests,
-      });
-    },
-    onSuccess: (data, variables) => {
-      if (!variables.onSuccess) {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "locations",
-            facilityId,
-            parentId ? "children" : "all",
-            parentId,
-          ],
-        });
-        toast.success(t("location_order_updated"));
-      } else {
-        variables.onSuccess();
-        toast.success(t("location_order_updated"));
-      }
-    },
-    onError: (error, variables) => {
-      if (variables.previousData) {
-        queryClient.setQueryData(
-          [
-            "locations",
-            facilityId,
-            parentId ? "children" : "all",
-            parentId,
-            { page, limit: itemsPerPage + 2, searchQuery },
-          ],
-          variables.previousData,
-        );
-      }
-      let errorMessage = t("failed_to_update_order");
-
-      if (error && typeof error === "object" && "cause" in error) {
-        const errorObj = error as { cause: unknown };
-        const errorData = errorObj.cause as {
-          results?: Array<{
-            reference_id: string;
-            status_code: number;
-            data: {
-              detail?: string;
-              errors?: Array<{
-                msg?: string;
-                error?: string;
-                detail?: string;
-                type?: string;
-                loc?: string[];
-              }>;
-            };
-          }>;
-        };
-
-        if (errorData?.results) {
-          const failedResults = errorData.results.filter(
-            (result) => result.status_code >= 400,
-          );
-
-          if (failedResults.length > 0) {
-            for (const result of failedResults) {
-              if (result.data?.detail) {
-                errorMessage = result.data.detail;
-                break;
-              }
-
-              const errors = result.data?.errors || [];
-              if (errors.length > 0) {
-                const firstError = errors[0];
-                errorMessage =
-                  firstError.msg ||
-                  firstError.error ||
-                  firstError.detail ||
-                  errorMessage;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      toast.error(errorMessage);
-    },
-  });
-
-  const handleMove = (location: LocationRead, direction: "up" | "down") => {
+  const handleMove = async (
+    location: LocationRead,
+    direction: "up" | "down",
+  ) => {
     if (!children?.results) return;
 
     const currentIndex = children.results.findIndex(
@@ -203,57 +99,61 @@ export function useLocationManagement({
     const targetLocation = children.results[targetIndex];
 
     // Swap sort_index values between the two locations
-    updateLocationOrder({
-      locations: [
-        {
-          locationId: location.id,
-          data: {
-            ...location,
-            sort_index: targetLocation.sort_index,
+    const swapped = [
+      { ...location, sort_index: targetLocation.sort_index },
+      { ...targetLocation, sort_index: location.sort_index },
+    ];
+
+    try {
+      await updateLocationOrder(
+        swapped.map((data, index) => ({
+          api: locationApi.update,
+          pathParams: { facility_id: facilityId, id: data.id },
+          referenceId: `location_${index}`,
+          body: {
+            ...data,
+            location_type: {
+              code: data.location_type?.code || "OTHER",
+            },
           },
-        },
-        {
-          locationId: targetLocation.id,
-          data: {
-            ...targetLocation,
-            sort_index: location.sort_index,
-          },
-        },
+        })),
+      );
+    } catch {
+      return;
+    }
+
+    toast.success(t("location_order_updated"));
+
+    // Update the UI only after successful API call
+    const updatedLocations = [...children.results];
+    [updatedLocations[targetIndex], updatedLocations[currentIndex]] = [
+      updatedLocations[currentIndex],
+      updatedLocations[targetIndex],
+    ];
+
+    // Update the local state
+    queryClient.setQueryData(
+      [
+        "locations",
+        facilityId,
+        parentId ? "children" : "all",
+        parentId,
+        { page, limit: itemsPerPage + 2, searchQuery },
       ],
-      previousData: children,
-      onSuccess: () => {
-        // Update the UI only after successful API call
-        const updatedLocations = [...children.results];
-        [updatedLocations[targetIndex], updatedLocations[currentIndex]] = [
-          updatedLocations[currentIndex],
-          updatedLocations[targetIndex],
-        ];
-
-        // Update the local state
-        queryClient.setQueryData(
-          [
-            "locations",
-            facilityId,
-            parentId ? "children" : "all",
-            parentId,
-            { page, limit: itemsPerPage + 2, searchQuery },
-          ],
-          {
-            ...children,
-            results: updatedLocations,
-          },
-        );
-
-        // Then invalidate to ensure data is fresh
-        queryClient.invalidateQueries({
-          queryKey: [
-            "locations",
-            facilityId,
-            parentId ? "children" : "all",
-            parentId,
-          ],
-        });
+      {
+        ...children,
+        results: updatedLocations,
       },
+    );
+
+    // Then invalidate to ensure data is fresh
+    queryClient.invalidateQueries({
+      queryKey: [
+        "locations",
+        facilityId,
+        parentId ? "children" : "all",
+        parentId,
+      ],
     });
   };
 

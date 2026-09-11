@@ -14,10 +14,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
-import { BatchRequestBody } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
 import deviceApi from "@/types/device/deviceApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
@@ -43,19 +42,19 @@ type MutationRoute =
   | typeof deviceApi.addOrganization
   | typeof deviceApi.removeOrganization;
 
-interface EncounterPathParams {
+type EncounterPathParams = {
   encounterId: string;
-}
+};
 
-interface LocationPathParams {
+type LocationPathParams = {
   facilityId: string;
   id: string;
-}
+};
 
-interface DevicePathParams {
+type DevicePathParams = {
   facilityId: string;
   id: string;
-}
+};
 
 type PathParams = EncounterPathParams | LocationPathParams | DevicePathParams;
 
@@ -205,8 +204,7 @@ export default function LinkDepartmentsSheet({
     props.setOpen?.(open);
   };
 
-  const { mutate: submitBatch, isPending: isAdding } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: submitBatch, isPending: isAdding } = useBatchRequest({
     onSuccess: () => {
       const invalidateQueries = getInvalidateQueries(entityType, entityId);
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
@@ -214,31 +212,6 @@ export default function LinkDepartmentsSheet({
       setSelectedOrgs(null);
       setOpen(false);
       onUpdate?.();
-    },
-    onError: (error) => {
-      try {
-        const errorData = error.cause as {
-          results?: {
-            data?: { detail?: string; errors?: { msg: string }[] };
-          }[];
-        };
-
-        const errorMessages = errorData?.results
-          ?.flatMap(
-            (result) =>
-              result?.data?.errors?.map((err) => err.msg) || // Extract from `errors[].msg`
-              (result?.data?.detail ? [result.data.detail] : []), // Extract from `data.detail`
-          )
-          .filter(Boolean); // Remove undefined/null values
-
-        if (errorMessages?.length) {
-          errorMessages.forEach((msg) => toast.error(msg));
-        } else {
-          toast.error("An unexpected error occurred");
-        }
-      } catch {
-        toast.error("An unexpected error occurred");
-      }
     },
   });
 
@@ -252,32 +225,17 @@ export default function LinkDepartmentsSheet({
       true,
     );
 
-    const batchRequest: BatchRequestBody = {
-      requests: selectedOrgs.map((orgId) => {
-        const resolvedPath = route.path
-          .replace("{facilityId}", facilityId)
-          .replace("{id}", entityId)
-          .replace("{encounterId}", entityId);
+    const requests: BatchRequestObject[] = selectedOrgs.map((orgId) => ({
+      api: route,
+      pathParams,
+      referenceId: `Add Organization ${orgId}`,
+      body:
+        entityType === "device"
+          ? { managing_organization: orgId }
+          : { organization: orgId },
+    }));
 
-        return {
-          url: resolvedPath,
-          method: "POST",
-          reference_id: `Add Organization ${orgId}`,
-          body: {
-            ...(entityType === "device"
-              ? {
-                  managing_organization: orgId,
-                }
-              : {
-                  organization: orgId,
-                }),
-          },
-          pathParams,
-        };
-      }),
-    };
-
-    submitBatch(batchRequest);
+    submitBatch(requests);
   };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
