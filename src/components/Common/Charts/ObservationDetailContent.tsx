@@ -156,7 +156,7 @@ export function ObservationDetailContent({
       {chartData.length > 0 ? (
         <div className="relative mt-2" style={{ height: 320 }}>
           <Button
-            variant="ghost"
+            variant="link"
             onClick={() => {
               const el = scrollContainerRef.current;
               if (el) {
