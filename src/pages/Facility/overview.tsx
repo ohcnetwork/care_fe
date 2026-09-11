@@ -1,17 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowUpRight,
-  Box,
-  Calendar,
-  Database,
-  RotateCcw,
-  Users,
-  Wrench,
-  X,
-} from "lucide-react";
+import { ArrowUpRight, RotateCcw, Wrench, X } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -33,16 +25,34 @@ import useUserPreferences from "@/hooks/useUserPreferences";
 import { getPermissions } from "@/common/Permissions";
 
 import {
+  AppointmentDuoIcon,
+  HeartDuoIcon,
+  StethoscopeDuoIcon,
+} from "@/CAREUI/icons/CustomIcons";
+import {
   DashboardLinkContext,
   processCustomDashboardLinks,
+  type DashboardShortcutIcon,
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
 
 interface FacilityOverviewProps {
   facilityId: string;
+}
+
+function greetUserKey(date: Date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 12) {
+    return "greet_user_morning";
+  }
+  if (hour < 18) {
+    return "greet_user_afternoon";
+  }
+  return "greet_user_evening";
 }
 
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
@@ -59,43 +69,41 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     }),
   });
 
-  const { canViewSchedule, canListEncounters } = getPermissions(
+  const { canViewAppointments, canListEncounters } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
 
   // Default shortcuts
-  const defaultShortcuts = [
+  const defaultShortcuts: Array<{
+    title: string;
+    description: string;
+    icon: DashboardShortcutIcon;
+    href: string;
+    visible: boolean;
+  }> = [
     {
-      title: t("my_schedules"),
-      description: t("manage_my_schedule"),
-      icon: Calendar,
-      href: `/facility/${facilityId}/users/${user?.username}/availability`,
-      visible: canViewSchedule,
+      title: t("appointments"),
+      description: t("view_appointments"),
+      icon: AppointmentDuoIcon,
+      href: `/facility/${facilityId}/appointments`,
+      visible: canViewAppointments,
     },
     {
-      title: t("encounters"),
-      description: t("manage_facility_users"),
-      icon: Users,
+      title: t("all_encounters"),
+      description: t("view_and_manage_encounters"),
+      icon: StethoscopeDuoIcon,
       href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
     },
     {
       title: t("services"),
       description: t("view_services"),
-      icon: Box,
+      icon: HeartDuoIcon,
       href: `/facility/${facilityId}/services`,
       visible: true,
     },
   ];
-
-  // Process custom dashboard links from environment
-  const iconMap = {
-    Calendar,
-    Users,
-    Box,
-    Database,
-  };
 
   const context: DashboardLinkContext = {
     facilityId,
@@ -106,7 +114,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const customDashboardLinks = processCustomDashboardLinks(
     careConfig.customShortcuts,
     context,
-    iconMap,
   );
 
   // Combine default and custom dashboard links
@@ -118,51 +125,67 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   return (
     <Page title="">
-      <div className="container mx-auto space-y-8">
+      <div className="container mx-auto space-y-8 max-w-6xl">
         {/* Welcome Header */}
-        <div className="rounded-lg">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {t("hey_user", {
-                  user: [user.prefix, user.first_name]
-                    .filter(Boolean)
-                    .join(" "),
-                })}
-              </h1>
-              <p className="text-gray-500">
-                {t("welcome_back_to_hospital_dashboard")}
-              </p>
-            </div>
+        <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(to_right,#F9FAFB_0%,#F0F0E6_60%)] pr-36 text-gray-900 sm:bg-[linear-gradient(to_right,#F5F8FF_0%,#F9FAFB_45%,#F0F0E6_100%)] sm:pr-40 md:pr-48">
+          <div
+            className="absolute -right-8 size-full rounded-lg bg-contain bg-right bg-no-repeat mix-blend-darken md:right-0"
+            style={{ backgroundImage: "url('/images/home-banner-icon.webp')" }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute left-0 size-full bg-contain bg-left bg-no-repeat mix-blend-darken"
+            style={{ backgroundImage: "url('/images/home-banner-sun.png')" }}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-10 max-w-xl p-4 md:p-8">
+            <h1 className="mb-2 text-xl/8 font-medium wrap-break-word text-gray-600">
+              <Trans
+                i18nKey={greetUserKey()}
+                values={{ user: formatName(user) }}
+                components={{
+                  1: <span />,
+                  2: <span className="font-semibold text-gray-950" />,
+                }}
+              />
+            </h1>
+            <p className="text-gray-700">{t("welcome_back")}</p>
           </div>
         </div>
 
         {/* Quick Actions Section */}
         <div className="">
-          <h2 className="mb-6 text-xl font-semibold text-gray-900">
-            {t("quick_actions")}
+          <h2 className="text-base/9 font-semibold text-gray-950">
+            {t("quick_links")}
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
             {shortcuts
               .filter((shortcut) => shortcut.visible)
               .map((shortcut) => (
                 <Link
                   key={shortcut.href}
                   href={shortcut.href}
-                  className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
+                  className="block h-full min-w-0 rounded-lg ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                 >
-                  <Card className="h-full border-0 shadow rounded-xl p-4">
-                    <CardContent className="p-0 flex flex-row items-center h-full gap-4">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <shortcut.icon className="size-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
+                  <Card className="flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-0 bg-white p-1 shadow-sm">
+                    <CardContent className="flex flex-1 flex-col gap-1.5 p-0">
+                      <div className="min-h-25 space-y-2 rounded-t rounded-b-lg bg-gray-100 px-3 py-2.5 sm:min-h-28 sm:space-y-3 sm:px-4 sm:py-3">
+                        <div className="w-fit">
+                          <shortcut.icon className="size-7 text-primary sm:size-8" />
+                        </div>
+                        <CardTitle className="m-0 text-sm leading-6 font-semibold text-gray-950 sm:text-base/9">
                           {shortcut.title}
                         </CardTitle>
-                        <CardDescription className="text-gray-500">
+                        <CardDescription className="truncate text-xs leading-4 font-normal text-gray-700 sm:leading-normal">
                           {shortcut.description}
                         </CardDescription>
+                      </div>
+                      <div className="flex h-7 items-center justify-between gap-1 px-3 py-1 sm:px-4">
+                        <span className="min-w-0 truncate text-xs font-medium text-gray-700 sm:text-sm">
+                          {t("go_to_page", { page: shortcut.title })}
+                        </span>
+                        <ArrowUpRight className="size-3.5 shrink-0 text-gray-700 sm:size-4" />
                       </div>
                     </CardContent>
                   </Card>
@@ -173,16 +196,21 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
         {/* Pinned Links Section */}
         {pinnedLinks.length > 0 && (
-          <div>
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="group/pinned-links">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base/9 font-semibold text-gray-950">
                 {t("pinned_links")}
               </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
-                    <Wrench className="size-5" />
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-gray-500 transition-all hover:text-gray-700 focus-visible:opacity-100 data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/pinned-links:opacity-100"
+                    aria-label={t("actions")}
+                  >
+                    <Wrench />
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={resetCustomLinks}>
@@ -194,31 +222,33 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {pinnedLinks.map((link) => (
-                <div
-                  key={link.link}
-                  className="relative group block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
-                >
-                  <button
+                <div key={link.link} className="relative group block h-full">
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 text-gray-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600 focus-visible:opacity-100"
                     aria-label={t("remove")}
                   >
-                    <X className="size-4" />
-                  </button>
-                  <Link href={link.link} className="block h-full">
-                    <Card className="h-full border border-gray-200 shadow-sm rounded-xl p-5">
-                      <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">
-                        <div className="space-y-1">
+                    <X />
+                  </Button>
+                  <Link
+                    href={link.link}
+                    className="block h-full rounded-xl ring-primary-400 ring-offset-2 transition-all duration-200 hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                  >
+                    <Card className="h-full rounded-xl border border-gray-200 bg-gray-100 p-1">
+                      <CardContent className="flex min-h-17 items-center justify-between gap-2 rounded-lg bg-white p-3 shadow-sm">
+                        <div className="min-w-0 space-y-2">
                           {link.description && (
-                            <CardDescription className="text-gray-500 text-sm">
+                            <CardDescription className="truncate text-sm font-medium text-gray-500">
                               {link.description}
                             </CardDescription>
                           )}
-                          <CardTitle className="text-xl font-semibold text-gray-900">
+                          <CardTitle className="truncate text-base font-semibold leading-tight text-gray-950">
                             {link.title}
                           </CardTitle>
                         </div>
-                        <ArrowUpRight className="size-5 text-gray-400 shrink-0" />
+                        <ArrowUpRight className="size-4 shrink-0 text-gray-600" />
                       </CardContent>
                     </Card>
                   </Link>
