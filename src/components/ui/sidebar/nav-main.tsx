@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath, usePath } from "raviger";
-import { Fragment, ReactNode, useMemo, useState } from "react";
+import { forwardRef, Fragment, ReactNode, useMemo, useState } from "react";
 
 import { navExpansionAtom } from "@/atoms/navExpansionAtom";
 import { cn } from "@/lib/utils";
@@ -22,8 +22,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -54,28 +52,35 @@ export interface NavigationLink {
   children?: NavigationLink[];
 }
 
-function NavLink({
-  href,
-  isSelected,
-  activeClass,
-  exactActiveClass,
-  className,
-  onClick,
-  children,
-}: {
-  href: string;
-  isSelected: boolean;
-  activeClass?: string;
-  exactActiveClass?: string;
-  className?: string;
-  onClick?: (e: React.MouseEvent) => void;
-  children: ReactNode;
-}) {
+const NavLink = forwardRef<
+  HTMLAnchorElement,
+  {
+    href: string;
+    isSelected: boolean;
+    activeClass?: string;
+    exactActiveClass?: string;
+    className?: string;
+    onClick?: (e: React.MouseEvent) => void;
+    children: ReactNode;
+  }
+>(function NavLink(
+  {
+    href,
+    isSelected,
+    activeClass,
+    exactActiveClass,
+    className,
+    onClick,
+    children,
+  },
+  ref,
+) {
   const resolvedExact = exactActiveClass ?? activeClass;
   const { toggleSidebar, isMobile } = useSidebar();
 
   return (
     <ActiveLink
+      ref={ref}
       href={href}
       className={className}
       activeClass={activeClass}
@@ -93,7 +98,7 @@ function NavLink({
       {children}
     </ActiveLink>
   );
-}
+});
 
 export function NavMain({ links }: { links: NavigationLink[] }) {
   const { state } = useSidebar();
@@ -136,17 +141,16 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                 )
               ) : (
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={link.name}
-                    className={
-                      "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
-                    }
+                  <NavLink
+                    href={link.url}
+                    isSelected={isSelected(link.url)}
+                    activeClass="bg-white text-green-700 shadow-sm"
                   >
-                    <NavLink
-                      href={link.url}
-                      isSelected={isSelected(link.url)}
-                      activeClass="bg-white text-green-700 shadow-sm"
+                    <SidebarMenuButton
+                      tooltip={link.name}
+                      className={
+                        "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
+                      }
                     >
                       {link.icon ? (
                         link.icon
@@ -160,8 +164,8 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                       <span className="group-data-[collapsible=icon]:hidden ml-1">
                         {link.name}
                       </span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                    </SidebarMenuButton>
+                  </NavLink>
                 </SidebarMenuItem>
               )}
             </Fragment>
@@ -173,7 +177,7 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
 
 function CollapsibleNavItem({
   link,
-  fullPathMap,
+  fullPathMap: _fullPathMap,
   path,
 }: {
   link: NavigationLink;
@@ -222,9 +226,10 @@ function CollapsibleNavItem({
                       </span>
                     </div>
                   )}
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       asChild
+                      tooltip={subItem.name}
                       className={
                         "text-gray-600 transition font-normal hover:bg-gray-200 hover:text-green-700"
                       }
@@ -232,19 +237,22 @@ function CollapsibleNavItem({
                       <NavLink
                         href={subItem.url}
                         isSelected={isSubItemSelected(subItem.url)}
-                        className="w-full"
-                        activeClass={cn(
-                          subItem.url
-                            .split("/")
-                            .every((part) => fullPathMap[part]) &&
-                            "bg-white text-green-700 shadow",
-                        )}
-                        exactActiveClass="bg-white text-green-700 shadow"
+                        activeClass="bg-white text-green-700 shadow-sm"
                       >
-                        {subItem.name}
+                        {subItem.icon ? (
+                          subItem.icon
+                        ) : (
+                          <Avatar
+                            name={subItem.name}
+                            className="size-6 -m-1 rounded-sm"
+                          />
+                        )}
+                        <span className="group-data-[collapsible=icon]:hidden ml-1">
+                          {subItem.name}
+                        </span>
                       </NavLink>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </Fragment>
               ))}
           </SidebarMenuSub>
