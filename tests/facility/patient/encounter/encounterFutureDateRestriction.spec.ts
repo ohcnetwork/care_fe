@@ -1,57 +1,17 @@
-import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
-import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
-import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
+import { expect, test } from "@playwright/test";
+import {
+  getEncounterCreateDialog as getEncounterDialog,
+  getFutureDateButtonFromCalendar,
+  openCalendarAndGetNextMonthButton,
+  openCreateEncounterDialog,
+  selectRandomEncounterClass,
+} from "tests/facility/patient/encounter/encounterFormHelpers";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function openEncounterForm(page: Page) {
-  const facilityId = getFacilityId();
-  const patientId = getPatientId();
-
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
-  await page.getByRole("link", { name: "Patient Home" }).click();
-
-  await expect(
-    page.getByRole("button", { name: "Create Encounter" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Create Encounter" }).click();
-}
-
-async function selectRandomEncounterClass(page: Page) {
-  const randomClass = faker.helpers.arrayElement(ENCOUNTER_CLASSES);
-  await page.getByRole("button", { name: randomClass }).click();
-}
-
-async function openCalendarAndGetNextMonthButton(page: Page) {
-  await page
-    .locator('[data-slot="form-item"]')
-    .filter({ hasText: "Date and Time" })
-    .locator('[data-slot="popover-trigger"]')
-    .click();
-
-  const nextMonthButton = page.getByRole("button", {
-    name: "Go to the Next Month",
-  });
-  await expect(nextMonthButton).toBeVisible();
-  return nextMonthButton;
-}
-
-function getFutureDateButtonFromCalendar(page: Page) {
-  return page
-    .getByRole("gridcell")
-    .filter({ hasText: /^15$/ })
-    .getByRole("button");
-}
-
-function getEncounterDialog(page: Page) {
-  return page.getByRole("dialog", { name: "Initiate Patient Encounter" });
-}
-
 test.describe("Encounter Future Date Restriction", () => {
   test.beforeEach(async ({ page }) => {
-    await openEncounterForm(page);
+    await openCreateEncounterDialog(page);
   });
 
   test("should disable future dates when status is In Progress", async ({
