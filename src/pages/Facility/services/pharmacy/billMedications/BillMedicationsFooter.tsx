@@ -94,7 +94,7 @@ export const BillMedicationsFooter = ({
             )}
             {isBillingMedications ? t("billing") : t("bill_selected")}
             {!isBillingMedications && <ArrowRightIcon className="size-4" />}
-            <ShortcutBadge actionId="submit-action" />
+            <ShortcutBadge actionId="enter-action" />
           </Button>
         </div>
       </div>

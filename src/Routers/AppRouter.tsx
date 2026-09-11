@@ -24,9 +24,7 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
-import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
 import { LicensesPage } from "@/pages/Licenses/Licenses";
@@ -149,10 +147,6 @@ export default function AppRouter() {
           id="pages"
           className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
         >
-          <Button onClick={() => setCommandDialogOpen(true)} className="hidden">
-            <ShortcutBadge actionId="show-shortcuts" />
-          </Button>
-
           <ShortcutCommandDialog
             open={commandDialogOpen}
             onOpenChange={setCommandDialogOpen}
