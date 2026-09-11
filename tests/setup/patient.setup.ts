@@ -19,8 +19,20 @@ test("navigate to an encounter and save patient and encounter id", async ({
   );
 
   try {
+    // Capture every patient id in the list before navigating away, so we can
+    // also record a second, distinct patient. Suites that book their own
+    // appointment use it to avoid racing the primary fixture patient for the
+    // same slot on parallel workers.
+    const encounterLinks = page.getByRole("link", { name: "View Encounter" });
+    await encounterLinks.first().waitFor({ state: "visible" });
+    const patientIds = (
+      await encounterLinks.evaluateAll((links) =>
+        links.map((link) => link.getAttribute("href") ?? ""),
+      )
+    ).map((href) => href.match(/\/patient\/([^/]+)/)?.[1]);
+
     // Wait for encounter link to be visible
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await encounterLinks.first().click();
 
     // Wait for navigation to the encounter page
     await page.waitForURL(
@@ -38,13 +50,28 @@ test("navigate to an encounter and save patient and encounter id", async ({
       throw new Error(`Failed to extract IDs from URL: ${url}`);
     }
 
+    // A second, distinct patient is optional here: only suites that book their
+    // own appointment need it (via getPatientIds), and that accessor throws if
+    // it's genuinely absent. Don't fail the whole setup — which every
+    // primary-patient suite depends on — just because a second patient wasn't
+    // found.
+    const secondPatientId = patientIds.find(
+      (id): id is string => !!id && id !== patientId,
+    );
+
     // Ensure the directory exists
     fs.mkdirSync("tests/.auth", { recursive: true });
 
-    // Save patient ID
+    // Save patient IDs (primary + a distinct second patient, when available)
     fs.writeFileSync(
       "tests/.auth/patientMeta.json",
-      JSON.stringify({ id: patientId }, null, 2),
+      JSON.stringify(
+        secondPatientId
+          ? { id: patientId, secondId: secondPatientId }
+          : { id: patientId },
+        null,
+        2,
+      ),
     );
 
     // Save encounter ID
@@ -54,6 +81,11 @@ test("navigate to an encounter and save patient and encounter id", async ({
     );
 
     console.log(`✅ Patient ID saved: ${patientId}`);
+    if (secondPatientId) {
+      console.log(`✅ Second patient ID saved: ${secondPatientId}`);
+    } else {
+      console.warn("⚠️ No second distinct patient found in the encounter list");
+    }
     console.log(`✅ Encounter ID saved: ${encounterId}`);
   } catch (error) {
     console.error("❌ Failed to set up patient and encounter:", error);
