@@ -34,6 +34,7 @@ import { Link } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 import { useTokenListInfiniteQuery } from "./utils";
 
 const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
@@ -348,19 +349,29 @@ function FinishedTokenOptions({
   });
 
   const handleMoveBackToInService = () => {
-    updateToken({
-      status: TokenStatus.IN_PROGRESS,
-      note: token.note,
-      sub_queue: token.sub_queue?.id || null,
-    });
+    updateToken(
+      {
+        status: TokenStatus.IN_PROGRESS,
+        note: token.note,
+        sub_queue: token.sub_queue?.id || null,
+      },
+      {
+        onSuccess: () => toast.success(t("move_back_to_in_service")),
+      },
+    );
   };
 
   const handleMoveBackToWaiting = () => {
-    updateToken({
-      status: TokenStatus.CREATED,
-      note: token.note,
-      sub_queue: null,
-    });
+    updateToken(
+      {
+        status: TokenStatus.CREATED,
+        note: token.note,
+        sub_queue: null,
+      },
+      {
+        onSuccess: () => toast.success(t("token_returned_to_waiting")),
+      },
+    );
   };
 
   return (
@@ -393,11 +404,16 @@ function FinishedTokenOptions({
 
           <DropdownMenuItem
             onClick={() =>
-              updateToken({
-                status: TokenStatus.UNFULFILLED,
-                note: token.note,
-                sub_queue: null,
-              })
+              updateToken(
+                {
+                  status: TokenStatus.UNFULFILLED,
+                  note: token.note,
+                  sub_queue: null,
+                },
+                {
+                  onSuccess: () => toast.success(t("token_recalled_later")),
+                },
+              )
             }
             disabled={isUpdating}
           >
