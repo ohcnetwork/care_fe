@@ -1,41 +1,40 @@
-import { DashboardIcon } from "@radix-ui/react-icons";
-import { Link, useLocationChange } from "raviger";
+import careConfig from "@careConfig";
+import { X } from "lucide-react";
+import { Link, useLocationChange, usePath } from "raviger";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { FacilityNav } from "@/components/ui/sidebar/facility/facility-nav";
-import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
 import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
 import { LocationSwitcher } from "@/components/ui/sidebar/facility/location/location-switcher";
 import { ServiceNav } from "@/components/ui/sidebar/facility/service/service-nav";
+import { FacilitySettingsNav } from "@/components/ui/sidebar/facility/settings/facility-settings-nav";
+import { FacilitySettingsSidebarHeader } from "@/components/ui/sidebar/facility/settings/facility-settings-sidebar-header";
 import {
   FacilityNavUser,
   PatientNavUser,
 } from "@/components/ui/sidebar/nav-user";
 import { OrgNav } from "@/components/ui/sidebar/org-nav";
-import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import { PatientNav } from "@/components/ui/sidebar/patient-nav";
-import {
-  ResponsibilityNav,
-  ResponsibilitySwitcher,
-} from "@/components/ui/sidebar/responsibility-switcher";
+import { ResponsibilityNav } from "@/components/ui/sidebar/responsibility-switcher";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
+import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
@@ -68,10 +67,17 @@ export function AppSidebar({
     "/facility/:facilityId/services/:serviceId",
   );
 
+  const path = usePath() ?? "";
+  const facilitySettingsSidebar =
+    !!facilityId &&
+    isFacilitySettingsPath(path) &&
+    sidebarFor === SidebarFor.FACILITY;
+
   const facilitySidebar =
     !!facilityId &&
     !locationId &&
     !serviceId &&
+    !facilitySettingsSidebar &&
     sidebarFor === SidebarFor.FACILITY;
   const facilityLocationSidebar =
     !!facilityId &&
@@ -88,6 +94,16 @@ export function AppSidebar({
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
 
   const { isMobile, setOpenMobile } = useSidebar();
+  const {
+    pinned,
+    isOverlay,
+    innerWorkspace,
+    cancelClose,
+    scheduleClose,
+    handleSidebarFocus,
+    handleSidebarBlur,
+  } = useAppSidebar();
+  const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
 
@@ -97,17 +113,18 @@ export function AppSidebar({
   }, [user?.organizations, organizationId]);
 
   React.useEffect(() => {
-    if (!user?.facilities || !facilityId || !facilitySidebar) {
+    if (
+      !user?.facilities ||
+      !facilityId ||
+      !(facilitySidebar || facilitySettingsSidebar)
+    ) {
       setSelectedFacility(null);
       return;
     }
 
     const facility = user.facilities.find((f) => f.id === facilityId) || null;
     setSelectedFacility(facility);
-  }, [facilityId, user?.facilities, facilitySidebar]);
-
-  const hasFacilities = user?.facilities && user.facilities.length > 0;
-  const hasOrganizations = user?.organizations && user.organizations.length > 0;
+  }, [facilityId, user?.facilities, facilitySidebar, facilitySettingsSidebar]);
 
   useLocationChange(() => {
     if (isMobile) {
@@ -117,59 +134,68 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      collapsible="icon"
-      variant="sidebar"
+      collapsible="offcanvas"
+      variant={innerWorkspace ? "sidebar" : "inset"}
+      onMouseEnter={cancelClose}
+      onMouseLeave={scheduleClose}
+      onFocusCapture={handleSidebarFocus}
+      onBlurCapture={handleSidebarBlur}
       {...props}
-      className="group-data-[side=left]:border-r-0"
+      className={cn(
+        "border-neutral-200 [&_[data-sidebar=sidebar]]:bg-neutral-100 [&_[data-sidebar=sidebar]]:text-neutral-950",
+        props.className,
+      )}
     >
-      <SidebarHeader>
-        {responsibilityId && (
-          <ResponsibilitySwitcher selectedResponsibilityId={responsibilityId} />
+      <SidebarHeader
+        inert={!showHeader}
+        aria-hidden={!showHeader}
+        className={cn(
+          "overflow-hidden border-b border-neutral-200 bg-neutral-100 text-neutral-950 transition-[max-height,padding] motion-reduce:transition-none",
+          !innerWorkspace && "px-0",
+          showHeader
+            ? "min-h-14 py-2"
+            : "max-h-0 min-h-0 border-transparent py-0",
         )}
-        {selectedOrganization && hasOrganizations && !responsibilityId && (
-          <OrganizationSwitcher
-            organizations={user?.organizations || []}
-            selectedOrganization={selectedOrganization}
-          />
+      >
+        {facilitySettingsSidebar ? (
+          <FacilitySettingsSidebarHeader />
+        ) : facilityLocationSidebar ? (
+          <LocationSwitcher />
+        ) : facilityServiceSidebar ? (
+          <ServiceSwitcher />
+        ) : (
+          <div className="flex min-h-9 items-center gap-2 px-2">
+            <Link
+              href="/"
+              basePath="/"
+              aria-label={t("view_dashboard")}
+              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+            >
+              <img
+                src={careConfig.mainLogo?.dark}
+                alt={t("care")}
+                className="h-9 w-auto max-w-full object-contain"
+              />
+            </Link>
+            {isMobile && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="ml-auto size-8 text-neutral-600 hover:bg-neutral-200 focus-visible:ring-indigo-400"
+                aria-label={t("close_sidebar")}
+                onClick={() => setOpenMobile(false)}
+              >
+                <X className="size-4" />
+              </Button>
+            )}
+          </div>
         )}
-        {facilityId && selectedFacility && hasFacilities && (
-          <FacilitySwitcher
-            facilities={user?.facilities || []}
-            selectedFacility={selectedFacility}
-          />
-        )}
-        {locationId && <LocationSwitcher />}
-        {serviceId && <ServiceSwitcher />}
-        {!locationId &&
-          !serviceId &&
-          !selectedFacility &&
-          !selectedOrganization &&
-          !responsibilityId && (
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white mt-2"
-                >
-                  <Link href="/">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
-                      <DashboardIcon className="size-4" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight text-gray-900">
-                      <span className="truncate font-semibold">
-                        {t("view_dashboard")}
-                      </span>
-                    </div>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-2 bg-neutral-100 text-neutral-950">
         {facilityLocationSidebar && <LocationNav />}
+        {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
         {facilitySidebar &&
           !facilityLocationSidebar &&
@@ -186,22 +212,23 @@ export function AppSidebar({
         {(facilitySidebar ||
           facilityLocationSidebar ||
           facilityServiceSidebar ||
+          facilitySettingsSidebar ||
           adminSidebar) && <PinPageDialog />}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-neutral-200 bg-neutral-100 text-neutral-950">
         {patientSidebar ? (
           <PatientNavUser />
         ) : (
           <FacilityNavUser
             selectedFacilityId={
-              facilitySidebar ? selectedFacility?.id : undefined
+              facilitySidebar || facilitySettingsSidebar
+                ? selectedFacility?.id
+                : undefined
             }
           />
         )}
       </SidebarFooter>
-
-      <SidebarRail />
     </Sidebar>
   );
 }

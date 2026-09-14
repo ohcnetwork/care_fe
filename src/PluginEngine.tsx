@@ -15,6 +15,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { registerPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -96,7 +97,17 @@ export default function PluginEngine({
           return { ...config, isLoading: true as const };
         }
 
-        return { ...config, isLoading: false as const, ...data! };
+        // `data` is the remote's OWN manifest — untrusted. `slug` spreads
+        // in AFTER `...data!` so nothing the manifest declares (a stray
+        // `slug` field, or reusing `plugin.plugin`) can shadow the
+        // backend-issued `config.slug` this query was actually fetched
+        // for. That's the identity namespace ownership checks rely on.
+        return {
+          ...config,
+          isLoading: false as const,
+          ...data!,
+          slug: config.slug,
+        };
       }),
   });
 
@@ -116,7 +127,7 @@ export default function PluginEngine({
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
-  // Register plugin overrides
+  // Register plugin overrides and structured question types
   const overrideCleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
@@ -126,9 +137,9 @@ export default function PluginEngine({
 
     // Register new overrides from all loaded plugins
     for (const plugin of pluginsQuery) {
-      if (plugin.isLoading || !plugin.overrides) continue;
+      if (plugin.isLoading) continue;
 
-      for (const override of plugin.overrides) {
+      for (const override of plugin.overrides ?? []) {
         const cleanup = addOverride(override.component, {
           component: override.replacement,
           condition: override.condition,
@@ -137,6 +148,28 @@ export default function PluginEngine({
             override.description ?? `Override from plugin: ${plugin.plugin}`,
         });
         overrideCleanupRef.current.push(cleanup);
+      }
+
+      // Structured question types the plugin contributes. Registration
+      // throws on a non-namespaced id — one malformed definition is logged
+      // and skipped, never fatal to the app. The registering plugin's slug
+      // goes in so the registry can verify the `{plugin_slug}.` half of the
+      // id actually belongs to it: namespacing is the isolation guarantee,
+      // and it is only a guarantee if someone checks. `plugin.slug` is the
+      // trusted, backend-issued identity (see the combine above) — never
+      // `plugin.plugin`, which is a field the remote manifest declares
+      // about itself and could spoof another plugin's namespace with.
+      for (const definition of plugin.structuredQuestionTypes ?? []) {
+        try {
+          overrideCleanupRef.current.push(
+            registerPluginStructuredType(definition, plugin.slug),
+          );
+        } catch (error) {
+          console.error(
+            `Invalid structured type from plugin ${plugin.plugin}`,
+            error,
+          );
+        }
       }
     }
 

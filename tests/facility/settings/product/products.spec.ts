@@ -16,7 +16,7 @@ test.describe("Product List", () => {
 
     // Navigate to Products via sidebar
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Settings" }).click();
+    await page.getByRole("link", { name: "Settings", exact: true }).click();
     await page.getByRole("link", { name: "Product", exact: true }).click();
   });
 
@@ -169,8 +169,10 @@ test.describe("Product List", () => {
     });
 
     await test.step("Navigate away and back", async () => {
-      // Navigate to another section
-      await page.getByRole("button", { name: "Settings" }).click();
+      // Navigate to another setting, then return to Products.
+      const sidebar = page.locator('[data-sidebar="sidebar"]');
+      await sidebar.getByRole("link", { name: "General", exact: true }).click();
+      await sidebar.getByRole("link", { name: "Product", exact: true }).click();
 
       // Verify the page loads correctly after navigation
       await expect(

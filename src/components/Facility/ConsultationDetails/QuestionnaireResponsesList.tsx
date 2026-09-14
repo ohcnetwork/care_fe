@@ -24,6 +24,10 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  StructuredAnswerView,
+  storedStructuredAnswer,
+} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -112,7 +116,15 @@ function QuestionGroup({
     return responses.some((r) => r.question_id === q.id);
   });
 
-  if (!hasResponses) return null;
+  // Structured answers a plugin type stored on the response — rendered
+  // below the table by the type's own component, full width; the table
+  // rows are for plain values.
+  const storedStructuredQuestions =
+    group.questions?.filter((question) =>
+      storedStructuredAnswer(question, responses),
+    ) ?? [];
+
+  if (!hasResponses && storedStructuredQuestions.length === 0) return null;
 
   const currentTitle = parentTitle
     ? `${parentTitle} - ${group.text}`
@@ -250,6 +262,14 @@ function QuestionGroup({
           </div>
         )}
 
+        {storedStructuredQuestions.map((question) => (
+          <StoredStructuredBlock
+            key={question.id}
+            question={question}
+            responses={responses}
+          />
+        ))}
+
         {group.questions?.map((subQuestion, idx) => {
           if (subQuestion.type === "structured" || !subQuestion.type)
             return null;
@@ -265,6 +285,27 @@ function QuestionGroup({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/** One response-persisted structured answer: its question title, then the
+ *  type's own read-only rendering (which shows the note too — the host
+ *  draws no note affordance for structured questions, so the type's
+ *  component owns it). Spans the card's full width. */
+function StoredStructuredBlock({
+  question,
+  responses,
+}: {
+  question: Question;
+  responses: QuestionnaireResponse["responses"];
+}) {
+  const response = storedStructuredAnswer(question, responses);
+  if (!response) return null;
+  return (
+    <div className="md:col-span-2 space-y-1 py-1.5">
+      <div className="text-sm text-gray-600 break-words">{question.text}</div>
+      <StructuredAnswerView question={question} response={response} />
     </div>
   );
 }
@@ -477,7 +518,22 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
     };
 
     questions.forEach((question, index) => {
-      if (question.type === "structured") return;
+      if (question.type === "structured") {
+        if (!storedStructuredAnswer(question, item.responses)) return;
+        flushNonGroupQuestions();
+        result.push(
+          <div
+            key={question.id}
+            className="border border-gray-200 rounded-md px-3 py-1.5"
+          >
+            <StoredStructuredBlock
+              question={question}
+              responses={item.responses}
+            />
+          </div>,
+        );
+        return;
+      }
 
       if (question.type === "group") {
         flushNonGroupQuestions();

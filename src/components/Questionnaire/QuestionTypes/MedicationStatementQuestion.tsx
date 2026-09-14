@@ -70,7 +70,6 @@ import {
 } from "@/types/questionnaire/validation";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
@@ -83,6 +82,7 @@ interface MedicationStatementQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
 }
@@ -145,6 +145,7 @@ export function validateMedicationStatementQuestion(
 export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
@@ -181,8 +182,12 @@ export function MedicationStatementQuestion({
   });
 
   useEffect(() => {
-    if (patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+    if (
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,
       );
@@ -304,12 +309,7 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -322,8 +322,7 @@ export function MedicationStatementQuestion({
         variant="destructive"
       />
 
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<
           MedicationRequestRead | MedicationStatementRead
         >
@@ -694,7 +693,7 @@ export function MedicationStatementQuestion({
       )}
 
       {desktopLayout ? (
-        <div className="max-w-4xl">
+        <div className="min-w-0 w-full">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}

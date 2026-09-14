@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
 import { BODY_SITES, KNOWN_USERNAMES } from "tests/helper/commonConstants";
+import { submitAndExpectSuccess } from "tests/helper/questionnaire";
 import {
-  expectToast,
   selectFromCommand,
   selectFromDefinitionCategoryPicker,
   selectFromValueSet,
@@ -129,9 +129,9 @@ export async function createServiceRequest(
     await serviceRequestCard.getByPlaceholder(/add note/i).fill(data.notes!);
   }
 
-  await page.getByRole("button", { name: /submit/i }).click();
-
-  await expectToast(page, /questionnaire submitted successfully/i);
+  // Service requests are authored on the v2 fill page — its primary action
+  // is "Save Changes" (see fill/FillHeader.tsx).
+  await submitAndExpectSuccess(page);
 
   return data;
 }

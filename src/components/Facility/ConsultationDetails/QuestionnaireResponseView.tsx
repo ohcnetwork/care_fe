@@ -8,6 +8,10 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
+import {
+  StructuredAnswerView,
+  storedStructuredAnswer,
+} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -48,6 +52,44 @@ export default function QuestionnaireResponseView({
     );
   }
 
+  const renderLeaf = (question: Question) => {
+    if (question.type === "structured") {
+      const stored = storedStructuredAnswer(question, formResponse.responses);
+      if (!stored) return null;
+      return (
+        <div key={question.id} className="space-y-1">
+          <div className="text-sm text-gray-500">{question.text}</div>
+          <StructuredAnswerView
+            question={question}
+            response={stored}
+            patientId={patientId}
+          />
+        </div>
+      );
+    }
+
+    const questionResponse = formResponse.responses.find(
+      (r: Response) => r.question_id === question.id,
+    );
+    if (!questionResponse) return null;
+
+    const value = questionResponse.values[0]?.value;
+
+    return (
+      <div key={question.id} className="grid grid-cols-2 gap-4">
+        <div className="text-sm text-gray-500">{question.text}</div>
+        <div className="font-medium">
+          {String(value)}
+          {questionResponse.note && (
+            <span className="ml-2 text-sm text-gray-500">
+              ({questionResponse.note})
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Page title={formResponse.questionnaire?.title || ""}>
       <div className="space-y-6 p-4">
@@ -78,37 +120,25 @@ export default function QuestionnaireResponseView({
 
         <Card className="p-6">
           <div className="space-y-6">
-            {formResponse.questionnaire?.questions.map((group: Question) => (
-              <div key={group.id} className="space-y-4">
-                <h3 className="font-medium">{group.text}</h3>
-                <div className="grid gap-4">
-                  {group.questions?.map((question: Question) => {
-                    const questionResponse = formResponse.responses.find(
-                      (r: Response) => r.question_id === question.id,
-                    );
-                    if (!questionResponse) return null;
-
-                    const value = questionResponse.values[0]?.value;
-
-                    return (
-                      <div key={question.id} className="grid grid-cols-2 gap-4">
-                        <div className="text-sm text-gray-500">
-                          {question.text}
-                        </div>
-                        <div className="font-medium">
-                          {String(value)}
-                          {questionResponse.note && (
-                            <span className="ml-2 text-sm text-gray-500">
-                              ({questionResponse.note})
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+            {formResponse.questionnaire?.questions.map((question: Question) =>
+              question.type === "group" ? (
+                <div key={question.id} className="space-y-4">
+                  <h3 className="font-medium">{question.text}</h3>
+                  <div className="grid gap-4">
+                    {question.questions?.map((child: Question) =>
+                      renderLeaf(child),
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ) : (
+                // A questionnaire may hold leaves at the top level too (a
+                // single structured question, say) — they read like a
+                // group of one.
+                <div key={question.id} className="grid gap-4">
+                  {renderLeaf(question)}
+                </div>
+              ),
+            )}
           </div>
         </Card>
       </div>

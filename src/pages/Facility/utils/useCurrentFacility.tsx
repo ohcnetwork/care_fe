@@ -38,6 +38,10 @@ export function useCurrentFacilitySilently() {
   try {
     return useCurrentFacility();
   } catch {
-    return { facilityId: undefined, facility: undefined };
+    return {
+      facilityId: undefined,
+      facility: undefined,
+      isFacilityLoading: false,
+    };
   }
 }

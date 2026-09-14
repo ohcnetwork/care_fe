@@ -12,15 +12,10 @@ import Page from "@/components/Common/Page";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
 import { Separator } from "@radix-ui/react-separator";
-import { AllergyHistory } from "./AllergyHistory";
-import { DiagnosesHistory } from "./DiagnosesHistory";
-import { ResponsesHistory } from "./ResponsesHistory";
-import { SymptomsHistory } from "./SymptomsHistory";
+import { useClinicalHistoryTabs } from "./clinicalHistoryTabs";
 
 function ClinicalHistoryPage({
   patientId,
@@ -61,34 +56,7 @@ function ClinicalHistoryPage({
     "2xl": 12,
   });
 
-  const tabs = {
-    responses: {
-      label: t("responses"),
-      component: <ResponsesHistory patientId={patientId} />,
-    },
-    diagnostic_reports: {
-      label: t("diagnostic_report_other", { count: 2 }),
-      component: (
-        <DiagnosticReportsTab patientId={patientId} facilityId={facilityId} />
-      ),
-    },
-    symptoms: {
-      label: t("past_symptoms"),
-      component: <SymptomsHistory patientId={patientId} />,
-    },
-    diagnoses: {
-      label: t("past_diagnoses"),
-      component: <DiagnosesHistory patientId={patientId} />,
-    },
-    allergies: {
-      label: t("allergies"),
-      component: <AllergyHistory patientId={patientId} />,
-    },
-    medications: {
-      label: t("past_medications"),
-      component: <MedicationHistory patientId={patientId} />,
-    },
-  } as const;
+  const tabs = useClinicalHistoryTabs({ patientId, facilityId });
 
   return (
     <Page

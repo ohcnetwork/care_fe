@@ -11,6 +11,10 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import {
+  storedStructuredAnswer,
+  StructuredAnswerView,
+} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -267,17 +271,34 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   );
 }
 
+/** A response-persisted structured answer, printed through the type's own
+ *  read-only rendering (note included — the type's component owns it);
+ *  nothing for every other structured question, which stores nothing on
+ *  the response. */
+function StoredStructuredAnswer({
+  question,
+  responses,
+}: {
+  question: Question;
+  responses: QuestionnaireResponse["responses"];
+}) {
+  const response = storedStructuredAnswer(question, responses);
+  if (!response) return null;
+  return (
+    <div className="space-y-1">
+      <div className="font-medium text-base">{question.text}</div>
+      <StructuredAnswerView question={question} response={response} />
+    </div>
+  );
+}
+
 function QuestionGroup({
   group,
   responses,
   level = 0,
 }: {
   group: Question;
-  responses: {
-    values: ResponseValue[];
-    note?: string;
-    question_id: string;
-  }[];
+  responses: QuestionnaireResponse["responses"];
   level?: number;
 }) {
   return (
@@ -310,7 +331,15 @@ function QuestionGroup({
             );
           }
 
-          if (question.type === "structured") return null;
+          if (question.type === "structured") {
+            return (
+              <StoredStructuredAnswer
+                key={question.id}
+                question={question}
+                responses={responses}
+              />
+            );
+          }
 
           const response = responses.find((r) => r.question_id === question.id);
           if (!response) return null;
@@ -355,7 +384,15 @@ export function PrintableResponseCard({ item }: ResponseCardProps) {
         {item.questionnaire && (
           <div className="mt-4 space-y-4">
             {item.questionnaire?.questions.map((question: Question) => {
-              if (question.type === "structured") return null;
+              if (question.type === "structured") {
+                return (
+                  <StoredStructuredAnswer
+                    key={question.id}
+                    question={question}
+                    responses={item.responses}
+                  />
+                );
+              }
 
               if (question.type === "group") {
                 return (
