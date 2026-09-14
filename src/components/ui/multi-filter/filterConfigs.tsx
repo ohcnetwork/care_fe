@@ -68,6 +68,10 @@ import {
   ENCOUNTER_STATUS_FILTER_COLORS,
 } from "@/types/emr/encounter/encounter";
 import {
+  MEDICATION_DISPENSE_STATUS_COLORS,
+  MedicationDispenseStatus,
+} from "@/types/emr/medicationDispense/medicationDispense";
+import {
   REQUEST_ORDER_PRIORITY_COLORS,
   RequestOrderPriority,
 } from "@/types/inventory/requestOrder/requestOrder";
@@ -677,5 +681,51 @@ export const inventoryPriorityFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <Zap className="size-4" />,
+    },
+  );
+
+export const dispenseStatusFilter = (
+  key: string = "dispense_status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+  statuses: MedicationDispenseStatus[] = [
+    MedicationDispenseStatus.preparation,
+    MedicationDispenseStatus.in_progress,
+    MedicationDispenseStatus.completed,
+    MedicationDispenseStatus.on_hold,
+  ],
+) =>
+  createFilterConfig(
+    key,
+    t("dispense_status"),
+    "command",
+    statuses.map((value) => ({
+      value: value,
+      label: t(value),
+      color: getVariantColorClasses(MEDICATION_DISPENSE_STATUS_COLORS[value]),
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant =
+            MEDICATION_DISPENSE_STATUS_COLORS[
+              option as MedicationDispenseStatus
+            ];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
+      showColorIndicators: true,
     },
   );

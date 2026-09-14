@@ -33,6 +33,7 @@ interface ImportMetaEnv {
   readonly REACT_OTP_LENGTH?: string;
   readonly REACT_PATIENT_TOKEN_FRESHNESS_MINUTES?: string;
   readonly REACT_PATIENT_SUPPORT_PHONE?: string;
+  readonly REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
@@ -49,6 +50,7 @@ interface ImportMetaEnv {
   readonly REACT_ACCOUNTING_PRECISION?: string;
   readonly REACT_DECIMAL_ROUNDING_METHOD?: string;
   readonly REACT_MAX_FORM_DIALOG_FAVORITES?: string;
+  readonly REACT_MAX_DATAPOINTS_PER_UPSERT?: string;
   readonly REACT_MEDICATION_VALUE_SET_SELECT_DEFAULT_TAB?: string;
 
   // Plugins related envs...

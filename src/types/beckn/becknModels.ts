@@ -413,6 +413,15 @@ export function clinicalUrgencyTierForPriority(
   return "ROUTINE";
 }
 
+/** Map a Care resource-request priority integer to an NFH urgency tier. */
+export function clinicalUrgencyTierForPriority(
+  priority: number | undefined,
+): string {
+  if (priority && priority >= 3) return "EMERGENCY";
+  if (priority && priority >= 2) return "URGENT";
+  return "ROUTINE";
+}
+
 /**
  * Build a commitment's `offer` for select/confirm. onyx validation requires
  * `offer.resourceIds` (mirroring the committed `resources[].id`); omitting it

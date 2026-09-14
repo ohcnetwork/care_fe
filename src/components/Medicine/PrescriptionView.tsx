@@ -53,7 +53,6 @@ export default function PrescriptionView({
           facility: facilityId,
           medications_only: true,
         },
-        pageSize: 100,
       }),
       enabled: !!patientId && !!encounterId && !!facilityId && !prescriptionId,
     });

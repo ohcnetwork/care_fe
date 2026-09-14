@@ -20,7 +20,7 @@ export const ScheduleResourceIcon = ({
     case SchedulableResourceType.Practitioner:
       return (
         <Avatar
-          name={formatName(resource.resource)}
+          name={formatName(resource.resource, true)}
           imageUrl={resource.resource.profile_picture_url}
           className={cn("size-8", className)}
         />
