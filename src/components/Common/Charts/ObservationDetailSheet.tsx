@@ -82,8 +82,6 @@ export function ObservationDetailSheet({
     enabled: open && validCodes.length > 0,
   });
 
-  if (open && !isHistoryLoading && !historyData) return null;
-
   const allResults = historyData?.pages.flatMap((page) => page.results) ?? [];
 
   const entriesByCode = resolveObservationEntries(allResults);
@@ -142,7 +140,7 @@ export function ObservationDetailSheet({
           <div className="flex flex-col gap-4 overflow-hidden p-4 flex-1 min-h-0">
             <TableSkeleton count={3} />
           </div>
-        ) : totalCount === 0 ? (
+        ) : totalCount === 0 || codeList.length === 0 ? (
           <div className="flex h-64 items-center justify-center text-sm text-gray-500">
             {t("no_data_available")}
           </div>

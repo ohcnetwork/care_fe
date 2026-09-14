@@ -69,6 +69,13 @@ export function resolveObservationEntries(
 
 // Convert a stored observation value to a number, or null when blank/non-numeric.
 export function toNumericValue(value?: string | null): number | null {
-  if (!value || isNaN(Number(value))) return null;
-  return toNumber(value);
+  if (!value) return null;
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue || isNaN(Number(trimmedValue))) {
+    return null;
+  }
+
+  return toNumber(trimmedValue);
 }
