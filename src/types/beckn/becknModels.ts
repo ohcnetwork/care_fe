@@ -372,6 +372,9 @@ const CODED_VALUE_CONTEXT =
 export function healthServiceTypeForCategory(
   category: string | undefined,
 ): string {
+  if (category && /(medicine|pharmac)/i.test(category)) {
+    return "PHARMACY_DISPENSING";
+  }
   // "Other" is presented as "Diagnostic" in this plug (translation override).
   return category && /(other|lab|diagnostic)/i.test(category)
     ? "LAB_TEST"
@@ -387,11 +390,18 @@ export const HEALTH_SERVICE_TYPES = [
   { value: "LAB_TEST", labelKey: "ccn_service_type__lab_test" },
 ] as const;
 
+// Referral-only codes: derived from the resource category, never picked in the
+// appointment wizard, so they carry a label without being selectable.
+const REFERRAL_SERVICE_TYPE_LABEL_KEYS: Record<string, string> = {
+  PHARMACY_DISPENSING: "ccn_service_type__pharmacy_dispensing",
+};
+
 /** Human label for a `healthServiceType`, falling back to the raw code. */
 export function healthServiceTypeLabel(value: string | undefined): string {
   if (!value) return "";
   const match = HEALTH_SERVICE_TYPES.find((o) => o.value === value);
-  return match ? t(match.labelKey) : value;
+  const labelKey = match?.labelKey ?? REFERRAL_SERVICE_TYPE_LABEL_KEYS[value];
+  return labelKey ? t(labelKey) : value;
 }
 
 /** Map a Care resource-request priority integer to an NFH urgency tier. */
@@ -513,21 +523,24 @@ function buildPatientParticipant(
 
 /**
  * `targetCriteria` for the referral flow, derived from the requested
- * `healthServiceType`. A lab test is an upward investigation referral; every
- * other service is a downward consultation (home-visit) referral.
+ * `healthServiceType`. A lab test and a pharmacy dispense are upward
+ * investigation referrals; every other service is a downward consultation
+ * (home-visit) referral.
  */
 function buildTargetCriteria(
   healthServiceType: string | undefined,
 ): Record<string, unknown> {
-  const isLab = healthServiceType === "LAB_TEST";
+  const isInvestigation =
+    healthServiceType === "LAB_TEST" ||
+    healthServiceType === "PHARMACY_DISPENSING";
   return pruneUndefined({
     serviceCategory: {
       "@context": CODED_VALUE_CONTEXT,
       "@type": "ServiceCategory",
-      code: isLab ? "INVESTIGATION" : "CONSULTATION",
-      display: isLab ? "Investigation" : "Consultation",
+      code: isInvestigation ? "INVESTIGATION" : "CONSULTATION",
+      display: isInvestigation ? "Investigation" : "Consultation",
     },
-    procedureNeeds: isLab ? undefined : ["HOME_VISIT"],
+    procedureNeeds: isInvestigation ? undefined : ["HOME_VISIT"],
     consultationModality: "IN_PERSON",
   });
 }
