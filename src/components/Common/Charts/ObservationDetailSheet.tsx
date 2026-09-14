@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -82,26 +82,19 @@ export function ObservationDetailSheet({
     enabled: open && validCodes.length > 0,
   });
 
-  const allResults = useMemo(
-    () => historyData?.pages.flatMap((page) => page.results) ?? [],
-    [historyData],
-  );
+  if (open && !isHistoryLoading && !historyData) return null;
 
-  const entriesByCode = useMemo(
-    () => resolveObservationEntries(allResults),
-    [allResults],
-  );
+  const allResults = historyData?.pages.flatMap((page) => page.results) ?? [];
 
-  const codeList = useMemo(
-    () => Object.values(entriesByCode).map((list) => list[0].code),
-    [entriesByCode],
-  );
+  const entriesByCode = resolveObservationEntries(allResults);
+
+  const codeList = Object.values(entriesByCode).map((list) => list[0].code);
 
   const totalCount = historyData?.pages?.[0]?.count ?? 0;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="appearance-none border-0 bg-transparent p-0 text-left text-inherit">
+      <SheetTrigger className="appearance-none border-0 bg-transparent p-0 text-left text-inherit w-full">
         {children}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-4xl flex flex-col p-0 gap-0 overflow-hidden h-dvh">
@@ -130,8 +123,23 @@ export function ObservationDetailSheet({
           </div>
         </SheetHeader>
 
+        {encounterId && (
+          <div className="flex items-center gap-2 text-sm ml-auto pt-2 pr-3">
+            <Checkbox
+              id="current-encounter-only"
+              checked={currentEncounterOnly}
+              onCheckedChange={(checked) =>
+                setCurrentEncounterOnly(checked === true)
+              }
+            />
+            <label htmlFor="current-encounter-only" className="cursor-pointer">
+              {t("show_current_encounter_recordings")}
+            </label>
+          </div>
+        )}
+
         {isHistoryLoading ? (
-          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0">
+          <div className="flex flex-col gap-4 overflow-hidden p-4 flex-1 min-h-0">
             <TableSkeleton count={3} />
           </div>
         ) : totalCount === 0 ? (
@@ -139,25 +147,7 @@ export function ObservationDetailSheet({
             {t("no_data_available")}
           </div>
         ) : (
-          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0">
-            {encounterId && (
-              <div className="flex items-center gap-2 text-sm ml-auto">
-                <Checkbox
-                  id="current-encounter-only"
-                  checked={currentEncounterOnly}
-                  onCheckedChange={(checked) =>
-                    setCurrentEncounterOnly(checked === true)
-                  }
-                />
-                <label
-                  htmlFor="current-encounter-only"
-                  className="cursor-pointer"
-                >
-                  {t("show_current_encounter_recordings")}
-                </label>
-              </div>
-            )}
-
+          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0 mt-3">
             {codeList.length > 1 ? (
               <Tabs defaultValue="all" className="w-full">
                 <TabsList className="bg-gray-100 max-w-full justify-start overflow-x-auto h-12 pb-1.5 pt-1">
@@ -193,16 +183,12 @@ export function ObservationDetailSheet({
                   </TabsContent>
                 ))}
               </Tabs>
-            ) : codeList.length === 1 ? (
+            ) : (
               <ObservationDetailContent
                 entries={entriesByCode[codeList[0].code] ?? []}
                 hasNextPage={hasNextPage}
                 fetchNextPage={fetchNextPage}
               />
-            ) : (
-              <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-                {t("no_data_available")}
-              </div>
             )}
             <ObservationHistoryMatrix
               codes={codeList}

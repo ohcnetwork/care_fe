@@ -96,41 +96,41 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
 }
 
 interface DiagnosticReportDetailCardProps {
-  diagnosticReport: DiagnosticReportRead;
+  reportId: string;
   patientId: string;
   facilityId?: string;
 }
 
 function DiagnosticReportDetailCard({
-  diagnosticReport,
+  reportId,
   patientId,
   facilityId,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
   const { data: report, isLoading: isReportLoading } = useQuery({
-    queryKey: ["diagnosticReport", diagnosticReport.id],
+    queryKey: ["diagnosticReport", reportId],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
         patient_external_id: patientId,
-        external_id: diagnosticReport.id,
+        external_id: reportId,
       },
     }),
-    enabled: !!diagnosticReport.id && !!patientId,
+    enabled: !!reportId && !!patientId,
   });
 
   // Query to fetch files for the diagnostic report
   const { data: filesData } = useQuery<PaginatedResponse<FileReadMinimal>>({
-    queryKey: ["files", "diagnostic_report", report?.id],
+    queryKey: ["files", "diagnostic_report", reportId],
     queryFn: query(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
-        associating_id: report?.id,
+        associating_id: reportId,
         limit: 100,
         offset: 0,
       },
     }),
-    enabled: !!report?.id,
+    enabled: !!reportId,
   });
 
   const files = filesData?.results || [];
@@ -557,7 +557,7 @@ export const DiagnosticReportsTab = ({
             ) : (
               selectedReport && (
                 <DiagnosticReportDetailCard
-                  diagnosticReport={selectedReport}
+                  reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
                 />

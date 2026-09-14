@@ -153,7 +153,7 @@ export function DiagnosticReportResultsTable({
           )}
         >
           <TableCell className="pl-4 border-r border-b border-gray-300 whitespace-normal wrap-break-word align-top">
-            <div className="w-2 h-px bg-gray-400" />
+            <div className="w-2 h-px" />
             {component.code?.display}
           </TableCell>
           <TableCell className="border-r border-b border-gray-300 whitespace-normal wrap-break-word align-top">

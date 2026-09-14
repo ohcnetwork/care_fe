@@ -1,4 +1,3 @@
-import { format, isToday } from "date-fns";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -16,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Code } from "@/types/base/code/code";
 import { formatDateTime } from "@/Utils/utils";
 
+import { RenderXAxisTick } from "@/components/Common/Charts/ObservationDetailContent";
 import {
   ResolvedObservationEntry,
   toNumericValue,
@@ -75,36 +75,6 @@ export function AllValuesChart({
     didInitialScroll.current = true;
   }, [chartData.length]);
 
-  const renderXAxisTick = ({
-    x,
-    y,
-    payload,
-  }: {
-    x?: number | string;
-    y?: number | string;
-    payload?: { value: number | string };
-  }): React.ReactElement => {
-    const value = Number(payload?.value);
-    const dateLabel = isToday(new Date(value))
-      ? t("today")
-      : format(new Date(value), "d MMM");
-    const timeLabel = format(new Date(value), "h:mma");
-    return (
-      <text
-        x={x}
-        y={Number(y) + 14}
-        textAnchor="middle"
-        fontSize={12}
-        fill="#6b7280"
-      >
-        <tspan x={x}>{dateLabel}</tspan>
-        <tspan x={x} dy={16}>
-          {timeLabel}
-        </tspan>
-      </text>
-    );
-  };
-
   if (chartData.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-sm text-gray-500">
@@ -117,7 +87,7 @@ export function AllValuesChart({
 
   return (
     <div className="mt-2 flex flex-col gap-3">
-      <div className="relative" style={{ height: 320 }}>
+      <div className="relative" style={{ height: 420 }}>
         <Button
           variant="link"
           onClick={() => {
@@ -144,7 +114,7 @@ export function AllValuesChart({
                   interval={0}
                   tickLine={{ stroke: "#374151" }}
                   axisLine={{ stroke: "#6b7280" }}
-                  tick={renderXAxisTick}
+                  tick={RenderXAxisTick}
                 />
                 <YAxis
                   tick={{ fontSize: 12 }}
@@ -153,9 +123,38 @@ export function AllValuesChart({
                   width={36}
                 />
                 <Tooltip
-                  labelFormatter={(value) =>
-                    typeof value === "number" ? formatDateTime(value) : value
-                  }
+                  cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    return (
+                      <div className="max-w-72 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs shadow-lg">
+                        <div className="mb-1 whitespace-nowrap text-gray-500">
+                          {typeof label === "number"
+                            ? formatDateTime(label)
+                            : label}
+                        </div>
+                        <div>
+                          {payload.map((entry) => (
+                            <div
+                              key={String(entry.dataKey)}
+                              className="flex items-center gap-2 py-0.5"
+                            >
+                              <span
+                                className="size-2 shrink-0 rounded-full"
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span className="min-w-0 flex-1 truncate text-gray-700">
+                                {entry.name}
+                              </span>
+                              <span className="shrink-0 whitespace-nowrap pl-4 font-medium text-gray-900">
+                                {entry.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }}
                 />
                 {codeList.map((code, index) => (
                   <Line
