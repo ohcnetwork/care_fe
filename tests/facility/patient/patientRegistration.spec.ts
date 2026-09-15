@@ -86,14 +86,14 @@ async function selectBloodGroup(page: Page, bloodGroup: string) {
 }
 
 /**
- * Expands the "Additional Details" section if it is currently collapsed.
- * When collapsed, its trigger label includes "(Optional)"; once open the
- * suffix is gone, so this is idempotent.
+ * Expands the "Additional Details" accordion section if it is collapsed.
+ * Keys off the trigger's `aria-expanded` state — in minimal mode the
+ * "(Optional)" suffix is a permanent part of the label, not a collapsed-state
+ * indicator, so it is not a reliable signal. Idempotent.
  */
 async function openAdditionalDetails(page: Page) {
   const section = page.getByRole("button", { name: "Additional Details" });
-  const label = await section.textContent();
-  if (label?.toLowerCase().includes("optional")) {
+  if ((await section.getAttribute("aria-expanded")) !== "true") {
     await section.click();
   }
 }
@@ -185,13 +185,14 @@ async function verifyPatientCard(
 ) {
   await test.step("Verify patient details in the card", async () => {
     await page.waitForURL("**/patients/home**");
-    // Scope to the specific patient's card so the age/gender assertion cannot
-    // match another patient's line elsewhere on the page. Using `has` with the
-    // name heading also excludes the hidden (mobile) hover-card trigger.
-    const patientCard = page.locator(
-      '[data-slot="patient-info-hover-card-trigger"]',
-      { has: page.getByRole("heading", { name: data.name }) },
-    );
+    // Scope to the specific patient's visible card so the age/gender assertion
+    // cannot match another patient's line elsewhere on the page. `PatientHoverCard`
+    // renders both a hidden mobile trigger and a desktop one with the same
+    // data-slot, so `:visible` selects only the active copy before filtering by
+    // the name heading.
+    const patientCard = page
+      .locator('[data-slot="patient-info-hover-card-trigger"]:visible')
+      .filter({ has: page.getByRole("heading", { name: data.name }) });
     await expect(
       patientCard.getByRole("heading", { name: data.name }),
     ).toBeVisible();
