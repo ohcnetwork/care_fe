@@ -1000,16 +1000,14 @@ export function DeliveryOrderShow({
                   alignContent="end"
                 />
               </div>
-              {deliveryOrder && (
-                <AllSupplyDeliveriesComponent
-                  facilityId={facilityId}
-                  deliveryOrder={deliveryOrder}
-                  locationId={locationId}
-                  internal={internal}
-                  isRequester={isRequester}
-                  selectedProductKnowledge={selectedProductKnowledgeDrawer}
-                />
-              )}
+              <AllSupplyDeliveriesComponent
+                facilityId={facilityId}
+                deliveryOrder={deliveryOrder}
+                locationId={locationId}
+                internal={internal}
+                isRequester={isRequester}
+                selectedProductKnowledge={selectedProductKnowledgeDrawer}
+              />
             </div>
           </DrawerContent>
         </Drawer>
