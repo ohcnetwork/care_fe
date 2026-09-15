@@ -1,3 +1,4 @@
+import { DeliveryOrderRetrieve } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductRead } from "@/types/inventory/product/product";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -70,6 +71,7 @@ export interface SupplyDeliveryUpdate {
 }
 
 export interface SupplyDeliveryRead extends SupplyDeliveryBase {
+  order: DeliveryOrderRetrieve;
   supplied_item_quantity: string;
   supplied_item_pack_quantity?: number;
   supplied_item_pack_size?: number;
