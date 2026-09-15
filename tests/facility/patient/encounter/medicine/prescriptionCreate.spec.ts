@@ -208,9 +208,10 @@ test.describe("Create Patient Prescription", () => {
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
       // Unit dosages (value === 1) are NOT visually highlighted
-      const medicationRow = table.getByRole("row").filter({
-        hasText: medicineName,
-      });
+      const medicationRow = table
+        .getByRole("row")
+        .filter({ hasText: medicineName })
+        .filter({ hasText: frequency.display });
       await expect(medicationRow.locator(".bg-yellow-100")).toHaveCount(0);
     });
   });
