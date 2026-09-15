@@ -431,6 +431,7 @@ export default function ServiceRequestShow({
           <ServiceRequestDetails
             request={request}
             activityDefinition={activityDefinition}
+            facilityId={facilityId}
           />
           <div className="space-y-3 pt-5">
             <ChargeItemsSection
