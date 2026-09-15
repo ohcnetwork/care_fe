@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDownUp, Truck } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 
 import Page from "@/components/Common/Page";
+import PaginationComponent from "@/components/Common/Pagination";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
   Table,
@@ -26,14 +27,25 @@ import useFilters from "@/hooks/useFilters";
 
 import { isLessThan, round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ACTIVE_SUPPLY_DELIVERY_STATUSES } from "@/types/inventory/supplyDelivery/supplyDelivery";
+import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
+import { SupplyDeliveryTable } from "./SupplyDeliveryTable";
 
 const SORT_OPTIONS = {
   low_to_high: "net_content",
@@ -41,6 +53,135 @@ const SORT_OPTIONS = {
 } as const;
 
 type SortOptionKey = keyof typeof SORT_OPTIONS;
+
+const DELIVERIES_PER_PAGE = 10;
+
+// Only in-progress and completed deliveries are shown in the deliveries drawer.
+const ACTIVE_DELIVERY_STATUS_FILTER = ACTIVE_SUPPLY_DELIVERY_STATUSES.join(",");
+
+// The API filters origin and destination with AND, so each direction is queried separately.
+type DeliveryDirection = "incoming" | "outgoing";
+
+interface ProductDeliveriesDrawerContentProps {
+  facilityId: string;
+  locationId: string;
+  selectedProductKnowledge?: ProductKnowledgeBase;
+}
+
+interface PaginatedDeliveriesProps {
+  facilityId: string;
+  locationId: string;
+  direction: DeliveryDirection;
+  productKnowledgeId: string;
+}
+
+const PaginatedDeliveries = ({
+  facilityId,
+  locationId,
+  direction,
+  productKnowledgeId,
+}: PaginatedDeliveriesProps) => {
+  const { t } = useTranslation();
+  const [page, setPage] = useState(1);
+
+  const { data: deliveries, isLoading } = useQuery({
+    queryKey: [
+      "supplyDeliveries",
+      facilityId,
+      locationId,
+      productKnowledgeId,
+      direction,
+      page,
+    ],
+    queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        facility: facilityId,
+        ...(direction === "incoming"
+          ? { destination: locationId }
+          : { origin: locationId }),
+        supplied_inventory_item_product_knowledge: productKnowledgeId,
+        status: ACTIVE_DELIVERY_STATUS_FILTER,
+        limit: DELIVERIES_PER_PAGE,
+        offset: (page - 1) * DELIVERIES_PER_PAGE,
+      },
+    }),
+    enabled: !!productKnowledgeId,
+  });
+
+  if (isLoading) {
+    return <TableSkeleton count={2} />;
+  }
+
+  if (!deliveries?.results?.length) {
+    return (
+      <EmptyState
+        icon={<Truck className="size-5 text-primary-600" />}
+        title={t("no_deliveries_found")}
+        description={t("no_deliveries_found_description")}
+      />
+    );
+  }
+
+  return (
+    <>
+      <SupplyDeliveryTable
+        deliveries={deliveries.results}
+        facilityId={facilityId}
+        serialNumberOffset={DELIVERIES_PER_PAGE * (page - 1)}
+        linkToProduct
+        showLocations
+      />
+      <div className="flex justify-center">
+        <PaginationComponent
+          data={{ totalCount: deliveries.count }}
+          onChange={(newPage) => setPage(newPage)}
+          defaultPerPage={DELIVERIES_PER_PAGE}
+          cPage={page}
+        />
+      </div>
+    </>
+  );
+};
+
+function ProductDeliveriesDrawerContent({
+  facilityId,
+  locationId,
+  selectedProductKnowledge,
+}: ProductDeliveriesDrawerContentProps) {
+  const { t } = useTranslation();
+  const [direction, setDirection] = useState<DeliveryDirection>("incoming");
+
+  return (
+    <div className="flex flex-col overflow-y-auto pt-4 max-h-[68vh]">
+      <Tabs
+        value={direction}
+        onValueChange={(value) => setDirection(value as DeliveryDirection)}
+        className="mb-4"
+      >
+        <TabsList>
+          <TabsTrigger value="incoming">{t("incoming_deliveries")}</TabsTrigger>
+          <TabsTrigger value="outgoing">{t("outgoing_deliveries")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="incoming">
+          <PaginatedDeliveries
+            facilityId={facilityId}
+            locationId={locationId}
+            direction="incoming"
+            productKnowledgeId={selectedProductKnowledge?.id || ""}
+          />
+        </TabsContent>
+        <TabsContent value="outgoing">
+          <PaginatedDeliveries
+            facilityId={facilityId}
+            locationId={locationId}
+            direction="outgoing"
+            productKnowledgeId={selectedProductKnowledge?.id || ""}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
 
 interface InventoryListProps {
   facilityId: string;
@@ -57,6 +198,11 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
     ProductKnowledgeBase | undefined
   >(undefined);
+
+  // State for the "all deliveries" drawer
+  const [showAllDeliveries, setShowAllDeliveries] = useState(false);
+  const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
+    useState<ProductKnowledgeBase | undefined>(undefined);
 
   // Clear selected product knowledge when query parameter is cleared
   useEffect(() => {
@@ -158,23 +304,28 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableHead>{t("expiration_date")}</TableHead>
                 <TableHead>{t("batch")}</TableHead>
                 <TableHead>{t("base_price")}</TableHead>
+                <TableHead>
+                  <span className="sr-only">{t("actions")}</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data?.results?.map((inventory) => (
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
-                    <Link
-                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
-                      basePath="/"
-                      className="flex items-center gap-2"
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="font-semibold hover:text-gray-700 underline underline-offset-2"
+                      onClick={() => {
+                        setSelectedProductKnowledgeDrawer(
+                          inventory.product.product_knowledge,
+                        );
+                        setShowAllDeliveries(true);
+                      }}
                     >
                       {inventory.product.product_knowledge.name}
-                      <CareIcon
-                        icon="l-external-link-alt"
-                        className="size-4 text-gray-500"
-                      />
-                    </Link>
+                    </Button>
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -216,6 +367,21 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                       />
                     )}
                   </TableCell>
+                  <TableCell className="w-12">
+                    <Link
+                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
+                      basePath="/"
+                      className="flex items-center justify-center"
+                    >
+                      <CareIcon
+                        icon="l-external-link-alt"
+                        className="size-4 text-gray-500 hover:text-gray-700"
+                      />
+                      <span className="sr-only">
+                        {t("view_product_details")}
+                      </span>
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -226,6 +392,25 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
       <div className="mt-8 flex justify-center">
         <Pagination totalCount={data?.count || 0} />
       </div>
+
+      <Drawer
+        open={showAllDeliveries}
+        onOpenChange={(open) => {
+          setShowAllDeliveries(open);
+          if (!open) setSelectedProductKnowledgeDrawer(undefined);
+        }}
+      >
+        <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
+          <DrawerHeader>
+            <DrawerTitle className="mb-2">{t("all_deliveries")}</DrawerTitle>
+          </DrawerHeader>
+          <ProductDeliveriesDrawerContent
+            facilityId={facilityId}
+            locationId={locationId}
+            selectedProductKnowledge={selectedProductKnowledgeDrawer}
+          />
+        </DrawerContent>
+      </Drawer>
     </Page>
   );
 }
