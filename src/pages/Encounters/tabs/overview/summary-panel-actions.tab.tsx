@@ -53,6 +53,15 @@ export const SummaryPanelActionsTab = () => {
       hideOnMobile: true,
     },
     {
+      label: t("refer_patient"),
+      onClick: () => {
+        navigate(
+          `/facility/${selectedEncounter?.facility.id}/resource/new?related_patient=${selectedEncounter?.patient.id}`,
+        );
+      },
+      hideOnMobile: false,
+    },
+    {
       label: t("dispense"),
       onClick: dispense,
       hideOnMobile: false,
