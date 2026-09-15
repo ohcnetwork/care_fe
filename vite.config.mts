@@ -532,7 +532,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       target: "es2022",
     },
     server: {
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
       host: "0.0.0.0",
       allowedHosts: true,
       watch: {
@@ -554,7 +555,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
     },
   };
 });
