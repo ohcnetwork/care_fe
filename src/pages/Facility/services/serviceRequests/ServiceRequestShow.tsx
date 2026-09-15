@@ -29,9 +29,9 @@ import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItems
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import batchApi from "@/types/base/batch/batchApi";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
@@ -129,9 +129,7 @@ export default function ServiceRequestShow({
     },
   });
 
-  const { mutate: executeBatch } = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: executeBatch } = useBatchRequest({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
@@ -140,7 +138,6 @@ export default function ServiceRequestShow({
       setIsQRCodeSheetOpen(true);
     },
     onError: () => {
-      toast.error(t("specimen_draft_create_error"));
       setIsPrintingAllQRCodes(false);
     },
   });
@@ -287,11 +284,11 @@ export default function ServiceRequestShow({
     if (missingDraftDefinitions.length > 0) {
       setIsPrintingAllQRCodes(true);
 
-      executeBatch({
-        requests: missingDraftDefinitions.map((requirement, index) => ({
-          url: `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}/create_specimen_from_definition/`,
-          method: "POST",
-          reference_id: `create_specimen_${index}`,
+      executeBatch(
+        missingDraftDefinitions.map((requirement, index) => ({
+          api: specimenApi.createSpecimenFromDefinition,
+          pathParams: { facilityId, serviceRequestId },
+          referenceId: `create_specimen_${index}`,
           body: {
             specimen_definition: requirement.id,
             specimen: {
@@ -316,7 +313,7 @@ export default function ServiceRequestShow({
             },
           },
         })),
-      });
+      );
     } else {
       setIsQRCodeSheetOpen(true);
     }
