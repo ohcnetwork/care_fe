@@ -28,6 +28,11 @@ applyTo: "src/components/**/*.{ts,tsx}"
 - Hover cards: Use `PatientHoverCard` for patient info overlays
 - Badge usage: Display patient status, facility capacity, medication dosage with color variants
 
+## Patient Name Display
+ Whenever a patient name (`patient.name` from `PatientRead`) is rendered to the user, it MUST have Tailwind `capitalize` applied (CSS `text-transform: capitalize`) so the first letter of each word is uppercased (it does not force the remaining letters to lowercase).
+- Do NOT mutate or pre-transform the stored name for display (avoid ad-hoc `toUpperCase()`/`properCase()` on patient names) — rely on the `capitalize` class so the underlying data stays intact.
+- `patient.name` is a single free-text field. For user/practitioner names (first/last name objects) use `formatName()` from `@/Utils/utils`, not this rule.
+
 ## Styling with Tailwind CSS 4.1.3
 - Class variance authority: Use `cva()` for variant-based component styling
 - Utility function: Use `cn()` from `@/lib/utils` for conditional classes

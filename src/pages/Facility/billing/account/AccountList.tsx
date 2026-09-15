@@ -277,7 +277,7 @@ export function AccountList({
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word">
+                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-word capitalize">
                             {account.patient.name}
                           </div>
                         )}

@@ -253,7 +253,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   <AlertDescription className="text-sm text-blue-700 whitespace-nowrap">
                     <span>
                       {t("linked_patient")}:{" "}
-                      <strong className="font-medium">
+                      <strong className="font-medium capitalize">
                         {patientData.name}
                       </strong>
                     </span>

@@ -444,7 +444,7 @@ export default function PrescriptionQueue({
                       }
                     }}
                   >
-                    <span className="underline decoration-1 underline-offset-2 font-semibold">
+                    <span className="underline decoration-1 underline-offset-2 font-semibold capitalize">
                       {item.encounter.patient.name}
                     </span>
                     <div className="text-sm font-medium text-gray-700 whitespace-pre-wrap">

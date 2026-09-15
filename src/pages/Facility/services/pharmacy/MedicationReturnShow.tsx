@@ -341,7 +341,9 @@ export default function MedicationReturnShow({
                       patient: deliveryOrder.patient.name,
                     }}
                     components={{
-                      strong: <span className="font-semibold text-gray-700" />,
+                      strong: (
+                        <span className="font-semibold text-gray-700 capitalize" />
+                      ),
                     }}
                   />
                 </p>
@@ -427,7 +429,9 @@ export default function MedicationReturnShow({
                         navigate(`/patient/${deliveryOrder.patient?.id}`)
                       }
                     >
-                      {deliveryOrder.patient.name}
+                      <span className="capitalize">
+                        {deliveryOrder.patient.name}
+                      </span>
                     </Button>
                   </div>
                 </div>

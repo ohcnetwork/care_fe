@@ -412,7 +412,7 @@ export function PatientIdentifierSelector({
                           onSelect={() => handlePatientSelect(patient)}
                           className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
                         >
-                          <span className="text-sm text-gray-900">
+                          <span className="text-sm text-gray-900 capitalize">
                             {patient.name}
                           </span>
                         </CommandItem>
@@ -440,7 +440,7 @@ export function PatientIdentifierSelector({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500">{t("patient")}</p>
-                <p className="font-medium">{selectedPatient.name}</p>
+                <p className="font-medium capitalize">{selectedPatient.name}</p>
               </div>
               <Button
                 type="button"

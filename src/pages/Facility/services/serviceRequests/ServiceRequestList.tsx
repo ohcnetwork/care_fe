@@ -90,7 +90,7 @@ function ServiceRequestCard({
         <div className="mb-2 flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex-1 min-w-0">
             <div className="mb-2">
-              <div className="font-semibold text-gray-900">
+              <div className="font-semibold text-gray-900 capitalize">
                 {request.encounter.patient.name}
               </div>
               <div className="text-xs text-gray-500">

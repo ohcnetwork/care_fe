@@ -84,7 +84,7 @@ const TokenCard = ({
                   <Label className="text-sm font-normal text-gray-600">
                     {t("patient_name")}:
                   </Label>
-                  <p className="font-semibold break-words">
+                  <p className="font-semibold break-words capitalize">
                     {token.patient.name}
                   </p>
                   <p className="text-sm font-medium text-gray-700">

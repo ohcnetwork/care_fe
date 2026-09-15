@@ -152,7 +152,7 @@ export default function OrganizationPatients({
                                 className="size-10"
                               />
                               <div>
-                                <h3 className="text-sm font-medium text-gray-900">
+                                <h3 className="text-sm font-medium text-gray-900 capitalize">
                                   {patient.name}
                                 </h3>
                                 <p className="text-sm text-gray-500">

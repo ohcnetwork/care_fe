@@ -390,7 +390,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                   onClick={() => handlePatientSelect(index)}
                                 >
                                   <TableCell className="font-medium">
-                                    {patient.name}
+                                    <span className="capitalize">
+                                      {patient.name}
+                                    </span>
                                     {!patientList?.partial && (
                                       <p className="text-xs text-gray-500 text-wrap line-clamp-2">
                                         {"address" in patient &&
@@ -521,7 +523,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 >
                                   <TableCell>
                                     <p className="font-medium text-wrap">
-                                      {encounter.patient.name}
+                                      <span className="capitalize">
+                                        {encounter.patient.name}
+                                      </span>
                                       {encounter.external_identifier && (
                                         <span className="text-gray-700">
                                           {" "}

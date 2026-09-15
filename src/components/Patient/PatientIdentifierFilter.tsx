@@ -256,7 +256,7 @@ function PatientSearchSelector({
                     onSelect={() => handlePatientSelect(patient)}
                     className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
                   >
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 capitalize">
                       {patient.name}
                     </span>
                   </CommandItem>
@@ -473,7 +473,9 @@ export default function PatientIdentifierFilter({
       className="flex-1 justify-between bg-white border-none rounded-none font-normal"
     >
       {selectedPatient && !verificationOpen ? (
-        <span className="text-primary-500 text-sm">{selectedPatient.name}</span>
+        <span className="text-primary-500 text-sm capitalize">
+          {selectedPatient.name}
+        </span>
       ) : (
         <span className="text-sm text-gray-900">
           {placeholder || t("filter_by_identifier")}

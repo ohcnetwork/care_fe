@@ -8,7 +8,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 export function CancelTokenDialog({
   open,
@@ -47,10 +47,16 @@ export function CancelTokenDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={t("cancel_token")}
-      description={t("cancel_token_confirmation", {
-        patientName: token.patient?.name,
-        tokenNumber: renderTokenNumber(token),
-      })}
+      description={
+        <Trans
+          i18nKey="cancel_token_confirmation"
+          values={{
+            patientName: token.patient?.name,
+            tokenNumber: renderTokenNumber(token),
+          }}
+          components={{ name: <span className="capitalize" /> }}
+        />
+      }
       onConfirm={() =>
         updateToken({
           status: TokenStatus.CANCELLED,

@@ -638,9 +638,16 @@ const AppointmentDetailsContent = ({
                       className="size-6"
                     />
                   )}
-                  {appointment.booked_by
-                    ? formatName(appointment.booked_by)
-                    : `${appointment.patient.name} (${t("patient")})`}{" "}
+                  {appointment.booked_by ? (
+                    formatName(appointment.booked_by)
+                  ) : (
+                    <>
+                      <span className="capitalize">
+                        {appointment.patient.name}
+                      </span>{" "}
+                      ({t("patient")})
+                    </>
+                  )}{" "}
                 </p>
                 {t("on")}{" "}
                 {format(appointment.booked_on, "MMMM d, yyyy 'at' h:mm a")}

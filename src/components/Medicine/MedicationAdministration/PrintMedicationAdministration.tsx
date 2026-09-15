@@ -258,9 +258,7 @@ export const PrintMedicationAdministration = (props: {
 
   return (
     <PrintPreview
-      title={`${
-        isMedication ? t("drug_chart") : t("intake_chart")
-      } - ${encounter?.patient.name}`}
+      title={isMedication ? t("drug_chart") : t("intake_chart")}
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
@@ -349,7 +347,7 @@ export const PrintMedicationAdministration = (props: {
               <div className="font-bold text-xs text-gray-500 uppercase">
                 {t("patient_name")}
               </div>
-              <div className="font-bold text-base">
+              <div className="font-bold text-base capitalize">
                 {encounter?.patient.name}
               </div>
             </div>

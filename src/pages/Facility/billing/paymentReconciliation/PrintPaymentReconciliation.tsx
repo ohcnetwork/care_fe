@@ -2,6 +2,8 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Badge } from "@/components/ui/badge";
@@ -51,23 +53,21 @@ type PrintPaymentReconciliationProps = {
 interface DetailRowProps {
   label: string;
   value?: string | null;
-  isStrong?: boolean;
+  valueClassName?: string;
   width?: string;
 }
 
 const DetailRow = ({
   label,
   value,
-  isStrong = false,
+  valueClassName = "",
   width = "w-32",
 }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className={`text-gray-600 ${width}`}>{label}</span>
       <span className="text-gray-600">: </span>
-      <span
-        className={`ml-1 whitespace-pre-wrap ${isStrong ? "font-semibold" : ""}`}
-      >
+      <span className={cn("ml-1 whitespace-pre-wrap", valueClassName)}>
         {value || "-"}
       </span>
     </div>
@@ -135,7 +135,7 @@ function PrintPaymentReconciliation({
                 label={t("name")}
                 value={payment.account.patient.name}
                 width="w-16"
-                isStrong
+                valueClassName="font-semibold capitalize"
               />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
@@ -171,7 +171,7 @@ function PrintPaymentReconciliation({
                   label={identifier.config.config.display}
                   value={identifier.value}
                   width="w-24"
-                  isStrong
+                  valueClassName="font-semibold"
                 />
               ))}
               <DetailRow
