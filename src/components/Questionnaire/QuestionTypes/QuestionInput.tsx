@@ -19,6 +19,7 @@ import { AppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/Ap
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -161,6 +162,7 @@ interface QuestionInputProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   errors: QuestionValidationError[];
   clearError: () => void;
   disabled?: boolean;
@@ -176,6 +178,7 @@ export function QuestionInput({
   questionnaireResponses,
   encounterId,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   errors,
   clearError,
   disabled,
@@ -223,6 +226,7 @@ export function QuestionInput({
       question,
       questionnaireResponse,
       updateQuestionnaireResponseCB,
+      setResponseContext,
       disabled,
       withLabel: false,
       clearError,
