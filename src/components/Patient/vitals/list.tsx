@@ -142,7 +142,12 @@ export const VitalsList = ({
       readOnly={true}
       className={className}
     >
-      <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
+      <VitalsTable
+        vitals={vitals}
+        vitalCodes={filteredVitalCodes}
+        patientId={patientId}
+        encounterId={encounterId}
+      />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
