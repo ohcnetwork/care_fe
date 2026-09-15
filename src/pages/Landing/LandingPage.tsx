@@ -298,7 +298,7 @@ export function LandingPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-sm bg-white hover:shadow-md transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
+              <div className="flex flex-col items-center justify-center gap-5 p-3 rounded-xl shadow-md ring-2 ring-primary-500 bg-white hover:shadow-lg transition-all bg-[url('/images/patient_background.png')] bg-auto bg-center bg-no-repeat">
                 <div className="rounded-full bg-indigo-100 m-2 p-1 aspect-square flex justify-center items-center border-2 border-white shadow-sm">
                   <CareIcon
                     icon="d-patient"
@@ -307,8 +307,8 @@ export function LandingPage() {
                 </div>
                 <div className="flex flex-col items-center">
                   <Button
-                    variant="outline"
-                    className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
+                    variant="primary_gradient"
+                    className="w-full text-xs md:text-sm font-semibold"
                     onClick={() => navigate(`/login?mode=patient`)}
                   >
                     {t("patient_login")}
