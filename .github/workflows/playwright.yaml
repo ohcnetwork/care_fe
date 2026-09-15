@@ -66,7 +66,11 @@ jobs:
         run: npm ci --prefer-offline
 
       - name: Build application
-        run: npm run build
+        # Build with the E2E config-override seam enabled so the per-file
+        # `window.__CARE_E2E_CONFIG__` overrides in the patient-registration
+        # specs are active. The seam is inert unless a spec injects overrides,
+        # so this does not affect any other test.
+        run: npm run build:e2e
         env:
           NODE_ENV: production
 

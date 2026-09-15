@@ -86,7 +86,66 @@ async function selectBloodGroup(page: Page, bloodGroup: string) {
 }
 
 /**
- * Fills the "Additional Details" section: address, PIN code, and state.
+ * Expands the "Additional Details" section if it is currently collapsed.
+ * When collapsed, its trigger label includes "(Optional)"; once open the
+ * suffix is gone, so this is idempotent.
+ */
+async function openAdditionalDetails(page: Page) {
+  const section = page.getByRole("button", { name: "Additional Details" });
+  const label = await section.textContent();
+  if (label?.toLowerCase().includes("optional")) {
+    await section.click();
+  }
+}
+
+/**
+ * Selects geo-organization levels from the cascading comboboxes inside the
+ * "Additional Details" section. Each combobox only appears after the previous
+ * level is chosen. Stops after `maxLevels` selections, or when no further level
+ * appears.
+ */
+async function selectGeoOrganizationLevels(page: Page, maxLevels = Infinity) {
+  await page
+    .getByRole("button", { name: /register patient/i })
+    .scrollIntoViewIfNeeded();
+
+  const geoRegion = page.getByRole("region", { name: "Additional Details" });
+  let previousCount = 0;
+
+  while (previousCount < maxLevels) {
+    const comboboxes = geoRegion.getByRole("combobox");
+    const count = await comboboxes.count();
+    if (count === previousCount) break;
+
+    const combobox = comboboxes.nth(count - 1);
+    await combobox.waitFor({ state: "visible" });
+    await combobox.click();
+
+    // Scope to the listbox just opened rather than page-wide options, so a
+    // stray combobox elsewhere on the page can't be selected by mistake.
+    const option = page.getByRole("listbox").getByRole("option").first();
+    await option.waitFor({ state: "visible" });
+    await option.click();
+
+    previousCount = count;
+    if (count >= maxLevels) break;
+
+    // Wait for either a new combobox to appear (more levels) or timeout (no more levels)
+    try {
+      await geoRegion
+        .getByRole("combobox")
+        .nth(count)
+        .waitFor({ state: "visible", timeout: 3000 });
+    } catch {
+      // No new combobox appeared — we've filled all required levels
+      break;
+    }
+  }
+}
+
+/**
+ * Fills the "Additional Details" section: address, PIN code, and all
+ * cascading geo-organization levels.
  * TODO: Update state selection to a specific state once fixtures support it.
  */
 async function fillAdditionalDetails(
@@ -94,52 +153,12 @@ async function fillAdditionalDetails(
   data: { address: string; pincode: string },
 ) {
   await test.step("Fill additional details", async () => {
-    const additionalDetailsSection = page.getByRole("button", {
-      name: "Additional Details",
-    });
-    const additionalDetailsSectionText =
-      await additionalDetailsSection.textContent();
-
-    if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
-      await additionalDetailsSection.click();
-    }
+    await openAdditionalDetails(page);
 
     await page.getByRole("textbox", { name: "Address" }).fill(data.address);
     await page.getByRole("spinbutton", { name: "PIN Code" }).fill(data.pincode);
 
-    await page
-      .getByRole("button", { name: /register patient/i })
-      .scrollIntoViewIfNeeded();
-
-    // Geo org comboboxes are cascading — the next one only appears after selecting the previous
-    const geoRegion = page.getByRole("region", { name: "Additional Details" });
-    let previousCount = 0;
-
-    while (true) {
-      const comboboxes = geoRegion.getByRole("combobox");
-      const count = await comboboxes.count();
-      if (count === previousCount) break;
-
-      const combobox = comboboxes.nth(count - 1);
-      await combobox.waitFor({ state: "visible" });
-      await combobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
-
-      previousCount = count;
-      // Wait for either a new combobox to appear (more levels) or timeout (no more levels)
-      try {
-        await geoRegion
-          .getByRole("combobox")
-          .nth(count)
-          .waitFor({ state: "visible", timeout: 3000 });
-      } catch {
-        // No new combobox appeared — we've filled all required levels
-        break;
-      }
-    }
+    await selectGeoOrganizationLevels(page);
   });
 }
 
@@ -155,10 +174,10 @@ async function submitRegistration(page: Page) {
 }
 
 /**
- * Verifies the newly registered patient is shown on the patients home card.
- * After registration the app navigates to `/patients/home`, where
- * `PatientHoverCard` renders the patient name (heading) and an
- * "{age} Y, {gender}" line.
+ * Verifies the newly registered patient is shown on the patient's home card.
+ * After registration, the app navigates to `/patients/home`, where
+ * `PatientInfoCard` renders `PatientHoverCard` — showing the patient name
+ * (heading) and an "{age}, {gender}" line.
  */
 async function verifyPatientCard(
   page: Page,
@@ -176,8 +195,12 @@ async function verifyPatientCard(
     await expect(
       patientCard.getByRole("heading", { name: data.name }),
     ).toBeVisible();
+    // Match the "<age>, <gender>" line by its gender only. Scoping to this
+    // patient's card (via the name heading) keeps it deterministic, and
+    // avoiding the age text decouples the assertion from `formatPatientAge`'s
+    // unit format, which varies with the generated date of birth.
     await expect(
-      patientCard.getByText(new RegExp(`Y,\\s*${data.gender}`, "i")),
+      patientCard.getByText(new RegExp(`,\\s*${data.gender}\\b`, "i")),
     ).toBeVisible();
   });
 }
@@ -270,15 +293,7 @@ test.describe("Patient Registration", () => {
     await selectBloodGroup(page, patientData.bloodGroup);
 
     await test.step("Open additional details and fill only first state", async () => {
-      const additionalDetailsSection = page.getByRole("button", {
-        name: "Additional Details",
-      });
-      const additionalDetailsSectionText =
-        await additionalDetailsSection.textContent();
-
-      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
-        await additionalDetailsSection.click();
-      }
+      await openAdditionalDetails(page);
 
       await page
         .getByRole("textbox", { name: "Address" })
@@ -287,21 +302,8 @@ test.describe("Patient Registration", () => {
         .getByRole("spinbutton", { name: "PIN Code" })
         .fill(patientData.pincode);
 
-      await page
-        .getByRole("button", { name: /register patient/i })
-        .scrollIntoViewIfNeeded();
-
       // Select only the first geo org level
-      const geoRegion = page.getByRole("region", {
-        name: "Additional Details",
-      });
-      const firstCombobox = geoRegion.getByRole("combobox").first();
-      await firstCombobox.waitFor({ state: "visible" });
-      await firstCombobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
+      await selectGeoOrganizationLevels(page, 1);
     });
 
     await test.step("Submit and verify validation error", async () => {
@@ -458,7 +460,7 @@ test.describe("Patient Registration config overrides (per-file)", () => {
   // The override is set on each test's own isolated browser context, so it
   // applies to that test only and Playwright discards it automatically when the
   // context is torn down — no manual teardown needed.
-  test("minimal registration lets a patient be registered without address or geo org", async ({
+  test("minimal registration lets a patient be registered without an address", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
@@ -475,7 +477,13 @@ test.describe("Patient Registration config overrides (per-file)", () => {
     await fillDateOfBirth(page, patientData.dateOfBirth);
     await selectBloodGroup(page, patientData.bloodGroup);
 
-    // No address / geo org filled — minimal mode makes them optional.
+    // Minimal mode makes the address optional (geo organization stays
+    // required), so select geo levels but leave the address/PIN blank.
+    await test.step("Select geo organization without an address", async () => {
+      await openAdditionalDetails(page);
+      await selectGeoOrganizationLevels(page);
+    });
+
     await submitRegistration(page);
     await verifyPatientCard(page, patientData);
   });
@@ -498,15 +506,7 @@ test.describe("Patient Registration config overrides (per-file)", () => {
     await selectBloodGroup(page, patientData.bloodGroup);
 
     await test.step("Open additional details and select only the first geo org level", async () => {
-      const additionalDetailsSection = page.getByRole("button", {
-        name: "Additional Details",
-      });
-      const additionalDetailsSectionText =
-        await additionalDetailsSection.textContent();
-
-      if (additionalDetailsSectionText?.toLowerCase().includes("optional")) {
-        await additionalDetailsSection.click();
-      }
+      await openAdditionalDetails(page);
 
       await page
         .getByRole("textbox", { name: "Address" })
@@ -515,20 +515,7 @@ test.describe("Patient Registration config overrides (per-file)", () => {
         .getByRole("spinbutton", { name: "PIN Code" })
         .fill(patientData.pincode);
 
-      await page
-        .getByRole("button", { name: /register patient/i })
-        .scrollIntoViewIfNeeded();
-
-      const geoRegion = page.getByRole("region", {
-        name: "Additional Details",
-      });
-      const firstCombobox = geoRegion.getByRole("combobox").first();
-      await firstCombobox.waitFor({ state: "visible" });
-      await firstCombobox.click();
-
-      const option = page.getByRole("option").first();
-      await option.waitFor({ state: "visible" });
-      await option.click();
+      await selectGeoOrganizationLevels(page, 1);
     });
 
     // With only 1 level required, a single selection must NOT raise the

@@ -64,9 +64,30 @@ const resolveApiUrl = (): string => {
  * affected flags only relax client-side form validation; the backend
  * independently enforces required fields, so this is not a security boundary.
  */
-interface E2EConfigOverrides {
+export interface E2EConfigOverrides {
   minGeoOrganizationLevelsRequired?: number;
   minimalPatientRegistration?: boolean;
+}
+
+/**
+ * Whether the E2E override seam is compiled into this build. Gated behind the
+ * `REACT_ENABLE_E2E_CONFIG_OVERRIDES` flag (enabled via `npm run build:e2e`),
+ * so it is completely inert in normal production builds.
+ */
+const e2eSeamEnabled = booleanFromString(
+  env.REACT_ENABLE_E2E_CONFIG_OVERRIDES,
+  false,
+);
+
+// Signal to E2E specs that the seam is active in this build, so they can detect
+// it (via `isCareConfigOverrideActive`) and skip themselves when run against a
+// build that does not enable it. Kept as an explicit top-level side effect —
+// rather than hidden inside `readE2EConfigOverrides` — so it is visible where it
+// happens and does not depend on that function having been called.
+if (e2eSeamEnabled && typeof window !== "undefined") {
+  (
+    window as unknown as { __CARE_E2E_CONFIG_ENABLED__?: boolean }
+  ).__CARE_E2E_CONFIG_ENABLED__ = true;
 }
 
 /**
@@ -74,42 +95,56 @@ interface E2EConfigOverrides {
  *
  * Because the object is runtime-injected (via `page.addInitScript`), it cannot
  * be trusted to have the right shape: values may be missing, of the wrong type,
- * or out of range. Each field is therefore type-checked and coerced, and
- * anything malformed is ignored (treated as "no override") rather than trusted
- * blindly. This prevents e.g. a string `"false"` from making a boolean flag
- * truthy, or an invalid geo-org level from being applied.
+ * or out of range. Each field is therefore type-checked and range-validated,
+ * and anything malformed is ignored (treated as "no override") rather than
+ * trusted blindly. To avoid a broken spec silently passing for the wrong
+ * reason, a present-but-rejected value is logged with `console.warn` (this code
+ * only exists in the e2e build, so there is no production cost). This prevents
+ * e.g. a string `"false"` from making a boolean flag truthy, or an invalid
+ * geo-org level from being applied.
  */
 function readE2EConfigOverrides(): E2EConfigOverrides {
-  if (
-    !booleanFromString(env.REACT_ENABLE_E2E_CONFIG_OVERRIDES, false) ||
-    typeof window === "undefined"
-  ) {
+  if (!e2eSeamEnabled || typeof window === "undefined") {
     return {};
   }
 
-  // Signal to E2E specs that the seam is active in this build (i.e. built with
-  // `REACT_ENABLE_E2E_CONFIG_OVERRIDES=true`), so they can skip themselves when
-  // run against a build that does not enable it.
-  (
-    window as unknown as { __CARE_E2E_CONFIG_ENABLED__?: boolean }
-  ).__CARE_E2E_CONFIG_ENABLED__ = true;
-
   const raw = (window as unknown as { __CARE_E2E_CONFIG__?: unknown })
     .__CARE_E2E_CONFIG__;
+  if (raw === undefined) {
+    return {};
+  }
   if (typeof raw !== "object" || raw === null) {
+    console.warn(
+      "[care.config] Ignoring window.__CARE_E2E_CONFIG__: expected an object, got",
+      raw,
+    );
     return {};
   }
 
   const source = raw as Record<string, unknown>;
   const overrides: E2EConfigOverrides = {};
 
-  if (typeof source.minimalPatientRegistration === "boolean") {
-    overrides.minimalPatientRegistration = source.minimalPatientRegistration;
+  if ("minimalPatientRegistration" in source) {
+    if (typeof source.minimalPatientRegistration === "boolean") {
+      overrides.minimalPatientRegistration = source.minimalPatientRegistration;
+    } else {
+      console.warn(
+        "[care.config] Ignoring E2E override minimalPatientRegistration: expected a boolean, got",
+        source.minimalPatientRegistration,
+      );
+    }
   }
 
-  const levels = source.minGeoOrganizationLevelsRequired;
-  if (typeof levels === "number" && Number.isInteger(levels) && levels >= 1) {
-    overrides.minGeoOrganizationLevelsRequired = levels;
+  if ("minGeoOrganizationLevelsRequired" in source) {
+    const levels = source.minGeoOrganizationLevelsRequired;
+    if (typeof levels === "number" && Number.isInteger(levels) && levels >= 1) {
+      overrides.minGeoOrganizationLevelsRequired = levels;
+    } else {
+      console.warn(
+        "[care.config] Ignoring E2E override minGeoOrganizationLevelsRequired: expected an integer >= 1, got",
+        levels,
+      );
+    }
   }
 
   return overrides;

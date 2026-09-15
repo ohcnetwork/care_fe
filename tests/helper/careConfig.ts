@@ -30,8 +30,10 @@ export type CareE2EConfig = {
  */
 export async function applyCareConfig(page: Page, config: CareE2EConfig) {
   await page.addInitScript((cfg) => {
+    // Cast inline as a plain record: this callback is serialized and executed
+    // in the browser, where the `CareE2EConfig` type name does not exist.
     (
-      window as unknown as { __CARE_E2E_CONFIG__?: CareE2EConfig }
+      window as unknown as { __CARE_E2E_CONFIG__?: Record<string, unknown> }
     ).__CARE_E2E_CONFIG__ = cfg;
   }, config);
 }
@@ -40,18 +42,27 @@ export async function applyCareConfig(page: Page, config: CareE2EConfig) {
  * Reports whether the E2E config-override seam is active in the running build.
  *
  * The seam is gated behind the `REACT_ENABLE_E2E_CONFIG_OVERRIDES` build flag
- * (enabled via `npm run build:e2e`). When active, `care.config.ts` sets
- * `window.__CARE_E2E_CONFIG_ENABLED__`. Specs can use this to skip themselves
- * when run against a regular build (e.g. CI's default `npm run build`), where
- * the overrides would otherwise silently have no effect.
+ * (enabled via `npm run build:e2e`, which CI uses). When active, `care.config.ts`
+ * sets `window.__CARE_E2E_CONFIG_ENABLED__` as it evaluates. Specs can use this
+ * to skip themselves when run against a regular build (e.g. an ad-hoc local
+ * `npm run build`), where the overrides would otherwise silently have no effect.
+ *
+ * Waits briefly for the flag so the check does not race the app's initial module
+ * evaluation; if it never appears (seam off), resolves to `false`.
  *
  * Must be called AFTER navigating (`page.goto`), so the app has loaded.
  */
 export async function isCareConfigOverrideActive(page: Page): Promise<boolean> {
-  return page.evaluate(() =>
-    Boolean(
-      (window as unknown as { __CARE_E2E_CONFIG_ENABLED__?: boolean })
-        .__CARE_E2E_CONFIG_ENABLED__,
-    ),
-  );
+  try {
+    await page.waitForFunction(
+      () =>
+        (window as unknown as { __CARE_E2E_CONFIG_ENABLED__?: boolean })
+          .__CARE_E2E_CONFIG_ENABLED__ === true,
+      undefined,
+      { timeout: 5000 },
+    );
+    return true;
+  } catch {
+    return false;
+  }
 }
