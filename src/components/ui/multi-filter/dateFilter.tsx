@@ -349,37 +349,28 @@ export const SelectedDateBadge = ({
     (option) => isSameRange(option),
   );
 
+  const selectedDateLabel = isRangeSelected
+    ? t(isRangeSelected.label, { count: isRangeSelected?.count })
+    : selected.from && selected.to && !isSameDate
+      ? (() => {
+          const needsYear =
+            selected.from.getFullYear() !== selected.to.getFullYear();
+          return [selected.from, selected.to]
+            .map((date) => format(date, needsYear ? "d MMM yy" : "d MMM"))
+            .join(" - ");
+        })()
+      : presentDate
+        ? format(presentDate, "d MMM yyyy")
+        : "";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
-        {isRangeSelected ? (
-          <span>
-            {t(isRangeSelected.label, { count: isRangeSelected?.count })}
-          </span>
-        ) : selected.from && selected.to && !isSameDate ? (
-          <span>
-            {(() => {
-              const needsYear =
-                selected.from.getFullYear() !== selected.to.getFullYear();
-              return [selected.from, selected.to].map((date, index) => (
-                <span key={date.toISOString() + index}>
-                  {index > 0 && " - "}
-                  <span>{format(date, needsYear ? "d MMM yy" : "d MMM")}</span>
-                </span>
-              ));
-            })()}
-          </span>
-        ) : presentDate ? (
-          <span>{format(presentDate, "d MMM yyyy")}</span>
-        ) : (
-          <></>
-        )}
+        <span className="block min-w-0 flex-1 truncate whitespace-nowrap">
+          {selectedDateLabel}
+        </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={15}
-        className="w-[320px] p-0"
-      >
+      <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter
           filter={filter}
           selected={selected}
