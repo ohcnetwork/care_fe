@@ -18,7 +18,7 @@ Build-time plugin identity:
 - Each entry is expected in the form `org/repo` or `org/repo@host/path/to/remoteEntry.js`.
 - If `@host/path` is omitted, CARE defaults to GitHub Pages: `https://{org}.github.io/{repo}`.
 - If the host contains `localhost`, CARE prefixes it with `http://`; otherwise it prefixes it with `https://`.
-- In host dev mode, CARE auto-discovers valid local plugin apps from `apps/*/src/manifest.tsx` and loads them directly through the host Vite graph.
+- In host dev mode, CARE auto-discovers valid local plugin apps from `apps/*/src/manifest.ts` or `apps/*/src/manifest.tsx` and loads them directly through the host Vite graph.
 - Example remote entry for non-hosted local testing or preview flows: `ohcnetwork/care_hello_fe@localhost:4173/assets/remoteEntry.js`.
 
 Merge behavior:
