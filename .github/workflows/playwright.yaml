@@ -108,6 +108,15 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
+      - name: Use quay.io mirror for MinIO image
+        # Docker Hub's `minio/minio` now requires authentication for anonymous
+        # pulls, which breaks `docker compose up`. quay.io mirrors the same
+        # image and is still anonymously pullable. Remove once the backend
+        # compose references a pullable image.
+        run: |
+          sed -i 's#image: minio/minio:#image: quay.io/minio/minio:#' care/docker-compose.yaml
+          grep -n "minio/minio" care/docker-compose.yaml
+
       - name: Cache Docker images
         id: docker-cache
         uses: actions/cache@v4
