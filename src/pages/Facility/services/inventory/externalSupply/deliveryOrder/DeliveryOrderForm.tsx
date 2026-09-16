@@ -206,6 +206,9 @@ export default function DeliveryOrderForm({
 
   useEffect(() => {
     if (isEditMode || supplyOrderId) return;
+    if (internal && form.getValues("destination") === locationId) {
+      form.setValue("destination", "");
+    }
     form.setValue(internal ? "origin" : "destination", locationId);
   }, [locationId, internal, isEditMode, supplyOrderId, form]);
 

@@ -203,8 +203,11 @@ export default function RequestOrderForm({
 
   useEffect(() => {
     if (isEditMode) return;
+    if (internal && form.getValues("origin") === locationId) {
+      form.setValue("origin", undefined);
+    }
     form.setValue("destination", locationId);
-  }, [locationId, isEditMode, form]);
+  }, [locationId, internal, isEditMode, form]);
 
   const tagIds = form.watch("tags") || [];
   const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
