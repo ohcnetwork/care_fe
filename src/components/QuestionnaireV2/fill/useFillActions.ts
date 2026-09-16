@@ -57,6 +57,19 @@ const MAX_RESPONSE_TEXT_LENGTH = 10_000;
 const MAX_LINK_ID_LENGTH = 256;
 const MAX_NOTE_LENGTH = 10_000;
 
+/** Structured-row keys the host fills in from its own data (e.g. every
+ *  location a service_request's activity definition is enabled at) rather
+ *  than from model output. The size guard below exists to catch runaway
+ *  LLM text, so these are excluded from it — a legitimately long host list
+ *  should not be able to trip a check meant for hallucinated content. */
+const HOST_POPULATED_KEYS = new Set(["locations"]);
+
+function structuredEntrySize(value: unknown): number {
+  return JSON.stringify(value, (key, val) =>
+    HOST_POPULATED_KEYS.has(key) ? undefined : val,
+  ).length;
+}
+
 const setResponseSchema = z.object({
   questionnaire_id: z.string().max(MAX_LINK_ID_LENGTH).optional(),
   link_id: z.string().max(MAX_LINK_ID_LENGTH),
@@ -69,7 +82,7 @@ const setResponseSchema = z.object({
         z
           .record(z.string(), z.json())
           .refine(
-            (value) => JSON.stringify(value).length <= MAX_RESPONSE_TEXT_LENGTH,
+            (value) => structuredEntrySize(value) <= MAX_RESPONSE_TEXT_LENGTH,
             "Structured entries must be at most 10000 characters",
           ),
       ]),
