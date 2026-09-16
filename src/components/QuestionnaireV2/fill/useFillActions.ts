@@ -41,7 +41,7 @@ import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
+import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import type { FormStore } from "./StoreRegistrar";
 import type { FillFormEntry } from "./formSession";
@@ -447,6 +447,12 @@ interface FormQuestionSummary {
    *  are unmet — it is not on the clinician's canvas and a write to it
    *  would be rejected. */
   enabled: boolean;
+  enable_when?: EnableWhen[];
+  enable_behavior?: "all" | "any";
+  /** False when an ancestor group's own conditions are unmet — no amount
+   *  of re-evaluating this question's own conditions can fix that. */
+  ancestors_enabled: boolean;
+  description?: string;
 }
 
 /** Apply one `questionnaire.forms.list` call — the agent's map of the
@@ -477,21 +483,36 @@ export function listFormsSummary(
               link_id: question.link_id,
               text: question.text,
               type: question.type,
+              ...(question.description
+                ? { description: question.description }
+                : {}),
               ...(question.structured_type
                 ? { structured_type: question.structured_type }
                 : {}),
-              ...(question.type === "structured" &&
-              question.structured_type !== "files"
-                ? {
-                    values: structuredClone(
-                      responses[question.id]?.values[0]?.value ?? [],
-                    ) as unknown[],
-                  }
-                : {}),
+              ...(question.type === "structured"
+                ? question.structured_type !== "files"
+                  ? {
+                      values: structuredClone(
+                        responses[question.id]?.values[0]?.value ?? [],
+                      ) as unknown[],
+                    }
+                  : {}
+                : {
+                    values: (responses[question.id]?.values ?? []).map(
+                      (v) => v.value,
+                    ),
+                  }),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
               answered: !!responses[question.id]?.values.some(entryHasContent),
               enabled,
+              ...(question.enable_when?.length
+                ? {
+                    enable_when: question.enable_when,
+                    enable_behavior: question.enable_behavior ?? "all",
+                  }
+                : {}),
+              ancestors_enabled: ancestorsEnabled,
             });
           }
           walk(question.questions ?? [], enabled);
@@ -591,7 +612,7 @@ export function useFillActions({
       return {
         id: "questionnaire.forms.list",
         description:
-          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids, to preserve when replacing answers.",
+          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids, to preserve when replacing answers. A question gated by enable_when also includes its own conditions and ancestors_enabled, so a dependent question can be answered in the same turn as its trigger.",
         parameters: {},
         schema: listFormsSchema,
         scope,
