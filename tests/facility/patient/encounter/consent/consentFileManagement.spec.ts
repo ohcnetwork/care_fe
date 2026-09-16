@@ -318,4 +318,33 @@ test.describe("Consent file management", () => {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBeTruthy();
   });
+
+  test('create consent without files → card shows "No files attached"', async ({
+    page,
+  }) => {
+    await goToConsentsTab(page);
+    await createConsentWithFiles(page, []);
+
+    await expect(
+      firstConsentCard(page).getByText("No files attached"),
+    ).toBeVisible({ timeout: 15000 });
+  });
+
+  test("file uploaded from the detail page is reflected on the consent card", async ({
+    page,
+  }) => {
+    const fileName = uniqueName("card-sync");
+    await goToConsentsTab(page);
+    await createConsentWithFiles(page, []);
+    await openNewestConsentDetail(page);
+
+    await uploadFileFromDetail(page, PNG, fileName);
+    await expect(page.getByText(fileName)).toBeVisible({ timeout: 15000 });
+
+    // Back on the list, the (still newest) consent card now shows the file.
+    await goToConsentsTab(page);
+    await expect(firstConsentCard(page).getByText(fileName)).toBeVisible({
+      timeout: 15000,
+    });
+  });
 });
