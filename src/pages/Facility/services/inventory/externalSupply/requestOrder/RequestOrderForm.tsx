@@ -201,7 +201,6 @@ export default function RequestOrderForm({
     }
   }, [isEditMode, existingData, form]);
 
-  // Keep the current location in sync when switching locations on a fresh form.
   useEffect(() => {
     if (isEditMode) return;
     form.setValue("destination", locationId);
