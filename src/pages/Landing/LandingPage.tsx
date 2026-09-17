@@ -183,7 +183,7 @@ export function LandingPage() {
           <div className="text-center mb-4 space-x-1">
             <span className="text-sm md:text-base block sm:inline">
               <Trans
-                i18nKey="search_facilities"
+                i18nKey="search_available_facilities"
                 components={{
                   strong: <strong />,
                 }}
@@ -261,7 +261,7 @@ export function LandingPage() {
               disabled={!selectedOrganization}
             >
               <span className="bg-linear-to-b from-white/15 to-transparent"></span>
-              {t("search_button")}
+              {t("search_facilities")}
             </Button>
           </div>
         </div>
