@@ -55,7 +55,8 @@ REACT_CARE_API_URL=http://127.0.0.1:9000
 
 ## Build/Lint Commands
 
-- `npm run dev` — Start dev server at http://localhost:4000
+- `portless` — Preferred way to start the dev server; see [Dev Servers](../AGENTS.md#dev-servers-portless) in `AGENTS.md`
+- `npm run dev` — Start dev server directly at http://localhost:4000
 - `npm run build` — Production build (takes 2+ minutes, set timeout to 180s+)
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
