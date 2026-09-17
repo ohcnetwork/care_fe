@@ -53,6 +53,7 @@ import {
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -76,6 +77,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 interface Props {
   facilityId: string;
@@ -264,18 +266,20 @@ export function DeliveryOrderShow({
 
   const isRequester = locationId === deliveryOrder?.destination.id;
 
-  const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
-    useQuery({
-      queryKey: ["supplyDeliveries", deliveryOrderId],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          order: deliveryOrderId,
-          facility: facilityId,
-          ordering: "created_date",
-        },
-      }),
-      enabled: !!deliveryOrderId,
-    });
+  const {
+    data: supplyDeliveries,
+    isLoading: isLoadingSupplyDeliveries,
+    isFetching: isFetchingSupplyDeliveries,
+  } = useQuery({
+    queryKey: ["supplyDeliveries", deliveryOrderId],
+    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        order: deliveryOrderId,
+        facility: facilityId,
+        ordering: "created_date",
+      },
+    }),
+  });
 
   const supplyOrderId = supplyDeliveries?.results?.find(
     (delivery) => delivery.supply_request && delivery.supply_request.id,
@@ -465,11 +469,31 @@ export function DeliveryOrderShow({
       (delivery) => delivery.status === SupplyDeliveryStatus.completed,
     ) ?? false;
 
+  const canMarkAsCompleted =
+    !!supplyDeliveries?.results?.length &&
+    supplyDeliveries.results.every(
+      (delivery) =>
+        delivery.status === SupplyDeliveryStatus.completed ||
+        delivery.status === SupplyDeliveryStatus.abandoned ||
+        delivery.status === SupplyDeliveryStatus.entered_in_error,
+    );
+
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
     internal,
     anyCompletedSupplyDeliveries,
   );
+
+  const inprogressSupplyDeliveries =
+    supplyDeliveries?.results?.filter(
+      (delivery) => delivery.status === SupplyDeliveryStatus.in_progress,
+    ) ?? [];
+
+  const hasReachedUpsertLimit =
+    inprogressSupplyDeliveries.length >= careConfig.maxDatapointsPerUpsert;
+
+  const isWithinUpsertLimit =
+    selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
 
   return (
     <Page
@@ -578,7 +602,8 @@ export function DeliveryOrderShow({
                   disabled={
                     isUpsertingDeliveries ||
                     isUpdating ||
-                    selectedDeliveries.length !== 0
+                    selectedDeliveries.length !== 0 ||
+                    !canMarkAsCompleted
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
@@ -799,7 +824,8 @@ export function DeliveryOrderShow({
                       disabled={
                         isUpdating ||
                         isUpsertingDeliveries ||
-                        selectedDeliveries.length === 0
+                        selectedDeliveries.length === 0 ||
+                        !isWithinUpsertLimit
                       }
                     >
                       {isUpsertingDeliveries
@@ -819,7 +845,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_abandoned")}
@@ -829,7 +856,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_damaged")}
@@ -840,6 +868,15 @@ export function DeliveryOrderShow({
                 )}
             </div>
           </CardHeader>
+          {!isWithinUpsertLimit && (
+            <div className="px-4">
+              <UpsertLimitCallout>
+                {t("max_deliveries_selected_limit", {
+                  count: careConfig.maxDatapointsPerUpsert,
+                })}
+              </UpsertLimitCallout>
+            </div>
+          )}
           <CardContent className="p-2">
             {isLoadingSupplyDeliveries ? (
               <div className="space-y-2">
@@ -911,14 +948,24 @@ export function DeliveryOrderShow({
                   <></>
                 )}
 
+                {hasReachedUpsertLimit && canAddSupplyDeliveries && (
+                  <UpsertLimitCallout>
+                    {t("max_datapoints_per_upsert_limit", {
+                      count: careConfig.maxDatapointsPerUpsert,
+                    })}
+                  </UpsertLimitCallout>
+                )}
+
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
-                {canAddSupplyDeliveries && (
+                {canAddSupplyDeliveries && !hasReachedUpsertLimit && (
                   <AddSupplyDeliveryForm
                     deliveryOrderId={deliveryOrderId}
                     facilityId={facilityId}
                     origin={deliveryOrder.origin?.id}
                     destination={deliveryOrder.destination.id}
                     onSuccess={handleSupplyDeliverySuccess}
+                    supplyDeliveriesCount={inprogressSupplyDeliveries.length}
+                    isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
                   />
                 )}
               </div>
