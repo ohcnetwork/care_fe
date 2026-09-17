@@ -53,22 +53,17 @@ export function VitalsTable({
               className="h-auto  py-1 px-2  text-gray-600 text-center"
             >
               <div className="flex items-center justify-center space-x-1">
-                {patientId ? (
-                  <ObservationDetailSheet
-                    codes={[code]}
-                    title={code.display || code.code}
-                    patientId={patientId}
-                    encounterId={encounterId}
-                  >
-                    <span className="cursor-pointer text-sm font-medium hover:underline">
-                      {code.display || ""}
-                    </span>
-                  </ObservationDetailSheet>
-                ) : (
-                  <span className="text-sm font-medium">
+                <ObservationDetailSheet
+                  codes={[code]}
+                  title={code.display || code.code}
+                  patientId={patientId}
+                  encounterId={encounterId}
+                >
+                  <span className="cursor-pointer text-sm font-medium hover:underline">
                     {code.display || ""}
                   </span>
-                )}
+                </ObservationDetailSheet>
+
                 <Popover>
                   <PopoverTrigger>
                     <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />

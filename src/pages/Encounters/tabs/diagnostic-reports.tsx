@@ -277,6 +277,7 @@ function DiagnosticReportDetailCard({
               observations={filteredObservations}
               patientId={report.encounter.patient.id}
               encounterId={report.encounter.id}
+              showObservationHistory={true}
             />
           </div>
         )}

@@ -199,7 +199,7 @@ export const ObservationHistoryMatrix = ({
             <TableRow className="hover:bg-transparent border-none">
               <TableCell
                 colSpan={2}
-                className="sticky left-0 z-10 border border-gray-200 h-2 border-l-0 border-b-0 border-t-0 p-0 bg-white"
+                className="sticky left-0 z-10 border border-gray-200 h-2 border-y-0 p-0 border-l-0"
               />
             </TableRow>
           </TableBody>

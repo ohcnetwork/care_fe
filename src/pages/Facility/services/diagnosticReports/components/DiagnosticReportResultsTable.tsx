@@ -31,12 +31,15 @@ interface DiagnosticReportResultsTableProps {
   observations: ObservationRead[];
   patientId?: string;
   encounterId?: string;
+
+  showObservationHistory?: boolean;
 }
 
 export function DiagnosticReportResultsTable({
   observations,
   patientId,
   encounterId,
+  showObservationHistory = false,
 }: DiagnosticReportResultsTableProps) {
   const hasInterpretation = observations.some(
     (observation) => observation.interpretation?.display,
@@ -206,7 +209,9 @@ export function DiagnosticReportResultsTable({
           )}
         >
           <TableCell className="whitespace-normal wrap-break-word align-top">
-            {!!observation.main_code && !!patientId ? (
+            {!!observation.main_code &&
+            !!patientId &&
+            showObservationHistory ? (
               <ObservationDetailSheet
                 codes={[observation.main_code]}
                 title={observationTitle || t("observation")}
