@@ -28,37 +28,6 @@ interface ObservationDetailContentProps {
   fetchNextPage?: () => void;
 }
 
-export const RenderXAxisTick = ({
-  x,
-  y,
-  payload,
-}: {
-  x?: number | string;
-  y?: number | string;
-  payload?: { value: number | string };
-}): React.ReactElement => {
-  const { t } = useTranslation();
-  const value = Number(payload?.value);
-  const dateLabel = isToday(new Date(value))
-    ? t("today")
-    : format(new Date(value), "d MMM");
-  const timeLabel = format(new Date(value), "h:mma");
-  return (
-    <text
-      x={x}
-      y={Number(y) + 14}
-      textAnchor="middle"
-      fontSize={12}
-      fill="#6b7280"
-    >
-      <tspan x={x}>{dateLabel}</tspan>
-      <tspan x={x} dy={16}>
-        {timeLabel}
-      </tspan>
-    </text>
-  );
-};
-
 export function ObservationDetailContent({
   entries,
   hasNextPage,
@@ -110,6 +79,36 @@ export function ObservationDetailContent({
     el.scrollLeft = el.scrollWidth;
     didInitialScroll.current = true;
   }, [chartData.length]);
+
+  const renderXAxisTick = ({
+    x,
+    y,
+    payload,
+  }: {
+    x?: number | string;
+    y?: number | string;
+    payload?: { value: number | string };
+  }): React.ReactElement => {
+    const value = Number(payload?.value);
+    const dateLabel = isToday(new Date(value))
+      ? t("today")
+      : format(new Date(value), "d MMM");
+    const timeLabel = format(new Date(value), "h:mma");
+    return (
+      <text
+        x={x}
+        y={Number(y) + 14}
+        textAnchor="middle"
+        fontSize={12}
+        fill="#6b7280"
+      >
+        <tspan x={x}>{dateLabel}</tspan>
+        <tspan x={x} dy={16}>
+          {timeLabel}
+        </tspan>
+      </text>
+    );
+  };
 
   const renderValueLabel = (props: {
     x?: number | string;
@@ -225,7 +224,7 @@ export function ObservationDetailContent({
                     interval={0}
                     tickLine={{ stroke: "#374151" }}
                     axisLine={{ stroke: "#6b7280" }}
-                    tick={RenderXAxisTick}
+                    tick={renderXAxisTick}
                   />
                   <YAxis
                     domain={[yMin - pad, yMax + pad]}

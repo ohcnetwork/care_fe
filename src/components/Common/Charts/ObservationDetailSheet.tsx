@@ -19,7 +19,6 @@ import { Code } from "@/types/base/code/code";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 
-import { AllValuesChart } from "./AllValuesChart";
 import { ObservationDetailContent } from "./ObservationDetailContent";
 import { resolveObservationEntries } from "./observationDetailUtils";
 import { ObservationHistoryMatrix } from "./ObservationHistoryMatrix";
@@ -147,14 +146,8 @@ export function ObservationDetailSheet({
         ) : (
           <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0 mt-3">
             {codeList.length > 1 ? (
-              <Tabs defaultValue="all" className="w-full">
+              <Tabs defaultValue={codeList[0].code} className="w-full">
                 <TabsList className="bg-gray-100 max-w-full justify-start overflow-x-auto h-12 pb-1.5 pt-1">
-                  <TabsTrigger
-                    value="all"
-                    className="shrink-0 whitespace-nowrap py-3"
-                  >
-                    {t("all_values")}
-                  </TabsTrigger>
                   {codeList.map((code) => (
                     <TabsTrigger
                       key={code.code}
@@ -165,12 +158,6 @@ export function ObservationDetailSheet({
                     </TabsTrigger>
                   ))}
                 </TabsList>
-                <TabsContent value="all">
-                  <AllValuesChart
-                    codeList={codeList}
-                    entriesByCode={entriesByCode}
-                  />
-                </TabsContent>
                 {codeList.map((code) => (
                   <TabsContent key={code.code} value={code.code}>
                     <ObservationDetailContent
