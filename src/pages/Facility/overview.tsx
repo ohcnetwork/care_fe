@@ -172,7 +172,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                     <CardContent className="flex flex-1 flex-col gap-1.5 p-0">
                       <div className="min-h-25 space-y-2 rounded-t rounded-b-lg bg-gray-100 px-3 py-2.5 sm:min-h-28 sm:space-y-3 sm:px-4 sm:py-3">
                         <div className="w-fit">
-                          <shortcut.icon className="size-7 text-primary sm:size-8" />
+                          <shortcut.icon className="size-7 sm:size-8" />
                         </div>
                         <CardTitle className="m-0 text-sm leading-6 font-semibold text-gray-950 sm:text-base/9">
                           {shortcut.title}
