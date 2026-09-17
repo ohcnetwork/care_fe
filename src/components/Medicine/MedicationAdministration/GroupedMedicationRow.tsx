@@ -487,6 +487,10 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                 isLastSlotOfDay && "border-r-4 border-r-gray-200",
               )}
             >
+              {/* Window start/end markers
+               * Start and end are calculated based on authored date. During Medication Request creation, authored date prefills with current time,
+               * but if the user changes the date, time sets to 00:00.
+               */}
               {windowState.isStartSlot && (
                 <WindowCap label={t("starts")} date={groupWindow.start} />
               )}

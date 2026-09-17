@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   getPaymentTypeLabelKey,
@@ -34,7 +35,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge, goBack } from "@/Utils/utils";
+import { formatName, goBack } from "@/Utils/utils";
 
 // Helper for friendly display of enum values
 function humanize(str: string): string {
@@ -191,7 +192,7 @@ function PaymentReconciliationShow({
                   <div>
                     <div className="text-sm text-gray-500 mb-1">{t("age")}</div>
                     <div className="font-medium">
-                      {formatPatientAge(payment.account.patient, true)}
+                      <PatientAge patient={payment.account.patient} />
                     </div>
                   </div>
                   <div>

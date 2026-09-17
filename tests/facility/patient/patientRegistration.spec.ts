@@ -347,13 +347,11 @@ test.describe("Patient Registration", () => {
     await submitRegistration(page);
 
     await page.waitForURL("**/patients/**");
-    await expect(
-      page.getByRole("button", {
-        name: new RegExp(`.*${patientAge} Y, Male`),
-      }),
-    ).toBeVisible();
 
-    expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
+    const selector = page.getByRole("button", { name: patientName });
+    await expect(selector).toContainText(
+      `${expectedYearOfBirth} (${patientAge}y), Male`,
+    );
   });
 });
 

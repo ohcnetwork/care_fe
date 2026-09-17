@@ -18,7 +18,6 @@ import {
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
 import {
-  MedicationDispenseCategory,
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
@@ -78,6 +77,7 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   isGreaterThan,
   isLessThanOrEqual,
@@ -244,9 +244,7 @@ export default function DispenseDrawer({
         inventories?.length &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
-        const validLot = inventories.find((inv) =>
-          isLotAllowedForDispensing(inv.product.expiration_date),
-        );
+        const validLot = inventories.find(isLotAllowedForDispensing);
 
         if (validLot) {
           form.setValue(`items.${index}.lots`, [
@@ -459,7 +457,7 @@ export default function DispenseDrawer({
 
           const dispenseData: MedicationDispenseCreate = {
             status: MedicationDispenseStatus.completed,
-            category: MedicationDispenseCategory.outpatient,
+            category: MedicationCategory.outpatient,
             when_prepared: new Date(),
             dosage_instruction: [],
             encounter: encounterId,

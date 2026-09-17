@@ -81,6 +81,8 @@ Flags:
   - `@/foo` is left as-is (plugins use the same `@/*` alias).
 - Skips existing files unless `--force` is passed.
 - Copies binary assets (images, fonts, lottie, etc.) byte-for-byte without rewriting.
+- Collects bare-specifier imports and syncs any missing packages into the target app's `package.json` using the version and dependency section from the root workspace `package.json`.
+- Ignores imports that only appear inside comments.
 
 ### Output
 
@@ -88,7 +90,11 @@ A summary is printed at the end:
 
 - `✓ Copied` — files written (or that would be written under `--dry-run`).
 - `• Skipped` — files already present in the target app; re-run with `--force` to replace.
-- `• External packages referenced` — bare-specifier imports encountered (e.g. `react`, `@radix-ui/react-slot`). Add any missing entries to the plugin's `package.json` before building.
+- `• External packages referenced` — bare-specifier imports encountered (e.g. `react`, `@radix-ui/react-slot`).
+- `✓ Synced` — packages added to the target app's `package.json` (or that would be added under `--dry-run`).
+- `• Packages already present` — dependencies the target app already declares.
+- `• Skipped Node builtins` — built-in Node modules that do not belong in `package.json`.
+- `! External packages missing from the root package.json` — packages the script could not source a version for automatically.
 - `! Unresolved imports` — specifiers that could not be resolved to a file in `src/` or `care.config.ts`. These need manual attention (often host-only modules outside `src/` such as `vite-env.d.ts`-style globals).
 
 ### Examples
@@ -107,5 +113,6 @@ npm run clone-component -- @careConfig care_voice_fe
 ### Caveats
 
 - Only files under `src/` (and `care.config.ts`) are followed. Imports that resolve outside those roots are reported as unresolved.
-- The CLI does not install npm dependencies or update the plugin's `package.json` — review the "External packages" list and add anything missing.
+- The CLI updates the target app's `package.json`, but it does not run `npm install`.
+- Auto-sync only works for packages that already exist in the root workspace `package.json`; anything else is still reported for manual follow-up.
 - Once cloned, files are independent copies. They will not stay in sync with the host; re-run with `--force` to refresh.

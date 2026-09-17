@@ -1,5 +1,7 @@
 import { HttpMethod, Type } from "@/Utils/request/types";
 import {
+  ConfirmPasswordResetOtpRequest,
+  ConfirmPasswordResetOtpResponse,
   LoginByOtpRequest,
   LoginByOtpResponse,
   SendOtpRequest,
@@ -18,5 +20,19 @@ export default {
     method: HttpMethod.POST,
     TBody: Type<LoginByOtpRequest>(),
     TRes: Type<LoginByOtpResponse>(),
+  },
+  sendPasswordResetOtp: {
+    path: "/api/v1/otp/password_reset/send/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TBody: Type<SendOtpRequest>(),
+    TRes: Type<SendOtpResponse>(),
+  },
+  confirmPasswordResetOtp: {
+    path: "/api/v1/otp/password_reset/confirm/",
+    method: HttpMethod.POST,
+    noAuth: true,
+    TBody: Type<ConfirmPasswordResetOtpRequest>(),
+    TRes: Type<ConfirmPasswordResetOtpResponse>(),
   },
 } as const;
