@@ -19,7 +19,10 @@ import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPatientIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 
@@ -153,19 +156,16 @@ const DispenseOrderPreview = ({
               }
               isStrong
             />
-            {patient?.instance_identifiers
-              ?.filter(
-                ({ config }) =>
-                  config.config.use === PatientIdentifierUse.official,
-              )
-              .map((identifier) => (
-                <DetailRow
-                  key={identifier.config.id}
-                  label={identifier.config.config.display}
-                  value={identifier.value}
-                  isStrong
-                />
-              ))}
+            {getPatientIdentifiers(patient, {
+              use: PatientIdentifierUse.official,
+            }).map((identifier) => (
+              <DetailRow
+                key={identifier.config.id}
+                label={identifier.config.config.display}
+                value={identifier.value}
+                isStrong
+              />
+            ))}
           </div>
           <div className="space-y-2">
             <DetailRow
@@ -238,7 +238,7 @@ export const PrintDispenseOrder = ({
 
   if (!dispenseOrder) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("dispense_order_not_found")}
       </div>
     );
@@ -246,7 +246,7 @@ export const PrintDispenseOrder = ({
 
   if (!medicationDispenses?.results?.length) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
+      <div className="flex h-50 items-center justify-center rounded-lg border-2 border-dashed p-4 text-gray-500 border-gray-200">
         {t("no_medication_dispenses_found")}
       </div>
     );

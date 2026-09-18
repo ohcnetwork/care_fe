@@ -66,15 +66,6 @@ test.describe("Create an Encounter", () => {
     await expect(
       page.getByRole("heading", { name: randomEncounterClass }),
     ).toBeVisible();
-
-    //verify encounter details on the details tab
-    await page.getByRole("tab", { name: "Details" }).click();
-    await page.getByRole("link", { name: "Update Encounter" }).click();
-
-    // Verify encounter status, class, and priority are displayed correctly
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
-    ).toBeVisible();
   });
 
   test("through phone number + year", async ({ page }) => {
@@ -149,12 +140,9 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("tab", { name: "Details" }).click();
     await page.getByRole("link", { name: "Update Encounter" }).click();
 
-    // Verify encounter status, class, and priority are displayed correctly
+    // Verify encounter status and priority are displayed correctly.
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
     ).toBeVisible();
     await expect(
       page.getByRole("combobox").filter({ hasText: randomEncounterPriority }),

@@ -25,13 +25,13 @@ import {
   formatDateTime,
   formatPatientAge,
 } from "@/Utils/utils";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPatientIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
-import {
-  PatientIdentifier,
-  PatientIdentifierUse,
-} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
@@ -218,26 +218,17 @@ export function PrintAppointments({
                           <p className="text-sm text-gray-600 flex items-center gap-1">
                             {formatPatientAge(appointment.patient, true)},{" "}
                             {t(`GENDER__${appointment.patient.gender}`)}
-                            {"instance_identifiers" in appointment.patient &&
-                              (
-                                appointment.patient
-                                  .instance_identifiers as PatientIdentifier[]
-                              )
-                                ?.filter(
-                                  ({ config }: PatientIdentifier) =>
-                                    config.config.use ===
-                                      PatientIdentifierUse.official &&
-                                    !config.config.auto_maintained,
-                                )
-                                .map((identifier: PatientIdentifier) => (
-                                  <p
-                                    key={identifier.config.id}
-                                    className="text-xs text-gray-600"
-                                  >
-                                    ({identifier.config.config.display}:{" "}
-                                    {identifier.value}){" "}
-                                  </p>
-                                ))}
+                            {getPatientIdentifiers(appointment.patient, {
+                              use: PatientIdentifierUse.official,
+                            }).map((identifier) => (
+                              <p
+                                key={identifier.config.id}
+                                className="text-xs text-gray-600"
+                              >
+                                ({identifier.config.config.display}:{" "}
+                                {identifier.value}){" "}
+                              </p>
+                            ))}
                           </p>
                         </div>
                       </TableCell>
