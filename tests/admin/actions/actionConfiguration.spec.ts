@@ -81,22 +81,17 @@ async function addAgeCondition(
     .fill(String(value));
 }
 
-/** Adds a message instruction (the index-th on the open action) and fills
- *  its required message param. Collapsed action cards are hidden, so the
- *  index counts only the controls of the card being edited. */
-async function addMessageInstruction(
+/** Fills the required message param of the index-th instruction on the open
+ *  action. Adding an action preseeds the one registered instruction already
+ *  selected, so the first message step exists without clicking "Add
+ *  instruction"; collapsed action cards are hidden, so the index counts only
+ *  the instructions of the card being edited. */
+async function fillMessage(
   page: Page,
   paramLabel: string,
   message: string,
-  index: number,
+  index = 0,
 ) {
-  await page.getByRole("button", { name: "Add instruction" }).click();
-  await page.getByRole("combobox", { name: "Instruction" }).nth(index).click();
-  await page
-    .getByRole("option")
-    .filter({ hasText: /Log a message|Show a message/ })
-    .first()
-    .click();
   await page
     .getByRole("textbox", { name: paramLabel })
     .nth(index)
@@ -153,13 +148,8 @@ test.describe("Admin action configurations", () => {
         .click();
       await page.getByRole("textbox", { name: "Condition 1 Value" }).fill("60");
 
-      await page.getByRole("button", { name: "Add instruction" }).click();
-      await page.getByRole("combobox", { name: "Instruction" }).click();
-      await page
-        .getByRole("option")
-        .filter({ hasText: /Log a message|Show a message/ })
-        .first()
-        .click();
+      // Adding the action preseeded the one registered instruction
+      // ("Log a message"), already selected — only its message needs filling.
       await page
         .getByRole("textbox", { name: paramLabel })
         .fill(`Elderly patient booked ${stamp}`);
@@ -264,12 +254,7 @@ test.describe("Admin action configurations", () => {
         await page
           .getByRole("textbox", { name: "Condition 1 Value" })
           .fill(String((index + 1) * 10));
-        await addMessageInstruction(
-          page,
-          paramLabel,
-          `${operator.symbol} ${stamp}`,
-          0,
-        );
+        await fillMessage(page, paramLabel, `${operator.symbol} ${stamp}`);
       }
     });
 
@@ -336,9 +321,11 @@ test.describe("Admin action configurations", () => {
         page.getByRole("combobox", { name: "Condition 3 Field" }),
       ).toHaveCount(0);
 
-      await addMessageInstruction(page, paramLabel, `Keep ${stamp}`, 0);
-      await addMessageInstruction(page, paramLabel, `Drop ${stamp}`, 1);
-      // Remove the second step, leaving one.
+      // The action came with one preseeded instruction — fill it, then add a
+      // second and drop it, proving add/remove leaves the first behind.
+      await fillMessage(page, paramLabel, `Keep ${stamp}`, 0);
+      await page.getByRole("button", { name: "Add instruction" }).click();
+      await fillMessage(page, paramLabel, `Drop ${stamp}`, 1);
       await page.getByRole("button", { name: "Remove step" }).nth(1).click();
     });
 
@@ -353,12 +340,7 @@ test.describe("Admin action configurations", () => {
       await page
         .getByRole("radio", { name: "Any condition is true (OR)" })
         .click();
-      await addMessageInstruction(
-        page,
-        paramLabel,
-        `Toddler or senior ${stamp}`,
-        0,
-      );
+      await fillMessage(page, paramLabel, `Toddler or senior ${stamp}`);
     });
 
     await test.step("Save stores both actions with compiled AND / OR", async () => {
