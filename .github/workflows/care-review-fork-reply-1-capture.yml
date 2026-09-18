@@ -1,0 +1,79 @@
+# Fork-reply bridge, Stage 1 of 3 — CAPTURE.
+#
+# Why this exists: `care-review` reviews fork PRs fine (it triggers on `pull_request_target`, which
+# runs in base-repo context WITH the Copilot credential). But when a fork contributor *replies* to
+# one of its review threads, the reply fires `pull_request_review_comment` / `issue_comment`, and
+# GitHub withholds the custom `COPILOT_GITHUB_TOKEN` from any run tied to a fork PR — so the reply
+# run dies at activation and the contributor is never answered. This 3-stage bridge carries the
+# trust back: Stage 1 (here) runs powerless and just records what was said; Stage 2 (`workflow_run`,
+# which DOES get secrets) picks the record up and dispatches the reply agent (Stage 3).
+#
+# This stage is deliberately dumb and powerless. It holds NO token (`permissions: {}`) — proving the
+# untrusted fork side needs nothing GitHub withholds — and makes NO fork/own-thread decisions. All
+# filtering that needs a token or an API call (is this actually a fork PR? is it addressed to
+# care-review?) happens in Stage 2, which runs in trusted base context. Same division of labour the
+# repo already uses for pr-review-trigger.yml -> pr-automation.yml and the Cloudflare preview bridge.
+name: CARE Reply Bridge — Capture
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+# Zero permissions: a hostile fork comment can do nothing here. The captured context crosses to
+# Stage 2 as an artifact, never as a token-bearing action.
+permissions: {}
+
+# Cheap trigger-level gate only. Upstream-repo, skip bots (their comments would spin the bridge for
+# nothing — see care-review.md's bot rationale), and for `issue_comment` require it to be on a PR
+# (issue_comment also fires on plain issues, which have no review threads to answer). Fork-detection
+# and "is this addressed to care-review?" are NOT here — they need a token, so Stage 2 owns them.
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.comment.user.type != 'Bot' &&
+          (github.event_name == 'pull_request_review_comment' ||
+           github.event.issue.pull_request != null) }}
+    steps:
+      # Everything the reply agent needs, env-mapped so no untrusted value is ever interpolated into
+      # a shell command. The comment body is base64'd — it is the one field an attacker fully
+      # controls, and it must survive to Stage 2 without being able to break out of a `run:` block.
+      - name: Record reply context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          # PR number: review-comment events carry `pull_request`, issue_comment carries `issue`.
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          # Present only on review-comment replies; empty for top-level review comments and for
+          # issue_comment. Lets Stage 2 / the agent tell a thread reply from a fresh mention.
+          IN_REPLY_TO: ${{ github.event.comment.in_reply_to_id }}
+          # Fork signal, available ONLY on review-comment events (issue_comment has no head repo in
+          # its payload). Empty for issue_comment — Stage 2 resolves fork-ness via the API instead.
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$EVENT_NAME"      > event_name.txt
+          printf '%s' "$PR_NUMBER"       > pr_number.txt
+          printf '%s' "$COMMENT_ID"      > comment_id.txt
+          printf '%s' "$COMMENT_AUTHOR"  > comment_author.txt
+          printf '%s' "$IN_REPLY_TO"     > in_reply_to.txt
+          printf '%s' "$HEAD_REPO"       > head_repo.txt
+          printf '%s' "$COMMENT_BODY" | base64 -w0 > comment_body_b64.txt
+
+      - name: Upload reply context
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-reply-context
+          path: |
+            event_name.txt
+            pr_number.txt
+            comment_id.txt
+            comment_author.txt
+            in_reply_to.txt
+            head_repo.txt
+            comment_body_b64.txt

@@ -1,0 +1,106 @@
+# Fork-reply bridge, Stage 2 of 3 — DISPATCH.
+#
+# Stage 1 ran powerless on a fork PR comment and left a `fork-reply-context` artifact. This stage is
+# a `workflow_run` job, which GitHub ALWAYS runs on the default branch in base-repo trust WITH
+# secrets and a write-capable token — regardless of the fork origin of the event that started Stage
+# 1. That is the whole trick: the trust the fork side was denied is recovered here.
+#
+# `workflow_run` only fires for the copy of this file on the DEFAULT branch, so edits here have no
+# effect until they land on `develop`. Matched by workflow `name:`, not filename.
+name: CARE Reply Bridge — Dispatch
+
+on:
+  workflow_run:
+    workflows: ["CARE Reply Bridge — Capture"]
+    types: [completed]
+
+permissions:
+  actions: write        # download Stage 1 artifact by run-id, and workflow_dispatch Stage 3
+  pull-requests: read   # resolve a PR's head repo to confirm it is a fork
+
+concurrency:
+  # One dispatcher per Stage 1 run. A re-run reuses the same id, so retries coalesce here.
+  group: care-reply-bridge-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.workflow_run.conclusion == 'success' }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download Stage 1 context
+        uses: actions/download-artifact@v4
+        with:
+          name: fork-reply-context
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The artifact came from an untrusted event, so treat every field as hostile: the ids must be
+      # numeric before they touch a shell or an API path, and the body stays base64 (decoded only
+      # for the log, never executed). The reply agent re-fetches the comment via the API by id — we
+      # do not forward the body into the dispatch, so a crafted body cannot ride into Stage 3.
+      - name: Recover and validate context
+        id: ctx
+        run: |
+          set -euo pipefail
+          PR=$(cat pr_number.txt); CID=$(cat comment_id.txt)
+          EVENT=$(cat event_name.txt); HEAD_REPO=$(cat head_repo.txt || true)
+          [[ "$PR"  =~ ^[0-9]+$ ]] || { echo "::error::non-numeric PR number"; exit 1; }
+          [[ "$CID" =~ ^[0-9]+$ ]] || { echo "::error::non-numeric comment id"; exit 1; }
+          echo "event=$EVENT pr=$PR comment=$CID head_repo=${HEAD_REPO:-<none>}"
+          echo "comment body (inert, for audit):"; base64 -d comment_body_b64.txt || true; echo
+          {
+            echo "pr=$PR"
+            echo "cid=$CID"
+            echo "head_repo=$HEAD_REPO"
+          } >> "$GITHUB_OUTPUT"
+
+      # Fork gate — the load-bearing decision. Same-repo replies are answered by care-review
+      # DIRECTLY (they keep their secret), so bridging them would post a SECOND, duplicate reply.
+      # Only fork PRs lose the secret and need this bridge. `head_repo` is present on
+      # review-comment events; for issue_comment it is empty, so resolve the PR's head repo via the
+      # API. If it is not a fork, stop here.
+      - name: Fork gate
+        id: fork
+        run: |
+          set -euo pipefail
+          PR='${{ steps.ctx.outputs.pr }}'
+          HEAD_REPO='${{ steps.ctx.outputs.head_repo }}'
+          if [ -z "$HEAD_REPO" ]; then
+            HEAD_REPO=$(gh api "repos/$GH_REPO/pulls/$PR" --jq '.head.repo.full_name' 2>/dev/null || true)
+          fi
+          if [ -z "$HEAD_REPO" ] || [ "$HEAD_REPO" = "$GH_REPO" ]; then
+            echo "Not a fork PR (head=$HEAD_REPO) — care-review answers same-repo replies directly. Skipping."
+            echo "is_fork=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Fork PR (head=$HEAD_REPO) — bridging the reply."
+            echo "is_fork=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # workflow_dispatch is the recursion-guard exception, so this GITHUB_TOKEN-fired step CAN spawn
+      # Stage 3. Hand it the full aw_context envelope built from the digit-validated ids (so
+      # --argjson cannot inject). Stage 3 pins its reply target to item_number and needs no inputs
+      # beyond this envelope.
+      - name: Dispatch Stage 3 (reply agent)
+        if: steps.fork.outputs.is_fork == 'true'
+        run: |
+          set -euo pipefail
+          PR='${{ steps.ctx.outputs.pr }}'; CID='${{ steps.ctx.outputs.cid }}'
+          AW_CONTEXT=$(jq -nc \
+            --argjson run_id "${{ github.event.workflow_run.id }}" \
+            --arg repo "$GH_REPO" \
+            --arg workflow_id "care-review-fork-reply" \
+            --arg item_type "pull_request" \
+            --argjson item_number "$PR" \
+            --argjson comment_id "$CID" \
+            '{run_id:$run_id,repo:$repo,workflow_id:$workflow_id,item_type:$item_type,item_number:$item_number,comment_id:$comment_id}')
+          gh workflow run care-review-fork-reply.lock.yml \
+            --repo "$GH_REPO" \
+            --ref "${{ github.event.repository.default_branch }}" \
+            -f aw_context="$AW_CONTEXT"
+          echo "Dispatched reply agent for fork PR #$PR comment $CID"
