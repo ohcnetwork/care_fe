@@ -1,0 +1,9 @@
+Is entire properly set up in my repo
+
+---
+
+Is entire runners fully sset up?
+
+---
+
+Do I need runner configurations to be on the repo for it to work?
