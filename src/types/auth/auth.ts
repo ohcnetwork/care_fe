@@ -12,6 +12,11 @@ export interface JwtTokenObtainPair {
 export interface LoginRequest {
   username: string;
   password: string;
+  /**
+   * ALTCHA proof-of-work solution payload, only present when the backend has
+   * responded with a 429 "captchaRequired" error for this username.
+   */
+  altcha?: string;
 }
 
 export interface TokenRefreshRequest {
