@@ -50,6 +50,27 @@ if: >
       (github.event.pull_request == null || github.event.pull_request.draft == false) &&
       (github.event.comment == null || github.event.comment.user.type != 'Bot') &&
       (github.event.issue == null || github.event.issue.pull_request != null) }}
+# Concurrency, overriding gh-aw's default of one per-PR group shared by ALL triggers.
+#
+# The default keys the group on `issue.number || pr.number || run_id` with cancel-in-progress, so
+# every trigger for a PR — a push AND every comment — shares one slot. Concurrency is evaluated
+# BEFORE the `if:` above, so even a bot comment that `if:` will skip still enters the group and
+# cancels the in-flight review. On a PR carrying CodeRabbit / Copilot / React Doctor / Cloudflare, a
+# real review is superseded by the next status comment before it can post — observed on #16818/24/25.
+#
+# The override is the DEFAULT group with one thing appended: `-${{ github.event.comment.id || 'review' }}`.
+# That trailing segment is a coalescing fallback, not an event-name branch — comment-bearing events
+# (issue_comment, pull_request_review_comment) carry `comment.id`; push/PR/dispatch do not, so they
+# fall to the literal `review`:
+#   - push / PR / dispatch (no comment) -> `…-<pr>-review`       one slot per PR; a newer push cancels
+#     the stale review (latest commit wins), and no comment can land in this slot.
+#   - comment events (comment.id set)   -> `…-<pr>-<comment_id>` one slot PER comment, so a comment
+#     never cancels the review, nor another reply. Deliberately NOT keyed on head SHA: that would give
+#     each commit its own slot and defeat newer-push-cancels-stale-review, billing every superseded commit.
+concurrency:
+  group: >-
+    gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}-${{ github.event.comment.id || 'review' }}
+  cancel-in-progress: true
 # Least privilege for the agent job. It only reads: the base repo (contents), the PR's files and
 # review threads (pull-requests), and PR conversation comments, which are issue comments (issues).
 # All writes happen in separate, permission-scoped safe-output jobs — the agent job never writes.
