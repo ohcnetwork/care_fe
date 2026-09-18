@@ -28,6 +28,87 @@ interface ObservationDetailContentProps {
   fetchNextPage?: () => void;
 }
 
+const RenderXAxisTick = ({
+  x,
+  y,
+  payload,
+}: {
+  x?: number | string;
+  y?: number | string;
+  payload?: { value: number | string };
+}): React.ReactElement => {
+  const { t } = useTranslation();
+  const value = Number(payload?.value);
+  const dateLabel = isToday(new Date(value))
+    ? t("today")
+    : format(new Date(value), "d MMM");
+  const timeLabel = format(new Date(value), "h:mma");
+  return (
+    <text
+      x={x}
+      y={Number(y) + 14}
+      textAnchor="middle"
+      fontSize={12}
+      fill="#6b7280"
+    >
+      <tspan x={x}>{dateLabel}</tspan>
+      <tspan x={x} dy={16}>
+        {timeLabel}
+      </tspan>
+    </text>
+  );
+};
+
+const RenderValueLabel = ({
+  x,
+  y,
+  value,
+  index,
+  lastIndex,
+}: {
+  x?: number | string;
+  y?: number | string;
+  value?: number | string | (number | string)[] | boolean | null;
+  index?: number;
+  lastIndex: number;
+}): React.ReactElement => {
+  const { t } = useTranslation();
+  const xNum = Number(x);
+  const yNum = Number(y);
+  if (isNaN(xNum) || isNaN(yNum)) return <g />;
+
+  if (index === lastIndex) {
+    return (
+      <g>
+        <text x={xNum + 14} y={yNum - 4} fontSize={11} fill="#6b7280">
+          {t("latest")}
+        </text>
+        <text
+          x={xNum + 14}
+          y={yNum + 13}
+          fontSize={15}
+          fontWeight={600}
+          fill="#111827"
+        >
+          {value}
+        </text>
+      </g>
+    );
+  }
+
+  return (
+    <text
+      x={xNum}
+      y={yNum - 12}
+      textAnchor="start"
+      fontSize={12}
+      fill="#374151"
+    >
+      {value}
+    </text>
+  );
+};
+
 export function ObservationDetailContent({
   entries,
   hasNextPage,
@@ -79,77 +160,6 @@ export function ObservationDetailContent({
     el.scrollLeft = el.scrollWidth;
     didInitialScroll.current = true;
   }, [chartData.length]);
-
-  const renderXAxisTick = ({
-    x,
-    y,
-    payload,
-  }: {
-    x?: number | string;
-    y?: number | string;
-    payload?: { value: number | string };
-  }): React.ReactElement => {
-    const value = Number(payload?.value);
-    const dateLabel = isToday(new Date(value))
-      ? t("today")
-      : format(new Date(value), "d MMM");
-    const timeLabel = format(new Date(value), "h:mma");
-    return (
-      <text
-        x={x}
-        y={Number(y) + 14}
-        textAnchor="middle"
-        fontSize={12}
-        fill="#6b7280"
-      >
-        <tspan x={x}>{dateLabel}</tspan>
-        <tspan x={x} dy={16}>
-          {timeLabel}
-        </tspan>
-      </text>
-    );
-  };
-
-  const renderValueLabel = (props: {
-    x?: number | string;
-    y?: number | string;
-    value?: number | string | (number | string)[] | boolean | null;
-    index?: number;
-  }): React.ReactElement => {
-    const x = Number(props.x);
-    const y = Number(props.y);
-    if (isNaN(x) || isNaN(y)) return <g />;
-
-    if (props.index === lastIndex) {
-      return (
-        <g>
-          <text x={x + 14} y={y - 4} fontSize={11} fill="#6b7280">
-            {t("latest")}
-          </text>
-          <text
-            x={x + 14}
-            y={y + 13}
-            fontSize={15}
-            fontWeight={600}
-            fill="#111827"
-          >
-            {props.value}
-          </text>
-        </g>
-      );
-    }
-
-    return (
-      <text x={x} y={y - 12} textAnchor="start" fontSize={12} fill="#374151">
-        {props.value}
-      </text>
-    );
-  };
-
-  const values = chartData.map((d) => d.value);
-  const yMin = values.length ? Math.min(...values) : 0;
-  const yMax = values.length ? Math.max(...values) : 0;
-  const pad = (yMax - yMin || 1) * 0.2;
 
   return (
     <div className="flex flex-col gap-8">
@@ -224,14 +234,19 @@ export function ObservationDetailContent({
                     interval={0}
                     tickLine={{ stroke: "#374151" }}
                     axisLine={{ stroke: "#6b7280" }}
-                    tick={renderXAxisTick}
+                    tick={<RenderXAxisTick />}
                   />
                   <YAxis
-                    domain={[yMin - pad, yMax + pad]}
-                    tick={false}
-                    tickLine={false}
+                    tick={{ fontSize: 12 }}
+                    tickLine={true}
                     axisLine={{ stroke: "#6b7280" }}
-                    width={1}
+                    width={36}
+                    label={{
+                      value: unit,
+                      angle: -90,
+                      position: "insideLeft",
+                      dx: -4,
+                    }}
                   />
                   <Line
                     type="monotone"
@@ -248,7 +263,10 @@ export function ObservationDetailContent({
                     animationDuration={1000}
                     animationEasing="ease-in-out"
                   >
-                    <LabelList dataKey="value" content={renderValueLabel} />
+                    <LabelList
+                      dataKey="value"
+                      content={<RenderValueLabel lastIndex={lastIndex} />}
+                    />
                   </Line>
                 </LineChart>
               </ResponsiveContainer>
