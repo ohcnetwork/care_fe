@@ -7,3 +7,11 @@ Is entire runners fully sset up?
 ---
 
 Do I need runner configurations to be on the repo for it to work?
+
+---
+
+Let's push a branch with entire runners
+
+---
+
+You need to checkout to a branch first
