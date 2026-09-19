@@ -221,6 +221,10 @@ const Login = (props: LoginProps) => {
     let hasError = false;
     const err = Object.assign({}, errors);
     Object.keys(form).forEach((key) => {
+      // altcha isn't user-entered; its presence is enforced via the submit
+      // button's disabled state (see `isCaptchaEnabled && !form.altcha`
+      // below), not via this required-field validation.
+      if (key === "altcha") return;
       if (
         typeof form[key] === "string" &&
         key !== "password" &&
@@ -326,6 +330,9 @@ const Login = (props: LoginProps) => {
 
   // Loading state derived from mutations
   const isLoading = isAuthenticating || sendOtpPending || verifyOtpPending;
+  // Blocks submission until ALTCHA has supplied a fresh payload, so the
+  // "verifying"/reset window never results in a silently no-op submit.
+  const captchaPending = isCaptchaEnabled && !form.altcha;
 
   const logos = [stateLogo, customLogo].filter(
     (logo) => logo?.light || logo?.dark,
@@ -446,7 +453,7 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
-                          disabled={isLoading}
+                          disabled={isLoading || captchaPending}
                         >
                           {isLoading ? (
                             <CircularProgress className="text-white" />
@@ -555,7 +562,7 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            disabled={isLoading}
+                            disabled={isLoading || captchaPending}
                           >
                             {isLoading ? (
                               <CircularProgress className="text-white" />
