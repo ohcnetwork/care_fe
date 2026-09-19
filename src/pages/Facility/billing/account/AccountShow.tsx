@@ -778,7 +778,7 @@ function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={account.total_balance} />
+          <ClosedCallout balance={roundedBalance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}
