@@ -69,7 +69,7 @@ function FacilityDetails({ id }: { id: string }) {
 ```typescript
 interface APICallOptions {
   pathParams?: Record<string, string>;  // URL parameters
-  queryParams?: QueryParams;            // Query string parameters
+  queryParams?: TQuery;                 // Route-specific query string parameters
   body?: TBody;                         // Request body
   silent?: boolean;                     // Suppress error notifications
   headers?: HeadersInit;                // Additional headers
