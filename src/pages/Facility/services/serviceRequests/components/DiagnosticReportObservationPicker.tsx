@@ -104,8 +104,12 @@ export function DiagnosticReportObservationPicker({
           }
         }}
       >
-        <Command shouldFilter={false}>
+        <Command
+          shouldFilter={false}
+          className="**:data-[slot=command-input-wrapper]:focus-within:border-gray-500"
+        >
           <CommandInput
+            className="border-0 focus:ring-0"
             value={search}
             onValueChange={setSearch}
             placeholder={t("search_observations")}
