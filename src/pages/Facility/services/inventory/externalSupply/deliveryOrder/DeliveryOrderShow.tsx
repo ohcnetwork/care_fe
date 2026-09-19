@@ -19,6 +19,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -734,13 +735,7 @@ export function DeliveryOrderShow({
                       }
                     />
                     {deliveryOrder?.tags?.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="secondary"
-                        className="rounded-sm"
-                      >
-                        {tag.display}
-                      </Badge>
+                      <TagBadge key={tag.id} tag={tag} className="rounded-sm" />
                     ))}
                   </div>
                 </div>

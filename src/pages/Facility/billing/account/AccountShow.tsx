@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -529,9 +530,7 @@ function AccountShow({
                   }
                 />
                 {account.tags?.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
-                    {tag.display}
-                  </Badge>
+                  <TagBadge key={tag.id} tag={tag} className="text-xs" />
                 ))}
               </div>
             </div>
