@@ -223,7 +223,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
-  const resourceIds  =
+  const resourceIds =
     resourceId ?? practitioners?.map((p) => p.id).join(",") ?? "";
 
   // Enabled only if filtered by a practitioner and a single day

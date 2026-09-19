@@ -2,6 +2,7 @@ import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   MedicationDispenseCreate,
   MedicationDispenseRead,
+  MedicationDispenseRetrieve,
   MedicationDispenseSummary,
   MedicationDispenseUpdate,
   MedicationDispenseUpsert,
@@ -17,7 +18,7 @@ export default {
   get: {
     path: "/api/v1/medication/dispense/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<MedicationDispenseRead>(),
+    TRes: Type<MedicationDispenseRetrieve>(),
   },
   list: {
     path: "/api/v1/medication/dispense/",

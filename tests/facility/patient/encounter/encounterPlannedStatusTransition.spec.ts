@@ -13,10 +13,16 @@ test.use({ storageState: "tests/.auth/user.json" });
 // Field-path prefixes may change while the core backend error stays the same.
 const VALIDATION_ERROR_TEXT = "Start Date cannot be greater than End Date";
 
-async function createPlannedEncounter(page: Page, start: "past" | "future") {
+async function createPlannedEncounter(
+  page: Page,
+  start: "past" | "future",
+  encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
+) {
   await openCreateEncounterDialog(page);
   const dialog = getEncounterCreateDialog(page);
-  await dialog.getByRole("button", { name: /^Ambulatory/ }).click();
+  await dialog
+    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
+    .click();
   await selectStatusInCreateDialog(page, "Planned");
   await openCalendarAndGetNextMonthButton(page);
   await page
@@ -62,6 +68,13 @@ async function changeStatus(page: Page, status: string) {
 async function selectClosingStatus(page: Page, status: string) {
   if (status === "Discharged") {
     await page.getByRole("button", { name: "Mark for discharge" }).click();
+    await page
+      .locator('label[data-slot="label"]')
+      .filter({ hasText: /^Discharge Disposition/ })
+      .locator("..")
+      .getByRole("combobox")
+      .click();
+    await page.getByRole("option", { name: "Home", exact: true }).click();
   } else {
     await changeStatus(page, status);
   }
@@ -191,7 +204,11 @@ test.describe("Planned Encounter Status Transition", () => {
     test(`${label} sets an end date for a past encounter`, async ({ page }) => {
       const closed =
         await test.step("Close an encounter with a valid period", async () => {
-          await createPlannedEncounter(page, "past");
+          await createPlannedEncounter(
+            page,
+            "past",
+            label === "Discharged" ? "Inpatient" : "Ambulatory",
+          );
           await openEncounterUpdateForm(page);
           await selectClosingStatus(page, label);
           await submitQuestionnaire(page);
@@ -226,7 +243,11 @@ test.describe("Planned Encounter Status Transition", () => {
       page,
     }) => {
       await test.step("Attempt a closing status with an invalid period", async () => {
-        await createPlannedEncounter(page, "future");
+        await createPlannedEncounter(
+          page,
+          "future",
+          status === "Discharged" ? "Inpatient" : "Ambulatory",
+        );
         await openEncounterUpdateForm(page);
         await selectClosingStatus(page, status);
         await submitQuestionnaire(page);
