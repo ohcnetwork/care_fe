@@ -141,25 +141,23 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    const now = new Date();
-    const startTime = Date.parse(encounter.period.start ?? "");
+    // An unknown status cannot tell us whether a known end date is invalid.
+    if (encounter.status === EncounterStatus.UNKNOWN) return;
+
     const shouldSetEndDate =
       encounter.status === EncounterStatus.DISCHARGED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      (encounter.status === EncounterStatus.ENTERED_IN_ERROR &&
-        (!encounter.period.start ||
-          (Number.isFinite(startTime) && startTime <= now.getTime())));
+      encounter.status === EncounterStatus.COMPLETED;
 
-    // Cancelled encounters never began, so they have no end date.
+    // Cancellation and invalidation do not represent a clinical end.
     const end = shouldSetEndDate
-      ? encounter.period.end || now.toISOString()
+      ? encounter.period.end || new Date().toISOString()
       : undefined;
 
     if (end !== encounter.period.end) {
       handleUpdateEncounter({ period: { ...encounter.period, end } });
     }
-  }, [encounter.status, encounter.period.start]);
+  }, [encounter.status]);
 
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
