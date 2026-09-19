@@ -84,6 +84,7 @@ export function DiagnosticReportObservationPicker({
         <Button
           type="button"
           variant="outline"
+          size="sm"
           disabled={disabled}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {

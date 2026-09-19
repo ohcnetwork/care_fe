@@ -1,9 +1,5 @@
-import {
-  ChevronsDownUp,
-  ChevronsUpDown,
-  FileCheck2,
-  MoreVertical,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, FileCheck2, MoreVertical } from "lucide-react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -44,35 +40,43 @@ export function DiagnosticReportReviewHeader({
 }: DiagnosticReportReviewHeaderProps) {
   const { t } = useTranslation();
   const reportTitle = report.code?.display ?? report.service_request?.title;
+  const timestampsId = useId();
+  const statusId = useId();
 
   return (
-    <CardHeader className="flex-row items-center gap-2 px-2 py-4">
+    <CardHeader className="flex-row items-start gap-2 space-y-0 p-4">
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex flex-1 flex-wrap items-center justify-between gap-3 min-w-0 text-left rounded-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="grid flex-1 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-3 min-w-0 text-left rounded-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center"
           aria-label={`${t(isExpanded ? "collapse" : "expand")} ${reportTitle ?? t("diagnostic_report")}`}
+          aria-describedby={`${timestampsId} ${statusId}`}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.stopPropagation();
             }
           }}
         >
-          <span className="flex w-full items-center gap-2 min-w-0 sm:w-auto sm:flex-1">
-            <FileCheck2 className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
+          <span className="flex items-start gap-2.5 min-w-0">
+            <FileCheck2 className="mt-0.5 size-5 shrink-0 text-gray-500 stroke-[1.5px]" />
             <span className="flex flex-col gap-1 min-w-0">
-              <span className="text-base text-gray-950 font-medium wrap-break-word">
+              <span className="text-sm leading-5 text-gray-950 font-semibold wrap-break-word sm:text-base sm:leading-6">
                 {reportTitle}
               </span>
-              <DiagnosticReportTimestamps report={report} />
+              <span id={timestampsId} className="flex">
+                <DiagnosticReportTimestamps
+                  report={report}
+                  compact={!isExpanded}
+                />
+              </span>
+              {isEmpty && (
+                <span className="text-xs text-gray-500 font-normal">
+                  {t("no_observations_entered")}
+                </span>
+              )}
             </span>
           </span>
-          <span className="flex flex-wrap items-center gap-3 sm:gap-5">
-            {isEmpty && (
-              <span className="text-sm text-gray-400 font-medium">
-                {t("no_observations_entered")}
-              </span>
-            )}
+          <span className="col-span-2 row-start-2 flex items-center justify-between gap-3 min-w-0 border-t border-gray-100 pt-3 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:border-0 sm:pt-0 sm:gap-4">
             {report.created_by && (
               <span
                 className="flex items-center gap-2 min-w-0"
@@ -85,20 +89,24 @@ export function DiagnosticReportReviewHeader({
                   className="size-5 shrink-0"
                   imageUrl={report.created_by.profile_picture_url}
                 />
-                <span className="text-sm text-gray-700 font-medium truncate">
+                <span className="text-xs text-gray-600 font-normal truncate">
                   {formatName(report.created_by)}
                 </span>
               </span>
             )}
-            <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
+            <Badge
+              id={statusId}
+              variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+              className="ml-auto shrink-0 px-2 text-xs"
+            >
               {t(report.status)}
             </Badge>
-            {isExpanded ? (
-              <ChevronsDownUp className="size-5" />
-            ) : (
-              <ChevronsUpDown className="size-5" />
-            )}
           </span>
+          {isExpanded ? (
+            <ChevronUp className="col-start-2 row-start-1 mt-0.5 size-4 text-gray-500 sm:col-start-3 sm:mt-0" />
+          ) : (
+            <ChevronDown className="col-start-2 row-start-1 mt-0.5 size-4 text-gray-500 sm:col-start-3 sm:mt-0" />
+          )}
         </button>
       </CollapsibleTrigger>
       {showObservationHistory && (
