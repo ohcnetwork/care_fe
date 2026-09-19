@@ -141,9 +141,6 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    // An unknown status cannot tell us whether a known end date is invalid.
-    if (encounter.status === EncounterStatus.UNKNOWN) return;
-
     const shouldSetEndDate =
       encounter.status === EncounterStatus.DISCHARGED ||
       encounter.status === EncounterStatus.DISCONTINUED ||

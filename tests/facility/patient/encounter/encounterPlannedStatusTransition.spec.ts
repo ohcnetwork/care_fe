@@ -5,7 +5,6 @@ import {
   openCreateEncounterDialog,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -182,61 +181,6 @@ test.describe("Planned Encounter Status Transition", () => {
         await openEncounterUpdateForm(page);
         await cancelEncounterFromCurrentForm(page);
       });
-    });
-  }
-
-  for (const hasEnd of [false, true]) {
-    test(`Unknown preserves ${hasEnd ? "an existing" : "an absent"} end date`, async ({
-      page,
-      request,
-    }) => {
-      await createPlannedEncounter(page, "past");
-      const encounter = await expectPersistedPeriod(page, "planned");
-      const url = `${getApiUrl()}/api/v1/encounter/${encounter.id}/`;
-      const headers = getApiHeaders();
-      const data = {
-        status: "unknown",
-        encounter_class: encounter.encounter_class,
-        period: {
-          start: encounter.period.start,
-          end: hasEnd
-            ? new Date(
-                Date.parse(encounter.period.start!) + 3600000,
-              ).toISOString()
-            : undefined,
-        },
-        priority: encounter.priority,
-        hospitalization: encounter.hospitalization,
-        external_identifier: encounter.external_identifier,
-        discharge_summary_advice: encounter.discharge_summary_advice,
-      };
-
-      try {
-        // Unknown is nonselectable, so seed this valid existing state through the API.
-        const response = await request.put(url, { headers, data });
-        expect(response.ok()).toBeTruthy();
-        const seeded: EncounterRead = await response.json();
-
-        await test.step("Submit the unchanged Unknown encounter", async () => {
-          await page.reload();
-          await openEncounterUpdateForm(page);
-          await expect(encounterStatusCombobox(page)).toContainText("Unknown");
-          await submitQuestionnaire(page);
-          await expectSubmissionSuccess(page);
-          const saved = await expectPersistedPeriod(page, "unknown", hasEnd);
-          expect(saved.period).toEqual(seeded.period);
-        });
-      } finally {
-        const response = await request.put(url, {
-          headers,
-          data: {
-            ...data,
-            status: "cancelled",
-            period: { start: encounter.period.start },
-          },
-        });
-        expect(response.ok()).toBeTruthy();
-      }
     });
   }
 
