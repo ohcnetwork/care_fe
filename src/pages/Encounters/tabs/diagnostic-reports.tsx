@@ -177,7 +177,7 @@ function DiagnosticReportDetailCard({
                     )
                   }
                   data-shortcut-id="print-button"
-                  disabled={!report.service_request?.id}
+                  aria-label={t("print")}
                 >
                   <Printer className="size-4" />
                 </Button>

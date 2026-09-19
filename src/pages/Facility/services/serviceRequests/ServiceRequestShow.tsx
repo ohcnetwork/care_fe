@@ -269,7 +269,12 @@ export default function ServiceRequestShow({
   const specimenRequirements = activityDefinition.specimen_requirements ?? [];
   const observationRequirements =
     activityDefinition.observation_result_requirements ?? [];
-  const diagnosticReports = request.diagnostic_reports || [];
+  const diagnosticReports = [...(request.diagnostic_reports || [])].sort(
+    (first, second) =>
+      new Date(first.created_date).getTime() -
+        new Date(second.created_date).getTime() ||
+      first.id.localeCompare(second.id),
+  );
 
   const assignedSpecimenIds = new Set<string>();
 
@@ -625,7 +630,7 @@ export default function ServiceRequestShow({
                 <p className="text-xs text-gray-600">
                   {hasPendingReports
                     ? t("reports_pending_final_review", {
-                        pending: pendingReports,
+                        count: pendingReports,
                         total: totalReports,
                       })
                     : t("complete_service_request_help_text")}

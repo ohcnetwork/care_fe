@@ -17,7 +17,11 @@ export default function DiagnosticReportPrint({
 }) {
   const { t } = useTranslation();
 
-  const { data: fullReport, isLoading: isLoadingReport } = useQuery({
+  const {
+    data: fullReport,
+    isFetching: isLoadingReport,
+    isError: isReportError,
+  } = useQuery({
     queryKey: ["diagnosticReport", diagnosticReportId],
     queryFn: query(diagnosticReportApi.retrieveDiagnosticReport, {
       pathParams: {
@@ -29,9 +33,9 @@ export default function DiagnosticReportPrint({
 
   const diagnosticReports = fullReport ? [fullReport] : [];
 
-  const { allFiles, isLoadingFiles } = useQueries({
+  const { allFiles, isLoadingFiles, isFilesError } = useQueries({
     queries: diagnosticReports.map((report) => ({
-      queryKey: ["files", "diagnostic_report", report.id],
+      queryKey: ["files", "diagnostic_report", report.id, "print"],
       queryFn: query.paginated(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
@@ -46,12 +50,17 @@ export default function DiagnosticReportPrint({
           file,
         })),
       ),
-      isLoadingFiles: results.some((result) => result.isLoading),
+      isLoadingFiles: results.some((result) => result.isFetching),
+      isFilesError: results.some((result) => result.isError),
     }),
   });
 
   if (isLoadingReport) {
     return <Loading />;
+  }
+
+  if (isReportError || isFilesError) {
+    return <div role="alert">{t("diagnostic_report_print_load_error")}</div>;
   }
 
   if (!fullReport) {

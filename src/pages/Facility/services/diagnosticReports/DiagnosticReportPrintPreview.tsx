@@ -11,7 +11,7 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ReactNode, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
@@ -22,9 +22,16 @@ import { Document, Page } from "react-pdf";
 // the screen, so this must not depend on the (non-reactive) viewport width.
 const PRINT_PAGE_WIDTH = 600;
 
+interface AttachmentRendererProps {
+  fileUrl: string;
+  onReady: (fileUrl: string) => void;
+  onError: (fileUrl: string) => void;
+}
+
 // TODO: Replace with PDFViewer or extract this to a component
-function PDFRenderer({ fileUrl }: { fileUrl: string }) {
+function PDFRenderer({ fileUrl, onReady, onError }: AttachmentRendererProps) {
   const [numPages, setNumPages] = useState<number>(0);
+  const renderedPages = useRef(new Set<number>());
   const { t } = useTranslation();
 
   return (
@@ -32,6 +39,8 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
       <Document
         file={fileUrl}
         onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+        onLoadError={() => onError(fileUrl)}
+        onSourceError={() => onError(fileUrl)}
         error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
         loading={<div className="text-gray-500">{t("loading")}</div>}
       >
@@ -44,6 +53,14 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
               scale={1.2}
               renderTextLayer={false}
               renderAnnotationLayer={false}
+              onRenderSuccess={() => {
+                renderedPages.current.add(index);
+                if (renderedPages.current.size === numPages) {
+                  onReady(fileUrl);
+                }
+              }}
+              onLoadError={() => onError(fileUrl)}
+              onRenderError={() => onError(fileUrl)}
             />
           ))}
         </div>
@@ -55,8 +72,9 @@ function PDFRenderer({ fileUrl }: { fileUrl: string }) {
 function ImageRenderer({
   fileUrl,
   fileName,
-}: {
-  fileUrl: string;
+  onReady,
+  onError,
+}: AttachmentRendererProps & {
   fileName?: string;
 }) {
   const { t } = useTranslation();
@@ -77,10 +95,14 @@ function ImageRenderer({
         src={fileUrl}
         alt={fileName || t("diagnostic_report_image")}
         className={`max-w-[600px] h-auto mx-auto ${isLoading || hasError ? "hidden" : ""}`}
-        onLoad={() => setIsLoading(false)}
+        onLoad={() => {
+          setIsLoading(false);
+          onReady(fileUrl);
+        }}
         onError={() => {
           setIsLoading(false);
           setHasError(true);
+          onError(fileUrl);
         }}
       />
     </div>
@@ -97,14 +119,38 @@ export const DiagnosticReportPrintPreview = ({
 }) => {
   const { facility } = useCurrentFacilitySilently();
   const { t } = useTranslation();
+  const [attachmentStates, setAttachmentStates] = useState<
+    Record<string, "ready" | "error">
+  >({});
+  const handleAttachmentReady = useCallback((fileUrl: string) => {
+    setAttachmentStates((current) =>
+      current[fileUrl] === "ready"
+        ? current
+        : { ...current, [fileUrl]: "ready" },
+    );
+  }, []);
+  const handleAttachmentError = useCallback((fileUrl: string) => {
+    setAttachmentStates((current) =>
+      current[fileUrl] === "error"
+        ? current
+        : { ...current, [fileUrl]: "error" },
+    );
+  }, []);
+
+  const printableFiles = allFiles.filter(
+    ({ file }) =>
+      file.upload_completed &&
+      !file.is_archived &&
+      /(pdf|jpg|jpeg|png|gif|webp)$/i.test(file.extension),
+  );
 
   const diagnosticReportDetail = diagnosticReports[0];
 
   const diagnosticReportLength = diagnosticReports.length;
 
   // Fetch a signed URL for each file across all reports via parallel queries.
-  const { fileUrls, isFetchingFileUrls } = useQueries({
-    queries: allFiles.map(({ reportId, file }) => ({
+  const { fileUrls, isFetchingFileUrls, isFileUrlsError } = useQueries({
+    queries: printableFiles.map(({ reportId, file }) => ({
       queryKey: ["diagnostic_report_file_url", reportId, file.id],
       queryFn: query(fileApi.get, {
         queryParams: {
@@ -116,7 +162,7 @@ export const DiagnosticReportPrintPreview = ({
     })),
     combine: (results) => {
       const fileUrls: Record<string, string> = {};
-      allFiles.forEach(({ file }, index) => {
+      printableFiles.forEach(({ file }, index) => {
         const url = results[index]?.data?.read_signed_url;
         if (url) {
           fileUrls[file.id] = url;
@@ -124,10 +170,24 @@ export const DiagnosticReportPrintPreview = ({
       });
       return {
         fileUrls,
-        isFetchingFileUrls: results.some((result) => result.isLoading),
+        isFetchingFileUrls: results.some((result) => result.isFetching),
+        isFileUrlsError: results.some(
+          (result) =>
+            result.isError ||
+            (result.isSuccess && !result.data.read_signed_url),
+        ),
       };
     },
   });
+
+  const isAttachmentError =
+    isFileUrlsError ||
+    printableFiles.some(
+      ({ file }) => attachmentStates[fileUrls[file.id]] === "error",
+    );
+  const areAttachmentsReady = printableFiles.every(
+    ({ file }) => attachmentStates[fileUrls[file.id]] === "ready",
+  );
 
   return (
     <div className="flex justify-center items-center">
@@ -135,9 +195,19 @@ export const DiagnosticReportPrintPreview = ({
         title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${diagnosticReportDetail?.service_request?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
-        disabled={isLoading || isFetchingFileUrls}
+        disabled={
+          isLoading ||
+          isFetchingFileUrls ||
+          isAttachmentError ||
+          !areAttachmentsReady
+        }
       >
         <div>
+          {isAttachmentError && (
+            <div role="alert" className="mb-4 text-red-600">
+              {t("diagnostic_report_print_load_error")}
+            </div>
+          )}
           <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
             {diagnosticReportDetail?.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
@@ -212,6 +282,8 @@ export const DiagnosticReportPrintPreview = ({
                 return acc;
               }, [])}
               fileUrls={fileUrls}
+              onAttachmentReady={handleAttachmentReady}
+              onAttachmentError={handleAttachmentError}
             />
           ))}
 
@@ -227,10 +299,14 @@ const DiagnosticReportPreviewItem = ({
   report,
   files,
   fileUrls,
+  onAttachmentReady,
+  onAttachmentError,
 }: {
   report: DiagnosticReportRead;
   files: FileReadMinimal[];
   fileUrls: Record<string, string>;
+  onAttachmentReady: AttachmentRendererProps["onReady"];
+  onAttachmentError: AttachmentRendererProps["onError"];
 }) => {
   const { t } = useTranslation();
 
@@ -324,8 +400,12 @@ const DiagnosticReportPreviewItem = ({
               <div className="mt-8">
                 <div className="space-y-12">
                   {pdfFiles.map((file) => (
-                    <div key={`content-${file.id}`}>
-                      <PDFRenderer fileUrl={fileUrls[file.id]} />
+                    <div key={`content-${file.id}-${fileUrls[file.id]}`}>
+                      <PDFRenderer
+                        fileUrl={fileUrls[file.id]}
+                        onReady={onAttachmentReady}
+                        onError={onAttachmentError}
+                      />
                     </div>
                   ))}
                 </div>
@@ -335,10 +415,12 @@ const DiagnosticReportPreviewItem = ({
               <div className="mt-8">
                 <div className="space-y-12">
                   {imageFiles.map((file) => (
-                    <div key={`content-${file.id}`}>
+                    <div key={`content-${file.id}-${fileUrls[file.id]}`}>
                       <ImageRenderer
                         fileUrl={fileUrls[file.id]}
                         fileName={file.name}
+                        onReady={onAttachmentReady}
+                        onError={onAttachmentError}
                       />
                     </div>
                   ))}

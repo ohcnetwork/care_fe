@@ -8,6 +8,7 @@ import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportAp
 import fileApi from "@/types/files/fileApi";
 import query from "@/Utils/request/query";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export const MultipleDiagnosticReportsPrint = ({
   serviceRequestId,
@@ -16,8 +17,9 @@ export const MultipleDiagnosticReportsPrint = ({
   serviceRequestId: string;
   patientId: string;
 }) => {
-  const { data, isLoading } = useQuery({
-    queryKey: ["diagnosticReports", patientId, serviceRequestId],
+  const { t } = useTranslation();
+  const { data, isFetching, isError } = useQuery({
+    queryKey: ["diagnosticReports", patientId, serviceRequestId, "print"],
     queryFn: query.paginated(diagnosticReportApi.listDiagnosticReports, {
       pathParams: { patient_external_id: patientId },
       queryParams: {
@@ -27,9 +29,14 @@ export const MultipleDiagnosticReportsPrint = ({
     }),
   });
 
-  const diagnosticReportResults = data?.results;
+  // The backend may ignore the service_request filter; verify ownership before printing.
+  const diagnosticReportResults = data?.results.filter(
+    (report) =>
+      report.service_request?.id === serviceRequestId &&
+      report.status === DiagnosticReportStatus.final,
+  );
 
-  const { diagnosticReports, isLoading: isLoadingReports } = useQueries({
+  const { diagnosticReports, isLoadingReports, isReportsError } = useQueries({
     queries:
       diagnosticReportResults?.map((report) => ({
         queryKey: ["diagnosticReport", report.id],
@@ -44,13 +51,14 @@ export const MultipleDiagnosticReportsPrint = ({
       diagnosticReports: results
         .map((r) => r.data)
         .filter((data): data is DiagnosticReportRead => !!data),
-      isLoading: results.some((r) => r.isLoading),
+      isLoadingReports: results.some((r) => r.isFetching),
+      isReportsError: results.some((r) => r.isError),
     }),
   });
 
-  const { allFiles, isLoadingFiles } = useQueries({
+  const { allFiles, isLoadingFiles, isFilesError } = useQueries({
     queries: diagnosticReports.map((report) => ({
-      queryKey: ["files", "diagnostic_report", report.id],
+      queryKey: ["files", "diagnostic_report", report.id, "print"],
       queryFn: query.paginated(fileApi.list, {
         queryParams: {
           file_type: "diagnostic_report",
@@ -65,12 +73,21 @@ export const MultipleDiagnosticReportsPrint = ({
           file,
         })),
       ),
-      isLoadingFiles: results.some((result) => result.isLoading),
+      isLoadingFiles: results.some((result) => result.isFetching),
+      isFilesError: results.some((result) => result.isError),
     }),
   });
 
-  if (isLoading || isLoadingReports) {
+  if (isFetching || isLoadingReports) {
     return <Loading />;
+  }
+
+  if (isError || isReportsError || isFilesError) {
+    return <div role="alert">{t("diagnostic_report_print_load_error")}</div>;
+  }
+
+  if (!diagnosticReports.length) {
+    return <div>{t("no_diagnostic_reports_found")}</div>;
   }
 
   return (

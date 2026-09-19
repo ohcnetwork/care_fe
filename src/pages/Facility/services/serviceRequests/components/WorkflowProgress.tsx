@@ -20,6 +20,7 @@ import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { useTranslation } from "react-i18next";
 
 interface TimelineEvent {
+  id: string;
   title: string;
   description: string;
   additional_info?: string;
@@ -104,11 +105,7 @@ function WorkflowContent({ events }: { events: TimelineEvent[] }) {
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">
           {events.map((event, index) => (
-            <TimelineNode
-              key={`${event.timestamp}-${event.title}`}
-              event={event}
-              isLatest={index === 0}
-            />
+            <TimelineNode key={event.id} event={event} isLatest={index === 0} />
           ))}
         </div>
       </ScrollArea>
@@ -131,6 +128,7 @@ export function WorkflowProgress({
   // Add service request creation
   if (request.created_by && request.created_date) {
     events.push({
+      id: `service-request-${request.id}-created`,
       title: t("service_request_created"),
       description: t("request_initiated_by", {
         name: formatName(request.created_by),
@@ -144,6 +142,7 @@ export function WorkflowProgress({
   request.specimens?.forEach((specimen: SpecimenRead) => {
     if (specimen.collection?.collected_date_time) {
       events.push({
+        id: `specimen-${specimen.id}-collected`,
         title: t("specimen_collected"),
         description: t("specimen_collected_description", {
           specimen: specimen.specimen_type?.display || t("specimen"),
@@ -156,9 +155,10 @@ export function WorkflowProgress({
 
   // Add specimen processing events
   request.specimens?.forEach((specimen: SpecimenRead) => {
-    specimen.processing.forEach((processing) => {
+    specimen.processing.forEach((processing, index) => {
       if (processing.time_date_time) {
         events.push({
+          id: `specimen-${specimen.id}-processing-${index}`,
           title: t("specimen_processed"),
           description: t("specimen_processed_description", {
             specimen: specimen.specimen_type?.display || t("specimen"),
@@ -175,6 +175,7 @@ export function WorkflowProgress({
     const diagnosticReportName =
       report.code?.display ?? report.service_request?.title ?? t("diagnostic");
     events.push({
+      id: `report-${report.id}-created`,
       title: t("diagnostic_report_created"),
       description: t("diagnostic_report_created_description", {
         name: diagnosticReportName,
@@ -183,6 +184,7 @@ export function WorkflowProgress({
       status: "completed",
     });
     events.push({
+      id: `report-${report.id}-status`,
       title:
         report.status === "final"
           ? t("diagnostic_report_approved")
@@ -214,6 +216,7 @@ export function WorkflowProgress({
             variant="outline"
             size="icon"
             className="border border-gray-400"
+            aria-label={t("workflow_progress")}
           >
             <PanelRight />
           </Button>

@@ -13,7 +13,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -128,6 +128,42 @@ interface ObservationsByDefinition {
   [definitionId: string]: ObservationValue[];
 }
 
+function reportCodeKey(code: Code) {
+  return JSON.stringify([code.system, code.code]);
+}
+
+function getReportObservations(
+  report?: DiagnosticReportRead,
+): ObservationsByDefinition {
+  const values: ObservationsByDefinition = {};
+  for (const observation of report?.observations ?? []) {
+    if (
+      !observation.observation_definition ||
+      observation.status === ObservationStatus.ENTERED_IN_ERROR
+    )
+      continue;
+    const components: Record<string, ComponentValue> = {};
+    for (const component of observation.component ?? []) {
+      if (!component.code) continue;
+      components[component.code.code] = {
+        value: component.value.value ?? "",
+        unit: component.value.unit?.code ?? "",
+        interpretation: component.interpretation,
+      };
+    }
+    const definitionId = observation.observation_definition.id;
+    (values[definitionId] ??= []).push({
+      id: observation.id,
+      value: observation.value.value ?? "",
+      unit: observation.value.unit?.code ?? "",
+      interpretation: observation.interpretation,
+      status: observation.status,
+      components,
+    });
+  }
+  return values;
+}
+
 export function DiagnosticReportForm({
   patientId,
   serviceRequestId,
@@ -145,10 +181,15 @@ export function DiagnosticReportForm({
 
   const [showReportTypeSelect, setShowReportTypeSelect] = useState(false);
 
-  // Check if all required specimens are collected
-  const hasCollectedSpecimens =
-    activityDefinition?.specimen_requirements?.length === 0 ||
-    specimens.some((specimen) => specimen.status === SpecimenStatus.available);
+  const hasCollectedSpecimens = (
+    activityDefinition?.specimen_requirements ?? []
+  ).every((requirement) =>
+    specimens.some(
+      (specimen) =>
+        specimen.specimen_definition?.id === requirement.id &&
+        specimen.status === SpecimenStatus.available,
+    ),
+  );
 
   const isMultipleDiagnosticReport =
     !!activityDefinition?.diagnostic_report_codes &&
@@ -157,14 +198,14 @@ export function DiagnosticReportForm({
   // Report codes already used by existing diagnostic reports
   const usedReportCodes = new Set(
     diagnosticReports
-      .map((report) => report.code?.code)
+      .map((report) => report.code && reportCodeKey(report.code))
       .filter((code): code is string => !!code),
   );
 
   // Report codes still available to create a new diagnostic report for
   const availableReportCodes =
     activityDefinition?.diagnostic_report_codes?.filter(
-      (code) => !usedReportCodes.has(code.code),
+      (code) => !usedReportCodes.has(reportCodeKey(code)),
     ) ?? [];
 
   const activeDiagnosticReports = diagnosticReports.filter(
@@ -189,18 +230,21 @@ export function DiagnosticReportForm({
           patient_external_id: patientId,
         },
       }),
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success(t("diagnostic_report_created_successfully"));
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: ["serviceRequest", facilityId, serviceRequestId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport"],
         });
       },
     });
 
   function handleCreateReport(code?: Code) {
+    if (
+      disableEdit ||
+      isCreatingReport ||
+      serviceRequestStatus === ServiceRequestStatus.completed
+    )
+      return;
     if (!hasCollectedSpecimens) {
       toast.error(t("specimen_collection_required"));
       return;
@@ -245,8 +289,7 @@ export function DiagnosticReportForm({
                 <ReportTypePicker
                   availableReportCodes={availableReportCodes}
                   hasCollectedSpecimens={hasCollectedSpecimens}
-                  disableEdit={disableEdit}
-                  isCreatingReport={isCreatingReport}
+                  disableEdit={disableEdit || isCreatingReport}
                   onCreateReport={(code) => {
                     handleCreateReport(code);
                     setShowReportTypeSelect(false);
@@ -277,8 +320,7 @@ export function DiagnosticReportForm({
           availableReportCodes={availableReportCodes}
           hasCollectedSpecimens={hasCollectedSpecimens}
           isMultipleDiagnosticReport={isMultipleDiagnosticReport}
-          isCreatingReport={isCreatingReport}
-          disableEdit={disableEdit}
+          disableEdit={disableEdit || isCreatingReport}
           serviceRequestId={serviceRequestId}
           handleCreateReport={handleCreateReport}
         />
@@ -308,12 +350,10 @@ function DiagnosticReportItem({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [observations, setObservations] = useState<ObservationsByDefinition>(
-    {},
-  );
+  const [observationDraft, setObservationDraft] =
+    useState<ObservationsByDefinition | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [conclusion, setConclusion] = useState("");
+  const [conclusionDraft, setConclusion] = useState<string | undefined>();
 
   const { data: fullReport } = useQuery({
     queryKey: ["diagnosticReport", report.id],
@@ -340,18 +380,22 @@ function DiagnosticReportItem({
 
   // Save observations and update the diagnostic report in a single batch request
   const { mutate: saveReport, isPending: isSubmitting } = useBatchRequest({
-    onSuccess: ({ results }) => {
+    onSuccess: async ({ results }) => {
       if (results.some((r) => r.reference_id === "upsert-observations")) {
         toast.success(t("test_results_saved_successfully"));
       } else {
         toast.success(t("diagnostic_report_saved_successfully"));
       }
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["diagnosticReport", report.id],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["serviceRequest", facilityId, serviceRequestId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["diagnosticReport", report.id],
+        }),
+      ]);
+      setObservationDraft(null);
+      setConclusion(undefined);
       setIsExpanded(false);
       onReportSaved({ id: report.id, savedAt: Date.now() });
     },
@@ -373,71 +417,23 @@ function DiagnosticReportItem({
     compress: false,
   });
 
-  // Handle file upload dialog
-  useEffect(() => {
-    if (disableEdit || fileUpload.files.length === 0 || fileUpload.previewing) {
-      setOpenUploadDialog(false);
-    } else {
-      setOpenUploadDialog(true);
-    }
-  }, [fileUpload.files, fileUpload.previewing, disableEdit]);
+  const openUploadDialog =
+    !disableEdit && fileUpload.files.length > 0 && !fileUpload.previewing;
+  const observations = observationDraft ?? getReportObservations(fullReport);
+  const conclusion = conclusionDraft ?? fullReport?.conclusion ?? "";
+  const isReadOnly =
+    disableEdit ||
+    !fullReport ||
+    isSubmitting ||
+    fullReport.status === DiagnosticReportStatus.final;
 
-  const { clearFiles } = fileUpload;
-
-  useEffect(() => {
-    if (!openUploadDialog) {
-      clearFiles();
-    }
-  }, [openUploadDialog, clearFiles]);
-
-  // Initialize form with existing observations from the full report
-  useEffect(() => {
-    if (fullReport?.observations && fullReport.observations.length > 0) {
-      const initialObservations: ObservationsByDefinition = {};
-
-      fullReport.observations
-        .filter((obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR)
-        .forEach((obs) => {
-          if (obs.observation_definition) {
-            const components: Record<string, ComponentValue> = {};
-
-            // Initialize components if they exist
-            if (obs.component && obs.component.length > 0) {
-              obs.component.forEach((comp: ObservationComponent) => {
-                if (comp.code) {
-                  components[comp.code.code] = {
-                    value: comp.value.value || "",
-                    unit: comp.value.unit?.code || "",
-                    interpretation: comp.interpretation,
-                  };
-                }
-              });
-            }
-
-            const observationValue = {
-              id: obs.id,
-              value: obs.value.value || "",
-              unit: obs.value.unit?.code || "",
-              interpretation: obs.interpretation,
-              status: obs.status,
-              components,
-            };
-
-            const definitionId = obs.observation_definition.id;
-            if (!initialObservations[definitionId]) {
-              initialObservations[definitionId] = [];
-            }
-            initialObservations[definitionId].push(observationValue);
-          }
-        });
-
-      setObservations(initialObservations);
-    }
-
-    if (fullReport) {
-      setConclusion(fullReport.conclusion || "");
-    }
-  }, [fullReport]);
+  function setObservations(
+    update: (previous: ObservationsByDefinition) => ObservationsByDefinition,
+  ) {
+    setObservationDraft((previous) =>
+      update(previous ?? getReportObservations(fullReport)),
+    );
+  }
 
   function handleValueChange(
     definitionId: string,
@@ -567,6 +563,7 @@ function DiagnosticReportItem({
   }
 
   function handleSubmit() {
+    if (isReadOnly) return;
     try {
       // Check if all observations have values
       const hasObservationValue = Object.values(observations).some((obsList) =>
@@ -839,7 +836,7 @@ function DiagnosticReportItem({
                           unit,
                         )
                       }
-                      disabled={isErrored || disableEdit}
+                      disabled={isErrored || isReadOnly}
                     >
                       <SelectTrigger className="w-full">
                         {componentData.unit ? (
@@ -884,7 +881,7 @@ function DiagnosticReportItem({
                         ? "number"
                         : "text"
                     }
-                    disabled={isErrored || disableEdit}
+                    disabled={isErrored || isReadOnly}
                   />
                 </div>
               </div>
@@ -904,12 +901,20 @@ function DiagnosticReportItem({
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger asChild className="px-2 py-4">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
-              <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
-                <CardTitle className="min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
+        <CardHeader className="px-2 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
+            <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
+              <CardTitle className="min-w-0">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 min-w-0 text-left"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.stopPropagation();
+                      }
+                    }}
+                  >
                     <NotepadText className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
                     <div className="flex flex-col min-w-0">
                       <span className="text-base text-gray-950 font-medium truncate">
@@ -922,36 +927,38 @@ function DiagnosticReportItem({
                         {format(report.modified_date, "hh:mm a, MMM dd, yyyy")}
                       </span>
                     </div>
-                  </div>
-                </CardTitle>
-              </div>
-              <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
-                {fullReport && (
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Avatar
-                      name={formatName(fullReport.created_by, true)}
-                      className="size-5 shrink-0"
-                      imageUrl={fullReport.created_by.profile_picture_url}
-                    />
-                    <span className="text-sm text-gray-700 font-medium truncate">
-                      {formatName(fullReport.created_by)}
-                    </span>
-                  </div>
-                )}
+                  </button>
+                </CollapsibleTrigger>
+              </CardTitle>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
+              {fullReport && (
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar
+                    name={formatName(fullReport.created_by, true)}
+                    className="size-5 shrink-0"
+                    imageUrl={fullReport.created_by.profile_picture_url}
+                  />
+                  <span className="text-sm text-gray-700 font-medium truncate">
+                    {formatName(fullReport.created_by)}
+                  </span>
+                </div>
+              )}
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <Badge
-                    variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
-                  >
-                    {t(report.status)}
-                  </Badge>
+              <div className="flex items-center gap-1 shrink-0">
+                <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
+                  {t(report.status)}
+                </Badge>
+                <CollapsibleTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="size-10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsExpanded(!isExpanded);
+                    aria-label={isExpanded ? t("collapse") : t("expand")}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.stopPropagation();
+                      }
                     }}
                   >
                     {isExpanded ? (
@@ -960,35 +967,39 @@ function DiagnosticReportItem({
                       <ChevronsUpDown className="size-5" />
                     )}
                   </Button>
-                  {observationDefinitions.length > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <ObservationHistorySheet
-                          patientId={patientId}
-                          diagnosticReportId={report.id}
+                </CollapsibleTrigger>
+                {observationDefinitions.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("view_observation_history")}
+                      >
+                        <MoreVertical className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <ObservationHistorySheet
+                        patientId={patientId}
+                        diagnosticReportId={report.id}
+                      >
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
-                          <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            {t("view_observation_history")}
-                          </DropdownMenuItem>
-                        </ObservationHistorySheet>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
+                          {t("view_observation_history")}
+                        </DropdownMenuItem>
+                      </ObservationHistorySheet>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
-          </CardHeader>
-        </CollapsibleTrigger>
+          </div>
+        </CardHeader>
 
         <CollapsibleContent>
           <CardContent className="px-2">
@@ -1004,7 +1015,7 @@ function DiagnosticReportItem({
                   handleComponentValueChange={handleComponentValueChange}
                   handleValueChange={handleValueChange}
                   handleUnitChange={handleUnitChange}
-                  disabled={disableEdit}
+                  disabled={isReadOnly}
                 />
               )}
               {report.status !== DiagnosticReportStatus.final &&
@@ -1057,7 +1068,7 @@ function DiagnosticReportItem({
                                       {t("marked_for_deletion")}
                                     </span>
                                   ) : (
-                                    !disableEdit && (
+                                    !isReadOnly && (
                                       <Button
                                         type="button"
                                         variant="ghost"
@@ -1097,7 +1108,7 @@ function DiagnosticReportItem({
                                               unit,
                                             )
                                           }
-                                          disabled={isErrored || disableEdit}
+                                          disabled={isErrored || isReadOnly}
                                         >
                                           <SelectTrigger className="w-full">
                                             <SelectValue
@@ -1142,7 +1153,7 @@ function DiagnosticReportItem({
                                             ? "number"
                                             : "text"
                                         }
-                                        disabled={isErrored || disableEdit}
+                                        disabled={isErrored || isReadOnly}
                                       />
                                     </div>
                                   </div>
@@ -1183,7 +1194,7 @@ function DiagnosticReportItem({
                                 };
                               });
                             }}
-                            disabled={disableEdit}
+                            disabled={isReadOnly}
                           >
                             <PlusCircle className="size-4 mr-2" />
                             {t("add_another_result")}
@@ -1211,7 +1222,7 @@ function DiagnosticReportItem({
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
                         rows={3}
-                        disabled={disableEdit}
+                        disabled={isReadOnly}
                       />
                     </CardContent>
                   </Card>
@@ -1224,7 +1235,7 @@ function DiagnosticReportItem({
                       <Button
                         variant="primary"
                         onClick={handleSubmit}
-                        disabled={isSubmitting || disableEdit}
+                        disabled={isReadOnly}
                       >
                         <Save className="size-4 mr-2" />
                         {t("save_results")}
@@ -1240,7 +1251,7 @@ function DiagnosticReportItem({
                         files={files.results}
                         type="diagnostic_report"
                         associatingId={report.id}
-                        canEdit={!disableEdit}
+                        canEdit={!isReadOnly}
                         showHeader={false}
                       />
                     </div>
@@ -1267,7 +1278,7 @@ function DiagnosticReportItem({
                             <Button
                               variant="outline"
                               className=" border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white"
-                              disabled={disableEdit}
+                              disabled={isReadOnly}
                               onClick={() => fileUpload.handleCameraCapture()}
                             >
                               <Camera className="size-4" />
@@ -1278,21 +1289,19 @@ function DiagnosticReportItem({
                               variant="outline"
                               className={cn(
                                 "border-gray-300 bg-white font-semibold text-gray-950 shadow-sm hover:bg-white",
-                                disableEdit
+                                isReadOnly
                                   ? "pointer-events-none opacity-50"
                                   : "cursor-pointer",
                               )}
                             >
-                              <Label
-                                htmlFor={disableEdit ? undefined : inputId}
-                              >
+                              <Label htmlFor={isReadOnly ? undefined : inputId}>
                                 <Upload className="size-4" />
                                 {t("upload_files")}
                               </Label>
                             </Button>
                             <fileUpload.Input
                               className="hidden"
-                              disabled={disableEdit}
+                              disabled={isReadOnly}
                             />
                           </div>
 
@@ -1312,7 +1321,7 @@ function DiagnosticReportItem({
                                 type="button"
                                 variant="outline"
                                 className="w-full border-gray-300 bg-white"
-                                disabled={disableEdit}
+                                disabled={isReadOnly}
                                 onClick={() => fileUpload.clearFiles()}
                               >
                                 {t("clear")}
@@ -1333,7 +1342,9 @@ function DiagnosticReportItem({
       {fileUpload.Dialogues}
       <FileUploadDialog
         open={openUploadDialog}
-        onOpenChange={setOpenUploadDialog}
+        onOpenChange={(open) => {
+          if (!open) fileUpload.clearFiles();
+        }}
         fileUpload={fileUpload}
         associatingId={report?.id || ""}
         type="diagnostic_report"
@@ -1347,14 +1358,12 @@ function ReportTypePicker({
   availableReportCodes,
   hasCollectedSpecimens,
   disableEdit,
-  isCreatingReport,
   onCreateReport,
   onDismiss,
 }: {
   availableReportCodes: Code[];
   hasCollectedSpecimens: boolean;
   disableEdit: boolean;
-  isCreatingReport: boolean;
   onCreateReport: (code: Code) => void;
   onDismiss?: () => void;
 }) {
@@ -1382,9 +1391,11 @@ function ReportTypePicker({
           {t("select_diagnostic_report_type")}
         </Label>
         <Select
-          value={selectedCode?.code ?? ""}
+          value={selectedCode ? reportCodeKey(selectedCode) : ""}
           onValueChange={(value) => {
-            const code = availableReportCodes.find((c) => c.code === value);
+            const code = availableReportCodes.find(
+              (c) => reportCodeKey(c) === value,
+            );
             setSelectedCode(code ?? null);
           }}
           disabled={!hasCollectedSpecimens || disableEdit}
@@ -1394,7 +1405,7 @@ function ReportTypePicker({
           </SelectTrigger>
           <SelectContent>
             {availableReportCodes.map((code) => (
-              <SelectItem key={code.code} value={code.code}>
+              <SelectItem key={reportCodeKey(code)} value={reportCodeKey(code)}>
                 <span className="truncate">
                   {code.display} ({code.code})
                 </span>
@@ -1418,12 +1429,7 @@ function ReportTypePicker({
             onCreateReport(selectedCode);
             setSelectedCode(null);
           }}
-          disabled={
-            disableEdit ||
-            isCreatingReport ||
-            !hasCollectedSpecimens ||
-            !selectedCode
-          }
+          disabled={disableEdit || !hasCollectedSpecimens || !selectedCode}
           className="w-full sm:w-auto"
         >
           <Plus className="size-4 mr-2" />
@@ -1435,7 +1441,6 @@ function ReportTypePicker({
 }
 
 const CreateDiagnosticReportForm = ({
-  isCreatingReport,
   disableEdit,
   serviceRequestId,
   handleCreateReport,
@@ -1443,7 +1448,6 @@ const CreateDiagnosticReportForm = ({
   isMultipleDiagnosticReport,
   availableReportCodes,
 }: {
-  isCreatingReport: boolean;
   disableEdit: boolean;
   serviceRequestId: string;
   handleCreateReport: (code?: Code) => void;
@@ -1462,41 +1466,53 @@ const CreateDiagnosticReportForm = ({
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger asChild className="px-2 py-4">
-          <CardHeader>
-            <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
-              <div className="flex items-center gap-2">
-                <CardTitle>
-                  <p className="flex items-center gap-1.5">
+        <CardHeader className="px-2 py-4">
+          <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
+            <div className="flex items-center gap-2">
+              <CardTitle>
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-left"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ")
+                        event.stopPropagation();
+                    }}
+                  >
                     <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("test_results_entry")}
                     </span>
-                  </p>
-                </CardTitle>
-              </div>
-              <div className="flex items-center gap-5">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsExpanded(!isExpanded);
-                    }}
-                  >
-                    {isExpanded ? (
-                      <ChevronsDownUp className="size-5" />
-                    ) : (
-                      <ChevronsUpDown className="size-5" />
-                    )}
-                  </Button>
-                </div>
+                  </button>
+                </CollapsibleTrigger>
+              </CardTitle>
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-10"
+                  aria-label={isExpanded ? t("collapse") : t("expand")}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ")
+                      event.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
+                >
+                  {isExpanded ? (
+                    <ChevronsDownUp className="size-5" />
+                  ) : (
+                    <ChevronsUpDown className="size-5" />
+                  )}
+                </Button>
               </div>
             </div>
-          </CardHeader>
-        </CollapsibleTrigger>
+          </div>
+        </CardHeader>
         <CollapsibleContent>
           <CardContent className="px-2 bg-gray-100">
             <PLUGIN_Component
@@ -1520,9 +1536,7 @@ const CreateDiagnosticReportForm = ({
                 {!isMultipleDiagnosticReport && (
                   <Button
                     onClick={() => handleCreateReport()}
-                    disabled={
-                      disableEdit || isCreatingReport || !hasCollectedSpecimens
-                    }
+                    disabled={disableEdit || !hasCollectedSpecimens}
                     className="w-full sm:w-auto"
                   >
                     <Plus className="size-4 mr-2" />
@@ -1535,7 +1549,6 @@ const CreateDiagnosticReportForm = ({
                   availableReportCodes={availableReportCodes}
                   hasCollectedSpecimens={hasCollectedSpecimens}
                   disableEdit={disableEdit}
-                  isCreatingReport={isCreatingReport}
                   onCreateReport={handleCreateReport}
                 />
               )}
