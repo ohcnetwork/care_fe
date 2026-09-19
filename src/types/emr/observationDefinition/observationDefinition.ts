@@ -57,8 +57,6 @@ export interface ObservationDefinitionRead extends BaseObservationDefinition {
 
 export interface ObservationDefinitionEmbedded extends BaseObservationDefinition {
   id: string;
-  // Older backend responses omit the slug from embedded definitions.
-  slug?: string;
 }
 
 export interface ObservationDefinitionCreate extends BaseObservationDefinition {

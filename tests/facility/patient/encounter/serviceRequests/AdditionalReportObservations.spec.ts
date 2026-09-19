@@ -226,7 +226,7 @@ test.describe("Additional diagnostic report observations", () => {
     }
   });
 
-  test("saves independent extra observations and repeats them after reopening legacy report responses", async ({
+  test("saves independent extra observations and repeats them after reopening reports", async ({
     page,
   }, testInfo) => {
     test.setTimeout(120000);
@@ -243,28 +243,6 @@ test.describe("Additional diagnostic report observations", () => {
     );
     let firstReportId: string;
     let secondReportId: string;
-
-    // Older backends omit the definition slug in report details. Keep covering
-    // the compatibility path even after the backend starts returning it.
-    await page.route(
-      `**/api/v1/patient/${patientId}/diagnostic_report/*/`,
-      async (route) => {
-        if (route.request().method() !== "GET") {
-          await route.continue();
-          return;
-        }
-        const response = await route.fetch();
-        const report: DiagnosticReportRead = await response.json();
-        for (const observation of report.observations) {
-          if (observation.observation_definition) {
-            const { slug: _slug, ...definition } =
-              observation.observation_definition;
-            Object.assign(observation, { observation_definition: definition });
-          }
-        }
-        await route.fulfill({ response, json: report });
-      },
-    );
 
     const readObservations = async (reportId: string) => {
       const response = await page.request.get(

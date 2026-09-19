@@ -638,10 +638,16 @@ function DiagnosticReportItem({
         return;
       }
 
-      // Resolve only new results whose embedded definition came from an older
-      // backend. Existing results are updated by observation ID without a lookup.
+      // Templates and picker selections already include the definition slug.
+      // Repeating a saved extra result after reopening needs a catalog lookup;
+      // existing results are updated by observation ID.
       setIsResolvingDefinitions(true);
-      const definitionSlugs = new Map<string, string>();
+      const definitionSlugs = new Map(
+        [...observationDefinitions, ...addedDefinitions].map((definition) => [
+          definition.id,
+          definition.slug,
+        ]),
+      );
       for (const [definitionId, values] of Object.entries(observations)) {
         const definition = definitionsById.get(definitionId);
         const hasNewResult = values.some(
@@ -655,10 +661,7 @@ function DiagnosticReportItem({
         );
         if (!hasNewResult) continue;
         if (!definition) throw new Error("Missing observation definition");
-        if (definition.slug) {
-          definitionSlugs.set(definitionId, definition.slug);
-          continue;
-        }
+        if (definitionSlugs.has(definitionId)) continue;
         const catalog = await queryClient.fetchQuery({
           queryKey: [
             "diagnostic-report-observation-slug",
