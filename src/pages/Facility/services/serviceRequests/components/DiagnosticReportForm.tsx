@@ -7,7 +7,6 @@ import {
   MoreVertical,
   NotepadText,
   Plus,
-  PlusCircle,
   Save,
   Trash2,
   Upload,
@@ -26,7 +25,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -35,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -85,6 +82,7 @@ import { ObservationHistorySheet } from "@/pages/Facility/services/serviceReques
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
+import { DiagnosticReportObservationInput } from "./DiagnosticReportObservationInput";
 import { DiagnosticReportObservationPicker } from "./DiagnosticReportObservationPicker";
 
 interface DiagnosticReportFormProps {
@@ -880,21 +878,17 @@ function DiagnosticReportItem({
     });
   }
 
-  // Helper to render component inputs for multi-component observations like blood pressure
   function renderComponentInputs(
     definition: ObservationDefinitionEmbedded,
     observationData: ObservationValue,
     index: number,
   ) {
-    if (!definition.component || definition.component.length === 0) {
-      return null;
-    }
     const isErrored =
       observationData.status === ObservationStatus.ENTERED_IN_ERROR;
 
     return (
-      <div className="space-y-2">
-        {definition.component.map((component, componentIndex) => {
+      <div className="min-w-0 flex-1 space-y-3">
+        {definition.component?.map((component, componentIndex) => {
           const componentData = observationData.components[
             component.code.code
           ] || {
@@ -902,83 +896,44 @@ function DiagnosticReportItem({
             unit: component.permitted_unit?.code || "",
             interpretation: "",
           };
+          const inputId = `observation-${report.id}-${definition.id}-${index}-${componentIndex}`;
+          const label = component.code.display || component.code.code;
 
           return (
-            <div key={component.code.code}>
-              <Label className="text-sm/10 mb-1 block text-gray-950">
-                {componentIndex + 1}.{" "}
-                {component.code.display || component.code.code}
+            <div key={component.code.code} className="space-y-1.5">
+              <Label htmlFor={inputId} className="text-sm text-gray-700">
+                {label}
               </Label>
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
-                {component.permitted_unit && (
-                  <div className="w-full sm:w-32">
-                    <Label className="text-sm font-medium mb-1 block text-gray-700">
-                      {t("unit")}
-                    </Label>
-                    <Select
-                      value={componentData.unit}
-                      onValueChange={(unit) =>
-                        handleComponentUnitChange(
-                          definition.id,
-                          index,
-                          component.code.code,
-                          unit,
-                        )
-                      }
-                      disabled={isErrored || isReadOnly}
-                    >
-                      <SelectTrigger className="w-full">
-                        {componentData.unit ? (
-                          componentData.unit
-                        ) : (
-                          <SelectValue placeholder={t("unit")} />
-                        )}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={component.permitted_unit.code}>
-                          <div className="flex flex-col">
-                            <span>
-                              {component.permitted_unit.code ||
-                                component.permitted_unit.display}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="flex-1">
-                  <Label className="text-sm font-medium mb-1 block text-gray-700">
-                    {t("result")}
-                  </Label>
-                  <Input
-                    aria-label={component.code.display || component.code.code}
-                    value={componentData.value}
-                    onChange={(e) =>
-                      handleComponentValueChange(
-                        definition.id,
-                        index,
-                        component.code.code,
-                        e.target.value,
-                        componentData.unit,
-                      )
-                    }
-                    placeholder={t("component_value")}
-                    type={
-                      component.permitted_data_type === "decimal" ||
-                      component.permitted_data_type === "integer"
-                        ? "number"
-                        : "text"
-                    }
-                    disabled={isErrored || isReadOnly}
-                  />
-                </div>
-              </div>
+              <DiagnosticReportObservationInput
+                id={inputId}
+                label={label}
+                value={componentData.value}
+                unit={componentData.unit}
+                permittedUnit={component.permitted_unit}
+                dataType={component.permitted_data_type}
+                placeholder={t("component_value")}
+                disabled={isErrored || isReadOnly}
+                onValueChange={(value) =>
+                  handleComponentValueChange(
+                    definition.id,
+                    index,
+                    component.code.code,
+                    value,
+                    componentData.unit,
+                  )
+                }
+                onUnitChange={(unit) =>
+                  handleComponentUnitChange(
+                    definition.id,
+                    index,
+                    component.code.code,
+                    unit,
+                  )
+                }
+              />
             </div>
           );
         })}
-        <Separator className="mt-4" />
       </div>
     );
   }
@@ -986,19 +941,19 @@ function DiagnosticReportItem({
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
+        "shadow-none border-gray-300 rounded-lg bg-white",
         isExpanded && "bg-gray-100",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CardHeader className="px-2 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
-            <div className="flex items-center gap-2 min-w-0 w-full sm:w-auto">
-              <CardTitle className="min-w-0">
+            <div className="flex flex-1 items-center gap-2 min-w-0 w-full sm:w-auto">
+              <CardTitle className="min-w-0 w-full">
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="flex items-center gap-2 min-w-0 text-left"
+                    className="flex items-center gap-2 min-w-0 w-full text-left"
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
                         event.stopPropagation();
@@ -1007,7 +962,7 @@ function DiagnosticReportItem({
                   >
                     <NotepadText className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
                     <div className="flex flex-col min-w-0">
-                      <span className="text-base text-gray-950 font-medium truncate">
+                      <span className="text-base text-gray-950 font-medium wrap-break-word">
                         {isMultipleDiagnosticReport
                           ? report.code?.display
                           : report.service_request?.title}
@@ -1109,235 +1064,255 @@ function DiagnosticReportItem({
                   disabled={isReadOnly}
                 />
               )}
-              {report.status !== DiagnosticReportStatus.final &&
-                reportDefinitions.map((definition) => {
-                  const observationsList = observations[definition.id] || [
-                    {
-                      id: "",
-                      value: "",
-                      unit: definition.permitted_unit?.code || "",
-                      interpretation: "",
-                      status: ObservationStatus.AMENDED,
-                      components: {},
-                    },
-                  ];
-
-                  return (
-                    <Card
-                      key={definition.id}
-                      className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50"
-                    >
-                      <CardContent className="p-4">
-                        <div className="grid gap-4">
-                          <div className="flex justify-between items-start">
-                            <Label className="text-base font-semibold text-gray-950">
-                              {definition.title || definition.code?.display}
-                            </Label>
-                          </div>
-
-                          {observationsList.map((observationData, index) => {
-                            const hasComponents =
-                              definition.component &&
-                              definition.component.length > 0;
-                            const isErrored =
-                              observationData.status ===
-                              ObservationStatus.ENTERED_IN_ERROR;
-                            return (
-                              <div
-                                key={index}
-                                className={cn(
-                                  "space-y-1 bg-gray-200/50 p-4 rounded-lg",
-                                  isErrored && "bg-gray-100",
-                                )}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <Label className="text-sm font-semibold text-gray-950">
-                                    {t("observation") + " " + (index + 1)}
-                                  </Label>
-                                  {isErrored ? (
-                                    <span className="text-sm text-red-500">
-                                      {t("marked_for_deletion")}
-                                    </span>
-                                  ) : (
-                                    !isReadOnly && (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
-                                        aria-label={t("remove_observation")}
-                                        onClick={() =>
-                                          handleDeleteObservation(
-                                            definition.id,
-                                            index,
-                                          )
-                                        }
-                                        disabled={
-                                          isErrored ||
-                                          (index === 0 &&
-                                            !observationData.id &&
-                                            observationDefinitions.some(
-                                              (required) =>
-                                                required.id === definition.id,
-                                            ))
-                                        }
-                                      >
-                                        <Trash2 className="size-4" />
-                                      </Button>
-                                    )
-                                  )}
-                                </div>
-
-                                {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
-                                {!hasComponents && (
-                                  <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
-                                    {definition.permitted_unit && (
-                                      <div className="w-full sm:w-32">
-                                        <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                          {t("unit")}
-                                        </Label>
-                                        <Select
-                                          value={observationData.unit}
-                                          onValueChange={(unit) =>
-                                            handleUnitChange(
-                                              definition.id,
-                                              index,
-                                              unit,
-                                            )
-                                          }
-                                          disabled={isErrored || isReadOnly}
-                                        >
-                                          <SelectTrigger className="w-full">
-                                            <SelectValue
-                                              placeholder={t("unit")}
-                                            />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem
-                                              value={
-                                                definition.permitted_unit.code
-                                              }
-                                            >
-                                              {definition.permitted_unit.code ||
-                                                definition.permitted_unit
-                                                  .display}
-                                            </SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    )}
-
-                                    <div className="flex-1">
-                                      <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                        {t("result")}
-                                      </Label>
-                                      <Input
-                                        aria-label={
-                                          definition.title ||
-                                          definition.code.display
-                                        }
-                                        value={observationData.value}
-                                        onChange={(e) =>
-                                          handleValueChange(
-                                            definition.id,
-                                            index,
-                                            e.target.value,
-                                            observationData.unit,
-                                          )
-                                        }
-                                        placeholder={t("result_value")}
-                                        type={
-                                          definition.permitted_data_type ===
-                                            "decimal" ||
-                                          definition.permitted_data_type ===
-                                            "integer"
-                                            ? "number"
-                                            : "text"
-                                        }
-                                        disabled={isErrored || isReadOnly}
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Render component inputs for multi-component observations */}
-                                {hasComponents &&
-                                  renderComponentInputs(
-                                    definition,
-                                    observationData,
-                                    index,
-                                  )}
-                              </div>
-                            );
-                          })}
-
-                          {/* Add button for multiple observations */}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setObservations((prev) => {
-                                const currentList =
-                                  prev[definition.id] ?? observationsList;
-                                return {
-                                  ...prev,
-                                  [definition.id]: [
-                                    ...currentList,
-                                    {
-                                      id: "",
-                                      value: "",
-                                      unit:
-                                        definition.permitted_unit?.code || "",
-                                      status: ObservationStatus.AMENDED,
-                                      components: {},
-                                    },
-                                  ],
-                                };
-                              });
-                            }}
-                            disabled={isReadOnly}
-                          >
-                            <PlusCircle className="size-4 mr-2" />
-                            {t("add_another_result")}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-
               {report.status !== DiagnosticReportStatus.final && (
-                <DiagnosticReportObservationPicker
-                  facilityId={facilityId}
-                  selectedIds={reportDefinitions.map(
-                    (definition) => definition.id,
-                  )}
-                  disabled={isReadOnly}
-                  onSelect={(definition) => {
-                    setAddedDefinitions((previous) => [
-                      ...previous,
-                      definition,
-                    ]);
-                    setObservations((previous) => ({
-                      ...previous,
-                      [definition.id]: [
+                <section
+                  aria-labelledby={`observations-${report.id}`}
+                  className="rounded-lg border border-gray-200 bg-white px-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 py-3">
+                    <h3
+                      id={`observations-${report.id}`}
+                      className="text-base font-semibold text-gray-950"
+                    >
+                      {t("observations")}
+                    </h3>
+                    <DiagnosticReportObservationPicker
+                      facilityId={facilityId}
+                      selectedIds={reportDefinitions.map(
+                        (definition) => definition.id,
+                      )}
+                      disabled={isReadOnly}
+                      onSelect={(definition) => {
+                        setAddedDefinitions((previous) => [
+                          ...previous,
+                          definition,
+                        ]);
+                        setObservations((previous) => ({
+                          ...previous,
+                          [definition.id]: [
+                            {
+                              id: "",
+                              value: "",
+                              unit: definition.permitted_unit?.code || "",
+                              status: ObservationStatus.AMENDED,
+                              components: {},
+                            },
+                          ],
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    {reportDefinitions.map((definition) => {
+                      const observationsList = observations[definition.id] || [
                         {
                           id: "",
                           value: "",
                           unit: definition.permitted_unit?.code || "",
+                          interpretation: "",
                           status: ObservationStatus.AMENDED,
                           components: {},
                         },
-                      ],
-                    }));
-                  }}
-                />
+                      ];
+                      const title = definition.title || definition.code.display;
+                      const titleId = `observation-title-${report.id}-${definition.id}`;
+                      const hasComponents = !!definition.component?.length;
+
+                      return (
+                        <Card
+                          key={definition.id}
+                          role="group"
+                          aria-labelledby={titleId}
+                          className="rounded-none border-0 not-first:border-t border-gray-200 bg-transparent shadow-none"
+                        >
+                          <CardContent className="grid gap-3 px-0 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-6">
+                            <div
+                              id={titleId}
+                              className="sm:pt-2 text-sm font-medium text-gray-950 wrap-break-word"
+                            >
+                              {title}
+                            </div>
+                            <div className="min-w-0 space-y-2">
+                              <div className="space-y-3">
+                                {observationsList.map(
+                                  (observationData, index) => {
+                                    const isErrored =
+                                      observationData.status ===
+                                      ObservationStatus.ENTERED_IN_ERROR;
+                                    const inputId = `observation-${report.id}-${definition.id}-${index}`;
+
+                                    return (
+                                      <div
+                                        key={index}
+                                        role="group"
+                                        aria-label={`${t("result")} ${index + 1}`}
+                                        className={cn(
+                                          "space-y-1.5",
+                                          hasComponents &&
+                                            "not-first:border-t not-first:border-gray-100 not-first:pt-3",
+                                        )}
+                                      >
+                                        {isErrored && (
+                                          <p className="text-sm text-red-600">
+                                            {t("marked_for_deletion")}
+                                          </p>
+                                        )}
+                                        <div className="flex items-start gap-2">
+                                          {observationsList.length > 1 && (
+                                            <span
+                                              aria-hidden="true"
+                                              className={cn(
+                                                "w-4 shrink-0 pt-2.5 text-xs text-gray-500 tabular-nums",
+                                                hasComponents && "pt-1",
+                                              )}
+                                            >
+                                              {index + 1}.
+                                            </span>
+                                          )}
+                                          {hasComponents ? (
+                                            renderComponentInputs(
+                                              definition,
+                                              observationData,
+                                              index,
+                                            )
+                                          ) : (
+                                            <DiagnosticReportObservationInput
+                                              id={inputId}
+                                              label={title}
+                                              value={observationData.value}
+                                              unit={observationData.unit}
+                                              permittedUnit={
+                                                definition.permitted_unit
+                                              }
+                                              dataType={
+                                                definition.permitted_data_type
+                                              }
+                                              placeholder={t("result_value")}
+                                              disabled={isErrored || isReadOnly}
+                                              onValueChange={(value) =>
+                                                handleValueChange(
+                                                  definition.id,
+                                                  index,
+                                                  value,
+                                                  observationData.unit,
+                                                )
+                                              }
+                                              onUnitChange={(unit) =>
+                                                handleUnitChange(
+                                                  definition.id,
+                                                  index,
+                                                  unit,
+                                                )
+                                              }
+                                            />
+                                          )}
+                                          {!isReadOnly && (
+                                            <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                <Button
+                                                  type="button"
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className={cn(
+                                                    "size-10 shrink-0 text-gray-500",
+                                                    hasComponents && "-mt-2",
+                                                  )}
+                                                  aria-label={`${t("result_actions")} ${index + 1}`}
+                                                  onKeyDown={(event) => {
+                                                    if (
+                                                      event.key === "Enter" ||
+                                                      event.key === " "
+                                                    ) {
+                                                      event.stopPropagation();
+                                                    }
+                                                  }}
+                                                >
+                                                  <MoreVertical className="size-4" />
+                                                </Button>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent
+                                                align="end"
+                                                onKeyDown={(event) => {
+                                                  if (
+                                                    event.key === "Enter" ||
+                                                    event.key === " "
+                                                  ) {
+                                                    event.stopPropagation();
+                                                  }
+                                                }}
+                                              >
+                                                <DropdownMenuItem
+                                                  onSelect={() => {
+                                                    setObservations((prev) => {
+                                                      const currentList =
+                                                        prev[definition.id] ??
+                                                        observationsList;
+                                                      return {
+                                                        ...prev,
+                                                        [definition.id]: [
+                                                          ...currentList,
+                                                          {
+                                                            id: "",
+                                                            value: "",
+                                                            unit:
+                                                              definition
+                                                                .permitted_unit
+                                                                ?.code || "",
+                                                            status:
+                                                              ObservationStatus.AMENDED,
+                                                            components: {},
+                                                          },
+                                                        ],
+                                                      };
+                                                    });
+                                                  }}
+                                                >
+                                                  <Plus className="size-4" />
+                                                  {t("add_another_result")}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                  variant="destructive"
+                                                  onSelect={() =>
+                                                    handleDeleteObservation(
+                                                      definition.id,
+                                                      index,
+                                                    )
+                                                  }
+                                                  disabled={
+                                                    isErrored ||
+                                                    (index === 0 &&
+                                                      !observationData.id &&
+                                                      observationDefinitions.some(
+                                                        (required) =>
+                                                          required.id ===
+                                                          definition.id,
+                                                      ))
+                                                  }
+                                                >
+                                                  <Trash2 className="size-4" />
+                                                  {t("remove_observation")}
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                            </DropdownMenu>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  },
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </section>
               )}
 
               <div className="space-y-4">
                 {report.status !== DiagnosticReportStatus.final && (
-                  <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-gray-50">
+                  <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
                     <CardContent className="p-4 space-y-2">
                       <Label
                         htmlFor={`conclusion-${report.id}`}
@@ -1591,7 +1566,7 @@ const CreateDiagnosticReportForm = ({
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg cursor-pointer bg-white",
+        "shadow-none border-gray-300 rounded-lg bg-white",
         isExpanded && "bg-gray-100",
       )}
     >

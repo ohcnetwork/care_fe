@@ -33,13 +33,13 @@ function getEntry(page: Page, reportType: string) {
     .first();
 }
 
-function getObservationCard(
-  page: Page,
+function getObservationGroup(
   entry: Locator,
   definition: ObservationDefinitionRead,
 ) {
-  return entry.locator('[data-slot="card"]').filter({
-    has: page.getByText(definition.title, { exact: true }),
+  return entry.getByRole("group", {
+    name: definition.title,
+    exact: true,
   });
 }
 
@@ -83,7 +83,22 @@ async function addObservation(
   await expect(
     page.getByRole("combobox", { name: "Search observations", exact: true }),
   ).toHaveCount(0);
-  await expect(getObservationCard(page, entry, definition)).toBeVisible();
+  await expect(getObservationGroup(entry, definition)).toBeVisible();
+}
+
+async function selectResultAction(
+  page: Page,
+  observationGroup: Locator,
+  action: "Add Another Result" | "Remove observation",
+  resultNumber = 1,
+) {
+  await observationGroup
+    .getByRole("button", {
+      name: `Result actions ${resultNumber}`,
+      exact: true,
+    })
+    .click();
+  await page.getByRole("menuitem", { name: action, exact: true }).click();
 }
 
 async function saveResults(page: Page, entry: Locator) {
@@ -234,13 +249,9 @@ test.describe("Additional diagnostic report observations", () => {
     const [firstReportType, secondReportType] = reportTypes;
     const firstEntry = getEntry(page, firstReportType);
     const secondEntry = getEntry(page, secondReportType);
-    const numericCard = getObservationCard(page, firstEntry, numericDefinition);
-    const textCard = getObservationCard(page, firstEntry, textDefinition);
-    const componentCard = getObservationCard(
-      page,
-      secondEntry,
-      componentDefinition,
-    );
+    const numericCard = getObservationGroup(firstEntry, numericDefinition);
+    const textCard = getObservationGroup(firstEntry, textDefinition);
+    const componentCard = getObservationGroup(secondEntry, componentDefinition);
     let firstReportId: string;
     let secondReportId: string;
 
@@ -380,20 +391,14 @@ test.describe("Additional diagnostic report observations", () => {
         fullPage: true,
       });
 
-      await numericCard
-        .getByRole("button", { name: "Add another result" })
-        .click();
+      await selectResultAction(page, numericCard, "Add Another Result");
       await numericCard.getByPlaceholder("Result value").nth(1).fill("112.25");
-      await textCard
-        .getByRole("button", { name: "Add another result" })
-        .click();
+      await selectResultAction(page, textCard, "Add Another Result");
       await textCard
         .getByPlaceholder("Result value")
         .nth(1)
         .fill("Reviewed sample");
-      await componentCard
-        .getByRole("button", { name: "Add another result" })
-        .click();
+      await selectResultAction(page, componentCard, "Add Another Result");
       await componentCard
         .getByPlaceholder("Component value")
         .nth(1)
@@ -444,10 +449,7 @@ test.describe("Additional diagnostic report observations", () => {
     await test.step("Correct a saved extra observation without changing another report", async () => {
       await page.reload();
       await expect(textCard.getByPlaceholder("Result value")).toHaveCount(2);
-      await textCard
-        .getByRole("button", { name: "Remove observation", exact: true })
-        .first()
-        .click();
+      await selectResultAction(page, textCard, "Remove observation");
       await saveResults(page, firstEntry);
       const corrected = resultsFor(
         await readObservations(firstReportId),
@@ -466,13 +468,8 @@ test.describe("Additional diagnostic report observations", () => {
     });
 
     await test.step("Keep correction history when the last extra definition is removed", async () => {
-      await componentCard
-        .getByRole("button", { name: "Remove observation", exact: true })
-        .first()
-        .click();
-      await componentCard
-        .getByRole("button", { name: "Remove observation", exact: true })
-        .click();
+      await selectResultAction(page, componentCard, "Remove observation");
+      await selectResultAction(page, componentCard, "Remove observation", 2);
       await saveResults(page, secondEntry);
       await page.reload();
       await expect(componentCard).toHaveCount(0);
