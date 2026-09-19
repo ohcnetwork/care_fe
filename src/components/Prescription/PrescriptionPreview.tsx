@@ -180,14 +180,14 @@ const PrescriptionContent = ({
 
 const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   return (
-    <div className="flex gap-1">
-      <span className="text-gray-700 font-medium min-w-24 shrink-0 text-sm print:text-xs">
+    <div className="grid grid-cols-[7rem_auto_minmax(0,1fr)] gap-1">
+      <span className="wrap-anywhere text-gray-700 font-medium text-sm print:text-xs">
         {label}
       </span>
       <span className="text-gray-700 text-sm print:text-xs">:</span>
       <span
         className={cn(
-          "ml-1 text-sm print:text-xs",
+          "ml-1 min-w-0 wrap-anywhere text-sm print:text-xs",
           isStrong ? "font-semibold text-gray-950" : "text-gray-700",
         )}
       >
@@ -282,10 +282,11 @@ export const PrescriptionPreview = ({
         <div>
           {/* Patient Details */}
           <div className="flex gap-4 pb-2 mb-2">
-            <div className="flex flex-col flex-1 justify-between gap-3">
-              <div className="flex gap-4">
+            <div className="flex min-w-0 flex-col flex-1 justify-between gap-3">
+              {/* Wrap metadata columns to fit the available paper width. */}
+              <div className="flex flex-wrap gap-4">
                 {/* Left column: Patient, Age/Sex, Mobile */}
-                <div className="space-y-1 flex-3">
+                <div className="min-w-0 space-y-1 flex-[3_1_14rem]">
                   <DetailRow
                     label={t("patient")}
                     value={patient.name}
@@ -310,7 +311,7 @@ export const PrescriptionPreview = ({
                 </div>
 
                 {/* Right column: Identifiers + Encounter Date */}
-                <div className="space-y-1 flex-2">
+                <div className="min-w-0 space-y-1 flex-[2_1_12rem] empty:hidden">
                   {getPatientIdentifiers(patient, {
                     use: PatientIdentifierUse.official,
                   }).map((identifier) => (

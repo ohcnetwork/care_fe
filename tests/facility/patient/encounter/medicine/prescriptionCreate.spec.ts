@@ -14,16 +14,6 @@ test.describe("Create Patient Prescription", () => {
   test.describe.configure({ mode: "serial" });
   let facilityId: string;
 
-  // These tests run serially against the same encounter, so every prescription
-  // they create shows up in one shared table. Pick two distinct medicines so
-  // the highlighted (non-unit) test and the unit test never land on rows that
-  // match the same medicine name — otherwise the unit test could match the
-  // other test's highlighted row and fail intermittently.
-  const [highlightedMedicine, unitMedicine] = faker.helpers.arrayElements(
-    medicineNames,
-    2,
-  );
-
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
@@ -36,12 +26,14 @@ test.describe("Create Patient Prescription", () => {
   });
 
   test("Add medication to patient prescription", async ({ page }) => {
-    const medicineName = highlightedMedicine;
+    const medicineName = faker.helpers.arrayElement(medicineNames);
     // Use a non-unit dose (value !== 1) so the dosage is highlighted
     const dosage = faker.number.int({ min: 2, max: 100 }).toString();
     const frequency = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
-    const notes = "testing notes";
+    // Identify this attempt's medication even when the encounter contains
+    // prescriptions for the same medicine from other tests or retries.
+    const notes = `Highlighted dosage ${faker.string.uuid()}`;
 
     await test.step("Open prescription form", async () => {
       await page.getByRole("link", { name: /Create/i }).click();
@@ -83,7 +75,9 @@ test.describe("Create Patient Prescription", () => {
         .click();
       await page.getByRole("option", { name: selectedInstruction }).click();
 
-      await page.getByPlaceholder("Notes").last().fill(notes);
+      await page
+        .getByPlaceholder("Enter additional notes", { exact: true })
+        .fill(notes);
     });
 
     await test.step("Submit prescription", async () => {
@@ -112,29 +106,32 @@ test.describe("Create Patient Prescription", () => {
         .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
-      await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      await expect(table).toContainText(frequency.display);
-      await expect(table).toContainText(selectedInstruction);
-      // Non-unit dosages (value !== 1) are visually highlighted
       const medicationRow = table
         .getByRole("row")
-        .filter({ hasText: medicineName });
-      const highlightedDosage = medicationRow.locator(".bg-yellow-100");
+        .filter({ has: page.getByText(notes, { exact: true }) });
+      await expect(medicationRow).toHaveCount(1);
+      await expect(medicationRow).toBeVisible();
+      await expect(medicationRow).toContainText(medicineName);
+      await expect(medicationRow).toContainText(frequency.display);
+      await expect(medicationRow).toContainText(selectedInstruction);
+      const dosageCell = medicationRow.getByRole("cell").nth(1);
+      await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
+      // Non-unit dosages (value !== 1) are visually highlighted
+      const highlightedDosage = dosageCell.locator(".bg-yellow-100");
       await expect(highlightedDosage).toHaveCount(1);
-      await expect(highlightedDosage.first()).toBeVisible();
+      await expect(highlightedDosage).toBeVisible();
     });
   });
 
   test("Unit dosage is not highlighted in patient prescription", async ({
     page,
   }) => {
-    const medicineName = unitMedicine;
+    const medicineName = faker.helpers.arrayElement(medicineNames);
     // Use a unit dose (value === 1) so the dosage is NOT highlighted
     const dosage = "1";
     const frequency = faker.helpers.arrayElement(frequencies);
     const selectedInstruction = faker.helpers.arrayElement(instructions);
-    const notes = "testing notes";
+    const notes = `Unit dosage ${faker.string.uuid()}`;
 
     await test.step("Open prescription form", async () => {
       await page.getByRole("link", { name: /Create/i }).click();
@@ -176,7 +173,9 @@ test.describe("Create Patient Prescription", () => {
         .click();
       await page.getByRole("option", { name: selectedInstruction }).click();
 
-      await page.getByPlaceholder("Notes").last().fill(notes);
+      await page
+        .getByPlaceholder("Enter additional notes", { exact: true })
+        .fill(notes);
     });
 
     await test.step("Submit prescription", async () => {
@@ -205,14 +204,18 @@ test.describe("Create Patient Prescription", () => {
         .click();
       const table = page.getByRole("table");
       await expect(table).toBeVisible();
-      await expect(table).toContainText(medicineName);
-      await expect(table).toContainText(dosage);
-      // Unit dosages (value === 1) are NOT visually highlighted
       const medicationRow = table
         .getByRole("row")
-        .filter({ hasText: medicineName })
-        .filter({ hasText: frequency.display });
-      await expect(medicationRow.locator(".bg-yellow-100")).toHaveCount(0);
+        .filter({ has: page.getByText(notes, { exact: true }) });
+      await expect(medicationRow).toHaveCount(1);
+      await expect(medicationRow).toBeVisible();
+      await expect(medicationRow).toContainText(medicineName);
+      await expect(medicationRow).toContainText(frequency.display);
+      await expect(medicationRow).toContainText(selectedInstruction);
+      const dosageCell = medicationRow.getByRole("cell").nth(1);
+      await expect(dosageCell).toHaveText(new RegExp(`^${dosage} `));
+      // Unit dosages (value === 1) are NOT visually highlighted
+      await expect(dosageCell.locator(".bg-yellow-100")).toHaveCount(0);
     });
   });
 });
