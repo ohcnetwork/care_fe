@@ -81,9 +81,9 @@ import {
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
-import { format } from "date-fns";
 import { DiagnosticReportObservationInput } from "./DiagnosticReportObservationInput";
 import { DiagnosticReportObservationPicker } from "./DiagnosticReportObservationPicker";
+import { DiagnosticReportTimestamps } from "./DiagnosticReportTimestamps";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -961,16 +961,15 @@ function DiagnosticReportItem({
                     }}
                   >
                     <NotepadText className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
-                    <div className="flex flex-col min-w-0">
+                    <div className="flex flex-col gap-1 min-w-0">
                       <span className="text-base text-gray-950 font-medium wrap-break-word">
                         {isMultipleDiagnosticReport
                           ? report.code?.display
                           : report.service_request?.title}
                       </span>
-                      <span className="text-sm text-gray-500 truncate">
-                        {t("last_updated")}:{" "}
-                        {format(report.modified_date, "hh:mm a, MMM dd, yyyy")}
-                      </span>
+                      <DiagnosticReportTimestamps
+                        report={fullReport ?? report}
+                      />
                     </div>
                   </button>
                 </CollapsibleTrigger>
@@ -978,7 +977,12 @@ function DiagnosticReportItem({
             </div>
             <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
               {fullReport && (
-                <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className="flex items-center gap-2 min-w-0"
+                  title={t("created_by_user", {
+                    name: formatName(fullReport.created_by),
+                  })}
+                >
                   <Avatar
                     name={formatName(fullReport.created_by, true)}
                     className="size-5 shrink-0"

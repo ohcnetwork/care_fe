@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import {
   ChevronsDownUp,
   ChevronsUpDown,
@@ -25,6 +24,8 @@ import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportRead,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
+
+import { DiagnosticReportTimestamps } from "./DiagnosticReportTimestamps";
 
 interface DiagnosticReportReviewHeaderProps {
   report: DiagnosticReportRead;
@@ -57,16 +58,13 @@ export function DiagnosticReportReviewHeader({
             }
           }}
         >
-          <span className="flex items-center gap-2 min-w-0">
+          <span className="flex w-full items-center gap-2 min-w-0 sm:w-auto sm:flex-1">
             <FileCheck2 className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
-            <span className="flex flex-col min-w-0">
-              <span className="text-base text-gray-950 font-medium truncate">
+            <span className="flex flex-col gap-1 min-w-0">
+              <span className="text-base text-gray-950 font-medium wrap-break-word">
                 {reportTitle}
               </span>
-              <span className="text-sm text-gray-500 truncate">
-                {t("last_updated")}:{" "}
-                {format(report.modified_date, "hh:mm a, MMM dd, yyyy")}
-              </span>
+              <DiagnosticReportTimestamps report={report} />
             </span>
           </span>
           <span className="flex flex-wrap items-center gap-3 sm:gap-5">
@@ -76,7 +74,12 @@ export function DiagnosticReportReviewHeader({
               </span>
             )}
             {report.created_by && (
-              <span className="flex items-center gap-2 min-w-0">
+              <span
+                className="flex items-center gap-2 min-w-0"
+                title={t("created_by_user", {
+                  name: formatName(report.created_by),
+                })}
+              >
                 <Avatar
                   name={formatName(report.created_by, true)}
                   className="size-5 shrink-0"

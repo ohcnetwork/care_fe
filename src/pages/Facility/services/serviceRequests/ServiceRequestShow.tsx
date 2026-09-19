@@ -69,7 +69,6 @@ import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
 import { SpecimenForm } from "./components/SpecimenForm";
 import { SpecimenHistorySheet } from "./components/SpecimenHistorySheet";
 import { SpecimenWorkflowCard } from "./components/SpecimenWorkflowCard";
-import { WorkflowProgress } from "./components/WorkflowProgress";
 
 interface ServiceRequestShowProps {
   facilityId: string;
@@ -237,7 +236,7 @@ export default function ServiceRequestShow({
     (!!activityDefinitionSlug && isLoadingActivityDefinition)
   ) {
     return (
-      <div className="p-4 max-w-6xl mx-auto space-y-4">
+      <div className="p-4 max-w-4xl mx-auto space-y-4">
         <Skeleton className="h-8 w-1/4 mb-4" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-40 w-full" />
@@ -349,9 +348,9 @@ export default function ServiceRequestShow({
   const canShowMarkAsCompleteFootBar = canMarkAsComplete && !disableEdit;
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-gray-50 relative">
       <div
-        className={`flex-1 p-4 max-w-6xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
+        className={`mx-auto w-full p-4 max-w-4xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
       >
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-2">
@@ -431,10 +430,6 @@ export default function ServiceRequestShow({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-
-              {isMobile && (
-                <WorkflowProgress request={request} variant="sheet" />
-              )}
             </div>
           </div>
           <div className="px-2">
@@ -448,7 +443,7 @@ export default function ServiceRequestShow({
             request={request}
             activityDefinition={activityDefinition}
           />
-          <div className="space-y-3 pt-5">
+          <div className="space-y-3">
             <ChargeItemsSection
               facilityId={facilityId}
               resourceId={serviceRequestId}
@@ -462,7 +457,7 @@ export default function ServiceRequestShow({
           </div>
 
           {specimenRequirements.length > 0 && !selectedSpecimenDefinition && (
-            <div className="space-y-3 pt-5">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{t("specimens")}</h2>
                 <div className="flex items-center gap-2">
@@ -500,6 +495,7 @@ export default function ServiceRequestShow({
                           (specimen) =>
                             specimen.status ===
                               SpecimenStatus.entered_in_error ||
+                            specimen.status === SpecimenStatus.unavailable ||
                             specimen.status === SpecimenStatus.unsatisfactory,
                         )}
                       >
@@ -582,8 +578,8 @@ export default function ServiceRequestShow({
             </Card>
           )}
 
-          <div className="space-y-3 pt-5">
-            {observationRequirements.length > 0 && (
+          <div className="space-y-3">
+            {(observationRequirements.length > 0 || pendingReports > 0) && (
               <h2 className="text-xl font-semibold">{t("test_results")}</h2>
             )}
 
@@ -613,16 +609,10 @@ export default function ServiceRequestShow({
           )}
         </div>
       </div>
-      {!isMobile && (
-        <div className="flex-1 p-2 min-w-90 md:max-w-90 mx-auto">
-          <WorkflowProgress request={request} variant="card" />
-        </div>
-      )}
-
       {canShowMarkAsCompleteFootBar && (
         <>
           <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
-            <div className="flex w-full items-center justify-between px-4 py-3 gap-2 bg-white">
+            <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-white">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-gray-900">
                   {t("complete_service_request")}

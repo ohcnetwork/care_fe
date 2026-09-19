@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/empty-state";
@@ -91,6 +92,43 @@ export function SpecimenHistorySheet({
                         <p>{specimen.collection?.method?.display || "-"}</p>
                       </div>
                     </div>
+
+                    {specimen.processing.length > 0 && (
+                      <div className="space-y-2 border-t pt-3">
+                        <h4 className="text-sm font-medium">
+                          {t("processing")}
+                        </h4>
+                        <ul className="space-y-2 text-sm">
+                          {specimen.processing.map((processing, index) => (
+                            <li key={index} className="space-y-0.5">
+                              <p>
+                                {processing.method?.display ||
+                                  processing.description ||
+                                  t("method")}
+                              </p>
+                              {processing.method?.display &&
+                                processing.description !==
+                                  processing.method.display && (
+                                  <p className="text-gray-500">
+                                    {processing.description}
+                                  </p>
+                                )}
+                              {processing.time_date_time && (
+                                <time
+                                  className="block text-gray-500"
+                                  dateTime={processing.time_date_time}
+                                >
+                                  {format(
+                                    new Date(processing.time_date_time),
+                                    "MMM d, yyyy, h:mm a",
+                                  )}
+                                </time>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
                     {specimen.note && (
                       <div>

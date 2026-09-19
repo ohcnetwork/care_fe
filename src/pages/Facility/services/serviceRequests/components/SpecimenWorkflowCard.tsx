@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { t } from "i18next";
 import {
   CheckCheck,
@@ -302,6 +303,25 @@ export function SpecimenWorkflowCard({
                               : "--"}
                           </span>
                         </div>
+                      </span>
+                    )}
+                    {collectedSpecimen.collection?.collected_date_time && (
+                      <span className="flex flex-col">
+                        <span className="text-sm text-gray-600">
+                          {t("collected_at")}:
+                        </span>
+                        <time
+                          dateTime={
+                            collectedSpecimen.collection.collected_date_time
+                          }
+                        >
+                          {format(
+                            new Date(
+                              collectedSpecimen.collection.collected_date_time,
+                            ),
+                            "MMM d, yyyy, h:mm a",
+                          )}
+                        </time>
                       </span>
                     )}
                   </div>

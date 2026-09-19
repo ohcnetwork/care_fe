@@ -41,11 +41,13 @@ export function DiagnosticReportReview({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      {diagnosticReports.some(
-        (report) => report.status !== DiagnosticReportStatus.final,
-      ) && (
-        <h3 className="text-xl font-semibold">{t("review_test_results")}</h3>
-      )}
+      <h2 className="text-xl font-semibold">
+        {diagnosticReports.some(
+          (report) => report.status !== DiagnosticReportStatus.final,
+        )
+          ? t("review_test_results")
+          : t("diagnostic_report", { count: diagnosticReports.length })}
+      </h2>
 
       {diagnosticReports.map((report) => (
         <DiagnosticReportReviewItem
