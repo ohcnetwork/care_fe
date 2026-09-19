@@ -55,6 +55,12 @@ export interface ObservationDefinitionRead extends BaseObservationDefinition {
   facility?: FacilityBareMinimum | null;
 }
 
+export interface ObservationDefinitionEmbedded extends BaseObservationDefinition {
+  id: string;
+  // Older backend responses omit the slug from embedded definitions.
+  slug?: string;
+}
+
 export interface ObservationDefinitionCreate extends BaseObservationDefinition {
   slug_value: string;
   facility?: string | null;

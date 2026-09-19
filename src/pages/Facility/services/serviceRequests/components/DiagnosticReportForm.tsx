@@ -55,8 +55,10 @@ import {
 import observationApi from "@/types/emr/observation/observationApi";
 import {
   ObservationDefinitionComponent,
+  ObservationDefinitionEmbedded,
   ObservationDefinitionRead,
 } from "@/types/emr/observationDefinition/observationDefinition";
+import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { Status as ServiceRequestStatus } from "@/types/emr/serviceRequest/serviceRequest";
 import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
@@ -83,6 +85,7 @@ import { ObservationHistorySheet } from "@/pages/Facility/services/serviceReques
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { formatName } from "@/Utils/utils";
 import { format } from "date-fns";
+import { DiagnosticReportObservationPicker } from "./DiagnosticReportObservationPicker";
 
 interface DiagnosticReportFormProps {
   patientId: string;
@@ -353,6 +356,10 @@ function DiagnosticReportItem({
   const [observationDraft, setObservationDraft] =
     useState<ObservationsByDefinition | null>(null);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [addedDefinitions, setAddedDefinitions] = useState<
+    ObservationDefinitionRead[]
+  >([]);
+  const [isResolvingDefinitions, setIsResolvingDefinitions] = useState(false);
   const [conclusionDraft, setConclusion] = useState<string | undefined>();
 
   const { data: fullReport } = useQuery({
@@ -395,6 +402,7 @@ function DiagnosticReportItem({
         }),
       ]);
       setObservationDraft(null);
+      setAddedDefinitions([]);
       setConclusion(undefined);
       setIsExpanded(false);
       onReportSaved({ id: report.id, savedAt: Date.now() });
@@ -419,12 +427,33 @@ function DiagnosticReportItem({
 
   const openUploadDialog =
     !disableEdit && fileUpload.files.length > 0 && !fileUpload.previewing;
+  // Each report can contain results beyond the service request's template.
+  const definitionsById = new Map<string, ObservationDefinitionEmbedded>(
+    observationDefinitions.map((definition) => [definition.id, definition]),
+  );
+  for (const observation of fullReport?.observations ?? []) {
+    const definition = observation.observation_definition;
+    if (
+      definition &&
+      observation.status !== ObservationStatus.ENTERED_IN_ERROR
+    ) {
+      definitionsById.set(definition.id, {
+        ...definitionsById.get(definition.id),
+        ...definition,
+      });
+    }
+  }
+  for (const definition of addedDefinitions) {
+    definitionsById.set(definition.id, definition);
+  }
+  const reportDefinitions = [...definitionsById.values()];
   const observations = observationDraft ?? getReportObservations(fullReport);
   const conclusion = conclusionDraft ?? fullReport?.conclusion ?? "";
   const isReadOnly =
     disableEdit ||
     !fullReport ||
     isSubmitting ||
+    isResolvingDefinitions ||
     fullReport.status === DiagnosticReportStatus.final;
 
   function setObservations(
@@ -562,7 +591,7 @@ function DiagnosticReportItem({
     });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (isReadOnly) return;
     try {
       // Check if all observations have values
@@ -609,14 +638,55 @@ function DiagnosticReportItem({
         return;
       }
 
+      // Resolve only new results whose embedded definition came from an older
+      // backend. Existing results are updated by observation ID without a lookup.
+      setIsResolvingDefinitions(true);
+      const definitionSlugs = new Map<string, string>();
+      for (const [definitionId, values] of Object.entries(observations)) {
+        const definition = definitionsById.get(definitionId);
+        const hasNewResult = values.some(
+          (value) =>
+            !value.id &&
+            value.status !== ObservationStatus.ENTERED_IN_ERROR &&
+            (value.value.trim() ||
+              Object.values(value.components).some((component) =>
+                component.value.trim(),
+              )),
+        );
+        if (!hasNewResult) continue;
+        if (!definition) throw new Error("Missing observation definition");
+        if (definition.slug) {
+          definitionSlugs.set(definitionId, definition.slug);
+          continue;
+        }
+        const catalog = await queryClient.fetchQuery({
+          queryKey: [
+            "diagnostic-report-observation-slug",
+            facilityId,
+            definition.id,
+          ],
+          queryFn: query.paginated(observationDefinitionApi.list, {
+            queryParams: { facility: facilityId, title: definition.title },
+          }),
+        });
+        const slug = catalog.results.find(
+          (candidate) => candidate.id === definitionId,
+        )?.slug;
+        if (!slug) {
+          toast.error(t("error_loading_observation_definition"));
+          return;
+        }
+        definitionSlugs.set(definitionId, slug);
+      }
+
       const formattedObservations: ObservationUpsertRequest[] = Object.entries(
         observations,
       )
         .flatMap(([definitionId, obsList]) =>
           obsList.map((obsData): ObservationUpsertRequest | null => {
-            const observationDefinition = observationDefinitions.find(
-              (def) => def.id === definitionId,
-            );
+            const observationDefinition = definitionsById.get(definitionId);
+            if (!observationDefinition)
+              throw new Error("Missing observation definition");
 
             // If it's a component-based observation (like blood pressure), we should check if components have values
             const hasComponents =
@@ -695,7 +765,9 @@ function DiagnosticReportItem({
             return {
               ...(obsData.id
                 ? { observation_id: obsData.id }
-                : { observation_definition: observationDefinition?.slug }),
+                : {
+                    observation_definition: definitionSlugs.get(definitionId),
+                  }),
               observation: {
                 status:
                   obsData.status === ObservationStatus.ENTERED_IN_ERROR
@@ -749,6 +821,8 @@ function DiagnosticReportItem({
       saveReport(requests);
     } catch (_error) {
       toast.error(t("error_validating_form"));
+    } finally {
+      setIsResolvingDefinitions(false);
     }
   }
 
@@ -757,6 +831,18 @@ function DiagnosticReportItem({
     if (!observationsList || !observationsList[index]) return;
 
     const observation = observationsList[index];
+    const isRequiredDefinition = observationDefinitions.some(
+      (definition) => definition.id === definitionId,
+    );
+    if (
+      !isRequiredDefinition &&
+      !observation.id &&
+      observationsList.length === 1
+    ) {
+      setAddedDefinitions((previous) =>
+        previous.filter((definition) => definition.id !== definitionId),
+      );
+    }
     setObservations((prev) => {
       const updatedList = [...(prev[definitionId] || [])];
       let newList = [];
@@ -776,7 +862,7 @@ function DiagnosticReportItem({
       return {
         ...prev,
         [definitionId]:
-          newList.length > 0
+          newList.length > 0 || !isRequiredDefinition
             ? newList
             : [
                 {
@@ -793,7 +879,7 @@ function DiagnosticReportItem({
 
   // Helper to render component inputs for multi-component observations like blood pressure
   function renderComponentInputs(
-    definition: ObservationDefinitionRead,
+    definition: ObservationDefinitionEmbedded,
     observationData: ObservationValue,
     index: number,
   ) {
@@ -864,6 +950,7 @@ function DiagnosticReportItem({
                     {t("result")}
                   </Label>
                   <Input
+                    aria-label={component.code.display || component.code.code}
                     value={componentData.value}
                     onChange={(e) =>
                       handleComponentValueChange(
@@ -968,7 +1055,8 @@ function DiagnosticReportItem({
                     )}
                   </Button>
                 </CollapsibleTrigger>
-                {observationDefinitions.length > 0 && (
+                {(reportDefinitions.length > 0 ||
+                  !!fullReport?.observations?.length) && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -1011,7 +1099,7 @@ function DiagnosticReportItem({
               {report.status !== DiagnosticReportStatus.final && (
                 <PLUGIN_Component
                   __name="DiagnosticReportOverride"
-                  observationDefinitions={observationDefinitions}
+                  observationDefinitions={reportDefinitions}
                   handleComponentValueChange={handleComponentValueChange}
                   handleValueChange={handleValueChange}
                   handleUnitChange={handleUnitChange}
@@ -1019,7 +1107,7 @@ function DiagnosticReportItem({
                 />
               )}
               {report.status !== DiagnosticReportStatus.final &&
-                observationDefinitions.map((definition) => {
+                reportDefinitions.map((definition) => {
                   const observationsList = observations[definition.id] || [
                     {
                       id: "",
@@ -1074,6 +1162,7 @@ function DiagnosticReportItem({
                                         variant="ghost"
                                         size="sm"
                                         className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+                                        aria-label={t("remove_observation")}
                                         onClick={() =>
                                           handleDeleteObservation(
                                             definition.id,
@@ -1082,7 +1171,12 @@ function DiagnosticReportItem({
                                         }
                                         disabled={
                                           isErrored ||
-                                          (index === 0 && !observationData.id)
+                                          (index === 0 &&
+                                            !observationData.id &&
+                                            observationDefinitions.some(
+                                              (required) =>
+                                                required.id === definition.id,
+                                            ))
                                         }
                                       >
                                         <Trash2 className="size-4" />
@@ -1135,6 +1229,10 @@ function DiagnosticReportItem({
                                         {t("result")}
                                       </Label>
                                       <Input
+                                        aria-label={
+                                          definition.title ||
+                                          definition.code.display
+                                        }
                                         value={observationData.value}
                                         onChange={(e) =>
                                           handleValueChange(
@@ -1177,7 +1275,8 @@ function DiagnosticReportItem({
                             size="sm"
                             onClick={() => {
                               setObservations((prev) => {
-                                const currentList = prev[definition.id] || [];
+                                const currentList =
+                                  prev[definition.id] ?? observationsList;
                                 return {
                                   ...prev,
                                   [definition.id]: [
@@ -1204,6 +1303,34 @@ function DiagnosticReportItem({
                     </Card>
                   );
                 })}
+
+              {report.status !== DiagnosticReportStatus.final && (
+                <DiagnosticReportObservationPicker
+                  facilityId={facilityId}
+                  selectedIds={reportDefinitions.map(
+                    (definition) => definition.id,
+                  )}
+                  disabled={isReadOnly}
+                  onSelect={(definition) => {
+                    setAddedDefinitions((previous) => [
+                      ...previous,
+                      definition,
+                    ]);
+                    setObservations((previous) => ({
+                      ...previous,
+                      [definition.id]: [
+                        {
+                          id: "",
+                          value: "",
+                          unit: definition.permitted_unit?.code || "",
+                          status: ObservationStatus.AMENDED,
+                          components: {},
+                        },
+                      ],
+                    }));
+                  }}
+                />
+              )}
 
               <div className="space-y-4">
                 {report.status !== DiagnosticReportStatus.final && (
