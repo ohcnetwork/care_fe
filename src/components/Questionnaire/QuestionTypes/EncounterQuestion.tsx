@@ -141,58 +141,25 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    const isStartDateInFuture =
-      !!encounter.period.start && new Date(encounter.period.start) > new Date();
-
-    if (
+    const now = new Date();
+    const startTime = Date.parse(encounter.period.start ?? "");
+    const shouldSetEndDate =
       encounter.status === EncounterStatus.DISCHARGED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.COMPLETED
-    ) {
-      // Always set end date — if start is in the future, BE will reject it
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else if (
-      encounter.status === EncounterStatus.CANCELLED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (isStartDateInFuture) {
-        // Valid transition from future encounters — don't set end date
-        if (encounter.period.end) {
-          handleUpdateEncounter({
-            period: {
-              ...encounter.period,
-              end: undefined,
-            },
-          });
-        }
-      } else if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      if (encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: undefined,
-          },
-        });
-      }
+      encounter.status === EncounterStatus.COMPLETED ||
+      (encounter.status === EncounterStatus.ENTERED_IN_ERROR &&
+        (!encounter.period.start ||
+          (Number.isFinite(startTime) && startTime <= now.getTime())));
+
+    // Cancelled encounters never began, so they have no end date.
+    const end = shouldSetEndDate
+      ? encounter.period.end || now.toISOString()
+      : undefined;
+
+    if (end !== encounter.period.end) {
+      handleUpdateEncounter({ period: { ...encounter.period, end } });
     }
-    // Re-run when the period changes too (e.g. status picked first, then the
-    // start date edited to a future date) so the end date stays consistent.
-  }, [encounter.status, encounter.period.start, encounter.period.end]);
+  }, [encounter.status, encounter.period.start]);
 
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (

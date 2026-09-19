@@ -9,7 +9,7 @@ export async function openCreateEncounterDialog(page: Page) {
   const patientId = getPatientId();
 
   await page.goto(`/facility/${facilityId}/patient/${patientId}`);
-  await page.getByRole("link", { name: "Patient Home" }).click();
+  await page.getByRole("link", { name: "Patient Home" }).first().click();
 
   await expect(
     page.getByRole("button", { name: "Create Encounter" }),
@@ -23,7 +23,9 @@ export async function selectRandomEncounterClass(page: Page) {
 }
 
 export async function selectStatusInCreateDialog(page: Page, status: string) {
-  await page.getByRole("combobox", { name: "Status" }).click();
+  await getEncounterCreateDialog(page)
+    .getByRole("combobox", { name: "Status", exact: true })
+    .click();
   await page.getByRole("option", { name: status, exact: true }).click();
 }
 

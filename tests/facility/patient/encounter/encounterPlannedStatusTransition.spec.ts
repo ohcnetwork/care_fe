@@ -1,39 +1,35 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   getEncounterCreateDialog,
-  getFutureDateButtonFromCalendar,
   openCalendarAndGetNextMonthButton,
   openCreateEncounterDialog,
-  selectRandomEncounterClass,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
 
+import type { EncounterRead } from "@/types/emr/encounter/encounter";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
-// Assert only the stable portion of the backend validation message; field-path
-// prefixes like "period:" may change while the core error stays the same.
+// Field-path prefixes may change while the core backend error stays the same.
 const VALIDATION_ERROR_TEXT = "Start Date cannot be greater than End Date";
 
-async function selectFutureDateInCalendar(page: Page) {
-  const nextMonthButton = await openCalendarAndGetNextMonthButton(page);
-  await expect(nextMonthButton).toBeEnabled();
-  await nextMonthButton.click();
-
-  const futureDayButton = getFutureDateButtonFromCalendar(page);
-  await expect(futureDayButton).toBeEnabled();
-  await futureDayButton.click();
-}
-
-async function createPlannedEncounterWithFutureDate(page: Page) {
+async function createPlannedEncounter(page: Page, start: "past" | "future") {
   await openCreateEncounterDialog(page);
-  await selectRandomEncounterClass(page);
-  await selectStatusInCreateDialog(page, "Planned");
-  await selectFutureDateInCalendar(page);
-
   const dialog = getEncounterCreateDialog(page);
+  await dialog.getByRole("button", { name: /^Ambulatory/ }).click();
+  await selectStatusInCreateDialog(page, "Planned");
+  await openCalendarAndGetNextMonthButton(page);
+  await page
+    .getByRole("button", {
+      name: `Go to the ${start === "future" ? "Next" : "Previous"} Month`,
+    })
+    .click();
+  await page
+    .getByRole("gridcell")
+    .filter({ hasText: /^15$/ })
+    .getByRole("button")
+    .click();
 
-  // Submit navigates to the encounter detail page. Register the URL listener
-  // before clicking so a fast navigation can't race past it.
   await Promise.all([
     page.waitForURL(/\/encounter\/[^/]+/),
     dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
@@ -43,9 +39,7 @@ async function createPlannedEncounterWithFutureDate(page: Page) {
   ).toBeVisible();
 }
 
-// Update-encounter form uses a bare <Label> + <SelectTrigger> (no FormLabel/htmlFor),
-// so the combobox has no programmatic accessible name. Anchor on the label and walk
-// to its immediate parent (the space-y-2 wrapper that contains exactly one combobox).
+// The update form's label isn't associated with its SelectTrigger yet.
 function encounterStatusCombobox(page: Page) {
   return page
     .locator('label[data-slot="label"]')
@@ -75,136 +69,129 @@ async function expectSubmissionSuccess(page: Page) {
   ).toBeVisible();
 }
 
-async function expectSubmissionBlockedByPeriodError(page: Page) {
-  await expect(page.getByText("Failed to submit questionnaire")).toBeVisible();
-  await expect(page.getByText(VALIDATION_ERROR_TEXT)).toBeVisible();
-}
-
-// Ensures the encounter ends in a terminal state so the patient's 5-live-encounter
-// limit isn't reached across repeated runs.
 async function cancelEncounterFromCurrentForm(page: Page) {
   await changeStatus(page, "Cancelled");
   await submitQuestionnaire(page);
   await expectSubmissionSuccess(page);
 }
 
+async function expectPersistedCancellation(page: Page) {
+  const encounterId = new URL(page.url()).pathname.match(
+    /\/encounter\/([^/]+)/,
+  )?.[1];
+  expect(encounterId).toBeTruthy();
+
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/encounter/${encounterId}/` &&
+        response.request().method() === "GET",
+    ),
+    page.reload(),
+  ]);
+  expect(response.ok()).toBeTruthy();
+  const encounter: EncounterRead = await response.json();
+  expect(encounter.status).toBe("cancelled");
+  expect(encounter.period.end ?? null).toBeNull();
+}
+
 test.describe("Planned Encounter Status Transition", () => {
-  // Each test creates a live encounter on the shared patient; running in parallel
-  // would exceed the backend's live-encounter-per-patient limit and fail creation.
+  // Tests share a patient with a limit of five live encounters.
   test.describe.configure({ mode: "serial" });
 
-  test.beforeEach(async ({ page }) => {
-    await createPlannedEncounterWithFutureDate(page);
-  });
-
-  // Best-effort cleanup: if a test failed before its inline cleanup step, try
-  // to cancel the encounter so it doesn't remain live and trip the backend's
-  // 5-live-encounter-per-patient limit on later runs.
   test.afterEach(async ({ page }, testInfo) => {
     if (testInfo.status === testInfo.expectedStatus) return;
     try {
-      await openEncounterUpdateForm(page);
+      await page.reload();
+      if (!(await encounterStatusCombobox(page).isVisible())) {
+        await openEncounterUpdateForm(page);
+      }
       await cancelEncounterFromCurrentForm(page);
     } catch {
-      // Encounter may already be terminal or the page in an unexpected state.
+      // The encounter may already be terminal or creation may have failed.
     }
   });
 
-  test("allows transition from Planned to In Progress", async ({ page }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
+  for (const start of ["past", "future"] as const) {
+    test(`cancels a ${start}-starting encounter without an end date`, async ({
+      page,
+    }) => {
+      await test.step("Create a planned encounter and open the update form", async () => {
+        await createPlannedEncounter(page, start);
+        await openEncounterUpdateForm(page);
+      });
+
+      await test.step("Cancel and verify the persisted period", async () => {
+        await cancelEncounterFromCurrentForm(page);
+        await expectPersistedCancellation(page);
+      });
     });
 
-    await test.step("Transition Planned to In Progress", async () => {
-      await changeStatus(page, "In Progress");
-      await submitQuestionnaire(page);
-      await expectSubmissionSuccess(page);
-    });
+    test(`clears the pending end date when a ${start}-starting encounter changes from Discontinued to Cancelled`, async ({
+      page,
+    }) => {
+      await test.step("Select Discontinued before saving", async () => {
+        await createPlannedEncounter(page, start);
+        await openEncounterUpdateForm(page);
+        await changeStatus(page, "Discontinued");
+      });
 
-    await test.step("Cleanup: cancel encounter", async () => {
-      await openEncounterUpdateForm(page);
-      await cancelEncounterFromCurrentForm(page);
+      await test.step("Switch to Cancelled and verify the persisted period", async () => {
+        await cancelEncounterFromCurrentForm(page);
+        await expectPersistedCancellation(page);
+      });
     });
-  });
+  }
 
-  test("allows transition from Planned to On Hold", async ({ page }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
-    });
+  for (const status of ["In Progress", "On Hold", "Entered in error"]) {
+    test(`allows a future Planned encounter to transition to ${status}`, async ({
+      page,
+    }) => {
+      await test.step("Update the planned encounter", async () => {
+        await createPlannedEncounter(page, "future");
+        await openEncounterUpdateForm(page);
+        await changeStatus(page, status);
+        await submitQuestionnaire(page);
+        await expectSubmissionSuccess(page);
+      });
 
-    await test.step("Transition Planned to On Hold", async () => {
-      await changeStatus(page, "On Hold");
-      await submitQuestionnaire(page);
-      await expectSubmissionSuccess(page);
+      if (status !== "Entered in error") {
+        await test.step("Cleanup: cancel the live encounter", async () => {
+          await openEncounterUpdateForm(page);
+          await cancelEncounterFromCurrentForm(page);
+        });
+      }
     });
+  }
 
-    await test.step("Cleanup: cancel encounter", async () => {
-      await openEncounterUpdateForm(page);
-      await cancelEncounterFromCurrentForm(page);
-    });
-  });
+  for (const status of ["Discharged", "Discontinued"]) {
+    test(`blocks a future Planned encounter from transitioning to ${status} with a period error`, async ({
+      page,
+    }) => {
+      await test.step("Attempt a closing status with an invalid period", async () => {
+        await createPlannedEncounter(page, "future");
+        await openEncounterUpdateForm(page);
+        if (status === "Discharged") {
+          await page
+            .getByRole("button", { name: "Mark for discharge" })
+            .click();
+        } else {
+          await changeStatus(page, status);
+        }
+        await submitQuestionnaire(page);
+        await expect(
+          page.getByText("Failed to submit questionnaire"),
+        ).toBeVisible();
+        await expect(page.getByText(VALIDATION_ERROR_TEXT)).toBeVisible();
+      });
 
-  test("allows transition from Planned to Cancelled", async ({ page }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
+      await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
+        // Discharged disables the status picker. Reload the unchanged backend state.
+        await page.reload();
+        await expect(encounterStatusCombobox(page)).toContainText("Planned");
+        await cancelEncounterFromCurrentForm(page);
+      });
     });
-
-    await test.step("Transition Planned to Cancelled", async () => {
-      await cancelEncounterFromCurrentForm(page);
-    });
-  });
-
-  test("allows transition from Planned to Entered in error", async ({
-    page,
-  }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
-    });
-
-    await test.step("Transition Planned to Entered in error", async () => {
-      await changeStatus(page, "Entered in error");
-      await submitQuestionnaire(page);
-      await expectSubmissionSuccess(page);
-    });
-  });
-
-  test("blocks transition from Planned to Completed with period error", async ({
-    page,
-  }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
-    });
-
-    await test.step("Attempt Planned to Completed", async () => {
-      await changeStatus(page, "Completed");
-      await submitQuestionnaire(page);
-      await expectSubmissionBlockedByPeriodError(page);
-    });
-
-    await test.step("Cleanup: cancel encounter (still Planned on backend)", async () => {
-      // Backend rejected the transition, so the encounter is still Planned.
-      // Selecting Cancelled clears the auto-set end date (see EncounterQuestion
-      // useEffect handling for future-start Cancelled/EnteredInError), so this
-      // submit succeeds and moves the encounter to a terminal state.
-      await cancelEncounterFromCurrentForm(page);
-    });
-  });
-
-  test("blocks transition from Planned to Discontinued with period error", async ({
-    page,
-  }) => {
-    await test.step("Open update form", async () => {
-      await openEncounterUpdateForm(page);
-    });
-
-    await test.step("Attempt Planned to Discontinued", async () => {
-      await changeStatus(page, "Discontinued");
-      await submitQuestionnaire(page);
-      await expectSubmissionBlockedByPeriodError(page);
-    });
-
-    await test.step("Cleanup: cancel encounter (still Planned on backend)", async () => {
-      await cancelEncounterFromCurrentForm(page);
-    });
-  });
+  }
 });
