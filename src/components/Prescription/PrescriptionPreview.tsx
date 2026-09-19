@@ -77,9 +77,12 @@ const PrescriptionContent = ({
 
       <div className="border border-gray-300 rounded-md">
         <div className="relative flex justify-between place-items-end px-4 py-3">
-          <div className="absolute top-5 left-0 h-3.5 w-1 bg-gray-400 rounded-r-md"></div>
           <div>
-            <p className="text-sm print:text-xs">
+            <p className="relative text-sm print:text-xs">
+              <span
+                aria-hidden="true"
+                className="absolute top-1/2 -left-4 h-3.5 w-1 -translate-y-1/2 bg-gray-400 rounded-r-md"
+              />
               <span className="text-gray-700 font-medium">
                 {t("prescribed_by")}:{" "}
               </span>
@@ -331,7 +334,7 @@ export const PrescriptionPreview = ({
               {prescriptions.length === 1 &&
                 prescriptions[0].encounter.current_location && (
                   <DetailRow
-                    label={t("patient_ip_location")}
+                    label={t("patient_location")}
                     value={getLocationPath(
                       prescriptions[0].encounter.current_location,
                     )}
