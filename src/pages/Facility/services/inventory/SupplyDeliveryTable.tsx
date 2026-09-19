@@ -65,6 +65,12 @@ interface SupplyDeliveryTableProps {
   linkToProduct?: boolean;
 }
 
+// Identify whether it's an internal or external delivery based on the presence of `origin`.
+// External deliveries will have `origin` as null, while internal deliveries will have a value for `origin`.
+const identifyOrderType = (delivery: SupplyDeliveryRead) => {
+  return delivery.order.origin ? "internal" : "external";
+};
+
 export function SupplyDeliveryTable({
   deliveries,
   showCheckbox = false,
@@ -265,20 +271,32 @@ export function SupplyDeliveryTable({
 
                 if (linkToProduct && facilityId && productId) {
                   return (
-                    <Link
-                      href={`/facility/${facilityId}/settings/product/${productId}`}
-                      className="font-medium text-primary-600 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                      basePath="/"
-                    >
-                      {productName}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/facility/${facilityId}/locations/${delivery.order.destination.id}/inventory/${identifyOrderType(delivery)}/deliveries/incoming/${delivery.order.id}`}
+                        className="font-medium text-primary-600 hover:underline"
+                        basePath="/"
+                      >
+                        {productName}
+                      </Link>
+                      <Link
+                        href={`/facility/${facilityId}/settings/product/${productId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        basePath="/"
+                        className="flex items-center gap-2"
+                      >
+                        <CareIcon
+                          icon="l-external-link-alt"
+                          className="size-4 text-gray-500"
+                        />
+                      </Link>
+                    </div>
                   );
                 }
                 return (
-                  <div className="font-medium text-wrap wrap-break-word">
+                  <span className="font-medium text-primary-600 hover:underline">
                     {productName}
-                  </div>
+                  </span>
                 );
               })()}
             </TableCell>
