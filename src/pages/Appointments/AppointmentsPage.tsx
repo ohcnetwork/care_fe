@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -763,9 +764,12 @@ function AppointmentCard({
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
-          <Badge variant="primary" className="text-xs" key={tag.id}>
-            {tag.display}
-          </Badge>
+          <TagBadge
+            key={tag.id}
+            tag={tag}
+            variant="primary"
+            className="text-xs"
+          />
         ))}
         {showStatus && (
           <Badge
