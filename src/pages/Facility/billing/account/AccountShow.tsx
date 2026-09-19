@@ -58,7 +58,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { isPositive } from "@/Utils/decimal";
+import { isPositive, roundWhole } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -288,6 +288,9 @@ function AccountShow({
 
   const isAccountBillableAndActive =
     !!account && isAccountActiveAndBillable(account);
+
+  const roundedBalance = roundWhole(account.total_balance);
+  const roundedBilledGross = roundWhole(account.total_gross);
 
   const tabs = {
     invoices: {
@@ -571,16 +574,16 @@ function AccountShow({
                 <p
                   className={cn(
                     "text-3xl font-bold",
-                    isPositive(account.total_balance)
+                    isPositive(roundedBalance)
                       ? "text-red-500"
                       : "text-green-700",
                   )}
                 >
-                  <MonetaryDisplay amount={account.total_balance} />
+                  <MonetaryDisplay amount={roundedBalance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {isPositive(account.total_balance)
+                {isPositive(roundedBalance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -608,7 +611,7 @@ function AccountShow({
               </p>
               <div className="flex items-end">
                 <p className="text-3xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={account.total_gross} />
+                  <MonetaryDisplay amount={roundedBilledGross} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
@@ -774,7 +777,7 @@ function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={account.total_balance} />
+          <ClosedCallout balance={roundedBalance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}
