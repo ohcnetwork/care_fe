@@ -84,6 +84,7 @@ import {
   isGreaterThanOrEqual,
   isPositive,
   round,
+  roundWhole,
   zodDecimal,
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -448,7 +449,13 @@ const PaymentReconciliationSheetBase = ({
                           {t("balance_due")}
                         </p>
                         <p className="text-3xl font-bold text-gray-900">
-                          <MonetaryDisplay amount={account?.total_balance} />
+                          <MonetaryDisplay
+                            amount={
+                              account?.total_balance != null
+                                ? roundWhole(account.total_balance)
+                                : account?.total_balance
+                            }
+                          />
                         </p>
                       </>
                     )}
