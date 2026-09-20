@@ -1,6 +1,10 @@
 import type { Page } from "@playwright/test";
 import { devices, expect, test } from "@playwright/test";
-import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
+import {
+  adminApiHeaders,
+  apiBaseUrl,
+  createQuestionnaire,
+} from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -243,6 +247,100 @@ test.describe("Shared workspace navigation", () => {
       await page.keyboard.press("Control+b");
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
       await expect(navigation).toBeInViewport({ ratio: 1 });
+    });
+  });
+
+  test("sidebar preview stays above the questionnaire detail header and supports navigation", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const title = `Sidebar layering ${Date.now()}`;
+    await createQuestionnaire(page, {
+      basePath: `${facilityPath}/settings/questionnaires`,
+      title,
+    });
+    const navigation = sidebar(page);
+    const toggle = sidebarToggle(page);
+    const state = sidebarState(page);
+    const heading = page.getByRole("heading", { name: title, exact: true });
+    const detailHeader = page.locator(".sticky").filter({ has: heading });
+    const backLink = navigation.getByRole("link", {
+      name: "Back to facility",
+      exact: true,
+    });
+
+    await test.step("Preview overlays the detail header without moving the page", async () => {
+      await expect(heading).toBeVisible();
+      await toggle.click();
+      await page.mouse.move(900, 700);
+      await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+      await expect(navigation).not.toBeVisible();
+      const closedLeft = await mainLeft(page);
+      const closedHeadingLeft = await heading.evaluate(
+        (element) => element.getBoundingClientRect().left,
+      );
+
+      await toggle.hover();
+      await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
+      await expect(navigation).toBeInViewport({ ratio: 1 });
+      await expect
+        .poll(async () => Math.abs((await mainLeft(page)) - closedLeft))
+        .toBeLessThan(1);
+      await expect
+        .poll(async () =>
+          Math.abs(
+            (await heading.evaluate(
+              (element) => element.getBoundingClientRect().left,
+            )) - closedHeadingLeft,
+          ),
+        )
+        .toBeLessThan(1);
+
+      const headerBounds = await detailHeader.boundingBox();
+      const linkBounds = await backLink.boundingBox();
+      expect(headerBounds).not.toBeNull();
+      expect(linkBounds).not.toBeNull();
+      const x = linkBounds!.x + linkBounds!.width / 2;
+      const y = linkBounds!.y + linkBounds!.height / 2;
+      // This must exercise the shared screen area, not a lower link that
+      // would still work when the sticky detail header covers the preview.
+      expect(x).toBeGreaterThan(headerBounds!.x);
+      expect(x).toBeLessThan(headerBounds!.x + headerBounds!.width);
+      expect(y).toBeGreaterThan(headerBounds!.y);
+      expect(y).toBeLessThan(headerBounds!.y + headerBounds!.height);
+      await expect
+        .poll(() =>
+          backLink.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            return element.contains(
+              document.elementFromPoint(
+                bounds.x + bounds.width / 2,
+                bounds.y + bounds.height / 2,
+              ),
+            );
+          }),
+        )
+        .toBe(true);
+    });
+
+    await test.step("The header toggle remains usable above the preview", async () => {
+      await toggle.click();
+      await page.mouse.move(900, 700);
+      await expect(state).toHaveAttribute("data-app-sidebar-pinned", "true");
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+      await toggle.click();
+      await page.mouse.move(900, 700);
+      await expect(navigation).not.toBeVisible();
+      await toggle.hover();
+      await expect(state).toHaveAttribute("data-app-sidebar-preview", "true");
+      await expect(navigation).toBeInViewport({ ratio: 1 });
+    });
+
+    await test.step("An overlapping upper sidebar link navigates on a real click", async () => {
+      await backLink.click();
+      await expect(page).toHaveURL(`${facilityPath}/overview`);
+      await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
+      await expect(state).toHaveAttribute("data-app-sidebar-preview", "false");
     });
   });
 

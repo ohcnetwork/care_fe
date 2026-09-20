@@ -142,7 +142,7 @@ export function AppSidebar({
       onBlurCapture={handleSidebarBlur}
       {...props}
       className={cn(
-        "border-neutral-200 [&_[data-sidebar=sidebar]]:bg-neutral-100 [&_[data-sidebar=sidebar]]:text-neutral-950",
+        "z-30 border-neutral-200 [&_[data-sidebar=sidebar]]:bg-neutral-100 [&_[data-sidebar=sidebar]]:text-neutral-950",
         props.className,
       )}
     >
