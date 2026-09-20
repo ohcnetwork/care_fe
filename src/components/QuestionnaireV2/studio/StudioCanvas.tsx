@@ -60,7 +60,6 @@ function StudioQuestionShell({
   question,
   index,
   siblingCount,
-  depth,
   hiddenByLogic,
   children,
 }: QuestionShellProps) {
@@ -76,19 +75,6 @@ function StudioQuestionShell({
 
   // Preview mode renders the plain form.
   if (!studio.editing) return <>{children}</>;
-
-  // Deep nesting (inside nested groups) is edited from the
-  // outline/inspector, not decorated in place — but the logic-hidden cue
-  // still applies, or a revealed deep question would look like a normal one.
-  if (depth >= 2) {
-    if (!hiddenByLogic) return <>{children}</>;
-    return (
-      <div className="relative">
-        {hiddenBadge}
-        {children}
-      </div>
-    );
-  }
 
   const selected = studio.selectedId === question.id;
 
@@ -256,12 +242,14 @@ function StudioQuestionTitle({
   if (!studio.editing) return <>{children}</>;
   return (
     <Input
+      data-question-heading={question.id}
       aria-label={t("edit_question_heading", {
         name: question.text || t("untitled_question"),
       })}
       value={question.text}
       placeholder={t("enter_question_title")}
       className="h-auto min-w-0 flex-1 border-transparent px-1 py-0 text-sm font-medium shadow-none hover:border-gray-300 focus-visible:border-primary-600"
+      onFocus={() => studio.onSelectQuestion(question.id)}
       onClick={(event) => event.stopPropagation()}
       onChange={(event) =>
         studio.dispatch({

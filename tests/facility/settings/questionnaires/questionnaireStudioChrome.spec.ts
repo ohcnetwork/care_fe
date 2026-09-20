@@ -14,6 +14,146 @@ test.use({ storageState: "tests/.auth/user.json" });
  * introduced on top of the builder contracts.
  */
 test.describe("Questionnaire v2 studio chrome", () => {
+  test("nested canvas questions select the exact leaf and persist inline edits", async ({
+    page,
+  }) => {
+    const stamp = Date.now();
+    const outerTitle = `Outer group ${stamp}`;
+    const innerTitle = `Inner group ${stamp}`;
+    const deepTitle = `Deep group ${stamp}`;
+    const leafTitles = [`Nested leaf ${stamp}`, `Deep leaf ${stamp}`];
+    const editedTitles = leafTitles.map((title) => `${title} edited`);
+    const canvas = page.getByRole("region", { name: "Form canvas" });
+    const nav = page.getByRole("navigation");
+    const titleInput = page.getByRole("textbox", {
+      name: "Question Title",
+      exact: true,
+    });
+    const heading = (title: string) =>
+      canvas.getByRole("textbox", {
+        name: `Edit question heading: ${title}`,
+        exact: true,
+      });
+
+    const leafBlock = (title: string) =>
+      canvas
+        .locator("[data-question-id]")
+        .filter({ hasNot: page.locator("[data-question-id]") })
+        .filter({
+          has: page.getByRole("textbox", {
+            name: `Edit question heading: ${title}`,
+            exact: true,
+          }),
+        });
+    const clickLeafBody = async (title: string) => {
+      const answer = leafBlock(title).locator('input[id^="question-input-"]');
+      await answer.scrollIntoViewIfNeeded();
+      const bounds = await answer.boundingBox();
+      expect(bounds).not.toBeNull();
+      // The answer is intentionally inert in edit mode. A real pointer
+      // click on its body must select this leaf, not an enclosing group.
+      await page.mouse.click(
+        bounds!.x + bounds!.width / 2,
+        bounds!.y + bounds!.height / 2,
+      );
+      await expect(titleInput).toHaveValue(title);
+      await expect(
+        leafBlock(title).locator("..").getByText("Editing", { exact: true }),
+      ).toBeVisible();
+    };
+
+    await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${getFacilityId()}/settings/questionnaires`,
+      title: `QV2 Nested Selection ${stamp}`,
+    });
+
+    await test.step("Import leaves inside two and three nested groups", async () => {
+      await page.getByRole("button", { name: "Import Questions" }).click();
+      await page.locator('input[type="file"]').setInputFiles({
+        name: "nested-groups.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(
+          JSON.stringify({
+            questions: [
+              {
+                text: outerTitle,
+                type: "group",
+                link_id: "outer",
+                questions: [
+                  {
+                    text: innerTitle,
+                    type: "group",
+                    link_id: "inner",
+                    styling_metadata: { containerClasses: "grid grid-cols-1" },
+                    questions: [
+                      {
+                        text: leafTitles[0],
+                        type: "string",
+                        link_id: "nested_leaf",
+                      },
+                      {
+                        text: deepTitle,
+                        type: "group",
+                        link_id: "deep",
+                        styling_metadata: {
+                          containerClasses: "grid grid-cols-1",
+                        },
+                        questions: [
+                          {
+                            text: leafTitles[1],
+                            type: "string",
+                            link_id: "deep_leaf",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        ),
+      });
+      await page.getByRole("button", { name: "Import", exact: true }).click();
+      await expectToast(page, "Questionnaire Imported Successfully");
+    });
+
+    await test.step("Each nested leaf's body selects its own inspector", async () => {
+      for (const title of leafTitles) {
+        await nav.getByRole("button", { name: outerTitle }).click();
+        await expect(titleInput).toHaveValue(outerTitle);
+        await clickLeafBody(title);
+      }
+    });
+
+    await test.step("Focusing each leaf's heading changes selection and edits that leaf", async () => {
+      for (const [index, title] of leafTitles.entries()) {
+        await nav.getByRole("button", { name: outerTitle }).click();
+        await heading(title).click();
+        await expect(heading(title)).toBeFocused();
+        await expect(titleInput).toHaveValue(title);
+        await expect(
+          leafBlock(title).locator("..").getByText("Editing", { exact: true }),
+        ).toBeVisible();
+        await page.keyboard.press("End");
+        await page.keyboard.type(" edited");
+        await expect(titleInput).toHaveValue(editedTitles[index]);
+      }
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+    });
+
+    await test.step("Reload preserves the edits and both leaves remain selectable", async () => {
+      await page.reload();
+      for (const title of editedTitles) {
+        await clickLeafBody(title);
+      }
+      for (const title of [outerTitle, innerTitle, deepTitle]) {
+        await expect(heading(title)).toHaveValue(title);
+      }
+    });
+  });
+
   test("issues popover lists save blockers and click-to-fix selects the question", async ({
     page,
   }) => {
