@@ -1,28 +1,7 @@
-import { ServiceRequestQuestion } from "@/components/Questionnaire/QuestionTypes/ServiceRequestQuestion";
-
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function ServiceRequestInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.encounterId || !props.facilityId) return null;
-  return (
-    <ServiceRequestQuestion
-      encounterId={props.encounterId}
-      facilityId={props.facilityId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-      questionnaireSlug={props.questionnaireSlug}
-    />
-  );
-}
+import { ServiceRequestInput } from "@/components/QuestionnaireV2/structured/inputs/ServiceRequestInput";
 
 export const serviceRequestDefinition: StructuredTypeDefinition<"service_request"> =
   {

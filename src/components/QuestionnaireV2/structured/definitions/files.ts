@@ -1,31 +1,11 @@
-import {
-  FilesQuestion,
-  validateFileUploadQuestion,
-} from "@/components/Questionnaire/QuestionTypes/FileQuestion";
+import { validateFileUploadQuestion } from "@/components/Questionnaire/QuestionTypes/FileQuestion";
 
 import { readFileAsDataURL } from "@/Utils/utils";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function FilesInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.encounterId) return null;
-  return (
-    <FilesQuestion
-      question={props.question}
-      encounterId={props.encounterId}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-    />
-  );
-}
+import { FilesInput } from "@/components/QuestionnaireV2/structured/inputs/FilesInput";
 
 export const filesDefinition: StructuredTypeDefinition<"files"> = {
   type: "files",

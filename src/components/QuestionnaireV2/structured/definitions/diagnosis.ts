@@ -1,27 +1,8 @@
-import { DiagnosisQuestion } from "@/components/Questionnaire/QuestionTypes/DiagnosisQuestion";
-
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
+import { sanitizeNote } from "./adapt";
 
-function DiagnosisInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId || !props.encounterId) return null;
-  return (
-    <DiagnosisQuestion
-      patientId={props.patientId}
-      encounterId={props.encounterId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      initializeQuestionnaireResponseCB={props.onInitializeResponse}
-      disabled={props.disabled}
-    />
-  );
-}
+import { DiagnosisInput } from "@/components/QuestionnaireV2/structured/inputs/DiagnosisInput";
 
 export const diagnosisDefinition: StructuredTypeDefinition<"diagnosis"> = {
   type: "diagnosis",

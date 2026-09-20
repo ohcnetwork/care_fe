@@ -1,26 +1,8 @@
-import { AllergyQuestion } from "@/components/Questionnaire/QuestionTypes/AllergyQuestion";
-
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
+import { sanitizeNote } from "./adapt";
 
-function AllergyIntoleranceInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId) return null; // `requires` gates rendering
-  return (
-    <AllergyQuestion
-      patientId={props.patientId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      initializeQuestionnaireResponseCB={props.onInitializeResponse}
-      disabled={props.disabled}
-    />
-  );
-}
+import { AllergyIntoleranceInput } from "@/components/QuestionnaireV2/structured/inputs/AllergyIntoleranceInput";
 
 export const allergyIntoleranceDefinition: StructuredTypeDefinition<"allergy_intolerance"> =
   {

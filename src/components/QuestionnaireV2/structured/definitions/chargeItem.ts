@@ -1,27 +1,7 @@
-import { ChargeItemQuestion } from "@/components/Questionnaire/QuestionTypes/ChargeItemQuestion";
-
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function ChargeItemInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.encounterId || !props.facilityId) return null;
-  return (
-    <ChargeItemQuestion
-      encounterId={props.encounterId}
-      facilityId={props.facilityId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-    />
-  );
-}
+import { ChargeItemInput } from "@/components/QuestionnaireV2/structured/inputs/ChargeItemInput";
 
 export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   type: "charge_item",

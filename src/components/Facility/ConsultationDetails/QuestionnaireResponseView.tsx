@@ -8,10 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
-import {
-  StructuredAnswerView,
-  storedStructuredAnswer,
-} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";

@@ -7,7 +7,6 @@ import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -22,27 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 
 import Page from "@/components/Common/Page";
 
@@ -55,7 +35,6 @@ import {
   ACTION_CONFIGURATION_CONTEXT_TYPES,
   ActionConfigurationRead,
   ActionConfigurationRetrieve,
-  SUPPORTED_ACTION_CONFIGURATION_CONTEXTS,
   SupportedActionConfigurationContext,
   isSupportedActionConfigurationContext,
 } from "@/types/actions/actionConfiguration";
@@ -66,10 +45,14 @@ import {
 } from "@/types/questionnaire/actions";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
 
+import { ActionConfigurationFields } from "./ActionConfigurationFields";
+import {
+  ActionConfigurationFormValues,
+  actionConfigurationFormSchema,
+} from "./actionConfigurationFormSchema";
 import { ADMIN_ACTIONS_PATH } from "./ActionConfigurationList";
-import { actionContextHint, actionContextLabel } from "./labels";
+import { actionContextHint } from "./labels";
 import { actionConfigurationKeys } from "./queryKeys";
 
 interface ActionConfigurationFormProps {
@@ -177,19 +160,9 @@ function ActionConfigurationEditor({
   const queryClient = useQueryClient();
   const isEditing = Boolean(id);
 
-  const schema = useMemo(
-    () =>
-      z.object({
-        name: z.string().trim().min(1, t("field_required")).max(254),
-        description: z.string().trim(),
-        action_context: z.enum(SUPPORTED_ACTION_CONFIGURATION_CONTEXTS),
-        performable: z.boolean(),
-      }),
-    [t],
-  );
-  type FormValues = z.infer<typeof schema>;
+  const schema = useMemo(() => actionConfigurationFormSchema(t), [t]);
 
-  const form = useForm<FormValues>({
+  const form = useForm<ActionConfigurationFormValues>({
     resolver: zodResolver(schema),
     defaultValues: existing
       ? {
@@ -297,7 +270,7 @@ function ActionConfigurationEditor({
     setActionsDirty(true);
   };
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ActionConfigurationFormValues) => {
     // The action rules gate Save the way the studio's do: the failing
     // action is opened so the author sees what to fix.
     const issue = issues[0];
@@ -384,171 +357,16 @@ function ActionConfigurationEditor({
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <section className="space-y-4 rounded-lg border border-gray-200 bg-white p-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("name")}</FormLabel>
-                    <FormControl>
-                      <Input {...field} autoFocus={!isEditing} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("description")}</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={3} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {isEditing ? (
-                <div className="space-y-1.5">
-                  <p className="text-sm font-medium text-gray-900">
-                    {t("action_configuration_context")}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary">
-                      {actionContextLabel(context, t)}
-                    </Badge>
-                    {form.getValues("performable") && (
-                      <Badge variant="secondary">
-                        {t("action_configuration_on_demand")}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    {actionContextHint(context, t)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {t("action_configuration_context_locked")}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="action_context"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("action_configuration_context")}
-                        </FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            if (value === field.value) return;
-                            if (!isSupportedActionConfigurationContext(value))
-                              return;
-                            field.onChange(value);
-                            // Conditions and steps were authored against
-                            // the previous context's fields; they cannot
-                            // resolve under the new one, so they go.
-                            if (actions.length > 0) {
-                              changeActions([]);
-                              setOpenIndex(null);
-                            }
-                          }}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className="w-full"
-                              aria-label={t("action_configuration_context")}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {SUPPORTED_ACTION_CONFIGURATION_CONTEXTS.map(
-                              (option) => (
-                                <SelectItem key={option} value={option}>
-                                  {actionContextLabel(option, t)}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          {actionContextHint(field.value, t)}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="performable"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start gap-3 space-y-0">
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            aria-label={t("action_configuration_performable")}
-                          />
-                        </FormControl>
-                        <div className="space-y-0.5">
-                          <FormLabel>
-                            {t("action_configuration_performable")}
-                          </FormLabel>
-                          <FormDescription>
-                            {t("action_configuration_performable_hint")}
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-              {existing && (
-                <dl className="space-y-3 border-t border-gray-200 pt-4 text-sm">
-                  <div>
-                    <dt className="text-xs font-medium text-gray-500">
-                      {t("created_by")}
-                    </dt>
-                    <dd className="text-gray-900">
-                      {existing.created_by?.username ?? t("unknown")}
-                      <time
-                        dateTime={existing.created_date}
-                        className="block text-xs text-gray-500"
-                      >
-                        {formatDateTime(
-                          existing.created_date,
-                          "DD/MM/YYYY hh:mm A",
-                        )}
-                      </time>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium text-gray-500">
-                      {t("last_updated_by")}
-                    </dt>
-                    <dd className="text-gray-900">
-                      {existing.updated_by?.username ?? t("unknown")}
-                      <time
-                        dateTime={existing.modified_date}
-                        className="block text-xs text-gray-500"
-                      >
-                        {formatDateTime(
-                          existing.modified_date,
-                          "DD/MM/YYYY hh:mm A",
-                        )}
-                      </time>
-                    </dd>
-                  </div>
-                </dl>
-              )}
-            </section>
+            <ActionConfigurationFields
+              isEditing={isEditing}
+              existing={existing}
+              onContextChange={() => {
+                if (actions.length > 0) {
+                  changeActions([]);
+                  setOpenIndex(null);
+                }
+              }}
+            />
 
             <section className="space-y-3">
               <div>

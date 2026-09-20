@@ -231,4 +231,68 @@ describe("mapBatchErrors", () => {
       { reference_id: "", message: FALLBACK, status_code: 400 },
     ]);
   });
+  it("unwraps the backend's nested inactive-questionnaire message before rendering", () => {
+    const mapped = mapBatchErrors(
+      [
+        {
+          reference_id: "draft-questionnaire",
+          status_code: 400,
+          data: {
+            errors: [
+              {
+                type: "validation_error",
+                msg: {
+                  type: "questionnaire_inactive",
+                  msg: "Questionnaire is inactive",
+                },
+              },
+            ],
+          },
+        },
+      ],
+      FALLBACK,
+    );
+    assert.deepEqual(mapped, {
+      serverErrors: [
+        {
+          reference_id: "draft-questionnaire",
+          status_code: 400,
+          message: "Questionnaire is inactive",
+        },
+      ],
+      questionErrors: [],
+    });
+  });
+
+  it("normalizes nested question errors and unknown message objects to text", () => {
+    const mapped = mapBatchErrors(
+      [
+        {
+          reference_id: "questionnaire",
+          status_code: 400,
+          data: {
+            errors: [
+              {
+                question_id: "q1",
+                loc: ["results", "0"],
+                msg: { type: "validation_error", msg: { msg: "Invalid code" } },
+              },
+              {
+                question_id: "q2",
+                msg: { type: "unknown_message" },
+                error: "Code rejected",
+              },
+              { question_id: "q3", msg: { type: "unknown_message" } },
+            ],
+          },
+        },
+      ],
+      FALLBACK,
+    );
+    assert.equal(mapped.serverErrors[0].message, "results > 0: Invalid code");
+    assert.deepEqual(
+      mapped.questionErrors.map(({ error }) => error),
+      ["Invalid code", "Code rejected", FALLBACK],
+    );
+  });
 });

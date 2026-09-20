@@ -52,6 +52,7 @@ test.describe("Fill page: repeats + value-set-backed choice", () => {
       const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
         basePath: `/facility/${facilityId}/settings/questionnaires`,
         title: `QV2 Valueset Repeats ${stamp}`,
+        status: "Active",
       });
       questionnaireId =
         detailUrl.match(/questionnaires\/([0-9a-f-]+)/)?.[1] ?? "";

@@ -1,34 +1,11 @@
-import {
-  MedicationRequestQuestion,
-  validateMedicationRequestQuestion,
-} from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
+import { validateMedicationRequestQuestion } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { sanitizeNote, useLegacyResponseCallback } from "./adapt";
+import { sanitizeNote } from "./adapt";
 
-function MedicationRequestInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.patientId || !props.encounterId) return null;
-  return (
-    <MedicationRequestQuestion
-      patientId={props.patientId}
-      encounterId={props.encounterId}
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      initializeQuestionnaireResponseCB={props.onInitializeResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-      questionnaireId={props.questionnaireId}
-      questionnaireSlug={props.questionnaireSlug}
-    />
-  );
-}
+import { MedicationRequestInput } from "@/components/QuestionnaireV2/structured/inputs/MedicationRequestInput";
 
 export const medicationRequestDefinition: StructuredTypeDefinition<"medication_request"> =
   {

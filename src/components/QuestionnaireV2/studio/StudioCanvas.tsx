@@ -103,9 +103,9 @@ function StudioQuestionShell({
   );
 
   return (
-    // The inner form content is `inert` on the edit canvas, so this wrapper
-    // is the click target; keyboard selection goes through the outline tree,
-    // which lists every question as a real button.
+    // Delegate body clicks while keeping the rendered labels selectable.
+    // The separate native button offers keyboard/screen-reader selection
+    // without turning headings, child questions or toolbars into its content.
     <div
       onClick={(event) => {
         event.stopPropagation();
@@ -118,6 +118,25 @@ function StudioQuestionShell({
           : "hover:ring-1 hover:ring-gray-300 hover:ring-offset-2",
       )}
     >
+      <button
+        type="button"
+        aria-label={`${t("select_question")}: ${question.text}`}
+        aria-pressed={selected}
+        onClick={(event) => {
+          event.stopPropagation();
+          studio.onSelectQuestion(question.id);
+        }}
+        onKeyDown={(event) => {
+          // Keep native button activation from reaching the app-wide Enter
+          // shortcut, which otherwise prevents the browser's default click.
+          if (event.key === "Enter" || event.key === " ") {
+            event.stopPropagation();
+          }
+        }}
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-md focus:bg-white focus:px-3 focus:py-1 focus:text-sm focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+      >
+        {t("select_question")}
+      </button>
       {selected && (
         <>
           <span

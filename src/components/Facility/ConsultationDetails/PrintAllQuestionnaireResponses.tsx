@@ -11,10 +11,8 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import {
-  storedStructuredAnswer,
-  StructuredAnswerView,
-} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
+import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";

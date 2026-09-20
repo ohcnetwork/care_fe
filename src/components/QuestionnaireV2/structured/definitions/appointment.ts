@@ -1,29 +1,9 @@
-import {
-  AppointmentQuestion,
-  validateAppointmentQuestion,
-} from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
+import { validateAppointmentQuestion } from "@/components/Questionnaire/QuestionTypes/AppointmentQuestion";
 
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function AppointmentInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.facilityId) return null;
-  return (
-    <AppointmentQuestion
-      question={props.question}
-      facilityId={props.facilityId}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-    />
-  );
-}
+import { AppointmentInput } from "@/components/QuestionnaireV2/structured/inputs/AppointmentInput";
 
 export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   type: "appointment",

@@ -39,51 +39,63 @@ export function ActionRuleValueInput({
   onChange,
 }: ActionRuleValueInputProps) {
   const { t } = useTranslation();
-  return date ? (
-    <div role="group" aria-label={ariaLabel}>
-      <DateField
-        date={
-          typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
-            ? new Date(`${value}T00:00:00`)
-            : undefined
-        }
-        onChange={(date) => onChange(dateQueryString(date) ?? "")}
-        hideLabels
+  if (date)
+    return (
+      <div role="group" aria-label={ariaLabel}>
+        <DateField
+          date={
+            typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+              ? new Date(`${value}T00:00:00`)
+              : undefined
+          }
+          onChange={(date) => onChange(dateQueryString(date) ?? "")}
+          hideLabels
+        />
+      </div>
+    );
+
+  if (shape === "boolean")
+    return (
+      <Select
+        value={value === true ? "true" : "false"}
+        onValueChange={(value) => onChange(value === "true")}
+      >
+        <SelectTrigger className="w-full" aria-label={ariaLabel}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="true">{t("yes")}</SelectItem>
+          <SelectItem value="false">{t("no")}</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+
+  if (shape === "number")
+    return (
+      <NumericConditionInput
+        value={value}
+        onChange={onChange}
+        aria-label={ariaLabel}
       />
-    </div>
-  ) : shape === "boolean" ? (
-    <Select
-      value={value === true ? "true" : "false"}
-      onValueChange={(value) => onChange(value === "true")}
-    >
-      <SelectTrigger className="w-full" aria-label={ariaLabel}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="true">{t("yes")}</SelectItem>
-        <SelectItem value="false">{t("no")}</SelectItem>
-      </SelectContent>
-    </Select>
-  ) : shape === "number" ? (
-    <NumericConditionInput
-      value={value}
-      onChange={onChange}
-      aria-label={ariaLabel}
-    />
-  ) : (shape === "choice" || shape === "choice_multi") && options.length > 0 ? (
-    <Select value={String(value)} onValueChange={onChange}>
-      <SelectTrigger className="w-full" aria-label={ariaLabel}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.display || option.value}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  ) : (
+    );
+
+  if ((shape === "choice" || shape === "choice_multi") && options.length > 0)
+    return (
+      <Select value={String(value)} onValueChange={onChange}>
+        <SelectTrigger className="w-full" aria-label={ariaLabel}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.display || option.value}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+
+  return (
     <Input
       aria-label={ariaLabel}
       value={String(value ?? "")}

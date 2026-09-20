@@ -1,34 +1,12 @@
-import {
-  EncounterQuestion,
-  validateEncounterQuestion,
-} from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
 
 import type {
   StructuredBatchEntry,
-  StructuredInputProps,
   StructuredTypeDefinition,
 } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function EncounterInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  if (!props.encounterId || !props.facilityId) return null;
-  return (
-    <EncounterQuestion
-      question={props.question}
-      encounterId={props.encounterId}
-      facilityId={props.facilityId}
-      patientId={props.patientId}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      initializeQuestionnaireResponseCB={props.onInitializeResponse}
-      disabled={props.disabled}
-      errors={props.errors}
-      clearError={props.clearError}
-    />
-  );
-}
+import { EncounterInput } from "@/components/QuestionnaireV2/structured/inputs/EncounterInput";
 
 export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   type: "encounter",

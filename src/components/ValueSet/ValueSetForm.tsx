@@ -1,38 +1,31 @@
-import { AlertCircle, ArrowLeft, Layers3 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigationPrompt } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import type { FieldErrors, FieldPath } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
+import { Form } from "@/components/ui/form";
 
 import type { ValueSetRead, ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { goBack } from "@/Utils/utils";
 
+import { collectFormIssues, type FormIssue } from "./collectValueSetFormIssues";
 import type { ScopedValueSet } from "./useScopedValueSets";
 import { useValueSetEditorForm } from "./useValueSetEditorForm";
 import { ValueSetBasedOnFields } from "./ValueSetBasedOnFields";
 import { ValueSetBasicFields } from "./ValueSetBasicFields";
+import { ValueSetCompositionFields } from "./ValueSetCompositionFields";
+import { ValueSetFormErrors } from "./ValueSetFormErrors";
 import { ValueSetFormPreview } from "./ValueSetFormPreview";
 import type {
   ValueSetFormData,
   ValueSetFormState,
   ValueSetFormSubmit,
 } from "./valueSetFormTypes";
-import { ValueSetRuleFields } from "./ValueSetRuleFields";
 
 export type {
   ValueSetFormData,
@@ -54,25 +47,6 @@ interface ValueSetFormProps {
    *  this slot lets the editor present one coherent workspace without
    *  coupling access mutations to the value-set payload. */
   accessControl?: React.ReactNode;
-}
-
-interface FormIssue {
-  name: FieldPath<ValueSetFormData>;
-  message: string;
-}
-
-function collectFormIssues(errors: unknown, path = ""): FormIssue[] {
-  if (!errors || typeof errors !== "object") return [];
-  if ("message" in errors && typeof errors.message === "string") {
-    return [
-      { name: path as FieldPath<ValueSetFormData>, message: errors.message },
-    ];
-  }
-  return Object.entries(errors)
-    .filter(([key]) => !["ref", "type", "types"].includes(key))
-    .flatMap(([key, value]) =>
-      collectFormIssues(value, path ? `${path}.${key}` : key),
-    );
 }
 
 export function ValueSetForm({
@@ -117,8 +91,9 @@ export function ValueSetForm({
       ? t("preview_value_set")
       : t("edit_value_set")
     : t("create_valueset");
-  const issues = collectFormIssues(form.formState.errors);
   const isDirty = form.formState.isDirty;
+  // The embedded sheet stores this snapshot in a ref for its close guard;
+  // it does not mirror form values or rerender the parent on field edits.
   useEffect(() => {
     onStateChange?.({ isDirty, isSubmitting: !!isSubmitting });
   }, [isDirty, isSubmitting, onStateChange]);
@@ -159,36 +134,6 @@ export function ValueSetForm({
         behavior: "auto",
       });
     });
-  };
-  const issueLabel = (issue: FormIssue) => {
-    const parts = issue.name.split(".");
-    if (parts[0] !== "compose") return t(parts[0]);
-    const rule = t(
-      parts[1] === "include"
-        ? "valueset_include_rule"
-        : "valueset_exclude_rule",
-      { number: Number(parts[2]) + 1 },
-    );
-    if (parts[3] === "concept" || parts[3] === "filter") {
-      const location = t("valueset_issue_location", {
-        rule,
-        item: t(
-          parts[3] === "concept"
-            ? "valueset_concept_number"
-            : "valueset_filter_number",
-          { number: Number(parts[4]) + 1 },
-        ),
-      });
-      const fieldLabel = t(
-        parts[5] === "op"
-          ? "operator"
-          : parts[5] === "display"
-            ? "display_name"
-            : parts[5],
-      );
-      return `${location} · ${fieldLabel}`;
-    }
-    return rule;
   };
   const handleInvalid = (errors: FieldErrors<ValueSetFormData>) => {
     const firstIssue = collectFormIssues(errors)[0];
@@ -250,27 +195,7 @@ export function ValueSetForm({
           </div>
         </header>
 
-        {form.formState.submitCount > 0 && issues.length > 0 && (
-          <Alert variant="destructive" className="border-red-200">
-            <AlertCircle />
-            <AlertTitle>{t("valueset_fix_errors")}</AlertTitle>
-            <AlertDescription>
-              <ul className="space-y-1">
-                {issues.map((issue) => (
-                  <li key={issue.name}>
-                    <button
-                      type="button"
-                      className="cursor-pointer text-left underline underline-offset-2"
-                      onClick={() => focusIssue(issue)}
-                    >
-                      {issueLabel(issue)}: {issue.message}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
+        <ValueSetFormErrors control={form.control} onFocusIssue={focusIssue} />
 
         <div className="space-y-7">
           <div className="min-w-0 space-y-7">
@@ -309,77 +234,17 @@ export function ValueSetForm({
               </Card>
             )}
 
-            <section className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Layers3 aria-hidden className="size-4 text-gray-500" />
-                  <h2 className="text-xl font-semibold tracking-tight text-gray-900">
-                    {t("definition")}
-                  </h2>
-                </div>
-                {!isReadOnly && (
-                  <p role="status" className="text-sm text-gray-500">
-                    {t(
-                      isDirty
-                        ? "valueset_unsaved_changes"
-                        : "no_changes_to_save",
-                    )}
-                  </p>
-                )}
-              </div>
-              {(initialData || parent) && (
-                <FormField
-                  control={form.control}
-                  name="disable_composition"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 p-4">
-                      <div className="space-y-1">
-                        <FormLabel>{t("valueset_use_parent_rules")}</FormLabel>
-                        <FormDescription>
-                          {t(
-                            field.value
-                              ? "valueset_own_rules_hint"
-                              : "valueset_parent_rules_hint",
-                          )}
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          ref={field.ref}
-                          name={field.name}
-                          onBlur={field.onBlur}
-                          checked={!field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(!checked)
-                          }
-                          disabled={isReadOnly || isSubmitting}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              )}
-              <div className="grid items-start gap-7">
-                <ValueSetRuleFields
-                  type="include"
-                  form={form}
-                  disabled={isReadOnly || isSubmitting}
-                  openIndex={openRules.include}
-                  onOpenIndexChange={(include) =>
-                    setOpenRules((current) => ({ ...current, include }))
-                  }
-                />
-                <ValueSetRuleFields
-                  type="exclude"
-                  form={form}
-                  disabled={isReadOnly || isSubmitting}
-                  openIndex={openRules.exclude}
-                  onOpenIndexChange={(exclude) =>
-                    setOpenRules((current) => ({ ...current, exclude }))
-                  }
-                />
-              </div>
-            </section>
+            <ValueSetCompositionFields
+              form={form}
+              hasParentRules={!!(initialData || parent)}
+              disabled={isReadOnly || isSubmitting}
+              isReadOnly={isReadOnly}
+              isDirty={isDirty}
+              openRules={openRules}
+              onOpenRule={(type, index) =>
+                setOpenRules((current) => ({ ...current, [type]: index }))
+              }
+            />
           </div>
 
           {isReadOnly && (

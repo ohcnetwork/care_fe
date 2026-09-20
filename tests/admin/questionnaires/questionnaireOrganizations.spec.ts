@@ -22,7 +22,9 @@ test.describe("Questionnaire v2 organizations field", () => {
         title,
       });
       await expect(
-        page.getByText("Organizations", { exact: true }),
+        page
+          .getByRole("tabpanel", { name: "Questions", exact: true })
+          .getByText("Organizations", { exact: true }),
       ).toBeVisible();
     });
 
@@ -93,7 +95,9 @@ test.describe("Questionnaire v2 organizations field", () => {
         title,
       });
       await expect(
-        page.getByText("Organizations", { exact: true }),
+        page
+          .getByRole("tabpanel", { name: "Questions", exact: true })
+          .getByText("Organizations", { exact: true }),
       ).toBeVisible();
       // The label and the combobox placeholder share the same text.
       await expect(

@@ -1,23 +1,7 @@
-import { TimeOfDeathQuestion } from "@/components/Questionnaire/QuestionTypes/DeathQuestion";
-
-import type {
-  StructuredInputProps,
-  StructuredTypeDefinition,
-} from "@/components/QuestionnaireV2/structured/types";
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
-import { useLegacyResponseCallback } from "./adapt";
 
-function TimeOfDeathInput(props: StructuredInputProps) {
-  const updateResponse = useLegacyResponseCallback(props.onChange);
-  return (
-    <TimeOfDeathQuestion
-      question={props.question}
-      questionnaireResponse={props.response}
-      updateQuestionnaireResponseCB={updateResponse}
-      disabled={props.disabled}
-    />
-  );
-}
+import { TimeOfDeathInput } from "@/components/QuestionnaireV2/structured/inputs/TimeOfDeathInput";
 
 export const timeOfDeathDefinition: StructuredTypeDefinition<"time_of_death"> =
   {

@@ -1,32 +1,19 @@
-import { Plus, X } from "lucide-react";
-import { memo, useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import { Button } from "@/components/ui/button";
+import { memo } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { emptyEntry } from "@/components/QuestionnaireV2/form/engine/inputs/withEntryAt";
-import { QUESTION_TYPE_COMPONENTS } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
-import {
-  EMPTY_ROW_KEYS,
-  dropRowKey,
-  growRowKeys,
-} from "@/components/QuestionnaireV2/form/engine/rowKeys";
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
 import {
   useQuestionEnabled,
   useQuestionErrors,
-  useQuestionResponse,
 } from "@/components/QuestionnaireV2/form/engine/store";
 
 import type { Question } from "@/types/questionnaire/question";
 
 import { useFormChrome } from "./chrome";
 import { useFormRenderer } from "./FormContext";
-import { NoteControl } from "./NoteControl";
+import { QuestionAnswerInput } from "./QuestionAnswerInput";
 import { SectionCard } from "./SectionCard";
-import { StructuredSlot } from "./StructuredSlot";
 
 export interface QuestionBlockProps {
   question: Question;
@@ -96,9 +83,8 @@ export const QuestionBlock = memo(function QuestionBlock(
 });
 
 /**
- * The non-group body — a separate component so the response and error
- * store subscriptions only exist for questions that actually record
- * answers (groups returned above without ever mounting them).
+ * The non-group chrome subscribes only to validation errors. Answer controls
+ * own their response subscriptions; groups never mount either subscription.
  */
 function LeafBlock({
   question,
@@ -113,58 +99,12 @@ function LeafBlock({
   effectiveDisabled: boolean;
   locked: boolean;
 }) {
-  const { t } = useTranslation();
   const { inert } = useFormRenderer();
   const { QuestionAnnotation } = useFormChrome();
   const errors = useQuestionErrors(question.id);
-  // Only written by repeating questions; read for entry counts.
-  const [response, updateResponse] = useQuestionResponse(question.id);
-
-  const InputComponent = QUESTION_TYPE_COMPONENTS[question.type];
-  // Programmatic label association: text-like inputs take `id={inputId}` for
-  // the htmlFor pairing; chip groups (boolean/choice) reference `labelId`
-  // via aria-labelledby on their radiogroup container instead.
+  // Text-like inputs use htmlFor; chip groups use aria-labelledby.
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
-
-  // Repeating questions render one input per value entry, except fixed-option
-  // choices, which render every selected value through their own multi-select
-  // control. The branch matches ChoiceInput: `answer_option` wins over
-  // `answer_value_set` when both are present.
-  const isSelfManagedChoice =
-    question.type === "choice" && !!question.answer_option?.length;
-
-  const isMultiEntry =
-    !!InputComponent &&
-    question.repeats === true &&
-    question.type !== "structured" &&
-    question.type !== "display" &&
-    !isSelfManagedChoice;
-
-  const entryCount = Math.max(response?.values.length ?? 0, 1);
-  const canRemoveEntries = (response?.values.length ?? 0) > 1;
-
-  // Rows that appeared since the last render claim a key here — see
-  // rowKeys.ts for why an index key cannot survive a removal.
-  const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
-  const visibleRowKeys = growRowKeys(rowKeys, entryCount);
-  if (visibleRowKeys !== rowKeys) setRowKeys(visibleRowKeys);
-
-  // Adding from an empty response materializes the on-screen placeholder entry
-  // too, so the new row never swallows the one the user was looking at.
-  const handleAddEntry = () => {
-    const current = response?.values ?? [];
-    const next = current.length === 0 ? [emptyEntry()] : [...current];
-    next.push(emptyEntry());
-    updateResponse({ values: next });
-  };
-
-  const handleRemoveEntry = (index: number) => {
-    setRowKeys((current) => dropRowKey(current, entryCount, index));
-    updateResponse({
-      values: (response?.values ?? []).filter((_, i) => i !== index),
-    });
-  };
 
   return (
     // data-question-id is the renderer's stable per-question DOM anchor —
@@ -216,77 +156,13 @@ function LeafBlock({
           fall through to the selection chrome and none of these controls
           surface in the a11y tree. */}
       <div inert={inert || undefined}>
-        {question.type === "structured" ? (
-          <StructuredSlot question={question} disabled={effectiveDisabled} />
-        ) : isMultiEntry ? (
-          <div className="space-y-2">
-            {Array.from({ length: entryCount }, (_, index) => (
-              <div
-                key={visibleRowKeys.keys[index]}
-                className="flex items-center gap-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <InputComponent
-                    question={question}
-                    disabled={effectiveDisabled}
-                    inputId={index === 0 ? inputId : `${inputId}-${index}`}
-                    labelId={labelId}
-                    valueIndex={index}
-                  />
-                </div>
-                {canRemoveEntries && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0"
-                    disabled={effectiveDisabled}
-                    onClick={() => handleRemoveEntry(index)}
-                    aria-label={t("remove")}
-                  >
-                    <X className="size-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={effectiveDisabled}
-                onClick={handleAddEntry}
-              >
-                <Plus className="size-4" />
-                {t("add_another")}
-              </Button>
-              <NoteControl questionId={question.id} locked={locked} />
-            </div>
-          </div>
-        ) : (
-          // Single-border model (reference design): each control keeps its
-          // own border; the note affordance sits behind a slim divider
-          // instead of sharing a second outer frame.
-          <div className="flex items-stretch gap-0.5">
-            <div className="min-w-0 flex-1">
-              {InputComponent ? (
-                <InputComponent
-                  question={question}
-                  disabled={effectiveDisabled}
-                  inputId={inputId}
-                  labelId={labelId}
-                />
-              ) : (
-                <p className="p-2 text-sm italic text-gray-400">
-                  {t("unsupported_question_type")}
-                </p>
-              )}
-            </div>
-            {question.type !== "display" && (
-              <NoteControl questionId={question.id} locked={locked} />
-            )}
-          </div>
-        )}
+        <QuestionAnswerInput
+          question={question}
+          disabled={effectiveDisabled}
+          locked={locked}
+          inputId={inputId}
+          labelId={labelId}
+        />
       </div>
       {/* role="alert" so a validation failure is ANNOUNCED, not only
           drawn: client-side validation writes these straight into the

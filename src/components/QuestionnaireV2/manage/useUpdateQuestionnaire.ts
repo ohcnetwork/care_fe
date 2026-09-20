@@ -69,11 +69,12 @@ export function useUpdateQuestionnaire(
         const records = facility
           ? (organizations.facilityOrganizations ?? [])
           : organizations.organizations;
+        const selectedIds = new Set(organizations.ids);
         // Seed the saved selection even if its picker is unmounted or the
         // following background refresh fails. Never restore stale access.
         if (
           records.length === organizations.ids.length &&
-          records.every((record) => organizations.ids.includes(record.id))
+          records.every((record) => selectedIds.has(record.id))
         ) {
           queryClient.setQueryData(
             questionnaireKeys.organizations(

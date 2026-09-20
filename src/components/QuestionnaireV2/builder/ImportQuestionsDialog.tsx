@@ -1,6 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import { TriangleAlert, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { TriangleAlert } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,14 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { extractQuestions } from "@/components/QuestionnaireV2/shared/questionnaireImport";
 import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
-
-import { cn } from "@/lib/utils";
 
 import { Question } from "@/types/questionnaire/question";
 
-import useDragAndDrop from "@/hooks/useDragAndDrop";
+import { ImportQuestionsFilePicker } from "./ImportQuestionsFilePicker";
+import { useQuestionImport } from "./useQuestionImport";
 
 type ImportMode = "file" | "url";
 type ImportStep = "select" | "confirm";
@@ -42,42 +39,49 @@ interface ImportQuestionsDialogProps {
   onImport: (questions: Question[], linkIdMap: Map<string, string>) => void;
 }
 
-interface UrlImportRequest {
-  url: string;
-  controller: AbortController;
-}
-
-/** Max accepted size for a fetched questionnaire JSON (bytes/characters). */
-const MAX_IMPORT_SIZE = 5_000_000;
-
 export function ImportQuestionsDialog({
   open,
   onOpenChange,
   onImport,
 }: ImportQuestionsDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        {/* Each opening owns a fresh import session. Closing from the parent
+            also clears pending data and aborts its work when it unmounts. */}
+        {open && (
+          <ImportQuestionsContent
+            onClose={() => onOpenChange(false)}
+            onImport={onImport}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface ImportQuestionsContentProps {
+  onClose: () => void;
+  onImport: ImportQuestionsDialogProps["onImport"];
+}
+
+function ImportQuestionsContent({
+  onClose,
+  onImport,
+}: ImportQuestionsContentProps) {
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const activeImport = useRef<AbortController | null>(null);
-
-  // Also invalidate work when the parent closes the controlled dialog or
-  // removes it without going through handleOpenChange.
-  useEffect(() => {
-    return () => {
-      activeImport.current?.abort();
-      activeImport.current = null;
-    };
-  }, [open]);
-
   const [step, setStep] = useState<ImportStep>("select");
   const [mode, setMode] = useState<ImportMode>("file");
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string>();
-  const [pendingQuestions, setPendingQuestions] = useState<Question[] | null>(
-    null,
-  );
-
-  const { dragOver, onDragOver, onDragLeave, fileDropError, setFileDropError } =
-    useDragAndDrop();
+  const {
+    pendingQuestions,
+    isFetching,
+    fileError,
+    importFile,
+    importUrl,
+    cancelImport,
+  } = useQuestionImport(() => setStep("confirm"));
 
   // http(s) only — z.url() alone admits javascript:, file:, data: etc.
   const urlSchema = z
@@ -87,118 +91,6 @@ export function ImportQuestionsDialog({
       t("invalid_url"),
     );
 
-  const isCurrentImport = (controller: AbortController) =>
-    activeImport.current === controller && !controller.signal.aborted;
-
-  const {
-    mutate: fetchFromUrl,
-    isPending: isFetching,
-    reset: resetFetch,
-  } = useMutation({
-    mutationFn: async ({
-      url,
-      controller,
-    }: UrlImportRequest): Promise<unknown> => {
-      // Bounded fetch: timeout + content-type/size sanity checks so a slow
-      // or oversized endpoint can't wedge the tab.
-      const response = await fetch(url, {
-        signal: AbortSignal.any([
-          controller.signal,
-          AbortSignal.timeout(10_000),
-        ]),
-      });
-      if (!response.ok) throw new Error("Failed to fetch questionnaire");
-      const contentType = response.headers.get("content-type") ?? "";
-      if (contentType && !/json|text/i.test(contentType)) {
-        throw new Error("Unexpected content type");
-      }
-      const declaredLength = Number(response.headers.get("content-length"));
-      if (declaredLength > MAX_IMPORT_SIZE) {
-        throw new Error("Questionnaire file too large");
-      }
-      const text = await response.text();
-      if (text.length > MAX_IMPORT_SIZE) {
-        throw new Error("Questionnaire file too large");
-      }
-      return JSON.parse(text) as unknown;
-    },
-    onSuccess: (data: unknown, { controller }) => {
-      if (!isCurrentImport(controller)) return;
-      const questions = extractQuestions(data);
-      if (!questions) {
-        toast.error(t("invalid_json"));
-        return;
-      }
-      setPendingQuestions(questions);
-      setStep("confirm");
-    },
-    onError: (_error, { controller }) => {
-      if (!isCurrentImport(controller)) return;
-      toast.error(t("failed_to_import_questionnaire"));
-    },
-  });
-
-  const cancelImport = () => {
-    activeImport.current?.abort();
-    activeImport.current = null;
-    resetFetch();
-  };
-
-  const startImport = () => {
-    cancelImport();
-    const controller = new AbortController();
-    activeImport.current = controller;
-    return controller;
-  };
-
-  const reset = () => {
-    cancelImport();
-    setStep("select");
-    setMode("file");
-    setUrl("");
-    setUrlError(undefined);
-    setFileDropError("");
-    setPendingQuestions(null);
-  };
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    onOpenChange(nextOpen);
-    if (!nextOpen) reset();
-  };
-
-  const handleFile = async (file: File) => {
-    const controller = startImport();
-    setFileDropError("");
-    try {
-      const text = await file.text();
-      if (!isCurrentImport(controller)) return;
-      const data: unknown = JSON.parse(text);
-      const questions = extractQuestions(data);
-      if (!questions) {
-        setFileDropError(t("invalid_json"));
-        return;
-      }
-      setPendingQuestions(questions);
-      setStep("confirm");
-    } catch {
-      if (!isCurrentImport(controller)) return;
-      setFileDropError(t("invalid_json"));
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    onDragLeave();
-    const file = e.dataTransfer.files[0];
-    if (file) void handleFile(file);
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (file) void handleFile(file);
-  };
-
   const handleImportFromUrl = () => {
     const result = urlSchema.safeParse(url);
     if (!result.success) {
@@ -206,7 +98,7 @@ export function ImportQuestionsDialog({
       return;
     }
     setUrlError(undefined);
-    fetchFromUrl({ url, controller: startImport() });
+    void importUrl(url);
   };
 
   const handleConfirm = () => {
@@ -222,159 +114,107 @@ export function ImportQuestionsDialog({
       toast.error(t("invalid_json"));
       return;
     }
-    handleOpenChange(false);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("import_questionnaire")}</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{t("import_questionnaire")}</DialogTitle>
+      </DialogHeader>
 
+      {step === "select" ? (
+        <div className="space-y-4">
+          <Select
+            value={mode}
+            onValueChange={(value) => {
+              cancelImport();
+              setMode(value as ImportMode);
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="file">{t("import_from_json_file")}</SelectItem>
+              <SelectItem value="url">{t("import_from_url")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {mode === "file" ? (
+            <ImportQuestionsFilePicker
+              error={fileError}
+              onFile={(file) => void importFile(file)}
+            />
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="import-questions-url">
+                {t("paste_questionnaire_json_url")}
+              </Label>
+              <Input
+                id="import-questions-url"
+                value={url}
+                onChange={(e) => {
+                  cancelImport();
+                  setUrl(e.target.value);
+                  setUrlError(undefined);
+                }}
+                // eslint-disable-next-line i18next/no-literal-string -- example URL, not translatable prose
+                placeholder="https://example.com/questionnaire.json"
+              />
+              {urlError && (
+                <p className="text-sm text-destructive">{urlError}</p>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            {t("questions_count")}: {pendingQuestions?.length ?? 0}
+          </p>
+          <Alert variant="destructive">
+            <TriangleAlert className="size-4" />
+            <AlertTitle>{t("warning")}</AlertTitle>
+            <AlertDescription>
+              {t("all_existing_data_will_be_replaced")}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      <DialogFooter>
         {step === "select" ? (
-          <div className="space-y-4">
-            <Select
-              value={mode}
-              onValueChange={(value) => {
-                cancelImport();
-                setPendingQuestions(null);
-                setMode(value as ImportMode);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="file">
-                  {t("import_from_json_file")}
-                </SelectItem>
-                <SelectItem value="url">{t("import_from_url")}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {mode === "file" ? (
-              <div className="space-y-2">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className={cn(
-                    "cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors",
-                    dragOver
-                      ? "border-primary bg-primary/10"
-                      : "border-gray-200 hover:border-gray-300",
-                  )}
-                  onDragOver={onDragOver}
-                  onDragLeave={onDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  // role="button" divs get no automatic Enter/Space
-                  // activation — wire it up for keyboard users.
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      fileInputRef.current?.click();
-                    }
-                  }}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="size-10 text-gray-400" />
-                    <p className="text-sm text-gray-500 select-none">
-                      {dragOver
-                        ? t("drop_file_here")
-                        : t("drag_and_drop_or_click_to_select")}
-                    </p>
-                    <p className="text-xs text-gray-400 select-none">
-                      {t("json_files_only")}
-                    </p>
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/json"
-                    className="hidden"
-                    onChange={handleFileInputChange}
-                  />
-                </div>
-                {fileDropError && (
-                  <p className="text-sm text-destructive">{fileDropError}</p>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="import-questions-url">
-                  {t("paste_questionnaire_json_url")}
-                </Label>
-                <Input
-                  id="import-questions-url"
-                  value={url}
-                  onChange={(e) => {
-                    cancelImport();
-                    setPendingQuestions(null);
-                    setUrl(e.target.value);
-                    setUrlError(undefined);
-                  }}
-                  // eslint-disable-next-line i18next/no-literal-string -- example URL, not translatable prose
-                  placeholder="https://example.com/questionnaire.json"
-                />
-                {urlError && (
-                  <p className="text-sm text-destructive">{urlError}</p>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-700">
-              {t("questions_count")}: {pendingQuestions?.length ?? 0}
-            </p>
-            <Alert variant="destructive">
-              <TriangleAlert className="size-4" />
-              <AlertTitle>{t("warning")}</AlertTitle>
-              <AlertDescription>
-                {t("all_existing_data_will_be_replaced")}
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
-
-        <DialogFooter>
-          {step === "select" ? (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-              >
-                {t("cancel")}
-              </Button>
-              {/* Always render the primary action so the footer keeps the
+          <>
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t("cancel")}
+            </Button>
+            {/* Always render the primary action so the footer keeps the
                   Cancel/primary rhythm in both modes; in file mode the
                   dropzone drives the flow, so it stays disabled. */}
-              <Button
-                type="button"
-                onClick={handleImportFromUrl}
-                disabled={mode === "file" || isFetching || !url}
-              >
-                {isFetching ? t("importing") : t("import")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep("select")}
-              >
-                {t("back")}
-              </Button>
-              <Button type="button" onClick={handleConfirm}>
-                {t("import")}
-              </Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <Button
+              type="button"
+              onClick={handleImportFromUrl}
+              disabled={mode === "file" || isFetching || !url}
+            >
+              {isFetching ? t("importing") : t("import")}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep("select")}
+            >
+              {t("back")}
+            </Button>
+            <Button type="button" onClick={handleConfirm}>
+              {t("import")}
+            </Button>
+          </>
+        )}
+      </DialogFooter>
+    </>
   );
 }

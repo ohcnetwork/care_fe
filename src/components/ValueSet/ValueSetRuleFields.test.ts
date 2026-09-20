@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance } from "i18next";
 import { JSDOM } from "jsdom";
-import { act, createElement, useState } from "react";
+import { act, createElement, Fragment, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 
@@ -22,8 +22,25 @@ test("rule edits stay local and deleting or restoring a rule preserves its sibli
   const dom = new JSDOM("<!doctype html><div id='root'></div>", {
     pretendToBeVisual: true,
   });
+  const lookups: {
+    body: { code: string; system: string };
+    signal: AbortSignal | null | undefined;
+    resolve: (response: Response) => void;
+  }[] = [];
   const globals = {
     window: dom.window,
+    localStorage: { getItem: () => null },
+    fetch: (_url: string | URL | Request, init?: RequestInit) =>
+      new Promise<Response>((resolve) => {
+        lookups.push({
+          body: JSON.parse(String(init?.body)) as {
+            code: string;
+            system: string;
+          },
+          signal: init?.signal,
+          resolve,
+        });
+      }),
     document: dom.window.document,
     HTMLElement: dom.window.HTMLElement,
     HTMLFormElement: dom.window.HTMLFormElement,
@@ -55,6 +72,7 @@ test("rule edits stay local and deleting or restoring a rule preserves its sibli
   require.cache[configPath] = configModule;
 
   const { Form } = await import("@/components/ui/form");
+  const { ValueSetFormErrors } = await import("./ValueSetFormErrors");
   const { ValueSetRuleFields } = await import("./ValueSetRuleFields");
   const { useValueSetEditorForm } = await import("./useValueSetEditorForm");
   const i18n = createInstance();
@@ -97,6 +115,7 @@ test("rule edits stay local and deleting or restoring a rule preserves its sibli
   const root = createRoot(container);
   let form: ReturnType<typeof useValueSetEditorForm>["form"];
   let renders = 0;
+  let focusedIssue: string | undefined;
   function Editor() {
     const editor = useValueSetEditorForm({
       scope: INSTANCE_VALUESET_SCOPE,
@@ -107,12 +126,22 @@ test("rule edits stay local and deleting or restoring a rule preserves its sibli
     const [openIndex, setOpenIndex] = useState<number | null>(0);
     return createElement(Form<ValueSetFormData>, {
       ...form,
-      children: createElement(ValueSetRuleFields, {
-        form,
-        type: "include",
-        openIndex,
-        onOpenIndexChange: setOpenIndex,
-      }),
+      children: createElement(
+        Fragment,
+        null,
+        createElement(ValueSetFormErrors, {
+          control: form.control,
+          onFocusIssue: (issue) => {
+            focusedIssue = issue.name;
+          },
+        }),
+        createElement(ValueSetRuleFields, {
+          form,
+          type: "include",
+          openIndex,
+          onOpenIndexChange: setOpenIndex,
+        }),
+      ),
     });
   }
   const codeInput = (index: number) => {
@@ -187,6 +216,75 @@ test("rule edits stay local and deleting or restoring a rule preserves its sibli
       (button) => button.getAttribute("aria-label") === "Include rule 2",
     );
     assert.match(attention?.textContent ?? "", /valueset_needs_attention/);
+
+    await act(async () => {
+      await form!.handleSubmit(() =>
+        assert.fail("unverified code must fail validation"),
+      )();
+    });
+    const errorSummary = container.querySelector('[role="alert"]');
+    assert.ok(errorSummary);
+    assert.match(
+      errorSummary.textContent ?? "",
+      /valueset_verify_before_saving/,
+    );
+    const issueButton = errorSummary.querySelector("button");
+    assert.ok(issueButton);
+    await act(async () => issueButton.click());
+    assert.equal(focusedIssue, "compose.include.1.concept.0.display");
+
+    const beforeErrorUpdate = renders;
+    await act(async () => {
+      form!.setError("compose.include.1.concept.0.display", {
+        message: "A more specific validation message",
+      });
+    });
+    assert.match(
+      errorSummary.textContent ?? "",
+      /A more specific validation message/,
+    );
+    assert.equal(
+      renders,
+      beforeErrorUpdate,
+      "updating the summary must not rerender the form owner",
+    );
+
+    await click("verify code");
+    assert.equal(lookups.length, 1);
+    assert.equal(lookups[0].body.code, "edited-second");
+    await act(async () => {
+      form!.setValue("compose.include.1.concept.0.code", "  replacement  ");
+    });
+    assert.equal(lookups[0].signal?.aborted, true);
+    await act(async () => {
+      lookups[0].resolve(
+        Response.json({ metadata: { display: "Stale result" } }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(
+      form!.getValues("compose.include.1.concept.0.display"),
+      "",
+      "a late verification must not change an edited code",
+    );
+
+    await click("verify code");
+    assert.equal(lookups.length, 2);
+    assert.equal(lookups[1].body.code, "replacement");
+    await act(async () => {
+      lookups[1].resolve(
+        Response.json({ metadata: { display: "Replacement display" } }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(
+      form!.getValues("compose.include.1.concept.0.code"),
+      "replacement",
+    );
+    assert.equal(
+      form!.getValues("compose.include.1.concept.0.display"),
+      "Replacement display",
+    );
   } finally {
     await act(async () => root.unmount());
     queryClient.clear();

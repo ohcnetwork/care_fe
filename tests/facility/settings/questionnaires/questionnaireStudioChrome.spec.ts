@@ -118,6 +118,22 @@ test.describe("Questionnaire v2 studio chrome", () => {
       }
     });
 
+    await test.step("Native canvas controls select nested questions with Enter and Space", async () => {
+      for (const [index, title] of leafTitles.entries()) {
+        await nav.getByRole("button", { name: outerTitle }).click();
+        const select = canvas.getByRole("button", {
+          name: `Select question: ${title}`,
+          exact: true,
+        });
+        await select.focus();
+        await expect(select).toBeFocused();
+        await select.press(index === 0 ? "Enter" : "Space");
+        await expect(titleInput).toHaveValue(title);
+        await expect(select).toHaveAttribute("aria-pressed", "true");
+        await expect(titleInput).toBeFocused();
+      }
+    });
+
     await test.step("Each plain leaf label selects its inspector for title editing", async () => {
       for (const [index, title] of leafTitles.entries()) {
         await nav.getByRole("button", { name: outerTitle }).click();

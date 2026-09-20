@@ -146,9 +146,9 @@ function InstanceOrganizationsField({
       next = orgToAdd ? [...selected, orgToAdd] : selected;
     }
     const ids = next.map((org) => org.id);
-    const savedIds = current?.results.map((org) => org.id) ?? [];
+    const savedIds = new Set(current?.results.map((org) => org.id));
     onChange(
-      ids.length === savedIds.length && ids.every((id) => savedIds.includes(id))
+      ids.length === savedIds.size && ids.every((id) => savedIds.has(id))
         ? null
         : { ids, organizations: next },
     );
@@ -253,10 +253,10 @@ function FacilityOrganizationsField({
           optional
           onChange={(value, facilityOrganizations) => {
             const ids = value ?? [];
-            const savedIds = current?.results.map((org) => org.id) ?? [];
+            const savedIds = new Set(current?.results.map((org) => org.id));
             onChange(
-              ids.length === savedIds.length &&
-                ids.every((id) => savedIds.includes(id))
+              ids.length === savedIds.size &&
+                ids.every((id) => savedIds.has(id))
                 ? null
                 : { ids, organizations: [], facilityOrganizations },
             );
