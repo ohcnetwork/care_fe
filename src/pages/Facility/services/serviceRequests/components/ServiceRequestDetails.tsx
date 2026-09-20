@@ -4,36 +4,14 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 
-import { LocationNode } from "@/components/Location/LocationTree";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import {
-  SERVICE_REQUEST_PRIORITY_COLORS,
-  SERVICE_REQUEST_STATUS_COLORS,
-  ServiceRequestReadSpec,
-} from "@/types/emr/serviceRequest/serviceRequest";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { formatName } from "@/Utils/utils";
 
-function formatSpecimenRequirements(specimens: SpecimenDefinitionRead[]) {
-  const counts = specimens.reduce<Record<string, number>>((acc, specimen) => {
-    const type = specimen.type_collected?.display;
-    if (type) {
-      acc[type] = (acc[type] || 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  const types = Object.entries(counts);
-  return types.map(([type, count], index) => (
-    <span key={type}>
-      {type}
-      {count > 1 && <span> × {count}</span>}
-      {index < types.length - 1 && ", "}
-    </span>
-  ));
-}
+import { ServiceRequestContext } from "./ServiceRequestContext";
+import { ServiceRequestRequirements } from "./ServiceRequestRequirements";
 
 interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
@@ -48,11 +26,6 @@ export function ServiceRequestDetails({
 }: ServiceRequestDetailsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const specimenRequirements = formatSpecimenRequirements(
-    activityDefinition.specimen_requirements ?? [],
-  );
-  const observationRequirements =
-    activityDefinition.observation_result_requirements ?? [];
   const titleId = `service-request-title-${request.id}`;
 
   return (
@@ -107,102 +80,14 @@ export function ServiceRequestDetails({
 
       <div className="mx-3 mb-3 rounded-lg bg-white p-4 shadow-md">
         <div className="grid gap-5 md:grid-cols-2 md:gap-6">
-          <dl className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-start gap-x-6 gap-y-5 text-sm">
-            <div className="space-y-1.5">
-              <dt className="text-gray-600">{t("priority")}</dt>
-              <dd>
-                <Badge
-                  variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
-                >
-                  {t(request.priority)}
-                </Badge>
-              </dd>
-            </div>
-            <div className="space-y-1.5">
-              <dt className="text-gray-600">{t("status")}</dt>
-              <dd>
-                <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
-                  {t(request.status)}
-                </Badge>
-              </dd>
-            </div>
-            {observationRequirements.length > 0 && (
-              <div className="col-span-2 space-y-1.5">
-                <dt className="text-gray-600">
-                  {t("observation_definitions")}
-                </dt>
-                <dd className="flex flex-wrap gap-1.5">
-                  {observationRequirements.map((definition) => (
-                    <Badge
-                      key={definition.id}
-                      variant="secondary"
-                      className="max-w-full whitespace-normal wrap-break-word"
-                    >
-                      {definition.title}
-                    </Badge>
-                  ))}
-                </dd>
-              </div>
-            )}
-            {specimenRequirements.length > 0 && (
-              <div className="col-span-2 space-y-1.5">
-                <dt className="text-gray-600">{t("specimen")}</dt>
-                <dd className="font-semibold text-gray-700 wrap-break-word">
-                  {specimenRequirements}
-                </dd>
-              </div>
-            )}
-            {request.body_site && (
-              <div className="col-span-2 space-y-1.5">
-                <dt className="text-gray-600">{t("body_site")}</dt>
-                <dd className="font-semibold text-gray-700 wrap-break-word">
-                  {request.body_site.display}
-                </dd>
-              </div>
-            )}
-          </dl>
-          {(activityDefinition.healthcare_service ||
-            request.requester ||
-            request.encounter.current_location ||
-            request.patient_instruction) && (
-            <dl className="min-w-0 space-y-5 border-t border-gray-200 pt-5 text-sm md:border-t-0 md:border-l md:pt-0 md:pl-6">
-              {activityDefinition.healthcare_service && (
-                <div className="space-y-1.5">
-                  <dt className="text-gray-600">{t("healthcare_service")}</dt>
-                  <dd className="font-semibold text-gray-700 wrap-break-word">
-                    {activityDefinition.healthcare_service.name}
-                  </dd>
-                </div>
-              )}
-              {request.requester && (
-                <div className="space-y-1.5">
-                  <dt className="text-gray-600">{t("requested by")}</dt>
-                  <dd className="font-semibold text-gray-700 wrap-break-word">
-                    {formatName(request.requester)}
-                  </dd>
-                </div>
-              )}
-              {request.encounter.current_location && (
-                <div className="space-y-1.5">
-                  <dt className="text-gray-600">{t("patient_location")}</dt>
-                  <dd className="wrap-break-word">
-                    <LocationNode
-                      location={request.encounter.current_location}
-                      isLast={true}
-                    />
-                  </dd>
-                </div>
-              )}
-              {request.patient_instruction && (
-                <div className="space-y-1.5">
-                  <dt className="text-gray-600">{t("patient_instruction")}</dt>
-                  <dd className="whitespace-pre-wrap text-gray-950 wrap-break-word">
-                    {request.patient_instruction}
-                  </dd>
-                </div>
-              )}
-            </dl>
-          )}
+          <ServiceRequestRequirements
+            request={request}
+            activityDefinition={activityDefinition}
+          />
+          <ServiceRequestContext
+            request={request}
+            activityDefinition={activityDefinition}
+          />
         </div>
         {request.note && (
           <dl className="mt-5 border-t border-gray-200 pt-4 text-sm">

@@ -15,10 +15,29 @@ import {
 } from "@/components/ui/sheet";
 
 import {
+  ProcessingSpec,
   SPECIMEN_STATUS_COLORS,
   SpecimenRead,
 } from "@/types/emr/specimen/specimen";
 import { round } from "@/Utils/decimal";
+
+// Processing entries are embedded values without IDs. Count identical signatures
+// separately so duplicate events retain unique keys without depending on list order.
+function processingEventsWithKeys(processing: ProcessingSpec[]) {
+  const occurrences = new Map<string, number>();
+  return processing.map((event) => {
+    const signature = JSON.stringify([
+      event.time_date_time,
+      event.performer,
+      event.method?.system,
+      event.method?.code,
+      event.description,
+    ]);
+    const occurrence = occurrences.get(signature) ?? 0;
+    occurrences.set(signature, occurrence + 1);
+    return { event, key: `${signature}:${occurrence}` };
+  });
+}
 
 interface SpecimenHistorySheetProps {
   specimens: SpecimenRead[];
@@ -99,33 +118,35 @@ export function SpecimenHistorySheet({
                           {t("processing")}
                         </h4>
                         <ul className="space-y-2 text-sm">
-                          {specimen.processing.map((processing, index) => (
-                            <li key={index} className="space-y-0.5">
-                              <p>
-                                {processing.method?.display ||
-                                  processing.description ||
-                                  t("method")}
-                              </p>
-                              {processing.method?.display &&
-                                processing.description !==
-                                  processing.method.display && (
-                                  <p className="text-gray-500">
-                                    {processing.description}
-                                  </p>
-                                )}
-                              {processing.time_date_time && (
-                                <time
-                                  className="block text-gray-500"
-                                  dateTime={processing.time_date_time}
-                                >
-                                  {format(
-                                    new Date(processing.time_date_time),
-                                    "MMM d, yyyy, h:mm a",
+                          {processingEventsWithKeys(specimen.processing).map(
+                            ({ event: processing, key }) => (
+                              <li key={key} className="space-y-0.5">
+                                <p>
+                                  {processing.method?.display ||
+                                    processing.description ||
+                                    t("method")}
+                                </p>
+                                {processing.method?.display &&
+                                  processing.description !==
+                                    processing.method.display && (
+                                    <p className="text-gray-500">
+                                      {processing.description}
+                                    </p>
                                   )}
-                                </time>
-                              )}
-                            </li>
-                          ))}
+                                {processing.time_date_time && (
+                                  <time
+                                    className="block text-gray-500"
+                                    dateTime={processing.time_date_time}
+                                  >
+                                    {format(
+                                      new Date(processing.time_date_time),
+                                      "MMM d, yyyy, h:mm a",
+                                    )}
+                                  </time>
+                                )}
+                              </li>
+                            ),
+                          )}
                         </ul>
                       </div>
                     )}

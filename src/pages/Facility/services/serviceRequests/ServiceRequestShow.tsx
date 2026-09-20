@@ -1,74 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckIcon, MoreVertical, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 
 import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
-
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import batchApi from "@/types/base/batch/batchApi";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
+import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
-import {
-  EDITABLE_SERVICE_REQUEST_STATUSES,
-  Status,
-} from "@/types/emr/serviceRequest/serviceRequest";
+import { EDITABLE_SERVICE_REQUEST_STATUSES } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import {
-  SpecimenRead,
-  SpecimenStatus,
-  getActiveAndDraftSpecimens,
-} from "@/types/emr/specimen/specimen";
-import specimenApi from "@/types/emr/specimen/specimenApi";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
-
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import BackButton from "@/components/Common/BackButton";
-import { PatientHeader } from "@/components/Patient/PatientHeader";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
-import {
-  DiagnosticReportForm,
-  type SavedReportSignal,
-} from "./components/DiagnosticReportForm";
-import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
-import { MultiQRCodePrintSheet } from "./components/MultiQRCodePrintSheet";
+import { ServiceRequestActions } from "./components/ServiceRequestActions";
+import { ServiceRequestCompletion } from "./components/ServiceRequestCompletion";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
-import { SpecimenForm } from "./components/SpecimenForm";
-import { SpecimenHistorySheet } from "./components/SpecimenHistorySheet";
-import { SpecimenWorkflowCard } from "./components/SpecimenWorkflowCard";
+import { ServiceRequestReportWorkflow } from "./components/ServiceRequestReportWorkflow";
+import { ServiceRequestSpecimenWorkflow } from "./components/ServiceRequestSpecimenWorkflow";
 
 interface ServiceRequestShowProps {
   facilityId: string;
@@ -87,21 +36,6 @@ export default function ServiceRequestShow({
   locationId,
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const isMobile = useBreakpoints({
-    default: true,
-    lg: false,
-  });
-
-  const [isPrintingAllQRCodes, setIsPrintingAllQRCodes] = useState(false);
-  const [isQRCodeSheetOpen, setIsQRCodeSheetOpen] = useState(false);
-  const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
-  const [completionNote, setCompletionNote] = useState("");
-  const [expandedReport, setExpandedReport] =
-    useState<SavedReportSignal | null>(null);
-  const [selectedSpecimenDefinition, setSelectedSpecimenDefinition] =
-    useState<SpecimenDefinitionRead | null>(null);
-
   const { data: request, isLoading: isLoadingRequest } = useQuery({
     queryKey: ["serviceRequest", facilityId, serviceRequestId],
     queryFn: query(serviceRequestApi.retrieveServiceRequest, {
@@ -111,112 +45,6 @@ export default function ServiceRequestShow({
       },
     }),
   });
-
-  const {
-    mutate: createDraftSpecimenFromDefinition,
-    isPending: isCreatingDraftSpecimen,
-  } = useMutation({
-    mutationFn: mutate(specimenApi.createSpecimenFromDefinition, {
-      pathParams: {
-        facilityId,
-        serviceRequestId,
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-    },
-    onError: () => {
-      toast.error(t("specimen_draft_create_error"));
-    },
-  });
-
-  const { mutate: executeBatch } = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-      setIsPrintingAllQRCodes(false);
-      setIsQRCodeSheetOpen(true);
-    },
-    onError: () => {
-      toast.error(t("specimen_draft_create_error"));
-      setIsPrintingAllQRCodes(false);
-    },
-  });
-
-  const {
-    mutate: cancelServiceRequest,
-    isPending: isCancellingServiceRequest,
-  } = useMutation({
-    mutationFn: mutate(serviceRequestApi.cancelServiceRequest, {
-      pathParams: { facilityId, serviceRequestId },
-    }),
-    onSuccess: () => {
-      toast.success(t("service_request_cancelled"));
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-    },
-  });
-
-  const {
-    mutate: completeServiceRequest,
-    isPending: isCompletingServiceRequest,
-  } = useMutation({
-    mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
-      pathParams: { facilityId, serviceRequestId },
-    }),
-    onSuccess: () => {
-      toast.success(t("service_request_completed"));
-      setIsCompleteDialogOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
-      });
-    },
-  });
-
-  const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
-    const matchingSpecimens = request?.specimens.filter(
-      (spec) => spec.specimen_definition?.id === requirement.id,
-    );
-
-    if (
-      matchingSpecimens?.some(
-        (spec) =>
-          spec.status === SpecimenStatus.available ||
-          spec.status === SpecimenStatus.draft,
-      )
-    ) {
-      return;
-    }
-
-    createDraftSpecimenFromDefinition({
-      specimen_definition: requirement.id,
-      specimen: {
-        status: SpecimenStatus.draft,
-        specimen_type: requirement.type_collected,
-        accession_identifier: "", // Will be generated by the server
-        received_time: null,
-        collection: {
-          method: requirement.collection || null,
-          body_site: null,
-          collector: null,
-          collected_date_time: null,
-          quantity: null,
-          procedure: null,
-          fasting_status_codeable_concept: null,
-          fasting_status_duration: null,
-        },
-        processing: [],
-        condition: [],
-        note: null,
-      },
-    });
-  };
 
   const activityDefinitionSlug = request?.activity_definition?.slug;
 
@@ -250,85 +78,16 @@ export default function ServiceRequestShow({
   }
 
   const disableEdit = !EDITABLE_SERVICE_REQUEST_STATUSES.includes(
-    request?.status || Status.draft,
+    request.status,
   );
 
-  function getExistingDraftSpecimen(
-    specimenDefinitionSlug: string,
-  ): SpecimenRead | undefined {
-    const specimen = request?.specimens.find(
-      (spec) =>
-        spec.specimen_definition?.slug === specimenDefinitionSlug &&
-        spec.status === SpecimenStatus.draft,
-    );
-
-    return specimen;
-  }
-
   const specimenRequirements = activityDefinition.specimen_requirements ?? [];
-  const observationRequirements =
-    activityDefinition.observation_result_requirements ?? [];
   const diagnosticReports = [...(request.diagnostic_reports || [])].sort(
     (first, second) =>
       new Date(first.created_date).getTime() -
         new Date(second.created_date).getTime() ||
       first.id.localeCompare(second.id),
   );
-
-  const assignedSpecimenIds = new Set<string>();
-
-  const preparePrintAllQRCodes = async () => {
-    // First create drafts for any specimen definitions without specimens
-    const missingDraftDefinitions =
-      request.status !== Status.completed
-        ? specimenRequirements.filter((requirement) => {
-            // Check if there's no draft or available specimen for this definition
-            return !request.specimens.some(
-              (spec) =>
-                spec.specimen_definition?.id === requirement.id &&
-                (spec.status === SpecimenStatus.draft ||
-                  spec.status === SpecimenStatus.available),
-            );
-          })
-        : [];
-
-    if (missingDraftDefinitions.length > 0) {
-      setIsPrintingAllQRCodes(true);
-
-      executeBatch({
-        requests: missingDraftDefinitions.map((requirement, index) => ({
-          url: `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}/create_specimen_from_definition/`,
-          method: "POST",
-          reference_id: `create_specimen_${index}`,
-          body: {
-            specimen_definition: requirement.id,
-            specimen: {
-              status: SpecimenStatus.draft,
-              specimen_type: requirement.type_collected,
-              accession_identifier: "",
-              received_time: null,
-              collection: {
-                method: requirement.collection,
-                body_site: null,
-                collector: null,
-                collector_object: null,
-                collected_date_time: null,
-                quantity: null,
-                procedure: null,
-                fasting_status_codeable_concept: null,
-                fasting_status_duration: null,
-              },
-              processing: [],
-              condition: [],
-              note: null,
-            },
-          },
-        })),
-      });
-    } else {
-      setIsQRCodeSheetOpen(true);
-    }
-  };
 
   const hasFinalizedReport = diagnosticReports.some(
     (report) => report.status === DiagnosticReportStatus.final,
@@ -338,13 +97,10 @@ export default function ServiceRequestShow({
   const pendingReports = diagnosticReports.filter(
     (report) => report.status !== DiagnosticReportStatus.final,
   ).length;
-  const hasPendingReports = pendingReports > 0;
 
   const canMarkAsComplete =
     hasFinalizedReport ||
     CLASSIFICATIONS_CAN_BE_MARKED_AS_COMPLETE.includes(request.category);
-  const canShowCompleteCta =
-    !request?.activity_definition?.diagnostic_report_codes || canMarkAsComplete;
   const canShowMarkAsCompleteFootBar = canMarkAsComplete && !disableEdit;
 
   return (
@@ -353,85 +109,12 @@ export default function ServiceRequestShow({
         className={`mx-auto w-full p-4 max-w-4xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
       >
         <div className="space-y-6">
-          <div className="flex items-center justify-between gap-2">
-            <BackButton
-              variant="outline"
-              className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
-            >
-              <ArrowLeft />
-              {t("back")}
-            </BackButton>
-
-            <div className="flex items-end gap-2">
-              {canShowCompleteCta && (
-                <div className="flex items-center gap-2">
-                  <>
-                    {hasFinalizedReport && (
-                      <Button
-                        variant="primary"
-                        className="font-semibold"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/service_request/${serviceRequestId}/diagnostic_reports/print`,
-                          )
-                        }
-                      >
-                        {t("view_full_report")}
-                        <ShortcutBadge actionId="view-report" />
-                      </Button>
-                    )}
-                  </>
-                </div>
-              )}
-              {request.status !== Status.completed &&
-                request.status !== Status.revoked && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="border-gray-400 px-2"
-                        disabled={isCancellingServiceRequest}
-                      >
-                        <CareIcon icon="l-ellipsis-v" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild className="text-primary-900">
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            cancelServiceRequest({
-                              status: Status.entered_in_error,
-                            })
-                          }
-                          className="w-full flex flex-row "
-                        >
-                          <CareIcon
-                            icon="l-exclamation-circle"
-                            className="mr-1"
-                          />
-                          <span>{t("mark_as_entered_in_error")}</span>
-                        </Button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className="text-primary-900">
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            cancelServiceRequest({
-                              status: Status.revoked,
-                            })
-                          }
-                          className="w-full flex flex-row justify-stretch items-center"
-                        >
-                          <CareIcon icon="l-ban" className="mr-1" />
-                          {t("mark_as_revoked")}
-                        </Button>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-            </div>
-          </div>
+          <ServiceRequestActions
+            request={request}
+            facilityId={facilityId}
+            serviceRequestId={serviceRequestId}
+            hasFinalizedReport={hasFinalizedReport}
+          />
           <div className="px-2">
             <PatientHeader
               patient={request.encounter.patient}
@@ -457,296 +140,34 @@ export default function ServiceRequestShow({
             />
           </div>
 
-          {specimenRequirements.length > 0 && !selectedSpecimenDefinition && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">{t("specimens")}</h2>
-                <div className="flex items-center gap-2">
-                  <MultiQRCodePrintSheet
-                    specimens={getActiveAndDraftSpecimens(request?.specimens)}
-                    open={isQRCodeSheetOpen}
-                    onOpenChange={setIsQRCodeSheetOpen}
-                    isLoading={isPrintingAllQRCodes}
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={preparePrintAllQRCodes}
-                      disabled={isCreatingDraftSpecimen || isPrintingAllQRCodes}
-                    >
-                      <PrinterIcon className="size-4" />
-                      {isPrintingAllQRCodes ? (
-                        t("preparing")
-                      ) : (
-                        <span className="hidden sm:inline">
-                          {t("print_all_qr_codes")}
-                        </span>
-                      )}
-                    </Button>
-                  </MultiQRCodePrintSheet>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <SpecimenHistorySheet
-                        specimens={(request?.specimens || []).filter(
-                          (specimen) =>
-                            specimen.status ===
-                              SpecimenStatus.entered_in_error ||
-                            specimen.status === SpecimenStatus.unavailable ||
-                            specimen.status === SpecimenStatus.unsatisfactory,
-                        )}
-                      >
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          {t("view_specimen_history")}
-                        </DropdownMenuItem>
-                      </SpecimenHistorySheet>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-              {specimenRequirements.map((requirement) => {
-                const allMatchingForThisDefId = request.specimens.filter(
-                  (spec) => spec.specimen_definition?.id === requirement.id,
-                );
+          <ServiceRequestSpecimenWorkflow
+            request={request}
+            requirements={specimenRequirements}
+            facilityId={facilityId}
+            serviceRequestId={serviceRequestId}
+            disableEdit={disableEdit}
+          />
 
-                const validSpecimens = allMatchingForThisDefId.filter(
-                  (spec) =>
-                    spec.status === SpecimenStatus.available ||
-                    spec.status === SpecimenStatus.draft,
-                );
-
-                const collectedSpecimen = validSpecimens.find(
-                  (spec) => !assignedSpecimenIds.has(spec.id),
-                );
-
-                if (collectedSpecimen) {
-                  assignedSpecimenIds.add(collectedSpecimen.id);
-                }
-
-                return (
-                  <SpecimenWorkflowCard
-                    request={request}
-                    key={requirement.id}
-                    facilityId={facilityId}
-                    serviceRequestId={serviceRequestId}
-                    requirement={requirement}
-                    specimen={collectedSpecimen}
-                    onCollect={() => {
-                      createDraftSpecimen(requirement);
-                      setSelectedSpecimenDefinition(requirement);
-                    }}
-                  />
-                );
-              })}
-            </div>
-          )}
-
-          {selectedSpecimenDefinition && (
-            <Card className="shadow-lg border-t-4 border-t-primary">
-              <CardHeader className="pb-0 flex flex-row justify-between items-center">
-                <CardTitle>
-                  {t("collect_specimen")}: {selectedSpecimenDefinition?.title}
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedSpecimenDefinition(null)}
-                >
-                  <CareIcon icon="l-arrow-left" className="size-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="py-4">
-                <SpecimenForm
-                  specimenDefinition={selectedSpecimenDefinition}
-                  onCancel={() => setSelectedSpecimenDefinition(null)}
-                  facilityId={facilityId}
-                  draftSpecimen={getExistingDraftSpecimen(
-                    selectedSpecimenDefinition.slug,
-                  )}
-                  serviceRequestId={serviceRequestId}
-                  disableEdit={disableEdit}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="space-y-3">
-            {(observationRequirements.length > 0 || pendingReports > 0) && (
-              <h2 className="text-xl font-semibold">{t("test_results")}</h2>
-            )}
-
-            <DiagnosticReportForm
-              patientId={request.encounter.patient.id}
-              facilityId={facilityId}
-              serviceRequestId={serviceRequestId}
-              observationDefinitions={observationRequirements}
-              diagnosticReports={diagnosticReports}
-              activityDefinition={activityDefinition}
-              specimens={request.specimens || []}
-              disableEdit={disableEdit}
-              serviceRequestStatus={request.status}
-              onReportSaved={setExpandedReport}
-            />
-          </div>
-          {diagnosticReports.length > 0 && (
-            <DiagnosticReportReview
-              facilityId={facilityId}
-              patientId={request.encounter.patient.id}
-              diagnosticReports={diagnosticReports}
-              observationDefinitions={observationRequirements}
-              serviceRequestId={serviceRequestId}
-              disableEdit={disableEdit}
-              expandedReport={expandedReport}
-            />
-          )}
+          <ServiceRequestReportWorkflow
+            request={request}
+            activityDefinition={activityDefinition}
+            diagnosticReports={diagnosticReports}
+            pendingReports={pendingReports}
+            facilityId={facilityId}
+            serviceRequestId={serviceRequestId}
+            disableEdit={disableEdit}
+          />
         </div>
       </div>
       {canShowMarkAsCompleteFootBar && (
-        <>
-          <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
-            <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-white">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  {t("complete_service_request")}
-                </p>
-                <p className="text-xs text-gray-600">
-                  {hasPendingReports
-                    ? t("reports_pending_final_review", {
-                        count: pendingReports,
-                        total: totalReports,
-                      })
-                    : t("complete_service_request_help_text")}
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="font-semibold shrink-0"
-                onClick={() => {
-                  setCompletionNote(request.note ?? "");
-                  setIsCompleteDialogOpen(true);
-                }}
-                disabled={isCompletingServiceRequest || hasPendingReports}
-              >
-                {t("mark_as_complete")}
-                <ShortcutBadge actionId="mark-as-complete" />
-              </Button>
-            </div>
-          </div>
-
-          {isMobile ? (
-            <Sheet
-              open={isCompleteDialogOpen}
-              onOpenChange={(open) => {
-                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-              }}
-            >
-              <SheetContent side="bottom">
-                <SheetHeader>
-                  <SheetTitle>{t("add_completion_note")}</SheetTitle>
-                  <SheetDescription>
-                    {t("service_request_completion_note_description")}
-                  </SheetDescription>
-                </SheetHeader>
-                <CompletionNoteContent
-                  note={completionNote}
-                  isUpdating={isCompletingServiceRequest}
-                  onNoteChange={setCompletionNote}
-                  onComplete={() =>
-                    completeServiceRequest({
-                      status: Status.completed,
-                      note: completionNote.trim() || null,
-                      locations: request.locations.map((loc) => loc.id),
-                    })
-                  }
-                  onCancel={() => setIsCompleteDialogOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-          ) : (
-            <Dialog
-              open={isCompleteDialogOpen}
-              onOpenChange={(open) => {
-                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-              }}
-            >
-              <DialogContent className="sm:max-w-lg shadow-lg border-white/20">
-                <DialogHeader>
-                  <DialogTitle>{t("add_completion_note")}</DialogTitle>
-                  <DialogDescription>
-                    {t("service_request_completion_note_description")}
-                  </DialogDescription>
-                </DialogHeader>
-                <CompletionNoteContent
-                  note={completionNote}
-                  isUpdating={isCompletingServiceRequest}
-                  onNoteChange={setCompletionNote}
-                  onComplete={() =>
-                    completeServiceRequest({
-                      status: Status.completed,
-                      note: completionNote.trim() || null,
-                      locations: request.locations.map((loc) => loc.id),
-                    })
-                  }
-                  onCancel={() => setIsCompleteDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
-        </>
+        <ServiceRequestCompletion
+          request={request}
+          facilityId={facilityId}
+          serviceRequestId={serviceRequestId}
+          pendingReports={pendingReports}
+          totalReports={totalReports}
+        />
       )}
     </div>
   );
 }
-
-interface CompletionNoteContentProps {
-  note: string;
-  isUpdating: boolean;
-  onNoteChange: (note: string) => void;
-  onComplete: () => void;
-  onCancel: () => void;
-}
-
-const CompletionNoteContent = ({
-  note,
-  isUpdating,
-  onNoteChange,
-  onComplete,
-  onCancel,
-}: CompletionNoteContentProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">
-          {t("completion_note")}
-        </p>
-        <Textarea
-          value={note}
-          onChange={(e) => onNoteChange(e.target.value)}
-          placeholder={t("enter_note")}
-          className="min-h-14"
-          aria-label={t("completion_note")}
-        />
-      </div>
-      <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
-        <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
-          <CheckIcon className="size-4" />
-          {isUpdating ? t("updating") : `${t("save_and_complete")}`}
-        </Button>
-        <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
-          {t("cancel")}
-        </Button>
-      </div>
-    </>
-  );
-};

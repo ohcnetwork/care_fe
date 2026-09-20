@@ -74,9 +74,10 @@ export function DiagnosticReportObservationPicker({
     enabled: open && !disabled,
   });
 
+  const selectedIdSet = new Set(selectedIds);
   const options = data?.pages
     .flatMap((page) => page.results)
-    .filter((definition) => !selectedIds.includes(definition.id));
+    .filter((definition) => !selectedIdSet.has(definition.id));
 
   return (
     <Popover open={open && !disabled} onOpenChange={setOpen}>

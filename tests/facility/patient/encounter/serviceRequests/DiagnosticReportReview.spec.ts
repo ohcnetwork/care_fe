@@ -90,10 +90,17 @@ function createFile(reportId: string) {
   };
 }
 
+interface ReportListSnapshot extends Omit<
+  ReturnType<typeof createReport>,
+  "observations"
+> {
+  observations?: ReturnType<typeof createObservation>[];
+}
+
 async function mockReviewPage(
   page: Page,
   report: ReturnType<typeof createReport>,
-  listReport = report,
+  listReport: ReportListSnapshot = report,
 ) {
   const facilityId = getFacilityId();
   const activity = {
@@ -167,6 +174,74 @@ async function mockReviewPage(
 }
 
 test.describe("Diagnostic report review", () => {
+  test("keeps additional observation history available after every result is entered in error", async ({
+    page,
+  }) => {
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+
+    for (const observationsInList of [true, false]) {
+      await test.step(`History from ${observationsInList ? "list" : "fetched"} report observations`, async () => {
+        const observation = createObservation();
+        observation.status = "entered_in_error";
+        const report = createReport([observation]);
+        report.status = "final";
+        const { observations, ...listReport } = report;
+        const fixture = await mockReviewPage(
+          page,
+          report,
+          observationsInList ? { ...listReport, observations } : listReport,
+        );
+
+        await page.goto(fixture.url);
+        const expand = fixture.review.getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        });
+        await expect(expand).toBeVisible();
+        const history = fixture.review.getByRole("button", {
+          name: "View Observation History",
+          exact: true,
+        });
+        if (observationsInList) {
+          await expect(history).toBeVisible();
+        } else {
+          await expect(history).toHaveCount(0);
+        }
+        expect(fixture.reportRequests()).toBe(0);
+
+        await expand.click();
+        await expect(
+          fixture.review.getByRole("link", { name: "Print Report" }),
+        ).toBeVisible();
+        await expect(
+          fixture.review.getByText(observation.observation_definition.title),
+        ).toHaveCount(0);
+        await history.click();
+        await page
+          .getByRole("menuitem", {
+            name: "View Observation History",
+            exact: true,
+          })
+          .click();
+        const historySheet = page.getByRole("dialog");
+        await expect(
+          historySheet.getByRole("heading", {
+            name: observation.observation_definition.title,
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(
+          historySheet.getByText("Entered in Error", { exact: true }),
+        ).toBeVisible();
+        await expect(
+          historySheet.getByText("101", { exact: true }),
+        ).toBeVisible();
+      });
+    }
+  });
+
   test("saves fetched report metadata when the service request snapshot is stale", async ({
     page,
   }) => {
@@ -411,13 +486,17 @@ test.describe("Diagnostic report review", () => {
       await expect(approve).toBeEnabled();
       await conclusion.fill("   ");
       await expect(approve).toBeDisabled();
-      await conclusion.fill("Final clinical conclusion");
-      await conclusion.press("ControlOrMeta+a");
+      await conclusion.fill("");
+      await expect(conclusion).toHaveText("");
       await fixture.review
         .getByRole("radio", { name: "Bold", exact: true })
         .click();
-      await conclusion.press("ArrowRight");
+      await conclusion.pressSequentially("Final clinical conclusion");
+      await expect(conclusion.locator("strong")).toHaveText(
+        "Final clinical conclusion",
+      );
       await conclusion.press("Enter");
+      await expect(conclusion.locator("p")).toHaveCount(2);
       await fixture.review
         .getByRole("radio", { name: "Remove bold", exact: true })
         .click();
@@ -427,6 +506,13 @@ test.describe("Diagnostic report review", () => {
       await conclusion.pressSequentially("First finding");
       await conclusion.press("Enter");
       await conclusion.pressSequentially("Second finding");
+      await expect(conclusion.getByRole("listitem")).toHaveText([
+        "First finding",
+        "Second finding",
+      ]);
+      await expect(conclusion.locator("strong")).toHaveText(
+        "Final clinical conclusion",
+      );
       await approve.click();
       const approvalRequest = page.waitForRequest(
         (request) =>
