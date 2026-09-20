@@ -113,7 +113,7 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
     queryKey: ["autocomplete", url, searchQuery, additionalParams],
     queryFn: query.debounced(
       {
-        ...API<unknown>(`${HttpMethod.GET} ${url || "/"}`),
+        ...API<unknown>(HttpMethod.GET, url || "/"),
         noAuth: !sendToken,
       },
       { queryParams },
