@@ -100,7 +100,7 @@ const accountId = getAccountId();
 `/facility/${facilityId}/encounters`;
 // Admin pages
 `/admin/questionnaires`;
-`/admin/valueset`;
+`/admin/valuesets`;
 ```
 
 ## Data Generation

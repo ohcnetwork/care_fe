@@ -197,3 +197,35 @@ test("decimal answers remain browser-valid and optional dates can be cleared", a
     dateBlock.getByRole("button", { name: "Pick a date", exact: true }),
   ).toBeVisible();
 });
+
+test("required composite inputs expose their label and requirement accessibly", async ({
+  page,
+}) => {
+  const variants = [
+    { type: "date", text: "Required date" },
+    { type: "dateTime", text: "Required appointment" },
+    {
+      type: "choice",
+      text: "Required choices",
+      repeats: true,
+      answer_option: [{ value: "First" }, { value: "Second" }],
+    },
+  ];
+  const questionnaireId = await createForm(
+    variants.map((question) => ({
+      ...question,
+      id: crypto.randomUUID(),
+      link_id: question.type,
+      required: true,
+    })),
+  );
+  await page.goto(fillUrl(questionnaireId));
+  for (const { text } of variants) {
+    const group = questionBlock(page, text).getByRole("group", {
+      name: text,
+      exact: true,
+    });
+    await expect(group).toHaveAccessibleDescription("Required");
+    await expect(group).not.toHaveAttribute("aria-required");
+  }
+});

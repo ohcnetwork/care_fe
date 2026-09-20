@@ -265,6 +265,24 @@ export function StudioCanvas({
     () => questionsByLinkId(questions),
     [questions],
   );
+  const contextValue = useMemo(
+    () => ({
+      editing,
+      selectedId,
+      onSelectQuestion,
+      dispatch,
+      conditionTargets,
+      issueKeysByQuestionId,
+    }),
+    [
+      editing,
+      selectedId,
+      onSelectQuestion,
+      dispatch,
+      conditionTargets,
+      issueKeysByQuestionId,
+    ],
+  );
 
   useEffect(() => {
     if (!scrollRequest) return;
@@ -276,16 +294,7 @@ export function StudioCanvas({
   }, [scrollRequest]);
 
   return (
-    <StudioCanvasContext.Provider
-      value={{
-        editing,
-        selectedId,
-        onSelectQuestion,
-        dispatch,
-        conditionTargets,
-        issueKeysByQuestionId,
-      }}
-    >
+    <StudioCanvasContext.Provider value={contextValue}>
       <QuestionnaireFormCanvas
         chrome={STUDIO_CHROME}
         emptyState={emptyState}

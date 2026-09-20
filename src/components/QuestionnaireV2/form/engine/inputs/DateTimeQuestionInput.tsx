@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
+import { QuestionInputGroup } from "./QuestionInputGroup";
 import { replaceEntryAt } from "./withEntryAt";
 
 function formatTime(date: Date | undefined) {
@@ -62,10 +63,9 @@ export function DateTimeQuestionInput({
     // Named group for the same reason as DateInput: the picker trigger
     // takes no id/aria props, and the bare time input would otherwise
     // reach screen readers nameless.
-    <div
-      role="group"
-      aria-labelledby={labelId}
-      aria-required={question.required || undefined}
+    <QuestionInputGroup
+      labelId={labelId}
+      required={question.required}
       className="flex flex-col sm:flex-row gap-2"
     >
       <DatePicker
@@ -82,6 +82,6 @@ export function DateTimeQuestionInput({
         onChange={handleTimeChange}
         disabled={disabled || !value}
       />
-    </div>
+    </QuestionInputGroup>
   );
 }

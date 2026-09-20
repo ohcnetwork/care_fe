@@ -24,9 +24,10 @@ import { QuestionnaireAction } from "@/types/questionnaire/actions";
 import { Question } from "@/types/questionnaire/question";
 
 import { ActionConditionEditor } from "./ActionConditionEditor";
-import { InstructionEditor, newInstruction } from "./InstructionEditor";
+import { InstructionEditor } from "./InstructionEditor";
 import { actionPlainWords } from "./actionSummary";
 import { isInstructionCompatible } from "./instructionCompatibility";
+import { newInstruction } from "./instructionDefaults";
 import { ActionVariableSources } from "./labels";
 import { ActionRegistry } from "./useActionRegistry";
 

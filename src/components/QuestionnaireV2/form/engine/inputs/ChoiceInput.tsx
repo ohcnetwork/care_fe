@@ -10,6 +10,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
+import { QuestionInputGroup } from "./QuestionInputGroup";
 import { replaceEntryAt } from "./withEntryAt";
 
 /** Past this many options, inline chips give way to a searchable dropdown. */
@@ -89,10 +90,9 @@ export function ChoiceInput({
         values.some((v) => v.value?.toString() === optionValue);
 
       return (
-        <div
-          role="group"
-          aria-labelledby={labelId}
-          aria-required={question.required || undefined}
+        <QuestionInputGroup
+          labelId={labelId}
+          required={question.required}
           className="flex flex-wrap gap-3"
         >
           {question.answer_option.map((option) => (
@@ -111,7 +111,7 @@ export function ChoiceInput({
               }
             />
           ))}
-        </div>
+        </QuestionInputGroup>
       );
     }
 

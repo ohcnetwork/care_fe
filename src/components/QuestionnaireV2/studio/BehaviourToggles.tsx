@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
+import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/questionTypeRules";
 
 import { Question } from "@/types/questionnaire/question";
 

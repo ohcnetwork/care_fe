@@ -11,6 +11,7 @@
  */
 import type { Getter, Setter } from "jotai";
 import { atom, useAtom, useAtomValue } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { useMemo } from "react";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -389,8 +390,12 @@ export function useAnsweredQuestionIds(): Set<string> {
 export function useQuestionErrors(questionId: string) {
   const questionErrorsAtom = useMemo(
     () =>
-      atom((get) =>
-        get(errorsAtom).filter((error) => error.question_id === questionId),
+      selectAtom(
+        errorsAtom,
+        (errors) => errors.filter((error) => error.question_id === questionId),
+        (previous, next) =>
+          previous.length === next.length &&
+          previous.every((error, index) => error === next[index]),
       ),
     [questionId],
   );

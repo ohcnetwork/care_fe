@@ -196,8 +196,8 @@ function LeafBlock({
         >
           {question.text}
         </label>
-        {/* Visual-only: the programmatic required state is aria-required
-            on the input itself (every engine input sets it). */}
+        {/* Visual-only: inputs expose their required state directly, and
+            composite groups describe the requirement accessibly. */}
         {question.required && (
           <span aria-hidden className="text-red-500">
             *

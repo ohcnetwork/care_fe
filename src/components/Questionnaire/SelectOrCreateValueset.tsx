@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -27,7 +27,7 @@ import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
 
 interface CreateValueSetProps {
-  onValueSetChange?: (valueSet: ValueSetConfig) => void;
+  onValueSetChange?: (valueSet: ValueSetConfig | undefined) => void;
   value?: ValueSetConfig;
   /** Where the host is mounted. Inside a facility the picker lists that
    *  facility's sets alongside the instance ones, and the inline "Create
@@ -49,7 +49,11 @@ export function SelectOrCreateValueset({
   const handleEditorStateChange = useCallback((state: ValueSetFormState) => {
     editorState.current = state;
   }, []);
-  const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
+  const [pickedValueSet, setPickedValueSet] = useState<{
+    binding: ValueSetConfig;
+    valueset: ValueSetRead;
+    scope: ValueSetScope;
+  }>();
   const [searchQuery, setSearchQuery] = useState("");
 
   const { options, isFetching: isFetchingValuesets } = useScopedValueSets({
@@ -79,10 +83,26 @@ export function SelectOrCreateValueset({
 
   const isLoadingCurrent = isLoadingById || isLoadingBySlug;
 
-  useEffect(() => {
-    const resolved = valuesetById ?? valuesetBySlug?.valueset;
-    resolved && setCurrentValueSet(resolved);
-  }, [valuesetById, valuesetBySlug]);
+  // Resolve only the controlled binding. A previous question's fetched value
+  // or optimistic pick must not leak into an empty or different binding.
+  const resolvedValueSet = value?.external_id
+    ? valuesetById
+    : value?.slug
+      ? valuesetBySlug?.valueset
+      : undefined;
+  const pickMatchesBinding = value?.external_id
+    ? pickedValueSet?.binding.external_id === value.external_id
+    : !!value?.slug &&
+      !pickedValueSet?.binding.external_id &&
+      pickedValueSet?.binding.slug === value.slug;
+  const pickMatchesScope =
+    pickedValueSet?.scope.authContext === scope.authContext &&
+    pickedValueSet?.scope.facilityId === scope.facilityId;
+  const currentValueSet =
+    resolvedValueSet ??
+    (pickMatchesBinding && pickMatchesScope
+      ? pickedValueSet?.valueset
+      : undefined);
 
   // The scope suffix is only meaningful where the two lists are merged —
   // an instance set and a facility override of it usually share a name.
@@ -95,6 +115,11 @@ export function SelectOrCreateValueset({
   }));
 
   const handleValueSetChange = (selectedId: string) => {
+    if (!selectedId) {
+      setPickedValueSet(undefined);
+      onValueSetChange?.(undefined);
+      return;
+    }
     const selected = options.find(
       (option) => option.valueset.id === selectedId,
     );
@@ -102,10 +127,9 @@ export function SelectOrCreateValueset({
       // Show the pick immediately. An instance set is stored by slug alone,
       // so `value.external_id` is empty and the trigger would otherwise keep
       // displaying the previous set until expand_slug resolves.
-      setCurrentValueSet(selected.valueset);
-      onValueSetChange?.(
-        valueSetBinding(selected.valueset, selected.authContext),
-      );
+      const binding = valueSetBinding(selected.valueset, selected.authContext);
+      setPickedValueSet({ binding, valueset: selected.valueset, scope });
+      onValueSetChange?.(binding);
       return;
     }
     // Re-picking the current (merged-in) entry keeps the stored reference
@@ -170,8 +194,9 @@ export function SelectOrCreateValueset({
               onStateChange={handleEditorStateChange}
               onSuccess={(data) => {
                 setIsSheetOpen(false);
-                setCurrentValueSet(data);
-                onValueSetChange?.(valueSetBinding(data, scope.authContext));
+                const binding = valueSetBinding(data, scope.authContext);
+                setPickedValueSet({ binding, valueset: data, scope });
+                onValueSetChange?.(binding);
               }}
             />
           </SheetContent>

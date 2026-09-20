@@ -165,6 +165,20 @@ test.describe("Studio value-set picker (facility scope)", () => {
         expect(question.answer_value_set?.slug).toBe(PARENT_SLUG);
         expect(question.answer_value_set?.external_id ?? null).toBeNull();
       });
+
+      await test.step("Clearing a resolved set removes the binding and its displayed selection", async () => {
+        const selectedTrigger = page
+          .getByRole("combobox")
+          .filter({ hasText: `${PARENT_NAME} (Instance)` });
+        await selectedTrigger
+          .locator("xpath=..")
+          .getByRole("button", { name: "Clear", exact: true })
+          .click();
+        await expect(
+          page.getByRole("combobox").filter({ hasText: "Select a value set" }),
+        ).toBeVisible();
+        await expect(selectedTrigger).toHaveCount(0);
+      });
     } finally {
       await deleteFacilityValueSetsBySlug(facilityId, PARENT_SLUG);
     }

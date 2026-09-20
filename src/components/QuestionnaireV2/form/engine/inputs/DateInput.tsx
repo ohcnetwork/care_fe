@@ -5,6 +5,7 @@ import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
 
+import { QuestionInputGroup } from "./QuestionInputGroup";
 import { replaceEntryAt } from "./withEntryAt";
 
 export function DateInput({
@@ -35,17 +36,13 @@ export function DateInput({
     // stay unmodified), so the question association rides on a named
     // group — without it every date question announces as an identical
     // bare "Pick a date" stop.
-    <div
-      role="group"
-      aria-labelledby={labelId}
-      aria-required={question.required || undefined}
-    >
+    <QuestionInputGroup labelId={labelId} required={question.required}>
       <CombinedDatePicker
         value={value}
         onChange={handleChange}
         disabled={disabled}
         buttonClassName="border-gray-300 shadow-none"
       />
-    </div>
+    </QuestionInputGroup>
   );
 }

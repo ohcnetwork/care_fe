@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { TriangleAlert, Upload } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -42,6 +42,11 @@ interface ImportQuestionsDialogProps {
   onImport: (questions: Question[], linkIdMap: Map<string, string>) => void;
 }
 
+interface UrlImportRequest {
+  url: string;
+  controller: AbortController;
+}
+
 /** Max accepted size for a fetched questionnaire JSON (bytes/characters). */
 const MAX_IMPORT_SIZE = 5_000_000;
 
@@ -52,6 +57,16 @@ export function ImportQuestionsDialog({
 }: ImportQuestionsDialogProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeImport = useRef<AbortController | null>(null);
+
+  // Also invalidate work when the parent closes the controlled dialog or
+  // removes it without going through handleOpenChange.
+  useEffect(() => {
+    return () => {
+      activeImport.current?.abort();
+      activeImport.current = null;
+    };
+  }, [open]);
 
   const [step, setStep] = useState<ImportStep>("select");
   const [mode, setMode] = useState<ImportMode>("file");
@@ -72,12 +87,25 @@ export function ImportQuestionsDialog({
       t("invalid_url"),
     );
 
-  const { mutate: fetchFromUrl, isPending: isFetching } = useMutation({
-    mutationFn: async (importUrl: string): Promise<unknown> => {
+  const isCurrentImport = (controller: AbortController) =>
+    activeImport.current === controller && !controller.signal.aborted;
+
+  const {
+    mutate: fetchFromUrl,
+    isPending: isFetching,
+    reset: resetFetch,
+  } = useMutation({
+    mutationFn: async ({
+      url,
+      controller,
+    }: UrlImportRequest): Promise<unknown> => {
       // Bounded fetch: timeout + content-type/size sanity checks so a slow
       // or oversized endpoint can't wedge the tab.
-      const response = await fetch(importUrl, {
-        signal: AbortSignal.timeout(10_000),
+      const response = await fetch(url, {
+        signal: AbortSignal.any([
+          controller.signal,
+          AbortSignal.timeout(10_000),
+        ]),
       });
       if (!response.ok) throw new Error("Failed to fetch questionnaire");
       const contentType = response.headers.get("content-type") ?? "";
@@ -94,7 +122,8 @@ export function ImportQuestionsDialog({
       }
       return JSON.parse(text) as unknown;
     },
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: unknown, { controller }) => {
+      if (!isCurrentImport(controller)) return;
       const questions = extractQuestions(data);
       if (!questions) {
         toast.error(t("invalid_json"));
@@ -103,12 +132,27 @@ export function ImportQuestionsDialog({
       setPendingQuestions(questions);
       setStep("confirm");
     },
-    onError: () => {
+    onError: (_error, { controller }) => {
+      if (!isCurrentImport(controller)) return;
       toast.error(t("failed_to_import_questionnaire"));
     },
   });
 
+  const cancelImport = () => {
+    activeImport.current?.abort();
+    activeImport.current = null;
+    resetFetch();
+  };
+
+  const startImport = () => {
+    cancelImport();
+    const controller = new AbortController();
+    activeImport.current = controller;
+    return controller;
+  };
+
   const reset = () => {
+    cancelImport();
     setStep("select");
     setMode("file");
     setUrl("");
@@ -123,9 +167,12 @@ export function ImportQuestionsDialog({
   };
 
   const handleFile = async (file: File) => {
+    const controller = startImport();
     setFileDropError("");
     try {
-      const data: unknown = JSON.parse(await file.text());
+      const text = await file.text();
+      if (!isCurrentImport(controller)) return;
+      const data: unknown = JSON.parse(text);
       const questions = extractQuestions(data);
       if (!questions) {
         setFileDropError(t("invalid_json"));
@@ -134,6 +181,7 @@ export function ImportQuestionsDialog({
       setPendingQuestions(questions);
       setStep("confirm");
     } catch {
+      if (!isCurrentImport(controller)) return;
       setFileDropError(t("invalid_json"));
     }
   };
@@ -158,7 +206,7 @@ export function ImportQuestionsDialog({
       return;
     }
     setUrlError(undefined);
-    fetchFromUrl(url);
+    fetchFromUrl({ url, controller: startImport() });
   };
 
   const handleConfirm = () => {
@@ -188,7 +236,11 @@ export function ImportQuestionsDialog({
           <div className="space-y-4">
             <Select
               value={mode}
-              onValueChange={(value) => setMode(value as ImportMode)}
+              onValueChange={(value) => {
+                cancelImport();
+                setPendingQuestions(null);
+                setMode(value as ImportMode);
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -257,6 +309,8 @@ export function ImportQuestionsDialog({
                   id="import-questions-url"
                   value={url}
                   onChange={(e) => {
+                    cancelImport();
+                    setPendingQuestions(null);
                     setUrl(e.target.value);
                     setUrlError(undefined);
                   }}

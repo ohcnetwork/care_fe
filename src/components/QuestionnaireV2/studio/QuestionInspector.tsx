@@ -18,13 +18,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { AnswerOptionsEditor } from "@/components/QuestionnaireV2/builder/AnswerOptionsEditor";
-import {
-  BehaviourSettingsCard,
-  NON_REPEATABLE_TYPES,
-} from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
+import { BehaviourSettingsCard } from "@/components/QuestionnaireV2/builder/BehaviourSettingsCard";
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { QuestionCodingCard } from "@/components/QuestionnaireV2/builder/QuestionCodingCard";
 import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/QuestionTypePicker";
+import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/questionTypeRules";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";

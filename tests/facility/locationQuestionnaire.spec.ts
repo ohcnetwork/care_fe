@@ -477,9 +477,7 @@ test.describe("Location overview and forms", () => {
           request.url().includes("/api/v1/resource_responses/") &&
           request.method() === "PUT",
       );
-      await confirmation
-        .getByRole("button", { name: "Confirm", exact: true })
-        .click();
+      await confirmation.getByRole("button", { name: /^Confirm\b/ }).click();
       expect((await statusUpdate).postDataJSON()).toEqual({
         status: "entered_in_error",
       });
