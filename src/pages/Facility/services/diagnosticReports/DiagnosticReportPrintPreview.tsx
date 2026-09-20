@@ -4,6 +4,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { FileReadMinimal } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
@@ -12,7 +13,7 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ReactNode, useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import "@/lib/pdfWorker";
@@ -223,32 +224,20 @@ export const DiagnosticReportPrintPreview = ({
                 {diagnosticReportDetail?.encounter.patient.name}
               </span>
             </div>
-            {diagnosticReportDetail?.encounter.patient &&
-              "instance_identifiers" in
-                diagnosticReportDetail.encounter.patient &&
-              diagnosticReportDetail.encounter.patient.instance_identifiers.reduce<
-                ReactNode[]
-              >((acc, identifier) => {
-                if (
-                  identifier.config.config.use === PatientIdentifierUse.official
-                ) {
-                  acc.push(
-                    <div
-                      key={identifier.config.id}
-                      className="grid grid-cols-[6rem_auto_1fr] items-center"
-                    >
-                      <span className="text-gray-600">
-                        {identifier.config.config.display}
-                      </span>
-                      <span className="text-gray-600">:</span>
-                      <span className="font-semibold ml-2">
-                        {identifier.value}
-                      </span>
-                    </div>,
-                  );
-                }
-                return acc;
-              }, [])}
+            {getPatientIdentifiers(diagnosticReportDetail?.encounter.patient, {
+              use: PatientIdentifierUse.official,
+            }).map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="grid grid-cols-[6rem_auto_1fr] items-center"
+              >
+                <span className="text-gray-600">
+                  {identifier.config.config.display}
+                </span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">{identifier.value}</span>
+              </div>
+            ))}
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">
                 {t("age")} / {t("sex")}

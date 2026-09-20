@@ -9,7 +9,28 @@ test.use({ storageState: "tests/.auth/user.json" });
 const LOAD_ERROR =
   "Unable to load all reports and attachments. Please reload the page and try again.";
 
-function createReport(patientId: string, serviceRequestId: string) {
+function createIdentifier(autoMaintained = false, use = "official") {
+  return {
+    config: {
+      id: faker.string.uuid(),
+      config: {
+        display: `Patient ID ${faker.string.alphanumeric(8)}`,
+        use,
+        auto_maintained: autoMaintained,
+      },
+    },
+    value: faker.string.alphanumeric(12),
+  };
+}
+
+function createReport(
+  patientId: string,
+  serviceRequestId: string,
+  identifiers: {
+    instance_identifiers?: ReturnType<typeof createIdentifier>[];
+    facility_identifiers?: ReturnType<typeof createIdentifier>[];
+  } = {},
+) {
   return {
     id: faker.string.uuid(),
     status: "final",
@@ -21,7 +42,8 @@ function createReport(patientId: string, serviceRequestId: string) {
         name: faker.person.fullName(),
         gender: "male",
         date_of_birth: "1990-01-01",
-        instance_identifiers: [],
+        instance_identifiers: identifiers.instance_identifiers ?? [],
+        facility_identifiers: identifiers.facility_identifiers ?? [],
       },
     },
     service_request: { id: serviceRequestId, title: faker.word.words(3) },
@@ -99,7 +121,19 @@ test.describe("Diagnostic report printing", () => {
   test("prints only final reports belonging to the requested service request", async ({
     page,
   }) => {
-    const report = createReport(patientId, serviceRequestId);
+    const instanceIdentifier = createIdentifier();
+    const facilityIdentifier = createIdentifier();
+    const automaticInstanceIdentifier = createIdentifier(true);
+    const automaticFacilityIdentifier = createIdentifier(true);
+    const secondaryIdentifier = createIdentifier(false, "secondary");
+    const report = createReport(patientId, serviceRequestId, {
+      instance_identifiers: [
+        instanceIdentifier,
+        automaticInstanceIdentifier,
+        secondaryIdentifier,
+      ],
+      facility_identifiers: [facilityIdentifier, automaticFacilityIdentifier],
+    });
     report.conclusion =
       "## **Clinical interpretation**\n\n<u>Underlined detail</u> and ==Highlighted detail==\n\n- First finding\n- Second finding\n\n- [ ] Follow up\n- [x] Sample reviewed\n\nValues <left> and <medication> remain visible.";
     const anotherRequestReport = createReport(patientId, faker.string.uuid());
@@ -134,6 +168,26 @@ test.describe("Diagnostic report printing", () => {
       0,
     );
     await expect(page.getByText(preliminaryReport.code.display)).toHaveCount(0);
+    for (const identifier of [instanceIdentifier, facilityIdentifier]) {
+      await expect(
+        page.getByText(identifier.config.config.display, { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(identifier.value, { exact: true }),
+      ).toBeVisible();
+    }
+    for (const identifier of [
+      automaticInstanceIdentifier,
+      automaticFacilityIdentifier,
+      secondaryIdentifier,
+    ]) {
+      await expect(
+        page.getByText(identifier.config.config.display, { exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByText(identifier.value, { exact: true }),
+      ).toHaveCount(0);
+    }
     await expect(
       page.locator("strong", { hasText: "Clinical interpretation" }),
     ).toBeVisible();

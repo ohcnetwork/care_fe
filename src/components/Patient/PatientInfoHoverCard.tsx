@@ -6,6 +6,7 @@ import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  getPatientIdentifiers,
   PatientListRead,
   PatientRead,
   PublicPatientRead,
@@ -88,20 +89,17 @@ export const PatientInfoHoverCard = ({
       </div>
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
-          {"instance_identifiers" in patient &&
-            patient.instance_identifiers
-              ?.filter(({ config }) => !config.config.auto_maintained)
-              .map((identifier) => (
-                <div
-                  key={identifier.config.id}
-                  className="flex flex-col gap-0.5 text-sm"
-                >
-                  <span className="font-medium text-gray-700">
-                    {identifier.config.config.display}:{" "}
-                  </span>
-                  <span className="font-semibold">{identifier.value}</span>
-                </div>
-              ))}
+          {getPatientIdentifiers(patient).map((identifier) => (
+            <div
+              key={identifier.config.id}
+              className="flex flex-col gap-0.5 text-sm"
+            >
+              <span className="font-medium text-gray-700">
+                {identifier.config.config.display}:{" "}
+              </span>
+              <span className="font-semibold">{identifier.value}</span>
+            </div>
+          ))}
           {patient.phone_number && (
             <div className="flex flex-col gap-1 text-sm font-medium">
               <span className="text-gray-700">{t("contact")}</span>
