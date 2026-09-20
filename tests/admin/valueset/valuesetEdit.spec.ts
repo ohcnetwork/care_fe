@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
-import { expectedSlug } from "tests/helper/utils";
 import {
   LOINC_CODE_NAME,
   SNOMED_CODE_NAME,
@@ -35,7 +34,9 @@ test.describe("ValueSet Edit", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/valuesets");
     name = faker.company.name();
-    slug = expectedSlug(name);
+    // This test exercises identifier preservation, independently of the
+    // punctuation a generated company name may contain.
+    slug = `edit-${faker.string.alphanumeric(12).toLowerCase()}`;
     description = faker.lorem.sentence();
     status = faker.helpers.arrayElement(STATUS_OPTIONS);
     system = faker.helpers.arrayElement(SYSTEM_OPTIONS);

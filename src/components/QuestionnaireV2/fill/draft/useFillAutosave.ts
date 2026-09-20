@@ -27,19 +27,8 @@ import {
   mergeDraftIntoSeed,
   preserveExcludedStructured,
   saveFillDraft,
-  sessionEditSignature,
 } from "./fillDraftStore";
-
-const AUTOSAVE_DEBOUNCE_MS = 1500;
-
-/** The edit signature for ONE form — `sessionEditSignature` scoped to a
- *  single-element input, so the per-form fingerprint is exactly what this
- *  form contributes to the whole-session signature (one rule, never two). */
-function formSignature(form: FillFormEntry, store: FormStore): string {
-  return sessionEditSignature([
-    { questionnaire: form.questionnaire, responses: store.get(responsesAtom) },
-  ]);
-}
+import { subscribeToFillEdits } from "./subscribeToFillEdits";
 
 interface UseFillSessionAutosaveArgs {
   /** This session's draft key — undefined only before the questionnaire
@@ -196,69 +185,23 @@ export function useFillSessionAutosave({
   // a SERVER draft needs both even though it writes no local draft.
   // `persistNow` is the thing that stands down, not the subscription.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const flush = () => {
-      if (timer === undefined) return;
-      clearTimeout(timer);
-      timer = undefined;
-      persistNow();
-    };
-
-    // Per-form signature cache, keyed by form.key. A keystroke only ever
-    // changes the ONE store that fired, so comparing just that form's own
-    // cached entry is sufficient — no other form's signature could have
-    // changed, so there is nothing to gain from joining them into a
-    // session-wide value.
-    //
-    // Rebuilt from scratch on every (re)run of this effect — a form
-    // add/remove or a store (un)registration bumps `storesVersion`, which
-    // is a dependency below — by iterating the CURRENT `forms`/`getStore`.
-    // A form no longer in that iteration simply never gets an entry, so a
-    // removed form's stale signature can never survive to be compared
-    // against again.
-    //
-    // Whatever is already in the stores when this is built is the
-    // baseline, not an edit — this is where the structured widgets'
-    // prefetched server rows sit.
-    const formSignatures = new Map<string, string>();
-    for (const form of forms) {
-      const store = getStore(form.key);
-      if (!store) continue;
-      registeredStores.current.set(form.key, store);
-      formSignatures.set(form.key, formSignature(form, store));
-    }
-
-    // One shared debounce across every form of the session — the draft is
-    // one localStorage entry, so one timer is all it can honour.
-    const unsubscribers = forms.flatMap((form) => {
+    const observedForms = forms.flatMap((form) => {
       const store = getStore(form.key);
       if (!store) return [];
-      return [
-        store.sub(responsesAtom, () => {
-          if (finishedRef.current) return;
-          // Compare this form's clinician input only. Prefill values are
-          // normalized against draft_context; file metadata still marks
-          // unsaved work even though the attachment cannot be drafted.
-          const signature = formSignature(form, store);
-          if (formSignatures.get(form.key) === signature) return;
-          formSignatures.set(form.key, signature);
-          setDirty(true);
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            timer = undefined;
-            persistNow();
-          }, AUTOSAVE_DEBOUNCE_MS);
-        }),
-      ];
+      registeredStores.current.set(form.key, store);
+      return [{ questionnaire: form.questionnaire, store }];
+    });
+    const edits = subscribeToFillEdits(observedForms, {
+      isFinished: () => finishedRef.current,
+      onEdit: () => setDirty(true),
+      persist: persistNow,
     });
 
     // pagehide covers reload/close/bfcache; unmount covers in-app nav.
-    window.addEventListener("pagehide", flush);
+    window.addEventListener("pagehide", edits.flush);
     return () => {
-      window.removeEventListener("pagehide", flush);
-      flush();
-      for (const unsubscribe of unsubscribers) unsubscribe();
+      window.removeEventListener("pagehide", edits.flush);
+      edits.dispose();
     };
     // storesVersion re-runs the subscription when a form (un)registers.
   }, [storesVersion, forms, getStore, persistNow]);

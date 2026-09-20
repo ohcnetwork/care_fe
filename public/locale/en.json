@@ -2855,6 +2855,7 @@
   "files": "Files",
   "fill_color": "Fill Color",
   "fill_context_load_failed": "Couldn't load the patient context for this form. Go back and try again.",
+  "fill_context_refresh_failed": "Couldn't refresh this form's context. Your answers are still here. Try again before saving.",
   "fill_draft_answers_dropped_one": "{{count}} answer couldn't be restored because the questionnaire changed:",
   "fill_draft_answers_dropped_other": "{{count}} answers couldn't be restored because the questionnaire changed:",
   "fill_draft_drop_reason_option_removed": "the selected option is no longer available",

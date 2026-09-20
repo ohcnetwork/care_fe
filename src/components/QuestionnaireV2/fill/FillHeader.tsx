@@ -39,6 +39,8 @@ interface FillHeaderProps {
    *  `draft/useSaveServerDraft`); absent → the affordance is not offered. */
   onSaveDraft?: () => void;
   isSavingDraft?: boolean;
+  /** Cached context remains visible after a failed refresh, but cannot be saved. */
+  saveDisabled?: boolean;
 }
 
 /**
@@ -57,6 +59,7 @@ export function FillHeader({
   isSubmitting,
   onSaveDraft,
   isSavingDraft = false,
+  saveDisabled = false,
 }: FillHeaderProps) {
   const { t } = useTranslation();
 
@@ -169,7 +172,7 @@ export function FillHeader({
               type="button"
               variant="outline"
               onClick={onSaveDraft}
-              disabled={isSubmitting || isSavingDraft}
+              disabled={isSubmitting || isSavingDraft || saveDisabled}
             >
               {isSavingDraft && <Loader2 className="size-4 animate-spin" />}
               {t("save_as_draft")}
@@ -178,7 +181,7 @@ export function FillHeader({
           <Button
             type="button"
             onClick={onSubmit}
-            disabled={isSubmitting || isSavingDraft}
+            disabled={isSubmitting || isSavingDraft || saveDisabled}
             className="border border-primary-900/80 bg-gradient-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
           >
             {isSubmitting ? (
