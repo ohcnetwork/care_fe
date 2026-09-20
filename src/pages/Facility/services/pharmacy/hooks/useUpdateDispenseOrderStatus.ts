@@ -81,7 +81,7 @@ const DISPENSE_STATUS_BY_ORDER_STATUS: Partial<
 function buildDispenseUpdate(
   { newStatus }: UpdateDispenseOrderStatusArgs,
   dispenses: MedicationDispenseRead[],
-): BatchRequestObject | null {
+): BatchRequestObject<{ datapoints: MedicationDispenseUpsert[] }> | null {
   const targetStatus = DISPENSE_STATUS_BY_ORDER_STATUS[newStatus];
 
   // Final corrections (abandoned / entered_in_error) don't touch dispenses.

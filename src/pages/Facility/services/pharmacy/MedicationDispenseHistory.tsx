@@ -242,8 +242,8 @@ export default function MedicationDispenseHistory({
           </TabsList>
         </Tabs>
       </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
           <PatientIdentifierFilter
             onSelect={(patientId, patientName) =>
               updateQuery({
@@ -256,15 +256,19 @@ export default function MedicationDispenseHistory({
             patientId={qParams.patientId}
             patientName={qParams.patient_name}
           />
-          <MultiFilter
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-            onOperationChange={handleOperationChange}
-            onClearAll={handleClearAll}
-            onClearFilter={handleClearFilter}
-            className="flex flex-row flex-wrap sm:items-center"
-            facilityId={facilityId}
-          />
+          <div className="w-full min-w-0 sm:w-auto">
+            <MultiFilter
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              onOperationChange={handleOperationChange}
+              onClearAll={handleClearAll}
+              onClearFilter={handleClearFilter}
+              className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+              triggerButtonClassName="self-start sm:self-center"
+              clearAllButtonClassName="self-center"
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-4">

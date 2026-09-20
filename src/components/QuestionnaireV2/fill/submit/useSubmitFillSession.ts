@@ -1,4 +1,3 @@
-import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -15,10 +14,10 @@ import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
-import batchApi from "@/types/base/batch/batchApi";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { Question } from "@/types/questionnaire/question";
-import mutate from "@/Utils/request/mutate";
+import { useBatchRequest } from "@/Utils/request/batch";
+import { Type } from "@/Utils/request/types";
 
 import {
   MissingEncounterError,
@@ -131,14 +130,10 @@ export function useSubmitFillSession({
   const { t } = useTranslation();
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>([]);
 
-  const { mutate: submitBatch, isPending } = useMutation({
+  const { mutate: submitBatch, isPending } = useBatchRequest({
     // Silent: batch failures are handled here (panel + per-question), not
     // by the global error toast.
-    // TODO: migrate to useBatchRequest once it can take pre-built batch
-    // entries (these requests carry raw urls) and can opt out of the
-    // global error toast.
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+    silent: true,
     // What the questionnaires' actions reported (`_actions` on each submit
     // result) is toasted by the mutation cache, like every other write.
     onSuccess: () => {
@@ -348,7 +343,19 @@ export function useSubmitFillSession({
       );
       return;
     }
-    submitBatch({ requests });
+    // Structured plugins build raw URLs. Adapt at the transport boundary so
+    // their contract, request ordering and per-question references survive.
+    submitBatch(
+      requests.map((request) => ({
+        api: {
+          path: request.url,
+          method: request.method,
+          TRes: Type<unknown>(),
+        },
+        referenceId: request.reference_id,
+        body: request.body,
+      })),
+    );
   }, [
     forms,
     getStore,

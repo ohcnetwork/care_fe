@@ -18,7 +18,7 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
-import { useBatchRequest } from "@/Utils/request/batch";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
@@ -149,7 +149,7 @@ const getDispenseCreateRequests = ({
 }) => {
   const whenPrepared = new Date();
 
-  const requests = [];
+  const requests: BatchRequestObject<MedicationDispenseCreate>[] = [];
 
   for (const item of items) {
     if (!item.isSelected) {
@@ -184,14 +184,17 @@ const getDispenseCreateRequests = ({
         api: medicationDispenseApi.create,
         referenceId: `dispense_${item.reference_id}_lot_${lot.item.id}`,
         body,
-      } as const);
+      });
     }
   }
 
   return requests;
 };
 
-const getPrescriptionCompletionRequest = (ids: string[], patientId: string) => {
+const getPrescriptionCompletionRequest = (
+  ids: string[],
+  patientId: string,
+): BatchRequestObject[] => {
   if (ids.length === 0) {
     return [];
   }
@@ -207,6 +210,6 @@ const getPrescriptionCompletionRequest = (ids: string[], patientId: string) => {
           status: PrescriptionStatus.completed,
         })),
       },
-    } as const,
+    },
   ];
 };

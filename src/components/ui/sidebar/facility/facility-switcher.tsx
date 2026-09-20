@@ -1,8 +1,15 @@
-import { ChevronsUpDown, Hospital, LayoutDashboard } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Hospital,
+  LayoutDashboard,
+  Search,
+} from "lucide-react";
 import { Link } from "raviger";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { cn } from "@/lib/utils";
 
@@ -28,15 +35,28 @@ export function FacilitySwitcher({
   const { isMobile, setOpenMobile } = useSidebar();
   const { handleMenuOpenChange } = useAppSidebar();
   const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredFacilities = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return facilities;
+    return facilities.filter((facility) =>
+      facility.name.toLowerCase().includes(query),
+    );
+  }, [facilities, searchQuery]);
 
   return (
-    <DropdownMenu onOpenChange={handleMenuOpenChange}>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        handleMenuOpenChange(open);
+        if (!open) setSearchQuery("");
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-sm font-normal text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
-          aria-label={selectedFacility?.name || t("select_facility")}
+          aria-label={t("select_facility")}
         >
           {
             <>
@@ -69,30 +89,53 @@ export function FacilitySwitcher({
         <DropdownMenuSeparator />
         <DropdownMenuLabel>{t("facilities")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {facilities.map((facility, index) => (
-          <DropdownMenuItem
-            key={index}
-            asChild
-            className={cn(
-              "gap-2 p-2",
-              facility.id === selectedFacility?.id &&
-                "bg-neutral-100 font-medium text-neutral-950 focus:bg-neutral-200 focus:text-neutral-950",
-            )}
-          >
-            <Link
-              href={`/facility/${facility.id}/overview`}
-              aria-current={
-                facility.id === selectedFacility?.id ? "true" : undefined
-              }
-              onClick={() => isMobile && setOpenMobile(false)}
+        {facilities.length > 1 && (
+          <div className="relative p-1.5">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
+            <Input
+              placeholder={t("search_facilities")}
+              aria-label={t("search_facilities")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 sm:text-sm"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+        {filteredFacilities.length === 0 ? (
+          <div className="px-2 py-4 text-center text-sm text-gray-500">
+            {t("no_facilities_found")}
+          </div>
+        ) : (
+          filteredFacilities.map((facility) => (
+            <DropdownMenuItem
+              key={facility.id}
+              asChild
+              className={cn(
+                "gap-2 p-2",
+                facility.id === selectedFacility?.id &&
+                  "bg-neutral-100 font-medium text-neutral-950 focus:bg-neutral-200 focus:text-neutral-950",
+              )}
             >
-              <div className="flex size-6 items-center justify-center rounded-sm border border-neutral-200 shrink-0">
-                <Hospital className="size-4 shrink-0 text-current" />
-              </div>
-              {facility.name}
-            </Link>
-          </DropdownMenuItem>
-        ))}
+              <Link
+                href={`/facility/${facility.id}/overview`}
+                aria-current={
+                  facility.id === selectedFacility?.id ? "true" : undefined
+                }
+                onClick={() => {
+                  setSearchQuery("");
+                  if (isMobile) setOpenMobile(false);
+                }}
+              >
+                <div className="flex size-6 items-center justify-center rounded-sm border border-neutral-200 shrink-0">
+                  <Hospital className="size-4 shrink-0 text-current" />
+                </div>
+                {facility.name}
+              </Link>
+            </DropdownMenuItem>
+          ))
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

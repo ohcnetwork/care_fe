@@ -113,7 +113,7 @@ for (const encounterClass of ["amb", "imp"]) {
           json: {
             ...encounter,
             encounter_class: encounterClass,
-            status: "cancelled",
+            status: "discontinued",
             period: { start: "2025-01-01T00:00:00Z", end: periodEnd },
           },
         }),
@@ -136,14 +136,16 @@ for (const encounterClass of ["amb", "imp"]) {
 
     await section
       .getByRole("combobox")
-      .filter({ hasText: "Cancelled" })
+      .filter({ hasText: "Discontinued" })
       .click();
     for (const unavailableStatus of ["Completed", "Unknown", "Discharged"]) {
       await expect(
         page.getByRole("option", { name: unavailableStatus, exact: true }),
       ).toHaveCount(0);
     }
-    await page.getByRole("option", { name: "Cancelled", exact: true }).click();
+    await page
+      .getByRole("option", { name: "Discontinued", exact: true })
+      .click();
 
     const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
       exact: true,
@@ -168,7 +170,7 @@ for (const encounterClass of ["amb", "imp"]) {
       (request) => request.url === `/api/v1/encounter/${getEncounterId()}/`,
     );
     expect(encounterRequest?.body).toMatchObject({
-      status: "cancelled",
+      status: "discontinued",
       period: { end: periodEnd },
       external_identifier: editedIdentifier,
     });

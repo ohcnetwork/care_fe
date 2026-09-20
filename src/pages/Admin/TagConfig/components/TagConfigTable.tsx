@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import TagColorDot from "@/components/Tags/TagColorDot";
 
 import {
   TAG_STATUS_COLORS,
@@ -76,7 +77,8 @@ function TagConfigCard({
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-gray-900 text-lg">
+            <h3 className="flex items-center gap-2 font-medium text-gray-900 text-lg">
+              <TagColorDot tag={config} fallbackColorClass="bg-gray-200" />
               {config.display}
             </h3>
             <p className="mt-1 text-sm text-gray-500 capitalize">
@@ -217,7 +219,13 @@ export default function TagConfigTable({
                 <TableRow key={config.id} className="divide-x hover:bg-gray-50">
                   <TableCell className="font-medium">
                     <div className="flex flex-col text-sm break-words whitespace-normal">
-                      <span>{config.display}</span>
+                      <span className="flex items-center gap-2">
+                        <TagColorDot
+                          tag={config}
+                          fallbackColorClass="bg-gray-200"
+                        />
+                        {config.display}
+                      </span>
                       {config.description && (
                         <ExpandableText>
                           <ExpandableTextContent className="text-gray-500">

@@ -241,17 +241,18 @@ export function EncounterQuestion({
     if (!encounterData) return;
     clearError();
     const newEncounter = { ...encounter, ...updates };
+    // Cancellation and invalidation do not represent a clinical end.
     const hasEnded = [
       EncounterStatus.DISCHARGED,
       EncounterStatus.COMPLETED,
-      EncounterStatus.CANCELLED,
       EncounterStatus.DISCONTINUED,
-      EncounterStatus.ENTERED_IN_ERROR,
     ].includes(newEncounter.status);
     newEncounter.period = {
       ...newEncounter.period,
       end: hasEnded
-        ? newEncounter.period.end || new Date().toISOString()
+        ? newEncounter.period.end ||
+          encounterData.period.end ||
+          new Date().toISOString()
         : undefined,
     };
     const encounterClass = encounterData.encounter_class;
