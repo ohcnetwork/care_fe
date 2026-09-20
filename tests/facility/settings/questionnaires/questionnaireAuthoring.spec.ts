@@ -72,7 +72,7 @@ test.describe("Questionnaire authoring", () => {
     await expect(fields.nth(1)).toContainText("Equals");
   });
 
-  test("canvas headings edit inline and custom options fit the inspector", async ({
+  test("inspector title edits update plain canvas labels and custom options fit", async ({
     page,
   }) => {
     await createQuestionnaireAndOpenBuilder(page, {
@@ -80,13 +80,19 @@ test.describe("Questionnaire authoring", () => {
       title: `Authoring layout ${Date.now()}`,
     });
     await page.getByRole("button", { name: "Add First Question" }).click();
-    const heading = page
-      .getByRole("region", { name: "Form canvas" })
-      .getByRole("textbox", { name: /Edit question heading/ });
-    await heading.fill("Severity of symptoms");
+    const canvas = page.getByRole("region", { name: "Form canvas" });
+    const titleInput = page.getByRole("textbox", {
+      name: "Question Title",
+      exact: true,
+    });
+    await expect(titleInput).toBeFocused();
+    await titleInput.fill("Severity of symptoms");
     await expect(
-      page.getByRole("textbox", { name: "Question Title", exact: true }),
-    ).toHaveValue("Severity of symptoms");
+      canvas.getByText("Severity of symptoms", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      canvas.getByRole("textbox", { name: /Edit question heading/ }),
+    ).toHaveCount(0);
     await page.getByRole("combobox", { name: "Question Type" }).click();
     await page.getByRole("option", { name: "Choice" }).click();
     await page.getByRole("button", { name: "Add Option" }).click();

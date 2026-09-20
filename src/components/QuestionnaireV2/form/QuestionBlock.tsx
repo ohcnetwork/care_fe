@@ -115,7 +115,7 @@ function LeafBlock({
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
-  const { QuestionAnnotation, QuestionTitle } = useFormChrome();
+  const { QuestionAnnotation } = useFormChrome();
   const errors = useQuestionErrors(question.id);
   // Only written by repeating questions; read for entry counts.
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -189,25 +189,13 @@ function LeafBlock({
             {number}
           </span>
         )}
-        {QuestionTitle ? (
-          <QuestionTitle question={question}>
-            <label
-              id={labelId}
-              htmlFor={inputId}
-              className="text-sm font-medium text-gray-800"
-            >
-              {question.text}
-            </label>
-          </QuestionTitle>
-        ) : (
-          <label
-            id={labelId}
-            htmlFor={inputId}
-            className="text-sm font-medium text-gray-800"
-          >
-            {question.text}
-          </label>
-        )}
+        <label
+          id={labelId}
+          htmlFor={inputId}
+          className="text-sm font-medium text-gray-800"
+        >
+          {question.text}
+        </label>
         {/* Visual-only: the programmatic required state is aria-required
             on the input itself (every engine input sets it). */}
         {question.required && (

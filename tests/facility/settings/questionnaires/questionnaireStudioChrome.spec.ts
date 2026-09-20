@@ -14,7 +14,7 @@ test.use({ storageState: "tests/.auth/user.json" });
  * introduced on top of the builder contracts.
  */
 test.describe("Questionnaire v2 studio chrome", () => {
-  test("nested canvas questions select the exact leaf and persist inline edits", async ({
+  test("nested canvas questions select the exact leaf and persist inspector edits", async ({
     page,
   }) => {
     const stamp = Date.now();
@@ -29,21 +29,12 @@ test.describe("Questionnaire v2 studio chrome", () => {
       name: "Question Title",
       exact: true,
     });
-    const heading = (title: string) =>
-      canvas.getByRole("textbox", {
-        name: `Edit question heading: ${title}`,
-        exact: true,
-      });
-
     const leafBlock = (title: string) =>
       canvas
         .locator("[data-question-id]")
         .filter({ hasNot: page.locator("[data-question-id]") })
         .filter({
-          has: page.getByRole("textbox", {
-            name: `Edit question heading: ${title}`,
-            exact: true,
-          }),
+          has: page.getByText(title, { exact: true }),
         });
     const clickLeafBody = async (title: string) => {
       const answer = leafBlock(title).locator('input[id^="question-input-"]');
@@ -57,6 +48,7 @@ test.describe("Questionnaire v2 studio chrome", () => {
         bounds!.y + bounds!.height / 2,
       );
       await expect(titleInput).toHaveValue(title);
+      await expect(titleInput).toBeFocused();
       await expect(
         leafBlock(title).locator("..").getByText("Editing", { exact: true }),
       ).toBeVisible();
@@ -126,19 +118,26 @@ test.describe("Questionnaire v2 studio chrome", () => {
       }
     });
 
-    await test.step("Focusing each leaf's heading changes selection and edits that leaf", async () => {
+    await test.step("Each plain leaf label selects its inspector for title editing", async () => {
       for (const [index, title] of leafTitles.entries()) {
         await nav.getByRole("button", { name: outerTitle }).click();
-        await heading(title).click();
-        await expect(heading(title)).toBeFocused();
+        await leafBlock(title).getByText(title, { exact: true }).click();
         await expect(titleInput).toHaveValue(title);
+        await expect(titleInput).toBeFocused();
         await expect(
           leafBlock(title).locator("..").getByText("Editing", { exact: true }),
         ).toBeVisible();
-        await page.keyboard.press("End");
-        await page.keyboard.type(" edited");
+        await titleInput.fill(editedTitles[index]);
         await expect(titleInput).toHaveValue(editedTitles[index]);
+        await expect(
+          leafBlock(editedTitles[index]).getByText(editedTitles[index], {
+            exact: true,
+          }),
+        ).toBeVisible();
       }
+      await expect(
+        canvas.getByRole("textbox", { name: /Edit question heading/ }),
+      ).toHaveCount(0);
       await page.getByRole("button", { name: "Save Changes" }).click();
       await expectToast(page, "Questionnaire updated successfully");
     });
@@ -149,7 +148,9 @@ test.describe("Questionnaire v2 studio chrome", () => {
         await clickLeafBody(title);
       }
       for (const title of [outerTitle, innerTitle, deepTitle]) {
-        await expect(heading(title)).toHaveValue(title);
+        await expect(
+          canvas.getByRole("heading", { name: title }),
+        ).toHaveAccessibleName(new RegExp(`${title}$`));
       }
     });
   });

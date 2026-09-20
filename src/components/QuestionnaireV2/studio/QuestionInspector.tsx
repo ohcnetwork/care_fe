@@ -1,5 +1,5 @@
 import { MoreVertical, Trash2 } from "lucide-react";
-import { Dispatch, useCallback, useState } from "react";
+import { Dispatch, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -79,18 +79,6 @@ export function QuestionInspector({
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState("question");
-  const focusTitle = useCallback(
-    (input: HTMLInputElement | null) => {
-      if (
-        input &&
-        document.activeElement?.getAttribute("data-question-heading") !==
-          question.id
-      ) {
-        input.focus();
-      }
-    },
-    [question.id],
-  );
   const ruleCount = question.enable_when?.length ?? 0;
   const parent = findFirstQuestion(
     allQuestions,
@@ -218,10 +206,11 @@ export function QuestionInspector({
                 value={question.text}
                 placeholder={t("enter_question_title")}
                 onChange={(e) => onChange({ text: e.target.value })}
-                // Keep keyboard flow after selecting or adding a question,
-                // while preserving focus in an inline heading being edited
-                // when this keyed inspector remounts for that same question.
-                ref={focusTitle}
+                // The inspector remounts per selection (keyed by question in
+                // the page) — focusing the title keeps keyboard flow intact
+                // after canvas clicks and after delete/duplicate, where the
+                // acted-on element unmounts and focus would fall to <body>.
+                autoFocus
               />
             </div>
 

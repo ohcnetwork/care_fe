@@ -24,8 +24,6 @@ export interface QuestionShellProps {
 }
 
 export interface FormChrome {
-  /** Lets authoring hosts edit a heading in place; filling keeps its label. */
-  QuestionTitle?: ComponentType<{ question: Question; children: ReactNode }>;
   /** Wraps each question block. Return `children` untouched to opt out at
    *  a given depth. */
   QuestionShell?: ComponentType<QuestionShellProps>;
