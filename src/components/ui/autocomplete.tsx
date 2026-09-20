@@ -213,14 +213,14 @@ export default function Autocomplete({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
+                "w-full min-w-0 justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
                 selectedOption && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
             >
-              <span className="overflow-hidden">
+              <span className="overflow-hidden truncate">
                 {value
                   ? freeInput
                     ? inputValue || value
@@ -246,7 +246,7 @@ export default function Autocomplete({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-l-none border-l-0 text-gray-400 h-auto"
+            className="rounded-l-none border-l-0 text-gray-400 border-gray-300 shadow-none h-auto"
             onClick={handleClear}
             title={t("clear")}
             hidden={disabled}
@@ -305,7 +305,7 @@ export default function Autocomplete({
         <Button
           variant="outline"
           size="icon"
-          className="rounded-l-none border-l-0 text-gray-400 h-auto"
+          className="rounded-l-none border-l-0 text-gray-400 border-gray-300 shadow-none h-auto"
           onClick={handleClear}
           title={t("clear")}
           hidden={disabled}
