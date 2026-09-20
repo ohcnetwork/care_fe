@@ -48,7 +48,10 @@ import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrgani
 
 interface FacilityOrganizationSelectorProps {
   value?: string[] | null;
-  onChange: (value: string[] | null) => void;
+  onChange: (
+    value: string[] | null,
+    organizations?: FacilityOrganizationRead[],
+  ) => void;
   facilityId: string;
   currentOrganizations?: FacilityOrganizationRead[];
   singleSelection?: boolean;
@@ -192,7 +195,10 @@ export default function FacilityOrganizationSelector(
           ? [org]
           : [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
-        onChange(newSelection.map((org) => org.id));
+        onChange(
+          newSelection.map((org) => org.id),
+          newSelection,
+        );
         setAlreadySelected(true);
       }
       setCurrentSelection(null);
@@ -318,7 +324,10 @@ export default function FacilityOrganizationSelector(
         ? [preferredOrganizations.results[0]]
         : preferredOrganizations.results;
       setSelectedOrganizations(orgsToSelect);
-      onChange(orgsToSelect.map((org) => org.id));
+      onChange(
+        orgsToSelect.map((org) => org.id),
+        orgsToSelect,
+      );
       setHasAutoSelectedPreferred(true);
     }
   }, [
@@ -395,6 +404,7 @@ export default function FacilityOrganizationSelector(
     setSelectedOrganizations(newSelection);
     onChange(
       newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
+      newSelection,
     );
   };
 

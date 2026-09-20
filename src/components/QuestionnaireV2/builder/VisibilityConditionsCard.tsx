@@ -53,10 +53,14 @@ const NUMERIC_OPERATORS = [
   "less",
   "greater_or_equals",
   "less_or_equals",
+  "equals",
+  "not_equals",
+  "exists",
 ] as const satisfies readonly ConditionOperator[];
 const STRING_OPERATORS = [
   "equals",
   "not_equals",
+  "exists",
 ] as const satisfies readonly ConditionOperator[];
 
 function flattenQuestions(questions: Question[]): Question[] {
@@ -149,10 +153,22 @@ export function VisibilityConditionsCard({
 
   const handleOperatorChange = (index: number, operator: ConditionOperator) => {
     const next = [...enableWhen];
-    const { question: target, answer } = next[index];
+    const {
+      question: target,
+      answer,
+      operator: previousOperator,
+    } = next[index];
     // Switching to or away from `exists` changes what the answer must be —
     // a literal boolean there, a "Yes"/"No" string for equals/not_equals.
-    next[index] = buildCondition(target, operator, answer);
+    next[index] =
+      previousOperator === "exists" && operator !== "exists"
+        ? buildEnableWhen(
+            target,
+            availableTargets.find((candidate) => candidate.link_id === target)
+              ?.type,
+            operator,
+          )
+        : buildCondition(target, operator, answer);
     updateConditions(next);
   };
 

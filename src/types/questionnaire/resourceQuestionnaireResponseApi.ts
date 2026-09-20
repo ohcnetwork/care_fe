@@ -1,7 +1,10 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
+import {
+  QuestionnaireResponseStatus,
+  QuestionnaireResponseUpdate,
+} from "@/types/questionnaire/questionnaireResponse";
 import { UserReadMinimal } from "@/types/user/user";
 
 export interface ResourceQuestionnaireAnswerValue {
@@ -29,6 +32,12 @@ export interface ResourceQuestionnaireResponse {
 }
 
 export default {
+  update: {
+    path: "/api/v1/resource_responses/{id}/",
+    method: HttpMethod.PUT,
+    TBody: Type<QuestionnaireResponseUpdate>(),
+    TRes: Type<ResourceQuestionnaireResponse>(),
+  },
   get: {
     path: "/api/v1/resource_responses/{id}/",
     method: HttpMethod.GET,

@@ -199,43 +199,59 @@ test.describe("Location overview and forms", () => {
         exact: true,
       });
       await expect(toggle).toBeVisible();
-      const sidebarContainer = page.locator(
-        '[data-side="left"][data-collapsible]',
-      );
+      const sidebarState = page.locator("[data-app-sidebar-pinned]");
       const sidebar = page.locator('[data-sidebar="sidebar"]');
-      if ((await sidebarContainer.getAttribute("data-state")) === "collapsed") {
+      if (
+        (await sidebarState.getAttribute("data-app-sidebar-pinned")) === "false"
+      ) {
         await toggle.click();
       }
-      await expect(sidebarContainer).toHaveAttribute("data-state", "expanded");
+      await expect(sidebarState).toHaveAttribute(
+        "data-app-sidebar-pinned",
+        "true",
+      );
       await expect(toggle).toHaveAttribute("aria-expanded", "true");
       await toggle.click();
-      await expect(sidebarContainer).toHaveAttribute("data-state", "collapsed");
+      await page.mouse.move(900, 700);
+      await expect(sidebarState).toHaveAttribute(
+        "data-app-sidebar-pinned",
+        "false",
+      );
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await expect(sidebar).not.toBeVisible();
+      await expect(sidebar).not.toBeInViewport();
+
+      await toggle.hover();
+      await expect(sidebarState).toHaveAttribute(
+        "data-app-sidebar-preview",
+        "true",
+      );
+      await expect(sidebar).toBeInViewport({ ratio: 1 });
       await expect(
         sidebar.getByRole("link", { name: "Overview", exact: true }),
       ).toBeVisible();
+      await toggle.click();
+      await page.mouse.move(900, 700);
+      await expect(sidebarState).toHaveAttribute(
+        "data-app-sidebar-pinned",
+        "true",
+      );
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
       const pharmacy = sidebar.getByRole("button", {
         name: "Pharmacy",
         exact: true,
       });
-      await pharmacy.click();
-      const pharmacyMenu = page.getByRole("dialog", {
-        name: "Pharmacy",
-        exact: true,
-      });
-      await expect(pharmacyMenu).toBeVisible();
+      if ((await pharmacy.getAttribute("aria-expanded")) !== "true") {
+        await pharmacy.click();
+      }
+      await expect(pharmacy).toHaveAttribute("aria-expanded", "true");
       await expect(
-        pharmacyMenu.getByRole("link", {
+        sidebar.getByRole("link", {
           name: "Prescription Queue",
           exact: true,
         }),
       ).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(pharmacyMenu).not.toBeVisible();
-      await expect(pharmacy).toBeFocused();
-      await toggle.click();
-      await expect(sidebarContainer).toHaveAttribute("data-state", "expanded");
-      await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
       for (const destination of [
         "/responses",
@@ -413,6 +429,80 @@ test.describe("Location overview and forms", () => {
       await expect(
         page.getByRole("row").filter({ hasText: LOCATION_QUESTIONNAIRE_TITLE }),
       ).toHaveCount(0);
+    });
+  });
+
+  test("marks a location response entered in error and preserves its answer", async ({
+    page,
+  }) => {
+    const answer = `Correction-${faker.string.alphanumeric(10)}`;
+    const location = await createAndOpenLocation(page, facilityId);
+    const locationPath = `/facility/${facilityId}/locations/${location.id}`;
+
+    await test.step("submit a location response", async () => {
+      await page.goto(`${locationPath}/questionnaire/${questionnaireId}`);
+      await questionBlock(page, "Notes").getByRole("textbox").fill(answer);
+      await page
+        .getByRole("button", { name: "Save Changes", exact: true })
+        .click();
+      await expectToast(page, "Questionnaire submitted successfully");
+      await page.waitForURL(`**${locationPath}/responses`);
+    });
+
+    await test.step("an entered-in-error correction persists and cannot be repeated", async () => {
+      const response = page.getByRole("row").filter({
+        hasText: LOCATION_QUESTIONNAIRE_TITLE,
+      });
+      await response.getByRole("button", { name: "View", exact: true }).click();
+      const viewer = page.getByRole("dialog", {
+        name: LOCATION_QUESTIONNAIRE_TITLE,
+      });
+      await viewer
+        .getByRole("button", { name: "Mark as entered in error", exact: true })
+        .click();
+      const confirmation = page.getByRole("alertdialog");
+      await expect(confirmation).toBeVisible();
+      await confirmation
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(
+        viewer.getByText("Completed", { exact: true }),
+      ).toBeVisible();
+
+      await viewer
+        .getByRole("button", { name: "Mark as entered in error", exact: true })
+        .click();
+      const statusUpdate = page.waitForRequest(
+        (request) =>
+          request.url().includes("/api/v1/resource_responses/") &&
+          request.method() === "PUT",
+      );
+      await confirmation
+        .getByRole("button", { name: "Confirm", exact: true })
+        .click();
+      expect((await statusUpdate).postDataJSON()).toEqual({
+        status: "entered_in_error",
+      });
+      await expectToast(
+        page,
+        "Questionnaire response marked as entered in error",
+      );
+      await expect(
+        viewer.getByText("Entered in Error", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        viewer.getByRole("button", {
+          name: "Mark as entered in error",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await page.reload();
+      await expect(
+        viewer.getByText("Entered in Error", { exact: true }),
+      ).toBeVisible();
+      await expect(viewer.getByText(answer, { exact: true })).toBeVisible();
+      await viewer.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(response).toContainText("Entered in Error");
     });
   });
 

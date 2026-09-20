@@ -76,19 +76,6 @@ export function QuestionOverviewList({
         <h3 className="text-xl font-semibold text-gray-900">
           {t("questions")}
         </h3>
-        {canWrite && (
-          <Button
-            // Rendered inside the detail page's <form> — without an explicit
-            // type this would double as a submit button and fire a PUT.
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onEditQuestions}
-          >
-            <SquarePen className="mr-2 size-4" />
-            {t("edit_questions")}
-          </Button>
-        )}
       </div>
 
       {questions.length === 0 ? (

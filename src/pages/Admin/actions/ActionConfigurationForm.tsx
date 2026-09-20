@@ -49,13 +49,15 @@ import Page from "@/components/Common/Page";
 import { ActionListEditor } from "@/components/QuestionnaireV2/builder/actions/ActionListEditor";
 import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/useActionRegistry";
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
+import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 
 import {
-  ACTION_CONFIGURATION_CONTEXTS,
   ACTION_CONFIGURATION_CONTEXT_TYPES,
-  ActionConfigurationContext,
   ActionConfigurationRead,
   ActionConfigurationRetrieve,
+  SUPPORTED_ACTION_CONFIGURATION_CONTEXTS,
+  SupportedActionConfigurationContext,
+  isSupportedActionConfigurationContext,
 } from "@/types/actions/actionConfiguration";
 import actionConfigurationApi from "@/types/actions/actionConfigurationApi";
 import {
@@ -64,6 +66,7 @@ import {
 } from "@/types/questionnaire/actions";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 
 import { ADMIN_ACTIONS_PATH } from "./ActionConfigurationList";
 import { actionContextHint, actionContextLabel } from "./labels";
@@ -122,14 +125,42 @@ export function ActionConfigurationForm({ id }: ActionConfigurationFormProps) {
       </Page>
     );
   }
-  return (
-    <ActionConfigurationEditor key={id ?? "new"} id={id} existing={existing} />
-  );
+  if (existing) {
+    if (!isSupportedActionConfigurationContext(existing.action_context)) {
+      return (
+        <Page title={existing.name}>
+          <div className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                {t("action_configuration_context_unsupported")}
+              </AlertDescription>
+            </Alert>
+            <Button asChild variant="outline">
+              <Link href={ADMIN_ACTIONS_PATH}>
+                <ArrowLeft className="size-4" />
+                {t("back")}
+              </Link>
+            </Button>
+          </div>
+        </Page>
+      );
+    }
+    return (
+      <ActionConfigurationEditor
+        key={id}
+        id={id}
+        existing={{ ...existing, action_context: existing.action_context }}
+      />
+    );
+  }
+  return <ActionConfigurationEditor key="new" />;
 }
 
 interface ActionConfigurationEditorProps {
   id?: string;
-  existing?: ActionConfigurationRetrieve;
+  existing?: ActionConfigurationRetrieve & {
+    action_context: SupportedActionConfigurationContext;
+  };
 }
 
 /**
@@ -151,7 +182,7 @@ function ActionConfigurationEditor({
       z.object({
         name: z.string().trim().min(1, t("field_required")).max(254),
         description: z.string().trim(),
-        action_context: z.enum(ACTION_CONFIGURATION_CONTEXTS),
+        action_context: z.enum(SUPPORTED_ACTION_CONFIGURATION_CONTEXTS),
         performable: z.boolean(),
       }),
     [t],
@@ -196,8 +227,19 @@ function ActionConfigurationEditor({
       findActionIssues(actions, {
         questions: [],
         instructions: registry.instructions,
+        contextPaths:
+          registry.isLoading || registry.isError
+            ? undefined
+            : reachableContextPaths(contextType, registry.fields),
       }),
-    [actions, registry.instructions],
+    [
+      actions,
+      registry.instructions,
+      registry.isLoading,
+      registry.isError,
+      registry.fields,
+      contextType,
+    ],
   );
 
   const invalidate = () =>
@@ -406,7 +448,9 @@ function ActionConfigurationEditor({
                           value={field.value}
                           onValueChange={(value) => {
                             if (value === field.value) return;
-                            field.onChange(value as ActionConfigurationContext);
+                            if (!isSupportedActionConfigurationContext(value))
+                              return;
+                            field.onChange(value);
                             // Conditions and steps were authored against
                             // the previous context's fields; they cannot
                             // resolve under the new one, so they go.
@@ -425,11 +469,13 @@ function ActionConfigurationEditor({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {ACTION_CONFIGURATION_CONTEXTS.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {actionContextLabel(option, t)}
-                              </SelectItem>
-                            ))}
+                            {SUPPORTED_ACTION_CONFIGURATION_CONTEXTS.map(
+                              (option) => (
+                                <SelectItem key={option} value={option}>
+                                  {actionContextLabel(option, t)}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormDescription>
@@ -463,6 +509,44 @@ function ActionConfigurationEditor({
                     )}
                   />
                 </>
+              )}
+              {existing && (
+                <dl className="space-y-3 border-t border-gray-200 pt-4 text-sm">
+                  <div>
+                    <dt className="text-xs font-medium text-gray-500">
+                      {t("created_by")}
+                    </dt>
+                    <dd className="text-gray-900">
+                      {existing.created_by?.username ?? t("unknown")}
+                      <time
+                        dateTime={existing.created_date}
+                        className="block text-xs text-gray-500"
+                      >
+                        {formatDateTime(
+                          existing.created_date,
+                          "DD/MM/YYYY hh:mm A",
+                        )}
+                      </time>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium text-gray-500">
+                      {t("last_updated_by")}
+                    </dt>
+                    <dd className="text-gray-900">
+                      {existing.updated_by?.username ?? t("unknown")}
+                      <time
+                        dateTime={existing.modified_date}
+                        className="block text-xs text-gray-500"
+                      >
+                        {formatDateTime(
+                          existing.modified_date,
+                          "DD/MM/YYYY hh:mm A",
+                        )}
+                      </time>
+                    </dd>
+                  </div>
+                </dl>
               )}
             </section>
 

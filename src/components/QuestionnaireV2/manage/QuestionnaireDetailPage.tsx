@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Copy, Download, Eye } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { ArrowLeft, Check, Copy, Download, Eye, SquarePen } from "lucide-react";
+import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -39,7 +39,10 @@ import { downloadQuestionnaireJson } from "@/components/QuestionnaireV2/shared/d
 import { BasicInformationCard } from "./BasicInformationCard";
 import { CloneQuestionnaireDialog } from "./CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "./FormPropertiesSidebar";
-import { OrganizationsField } from "./OrganizationsField";
+import {
+  OrganizationSelection,
+  OrganizationsField,
+} from "./OrganizationsField";
 import {
   DetailFormValues,
   questionnaireBasicSchema,
@@ -67,6 +70,8 @@ export function QuestionnaireDetailPage({
 }) {
   const { t } = useTranslation();
   const [cloneOpen, setCloneOpen] = useState(false);
+  const [organizationDraft, setOrganizationDraft] =
+    useState<OrganizationSelection | null>(null);
   // `?tab=versions` deep-links straight to the Versions tab — it's how the
   // revision page's Back button returns to the tab it was opened from.
   const [{ tab }] = useQueryParams();
@@ -105,6 +110,8 @@ export function QuestionnaireDetailPage({
   // Owns the setQueryData-before-invalidate cache sequence and the success
   // toast (see the hook's doc comment).
   const { mutate: save, isPending } = useUpdateQuestionnaire(id);
+  const dirty = form.formState.isDirty || organizationDraft !== null;
+  useNavigationPrompt(dirty, t("unsaved_changes_warning"));
 
   const onSubmit = (values: DetailFormValues) => {
     if (!questionnaire) return;
@@ -115,6 +122,29 @@ export function QuestionnaireDetailPage({
         description: values.description,
         status: values.status,
       }),
+      organizationDraft ? { scope, ...organizationDraft } : undefined,
+      (updated) => {
+        // This callback belongs to this successful save only. A failed save
+        // followed by a reorder cannot clear the still-unsaved form.
+        const live = form.getValues();
+        if (
+          Object.keys(values).every(
+            (key) =>
+              live[key as keyof DetailFormValues] ===
+              values[key as keyof DetailFormValues],
+          )
+        ) {
+          form.reset({
+            title: updated.title,
+            slug: updated.slug,
+            description: updated.description ?? "",
+            status: updated.status,
+          });
+        }
+        setOrganizationDraft((current) =>
+          current === organizationDraft ? null : current,
+        );
+      },
     );
   };
 
@@ -212,7 +242,7 @@ export function QuestionnaireDetailPage({
                     {t("cancel")}
                   </Button>
                   {canWrite && (
-                    <Button type="submit" disabled={isPending}>
+                    <Button type="submit" disabled={isPending || !dirty}>
                       <Check className="mr-2 size-4" />
                       {t("save_form")}
                     </Button>
@@ -232,13 +262,7 @@ export function QuestionnaireDetailPage({
             <TabsContent value="questions" className="mt-4">
               <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">
                 <div className="space-y-4">
-                  <BasicInformationCard form={form} canWrite={canWrite}>
-                    <OrganizationsField
-                      scope={scope}
-                      questionnaireId={id}
-                      canWrite={canWrite}
-                    />
-                  </BasicInformationCard>
+                  <BasicInformationCard form={form} canWrite={canWrite} />
                   <QuestionOverviewList
                     questions={questionnaire.questions}
                     isSaving={isPending}
@@ -267,6 +291,26 @@ export function QuestionnaireDetailPage({
                   form={form}
                   canWrite={canWrite}
                 >
+                  <fieldset disabled={isPending} className="min-w-0">
+                    <OrganizationsField
+                      scope={scope}
+                      questionnaireId={id}
+                      canWrite={canWrite}
+                      draft={organizationDraft}
+                      onChange={(selection) => {
+                        if (!isPending) setOrganizationDraft(selection);
+                      }}
+                    />
+                  </fieldset>
+                  {canWrite && (
+                    <LabeledActionButton
+                      label={t("edit_questions")}
+                      onClick={() => navigate(`${scope.basePath}/${id}/edit`)}
+                    >
+                      <SquarePen className="size-4" />
+                      {t("edit_questions")}
+                    </LabeledActionButton>
+                  )}
                   <LabeledActionButton
                     label={t("check_how_form_looks")}
                     onClick={() =>

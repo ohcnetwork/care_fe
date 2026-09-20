@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
-import { ALWAYS_CONDITION } from "@/components/QuestionnaireV2/shared/actionExpression";
+import {
+  ALWAYS_CONDITION,
+  lintExpression,
+} from "@/components/QuestionnaireV2/shared/actionExpression";
 import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
@@ -23,6 +26,7 @@ import { Question } from "@/types/questionnaire/question";
 import { ActionConditionEditor } from "./ActionConditionEditor";
 import { InstructionEditor, newInstruction } from "./InstructionEditor";
 import { actionPlainWords } from "./actionSummary";
+import { isInstructionCompatible } from "./instructionCompatibility";
 import { ActionVariableSources } from "./labels";
 import { ActionRegistry } from "./useActionRegistry";
 
@@ -101,6 +105,9 @@ export function ActionListEditor({
   const issueByIndex = new Map(
     issues.map((issue) => [issue.index, issue.messageKey]),
   );
+  const compatibleInstructions = registry.instructions?.filter((instruction) =>
+    isInstructionCompatible(instruction, contextPaths),
+  );
 
   const setAction = (index: number, action: QuestionnaireAction) =>
     onActionsChange(actions.map((entry, i) => (i === index ? action : entry)));
@@ -109,8 +116,8 @@ export function ActionListEditor({
     // One registered instruction is a foregone choice — preselect it so
     // the author only fills in its inputs.
     const only =
-      registry.instructions?.length === 1
-        ? registry.instructions[0]
+      compatibleInstructions?.length === 1
+        ? compatibleInstructions[0]
         : undefined;
     onActionsChange([
       ...actions,
@@ -163,6 +170,15 @@ export function ActionListEditor({
         <div className="space-y-3">
           {actions.map((action, index) => {
             const issueKey = issueByIndex.get(index);
+            const conditionIssue =
+              issueKey &&
+              [
+                "action_issue_condition_empty",
+                "action_issue_expression_syntax",
+                "action_issue_expression_attribute",
+              ].includes(issueKey) &&
+              (action.condition.trim() === "" ||
+                !!lintExpression(action.condition));
             const idPrefix = `action-${index}`;
             return (
               <CollapsibleSettingsCard
@@ -197,7 +213,7 @@ export function ActionListEditor({
                 }
               >
                 <div className="space-y-5">
-                  {issueKey && (
+                  {issueKey && !conditionIssue && (
                     <p className="flex items-start gap-2 text-xs text-red-600">
                       <TriangleAlert
                         aria-hidden
@@ -266,9 +282,9 @@ export function ActionListEditor({
                           ...action,
                           instructions: [
                             ...action.instructions,
-                            registry.instructions?.length === 1
+                            compatibleInstructions?.length === 1
                               ? newInstruction(
-                                  registry.instructions[0],
+                                  compatibleInstructions[0],
                                   contextPaths,
                                 )
                               : { slug: "", params: {}, context: "self" },

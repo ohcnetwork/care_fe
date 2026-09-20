@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -11,24 +10,33 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+
+export interface OrganizationSelection {
+  ids: string[];
+  /** Labels survive a closed picker or a changed search term. */
+  organizations: Organization[];
+  facilityOrganizations?: FacilityOrganizationRead[];
+}
 
 interface OrganizationsFieldProps {
   scope: QuestionnaireScope;
   questionnaireId: string;
   /** When false, the organization list renders read-only (no toggles). */
   canWrite: boolean;
+  draft: OrganizationSelection | null;
+  onChange: (selection: OrganizationSelection | null) => void;
 }
 
 /**
  * Plain labeled field (not a separate card) — Organizations renders as the
- * fourth field inside the Basic Information card, matching the design where
- * it is one control among the card's fields rather than its own surface.
+ * access control within the questionnaire properties. Edits remain local
+ * until the page saves the questionnaire.
  */
 function OrganizationsFieldShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -58,12 +66,16 @@ export function OrganizationsField({
   scope,
   questionnaireId,
   canWrite,
+  draft,
+  onChange,
 }: OrganizationsFieldProps) {
   if (scope.authContext === "instance") {
     return (
       <InstanceOrganizationsField
         questionnaireId={questionnaireId}
         canWrite={canWrite}
+        draft={draft}
+        onChange={onChange}
       />
     );
   }
@@ -73,6 +85,8 @@ export function OrganizationsField({
         facilityId={scope.facilityId}
         questionnaireId={questionnaireId}
         canWrite={canWrite}
+        draft={draft}
+        onChange={onChange}
       />
     );
   }
@@ -85,14 +99,11 @@ export function OrganizationsField({
 function InstanceOrganizationsField({
   questionnaireId,
   canWrite,
-}: {
-  questionnaireId: string;
-  canWrite: boolean;
-}) {
+  draft,
+  onChange,
+}: Omit<OrganizationsFieldProps, "scope">) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selected, setSelected] = useState<Organization[]>([]);
 
   const {
     data: current,
@@ -116,29 +127,7 @@ function InstanceOrganizationsField({
     enabled: canWrite && !isError,
   });
 
-  useEffect(() => {
-    if (current?.results) {
-      setSelected(current.results);
-    }
-  }, [current?.results]);
-
-  const { mutate: setOrganizations } = useMutation({
-    mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { id: questionnaireId },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: questionnaireKeys.organizations(questionnaireId, "instance"),
-      });
-      toast.success(t("organizations_updated"));
-    },
-    onError: () => {
-      // Roll back the optimistic chip update — the global mutation error
-      // handler already toasts; without this the UI would keep reporting an
-      // access change the backend rejected.
-      setSelected(current?.results ?? []);
-    },
-  });
+  const selected = draft?.organizations ?? current?.results ?? [];
 
   if (isError) {
     return <OrganizationsUnavailableCard />;
@@ -146,7 +135,7 @@ function InstanceOrganizationsField({
 
   const handleToggle = (orgId: string) => {
     const isSelected = selected.some((org) => org.id === orgId);
-    let next: Organization[];
+    let next: OrganizationSelection["organizations"];
     if (isSelected) {
       next = selected.filter((org) => org.id !== orgId);
     } else {
@@ -156,8 +145,13 @@ function InstanceOrganizationsField({
       ].find((org) => org.id === orgId);
       next = orgToAdd ? [...selected, orgToAdd] : selected;
     }
-    setSelected(next);
-    setOrganizations({ organizations: next.map((org) => org.id) });
+    const ids = next.map((org) => org.id);
+    const savedIds = current?.results.map((org) => org.id) ?? [];
+    onChange(
+      ids.length === savedIds.length && ids.every((id) => savedIds.includes(id))
+        ? null
+        : { ids, organizations: next },
+    );
   };
 
   return (
@@ -184,7 +178,7 @@ function InstanceOrganizationsField({
             )}
           </Badge>
         ))}
-        {canWrite && (
+        {canWrite && !isLoading && (
           <OrgSelector
             selected={selected.map((org) => org.id)}
             onToggle={handleToggle}
@@ -204,15 +198,16 @@ function FacilityOrganizationsField({
   facilityId,
   questionnaireId,
   canWrite,
-}: {
-  facilityId: string;
-  questionnaireId: string;
-  canWrite: boolean;
-}) {
+  draft,
+  onChange,
+}: Omit<OrganizationsFieldProps, "scope"> & { facilityId: string }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
-  const { data: current, isError } = useQuery({
+  const {
+    data: current,
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: questionnaireKeys.organizations(questionnaireId, "facility"),
     // silent for the same cross-scope reason as the instance variant.
     queryFn: query(questionnaireApi.getFacilityOrganizations, {
@@ -221,23 +216,11 @@ function FacilityOrganizationsField({
     }),
   });
 
-  const { mutate: setFacilityOrganizations } = useMutation({
-    mutationFn: mutate(questionnaireApi.setFacilityOrganizations, {
-      pathParams: { id: questionnaireId },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: questionnaireKeys.organizations(questionnaireId, "facility"),
-      });
-      toast.success(t("organizations_updated"));
-    },
-  });
-
   if (isError) {
     return <OrganizationsUnavailableCard />;
   }
 
-  const currentIds = current?.results.map((org) => org.id) ?? [];
+  const currentIds = draft?.ids ?? current?.results.map((org) => org.id) ?? [];
 
   if (!canWrite) {
     return (
@@ -260,15 +243,26 @@ function FacilityOrganizationsField({
 
   return (
     <OrganizationsFieldShell>
-      <FacilityOrganizationSelector
-        facilityId={facilityId}
-        value={currentIds}
-        currentOrganizations={current?.results}
-        optional
-        onChange={(ids) =>
-          setFacilityOrganizations({ facility_organizations: ids ?? [] })
-        }
-      />
+      {!isLoading && (
+        <FacilityOrganizationSelector
+          facilityId={facilityId}
+          value={currentIds}
+          currentOrganizations={
+            draft?.facilityOrganizations ?? current?.results
+          }
+          optional
+          onChange={(value, facilityOrganizations) => {
+            const ids = value ?? [];
+            const savedIds = current?.results.map((org) => org.id) ?? [];
+            onChange(
+              ids.length === savedIds.length &&
+                ids.every((id) => savedIds.includes(id))
+                ? null
+                : { ids, organizations: [], facilityOrganizations },
+            );
+          }}
+        />
+      )}
     </OrganizationsFieldShell>
   );
 }

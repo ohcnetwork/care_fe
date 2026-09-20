@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import DateField from "@/components/ui/date-field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,17 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import {
   ActionRule,
   ActionRuleBehavior,
   ActionRuleValue,
   compileCondition,
   compileRef,
+  lintExpression,
   parseCondition,
   questionRef,
   referenceableLinkId,
 } from "@/components/QuestionnaireV2/shared/actionExpression";
+import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import {
   AnswerShape,
@@ -35,6 +37,8 @@ import {
 } from "@/components/QuestionnaireV2/builder/actionVariables";
 
 import { Question } from "@/types/questionnaire/question";
+import { dateQueryString } from "@/Utils/utils";
+import { contextFieldInput } from "./contextFieldInput";
 
 import {
   ActionVariableSources,
@@ -146,8 +150,25 @@ export function ActionConditionEditor({
   const parsed = parseCondition(condition);
   const [wantsExpression, setWantsExpression] = useState(false);
   const [confirmReplace, setConfirmReplace] = useState(false);
+  const [lastValidCondition, setLastValidCondition] = useState(
+    parsed ? condition : compileCondition([], "all"),
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const expressionMode = wantsExpression || !parsed;
+  const expressionError = lintExpression(condition);
+  const expressionErrorKey =
+    condition.trim() === ""
+      ? "action_issue_condition_empty"
+      : expressionError === "syntax"
+        ? "action_issue_expression_syntax"
+        : expressionError === "attribute"
+          ? "action_issue_expression_attribute"
+          : undefined;
+
+  const changeCondition = (next: string) => {
+    if (parseCondition(next)) setLastValidCondition(next);
+    onChange(next);
+  };
 
   // Everything in the tree, for the rename's collision check.
   const takenLinkIds = new Set(
@@ -159,7 +180,7 @@ export function ActionConditionEditor({
   const canAddRule = pickable.length > 0 || contextValues.length > 0;
 
   const update = (rules: ActionRule[], behavior: ActionRuleBehavior) =>
-    onChange(compileCondition(rules, behavior));
+    changeCondition(compileCondition(rules, behavior));
 
   /** The ref a picked question should be stored under — renaming a
    *  legacy link id on the way, since `q_Q-1234` is not a name. */
@@ -173,11 +194,18 @@ export function ActionConditionEditor({
     );
   };
 
-  const freshRule = (entry: QuestionVariable | undefined, ref: string) => ({
-    ref,
-    operator: operatorsFor(entry?.shape)[0],
-    value: defaultValue(entry?.shape, entry?.question),
-  });
+  const freshRule = (entry: QuestionVariable | undefined, ref: string) => {
+    const fieldInput = contextFieldInput(
+      contextValues.find((value) => value.ref === ref),
+    );
+    const shape = entry?.shape ?? fieldInput?.shape;
+    return {
+      ref,
+      operator: operatorsFor(shape)[0],
+      value:
+        fieldInput?.options?.[0]?.value ?? defaultValue(shape, entry?.question),
+    };
+  };
 
   const addRule = () => {
     if (!parsed) return;
@@ -198,7 +226,7 @@ export function ActionConditionEditor({
     const element = textareaRef.current;
     const start = element?.selectionStart ?? condition.length;
     const end = element?.selectionEnd ?? start;
-    onChange(condition.slice(0, start) + text + condition.slice(end));
+    changeCondition(condition.slice(0, start) + text + condition.slice(end));
     requestAnimationFrame(() => {
       element?.focus();
       element?.setSelectionRange(start + text.length, start + text.length);
@@ -226,11 +254,23 @@ export function ActionConditionEditor({
           ref={textareaRef}
           id={`${idPrefix}-expression`}
           aria-label={t("action_expression")}
+          aria-invalid={!!expressionErrorKey}
+          aria-describedby={
+            expressionErrorKey ? `${idPrefix}-expression-error` : undefined
+          }
           className="font-mono text-xs"
           rows={3}
           value={condition}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => changeCondition(e.target.value)}
         />
+        {expressionErrorKey && (
+          <p
+            id={`${idPrefix}-expression-error`}
+            className="text-xs text-red-600"
+          >
+            {t(expressionErrorKey)}
+          </p>
+        )}
         {chips.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {chips.map((chip) => (
@@ -262,7 +302,7 @@ export function ActionConditionEditor({
                 onClick={() => {
                   setConfirmReplace(false);
                   setWantsExpression(false);
-                  update([], "all");
+                  onChange(lastValidCondition);
                 }}
               >
                 {t("action_replace_expression")}
@@ -350,9 +390,18 @@ export function ActionConditionEditor({
       <div className="space-y-2">
         {rules.map((rule, index) => {
           const target = questionOfRef(rule.ref, questions);
-          const shape = target?.shape;
+          const fieldInput = contextFieldInput(
+            contextValues.find((value) => value.ref === rule.ref),
+          );
+          const shape = target?.shape ?? fieldInput?.shape;
           const operators = operatorsFor(shape);
-          const options = target?.question.answer_option ?? [];
+          const options =
+            target?.question.answer_option ??
+            fieldInput?.options?.map(({ value, label, translationKey }) => ({
+              value,
+              display: translationKey ? t(translationKey) : label,
+            })) ??
+            [];
           const rowLabel = t("condition_n", { n: index + 1 });
           const unresolved =
             !target && !contextValues.some((v) => v.ref === rule.ref);
@@ -498,7 +547,28 @@ export function ActionConditionEditor({
 
                   <div className="space-y-1">
                     <p className="text-xs text-gray-500">{t("action_value")}</p>
-                    {shape === "boolean" ? (
+                    {fieldInput?.date ? (
+                      <div
+                        role="group"
+                        aria-label={`${rowLabel} ${t("action_value")}`}
+                      >
+                        <DateField
+                          date={
+                            typeof rule.value === "string" &&
+                            /^\d{4}-\d{2}-\d{2}$/.test(rule.value)
+                              ? new Date(`${rule.value}T00:00:00`)
+                              : undefined
+                          }
+                          onChange={(date) =>
+                            setRule(index, {
+                              ...rule,
+                              value: dateQueryString(date) ?? "",
+                            })
+                          }
+                          hideLabels
+                        />
+                      </div>
+                    ) : shape === "boolean" ? (
                       <Select
                         value={rule.value === true ? "true" : "false"}
                         onValueChange={(value) =>
@@ -619,7 +689,10 @@ export function ActionConditionEditor({
           variant="link"
           size="sm"
           className="h-auto px-0"
-          onClick={() => setWantsExpression(true)}
+          onClick={() => {
+            setLastValidCondition(condition);
+            setWantsExpression(true);
+          }}
         >
           {t("action_edit_as_expression")}
         </Button>

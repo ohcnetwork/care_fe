@@ -24,11 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { regenerateQuestionIds } from "@/components/QuestionnaireV2/shared/questionTree";
+import { extractQuestions } from "@/components/QuestionnaireV2/shared/questionnaireImport";
+import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { cn } from "@/lib/utils";
 
-import { QUESTION_TYPES, Question } from "@/types/questionnaire/question";
+import { Question } from "@/types/questionnaire/question";
 
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 
@@ -38,65 +39,11 @@ type ImportStep = "select" | "confirm";
 interface ImportQuestionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (questions: Question[]) => void;
+  onImport: (questions: Question[], linkIdMap: Map<string, string>) => void;
 }
 
 /** Max accepted size for a fetched questionnaire JSON (bytes/characters). */
 const MAX_IMPORT_SIZE = 5_000_000;
-
-/**
- * Recursively narrows an unknown question-ish object down to the fields the
- * importer needs. Validation must recurse: nested `questions` reach the
- * builder tree and the PUT body unmodified, so a malformed child (missing
- * `text`, or `questions` that isn't an array) would otherwise surface as a
- * crash in the confirm step or a save that silently does nothing.
- */
-function isQuestionLike(value: unknown): value is Question {
-  if (typeof value !== "object" || value === null) return false;
-  const candidate = value as {
-    text?: unknown;
-    type?: unknown;
-    link_id?: unknown;
-    questions?: unknown;
-  };
-  if (typeof candidate.text !== "string") return false;
-  // Membership, not just typeof: an unknown `type` (e.g. "radio") would flow
-  // into builder state and crash the type picker's TYPE_ICONS lookup, then
-  // be PUT to the API on save.
-  if (
-    typeof candidate.type !== "string" ||
-    !(QUESTION_TYPES as readonly string[]).includes(candidate.type)
-  ) {
-    return false;
-  }
-  // link_id is optional (regenerateQuestionIds synthesizes fresh ones), but
-  // when present it must be a string.
-  if (
-    candidate.link_id !== undefined &&
-    typeof candidate.link_id !== "string"
-  ) {
-    return false;
-  }
-  if (candidate.questions !== undefined) {
-    if (!Array.isArray(candidate.questions)) return false;
-    return candidate.questions.every(isQuestionLike);
-  }
-  return true;
-}
-
-/**
- * Accepts either a bare `{ questions: [...] }` payload or a full
- * questionnaire export (which has a `questions` array alongside its other
- * fields) — both shapes are read the same way, through `.questions`.
- */
-function extractQuestions(data: unknown): Question[] | null {
-  if (typeof data !== "object" || data === null || !("questions" in data)) {
-    return null;
-  }
-  const questions = (data as { questions: unknown }).questions;
-  if (!Array.isArray(questions) || questions.length === 0) return null;
-  return questions.every(isQuestionLike) ? (questions as Question[]) : null;
-}
 
 export function ImportQuestionsDialog({
   open,
@@ -217,7 +164,9 @@ export function ImportQuestionsDialog({
   const handleConfirm = () => {
     if (!pendingQuestions) return;
     try {
-      onImport(regenerateQuestionIds(pendingQuestions));
+      const { questions, linkIdMap } =
+        regenerateQuestionIdsWithMap(pendingQuestions);
+      onImport(questions, linkIdMap);
     } catch {
       // Insurance against shapes the validators didn't anticipate — a toast
       // beats an uncaught throw in an onClick (which the page ErrorBoundary

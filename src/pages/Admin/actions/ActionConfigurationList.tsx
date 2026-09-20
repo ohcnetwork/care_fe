@@ -19,6 +19,7 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
+import { isSupportedActionConfigurationContext } from "@/types/actions/actionConfiguration";
 import actionConfigurationApi from "@/types/actions/actionConfigurationApi";
 import query from "@/Utils/request/query";
 
@@ -29,7 +30,7 @@ export const ADMIN_ACTIONS_PATH = "/admin/actions";
 
 /**
  * Instance-level action configurations: what runs when an appointment is
- * booked (and, once the backend wires them, other records). One row per
+ * booked. One row per supported
  * configuration; the row opens its editor.
  */
 export function ActionConfigurationList() {
@@ -40,15 +41,20 @@ export function ActionConfigurationList() {
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: actionConfigurationKeys.list(qParams),
-    queryFn: query(actionConfigurationApi.list, {
-      queryParams: {
-        limit: resultsPerPage,
-        offset: ((qParams.page || 1) - 1) * resultsPerPage,
-      },
-    }),
+    queryKey: actionConfigurationKeys.list({ supportedContexts: true }),
+    // The API has no context filter. Load every page before filtering so
+    // unsupported records cannot leave empty pages or inflate the count.
+    queryFn: query.paginated(actionConfigurationApi.list),
   });
-  const configurations = response?.results ?? [];
+  const supportedConfigurations = (response?.results ?? []).filter(
+    (configuration) =>
+      isSupportedActionConfigurationContext(configuration.action_context),
+  );
+  const offset = ((qParams.page || 1) - 1) * resultsPerPage;
+  const configurations = supportedConfigurations.slice(
+    offset,
+    offset + resultsPerPage,
+  );
 
   return (
     <Page title={t("action_configurations")} hideTitleOnPage>
@@ -142,7 +148,7 @@ export function ActionConfigurationList() {
           </div>
         )}
 
-        <Pagination totalCount={response?.count ?? 0} />
+        <Pagination totalCount={supportedConfigurations.length} />
       </div>
     </Page>
   );

@@ -14,6 +14,8 @@ import {
   QuestionnaireAction,
 } from "@/types/questionnaire/actions";
 import { Question } from "@/types/questionnaire/question";
+import type { ContextPathOption } from "./actionVariables";
+import { isInstructionCompatible } from "./actions/instructionCompatibility";
 
 import {
   actionReferencedLinkIds,
@@ -33,6 +35,8 @@ export interface ActionCheckContext {
    *  rather than flag every action as unknown while the request is in
    *  flight. */
   instructions?: ActionInstructionDefinition[];
+  /** Omitted while the field registry is loading or unavailable. */
+  contextPaths?: ContextPathOption[];
 }
 
 interface TreeIndex {
@@ -88,6 +92,7 @@ interface ActionRule {
     action: QuestionnaireAction,
     tree: TreeIndex,
     instructions: ActionInstructionDefinition[] | undefined,
+    contextPaths: ContextPathOption[] | undefined,
   ) => boolean;
   messageKey: string;
 }
@@ -134,6 +139,20 @@ const ACTION_RULES: ActionRule[] = [
     messageKey: "action_issue_instruction_unknown",
   },
   {
+    predicate: (action, _tree, instructions, contextPaths) =>
+      !!instructions &&
+      !!contextPaths &&
+      action.instructions.some((instruction) => {
+        const definition = instructions.find(
+          (candidate) => candidate.slug === instruction.slug,
+        );
+        return (
+          !!definition && !isInstructionCompatible(definition, contextPaths)
+        );
+      }),
+    messageKey: "action_instruction_incompatible",
+  },
+  {
     predicate: (action) =>
       action.instructions.some((instruction) => !instruction.context),
     messageKey: "action_issue_context_missing",
@@ -166,13 +185,13 @@ const ACTION_RULES: ActionRule[] = [
 /** The first failing rule per action, in action order. */
 export function findActionIssues(
   actions: QuestionnaireAction[],
-  { questions, instructions }: ActionCheckContext,
+  { questions, instructions, contextPaths }: ActionCheckContext,
 ): ActionIssue[] {
   const tree = indexTree(questions);
   const issues: ActionIssue[] = [];
   actions.forEach((action, index) => {
     const failing = ACTION_RULES.find((rule) =>
-      rule.predicate(action, tree, instructions),
+      rule.predicate(action, tree, instructions, contextPaths),
     );
     if (failing) issues.push({ index, messageKey: failing.messageKey });
   });

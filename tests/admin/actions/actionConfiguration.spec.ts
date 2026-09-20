@@ -86,7 +86,9 @@ test.describe("Admin action configurations", () => {
       await page
         .getByRole("option", { name: "Greater Than", exact: true })
         .click();
-      await page.getByRole("textbox", { name: "Condition 1 Value" }).fill("60");
+      await page
+        .getByRole("spinbutton", { name: "Condition 1 Value" })
+        .fill("60");
 
       await page.getByRole("button", { name: "Add instruction" }).click();
       await page.getByRole("combobox", { name: "Instruction" }).click();

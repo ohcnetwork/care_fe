@@ -652,6 +652,7 @@ export function DiagnosisQuestion({
           buttonLabel={t("diagnosis_history")}
           onAddSelected={handleAddHistoricalDiagnoses}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
 

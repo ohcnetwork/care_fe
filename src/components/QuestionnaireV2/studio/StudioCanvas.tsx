@@ -20,6 +20,8 @@ import {
 } from "@/components/QuestionnaireV2/form/chrome";
 import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormCanvas";
 
+import { Input } from "@/components/ui/input";
+
 import { Question } from "@/types/questionnaire/question";
 
 import { questionsByLinkId, shortConditionSummary } from "./conditionSummary";
@@ -242,7 +244,38 @@ function StudioQuestionAnnotation({ question }: { question: Question }) {
   );
 }
 
+function StudioQuestionTitle({
+  question,
+  children,
+}: {
+  question: Question;
+  children: React.ReactNode;
+}) {
+  const { t } = useTranslation();
+  const studio = useStudioCanvas();
+  if (!studio.editing) return <>{children}</>;
+  return (
+    <Input
+      aria-label={t("edit_question_heading", {
+        name: question.text || t("untitled_question"),
+      })}
+      value={question.text}
+      placeholder={t("enter_question_title")}
+      className="h-auto min-w-0 flex-1 border-transparent px-1 py-0 text-sm font-medium shadow-none hover:border-gray-300 focus-visible:border-primary-600"
+      onClick={(event) => event.stopPropagation()}
+      onChange={(event) =>
+        studio.dispatch({
+          type: "updateQuestion",
+          id: question.id,
+          patch: { text: event.target.value },
+        })
+      }
+    />
+  );
+}
+
 const STUDIO_CHROME: FormChrome = {
+  QuestionTitle: StudioQuestionTitle,
   QuestionShell: StudioQuestionShell,
   AppendZone: StudioAppendZone,
   QuestionAnnotation: StudioQuestionAnnotation,

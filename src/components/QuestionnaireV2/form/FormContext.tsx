@@ -13,6 +13,7 @@ import {
   questionnaireAtom,
   responsesAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 
 // Live-store hooks hosts may need (the studio outline drops
 // enable_when-hidden rows in preview; the fill outline adds completion
@@ -33,6 +34,8 @@ interface FormContextValue {
   mode: FormMode;
   subject: RendererSubject;
   questionnaire: QuestionnaireRead;
+  /** Questions referenced by actions must be answered for submission. */
+  actionRequiredLinkIds: ReadonlySet<string>;
   /** Render enable_when-hidden questions anyway (builder edit canvas). */
   revealHidden: boolean;
   /** Render inputs visually but non-interactive and out of the a11y tree
@@ -215,9 +218,30 @@ export function QuestionnaireFormProvider({
   // per render would re-render every block on any host re-render (a studio
   // keystroke, a fill-page state change) — defeating the response-identity
   // preservation `syncResponses` above exists for.
+  const actionRequiredLinkIds = useMemo(
+    () =>
+      new Set((questionnaire.actions ?? []).flatMap(actionReferencedLinkIds)),
+    [questionnaire.actions],
+  );
   const value = useMemo(
-    () => ({ mode, subject, questionnaire, revealHidden, inert, frozen }),
-    [mode, subject, questionnaire, revealHidden, inert, frozen],
+    () => ({
+      mode,
+      subject,
+      questionnaire,
+      actionRequiredLinkIds,
+      revealHidden,
+      inert,
+      frozen,
+    }),
+    [
+      mode,
+      subject,
+      questionnaire,
+      actionRequiredLinkIds,
+      revealHidden,
+      inert,
+      frozen,
+    ],
   );
 
   return (

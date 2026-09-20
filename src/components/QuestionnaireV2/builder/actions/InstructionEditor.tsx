@@ -1,10 +1,23 @@
-import { Trash2 } from "lucide-react";
+import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -30,6 +43,7 @@ import { TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 import { ParamValueInput } from "./ParamValueInput";
 import { TagConfigParamPicker } from "./TagConfigParamPicker";
+import { isInstructionCompatible } from "./instructionCompatibility";
 import {
   ActionVariableSources,
   contextPathLabel,
@@ -220,6 +234,7 @@ export function InstructionEditor({
   onRemove,
 }: InstructionEditorProps) {
   const { t } = useTranslation();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const definition = definitions?.find(
     (candidate) => candidate.slug === instruction.slug,
   );
@@ -235,6 +250,11 @@ export function InstructionEditor({
   const runsOn = contextPaths.find(
     (option) => option.path === instruction.context,
   );
+  const compatibleDefinitions = definitions?.filter((candidate) =>
+    isInstructionCompatible(candidate, contextPaths),
+  );
+  const incompatible =
+    !!definition && !isInstructionCompatible(definition, contextPaths);
 
   const setParam = (name: string, value: unknown) => {
     const params = { ...instruction.params };
@@ -261,47 +281,71 @@ export function InstructionEditor({
         </Button>
       </div>
 
-      <Select
-        value={instruction.slug || undefined}
-        onValueChange={(slug) => {
-          const next = definitions?.find(
-            (candidate) => candidate.slug === slug,
-          );
-          onChange(
-            next
-              ? newInstruction(next, contextPaths)
-              : { slug, params: {}, context: SELF_CONTEXT_PATH },
-          );
-        }}
-      >
-        <SelectTrigger
-          className="w-full"
-          aria-label={t("action_instruction")}
-          aria-invalid={Boolean(unknownSlug)}
+      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            className="w-full justify-between font-normal"
+            aria-label={t("action_instruction")}
+            aria-expanded={pickerOpen}
+            aria-invalid={Boolean(unknownSlug) || incompatible}
+          >
+            <span className="truncate">
+              {instruction.slug
+                ? instructionLabel(instruction.slug, t)
+                : t("action_instruction_placeholder")}
+            </span>
+            <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-(--radix-popover-trigger-width) p-0"
+          align="start"
         >
-          <SelectValue placeholder={t("action_instruction_placeholder")} />
-        </SelectTrigger>
-        <SelectContent>
-          {unknownSlug && (
-            <SelectItem value={unknownSlug} disabled className="text-red-600">
-              {humanize(unknownSlug)}
-            </SelectItem>
-          )}
-          {(definitions ?? []).map((candidate) => (
-            <SelectItem key={candidate.slug} value={candidate.slug}>
-              <span className="flex items-center gap-2">
-                {instructionLabel(candidate.slug, t)}
-                <Badge variant="secondary" className="text-[10px]">
-                  {instructionTypeLabel(candidate.instruction_type, t)}
-                </Badge>
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Command>
+            <CommandInput placeholder={t("search")} aria-label={t("search")} />
+            <CommandList>
+              <CommandEmpty>{t("no_results_found")}</CommandEmpty>
+              <CommandGroup>
+                {(compatibleDefinitions ?? []).map((candidate) => (
+                  <CommandItem
+                    key={candidate.slug}
+                    value={candidate.slug}
+                    keywords={[
+                      instructionLabel(candidate.slug, t),
+                      instructionTypeLabel(candidate.instruction_type, t),
+                    ]}
+                    onSelect={() => {
+                      onChange(newInstruction(candidate, contextPaths));
+                      setPickerOpen(false);
+                    }}
+                  >
+                    <span className="flex-1">
+                      {instructionLabel(candidate.slug, t)}
+                    </span>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {instructionTypeLabel(candidate.instruction_type, t)}
+                    </Badge>
+                    {instruction.slug === candidate.slug && (
+                      <Check className="size-4" />
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
       {unknownSlug && (
         <p className="text-xs text-red-600">
           {t("action_instruction_unknown")}
+        </p>
+      )}
+      {incompatible && (
+        <p className="text-xs text-red-600">
+          {t("action_instruction_incompatible")}
         </p>
       )}
 

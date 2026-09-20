@@ -71,7 +71,7 @@ export function QuestionnaireCreatePage({
       title: "",
       slug: "",
       description: "",
-      status: "active",
+      status: "draft",
       subject_type: subjectTypeOptions[0],
     },
   });

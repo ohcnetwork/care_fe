@@ -8,7 +8,10 @@ import { Form } from "@/components/ui/form";
 import { BasicInformationCard } from "@/components/QuestionnaireV2/manage/BasicInformationCard";
 import { CloneQuestionnaireDialog } from "@/components/QuestionnaireV2/manage/CloneQuestionnaireDialog";
 import { FormPropertiesSidebar } from "@/components/QuestionnaireV2/manage/FormPropertiesSidebar";
-import { OrganizationsField } from "@/components/QuestionnaireV2/manage/OrganizationsField";
+import {
+  OrganizationSelection,
+  OrganizationsField,
+} from "@/components/QuestionnaireV2/manage/OrganizationsField";
 import { DetailFormValues } from "@/components/QuestionnaireV2/manage/questionnaireFormSchema";
 import { downloadQuestionnaireJson } from "@/components/QuestionnaireV2/shared/downloadQuestionnaireJson";
 import { LabeledActionButton } from "@/components/QuestionnaireV2/shared/LabeledActionButton";
@@ -25,6 +28,9 @@ export interface FormSettingsPanelProps {
    *  tree by the page's Save Changes (one full-body PUT). */
   form: UseFormReturn<DetailFormValues>;
   canWrite: boolean;
+  isSaving: boolean;
+  organizationDraft: OrganizationSelection | null;
+  onOrganizationsChange: (selection: OrganizationSelection | null) => void;
   /** Composes the current DRAFT (unsaved questions + metadata) — the JSON
    *  export must match what the author is looking at, not the last save. */
   exportQuestionnaire: () => QuestionnaireRead;
@@ -32,14 +38,17 @@ export interface FormSettingsPanelProps {
 
 /**
  * The inspector's questionnaire-level state: identity fields, status, subject
- * type, organizations, clone and JSON export. Organizations keep their own
- * immediate-save semantics, independent of the Save Changes flow.
+ * type, organizations, clone and JSON export. Changes are saved together
+ * by the studio page.
  */
 export function FormSettingsPanel({
   scope,
   questionnaire,
   form,
   canWrite,
+  isSaving,
+  organizationDraft,
+  onOrganizationsChange,
   exportQuestionnaire,
 }: FormSettingsPanelProps) {
   const { t } = useTranslation();
@@ -55,19 +64,24 @@ export function FormSettingsPanel({
       </div>
 
       <Form {...form}>
-        <BasicInformationCard form={form} canWrite={canWrite}>
-          <OrganizationsField
-            scope={scope}
-            questionnaireId={questionnaire.id}
-            canWrite={canWrite}
-          />
-        </BasicInformationCard>
+        <BasicInformationCard form={form} canWrite={canWrite} />
 
         <FormPropertiesSidebar
           questionnaire={questionnaire}
           form={form}
           canWrite={canWrite}
         >
+          <fieldset disabled={isSaving} className="min-w-0">
+            <OrganizationsField
+              scope={scope}
+              questionnaireId={questionnaire.id}
+              canWrite={canWrite}
+              draft={organizationDraft}
+              onChange={(selection) => {
+                if (!isSaving) onOrganizationsChange(selection);
+              }}
+            />
+          </fieldset>
           {canWrite && (
             <LabeledActionButton
               label={t("create_copy_of_form")}

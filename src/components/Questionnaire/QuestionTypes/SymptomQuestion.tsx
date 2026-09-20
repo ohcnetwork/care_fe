@@ -910,6 +910,7 @@ export function SymptomQuestion({
           buttonLabel={t("symptom_history")}
           onAddSelected={handleAddHistoricalSymptoms}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
       {symptoms.length > 0 && (

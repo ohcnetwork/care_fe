@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
+import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
 import {
   BuilderState,
@@ -42,6 +43,7 @@ import {
   findInvalidQuestions,
 } from "@/components/QuestionnaireV2/builder/saveValidation";
 import { QuestionnaireFormProvider } from "@/components/QuestionnaireV2/form/FormContext";
+import { OrganizationSelection } from "@/components/QuestionnaireV2/manage/OrganizationsField";
 import {
   DetailFormValues,
   questionnaireBasicSchema,
@@ -183,7 +185,11 @@ export function QuestionnaireStudioPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dirty = state.dirty || form.formState.isDirty;
+  const [organizationDraft, setOrganizationDraft] =
+    useState<OrganizationSelection | null>(null);
+  const savedOrganizationsRef = useRef<OrganizationSelection | null>(null);
+  const dirty =
+    state.dirty || form.formState.isDirty || organizationDraft !== null;
   useNavigationPrompt(dirty, t("unsaved_changes_warning"));
 
   const { canWrite, isLoading: isPermissionLoading } =
@@ -272,13 +278,20 @@ export function QuestionnaireStudioPage({
   // What the backend can run and what an action may read; the actions'
   // own save rules ride the same deferred tree as the question rules.
   const registry = useActionRegistry();
+  const contextPaths = useMemo(() => {
+    if (registry.isLoading || registry.isError) return undefined;
+    const rootType =
+      questionnaire && actionContextTypeFor(questionnaire.subject_type);
+    return rootType ? reachableContextPaths(rootType, registry.fields) : [];
+  }, [questionnaire, registry.fields, registry.isLoading, registry.isError]);
   const actionIssues = useMemo(
     () =>
       findActionIssues(state.actions, {
         questions: deferredQuestions,
         instructions: registry.instructions,
+        contextPaths,
       }),
-    [state.actions, deferredQuestions, registry.instructions],
+    [state.actions, deferredQuestions, registry.instructions, contextPaths],
   );
   // Questions an action reads — the outline marks them so an author
   // retitling or deleting one knows something depends on it.
@@ -336,6 +349,9 @@ export function QuestionnaireStudioPage({
         keepSelectedId: state.selectedId,
       });
     }
+    setOrganizationDraft((current) =>
+      current === savedOrganizationsRef.current ? null : current,
+    );
     if (!metaEditedDuringFlight) {
       form.reset({
         title: updated.title,
@@ -395,6 +411,7 @@ export function QuestionnaireStudioPage({
     const actionIssue = findActionIssues(state.actions, {
       questions: state.questions,
       instructions: registry.instructions,
+      contextPaths,
     })[0];
     if (actionIssue) {
       toast.error(t(actionIssue.messageKey));
@@ -411,6 +428,7 @@ export function QuestionnaireStudioPage({
         // must not clobber.
         saveDispatchSeqRef.current = dispatchSeqRef.current;
         saveMetaRef.current = meta;
+        savedOrganizationsRef.current = organizationDraft;
         save(
           buildUpdateBody(questionnaire, {
             questions: state.questions,
@@ -420,6 +438,7 @@ export function QuestionnaireStudioPage({
             description: meta.description,
             status: meta.status,
           }),
+          organizationDraft ? { scope, ...organizationDraft } : undefined,
         );
       },
       () => {
@@ -433,6 +452,7 @@ export function QuestionnaireStudioPage({
 
   const handleDiscard = () => {
     if (!questionnaire) return;
+    setOrganizationDraft(null);
     dispatch({
       type: "reset",
       questions: questionnaire.questions,
@@ -622,6 +642,9 @@ export function QuestionnaireStudioPage({
                   questionnaire={questionnaire}
                   form={form}
                   canWrite={canWrite}
+                  isSaving={isPending}
+                  organizationDraft={organizationDraft}
+                  onOrganizationsChange={setOrganizationDraft}
                   exportQuestionnaire={() => ({
                     ...questionnaire,
                     ...form.getValues(),
@@ -693,8 +716,8 @@ export function QuestionnaireStudioPage({
         <ImportQuestionsDialog
           open={importOpen}
           onOpenChange={setImportOpen}
-          onImport={(questions) => {
-            studioDispatch({ type: "replaceAll", questions });
+          onImport={(questions, linkIdMap) => {
+            studioDispatch({ type: "replaceAll", questions, linkIdMap });
             toast.success(t("questionnaire_imported_successfully"));
           }}
         />

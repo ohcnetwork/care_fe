@@ -27,6 +27,7 @@ import { QuestionCodingCard } from "@/components/QuestionnaireV2/builder/Questio
 import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/QuestionTypePicker";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
+import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
 import { ValueSetScope } from "@/types/valueSet/valueSet";
 import { BehaviourToggles } from "./BehaviourToggles";
@@ -79,6 +80,11 @@ export function QuestionInspector({
   const { t } = useTranslation();
   const [tab, setTab] = useState("question");
   const ruleCount = question.enable_when?.length ?? 0;
+  const parent = findFirstQuestion(
+    allQuestions,
+    (candidate) =>
+      candidate.questions?.some((child) => child.id === question.id) ?? false,
+  );
 
   const onChange = (patch: Partial<Question>) => {
     dispatch({ type: "updateQuestion", id: question.id, patch });
@@ -120,6 +126,13 @@ export function QuestionInspector({
   return (
     <Card>
       <CardContent className="p-0">
+        {parent && (
+          <p className="px-4 pt-3 text-xs text-gray-500">
+            {t(question.type === "group" ? "subgroup_of" : "subquestion_of", {
+              name: parent.text || t("untitled_question"),
+            })}
+          </p>
+        )}
         <div className="flex items-center gap-2 px-4 pt-4">
           <span className="shrink-0 font-mono text-xs text-gray-400 tabular-nums">
             {number}

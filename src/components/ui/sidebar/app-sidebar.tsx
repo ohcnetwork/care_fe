@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarHeader,
   useSidebar,
@@ -34,6 +33,7 @@ import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
+import { ScrollableSidebarContent } from "@/components/Common/ScrollableSidebarContent";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
@@ -193,7 +193,7 @@ export function AppSidebar({
         )}
       </SidebarHeader>
 
-      <SidebarContent className="gap-2 bg-neutral-100 text-neutral-950">
+      <ScrollableSidebarContent>
         {facilityLocationSidebar && <LocationNav />}
         {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
@@ -214,7 +214,7 @@ export function AppSidebar({
           facilityServiceSidebar ||
           facilitySettingsSidebar ||
           adminSidebar) && <PinPageDialog />}
-      </SidebarContent>
+      </ScrollableSidebarContent>
 
       <SidebarFooter className="border-t border-neutral-200 bg-neutral-100 text-neutral-950">
         {patientSidebar ? (

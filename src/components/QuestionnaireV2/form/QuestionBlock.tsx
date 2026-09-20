@@ -101,7 +101,7 @@ export const QuestionBlock = memo(function QuestionBlock(
  * answers (groups returned above without ever mounting them).
  */
 function LeafBlock({
-  question,
+  question: authoredQuestion,
   depth,
   number,
   effectiveDisabled,
@@ -114,8 +114,13 @@ function LeafBlock({
   locked: boolean;
 }) {
   const { t } = useTranslation();
-  const { inert } = useFormRenderer();
-  const { QuestionAnnotation } = useFormChrome();
+  const { inert, actionRequiredLinkIds } = useFormRenderer();
+  // Match submit-time action-reference validation before the user submits,
+  // including the required state announced by each input.
+  const question = actionRequiredLinkIds.has(authoredQuestion.link_id)
+    ? { ...authoredQuestion, required: true }
+    : authoredQuestion;
+  const { QuestionAnnotation, QuestionTitle } = useFormChrome();
   const errors = useQuestionErrors(question.id);
   // Only written by repeating questions; read for entry counts.
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -189,13 +194,25 @@ function LeafBlock({
             {number}
           </span>
         )}
-        <label
-          id={labelId}
-          htmlFor={inputId}
-          className="text-sm font-medium text-gray-800"
-        >
-          {question.text}
-        </label>
+        {QuestionTitle ? (
+          <QuestionTitle question={question}>
+            <label
+              id={labelId}
+              htmlFor={inputId}
+              className="text-sm font-medium text-gray-800"
+            >
+              {question.text}
+            </label>
+          </QuestionTitle>
+        ) : (
+          <label
+            id={labelId}
+            htmlFor={inputId}
+            className="text-sm font-medium text-gray-800"
+          >
+            {question.text}
+          </label>
+        )}
         {/* Visual-only: the programmatic required state is aria-required
             on the input itself (every engine input sets it). */}
         {question.required && (

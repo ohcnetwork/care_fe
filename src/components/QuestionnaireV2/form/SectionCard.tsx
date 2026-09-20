@@ -37,7 +37,7 @@ export function SectionCard({
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
-  const { AppendZone, QuestionAnnotation } = useFormChrome();
+  const { AppendZone, QuestionAnnotation, QuestionTitle } = useFormChrome();
 
   // On the edit canvas the inert wrapper already neutralizes the inputs;
   // keeping the fieldset natively disabled there would also disable the
@@ -92,9 +92,13 @@ export function SectionCard({
             aria-hidden
             className="h-4 w-1 shrink-0 rounded-full bg-primary-600"
           />
-          <h3 className="text-sm font-semibold text-gray-900">
+          <h3 className="flex min-w-0 flex-1 items-center text-sm font-semibold text-gray-900">
             {number && <span className="mr-1 tabular-nums">{number}</span>}
-            {question.text}
+            {QuestionTitle ? (
+              <QuestionTitle question={question}>{question.text}</QuestionTitle>
+            ) : (
+              question.text
+            )}
           </h3>
           <Badge variant="outline">{t("group")}</Badge>
           <span className="ml-auto text-xs text-gray-400">
@@ -135,9 +139,13 @@ export function SectionCard({
         decorationClasses,
       )}
     >
-      <h4 className="px-3 py-1.5 text-sm font-semibold text-gray-900">
+      <h4 className="flex items-center px-3 py-1.5 text-sm font-semibold text-gray-900">
         {number && <span className="mr-1 tabular-nums">{number}</span>}
-        {question.text}
+        {QuestionTitle ? (
+          <QuestionTitle question={question}>{question.text}</QuestionTitle>
+        ) : (
+          question.text
+        )}
       </h4>
       <fieldset
         disabled={fieldsetDisabled}

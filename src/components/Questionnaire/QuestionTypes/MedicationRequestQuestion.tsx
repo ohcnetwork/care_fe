@@ -1123,6 +1123,7 @@ export function MedicationRequestQuestion({
               buttonLabel={t("medication_history")}
               onAddSelected={handleAddHistoricalMedications}
               disableAPI={isPreview}
+              disabled={disabled}
             />
             {questionnaireSlug && (
               <ManageResponseTemplatesSheet

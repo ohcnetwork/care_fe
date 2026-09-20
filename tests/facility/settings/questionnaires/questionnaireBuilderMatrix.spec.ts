@@ -188,9 +188,8 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
       await expect(rows.nth(3).getByRole("textbox")).toHaveValue(optionB);
     });
 
-    await test.step("Delete the first option via its kebab", async () => {
-      await rows.nth(1).getByRole("button", { name: "More options" }).click();
-      await page.getByRole("menuitem", { name: "Delete" }).click();
+    await test.step("Delete the first option directly", async () => {
+      await rows.nth(1).getByRole("button", { name: "Delete" }).click();
       await expect(rows.nth(1).getByRole("textbox")).toHaveValue(optionC);
       await expect(rows.nth(2).getByRole("textbox")).toHaveValue(optionB);
       await expect(rows.nth(3)).not.toBeVisible();

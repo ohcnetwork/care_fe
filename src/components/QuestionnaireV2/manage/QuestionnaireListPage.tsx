@@ -7,8 +7,10 @@ import {
   NotepadTextDashed,
   Plus,
   Search,
+  Upload,
 } from "lucide-react";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -39,6 +41,8 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
+import { ImportQuestionnaireDialog } from "./ImportQuestionnaireDialog";
+
 const STATUS_TAB_ICONS: Record<QuestionStatus, React.ReactNode> = {
   active: <FileCheck className="size-4" />,
   draft: <NotepadTextDashed className="size-4" />,
@@ -58,6 +62,7 @@ export function QuestionnaireListPage({
   scope: QuestionnaireScope;
 }) {
   const { t } = useTranslation();
+  const [importOpen, setImportOpen] = useState(false);
   const { canWrite: canWriteQuestionnaire, isLoading: isPermissionLoading } =
     useCanWriteQuestionnaire(scope);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -132,13 +137,16 @@ export function QuestionnaireListPage({
         </div>
 
         {canWriteQuestionnaire && (
-          <Button
-            className="w-full md:ml-auto md:w-auto"
-            onClick={() => navigate(`${scope.basePath}/new`)}
-          >
-            <Plus className="mr-2 size-4" />
-            {t("create_questionnaire")}
-          </Button>
+          <div className="flex w-full flex-wrap gap-2 md:ml-auto md:w-auto">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="size-4" />
+              {t("import_questionnaire")}
+            </Button>
+            <Button onClick={() => navigate(`${scope.basePath}/new`)}>
+              <Plus className="mr-2 size-4" />
+              {t("create_questionnaire")}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -248,6 +256,13 @@ export function QuestionnaireListPage({
             </button>
           ))}
         </div>
+      )}
+      {canWriteQuestionnaire && importOpen && (
+        <ImportQuestionnaireDialog
+          scope={scope}
+          open
+          onOpenChange={setImportOpen}
+        />
       )}
       <div className="flex justify-center">
         <Pagination totalCount={response?.count || 0} />

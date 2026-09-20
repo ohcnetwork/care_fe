@@ -24,6 +24,15 @@ test.describe("Questionnaire v2 studio chrome", () => {
       basePath: `/facility/${facilityId}/settings/questionnaires`,
       title: `QV2 Chrome ${stamp}`,
     });
+    // The header controls sit underneath top-center notifications. Dismiss
+    // notices through their normal control before testing the issues popover.
+    await page.addLocatorHandler(
+      page.locator('li[data-sonner-toast][data-removed="false"]').first(),
+      async (notice) => {
+        await notice.getByRole("button", { name: "Close toast" }).click();
+      },
+      { noWaitAfter: true },
+    );
 
     await test.step("An untitled question surfaces as '1 to fix'", async () => {
       await page.getByRole("button", { name: "Add First Question" }).click();

@@ -232,13 +232,16 @@ export function QuestionTypePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-(--radix-popover-trigger-width) min-w-80 p-0"
+        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] overflow-hidden p-0"
         align="start"
       >
         {step === "list" ? (
-          <Command>
-            <CommandInput placeholder={t("search")} />
-            <CommandList className="max-h-[60vh]">
+          <Command className="max-h-(--radix-popover-content-available-height)">
+            <CommandInput
+              placeholder={t("search")}
+              className="border-0 ring-0 focus:ring-0"
+            />
+            <CommandList className="min-h-0 max-h-[60vh] flex-1">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup heading={t("frequently_used")}>
                 {frequentlyUsed.map(renderTypeRow)}
@@ -249,7 +252,7 @@ export function QuestionTypePicker({
             </CommandList>
           </Command>
         ) : (
-          <Command>
+          <Command className="max-h-(--radix-popover-content-available-height)">
             <div className="flex items-center gap-2 border-b border-gray-100 p-2">
               <Button
                 type="button"
@@ -265,7 +268,7 @@ export function QuestionTypePicker({
                 {t("question_type__structured")}
               </span>
             </div>
-            <CommandList className="max-h-[60vh]">
+            <CommandList className="min-h-0 max-h-[60vh] flex-1">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup>
                 {availableStructuredQuestions.map((entry) => {

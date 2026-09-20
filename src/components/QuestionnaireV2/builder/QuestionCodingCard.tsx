@@ -75,7 +75,7 @@ export function QuestionCodingCard({
           {t("code_verified")}
         </Badge>
       )}
-      <span className="min-w-0 flex-1 truncate text-sm text-gray-600">
+      <span className="w-full min-w-0 break-words text-sm text-gray-600">
         {code.display}
       </span>
       <div className="flex shrink-0 items-center gap-1">
