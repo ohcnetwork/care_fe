@@ -161,23 +161,66 @@ test.describe("Diagnostic report review", () => {
         name: "Conclusion",
         exact: true,
       });
+      await conclusion.click();
+      await fixture.review
+        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .click();
+      await expect(conclusion.getByRole("listitem")).toHaveCount(1);
+      await expect(approve).toBeDisabled();
+      await conclusion.press("Enter");
+      await expect(conclusion.getByRole("listitem")).toHaveCount(0);
+      const more = fixture.review.getByRole("button", {
+        name: "More formatting options",
+        exact: true,
+      });
+      await more.click();
+      await fixture.review
+        .getByRole("dialog", { name: "More formatting options", exact: true })
+        .getByRole("radio", { name: "Check list", exact: true })
+        .click();
+      await more.press("Escape");
+      await expect(conclusion.getByRole("checkbox")).toHaveCount(1);
+      await expect(approve).toBeDisabled();
+      await conclusion.press("Enter");
+      await expect(conclusion.getByRole("checkbox")).toHaveCount(0);
       await conclusion.fill("Review conclusion without observations");
       await expect(approve).toBeEnabled();
       await conclusion.fill("   ");
       await expect(approve).toBeDisabled();
       await conclusion.fill("Final clinical conclusion");
+      await conclusion.press("ControlOrMeta+a");
+      await fixture.review
+        .getByRole("radio", { name: "Bold", exact: true })
+        .click();
+      await conclusion.press("ArrowRight");
+      await conclusion.press("Enter");
+      await fixture.review
+        .getByRole("radio", { name: "Remove bold", exact: true })
+        .click();
+      await fixture.review
+        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .click();
+      await conclusion.pressSequentially("First finding");
+      await conclusion.press("Enter");
+      await conclusion.pressSequentially("Second finding");
       await approve.click();
       const approvalRequest = page.waitForRequest(
         (request) =>
           request.method() === "PUT" && request.url().includes(report.id),
       );
       await page.getByRole("button", { name: "Approve", exact: true }).click();
-      expect((await approvalRequest).postDataJSON()).toMatchObject({
-        status: "final",
-        conclusion: "Final clinical conclusion",
-      });
+      const savedReport = (await approvalRequest).postDataJSON();
+      expect(savedReport.status).toBe("final");
+      expect(savedReport.conclusion).toMatch(
+        /\*\*Final clinical conclusion\*\*/,
+      );
+      expect(savedReport.conclusion).toMatch(
+        /[-*] First finding\n[-*] Second finding/,
+      );
       await expect(
-        fixture.review.getByText("Final clinical conclusion", { exact: true }),
+        fixture.review.locator("strong", {
+          hasText: "Final clinical conclusion",
+        }),
       ).toBeVisible();
     } finally {
       releaseFiles();
@@ -264,7 +307,7 @@ test.describe("Diagnostic report review", () => {
     }
   });
 
-  test("preserves a review draft across refetch and keeps conclusion field IDs distinct", async ({
+  test("preserves a review draft across refetch and keeps conclusion editors independent", async ({
     page,
   }) => {
     const report = createReport();
@@ -284,12 +327,19 @@ test.describe("Diagnostic report review", () => {
       name: "Conclusion",
       exact: true,
     });
-    await expect(conclusion).toHaveValue("Saved conclusion");
-    await expect(page.locator(`#conclusion-${report.id}`)).toHaveCount(1);
-    await expect(page.locator(`#review-conclusion-${report.id}`)).toHaveCount(
-      1,
-    );
+    await expect(conclusion).toHaveText("Saved conclusion");
+    const entryConclusion = page
+      .locator('[data-slot="collapsible"]')
+      .filter({
+        has: page.getByRole("button", { name: "Save Results", exact: true }),
+      })
+      .getByRole("textbox", { name: "Conclusion", exact: true });
+    await expect(
+      page.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).toHaveCount(2);
+    await expect(entryConclusion).toHaveText("Saved conclusion");
     await conclusion.fill("Unsaved review draft");
+    await expect(entryConclusion).toHaveText("Saved conclusion");
     report.conclusion = "Saved by another reviewer";
     await page
       .getByRole("button", {
@@ -305,7 +355,126 @@ test.describe("Diagnostic report review", () => {
       })
       .click();
     await reportResponse;
-    await expect(conclusion).toHaveValue("Unsaved review draft");
+    await expect(conclusion).toHaveText("Unsaved review draft");
+    await expect(entryConclusion).toHaveText("Saved by another reviewer");
+  });
+
+  test("keeps mobile formatting on one row and preserves the draft through more options", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const report = createReport();
+    const fixture = await mockReviewPage(page, report);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.goto(fixture.url);
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const conclusion = fixture.review.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
+    await conclusion.click();
+    await conclusion.pressSequentially("Draft assessment");
+    const toolbar = fixture.review.getByRole("toolbar");
+    const more = toolbar.getByRole("button", {
+      name: "More formatting options",
+      exact: true,
+    });
+    await expect(more).toBeVisible();
+    await expect(toolbar.locator("button:visible")).toHaveCount(6);
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      const geometry = await toolbar.evaluate((element) => {
+        const controls = Array.from(element.querySelectorAll("button")).filter(
+          (control) => control.checkVisibility(),
+        );
+        const centers = controls.map((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.top + rect.height / 2;
+        });
+        return {
+          rowHeightDifference: Math.max(...centers) - Math.min(...centers),
+          hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
+          pageHasHorizontalOverflow:
+            document.documentElement.scrollWidth > window.innerWidth,
+        };
+      });
+      expect(
+        geometry.rowHeightDifference,
+        `Controls at ${width}px`,
+      ).toBeLessThanOrEqual(1);
+      expect(geometry.hasHorizontalOverflow, `Toolbar at ${width}px`).toBe(
+        false,
+      );
+      expect(geometry.pageHasHorizontalOverflow, `Page at ${width}px`).toBe(
+        false,
+      );
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await conclusion.press("ControlOrMeta+a");
+    await more.click();
+    const moreOptions = fixture.review.getByRole("dialog", {
+      name: "More formatting options",
+      exact: true,
+    });
+    await expect(
+      moreOptions.getByRole("radio", { name: /^Undo / }),
+    ).toBeEnabled();
+    await moreOptions
+      .getByRole("radio", { name: "Highlight", exact: true })
+      .click();
+    await more.press("Escape");
+    await expect(moreOptions).not.toBeVisible();
+    const blockType = toolbar.getByRole("combobox", {
+      name: "Block type",
+      exact: true,
+    });
+    await blockType.press("Space");
+    await page
+      .getByRole("option", { name: "Heading 2", exact: true })
+      .press("Enter");
+    await expect(
+      conclusion.getByRole("heading", { name: "Draft assessment", level: 2 }),
+    ).toBeVisible();
+    await expect(
+      conclusion
+        .getByRole("heading", { name: "Draft assessment", level: 2 })
+        .locator("mark"),
+    ).toBeVisible();
+
+    await conclusion.press("ControlOrMeta+a");
+    await conclusion.press("ArrowRight");
+    await conclusion.press("Enter");
+    await conclusion.pressSequentially("Follow-up finding");
+    await toolbar
+      .getByRole("radio", { name: "Bulleted list", exact: true })
+      .click();
+    await more.click();
+    await expect(
+      moreOptions.getByRole("radio", { name: /^Undo / }),
+    ).toBeEnabled();
+    await more.press("Escape");
+    await expect(conclusion.getByRole("listitem")).toHaveText([
+      "Follow-up finding",
+    ]);
+    await expect(
+      conclusion.getByRole("heading", { name: "Draft assessment", level: 2 }),
+    ).toBeVisible();
+    await expect(
+      conclusion
+        .getByRole("heading", { name: "Draft assessment", level: 2 })
+        .locator("mark"),
+    ).toBeVisible();
+    await expect(
+      fixture.review.getByRole("button", { name: "Approve Results" }),
+    ).toBeEnabled();
   });
 
   test("loads final report details only after keyboard expansion and keeps attachments read-only", async ({
@@ -313,6 +482,8 @@ test.describe("Diagnostic report review", () => {
   }) => {
     const report = createReport();
     report.status = "final";
+    report.conclusion =
+      "## **Clinical interpretation**\n\n<u>Underlined detail</u> and ==Highlighted detail==\n\n- First finding\n- Second finding\n\n- [ ] Follow up\n- [x] Sample reviewed\n\nValues <left> and <medication> remain visible.";
     const fixture = await mockReviewPage(page, report);
     let fileRequests = 0;
     await page.route("**/api/v1/files/?*", (route) => {
@@ -339,6 +510,42 @@ test.describe("Diagnostic report review", () => {
     ).toBeVisible();
     expect(fixture.reportRequests()).toBe(1);
     expect(fileRequests).toBe(1);
+    await expect(
+      fixture.review.locator("strong", { hasText: "Clinical interpretation" }),
+    ).toBeVisible();
+    await expect(fixture.review.getByRole("listitem")).toHaveText([
+      "First finding",
+      "Second finding",
+      "Follow up",
+      "Sample reviewed",
+    ]);
+    await expect(
+      fixture.review.getByRole("heading", {
+        name: "Clinical interpretation",
+        level: 2,
+      }),
+    ).toBeVisible();
+    await expect(
+      fixture.review.locator("u", { hasText: "Underlined detail" }),
+    ).toBeVisible();
+    await expect(
+      fixture.review.locator("mark", { hasText: "Highlighted detail" }),
+    ).toBeVisible();
+    const checkboxes = fixture.review.getByRole("checkbox");
+    await expect(checkboxes).toHaveCount(2);
+    await expect(checkboxes.nth(0)).toBeDisabled();
+    await expect(checkboxes.nth(0)).not.toBeChecked();
+    await expect(checkboxes.nth(1)).toBeDisabled();
+    await expect(checkboxes.nth(1)).toBeChecked();
+    await expect(
+      fixture.review.getByText(
+        "Values <left> and <medication> remain visible.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      fixture.review.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).toHaveCount(0);
     await fixture.review
       .getByRole("button", { name: "actions", exact: true })
       .click();

@@ -1,5 +1,6 @@
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import PrintFooter from "@/components/Common/PrintFooter";
+import { Markdown } from "@/components/ui/markdown";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationStatus } from "@/types/emr/observation/observation";
@@ -383,13 +384,15 @@ const DiagnosticReportPreviewItem = ({
             </div>
           )}
           {report.conclusion && (
-            <div className="col-span-full">
+            <div className="col-span-full min-w-0">
               <div className="text-sm font-medium text-gray-950 mb-1">
                 {t("conclusion")}
               </div>
-              <div className="whitespace-pre-wrap text-sm">
-                {report.conclusion}
-              </div>
+              <Markdown
+                richText
+                content={report.conclusion}
+                className="prose-sm wrap-anywhere text-gray-950 [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+              />
             </div>
           )}
         </div>

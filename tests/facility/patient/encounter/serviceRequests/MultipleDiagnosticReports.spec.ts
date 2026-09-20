@@ -41,6 +41,30 @@ async function saveResults(page: Page, entry: Locator) {
   ).toBeVisible();
 }
 
+async function expectRichConclusion(card: Locator) {
+  const conclusion = card.getByRole("textbox", {
+    name: "Conclusion",
+    exact: true,
+  });
+  const heading = conclusion.getByRole("heading", {
+    name: "Revised first draft",
+    level: 2,
+  });
+  await expect(heading).toBeVisible();
+  await expect(heading.locator("strong")).toHaveCSS(
+    "text-decoration-line",
+    "underline",
+  );
+  await expect(heading.locator("mark")).toBeVisible();
+  await expect(conclusion.getByRole("checkbox")).toHaveCount(2);
+  await expect(conclusion.getByRole("checkbox").nth(0)).not.toBeChecked();
+  await expect(conclusion.getByRole("checkbox").nth(1)).not.toBeChecked();
+  await expect(conclusion.getByRole("listitem")).toHaveText([
+    "First finding",
+    "Second finding",
+  ]);
+}
+
 test.describe("Multiple diagnostic reports", () => {
   let facilityId: string;
   let activityTitle: string;
@@ -151,7 +175,9 @@ test.describe("Multiple diagnostic reports", () => {
     await test.step("Keep the first report's draft when creating a second report", async () => {
       await createReport(page, firstReportType);
       await firstEntry.getByPlaceholder("Result value").fill("101");
-      await firstEntry.getByPlaceholder("Enter Conclusion").fill("First draft");
+      await firstEntry
+        .getByRole("textbox", { name: "Conclusion", exact: true })
+        .fill("First draft");
 
       await page
         .getByRole("button", { name: "Another Diagnostic Report" })
@@ -163,12 +189,12 @@ test.describe("Multiple diagnostic reports", () => {
       await expect(firstEntry.getByPlaceholder("Result value")).toHaveValue(
         "101",
       );
-      await expect(firstEntry.getByPlaceholder("Enter Conclusion")).toHaveValue(
-        "First draft",
-      );
+      await expect(
+        firstEntry.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText("First draft");
       await secondEntry.getByPlaceholder("Result value").fill("202");
       await secondEntry
-        .getByPlaceholder("Enter Conclusion")
+        .getByRole("textbox", { name: "Conclusion", exact: true })
         .fill("Second draft");
     });
 
@@ -183,14 +209,14 @@ test.describe("Multiple diagnostic reports", () => {
         firstReview.getByRole("button", { name: "Approve Results" }),
       ).toBeVisible();
       await expect(
-        firstReview.getByPlaceholder("Enter Conclusion"),
-      ).toHaveValue("First draft");
+        firstReview.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText("First draft");
       await expect(secondEntry.getByPlaceholder("Result value")).toHaveValue(
         "202",
       );
       await expect(
-        secondEntry.getByPlaceholder("Enter Conclusion"),
-      ).toHaveValue("Second draft");
+        secondEntry.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText("Second draft");
     });
 
     await test.step("Keep an edited saved report when saving the other report", async () => {
@@ -199,9 +225,66 @@ test.describe("Multiple diagnostic reports", () => {
         .first()
         .click();
       await firstEntry.getByPlaceholder("Result value").fill("303");
+      const conclusion = firstEntry.getByRole("textbox", {
+        name: "Conclusion",
+        exact: true,
+      });
+      const more = firstEntry.getByRole("button", {
+        name: "More formatting options",
+        exact: true,
+      });
+      const moreOptions = firstEntry.getByRole("dialog", {
+        name: "More formatting options",
+        exact: true,
+      });
+      await conclusion.fill("Revised first draft");
+      await conclusion.press("ControlOrMeta+a");
       await firstEntry
-        .getByPlaceholder("Enter Conclusion")
-        .fill("Revised first draft");
+        .getByRole("radio", { name: "Bold", exact: true })
+        .click();
+      await firstEntry
+        .getByRole("radio", { name: "Underline", exact: true })
+        .click();
+      await more.click();
+      await moreOptions
+        .getByRole("radio", { name: "Highlight", exact: true })
+        .click();
+      await more.press("Escape");
+      await firstEntry
+        .getByRole("combobox", { name: "Block type", exact: true })
+        .click();
+      await page
+        .getByRole("option", { name: "Heading 2", exact: true })
+        .click();
+      await conclusion.press("ArrowRight");
+      await conclusion.press("Enter");
+      await firstEntry
+        .getByRole("radio", { name: "Remove bold", exact: true })
+        .click();
+      await firstEntry
+        .getByRole("radio", { name: "Remove underline", exact: true })
+        .click();
+      await more.click();
+      await moreOptions
+        .getByRole("radio", { name: "Remove highlight", exact: true })
+        .click();
+      await more.press("Escape");
+      await firstEntry
+        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .click();
+      await conclusion.pressSequentially("First finding");
+      await conclusion.press("Enter");
+      await conclusion.pressSequentially("Second finding");
+      await conclusion.press("Enter");
+      await conclusion.press("Enter");
+      await more.click();
+      await moreOptions
+        .getByRole("radio", { name: "Check list", exact: true })
+        .click();
+      await more.press("Escape");
+      await conclusion.pressSequentially("Follow up");
+      await conclusion.press("Enter");
+      await conclusion.pressSequentially("Repeat sample");
       await saveResults(page, secondEntry);
 
       await expect(reportCards.nth(0)).toContainText(firstReportType);
@@ -209,41 +292,35 @@ test.describe("Multiple diagnostic reports", () => {
       await expect(firstEntry.getByPlaceholder("Result value")).toHaveValue(
         "303",
       );
-      await expect(firstEntry.getByPlaceholder("Enter Conclusion")).toHaveValue(
-        "Revised first draft",
-      );
+      await expectRichConclusion(firstEntry);
       await expect(
-        secondReview.getByPlaceholder("Enter Conclusion"),
-      ).toHaveValue("Second draft");
+        secondReview.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText("Second draft");
     });
 
     await test.step("Reopen the correct review after saving that report again", async () => {
       await firstReview.locator('[data-slot="collapsible-trigger"]').click();
       await expect(
-        firstReview.getByPlaceholder("Enter Conclusion"),
+        firstReview.getByRole("textbox", { name: "Conclusion", exact: true }),
       ).not.toBeVisible();
       await saveResults(page, firstEntry);
 
       await expect(
         firstReview.getByRole("button", { name: "Approve Results" }),
       ).toBeVisible();
-      await expect(
-        firstReview.getByPlaceholder("Enter Conclusion"),
-      ).toHaveValue("Revised first draft");
+      await expectRichConclusion(firstReview);
 
       await page.reload();
       await expect(firstEntry.getByPlaceholder("Result value")).toHaveValue(
         "303",
       );
-      await expect(firstEntry.getByPlaceholder("Enter Conclusion")).toHaveValue(
-        "Revised first draft",
-      );
+      await expectRichConclusion(firstEntry);
       await expect(secondEntry.getByPlaceholder("Result value")).toHaveValue(
         "202",
       );
       await expect(
-        secondEntry.getByPlaceholder("Enter Conclusion"),
-      ).toHaveValue("Second draft");
+        secondEntry.getByRole("textbox", { name: "Conclusion", exact: true }),
+      ).toHaveText("Second draft");
     });
   });
 });

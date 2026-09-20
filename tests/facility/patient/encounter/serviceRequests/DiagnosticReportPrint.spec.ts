@@ -26,6 +26,7 @@ function createReport(patientId: string, serviceRequestId: string) {
     },
     service_request: { id: serviceRequestId, title: faker.word.words(3) },
     observations: [],
+    conclusion: "",
     created_date: new Date().toISOString(),
   };
 }
@@ -99,6 +100,8 @@ test.describe("Diagnostic report printing", () => {
     page,
   }) => {
     const report = createReport(patientId, serviceRequestId);
+    report.conclusion =
+      "## **Clinical interpretation**\n\n<u>Underlined detail</u> and ==Highlighted detail==\n\n- First finding\n- Second finding\n\n- [ ] Follow up\n- [x] Sample reviewed\n\nValues <left> and <medication> remain visible.";
     const anotherRequestReport = createReport(patientId, faker.string.uuid());
     const preliminaryReport = {
       ...createReport(patientId, serviceRequestId),
@@ -131,6 +134,44 @@ test.describe("Diagnostic report printing", () => {
       0,
     );
     await expect(page.getByText(preliminaryReport.code.display)).toHaveCount(0);
+    await expect(
+      page.locator("strong", { hasText: "Clinical interpretation" }),
+    ).toBeVisible();
+    const conclusion = page
+      .getByRole("article")
+      .filter({ hasText: "Clinical interpretation" });
+    await expect(conclusion.getByRole("listitem")).toHaveText([
+      "First finding",
+      "Second finding",
+      "Follow up",
+      "Sample reviewed",
+    ]);
+    await expect(
+      conclusion.getByRole("heading", {
+        name: "Clinical interpretation",
+        level: 2,
+      }),
+    ).toBeVisible();
+    await expect(
+      conclusion.locator("u", { hasText: "Underlined detail" }),
+    ).toBeVisible();
+    await expect(
+      conclusion.locator("mark", { hasText: "Highlighted detail" }),
+    ).toBeVisible();
+    const checkboxes = conclusion.getByRole("checkbox");
+    await expect(checkboxes).toHaveCount(2);
+    await expect(checkboxes.nth(0)).toBeDisabled();
+    await expect(checkboxes.nth(0)).not.toBeChecked();
+    await expect(checkboxes.nth(1)).toBeDisabled();
+    await expect(checkboxes.nth(1)).toBeChecked();
+    await expect(
+      conclusion.getByText("Values <left> and <medication> remain visible.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).toHaveCount(0);
   });
 
   test("does not print a single report when its attachment list fails", async ({

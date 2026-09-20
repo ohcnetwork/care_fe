@@ -5204,6 +5204,35 @@
   "revoked": "Revoked",
   "revoked_on": "Revoked On",
   "revoking": "Revoking...",
+  "rich_text_editor": {
+    "toolbar": {
+      "bold": "Bold",
+      "bulletedList": "Bulleted list",
+      "checkList": "Check list",
+      "italic": "Italic",
+      "numberedList": "Numbered list",
+      "redo": "Redo {{shortcut}}",
+      "removeBold": "Remove bold",
+      "removeItalic": "Remove italic",
+      "toggleGroup": "Formatting options",
+      "undo": "Undo {{shortcut}}",
+      "underline": "Underline",
+      "removeUnderline": "Remove underline",
+      "highlight": "Highlight",
+      "removeHighlight": "Remove highlight",
+      "blockTypes": {
+        "paragraph": "Paragraph",
+        "quote": "Quote",
+        "heading": "Heading {{level}}"
+      },
+      "blockTypeSelect": {
+        "selectBlockTypeTooltip": "Select block type",
+        "placeholder": "Block type"
+      },
+      "moreFormatting": "More formatting options"
+    }
+  },
+  "rich_text_plain_text_fallback": "Formatting could not be loaded. You can still edit the text below.",
   "right": "Right",
   "role": "Role",
   "role_context__facility": "Facility",

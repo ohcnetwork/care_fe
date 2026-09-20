@@ -61,11 +61,13 @@ import { SpecimenRead, SpecimenStatus } from "@/types/emr/specimen/specimen";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { BACKEND_ALLOWED_EXTENSIONS, FileType } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
+import { hasMarkdownContent } from "@/Utils/markdown";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 import { Avatar } from "@/components/Common/Avatar";
+import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import { FileListTable } from "@/components/Files/FileListTable";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import { Badge } from "@/components/ui/badge";
@@ -618,7 +620,7 @@ function DiagnosticReportItem({
 
       // If there's a conclusion, we must have results first
       if (
-        conclusion.trim() &&
+        hasMarkdownContent(conclusion) &&
         !hasObservationValue &&
         observationDefinitions.length > 0
       ) {
@@ -1318,19 +1320,14 @@ function DiagnosticReportItem({
                 {report.status !== DiagnosticReportStatus.final && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
                     <CardContent className="p-4 space-y-2">
-                      <Label
-                        htmlFor={`conclusion-${report.id}`}
-                        className="text-base font-semibold text-gray-950"
-                      >
+                      <h3 className="text-base font-semibold text-gray-950">
                         {t("conclusion")}
-                      </Label>
-                      <textarea
-                        id={`conclusion-${report.id}`}
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
+                      </h3>
+                      <RichTextEditor
+                        label={t("conclusion")}
                         placeholder={t("enter_conclusion")}
                         value={conclusion}
-                        onChange={(e) => setConclusion(e.target.value)}
-                        rows={3}
+                        onChange={setConclusion}
                         disabled={isReadOnly}
                       />
                     </CardContent>

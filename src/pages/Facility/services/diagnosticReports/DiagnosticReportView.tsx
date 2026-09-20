@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import BackButton from "@/components/Common/BackButton";
@@ -166,11 +167,15 @@ export default function DiagnosticReportView({
                 </div>
               )}
               {report.conclusion && (
-                <div className="col-span-full">
+                <div className="col-span-full min-w-0">
                   <div className="text-sm font-medium text-gray-500">
                     {t("conclusion")}
                   </div>
-                  <div className="whitespace-pre-wrap">{report.conclusion}</div>
+                  <Markdown
+                    richText
+                    content={report.conclusion}
+                    className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+                  />
                 </div>
               )}
             </div>

@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { hasMarkdownContent } from "@/Utils/markdown";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { type SavedReportSignal } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportForm";
@@ -156,7 +157,7 @@ function DiagnosticReportReviewItem({
   );
   const hasContent =
     observations.length > 0 ||
-    conclusion.trim().length > 0 ||
+    hasMarkdownContent(conclusion) ||
     (isFilesFetched &&
       !isFetchingFiles &&
       files.results.some((file) => !file.is_archived && file.upload_completed));

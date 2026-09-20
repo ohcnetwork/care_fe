@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Markdown } from "@/components/ui/markdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
@@ -267,11 +268,13 @@ function DiagnosticReportDetailCard({
             </div>
           )}
           {report.conclusion && (
-            <div className="col-span-full">
+            <div className="col-span-full min-w-0">
               <div className="text-gray-500">{t("conclusion")}</div>
-              <div className="font-medium whitespace-pre-wrap">
-                {report.conclusion}
-              </div>
+              <Markdown
+                richText
+                content={report.conclusion}
+                className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+              />
             </div>
           )}
         </div>

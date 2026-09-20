@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import { FileListTable } from "@/components/Files/FileListTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Markdown } from "@/components/ui/markdown";
 
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import {
@@ -67,24 +67,19 @@ export function DiagnosticReportReviewContent({
 
       <Card className="shadow-none rounded-lg border-gray-200 bg-gray-50">
         <CardContent className="p-4 space-y-2">
-          <Label
-            htmlFor={`review-conclusion-${report.id}`}
-            className="font-medium"
-          >
-            {t("conclusion")}
-          </Label>
-          {isFinal ? (
-            <p className="text-gray-800 whitespace-pre-wrap p-2 rounded-lg bg-white border border-gray-200 cursor-default">
-              {report.conclusion || t("no_conclusion_entered")}
-            </p>
+          <h3 className="font-medium">{t("conclusion")}</h3>
+          {isFinal || disableEdit ? (
+            <Markdown
+              richText
+              content={conclusion || t("no_conclusion_entered")}
+              className="prose-sm text-gray-800 wrap-break-word p-3 rounded-lg bg-white border border-gray-200 [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+            />
           ) : (
-            <Textarea
-              id={`review-conclusion-${report.id}`}
-              className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
+            <RichTextEditor
+              label={t("conclusion")}
               placeholder={t("enter_conclusion")}
               value={conclusion}
-              onChange={(event) => onConclusionChange(event.target.value)}
-              disabled={disableEdit}
+              onChange={onConclusionChange}
             />
           )}
         </CardContent>
