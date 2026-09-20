@@ -6,7 +6,34 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-function createReport() {
+function createObservation() {
+  return {
+    id: faker.string.uuid(),
+    status: "final",
+    value_type: "decimal",
+    value: { value: "101" },
+    component: [],
+    effective_datetime: new Date().toISOString(),
+    observation_definition: {
+      id: faker.string.uuid(),
+      title: faker.word.words(3),
+      status: "active",
+      description: "",
+      category: "laboratory",
+      code: { system: "test", code: "glucose", display: "Glucose" },
+      permitted_data_type: "decimal",
+      component: [],
+      body_site: null,
+      method: null,
+      permitted_unit: null,
+      qualified_ranges: [],
+    },
+  };
+}
+
+function createReport(
+  observations: ReturnType<typeof createObservation>[] = [],
+) {
   const serviceRequestId = faker.string.uuid();
   return {
     id: faker.string.uuid(),
@@ -14,7 +41,8 @@ function createReport() {
     code: { system: "test", code: "panel", display: faker.word.words(3) },
     category: { system: "test", code: "lab", display: "Laboratory" },
     conclusion: "",
-    observations: [],
+    note: "",
+    observations,
     created_by: {
       username: "reviewer",
       first_name: "Review",
@@ -65,6 +93,7 @@ function createFile(reportId: string) {
 async function mockReviewPage(
   page: Page,
   report: ReturnType<typeof createReport>,
+  listReport = report,
 ) {
   const facilityId = getFacilityId();
   const activity = {
@@ -99,9 +128,10 @@ async function mockReviewPage(
           priority: "routine",
           activity_definition: activity,
           encounter: report.encounter,
-          diagnostic_reports: [report],
+          diagnostic_reports: [listReport],
           specimens: [],
           locations: [],
+          tags: [],
         },
       }),
   );
@@ -120,6 +150,14 @@ async function mockReviewPage(
     url: `/facility/${facilityId}/service_requests/${report.service_request.id}`,
     reportUrl,
     reportRequests: () => reportRequests,
+    entry: page
+      .locator('[data-slot="collapsible"]')
+      .filter({
+        has: page.locator('[data-slot="collapsible-trigger"]').filter({
+          hasText: listReport.code.display,
+        }),
+      })
+      .first(),
     review: page.locator('[data-slot="collapsible"]').filter({
       has: page.getByRole("button", {
         name: new RegExp(`^(Expand|Collapse) ${report.code.display}$`),
@@ -129,6 +167,192 @@ async function mockReviewPage(
 }
 
 test.describe("Diagnostic report review", () => {
+  test("saves fetched report metadata when the service request snapshot is stale", async ({
+    page,
+  }) => {
+    const listReport = createReport();
+    listReport.status = "modified";
+    const report = {
+      ...listReport,
+      status: "preliminary",
+      code: {
+        system: "test",
+        code: "updated-panel",
+        display: faker.word.words(3),
+      },
+      category: { system: "test", code: "updated-lab", display: "Updated lab" },
+      note: faker.lorem.sentence(),
+    };
+    const fixture = await mockReviewPage(page, report, listReport);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.route("**/api/v1/batch_requests/", (route) =>
+      route.fulfill({
+        json: {
+          results: [
+            { reference_id: "update-report", status_code: 200, data: report },
+          ],
+        },
+      }),
+    );
+
+    await page.goto(fixture.url);
+    const entry = fixture.entry;
+    await entry
+      .getByRole("textbox", { name: "Conclusion", exact: true })
+      .fill("Updated conclusion");
+    const saved = page.waitForRequest("**/api/v1/batch_requests/");
+    await entry.getByRole("button", { name: "Save Results" }).click();
+    const { requests } = (await saved).postDataJSON();
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({
+      reference_id: "update-report",
+      body: {
+        id: report.id,
+        status: "preliminary",
+        code: report.code,
+        category: report.category,
+        note: report.note,
+        conclusion: "Updated conclusion",
+      },
+    });
+  });
+
+  test("locks an open entry draft when review approval finalizes the fetched report", async ({
+    page,
+  }) => {
+    const report = createReport();
+    report.conclusion = "Saved conclusion";
+    const listReport = { ...report };
+    const fixture = await mockReviewPage(page, report, listReport);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    let batchRequests = 0;
+    await page.route("**/api/v1/batch_requests/", (route) => {
+      batchRequests += 1;
+      return route.fulfill({ status: 400, json: {} });
+    });
+
+    await page.goto(fixture.url);
+    const entry = fixture.entry;
+    const save = entry.getByRole("button", { name: "Save Results" });
+    const conclusion = entry.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
+    await conclusion.fill("Unsubmitted entry draft");
+    await expect(save).toBeEnabled();
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    await fixture.review
+      .getByRole("button", { name: "Approve Results", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Approve", exact: true }).click();
+
+    await expect(
+      fixture.review.getByRole("link", { name: "Print Report" }),
+    ).toBeVisible();
+    await expect(save).toHaveCount(0);
+    await expect(conclusion).not.toBeEditable();
+    await expect(conclusion).toHaveText("Unsubmitted entry draft");
+    expect(listReport.status).toBe("preliminary");
+    expect(report.status).toBe("final");
+    expect(batchRequests).toBe(0);
+  });
+
+  test("cancels a pending entry save when review approval finalizes the report during catalog lookup", async ({
+    page,
+  }) => {
+    const observation = createObservation();
+    const report = createReport([observation]);
+    report.conclusion = "Saved conclusion";
+    const fixture = await mockReviewPage(page, report, { ...report });
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    let batchRequests = 0;
+    await page.route("**/api/v1/batch_requests/", (route) => {
+      batchRequests += 1;
+      return route.fulfill({ status: 400, json: {} });
+    });
+    let releaseCatalog = () => {};
+    const catalogGate = new Promise<void>((resolve) => {
+      releaseCatalog = resolve;
+    });
+    const catalogUrl = "**/api/v1/observation_definition/?*";
+    await page.route(catalogUrl, async (route) => {
+      await catalogGate;
+      await route.fulfill({
+        json: {
+          count: 1,
+          results: [
+            {
+              ...observation.observation_definition,
+              slug: faker.string.uuid(),
+            },
+          ],
+        },
+      });
+    });
+
+    try {
+      await page.goto(fixture.url);
+      const entry = fixture.entry;
+      const group = entry.getByRole("group", {
+        name: observation.observation_definition.title,
+        exact: true,
+      });
+      await group
+        .getByRole("button", { name: "Result actions 1", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Add Another Result", exact: true })
+        .click();
+      await group.getByPlaceholder("Result value").nth(1).fill("102");
+      await page
+        .getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        })
+        .click();
+      const approve = fixture.review.getByRole("button", {
+        name: "Approve Results",
+        exact: true,
+      });
+      await expect(approve).toBeEnabled();
+      const catalogRequested = page.waitForRequest(catalogUrl);
+      await entry.getByRole("button", { name: "Save Results" }).click();
+      await catalogRequested;
+
+      await approve.click();
+      await page.getByRole("button", { name: "Approve", exact: true }).click();
+      await expect(
+        fixture.review.getByRole("link", { name: "Print Report" }),
+      ).toBeVisible();
+      const catalogResponse = page.waitForResponse(catalogUrl);
+      releaseCatalog();
+      await catalogResponse;
+      await page.waitForLoadState("networkidle");
+
+      await expect(
+        entry.getByRole("button", { name: "Save Results" }),
+      ).toHaveCount(0);
+      await expect(
+        group.getByPlaceholder("Result value").nth(1),
+      ).toBeDisabled();
+      expect(report.status).toBe("final");
+      expect(batchRequests).toBe(0);
+    } finally {
+      releaseCatalog();
+    }
+  });
+
   test("requires report content and uses the edited conclusion for approval", async ({
     page,
   }) => {

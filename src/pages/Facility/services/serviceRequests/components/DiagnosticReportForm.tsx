@@ -789,6 +789,19 @@ function DiagnosticReportItem({
 
       const requests: BatchRequestObject[] = [];
 
+      // The detail query can change while a definition lookup is pending (for
+      // example, when the review card approves this report).
+      const currentReport = queryClient.getQueryData<DiagnosticReportRead>([
+        "diagnosticReport",
+        report.id,
+      ]);
+      if (
+        !currentReport ||
+        currentReport.status === DiagnosticReportStatus.final
+      ) {
+        return;
+      }
+
       // Upsert observations only when there are results to save
       if (formattedObservations.length > 0) {
         requests.push({
@@ -813,10 +826,10 @@ function DiagnosticReportItem({
         },
         body: {
           id: report.id,
-          status: report.status,
-          category: report.category,
-          code: report.code,
-          note: report.note,
+          status: currentReport.status,
+          category: currentReport.category,
+          code: currentReport.code,
+          note: currentReport.note,
           conclusion,
         },
       });
