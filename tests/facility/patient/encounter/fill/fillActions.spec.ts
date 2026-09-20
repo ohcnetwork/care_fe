@@ -101,12 +101,6 @@ test.describe("Questionnaire v2 fill — actions", () => {
       `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
     );
     await expect(questionBlock(page, noteTitle)).toBeVisible();
-    await expect(
-      questionBlock(page, noteTitle).getByText("*", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      questionBlock(page, noteTitle).getByRole("textbox"),
-    ).toHaveAttribute("aria-required", "true");
     await fillStringField(page, noteTitle, `hello-${stamp}`);
     await submitAndExpectSuccess(page);
     await expectToast(page, `Action ping hello-${stamp}`);
@@ -152,15 +146,6 @@ test.describe("Questionnaire v2 fill — actions", () => {
       `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
     );
     await fillStringField(page, `Note ${stamp}`, "only the note");
-    await expect(
-      questionBlock(page, tempTitle).getByText("*", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      questionBlock(page, tempTitle).getByRole("spinbutton"),
-    ).toHaveAttribute("aria-required", "true");
-    await expect(
-      questionBlock(page, `Note ${stamp}`).getByText("*", { exact: true }),
-    ).toHaveCount(0);
 
     await test.step("Submit is blocked on the unanswered referenced question", async () => {
       await submitForm(page);

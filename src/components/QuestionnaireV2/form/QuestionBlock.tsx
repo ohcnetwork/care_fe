@@ -101,7 +101,7 @@ export const QuestionBlock = memo(function QuestionBlock(
  * answers (groups returned above without ever mounting them).
  */
 function LeafBlock({
-  question: authoredQuestion,
+  question,
   depth,
   number,
   effectiveDisabled,
@@ -114,12 +114,7 @@ function LeafBlock({
   locked: boolean;
 }) {
   const { t } = useTranslation();
-  const { inert, actionRequiredLinkIds } = useFormRenderer();
-  // Match submit-time action-reference validation before the user submits,
-  // including the required state announced by each input.
-  const question = actionRequiredLinkIds.has(authoredQuestion.link_id)
-    ? { ...authoredQuestion, required: true }
-    : authoredQuestion;
+  const { inert } = useFormRenderer();
   const { QuestionAnnotation, QuestionTitle } = useFormChrome();
   const errors = useQuestionErrors(question.id);
   // Only written by repeating questions; read for entry counts.
