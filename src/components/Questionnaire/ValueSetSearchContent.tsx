@@ -145,7 +145,7 @@ const Item = ({
             e.stopPropagation();
             onFavourite();
           }}
-          className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          className="hover:text-primary-500 transition-colors text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isFavourite ? <StarFilledIcon /> : <StarIcon />}
         </button>

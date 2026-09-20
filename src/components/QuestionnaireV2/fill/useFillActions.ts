@@ -10,7 +10,13 @@
  * against the schema and re-checks the scope before any `run` below is
  * reached.
  */
-import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { z } from "zod";
 
 import type {
@@ -27,10 +33,10 @@ import {
   useRegisterAction,
 } from "@/lib/actions";
 
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 import {
   buildLinkIndex,
   clearQuestionErrorsInState,
-  entryHasContent,
   isQuestionEnabledInState,
   responsesAtom,
   structuredRenderFailedAtom,
@@ -518,7 +524,7 @@ export function listFormsSummary(
                   }),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
-              answered: !!responses[question.id]?.values.some(entryHasContent),
+              answered: !!responses[question.id]?.values?.some(entryIsAnswered),
               enabled,
               ...(question.enable_when?.length
                 ? {
@@ -565,7 +571,9 @@ export function useFillActions({
   // Registered actions can outlive the render that supplied them. Check
   // the live save state when an asynchronous Scribe result reaches us.
   const frozenRef = useRef(frozen);
-  frozenRef.current = frozen;
+  useLayoutEffect(() => {
+    frozenRef.current = frozen;
+  }, [frozen]);
   const patientId = isPatientBound(subject) ? subject.patientId : undefined;
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;

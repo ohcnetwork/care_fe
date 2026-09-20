@@ -30,6 +30,8 @@ import {
   QuestionType,
 } from "@/types/questionnaire/question";
 
+import { useEditorRowKeys } from "./useEditorRowKeys";
+
 interface VisibilityConditionsCardProps {
   question: Question;
   allQuestions: Question[];
@@ -130,6 +132,10 @@ export function VisibilityConditionsCard({
 }: VisibilityConditionsCardProps) {
   const { t } = useTranslation();
   const enableWhen = question.enable_when ?? [];
+  const { rowKeys, removeRowKey } = useEditorRowKeys(
+    question.id,
+    enableWhen.length,
+  );
   const enableBehavior = question.enable_behavior ?? "all";
   const excludedIds = new Set(collectIds(question));
   const flatQuestions = flattenQuestions(allQuestions);
@@ -187,6 +193,7 @@ export function VisibilityConditionsCard({
   };
 
   const handleDeleteCondition = (index: number) => {
+    removeRowKey(index);
     updateConditions(enableWhen.filter((_, i) => i !== index));
   };
 
@@ -242,7 +249,7 @@ export function VisibilityConditionsCard({
             : undefined;
 
           return (
-            <div key={index}>
+            <div key={rowKeys[index]}>
               {index > 0 && (
                 <div className="relative flex justify-start py-1 pl-6">
                   <span

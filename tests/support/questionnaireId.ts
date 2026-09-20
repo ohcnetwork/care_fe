@@ -47,6 +47,7 @@ export async function ensureEnableWhenQuestionnaire(): Promise<string> {
   // Required by QuestionnaireCreateSpec; instance creation is superuser-only
   // and this runs as the admin superuser.
   fixture.auth_context ??= "instance";
+  fixture.organizations ??= [];
 
   const saveMeta = (id: string) => {
     fs.mkdirSync(path.dirname(META_PATH), { recursive: true });

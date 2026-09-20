@@ -145,7 +145,7 @@ export default function PluginEngine({
           condition: override.condition,
           priority: override.priority,
           description:
-            override.description ?? `Override from plugin: ${plugin.plugin}`,
+            override.description ?? `Override from plugin: ${plugin.slug}`,
         });
         overrideCleanupRef.current.push(cleanup);
       }
@@ -166,7 +166,7 @@ export default function PluginEngine({
           );
         } catch (error) {
           console.error(
-            `Invalid structured type from plugin ${plugin.plugin}`,
+            `Invalid structured type from plugin ${plugin.slug}`,
             error,
           );
         }
@@ -230,7 +230,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
         } as PluginProps<typeof __name>;
 
         return (
-          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+          <PluginErrorBoundary key={plugin.slug} pluginName={plugin.slug}>
             <React.Suspense
               fallback={
                 <div className="flex items-center justify-center gap-2">

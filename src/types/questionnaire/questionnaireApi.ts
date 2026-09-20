@@ -43,6 +43,11 @@ export interface QuestionnaireSubmitBody {
   results: SubmitResult[];
 }
 
+/** The backend defaults to its standard favorite list when omitted. */
+interface QuestionnaireFavoriteBody {
+  favorite_list?: string;
+}
+
 export default {
   list: {
     path: "/api/v1/questionnaire/",
@@ -128,12 +133,14 @@ export default {
   addFavorite: {
     path: "/api/v1/questionnaire/{id}/add_favorite/",
     method: HttpMethod.POST,
-    TRes: Type<QuestionnaireRead>(),
+    TBody: Type<QuestionnaireFavoriteBody>(),
+    TRes: Type<Record<string, never>>(),
   },
   removeFavorite: {
     path: "/api/v1/questionnaire/{id}/remove_favorite/",
     method: HttpMethod.POST,
-    TRes: Type<QuestionnaireRead>(),
+    TBody: Type<QuestionnaireFavoriteBody>(),
+    TRes: Type<Record<string, never>>(),
   },
   listFavorites: {
     path: "/api/v1/questionnaire/favorite_lists/",

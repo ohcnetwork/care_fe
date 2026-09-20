@@ -42,7 +42,7 @@ export function NumberInput({
       inputMode={question.type === "decimal" ? "decimal" : "numeric"}
       pattern="[0-9]*[.]?[0-9]*"
       value={value?.toString() ?? ""}
-      step={question.type === "integer" ? 1 : undefined}
+      step={question.type === "integer" ? 1 : "any"}
       disabled={disabled}
       onChange={handleChange}
     />

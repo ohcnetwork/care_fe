@@ -56,8 +56,16 @@ export function getResponsePreview(
     questions: Question[],
     answers: ResourceQuestionnaireAnswer[],
   ): string => {
+    const answersByQuestionId = new Map<string, ResourceQuestionnaireAnswer>();
+    for (const answer of answers) {
+      // Preserve the first answer if an older response contains duplicates.
+      if (!answersByQuestionId.has(answer.question_id)) {
+        answersByQuestionId.set(answer.question_id, answer);
+      }
+    }
+
     for (const question of questions) {
-      const answer = answers.find((entry) => entry.question_id === question.id);
+      const answer = answersByQuestionId.get(question.id);
 
       if (question.type === "group") {
         const groups = answer?.sub_results?.length

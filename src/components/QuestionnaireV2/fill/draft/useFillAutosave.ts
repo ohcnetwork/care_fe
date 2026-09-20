@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 
 import {
@@ -89,11 +95,8 @@ export function useFillSessionAutosave({
 
   // The subscription effect reads these without re-subscribing.
   const scopeRef = useRef(scope);
-  scopeRef.current = scope;
   const persistRef = useRef(persistLocally);
-  persistRef.current = persistLocally;
   const retainedRef = useRef(retainedSnapshots);
-  retainedRef.current = retainedSnapshots;
   // Set on successful submit: the draft served its purpose, so neither the
   // pending debounce nor the unmount/pagehide flush may re-save it.
   const finishedRef = useRef(false);
@@ -105,11 +108,24 @@ export function useFillSessionAutosave({
   // Read by resumeRestoredDraft, which only ever fires from an event
   // handler well after mount.
   const restoredDraftRef = useRef(restoredDraft);
-  restoredDraftRef.current = restoredDraft;
   // A detected draft the clinician has neither resumed nor discarded is
   // still theirs to decide about — see persistNow.
   const restorePendingRef = useRef(false);
-  restorePendingRef.current = !!restoredDraft && !restoreDismissed;
+  // Publish only committed values. A suspended/abandoned render must not
+  // change what existing subscriptions or an unmount flush persist.
+  useLayoutEffect(() => {
+    scopeRef.current = scope;
+    persistRef.current = persistLocally;
+    retainedRef.current = retainedSnapshots;
+    restoredDraftRef.current = restoredDraft;
+    restorePendingRef.current = !!restoredDraft && !restoreDismissed;
+  }, [
+    scope,
+    persistLocally,
+    retainedSnapshots,
+    restoredDraft,
+    restoreDismissed,
+  ]);
 
   const scopeKey = scope ? fillDraftScopeKey(scope) : undefined;
 
@@ -277,7 +293,7 @@ export function useFillSessionAutosave({
     // prompt gate protects.
     //
     // Persistence was standing down while the prompt was pending — flip
-    // the gate synchronously (the ref recomputes only on the next render)
+    // the gate synchronously (the ref updates only after the next commit)
     // and write now, so anything typed in the meantime becomes a fresh
     // draft of its own instead of living un-persisted until the next
     // keystroke. An untouched session stores nothing, and the key it would

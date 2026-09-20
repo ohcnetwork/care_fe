@@ -20,12 +20,13 @@ export function DateInput({
   const value = entry?.type === "date" ? entry.value : undefined;
 
   const handleChange = (date: Date | undefined) => {
-    if (!date) return;
     updateResponse({
-      values: replaceEntryAt(response?.values, valueIndex, {
-        type: "date",
-        value: date,
-      }),
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "date", value: date },
+        date === undefined,
+      ),
     });
   };
 

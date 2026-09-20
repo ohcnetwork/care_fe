@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -164,7 +164,7 @@ export function EncounterQuestion({
 
   // A refetch provides context for draft reconciliation; it must never be
   // reported as a clinician edit or replace a response retained on remount.
-  useEffect(() => {
+  const initializeResponse = useEffectEvent(() => {
     if (!encounterData) return;
     const initialEncounter = transformEncounterForUpdate(encounterData);
     if (toDischarge === "true") {
@@ -194,7 +194,11 @@ export function EncounterQuestion({
     } else if (questionnaireResponse.values.length === 0) {
       updateQuestionnaireResponseCB(values, questionnaireResponse.question_id);
     }
-  }, [encounterData]);
+  });
+
+  useEffect(() => {
+    initializeResponse();
+  }, [encounterData, toDischarge]);
 
   // Older drafts could change encounter class. Normalize their values after
   // reconciliation so hidden hospitalization edits cannot survive an immutable

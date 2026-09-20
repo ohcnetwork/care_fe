@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -42,10 +42,13 @@ export function SelectOrCreateValueset({
   scope = INSTANCE_VALUESET_SCOPE,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editorState, setEditorState] = useState<ValueSetFormState>({
+  const editorState = useRef<ValueSetFormState>({
     isDirty: false,
     isSubmitting: false,
   });
+  const handleEditorStateChange = useCallback((state: ValueSetFormState) => {
+    editorState.current = state;
+  }, []);
   const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -114,12 +117,15 @@ export function SelectOrCreateValueset({
 
   const handleSheetOpenChange = (open: boolean) => {
     if (open) {
-      setEditorState({ isDirty: false, isSubmitting: false });
+      editorState.current = { isDirty: false, isSubmitting: false };
       setIsSheetOpen(true);
       return;
     }
-    if (editorState.isSubmitting) return;
-    if (editorState.isDirty && !window.confirm(t("unsaved_changes_warning"))) {
+    if (editorState.current.isSubmitting) return;
+    if (
+      editorState.current.isDirty &&
+      !window.confirm(t("unsaved_changes_warning"))
+    ) {
       return;
     }
     setIsSheetOpen(false);
@@ -161,7 +167,7 @@ export function SelectOrCreateValueset({
             <ValueSetEditor
               scope={scope}
               onCancel={() => handleSheetOpenChange(false)}
-              onStateChange={setEditorState}
+              onStateChange={handleEditorStateChange}
               onSuccess={(data) => {
                 setIsSheetOpen(false);
                 setCurrentValueSet(data);

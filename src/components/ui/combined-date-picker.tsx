@@ -51,7 +51,6 @@ export function CombinedDatePicker({
   );
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
     onChange(date);
   };
 

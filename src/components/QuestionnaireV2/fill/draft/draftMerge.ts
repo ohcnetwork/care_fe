@@ -1,7 +1,5 @@
-import {
-  entryHasContent,
-  initializeResponses,
-} from "@/components/QuestionnaireV2/form/engine/store";
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
+import { initializeResponses } from "@/components/QuestionnaireV2/form/engine/store";
 
 import type {
   QuestionnaireResponse,
@@ -148,7 +146,7 @@ export function draftResponseHasContent(
   if (response.draft_context !== undefined) {
     return structuredResponseHasEdits(response) || !!response.note;
   }
-  if (response.values.some(entryHasContent)) return true;
+  if (response.values?.some(entryIsAnswered)) return true;
   return !!response.note;
 }
 

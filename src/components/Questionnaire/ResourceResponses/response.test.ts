@@ -184,6 +184,51 @@ describe("resource responses with omitted default values", () => {
     );
   });
 
+  it("looks past empty repetitions without mixing answers between groups", () => {
+    assert.equal(
+      getResponsePreview(
+        {
+          ...response,
+          responses: [
+            {
+              question_id: "group",
+              sub_results: [
+                [{ question_id: "answer", values: [] }],
+                [{ question_id: "answer", values: [{ value: "Second row" }] }],
+              ],
+            },
+          ],
+        },
+        t,
+      ),
+      "Answer: Second row",
+    );
+  });
+
+  it("retains questionnaire order and the first duplicate in flat legacy answers", () => {
+    assert.equal(
+      getResponsePreview(
+        {
+          ...response,
+          questionnaire: {
+            ...response.questionnaire,
+            questions: [
+              ...response.questionnaire.questions,
+              { ...question("string"), id: "later", text: "Later" },
+            ],
+          },
+          responses: [
+            { question_id: "later", values: [{ value: "Later answer" }] },
+            { question_id: "answer", values: [{ value: "First answer" }] },
+            { question_id: "answer", values: [{ value: "Duplicate answer" }] },
+          ],
+        },
+        t,
+      ),
+      "Answer: First answer",
+    );
+  });
+
   it("renders note-only answers in the response viewer", () => {
     const html = renderToStaticMarkup(
       createElement(I18nextProvider, {

@@ -139,7 +139,7 @@ export function QuestionTypePicker({
       setStep("structured");
       return;
     }
-    onChange({ type });
+    onChange({ type, structured_type: undefined });
     setOpen(false);
   };
 

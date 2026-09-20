@@ -26,6 +26,13 @@ export function ChoiceInput({
   const [response, updateResponse] = useQuestionResponse(question.id);
 
   if (question.answer_option?.length) {
+    const entryForOption = (value: string) => ({
+      type: "string" as const,
+      value,
+      coding:
+        question.answer_option?.find((option) => option.value === value)
+          ?.code ?? undefined,
+    });
     const dropdown = question.answer_option.length > INLINE_CHOICE_MAX;
     const dropdownOptions = question.answer_option.map((option) => ({
       label: option.display ?? option.value,
@@ -51,7 +58,7 @@ export function ChoiceInput({
             )}
             onValueChange={(selected) =>
               updateResponse({
-                values: selected.map((value) => ({ type: "string", value })),
+                values: selected.map(entryForOption),
               })
             }
             options={dropdownOptions}
@@ -66,7 +73,7 @@ export function ChoiceInput({
           {...labelling}
           value={response?.values[0]?.value?.toString() ?? ""}
           onChange={(value) =>
-            updateResponse({ values: [{ type: "string", value }] })
+            updateResponse({ values: [entryForOption(value)] })
           }
           options={dropdownOptions}
           placeholder={t("select_an_option")}
@@ -99,7 +106,7 @@ export function ChoiceInput({
                 updateResponse({
                   values: isSelected(option.value)
                     ? values.filter((v) => v.value?.toString() !== option.value)
-                    : [...values, { type: "string", value: option.value }],
+                    : [...values, entryForOption(option.value)],
                 })
               }
             />
@@ -126,7 +133,7 @@ export function ChoiceInput({
             disabled={disabled}
             onCheckedChange={() =>
               updateResponse({
-                values: [{ type: "string", value: option.value }],
+                values: [entryForOption(option.value)],
               })
             }
           />

@@ -17,6 +17,10 @@ const BLOCKED_BASE =
   /^-?(?:fixed|absolute|sticky|inset|top|right|bottom|left|z)(?:$|-)/;
 
 function isBlocked(token: string): boolean {
+  // Arbitrary properties contain their own colon, so splitting variant
+  // prefixes first would hide properties such as [position:fixed]. Keep
+  // arbitrary utility values (grid-cols-[2fr_1fr]), but reject properties.
+  if (/(?:^|:)\[[\w-]+:/.test(token)) return true;
   const base = token.split(":").pop() ?? token;
   return BLOCKED_BASE.test(base);
 }

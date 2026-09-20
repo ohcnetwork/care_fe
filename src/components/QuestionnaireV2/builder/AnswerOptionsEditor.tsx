@@ -24,6 +24,8 @@ import { ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { AnswerOption, Question } from "@/types/questionnaire/question";
 
+import { useEditorRowKeys } from "./useEditorRowKeys";
+
 interface AnswerOptionsEditorProps {
   question: Question;
   onChange: (patch: Partial<Question>) => void;
@@ -121,6 +123,11 @@ export function AnswerOptionsEditor({
     questionId: string;
     mode: Mode;
   } | null>(null);
+  const options = question.answer_option ?? [];
+  const { rowKeys, removeRowKey, moveRowKey } = useEditorRowKeys(
+    question.id,
+    options.length,
+  );
 
   if (question.type === "quantity") {
     return (
@@ -139,7 +146,6 @@ export function AnswerOptionsEditor({
   const derivedMode: Mode = question.answer_value_set ? "valueset" : "custom";
   const mode: Mode =
     modeOverride?.questionId === question.id ? modeOverride.mode : derivedMode;
-  const options = question.answer_option ?? [];
 
   const handleModeChange = (next: Mode) => {
     if (next === mode) return;
@@ -184,12 +190,14 @@ export function AnswerOptionsEditor({
   };
 
   const handleDeleteOption = (index: number) => {
+    removeRowKey(index);
     updateOptions(options.filter((_, i) => i !== index));
   };
 
   const handleMoveOption = (index: number, direction: -1 | 1) => {
     const target = index + direction;
     if (target < 0 || target >= options.length) return;
+    moveRowKey(index, target);
     const next = [...options];
     [next[index], next[target]] = [next[target], next[index]];
     updateOptions(next);
@@ -250,7 +258,7 @@ export function AnswerOptionsEditor({
               </TableHeader>
               <TableBody>
                 {options.map((option, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={rowKeys[index]}>
                     <TableCell className="text-sm text-gray-500">
                       {index + 1}
                     </TableCell>

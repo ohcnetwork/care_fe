@@ -35,6 +35,7 @@ import {
   operatorsFor,
   questionOfRef,
 } from "@/components/QuestionnaireV2/builder/actionVariables";
+import { useEditorRowKeys } from "@/components/QuestionnaireV2/builder/useEditorRowKeys";
 
 import { Question } from "@/types/questionnaire/question";
 import { dateQueryString } from "@/Utils/utils";
@@ -148,9 +149,13 @@ export function ActionConditionEditor({
   const { t } = useTranslation();
   const { questions, contextValues } = sources;
   const parsed = parseCondition(condition);
+  const { rowKeys, removeRowKey } = useEditorRowKeys(
+    idPrefix,
+    parsed?.rules.length ?? 0,
+  );
   const [wantsExpression, setWantsExpression] = useState(false);
   const [confirmReplace, setConfirmReplace] = useState(false);
-  const [lastValidCondition, setLastValidCondition] = useState(
+  const lastValidCondition = useRef(
     parsed ? condition : compileCondition([], "all"),
   );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -166,7 +171,7 @@ export function ActionConditionEditor({
           : undefined;
 
   const changeCondition = (next: string) => {
-    if (parseCondition(next)) setLastValidCondition(next);
+    if (parseCondition(next)) lastValidCondition.current = next;
     onChange(next);
   };
 
@@ -302,7 +307,7 @@ export function ActionConditionEditor({
                 onClick={() => {
                   setConfirmReplace(false);
                   setWantsExpression(false);
-                  onChange(lastValidCondition);
+                  onChange(lastValidCondition.current);
                 }}
               >
                 {t("action_replace_expression")}
@@ -406,7 +411,7 @@ export function ActionConditionEditor({
           const unresolved =
             !target && !contextValues.some((v) => v.ref === rule.ref);
           return (
-            <div key={index}>
+            <div key={rowKeys[index]}>
               {index > 0 && (
                 <div className="relative flex justify-start py-1 pl-6">
                   <span
@@ -428,12 +433,13 @@ export function ActionConditionEditor({
                     variant="ghost"
                     size="icon"
                     className="size-6"
-                    onClick={() =>
+                    onClick={() => {
+                      removeRowKey(index);
                       update(
                         rules.filter((_, i) => i !== index),
                         behavior,
-                      )
-                    }
+                      );
+                    }}
                     aria-label={t("delete")}
                   >
                     <Trash2 className="size-4" />
@@ -690,7 +696,7 @@ export function ActionConditionEditor({
           size="sm"
           className="h-auto px-0"
           onClick={() => {
-            setLastValidCondition(condition);
+            lastValidCondition.current = condition;
             setWantsExpression(true);
           }}
         >

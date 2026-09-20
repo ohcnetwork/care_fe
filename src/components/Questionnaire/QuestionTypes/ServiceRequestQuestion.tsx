@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -637,7 +637,7 @@ export function ServiceRequestQuestion({
     enabled: !!selectedActivityDefinition,
   });
 
-  useEffect(() => {
+  const addSelectedActivityDefinition = useEffectEvent(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -677,6 +677,10 @@ export function ServiceRequestQuestion({
       }));
       setSelectedActivityDefinition(null);
     }
+  });
+
+  useEffect(() => {
+    addSelectedActivityDefinition();
   }, [
     selectedActivityDefinition,
     selectedActivityDefinitionData,
