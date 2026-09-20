@@ -96,7 +96,7 @@ export function SelectedFilterBar({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm cursor-pointer"
+            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
             onClick={onClick}
           >
             {filter?.icon}
