@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { hasDuplicateClinicalCode } from "@/components/Questionnaire/QuestionTypes/conditionValidation";
 import type { ResolvedStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import { CodeSchema } from "@/types/base/code/code";
@@ -55,6 +54,93 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+/** These clinical lists accept complete changed rows, preserving every row
+ *  omitted by the caller. Other structured inputs keep replacement semantics. */
+function mergeClinicalRows(
+  incoming: Record<string, unknown>[],
+  existing: unknown[],
+  type: string,
+): { ok: true; rows: unknown[] } | { ok: false; error: string } {
+  const codeOf = (row: Record<string, unknown>) =>
+    isRecord(row.code) ? row.code.code : undefined;
+  const active = (row: Record<string, unknown>) =>
+    row.verification_status !== "entered_in_error";
+  const updatedIds = new Set(incoming.map((row) => row.id).filter(Boolean));
+  const replacements = new Map<number, Record<string, unknown>>();
+  const additions: Record<string, unknown>[] = [];
+  const ids = new Set<unknown>();
+
+  for (const row of incoming) {
+    if (row.id && ids.has(row.id)) {
+      return { ok: false, error: `Duplicate ${type} record id "${row.id}"` };
+    }
+    if (row.id) ids.add(row.id);
+    let matches = existing.flatMap((entry, index) => {
+      if (!isRecord(entry)) return [];
+      // Explicit ids take precedence. Code-only updates retain saved ids;
+      // records entered in error do not prevent adding that code again.
+      const matches = row.id
+        ? entry.id === row.id
+        : !updatedIds.has(entry.id) &&
+          (active(entry) || !active(row)) &&
+          codeOf(entry) === codeOf(row);
+      return matches ? [index] : [];
+    });
+    if (!row.id && !active(row)) {
+      // Invalidate the active record first. On a retry, match the record
+      // already marked in error instead of appending another error row.
+      const activeMatches = matches.filter((index) =>
+        active(existing[index] as Record<string, unknown>),
+      );
+      if (activeMatches.length) matches = activeMatches;
+    }
+    if (matches.length > 1) {
+      return {
+        ok: false,
+        error: `Multiple ${type} records match; provide a unique record id`,
+      };
+    }
+    const index = matches[0];
+    if (index === undefined) {
+      additions.push(row);
+    } else {
+      if (replacements.has(index)) {
+        return { ok: false, error: `Duplicate ${type} code "${codeOf(row)}"` };
+      }
+      const previous = existing[index] as Record<string, unknown>;
+      replacements.set(index, {
+        ...row,
+        ...(typeof previous.id === "string" && previous.id
+          ? { id: previous.id }
+          : {}),
+      });
+    }
+  }
+
+  // Check changed rows against the proposed state, without validating or
+  // normalizing untouched rows (which may predate the current schema).
+  const seen = existing.filter(
+    (row, index): row is Record<string, unknown> =>
+      !replacements.has(index) && isRecord(row),
+  );
+  for (const row of [...replacements.values(), ...additions]) {
+    if (
+      active(row) &&
+      seen.some((entry) => active(entry) && codeOf(entry) === codeOf(row))
+    ) {
+      return { ok: false, error: `Duplicate ${type} code "${codeOf(row)}"` };
+    }
+    seen.push(row);
+  }
+  return {
+    ok: true,
+    rows: [
+      ...existing.map((row, index) => replacements.get(index) ?? row),
+      ...additions,
+    ],
+  };
+}
+
 /** Structured answers carry one array of domain records, regardless of
  *  the questionnaire's primitive-answer repeats setting. */
 export function coerceStructuredFillValue(
@@ -71,6 +157,9 @@ export function coerceStructuredFillValue(
       `Question "${question.link_id}" cannot be filled with JSON records`,
     );
   }
+  const mergeRows = ["diagnosis", "symptom", "allergy_intolerance"].includes(
+    type,
+  );
   if (
     ["encounter", "appointment", "time_of_death"].includes(type) &&
     rawValues.length > 1
@@ -141,41 +230,6 @@ export function coerceStructuredFillValue(
         `Invalid ${type} record: ${parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`,
       );
     }
-    const currentRows: unknown = current.values[0]?.value;
-    const existing = (Array.isArray(currentRows) ? currentRows : []).filter(
-      (
-        row,
-      ): row is {
-        id: string;
-        code: { code: string };
-        verification_status: string;
-      } =>
-        isRecord(row) &&
-        typeof row.id === "string" &&
-        !!row.id &&
-        isRecord(row.code) &&
-        typeof row.code.code === "string" &&
-        typeof row.verification_status === "string",
-    );
-    const seen: z.infer<typeof clinicalRecordSchema>[] = [];
-    const ids = new Set<string>();
-    const updatedIds = new Set(
-      parsed.data.map((row) => row.id).filter(Boolean),
-    );
-    const unchanged = existing.filter((entry) => !updatedIds.has(entry.id));
-    for (const row of parsed.data) {
-      if (row.id && ids.has(row.id))
-        return fail(`Duplicate ${type} record id "${row.id}"`);
-      if (row.id) ids.add(row.id);
-      if (
-        row.verification_status !== "entered_in_error" &&
-        (hasDuplicateClinicalCode(seen, row.code.code) ||
-          hasDuplicateClinicalCode(unchanged, row.code.code))
-      ) {
-        return fail(`Duplicate ${type} code "${row.code.code}"`);
-      }
-      seen.push(row);
-    }
     data = parsed.data;
   }
 
@@ -192,7 +246,9 @@ export function coerceStructuredFillValue(
 
   try {
     const errors =
-      definition.validate?.(data, question.id, !!question.required) ?? [];
+      mergeRows && data.length === 0
+        ? []
+        : (definition.validate?.(data, question.id, !!question.required) ?? []);
     if (errors.length) {
       return fail(
         errors
@@ -210,6 +266,16 @@ export function coerceStructuredFillValue(
     return fail(
       `Malformed ${type} records; provide the complete structured request fields`,
     );
+  }
+  if (mergeRows && data.every(isRecord)) {
+    const currentRows: unknown = current.values[0]?.value;
+    const merged = mergeClinicalRows(
+      data,
+      Array.isArray(currentRows) ? currentRows : [],
+      type,
+    );
+    if (!merged.ok) return merged;
+    data = merged.rows;
   }
   // Core definitions and plugin validators own their payload shapes; the
   // response union only enumerates compile-time core types.
