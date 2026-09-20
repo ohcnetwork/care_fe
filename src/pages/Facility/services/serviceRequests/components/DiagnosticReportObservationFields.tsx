@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 import { Label } from "@/components/ui/label";
 import { ObservationDefinitionEmbedded } from "@/types/emr/observationDefinition/observationDefinition";
 
@@ -24,7 +22,6 @@ export function DiagnosticReportObservationFields({
   disabled,
   draft,
 }: DiagnosticReportObservationFieldsProps) {
-  const { t } = useTranslation();
   const inputId = `observation-${reportId}-${definition.id}-${index}`;
   if (!definition.component?.length) {
     return (
@@ -33,15 +30,10 @@ export function DiagnosticReportObservationFields({
         label={definition.title || definition.code.display}
         value={observation.value}
         unit={observation.unit}
-        permittedUnit={definition.permitted_unit}
         dataType={definition.permitted_data_type}
-        placeholder={t("result_value")}
         disabled={disabled}
         onValueChange={(value) =>
           draft.handleValueChange(definition.id, index, value, observation.unit)
-        }
-        onUnitChange={(unit) =>
-          draft.handleUnitChange(definition.id, index, unit)
         }
       />
     );
@@ -65,9 +57,7 @@ export function DiagnosticReportObservationFields({
               label={label}
               value={data.value}
               unit={data.unit}
-              permittedUnit={component.permitted_unit}
               dataType={component.permitted_data_type}
-              placeholder={t("component_value")}
               disabled={disabled}
               onValueChange={(value) =>
                 draft.handleComponentValueChange(
@@ -76,14 +66,6 @@ export function DiagnosticReportObservationFields({
                   component.code.code,
                   value,
                   data.unit,
-                )
-              }
-              onUnitChange={(unit) =>
-                draft.handleComponentUnitChange(
-                  definition.id,
-                  index,
-                  component.code.code,
-                  unit,
                 )
               }
             />

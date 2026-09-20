@@ -1,17 +1,7 @@
-import { useTranslation } from "react-i18next";
-
 import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-import { Code } from "@/types/base/code/code";
 import { QuestionType } from "@/types/emr/observationDefinition/observationDefinition";
 
 interface DiagnosticReportObservationInputProps {
@@ -19,12 +9,9 @@ interface DiagnosticReportObservationInputProps {
   label: string;
   value: string;
   unit: string;
-  permittedUnit?: Code | null;
   dataType: QuestionType;
-  placeholder: string;
   disabled: boolean;
   onValueChange: (value: string) => void;
-  onUnitChange: (unit: string) => void;
 }
 
 export function DiagnosticReportObservationInput({
@@ -32,51 +19,38 @@ export function DiagnosticReportObservationInput({
   label,
   value,
   unit,
-  permittedUnit,
   dataType,
-  placeholder,
   disabled,
   onValueChange,
-  onUnitChange,
 }: DiagnosticReportObservationInputProps) {
-  const { t } = useTranslation();
-
   return (
-    <div className="flex min-w-0 flex-1 items-stretch">
+    <label
+      htmlFor={id}
+      className={cn(
+        "flex h-10 min-w-0 flex-1 cursor-text items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 shadow-xs transition-colors focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
       <Input
         id={id}
         aria-label={label}
-        aria-describedby={permittedUnit ? `${id}-unit` : undefined}
-        className={cn(
-          "h-10 min-w-0 shadow-none focus:relative focus:z-10",
-          permittedUnit && "rounded-r-none",
-        )}
+        aria-describedby={unit ? `${id}-unit` : undefined}
+        className="field-sizing-content h-auto w-auto min-w-0 max-w-full border-none bg-transparent p-0 text-base shadow-none focus:ring-0 focus-visible:ring-0 disabled:cursor-default disabled:opacity-100 md:text-sm"
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
-        placeholder={placeholder}
         type={
           dataType === "decimal" || dataType === "integer" ? "number" : "text"
         }
         disabled={disabled}
       />
-      {permittedUnit && (
-        <Select value={unit} onValueChange={onUnitChange} disabled={disabled}>
-          <SelectTrigger
-            id={`${id}-unit`}
-            aria-label={`${label} ${t("unit")}`}
-            className="-ml-px w-24! max-w-[45%] shrink-0 rounded-l-none bg-gray-50 shadow-none data-[size=default]:h-10 focus-visible:relative focus-visible:z-10"
-          >
-            <SelectValue placeholder={t("unit")}>
-              {unit || undefined}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={permittedUnit.code}>
-              {permittedUnit.code || permittedUnit.display}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+      {unit && (
+        <span
+          id={`${id}-unit`}
+          className="shrink-0 text-sm text-gray-500 select-none"
+        >
+          {unit}
+        </span>
       )}
-    </div>
+    </label>
   );
 }
