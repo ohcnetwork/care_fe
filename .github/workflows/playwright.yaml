@@ -95,7 +95,15 @@ jobs:
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "branch=develop" >> "$GITHUB_OUTPUT"
+        env:
+          FRONTEND_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          # Questionnaire actions depend on the companion backend branch.
+          if [ "$FRONTEND_BRANCH" = "bodhi/questionnaire-actions" ]; then
+            echo "branch=ENG-737" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch=develop" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout care
         uses: actions/checkout@v4
@@ -104,14 +112,16 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
+      - name: Resolve backend revision
+        id: backend-revision
+        run: echo "sha=$(git -C care rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Docker images
         id: docker-cache
         uses: actions/cache@v4
         with:
           path: /tmp/docker-cache
-          key: ${{ runner.os }}-docker-care-${{ hashFiles('care/docker/dev.Dockerfile', 'care/Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-care-
+          key: ${{ runner.os }}-docker-care-${{ steps.backend-revision.outputs.sha }}
 
       - name: Load cached Docker images
         run: |
