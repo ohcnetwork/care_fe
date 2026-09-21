@@ -103,7 +103,7 @@ export type MedicationRequestStatusFilter =
 
 /** Serializes one or more medication request statuses for list filtering. */
 export function formatMedicationRequestStatusFilter(
-  statuses: readonly MedicationRequestStatus[],
+  statuses: readonly [MedicationRequestStatus, ...MedicationRequestStatus[]],
 ): MedicationRequestStatusFilter {
   return statuses.join(",") as MedicationRequestStatusFilter;
 }
