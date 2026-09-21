@@ -127,16 +127,11 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <Page title="">
       <div className="container mx-auto space-y-8 max-w-6xl">
         {/* Welcome Header */}
-        <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(to_right,#F9FAFB_0%,#F0F0E6_60%)] pr-36 text-gray-900 sm:bg-[linear-gradient(to_right,#F5F8FF_0%,#F9FAFB_45%,#F0F0E6_100%)] sm:pr-40 md:pr-48">
-          <div
-            className="absolute -right-8 size-full rounded-lg bg-contain bg-right bg-no-repeat mix-blend-darken md:right-0"
-            style={{ backgroundImage: "url('/images/home-banner-icon.webp')" }}
+        <div className="relative overflow-hidden rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 text-gray-900">
+          <img
+            src="/images/home-banner.svg"
             aria-hidden="true"
-          />
-          <div
-            className="absolute left-0 size-full bg-contain bg-left bg-no-repeat mix-blend-darken"
-            style={{ backgroundImage: "url('/images/home-banner-sun.png')" }}
-            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 size-full select-none object-cover object-right"
           />
 
           <div className="relative z-10 max-w-xl p-4 md:p-8">
