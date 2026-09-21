@@ -33,6 +33,14 @@ if ("serviceWorker" in navigator) {
 
 if (import.meta.env.PROD) {
   window.addEventListener("vite:preloadError", () => {
+    const retryKey = `care:chunk-reload:${window.location.href}`;
+    try {
+      if (sessionStorage.getItem(retryKey)) return;
+      sessionStorage.setItem(retryKey, "true");
+    } catch {
+      // Without persistent storage, let the error boundary handle the failure.
+      return;
+    }
     window.location.reload();
   });
 
