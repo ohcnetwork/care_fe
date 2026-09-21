@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { format, isAfter, isBefore, parseISO } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -74,17 +74,17 @@ function PatientPortalIndex() {
     );
 
   const pastAppointments = appointments?.filter((appointment) =>
-    dayjs().isAfter(dayjs(appointment.token_slot.start_datetime)),
+    isAfter(new Date(), parseISO(appointment.token_slot.start_datetime)),
   );
 
   const scheduledAppointments = appointments?.filter((appointment) =>
-    dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
+    isBefore(new Date(), parseISO(appointment.token_slot.start_datetime)),
   );
 
   const getAppointmentCard = (appointment: PublicAppointment) => {
-    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
-    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
-    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
+    const appointmentTime = parseISO(appointment.token_slot.start_datetime);
+    const appointmentDate = format(appointmentTime, "dd MMMM yyyy");
+    const appointmentTimeSlot = format(appointmentTime, "hh:mm aaa");
     return (
       <Card key={appointment.id} className="shadow-sm overflow-hidden">
         <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">

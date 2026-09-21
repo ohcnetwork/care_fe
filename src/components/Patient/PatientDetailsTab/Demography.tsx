@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { format, parseISO } from "date-fns";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -205,7 +205,7 @@ export const Demography = (props: PatientProps) => {
           ),
           value: patientData.date_of_birth ? (
             <>
-              {dayjs(patientData.date_of_birth).format("DD MMM YYYY")} (
+              {format(parseISO(patientData.date_of_birth), "dd MMM yyyy")} (
               {formatPatientAge(patientData, true)})
             </>
           ) : (

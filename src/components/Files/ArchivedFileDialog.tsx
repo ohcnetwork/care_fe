@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { format, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ export default function ArchivedFileDialog({
             </span>
             <span className="whitespace-nowrap">
               {t("archived_at")}:{" "}
-              {dayjs(file.archived_datetime).format("DD MMM YYYY, hh:mm A")}
+              {format(parseISO(file.archived_datetime), "dd MMM yyyy, hh:mm a")}
             </span>
           </div>
         </div>

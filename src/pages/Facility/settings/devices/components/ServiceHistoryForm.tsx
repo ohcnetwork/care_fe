@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -41,7 +40,7 @@ export default function ServiceHistoryForm({
 
   const formSchema = z.object({
     note: z.string().min(1, { message: t("field_required") }),
-    serviced_on: z.date({ error: t("field_required") }).max(dayjs().toDate(), {
+    serviced_on: z.date({ error: t("field_required") }).max(new Date(), {
       message: t("service_date_min_date"),
     }),
   });

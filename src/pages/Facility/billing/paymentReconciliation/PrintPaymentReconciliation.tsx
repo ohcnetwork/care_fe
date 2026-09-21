@@ -155,7 +155,7 @@ function PrintPaymentReconciliation({
             <div className="space-y-1">
               <DetailRow
                 label={`${t("date")}`}
-                value={formatDateTime(payment.created_date, "DD-MM-YYYY")}
+                value={formatDateTime(payment.created_date, "dd-MM-yyyy")}
                 width="w-24"
               />
               <DetailRow
