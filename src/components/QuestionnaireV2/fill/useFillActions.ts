@@ -461,6 +461,10 @@ interface FormQuestionSummary {
   values?: unknown[];
   required: boolean;
   options?: string[];
+  /** True for a choice question that accepts more than one selection
+   *  (`Question.repeats`) — the answer is written as a `values` array in
+   *  one `questionnaire.response.set` call, never one call per option. */
+  repeats?: boolean;
   answered: boolean;
   /** False while the question's (or an ancestor's) enable_when conditions
    *  are unmet — it is not on the clinician's canvas and a write to it
@@ -524,6 +528,7 @@ export function listFormsSummary(
                   }),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
+              ...(question.repeats ? { repeats: true } : {}),
               answered: !!responses[question.id]?.values?.some(entryIsAnswered),
               enabled,
               ...(question.enable_when?.length
