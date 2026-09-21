@@ -213,7 +213,9 @@ test.describe("Facility Devices Management", () => {
       await page.getByRole("link", { name: "Add Device" }).click();
       await page.getByRole("button", { name: "Add Contact Point" }).click();
 
-      const contactType = page.locator('[data-slot="select-trigger"]').last();
+      const contactType = page
+        .getByRole("combobox")
+        .filter({ hasText: "Phone" });
       await contactType.click();
       await page.getByRole("option", { name: "Email", exact: true }).click();
 
@@ -225,7 +227,9 @@ test.describe("Facility Devices Management", () => {
     });
 
     await test.step("Switch type and clear the stale error", async () => {
-      const contactType = page.locator('[data-slot="select-trigger"]').last();
+      const contactType = page
+        .getByRole("combobox")
+        .filter({ hasText: "Email" });
       await contactType.click();
       await page.getByRole("option", { name: "URL", exact: true }).click();
 
