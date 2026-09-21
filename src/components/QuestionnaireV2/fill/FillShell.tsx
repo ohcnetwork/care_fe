@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
+import { useDisableSmoothScroll } from "@/components/QuestionnaireV2/shared/useDisableSmoothScroll";
+
 /** The fullscreen frame (the fill routes opt out of the app sidebar):
- *  fixed viewport shell, z-40 under portals at z-50. Every state of the
+ *  fixed viewport shell from md up, z-40 under portals at z-50. Every state of the
  *  fill page — picker, skeleton, loaded session — renders inside it, so
  *  the layout never jumps shells and the close affordance always exists. */
 export function FillShell({
@@ -18,12 +20,14 @@ export function FillShell({
   tabs?: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  useDisableSmoothScroll();
   return (
-    <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-gray-100">
+    // -m-4 cancels AppRouter's page-wrapper p-4 below md, where this shell
+    <div className="-m-4 flex min-h-dvh flex-col bg-gray-100 md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden">
       {/* min-w-0 + overflow on the strip: a long questionnaire title (or
           the two tabs) scrolls within its own row on narrow screens
           instead of pushing the close button off-viewport. */}
-      <div className="flex shrink-0 items-end justify-between gap-2 bg-gray-200 px-4 pt-3 md:px-6">
+      <div className="sticky top-0 z-10 flex shrink-0 items-end justify-between gap-2 bg-gray-200 px-4 pt-3 md:px-6">
         <div className="min-w-0 flex-1 overflow-x-auto">{tabs ?? <div />}</div>
         <Button
           type="button"

@@ -19,6 +19,7 @@ import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/Impo
 import { findFirstInvalidQuestion } from "@/components/QuestionnaireV2/builder/saveValidation";
 import { QuestionnaireFormProvider } from "@/components/QuestionnaireV2/form/FormContext";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { useDisableSmoothScroll } from "@/components/QuestionnaireV2/shared/useDisableSmoothScroll";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
 import { actionContextTypeFor } from "@/types/questionnaire/actions";
@@ -51,6 +52,7 @@ export function QuestionnaireStudioPage({
   id: string;
 }) {
   const { t } = useTranslation();
+  useDisableSmoothScroll();
 
   const {
     data: questionnaire,
@@ -214,10 +216,10 @@ export function QuestionnaireStudioPage({
       {/* Fullscreen shell (the route opts out of the app sidebar in
           AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
           viewport-filling frame — fixed top bar, three independently
-          scrolling columns. z-40 keeps portals (dialogs, popovers, toasts
+          scrolling columns, from md up. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}
-      <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-white">
-        <header className="shrink-0">
+      <div className="min-h-dvh flex flex-col bg-white md:fixed md:inset-0 md:z-40 md:overflow-hidden">
+        <header className="sticky top-0 z-10 shrink-0">
           <StudioTopBar
             questionnaire={questionnaire}
             questions={state.questions}
