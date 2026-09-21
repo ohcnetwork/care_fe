@@ -76,6 +76,7 @@ export function MultiFilterStyleTagSelector({
   const [selectedGroup, setSelectedGroup] = useState<TagConfig | null>(null);
   const isMobile = useIsMobile();
   const { t } = useTranslation();
+  const groupPopoverSide = align === "end" ? "left" : "right";
 
   // Fetch top-level tags (both instance and facility tags in one call)
   const { data: rootTags, isLoading: isLoadingRoot } = useQuery({
@@ -498,12 +499,16 @@ export function MultiFilterStyleTagSelector({
                                       {t("group")}
                                     </Badge>
                                   </div>
-                                  <ArrowRight className="ml-auto size-4" />
+                                  {groupPopoverSide === "left" ? (
+                                    <ArrowLeft className="ml-auto size-4" />
+                                  ) : (
+                                    <ArrowRight className="ml-auto size-4" />
+                                  )}
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent
                                 className="w-64 p-0"
-                                side="right"
+                                side={groupPopoverSide}
                                 align="start"
                                 sideOffset={5}
                               >
