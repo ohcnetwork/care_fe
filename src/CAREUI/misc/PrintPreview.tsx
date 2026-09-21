@@ -1,4 +1,5 @@
 import careConfig from "@careConfig";
+import { FileDown } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,8 +7,17 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { FitToWidthScrollContainer } from "@/CAREUI/interactive/FitToWidthScrollContainer";
+import { PrintPage } from "@/CAREUI/misc/PrintPage";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import Page from "@/components/Common/Page";
 
@@ -15,14 +25,18 @@ import BackButton from "@/components/Common/BackButton";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAutoPrint from "@/hooks/useAutoPrint";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityRead } from "@/types/facility/facility";
 import type {
   LogoConfig,
-  PrintTemplate,
+  PageConfig,
   WatermarkConfig,
 } from "@/types/facility/printTemplate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { getPrintPage, resolvePrintTemplate } from "@/Utils/print";
 import { isIOSDevice } from "@/Utils/utils";
+
+import "./print.css";
 
 interface WatermarkProps {
   text: string;
@@ -40,18 +54,27 @@ type Props = {
   templateSlug: string;
   hideFacilityHeader?: boolean;
   footer?: ReactNode;
+  autoPrint?: boolean;
+  defaultPage?: PageConfig;
 };
 
 export default function PrintPreview(props: Props) {
+  const { facility: currentFacility, facilityId } =
+    useCurrentFacilitySilently();
+  const facility = props.facility ?? currentFacility ?? undefined;
+  const disabled = props.disabled || (!!facilityId && !facility);
   const isMobile = useBreakpoints({ default: true, md: false });
   const { t } = useTranslation();
   useShortcutSubContext();
 
+  const template = resolvePrintTemplate(
+    facility?.print_templates,
+    props.templateSlug,
+  );
+  const page = getPrintPage(template, props.defaultPage);
   const autoPrintEnabled =
-    (props.facility
-      ? resolvePrintTemplate(props.facility, props.templateSlug)?.print_setup
-          ?.auto_print
-      : undefined) ?? false;
+    props.autoPrint ?? template?.print_setup?.auto_print ?? false;
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
 
   const [imagesReady, setImagesReady] = useState(false);
   const printSectionRef = useRef<HTMLDivElement>(null);
@@ -59,7 +82,7 @@ export default function PrintPreview(props: Props) {
   useEffect(() => {
     setImagesReady(false);
     const node = printSectionRef.current;
-    if (!node || props.disabled) return;
+    if (!node || disabled) return;
 
     let cancelled = false;
 
@@ -72,6 +95,7 @@ export default function PrintPreview(props: Props) {
             : img.decode().catch(() => undefined),
         ),
       );
+      await document.fonts.ready;
       if (!cancelled) setImagesReady(true);
     };
 
@@ -80,31 +104,42 @@ export default function PrintPreview(props: Props) {
     return () => {
       cancelled = true;
     };
-  }, [props.disabled, props.facility]);
+  }, [disabled, facility, props.templateSlug, props.children]);
 
   const { isPrinting } = useAutoPrint({
-    enabled: autoPrintEnabled && imagesReady && !props.disabled,
+    enabled: autoPrintEnabled && imagesReady && !disabled,
   });
 
-  const templateWatermark = props.facility
-    ? resolvePrintTemplate(props.facility, props.templateSlug)?.watermark
-    : undefined;
+  const templateWatermark = template?.watermark;
+
+  const handlePrint = () => {
+    if (disabled || isPrinting || !imagesReady) return;
+    const previousTitle = document.title;
+    document.title = props.title;
+    try {
+      window.print();
+    } finally {
+      document.title = previousTitle;
+    }
+  };
 
   const printContent = (
     <div
       ref={printSectionRef}
       id="section-to-print"
-      className={cn("w-full relative overflow-clip", props.className)}
+      className={cn("relative", props.className)}
+      style={{ width: `${page.contentWidth}mm` }}
     >
       {props.watermark && <StatusWatermark watermark={props.watermark} />}
       {templateWatermark?.enabled && templateWatermark.text && (
         <TiledWatermark watermark={templateWatermark} />
       )}
       <FacilityPrintLayout
-        facility={props.facility}
+        facility={facility}
         templateSlug={props.templateSlug}
         hideFacilityHeader={props.hideFacilityHeader}
         footer={props.footer}
+        defaultPage={props.defaultPage}
       >
         {props.children}
       </FacilityPrintLayout>
@@ -116,7 +151,7 @@ export default function PrintPreview(props: Props) {
       <Page
         title={props.title}
         options={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {props.showBackButton !== false && (
               <BackButton variant="outline" data-shortcut-id="go-back">
                 <CareIcon icon="l-arrow-left" className="text-lg" />
@@ -124,9 +159,17 @@ export default function PrintPreview(props: Props) {
               </BackButton>
             )}
             <Button
+              variant="outline"
+              disabled={disabled || isPrinting || !imagesReady}
+              onClick={() => setPdfDialogOpen(true)}
+            >
+              <FileDown className="size-4" />
+              {t("print_export_pdf")}
+            </Button>
+            <Button
               variant="primary"
-              disabled={props.disabled || isPrinting}
-              onClick={print}
+              disabled={disabled || isPrinting || !imagesReady}
+              onClick={handlePrint}
             >
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
@@ -139,17 +182,38 @@ export default function PrintPreview(props: Props) {
           <div className="mt-4 print:max-w-none">
             <FitToWidthScrollContainer
               className="w-[95vw] mx-2 shadow-2xl"
-              contentClassName="bg-white p-4 text-sm min-w-[800px]"
+              contentClassName="bg-white p-4 text-sm"
             >
               {printContent}
             </FitToWidthScrollContainer>
           </div>
         ) : (
-          <div className="mx-auto my-4 print:max-w-none sm:my-8 origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
+          <div className="mx-auto my-4 overflow-auto print:max-w-none sm:my-8 origin-top-left bg-white p-10 text-sm shadow-2xl print:transform-none max-w-[calc(100vw-1rem)]">
             {printContent}
           </div>
         )}
       </Page>
+      <Dialog open={pdfDialogOpen} onOpenChange={setPdfDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("print_export_pdf")}</DialogTitle>
+            <DialogDescription>{t("print_export_pdf_help")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPdfDialogOpen(false)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={() => {
+                setPdfDialogOpen(false);
+                requestAnimationFrame(handlePrint);
+              }}
+            >
+              {t("continue")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -233,41 +297,6 @@ function TiledWatermark({ watermark }: { watermark: WatermarkConfig }) {
   );
 }
 
-function resolvePrintTemplate(
-  facility: FacilityRead,
-  templateSlug?: string,
-): PrintTemplate | undefined {
-  const templates = facility.print_templates;
-  if (!templates?.length) return undefined;
-
-  const match = templateSlug
-    ? templates.find((t) => t.slug === templateSlug)
-    : undefined;
-
-  return match ?? templates.find((t) => t.slug === "default");
-}
-
-function buildPageStyle(template?: PrintTemplate): string | null {
-  const page = template?.page;
-  if (!page) return null;
-
-  const parts: string[] = [];
-
-  if (page.size || page.orientation) {
-    const sizeParts = [page.size, page.orientation].filter(Boolean).join(" ");
-    parts.push(`size: ${sizeParts}`);
-  }
-
-  if (page.margin) {
-    const { top, right, bottom, left } = page.margin;
-    parts.push(`margin: ${top}mm ${right}mm ${bottom}mm ${left}mm`);
-  }
-
-  if (parts.length === 0) return null;
-
-  return `@media print { @page { ${parts.join("; ")}; } }`;
-}
-
 function FacilityInfo({ facility }: { facility: FacilityRead }) {
   return (
     <div className="text-left">
@@ -315,84 +344,93 @@ function FacilityPrintLayout({
   children,
   hideFacilityHeader,
   footer,
+  defaultPage,
 }: {
   templateSlug?: string;
   facility?: FacilityRead;
   children: ReactNode;
   hideFacilityHeader?: boolean;
   footer?: ReactNode;
+  defaultPage?: PageConfig;
 }) {
-  if (!facility) {
-    return (
-      <>
-        {children}
-        {footer && <div>{footer}</div>}
-      </>
-    );
-  }
-
-  const printTemplate = resolvePrintTemplate(facility, templateSlug);
+  const printTemplate = resolvePrintTemplate(
+    facility?.print_templates,
+    templateSlug ?? "default",
+  );
   const headerImage = printTemplate?.branding?.header_image;
   const footerImage = printTemplate?.branding?.footer_image;
   const logo = printTemplate?.branding?.logo;
-  const pageStyle = buildPageStyle(printTemplate);
   const logoUrl = logo?.url || undefined;
   const alignment = logoUrl ? (logo?.alignment ?? "right") : "right";
 
-  return (
-    <div className="flex flex-col min-h-[calc(100vh-80px)] print:min-h-screen">
-      {pageStyle && <style>{pageStyle}</style>}
-      {hideFacilityHeader ? null : headerImage?.url ? (
-        <div className="flex justify-between items-start mb-2 pb-2">
-          <img
-            src={headerImage.url}
-            alt="Custom Header"
-            className="flex-1 h-auto object-contain max-w-3xl"
-            style={
-              headerImage.height
-                ? { maxHeight: `${headerImage.height}px` }
-                : undefined
-            }
-          />
-        </div>
-      ) : alignment === "center" ? (
-        <div className="flex flex-col items-center mb-3 pb-2 border-b border-gray-200 gap-2">
-          <FacilityLogo logoUrl={logoUrl} logo={logo} />
-          <div className="w-full">
-            <FacilityInfo facility={facility} />
-          </div>
-        </div>
-      ) : (
-        <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-200">
-          {alignment === "left" ? (
-            <>
-              <FacilityLogo logoUrl={logoUrl} logo={logo} />
-              <FacilityInfo facility={facility} />
-            </>
-          ) : (
-            <>
-              <FacilityInfo facility={facility} />
-              <FacilityLogo logoUrl={logoUrl} logo={logo} />
-            </>
-          )}
-        </div>
-      )}
-      <div className="flex-1">{children}</div>
-      {footerImage?.url && (
-        <div className="mt-auto pt-2">
-          <img
-            src={footerImage.url}
-            alt="Footer"
-            className="w-full h-auto object-contain"
-            style={
-              footerImage.height
-                ? { maxHeight: `${footerImage.height}px` }
-                : undefined
-            }
-          />
-        </div>
-      )}
-      {footer && <div>{footer}</div>}
+  const header = hideFacilityHeader ? null : headerImage?.url ? (
+    <div className="flex justify-between items-start mb-2 pb-2">
+      <img
+        src={headerImage.url}
+        alt="Custom Header"
+        className="flex-1 h-auto object-contain max-w-3xl"
+        style={
+          headerImage.height
+            ? { maxHeight: `${headerImage.height}px` }
+            : undefined
+        }
+      />
     </div>
+  ) : !facility ? (
+    <div className="mb-3 pb-2 border-b border-gray-200">
+      <FacilityLogo logoUrl={logoUrl} logo={logo} />
+    </div>
+  ) : alignment === "center" ? (
+    <div className="flex flex-col items-center mb-3 pb-2 border-b border-gray-200 gap-2">
+      <FacilityLogo logoUrl={logoUrl} logo={logo} />
+      <div className="w-full">
+        <FacilityInfo facility={facility} />
+      </div>
+    </div>
+  ) : (
+    <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-200">
+      {alignment === "left" ? (
+        <>
+          <FacilityLogo logoUrl={logoUrl} logo={logo} />
+          <FacilityInfo facility={facility} />
+        </>
+      ) : (
+        <>
+          <FacilityInfo facility={facility} />
+          <FacilityLogo logoUrl={logoUrl} logo={logo} />
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <PrintPage
+      template={printTemplate}
+      defaultPage={defaultPage}
+      header={header}
+      footer={
+        footerImage?.url || footer ? (
+          <>
+            {footerImage?.url && (
+              <div>
+                <img
+                  src={footerImage.url}
+                  alt="Footer"
+                  className="w-full h-auto object-contain"
+                  style={
+                    footerImage.height
+                      ? { maxHeight: `${footerImage.height}px` }
+                      : undefined
+                  }
+                />
+              </div>
+            )}
+            {footer}
+          </>
+        ) : undefined
+      }
+    >
+      {children}
+    </PrintPage>
   );
 }
