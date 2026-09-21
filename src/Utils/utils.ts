@@ -83,6 +83,11 @@ export const dateQueryString = (date: DateLike) => {
   return dayjs(date).format("YYYY-MM-DD");
 };
 
+/** Local midnight from a "YYYY-MM-DD" string (avoids UTC parsing of date-only values) for the calendar. */
+export const parseLocalDate = (dateYmd?: string): Date | undefined => {
+  return dateYmd ? new Date(`${dateYmd}T00:00:00`) : undefined;
+};
+
 export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
   if (!date || !dayjs(date).isValid()) return "";
   const d = dayjs(date).toDate();
