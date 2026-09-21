@@ -5,8 +5,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import { cn } from "@/lib/utils";
-
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { getPermissions } from "@/common/Permissions";
@@ -65,24 +63,16 @@ import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 
 interface DetailRowProps {
   label: string;
-  value?: string | null;
-  valueClassName?: string;
+  value?: React.ReactNode | null;
   width?: string;
 }
 
-const DetailRow = ({
-  label,
-  value,
-  valueClassName = "",
-  width = "w-32",
-}: DetailRowProps) => {
+const DetailRow = ({ label, value, width = "w-32" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className={`text-gray-600 ${width}`}>{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={cn("ml-1 whitespace-pre-wrap", valueClassName)}>
-        {value}
-      </span>
+      <span className="ml-1 whitespace-pre-wrap">{value}</span>
     </div>
   );
 };
@@ -439,9 +429,12 @@ export const PrintChargeItems = (props: {
                         <div className="space-y-1">
                           <DetailRow
                             label={t("name")}
-                            value={account?.patient?.name}
+                            value={
+                              <span className="capitalize">
+                                {account?.patient?.name}
+                              </span>
+                            }
                             width="w-22"
-                            valueClassName="capitalize"
                           />
                           <DetailRow
                             label={`${t("age")} / ${t("sex")}`}

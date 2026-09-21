@@ -2,8 +2,6 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +32,7 @@ import { PrintTemplateType } from "@/types/facility/printTemplate";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+import React from "react";
 
 const outcomeMap: Record<
   PaymentReconciliationOutcome,
@@ -52,24 +51,16 @@ type PrintPaymentReconciliationProps = {
 
 interface DetailRowProps {
   label: string;
-  value?: string | null;
-  valueClassName?: string;
+  value?: React.ReactNode | null;
   width?: string;
 }
 
-const DetailRow = ({
-  label,
-  value,
-  valueClassName = "",
-  width = "w-32",
-}: DetailRowProps) => {
+const DetailRow = ({ label, value, width = "w-32" }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className={`text-gray-600 ${width}`}>{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={cn("ml-1 whitespace-pre-wrap", valueClassName)}>
-        {value || "-"}
-      </span>
+      <span className="ml-1 whitespace-pre-wrap">{value || "-"}</span>
     </div>
   );
 };
@@ -133,9 +124,12 @@ function PrintPaymentReconciliation({
             <div className="space-y-1">
               <DetailRow
                 label={t("name")}
-                value={payment.account.patient.name}
+                value={
+                  <span className="capitalize font-semibold">
+                    {payment.account.patient?.name}
+                  </span>
+                }
                 width="w-16"
-                valueClassName="font-semibold capitalize"
               />
               <DetailRow
                 label={`${t("age")} / ${t("sex")}`}
@@ -169,9 +163,10 @@ function PrintPaymentReconciliation({
                 <DetailRow
                   key={identifier.config.id}
                   label={identifier.config.config.display}
-                  value={identifier.value}
+                  value={
+                    <span className="font-semibold">{identifier.value}</span>
+                  }
                   width="w-24"
-                  valueClassName="font-semibold"
                 />
               ))}
               <DetailRow

@@ -30,22 +30,18 @@ import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatPatientAge } from "@/Utils/utils";
-import { cn } from "@/lib/utils";
 
 interface DetailRowProps {
   label: string;
-  value?: string | null;
-  valueClassName?: string;
+  value?: React.ReactNode | null;
 }
 
-const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
+const DetailRow = ({ label, value }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={cn("ml-1 font-semibold", valueClassName)}>
-        {value || "-"}
-      </span>
+      <span className="ml-1 font-semibold">{value || "-"}</span>
     </div>
   );
 };
@@ -149,8 +145,7 @@ const DispenseOrderPreview = ({
           <div className="space-y-2">
             <DetailRow
               label={t("patient")}
-              valueClassName="capitalize"
-              value={patient.name}
+              value={<span className="capitalize">{patient.name}</span>}
             />
             <DetailRow
               label={`${t("age")} / ${t("sex")}`}

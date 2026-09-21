@@ -9,7 +9,6 @@ import Loading from "@/components/Common/Loading";
 import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
-import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPatientIdentifiers,
@@ -31,18 +30,15 @@ import { formatPatientAge } from "@/Utils/utils";
 
 interface DetailRowProps {
   label: string;
-  value?: string | null;
-  valueClassName?: string;
+  value?: React.ReactNode | null;
 }
 
-const DetailRow = ({ label, value, valueClassName = "" }: DetailRowProps) => {
+const DetailRow = ({ label, value }: DetailRowProps) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span className={cn("ml-1 font-semibold", valueClassName)}>
-        {value || "-"}
-      </span>
+      <span className="ml-1 font-semibold">{value || "-"}</span>
     </div>
   );
 };
@@ -144,8 +140,7 @@ const MedicationReturnPreview = ({
           <div className="space-y-2">
             <DetailRow
               label={t("patient")}
-              value={patient.name}
-              valueClassName="capitalize"
+              value={<span className="capitalize">{patient.name}</span>}
             />
             <DetailRow
               label={`${t("age")} / ${t("sex")}`}

@@ -492,26 +492,15 @@ export default function AppointmentPrint(props: Props) {
 interface DetailRowProps {
   label: string;
   value?: ReactNode;
-  valueClassName?: string;
   width?: string;
 }
 
-const DetailRow = ({
-  label,
-  value,
-  valueClassName = "",
-  width = "w-20",
-}: DetailRowProps) => {
+const DetailRow = ({ label, value, width = "w-20" }: DetailRowProps) => {
   return (
     <div className="flex text-xs leading-snug">
       <span className={cn("text-gray-600 shrink-0", width)}>{label}</span>
       <span className="text-gray-950 font-semibold">: </span>
-      <span
-        className={cn(
-          "ml-0.5 whitespace-pre-wrap text-gray-950 font-semibold",
-          valueClassName,
-        )}
-      >
+      <span className="ml-0.5 whitespace-pre-wrap text-gray-950 font-semibold">
         {value}
       </span>
     </div>

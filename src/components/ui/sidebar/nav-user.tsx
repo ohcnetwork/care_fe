@@ -166,12 +166,8 @@ export function PatientNavUser() {
                     name={patient?.name || phoneNumber}
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {patient?.name ? (
-                        <span className="capitalize">{patient.name}</span>
-                      ) : (
-                        phoneNumber
-                      )}
+                    <span className="truncate font-semibold capitalize">
+                      {patient?.name || phoneNumber}
                     </span>
                     {patient && (
                       <span className="truncate text-xs">{phoneNumber}</span>
@@ -203,12 +199,8 @@ export function PatientNavUser() {
                   name={patient?.name || phoneNumber}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {patient?.name ? (
-                      <span className="capitalize">{patient.name}</span>
-                    ) : (
-                      phoneNumber
-                    )}
+                  <span className="truncate font-semibold capitalize">
+                    {patient?.name || phoneNumber}
                   </span>
                   {patient && (
                     <span className="truncate text-xs">{phoneNumber}</span>

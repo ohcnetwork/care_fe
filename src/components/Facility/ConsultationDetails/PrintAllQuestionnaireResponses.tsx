@@ -129,19 +129,15 @@ export function PrintAllQuestionnaireResponses({
 const DetailRow = ({
   label,
   value,
-  valueClassName = "",
 }: {
   label: string;
-  value?: string | null;
-  valueClassName?: string;
+  value: React.ReactNode | null;
 }) => {
   return (
     <div className="flex">
       <span className="text-gray-600 w-32">{label}</span>
       <span className="text-gray-600">: </span>
-      <span
-        className={cn("ml-1 whitespace-pre-wrap font-semibold", valueClassName)}
-      >
+      <span className="ml-1 whitespace-pre-wrap font-semibold">
         {value || "-"}
       </span>
     </div>
@@ -166,8 +162,7 @@ export function PrintableEncounterDetails({
       <div className="space-y-2">
         <DetailRow
           label={t("patient")}
-          value={patient.name}
-          valueClassName="capitalize"
+          value={<span className="capitalize">{patient.name}</span>}
         />
         <DetailRow
           label={`${t("age")} / ${t("sex")}`}
