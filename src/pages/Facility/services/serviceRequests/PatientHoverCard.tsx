@@ -123,13 +123,13 @@ function PatientHoverCardTrigger({
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {bloodGroup && (
-              <Badge variant="destructive" className="gap-1">
+              <Badge variant="yellow" className="gap-1">
                 <DropletIcon className="size-3.5" strokeWidth={1.5} />
                 {bloodGroup}
               </Badge>
             )}
             {!!compact.allergiesCount && (
-              <Badge variant="yellow" className="gap-1">
+              <Badge variant="destructive" className="gap-1">
                 <AllergyIcon className="size-3.5" />
                 {compact.allergiesCount} {t("allergies")}
               </Badge>
