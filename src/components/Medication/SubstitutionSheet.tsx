@@ -43,6 +43,7 @@ import {
   getSubstitutionTypeDisplay,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 export const substitutionSchema = z.object({
   substitutedProductKnowledge: z
@@ -278,6 +279,7 @@ export function SubstitutionSheet({
                 className="flex-1 sm:flex-initial"
               >
                 {t("save")}
+                <ShortcutBadge actionId="enter-action" />
               </Button>
             </div>
           </div>

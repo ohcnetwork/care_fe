@@ -527,7 +527,7 @@ export function EncounterList({
           <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="relative w-full sm:w-auto sm:min-w-60">
+                <div className="relative w-full sm:w-auto sm:min-w-60 **:data-[slot=command-input-wrapper]:px-0">
                   <Command
                     shouldFilter={false}
                     className="overflow-visible bg-transparent"
@@ -562,7 +562,7 @@ export function EncounterList({
                               }
                             }}
                             placeholder={selectedSearchType.placeholder}
-                            className="h-9 pl-2 bg-white"
+                            className="h-9 pl-2 w-full focus:border-primary-500 focus:ring-primary-500 focus-visible:outline-hidden"
                           />
                         </div>
                       </PopoverAnchor>
@@ -621,17 +621,19 @@ export function EncounterList({
                   patientId={qParams.patient_filter}
                   patientName={qParams.patient_name}
                 />
-                <MultiFilter
-                  selectedFilters={displaySelectedFilters}
-                  onFilterChange={handleFilterChange}
-                  onOperationChange={handleOperationChange}
-                  onClearAll={handleClearAll}
-                  onClearFilter={handleClearFilter}
-                  className="flex sm:flex-row flex-wrap sm:items-center"
-                  triggerButtonClassName="self-start sm:self-center"
-                  clearAllButtonClassName="self-center"
-                  facilityId={facilityId}
-                />
+                <div className="w-full min-w-0 sm:w-auto">
+                  <MultiFilter
+                    selectedFilters={displaySelectedFilters}
+                    onFilterChange={handleFilterChange}
+                    onOperationChange={handleOperationChange}
+                    onClearAll={handleClearAll}
+                    onClearFilter={handleClearFilter}
+                    className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+                    triggerButtonClassName="self-start sm:self-center"
+                    clearAllButtonClassName="self-center"
+                    facilityId={facilityId}
+                  />
+                </div>
               </div>
             </div>
 
