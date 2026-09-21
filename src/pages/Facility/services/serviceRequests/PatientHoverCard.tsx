@@ -129,7 +129,7 @@ function PatientHoverCardTrigger({
               </Badge>
             )}
             {!!compact.allergiesCount && (
-              <Badge variant="destructive" className="gap-1">
+              <Badge variant="yellow" className="gap-1">
                 <AllergyIcon className="size-3.5" />
                 {compact.allergiesCount} {t("allergies")}
               </Badge>

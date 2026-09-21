@@ -142,7 +142,7 @@ export function FillHeader({
               <span className="text-xs font-medium text-gray-600">
                 {t("blood_group")}:
               </span>
-              <Badge variant="yellow">
+              <Badge variant="destructive">
                 <DropletIcon className="size-4" strokeWidth={1.5} />
                 <span>
                   {t(`BLOOD_GROUP_LONG__${patient.blood_group || "unknown"}`)}
@@ -155,7 +155,7 @@ export function FillHeader({
               <span className="text-xs font-medium text-gray-600">
                 {t("allergies")}:
               </span>
-              <Badge variant="destructive">
+              <Badge variant="yellow">
                 <AllergyIcon className="size-4" />
                 <span>
                   {formatTruncatedList(
