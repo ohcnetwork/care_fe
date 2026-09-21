@@ -16,7 +16,8 @@ on:
 
 permissions:
   actions: write        # download Stage 1 artifact by run-id, and workflow_dispatch Stage 3
-  pull-requests: read   # resolve a PR's head repo to confirm it is a fork
+  pull-requests: read   # resolve fork-ness and fetch review comments for the addressed gate
+  issues: read          # fetch issue comments for the conversation @mention gate
 
 concurrency:
   # One dispatcher per Stage 1 run. A re-run reuses the same id, so retries coalesce here.
@@ -52,11 +53,16 @@ jobs:
           EVENT=$(cat event_name.txt); HEAD_REPO=$(cat head_repo.txt || true)
           [[ "$PR"  =~ ^[0-9]+$ ]] || { echo "::error::non-numeric PR number"; exit 1; }
           [[ "$CID" =~ ^[0-9]+$ ]] || { echo "::error::non-numeric comment id"; exit 1; }
+          case "$EVENT" in
+            issue_comment|pull_request_review_comment) ;;
+            *) echo "::error::unexpected event_name '$EVENT'"; exit 1 ;;
+          esac
           echo "event=$EVENT pr=$PR comment=$CID head_repo=${HEAD_REPO:-<none>}"
           echo "comment body (inert, for audit):"; base64 -d comment_body_b64.txt || true; echo
           {
             echo "pr=$PR"
             echo "cid=$CID"
+            echo "event=$EVENT"
             echo "head_repo=$HEAD_REPO"
           } >> "$GITHUB_OUTPUT"
 
@@ -82,12 +88,91 @@ jobs:
             echo "is_fork=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Addressed-to-reviewer gate. Without this, every human comment on a fork PR starts Stage 3
+      # (Copilot CLI) and the prompt-level noop still bills. Re-fetch the comment by id — do not
+      # trust the Stage 1 body / in_reply_to — then dispatch only if:
+      #   - issue_comment: the body @mentions github-actions (how humans summon the reviewer)
+      #   - pull_request_review_comment: same @mention, OR in_reply_to a thread whose root carries
+      #     the gh-aw marker `workflow_id: care-review` (matches care-review-fork-reply too)
+      - name: Addressed-to-reviewer gate
+        id: addressed
+        if: steps.fork.outputs.is_fork == 'true'
+        env:
+          PR: ${{ steps.ctx.outputs.pr }}
+          CID: ${{ steps.ctx.outputs.cid }}
+          EVENT: ${{ steps.ctx.outputs.event }}
+        run: |
+          set -euo pipefail
+          addressed=false
+
+          if [ "$EVENT" = "pull_request_review_comment" ]; then
+            API_PATH="repos/${GH_REPO}/pulls/comments/${CID}"
+          else
+            API_PATH="repos/${GH_REPO}/issues/comments/${CID}"
+          fi
+
+          if ! COMMENT=$(gh api "$API_PATH" 2>/dev/null); then
+            echo "Comment $CID not found via $API_PATH; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "$COMMENT" | jq -r '.body // empty' > "${RUNNER_TEMP}/comment_body.txt"
+          USER_TYPE=$(echo "$COMMENT" | jq -r '.user.type // empty')
+          if [ "$USER_TYPE" = "Bot" ]; then
+            echo "Comment author is a Bot; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$EVENT" = "pull_request_review_comment" ]; then
+            COMMENT_PR=$(echo "$COMMENT" | jq -r '.pull_request_url // empty' | grep -oE '[0-9]+$' || true)
+          else
+            COMMENT_PR=$(echo "$COMMENT" | jq -r '.issue_url // empty' | grep -oE '[0-9]+$' || true)
+          fi
+          if [ "$COMMENT_PR" != "$PR" ]; then
+            echo "Comment $CID is on #$COMMENT_PR, not claimed #$PR; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if grep -qiF '@github-actions' "${RUNNER_TEMP}/comment_body.txt"; then
+            echo "Comment mentions @github-actions."
+            addressed=true
+          fi
+
+          if [ "$addressed" = false ] && [ "$EVENT" = "pull_request_review_comment" ]; then
+            PARENT_ID=$(echo "$COMMENT" | jq -r '.in_reply_to_id // empty')
+            if [[ "$PARENT_ID" =~ ^[0-9]+$ ]]; then
+              if PARENT=$(gh api "repos/${GH_REPO}/pulls/comments/${PARENT_ID}" 2>/dev/null); then
+                echo "$PARENT" | jq -r '.body // empty' > "${RUNNER_TEMP}/parent_body.txt"
+                if grep -qF 'workflow_id: care-review' "${RUNNER_TEMP}/parent_body.txt" \
+                  || grep -qF 'gh-aw-workflow-call-id: ohcnetwork/care_fe/care-review' "${RUNNER_TEMP}/parent_body.txt"; then
+                  echo "Parent comment $PARENT_ID is a care-review thread."
+                  addressed=true
+                else
+                  echo "Parent comment $PARENT_ID is not a care-review thread; skipping."
+                fi
+              else
+                echo "Parent comment $PARENT_ID not found; skipping."
+              fi
+            else
+              echo "Top-level review comment with no @mention; skipping."
+            fi
+          fi
+
+          if [ "$addressed" = false ] && [ "$EVENT" = "issue_comment" ]; then
+            echo "Issue comment does not @mention the reviewer; skipping."
+          fi
+
+          echo "addressed=${addressed}" >> "$GITHUB_OUTPUT"
+
       # workflow_dispatch is the recursion-guard exception, so this GITHUB_TOKEN-fired step CAN spawn
       # Stage 3. Hand it the full aw_context envelope built from the digit-validated ids (so
       # --argjson cannot inject). Stage 3 pins its reply target to item_number and needs no inputs
       # beyond this envelope.
       - name: Dispatch Stage 3 (reply agent)
-        if: steps.fork.outputs.is_fork == 'true'
+        if: steps.fork.outputs.is_fork == 'true' && steps.addressed.outputs.addressed == 'true'
         run: |
           set -euo pipefail
           PR='${{ steps.ctx.outputs.pr }}'; CID='${{ steps.ctx.outputs.cid }}'

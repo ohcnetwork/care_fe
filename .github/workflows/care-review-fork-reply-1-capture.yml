@@ -11,7 +11,8 @@
 # This stage is deliberately dumb and powerless. It holds NO token (`permissions: {}`) — proving the
 # untrusted fork side needs nothing GitHub withholds — and makes NO fork/own-thread decisions. All
 # filtering that needs a token or an API call (is this actually a fork PR? is it addressed to
-# care-review?) happens in Stage 2, which runs in trusted base context. Same division of labour the
+# care-review via @mention or a care-review review thread?) happens in Stage 2, which runs in
+# trusted base context and must skip Stage 3 unless that gate passes. Same division of labour the
 # repo already uses for pr-review-trigger.yml -> pr-automation.yml and the Cloudflare preview bridge.
 name: CARE Reply Bridge — Capture
 
@@ -28,7 +29,8 @@ permissions: {}
 # Cheap trigger-level gate only. Upstream-repo, skip bots (their comments would spin the bridge for
 # nothing — see care-review.md's bot rationale), and for `issue_comment` require it to be on a PR
 # (issue_comment also fires on plain issues, which have no review threads to answer). Fork-detection
-# and "is this addressed to care-review?" are NOT here — they need a token, so Stage 2 owns them.
+# and "is this addressed to care-review?" are NOT here — they need a token, so Stage 2 owns them
+# and must not dispatch the Copilot agent until that gate passes.
 jobs:
   capture:
     runs-on: ubuntu-latest
