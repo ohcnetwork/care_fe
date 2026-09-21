@@ -77,7 +77,7 @@ export interface ApiCallOptions<
   /** Parameters to replace placeholders in the route path. */
   pathParams?: PathParams<Route["path"]>;
   /** Query parameters to append to the URL. */
-  queryParams?: RouteQueryParams<Route>;
+  queryParams?: RouteQueryParams<NoInfer<Route>>;
   /** The request body. */
   body?: Route["TBody"];
   /** Whether to suppress error toasts for this request. */
