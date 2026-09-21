@@ -1084,10 +1084,11 @@ const AppointmentActions = ({
                           {appointment.tags?.length > 0 ? (
                             <p className="text-gray-600 flex flex-wrap gap-1">
                               {appointment.tags.map((tag) => (
-                                <Badge key={tag.id} variant="secondary">
-                                  {tag.parent ? `${tag.parent.display}: ` : ""}
-                                  {tag.display}
-                                </Badge>
+                                <TagBadge
+                                  key={tag.id}
+                                  tag={tag}
+                                  hierarchyDisplay
+                                />
                               ))}
                             </p>
                           ) : (

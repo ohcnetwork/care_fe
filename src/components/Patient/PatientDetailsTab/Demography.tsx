@@ -219,6 +219,12 @@ export const Demography = (props: PatientProps) => {
           label: t("sex"),
           value: patientGender,
         },
+        {
+          label: t("blood_group"),
+          value: patientData.blood_group
+            ? t(`BLOOD_GROUP_LONG__${patientData.blood_group}`)
+            : t("BLOOD_GROUP_LONG__unknown"),
+        },
         <EmergencyContact
           key="emergency-contact"
           number={patientData.emergency_phone_number}
