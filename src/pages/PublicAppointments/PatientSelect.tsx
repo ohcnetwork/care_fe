@@ -212,8 +212,12 @@ export default function PatientSelect({
           asChild
         >
           <Link
-            href={`/facility/${facilityId}/appointments/${staffId}/patient-registration`}
-            query={{ slotId, reason }}
+            href={`/facility/${facilityId}/appointments/${staffId}/patient-registration?${new URLSearchParams(
+              {
+                ...(slotId != null && { slotId }),
+                ...(reason != null && { reason }),
+              },
+            ).toString()}`}
           >
             <span className="bg-linear-to-b from-white/15 to-transparent"></span>
             {t("add_new_patient")}

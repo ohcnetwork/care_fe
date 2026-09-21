@@ -158,28 +158,34 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       !!(encounterSearch.key && encounterSearch.value),
   });
 
-  const getVerifyQuery = (
+  const getVerifyUrl = (
     patient: PartialPatientModel | PatientListRead | PatientRead,
     yearOfBirth?: string,
     action?: "schedule" | "create_encounter",
-  ) => ({
-    config: identifierSearch.config,
-    value: identifierSearch.value,
-    phone_number: patient.phone_number,
-    year_of_birth:
-      yearOfBirth || (patient as PatientRead).year_of_birth?.toString() || "",
-    partial_id: getPartialId(patient),
-    ...(action ? { action } : {}),
-  });
+  ) => {
+    const params = new URLSearchParams();
+    Object.entries({
+      config: identifierSearch.config,
+      value: identifierSearch.value,
+      phone_number: patient.phone_number,
+      year_of_birth:
+        yearOfBirth || (patient as PatientRead).year_of_birth?.toString() || "",
+      partial_id: getPartialId(patient),
+      ...(action ? { action } : {}),
+    }).forEach(([key, value]) => {
+      if (value != null) {
+        params.set(key, value);
+      }
+    });
+    return `/facility/${facilityId}/patients/home?${params.toString()}`;
+  };
 
   const navigateToVerify = (
     patient: PartialPatientModel | PatientListRead | PatientRead,
     yearOfBirth?: string,
     action?: "schedule" | "create_encounter",
   ) => {
-    navigate(`/facility/${facilityId}/patients/home`, {
-      query: getVerifyQuery(patient, yearOfBirth, action),
-    });
+    navigate(getVerifyUrl(patient, yearOfBirth, action));
   };
 
   const handlePatientSelect = (index: number) => {
@@ -561,8 +567,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                         className="flex-1 rounded-r-none border-r-0"
                                       >
                                         <Link
-                                          href={`/facility/${facilityId}/patients/home`}
-                                          query={getVerifyQuery(
+                                          href={getVerifyUrl(
                                             encounter.patient,
                                             undefined,
                                             "schedule",
@@ -587,8 +592,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                         <DropdownMenuContent align="end">
                                           <DropdownMenuItem asChild>
                                             <Link
-                                              href={`/facility/${facilityId}/patients/home`}
-                                              query={getVerifyQuery(
+                                              href={getVerifyUrl(
                                                 encounter.patient,
                                                 undefined,
                                                 "schedule",
@@ -599,8 +603,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           </DropdownMenuItem>
                                           <DropdownMenuItem asChild>
                                             <Link
-                                              href={`/facility/${facilityId}/patients/home`}
-                                              query={getVerifyQuery(
+                                              href={getVerifyUrl(
                                                 encounter.patient,
                                                 undefined,
                                                 "create_encounter",
@@ -611,8 +614,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           </DropdownMenuItem>
                                           <DropdownMenuItem asChild>
                                             <Link
-                                              href={`/facility/${facilityId}/patients/home`}
-                                              query={getVerifyQuery(
+                                              href={getVerifyUrl(
                                                 encounter.patient,
                                               )}
                                             >
@@ -783,8 +785,11 @@ function AddPatientButton({
       data-shortcut-id="submit-action"
     >
       <Link
-        href={`/facility/${facilityId}/patient/create`}
-        query={phoneNumber ? { phone_number: phoneNumber } : undefined}
+        href={`/facility/${facilityId}/patient/create${
+          phoneNumber
+            ? `?${new URLSearchParams({ phone_number: phoneNumber }).toString()}`
+            : ""
+        }`}
       >
         <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}

@@ -53,19 +53,16 @@ export interface BaseSearchableItem {
 
 function ItemCard<T extends BaseSearchableItem>({
   item,
-  onItemClick,
+  href,
 }: {
   item: T;
-  onItemClick: (item: T) => void;
+  href: string;
 }) {
   const displayTitle = item.title ?? item.name;
   return (
-    <Card
-      className="hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => onItemClick(item)}
-    >
+    <Card className="hover:shadow-md transition-shadow">
       <CardContent className="py-2 px-4">
-        <div className="flex items-center justify-between">
+        <Link href={href} className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="shrink-0">
               <div className="p-1 rounded bg-green-100 text-green-600">
@@ -81,7 +78,7 @@ function ItemCard<T extends BaseSearchableItem>({
               </span>
             </div>
           </div>
-        </div>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -524,7 +521,7 @@ export function ResourceCategoryList<
                   <ItemCard
                     key={item.id}
                     item={item}
-                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                    href={`${basePath}/${item.slug}`}
                   />
                 ))}
               </>
