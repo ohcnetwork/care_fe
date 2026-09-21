@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Check, Loader2, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -323,6 +323,53 @@ export function FillPageBody({
             </section>
           </div>
         </FillOutlineNavProvider>
+        {/* Phone-only action row: visible only on small screens */}
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 bg-white p-3 md:hidden">
+          <Button
+            type="button"
+            variant="ghost"
+            className="font-semibold underline underline-offset-4"
+            onClick={() => navigate(exitTarget)}
+          >
+            {t("cancel")}
+          </Button>
+          {serverDraftSave.canSaveDraft && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (!contextRefreshFailed) serverDraftSave.saveDraft();
+              }}
+              disabled={
+                isPending ||
+                serverDraftSave.isSavingDraft ||
+                contextRefreshFailed
+              }
+            >
+              {serverDraftSave.isSavingDraft && (
+                <Loader2 className="size-4 animate-spin" />
+              )}
+              {t("save_as_draft")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={() => {
+              if (!contextRefreshFailed) void submit();
+            }}
+            disabled={
+              isPending || serverDraftSave.isSavingDraft || contextRefreshFailed
+            }
+            className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
+            )}
+            {t("save_changes")}
+          </Button>
+        </div>
       </div>
     </FillSessionTabs>
   );
