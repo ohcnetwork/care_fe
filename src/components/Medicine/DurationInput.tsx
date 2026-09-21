@@ -38,6 +38,7 @@ import {
   TimingBounds,
   validateTimingBounds,
 } from "@/types/emr/medicationRequest/medicationRequest";
+import { parseLocalDate } from "@/Utils/utils";
 
 interface DurationInputProps {
   value?: TimingBounds;
@@ -59,11 +60,6 @@ const BOUND_ICONS = {
   range: ArrowLeftRight,
   period: CalendarIcon,
 } as const;
-
-/** Local Date (midnight) from a "YYYY-MM-DD" string, for the calendar. */
-function parseLocalDate(ymd: string): Date | undefined {
-  return ymd ? new Date(`${ymd}T00:00:00`) : undefined;
-}
 
 /**
  * Duration field with scheduling bounds — Duration · Range · Period.
