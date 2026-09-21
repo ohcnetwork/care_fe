@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -143,24 +143,21 @@ export function DeliveryOrderList({
                   locationId={locationId}
                 />
               )}
-              <Button
-                variant="primary"
-                onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
-                      facilityId,
-                      locationId,
-                      internal,
-                      false,
-                      isRequester,
-                      "new",
-                    ),
-                  )
-                }
-              >
-                <CareIcon icon="l-plus" />
-                {t("create_delivery")}
-                <ShortcutBadge actionId="create-order" />
+              <Button variant="primary" asChild>
+                <Link
+                  href={getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    isRequester,
+                    "new",
+                  )}
+                >
+                  <CareIcon icon="l-plus" />
+                  {t("create_delivery")}
+                  <ShortcutBadge actionId="create-order" />
+                </Link>
               </Button>
             </div>
           )}

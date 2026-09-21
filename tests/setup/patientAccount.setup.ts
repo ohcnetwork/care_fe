@@ -22,7 +22,7 @@ test("navigate to an patient - create and save account id", async ({
     await page.waitForLoadState("networkidle");
 
     // Check if an account already exists
-    const goToAccountButton = page.getByRole("button", {
+    const goToAccountButton = page.getByRole("link", {
       name: "Go to account",
     });
     const accountExists = await goToAccountButton
@@ -43,7 +43,7 @@ test("navigate to an patient - create and save account id", async ({
         .pressSequentially(accountName);
       await page.getByRole("button", { name: "Create" }).click();
 
-      await page.getByRole("button", { name: "Go to account" }).click();
+      await page.getByRole("link", { name: "Go to account" }).click();
     }
 
     // Wait for navigation and extract account ID from URL

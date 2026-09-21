@@ -59,7 +59,7 @@ function detailFieldValue(page: Page, heading: string) {
 function firstConsentCard(page: Page) {
   return page
     .locator('[data-slot="card"]')
-    .filter({ has: page.getByRole("button", { name: "See Details" }) })
+    .filter({ has: page.getByRole("link", { name: "See Details" }) })
     .first();
 }
 
@@ -104,7 +104,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Click See Details on the newest card
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
 
     // Verify each field renders its expected value (not merely that the text
     // appears somewhere on the page)
@@ -182,7 +182,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
 
     // Verify note is visible
     await expect(page.getByText(noteText)).toBeVisible();
@@ -199,7 +199,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
 
     // The Note heading should not be visible (it only shows when note exists)
     await expect(page.getByRole("heading", { name: "Note" })).not.toBeVisible();
@@ -228,7 +228,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Go to detail page and verify both dates saved (rendered, not N/A)
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
 
     const validPeriod = detailFieldValue(page, "Valid Period");
     await expect(validPeriod).toContainText(format(validFrom, "MMMM d, yyyy"));
@@ -297,7 +297,7 @@ test.describe("Consent Editing", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
     await expect(page.getByText("Consent Details")).toBeVisible();
 
     // Click Edit
@@ -332,7 +332,7 @@ test.describe("Consent Editing", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await page.getByRole("link", { name: "See Details" }).first().click();
     await expect(page.getByText(originalNote)).toBeVisible();
 
     // Edit
@@ -366,7 +366,7 @@ test.describe("Consent Editing", () => {
       await expectToast(page, /consent created successfully/i);
 
       // Navigate to detail
-      await page.getByRole("button", { name: "See Details" }).first().click();
+      await page.getByRole("link", { name: "See Details" }).first().click();
       await expect(
         page.getByRole("heading", { name: "Consent Details" }),
       ).toBeVisible();

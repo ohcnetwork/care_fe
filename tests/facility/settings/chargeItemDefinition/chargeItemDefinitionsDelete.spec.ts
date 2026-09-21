@@ -27,7 +27,7 @@ test.describe("Charge Item Definition Delete operations", () => {
   });
 
   test("quick create and delete charge item definition", async ({ page }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("link", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
     await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);

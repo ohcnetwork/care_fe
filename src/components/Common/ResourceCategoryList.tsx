@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -225,10 +225,10 @@ function ResourceCategoryBreadcrumb({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
-            onClick={() => navigate(basePath)}
+            asChild
             className="cursor-pointer hover:underline hover:underline-offset-2"
           >
-            {baseTitle}
+            <Link href={basePath}>{baseTitle}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
@@ -279,7 +279,7 @@ interface ResourceCategoryListProps<
   basePath: string;
   baseTitle: string;
   onNavigate: (slug: string) => void;
-  onCreateItem?: () => void;
+  createItemHref?: string;
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   allowCategoryCreate?: boolean;
@@ -298,7 +298,7 @@ export function ResourceCategoryList<
   basePath,
   baseTitle,
   onNavigate,
-  onCreateItem,
+  createItemHref,
   createItemLabel,
   createItemIcon = "l-plus",
   allowCategoryCreate = false,
@@ -434,16 +434,25 @@ export function ResourceCategoryList<
                 {t("add_category")}
               </Button>
             )}
-            {onCreateItem && (
+            {createItemHref && (
               <div className="w-full sm:w-auto">
                 <Button
                   className="w-full sm:w-auto"
-                  onClick={onCreateItem}
-                  disabled={!isLeafCategory || false}
+                  asChild={!!isLeafCategory}
+                  disabled={!isLeafCategory}
                   hidden={!isLeafCategory}
                 >
-                  <CareIcon icon={createItemIcon} className="mr-2" />
-                  {createItemLabel}
+                  {isLeafCategory ? (
+                    <Link href={createItemHref}>
+                      <CareIcon icon={createItemIcon} className="mr-2" />
+                      {createItemLabel}
+                    </Link>
+                  ) : (
+                    <>
+                      <CareIcon icon={createItemIcon} className="mr-2" />
+                      {createItemLabel}
+                    </>
+                  )}
                 </Button>
               </div>
             )}

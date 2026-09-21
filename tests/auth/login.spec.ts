@@ -5,7 +5,7 @@ test.describe("Login", () => {
     await page.goto("/");
 
     // Navigate to login
-    await page.getByRole("button", { name: /log in as staff/i }).click();
+    await page.getByRole("link", { name: /log in as staff/i }).click();
 
     // Verify we're on the login page
     await expect(page).toHaveURL(/.*login/);

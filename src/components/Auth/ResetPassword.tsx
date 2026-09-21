@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -97,13 +97,10 @@ const ResetPassword = (props: ResetPasswordProps) => {
         />
 
         <div className="grid p-4 sm:flex sm:justify-between gap-4 mt-6">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => navigate("/login")}
-            className="w-full sm:w-auto"
-          >
-            <span>{t("cancel")}</span>
+          <Button variant="outline" asChild className="w-full sm:w-auto">
+            <Link href="/login">
+              <span>{t("cancel")}</span>
+            </Link>
           </Button>
           <Button variant="primary" type="submit" className="w-full sm:w-auto">
             <span>{t("reset")}</span>

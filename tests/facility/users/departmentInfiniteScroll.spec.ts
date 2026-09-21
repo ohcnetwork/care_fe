@@ -65,9 +65,9 @@ test.describe("Department Selector Infinite Scroll", () => {
     await test.step("Navigate to a user's Departments tab", async () => {
       await page.goto(`/facility/${facilityId}/users`);
       await expect(
-        page.getByRole("button", { name: "See Details" }).first(),
+        page.getByRole("link", { name: "See Details" }).first(),
       ).toBeVisible();
-      await page.getByRole("button", { name: "See Details" }).first().click();
+      await page.getByRole("link", { name: "See Details" }).first().click();
       await page.waitForLoadState("networkidle");
       await page.getByText("Departments", { exact: true }).click();
       await page.waitForLoadState("networkidle");

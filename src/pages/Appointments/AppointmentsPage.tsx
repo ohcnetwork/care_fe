@@ -931,14 +931,12 @@ function AppointmentRow(props: {
               {appointments.map((appointment) => (
                 <TableRow
                   key={appointment.id}
-                  className="shadow-sm rounded-lg cursor-pointer group"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
-                    )
-                  }
+                  className="shadow-sm rounded-lg group"
                 >
-                  <AppointmentRowItem appointment={appointment} />
+                  <AppointmentRowItem
+                    appointment={appointment}
+                    facilityId={facilityId}
+                  />
                 </TableRow>
               ))}
             </TableBody>
@@ -950,14 +948,23 @@ function AppointmentRow(props: {
   );
 }
 
-function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
+function AppointmentRowItem({
+  appointment,
+  facilityId,
+}: {
+  appointment: Appointment;
+  facilityId: string;
+}) {
   const { patient } = appointment;
   const { t } = useTranslation();
 
   return (
     <>
       <TableCell className="flex flex-row gap-2 py-6 group-hover:bg-gray-100 bg-white rounded-l-lg">
-        <span className="flex flex-row items-center gap-2">
+        <Link
+          href={`/facility/${facilityId}/patient/${patient.id}/appointments/${appointment.id}`}
+          className="flex flex-row items-center gap-2"
+        >
           <CareIcon
             icon="l-draggabledots"
             className="size-4 invisible group-hover:visible"
@@ -968,7 +975,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
               <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
             </span>
           </span>
-        </span>
+        </Link>
         {patient.deceased_datetime && (
           <Badge
             variant="destructive"

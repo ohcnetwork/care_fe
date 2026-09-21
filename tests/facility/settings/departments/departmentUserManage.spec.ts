@@ -27,7 +27,11 @@ test.describe("Department User Management", () => {
 
   async function openFirstDepartment(page: Page, departmentName: string) {
     await searchDepartment(page, departmentName);
-    await page.getByRole("row").filter({ hasText: departmentName }).click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: departmentName })
+      .getByRole("link", { name: departmentName, exact: true })
+      .click();
   }
 
   async function navigateToUsersTab(page: Page) {

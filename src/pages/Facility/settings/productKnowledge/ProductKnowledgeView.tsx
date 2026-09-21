@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -169,16 +169,13 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {isDeleting ? t("deleting") : t("delete")}
               </Button>
             )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-pen" className="mr-2 size-4" />
-              {t("edit")}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`}
+              >
+                <CareIcon icon="l-pen" className="mr-2 size-4" />
+                {t("edit")}
+              </Link>
             </Button>
           </div>
         </div>

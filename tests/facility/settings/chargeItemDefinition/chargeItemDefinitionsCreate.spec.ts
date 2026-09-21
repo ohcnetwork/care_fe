@@ -37,7 +37,7 @@ test.describe("Charge Item Definition Creation", () => {
   });
 
   test("validate required fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("link", { name: /add definition/i }).click();
     await page.getByRole("button", { name: /create/i }).click();
 
     // Title required
@@ -49,7 +49,7 @@ test.describe("Charge Item Definition Creation", () => {
   });
 
   test("rejects a whitespace-only title", async ({ page }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("link", { name: /add definition/i }).click();
     // Title is only spaces; slug and base price are valid, so the title
     // validation is the only thing that can block creation.
     await page.getByRole("textbox", { name: /title/i }).fill("   ");
@@ -67,7 +67,7 @@ test.describe("Charge Item Definition Creation", () => {
   test("create charge item definition with required fields only", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("link", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
     await page.getByRole("textbox", { name: /base price/i }).fill(basePrice);
@@ -89,7 +89,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page.waitForURL("**/charge_item_definitions/**");
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.getByRole("link", { name: "Edit" }).first().click();
     await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
       title,
     );
@@ -104,7 +104,7 @@ test.describe("Charge Item Definition Creation", () => {
   test("create charge item definition with all fields", async ({ page }) => {
     const cgstRate = "9";
     const sgstRate = "6";
-    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("link", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
     await page.getByRole("textbox", { name: /description/i }).fill(description);

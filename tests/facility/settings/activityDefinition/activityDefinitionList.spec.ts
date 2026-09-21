@@ -233,7 +233,7 @@ test.describe("Activity Definition List", () => {
     );
 
     await page
-      .getByRole("button", { name: /add activity definition/i })
+      .getByRole("link", { name: /add activity definition/i })
       .click();
 
     await expect(page).toHaveURL(

@@ -1,5 +1,5 @@
 import { CheckIcon, NotebookPen } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export const SummaryPanelActionsTab = () => {
   const actions = [
     {
       label: t("manage_consents"),
-      onClick: () => navigate("consents"),
+      href: "consents",
       hideOnMobile: false,
     },
     {
@@ -60,7 +60,8 @@ export const SummaryPanelActionsTab = () => {
     },
   ] as const satisfies {
     label: string;
-    onClick: () => void;
+    onClick?: () => void;
+    href?: string;
     hideOnMobile: boolean;
     shortcut?: React.ReactNode;
   }[];
@@ -72,23 +73,36 @@ export const SummaryPanelActionsTab = () => {
       </div>
       <div>
         <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
-          {actions.map((action) => (
-            <Button
-              key={action.label}
-              variant="outline"
-              className={cn(
-                "justify-start sm:@sm:justify-center sm:@sm:flex-1",
-                action.hideOnMobile && "hidden xl:flex",
-              )}
-              onClick={action.onClick}
-            >
-              <NotebookPen />
-              {action.label}
-              <span className="ml-auto">
-                {"shortcut" in action && action.shortcut}
-              </span>
-            </Button>
-          ))}
+          {actions.map((action) => {
+            const content = (
+              <>
+                <NotebookPen />
+                {action.label}
+                <span className="ml-auto">
+                  {"shortcut" in action && action.shortcut}
+                </span>
+              </>
+            );
+
+            return (
+              <Button
+                key={action.label}
+                variant="outline"
+                className={cn(
+                  "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+                  action.hideOnMobile && "hidden xl:flex",
+                )}
+                asChild={"href" in action}
+                onClick={"onClick" in action ? action.onClick : undefined}
+              >
+                {"href" in action ? (
+                  <Link href={action.href}>{content}</Link>
+                ) : (
+                  content
+                )}
+              </Button>
+            );
+          })}
 
           {selectedEncounter && (
             <PLUGIN_Component

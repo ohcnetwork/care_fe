@@ -16,7 +16,7 @@ test.describe("Questionnaire Visibility by Status and Subject Type", () => {
 
     await page.goto("/");
     await page.getByRole("link", { name: "Admin Dashboard" }).click();
-    await page.getByRole("button", { name: "Create Questionnaire" }).click();
+    await page.getByRole("link", { name: "Create Questionnaire" }).click();
     await page.getByRole("button", { name: "Import" }).click();
     await page
       .locator("[data-slot='dropdown-menu-item']")

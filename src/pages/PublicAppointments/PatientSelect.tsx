@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ArrowLeft } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -195,16 +195,13 @@ export default function PatientSelect({
   return (
     <div className="container mx-auto p-4 max-w-4xl pb-32">
       <div className="flex pb-4 justify-start">
-        <Button
-          variant="outline"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/${staffId}/book-appointment`,
-            )
-          }
-        >
-          <ArrowLeft className="size-4" />
-          <span className="text-sm underline">{t("back")}</span>
+        <Button variant="outline" asChild>
+          <Link
+            href={`/facility/${facilityId}/appointments/${staffId}/book-appointment`}
+          >
+            <ArrowLeft className="size-4" />
+            <span className="text-sm underline">{t("back")}</span>
+          </Link>
         </Button>
       </div>
       <div className="flex flex-col sm:flex-row gap-2 justify-between items-center my-6">
@@ -212,20 +209,15 @@ export default function PatientSelect({
         <Button
           variant="primary_gradient"
           className="w-full sm:w-auto"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/appointments/${staffId}/patient-registration`,
-              {
-                query: {
-                  slotId,
-                  reason,
-                },
-              },
-            )
-          }
+          asChild
         >
-          <span className="bg-linear-to-b from-white/15 to-transparent"></span>
-          {t("add_new_patient")}
+          <Link
+            href={`/facility/${facilityId}/appointments/${staffId}/patient-registration`}
+            query={{ slotId, reason }}
+          >
+            <span className="bg-linear-to-b from-white/15 to-transparent"></span>
+            {t("add_new_patient")}
+          </Link>
         </Button>
       </div>
       <div className="flex flex-col justify-center space-y-4">

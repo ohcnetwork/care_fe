@@ -304,16 +304,13 @@ export function DispenseOrderViewFooter({
                 }
               />
             )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}/print`,
-                )
-              }
-            >
-              <PrinterIcon className="size-4" />
-              {t("print")}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}/print`}
+              >
+                <PrinterIcon className="size-4" />
+                {t("print")}
+              </Link>
             </Button>
             {/* Next pharmacy actions — primary split button */}
             <div className="flex">

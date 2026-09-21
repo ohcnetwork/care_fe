@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
@@ -204,17 +204,13 @@ function MedicationReturnTable({
               </Badge>
             </TableCell>
             <TableCell>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/locations/${locationId}/medication_return/order/${delivery.id}`,
-                  )
-                }
-              >
-                <Eye className="mr-1 size-4" />
-                {t("view")}
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/facility/${facilityId}/locations/${locationId}/medication_return/order/${delivery.id}`}
+                >
+                  <Eye className="mr-1 size-4" />
+                  {t("view")}
+                </Link>
               </Button>
             </TableCell>
           </TableRow>

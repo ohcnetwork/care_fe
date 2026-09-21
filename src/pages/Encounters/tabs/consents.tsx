@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { isPast } from "date-fns";
 import { List, Search } from "lucide-react";
-import { useNavigate, usePathParams } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +33,6 @@ function ConsentCard({
   patientId: string;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const encounterId = consent.encounter;
   const consentId = consent.id;
@@ -130,18 +129,18 @@ function ConsentCard({
         <Button
           variant="ghost"
           className="w-full justify-center items-center gap-2 rounded-t-none"
-          onClick={() =>
-            navigate(
-              buildEncounterUrl(
-                patientId,
-                `/encounter/${encounterId}/consents/${consentId}`,
-                facilityId,
-              ),
-            )
-          }
+          asChild
         >
-          <List className="size-4" />
-          {t("see_details")}
+          <Link
+            href={buildEncounterUrl(
+              patientId,
+              `/encounter/${encounterId}/consents/${consentId}`,
+              facilityId,
+            )}
+          >
+            <List className="size-4" />
+            {t("see_details")}
+          </Link>
         </Button>
       </CardFooter>
     </Card>
