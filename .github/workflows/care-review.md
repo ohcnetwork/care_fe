@@ -97,6 +97,15 @@ checkout:
   repository: ${{ github.repository }}
 imports:
   - .github/agents/care-review.agent.md
+# Daily AI-credit budget for this workflow (24-hour rolling window, enforced by the activation
+# job). When this key is omitted the compiler falls back to
+# `vars.GH_AW_DEFAULT_MAX_DAILY_AI_CREDITS || 5000`, and 5K is what one ordinary day of
+# legitimate reviews costs here: the window before run 35535244745 (issue #16840) held 33 billed
+# runs at roughly 150 AIC each, so the default benched the reviewer mid-day. This guardrail
+# exists to cap a runaway (two bots looping, a retry storm), not to ration normal traffic —
+# 25K is ~5x the observed daily peak: high enough that legitimate review volume never trips it,
+# low enough that a runaway still stops at a bounded cost.
+max-daily-ai-credits: 25000
 # Harness retry policy. The Copilot CLI already retries an unanswered model call ~5 times internally
 # (~90s) before the harness sees a failure; these settings control how many times the harness then
 # re-launches it. Defaults (3 retries, 5s initial delay, 60s cap) space the attempts only ~35s
