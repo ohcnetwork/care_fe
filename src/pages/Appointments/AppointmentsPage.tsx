@@ -731,7 +731,7 @@ function AppointmentCard({
     <div className="bg-white p-3 rounded shadow-sm group hover:ring-1 hover:ring-primary-700 hover:ring-offset-1 hover:ring-offset-white hover:shadow-md transition-all duration-100 ease-in-out">
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="font-semibold text-base group-hover:text-primary-700 transition-all duration-200 ease-in-out capitalize">
+          <h3 className="font-semibold text-base capitalize group-hover:text-primary-700 transition-all duration-200 ease-in-out">
             {patient.name}
           </h3>
           <p className="text-sm text-gray-700">

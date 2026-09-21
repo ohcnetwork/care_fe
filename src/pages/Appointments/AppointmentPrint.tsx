@@ -501,7 +501,7 @@ const DetailRow = ({ label, value, width = "w-20" }: DetailRowProps) => {
       <span className={cn("text-gray-600 shrink-0", width)}>{label}</span>
       <span className="text-gray-950 font-semibold">: </span>
       <span className="ml-0.5 whitespace-pre-wrap text-gray-950 font-semibold">
-        {value}
+        {value ?? "-"}
       </span>
     </div>
   );
