@@ -1,17 +1,37 @@
+import careConfig from "@careConfig";
 import { Redirect } from "raviger";
+import { lazy } from "react";
 
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import PatientIndex from "@/components/Patient/PatientIndex";
-import { PatientProfile } from "@/components/Patient/PatientProfile";
 
-import { AppRoutes } from "@/Routers/AppRouter";
-import { PatientRegistration } from "@/components/Patient/PatientRegistration";
-import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
-import EncountersOverview from "@/pages/Encounters/EncountersOverview";
-import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
-import ClinicalHistoryPage from "@/pages/Patient/History";
-import PatientHome from "@/pages/Patient/PatientHome";
-import careConfig from "@careConfig";
+import type { AppRoutes } from "@/Routers/AppRouter";
+
+const PatientIndex = lazy(() => import("@/components/Patient/PatientIndex"));
+const PatientProfile = lazy(() =>
+  import("@/components/Patient/PatientProfile").then((module) => ({
+    default: module.PatientProfile,
+  })),
+);
+const PatientRegistration = lazy(() =>
+  import("@/components/Patient/PatientRegistration").then((module) => ({
+    default: module.PatientRegistration,
+  })),
+);
+const ConsentDetailPage = lazy(() =>
+  import("@/pages/Encounters/ConsentDetail").then((module) => ({
+    default: module.ConsentDetailPage,
+  })),
+);
+const EncountersOverview = lazy(
+  () => import("@/pages/Encounters/EncountersOverview"),
+);
+const EncounterProvider = lazy(() =>
+  import("@/pages/Encounters/utils/EncounterProvider").then((module) => ({
+    default: module.EncounterProvider,
+  })),
+);
+const ClinicalHistoryPage = lazy(() => import("@/pages/Patient/History"));
+const PatientHome = lazy(() => import("@/pages/Patient/PatientHome"));
 
 const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients": ({ facilityId }) => (
