@@ -10,7 +10,7 @@ import {
   Space,
   Tag as TagIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -77,6 +77,28 @@ export function MultiFilterStyleTagSelector({
   const isMobile = useIsMobile();
   const { t } = useTranslation();
   const groupPopoverSide = align === "end" ? "left" : "right";
+  const [resolvedGroupPopoverSide, setResolvedGroupPopoverSide] = useState<
+    "left" | "right"
+  >(groupPopoverSide);
+  const groupPopoverContentRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+
+    const updateResolvedSide = () => {
+      const side = node.dataset.side;
+      if (side === "left" || side === "right") {
+        setResolvedGroupPopoverSide(side);
+      }
+    };
+
+    updateResolvedSide();
+    const observer = new MutationObserver(updateResolvedSide);
+    observer.observe(node, {
+      attributes: true,
+      attributeFilter: ["data-side"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch top-level tags (both instance and facility tags in one call)
   const { data: rootTags, isLoading: isLoadingRoot } = useQuery({
@@ -482,9 +504,12 @@ export function MultiFilterStyleTagSelector({
                           <div key={tag.id} className="relative">
                             <Popover
                               open={groupPopoverOpen === tag.id}
-                              onOpenChange={(open) =>
-                                setGroupPopoverOpen(open ? tag.id : null)
-                              }
+                              onOpenChange={(open) => {
+                                if (open) {
+                                  setResolvedGroupPopoverSide(groupPopoverSide);
+                                }
+                                setGroupPopoverOpen(open ? tag.id : null);
+                              }}
                             >
                               <PopoverTrigger asChild>
                                 <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
@@ -499,7 +524,9 @@ export function MultiFilterStyleTagSelector({
                                       {t("group")}
                                     </Badge>
                                   </div>
-                                  {groupPopoverSide === "left" ? (
+                                  {(groupPopoverOpen === tag.id
+                                    ? resolvedGroupPopoverSide
+                                    : groupPopoverSide) === "left" ? (
                                     <ArrowLeft className="ml-auto size-4" />
                                   ) : (
                                     <ArrowRight className="ml-auto size-4" />
@@ -507,6 +534,7 @@ export function MultiFilterStyleTagSelector({
                                 </div>
                               </PopoverTrigger>
                               <PopoverContent
+                                ref={groupPopoverContentRef}
                                 className="w-64 p-0"
                                 side={groupPopoverSide}
                                 align="start"
