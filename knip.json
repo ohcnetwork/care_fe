@@ -17,6 +17,7 @@
     "src/components/Common/Table.tsx": ["exports"],
     "src/Utils/decimal.ts": ["exports"]
   },
+  "ignore": [".opencode/**"],
   "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
   "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
 }

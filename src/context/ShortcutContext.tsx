@@ -2,8 +2,11 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import actionsJson from "@/config/keyboardShortcuts.json";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { FacilityAction, FacilityActionId } from "@/types/shortcuts";
+import {
+  ShortcutHandlers,
+  useKeyboardShortcuts,
+} from "@/hooks/useKeyboardShortcuts";
+import { FacilityAction } from "@/types/shortcuts";
 import {
   formatKeyboardShortcut,
   shortcutActionHandler,
@@ -84,13 +87,15 @@ export function ShortcutProvider({
   }, [subContext]);
 
   const handlers = useMemo(() => {
-    const handlersMap = {} as Record<FacilityActionId, () => void>;
+    const handlersMap: ShortcutHandlers = {};
 
     actions.forEach((action) => {
       handlersMap[action.id] = () => {
         action.handler();
       };
     });
+
+    handlersMap["show-shortcuts"] = () => setCommandDialogOpen(true);
 
     return handlersMap;
   }, [actions]);
@@ -123,7 +128,6 @@ export function ShortcutProvider({
   // Set up facility shortcuts
   useKeyboardShortcuts(
     ["global", ...expandShortcutContext(subContext || "")],
-    { canCreate: true },
     handlers,
     subContext,
     ignoreInputFields,

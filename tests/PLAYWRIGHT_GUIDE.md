@@ -59,6 +59,7 @@ Use one of these storage states depending on the role needed:
 | `tests/.auth/user.json`          | Admin          | `admin` / `admin`             |
 | `tests/.auth/facilityAdmin.json` | Facility Admin | `care-fac-admin` / `Ohcn@123` |
 | `tests/.auth/nurse.json`         | Nurse          | `care-nurse` / `Ohcn@123`     |
+| `tests/.auth/staff.json`         | Staff          | `care-staff` / `Ohcn@123`     |
 
 ```typescript
 // Most tests use admin

@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes, format, isValid, parseISO } from "date-fns";
 import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
@@ -14,6 +14,15 @@ import { navigate } from "raviger";
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
 const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
+
+/**
+ * Guards against invalid dates from unvalidated query params (e.g. ?..._after=lol)
+ */
+export function parseValidISO(value: string | undefined) {
+  if (!value) return undefined;
+  const date = parseISO(value);
+  return isValid(date) ? date : undefined;
+}
 
 type DateLike = Parameters<typeof dayjs>[0];
 
@@ -83,6 +92,11 @@ export const dateQueryString = (date: DateLike) => {
   return dayjs(date).format("YYYY-MM-DD");
 };
 
+/** Local midnight from a "YYYY-MM-DD" string (avoids UTC parsing of date-only values) for the calendar. */
+export const parseLocalDate = (dateYmd?: string): Date | undefined => {
+  return dateYmd ? new Date(`${dateYmd}T00:00:00`) : undefined;
+};
+
 export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
   if (!date || !dayjs(date).isValid()) return "";
   const d = dayjs(date).toDate();
@@ -136,49 +150,98 @@ export const isValidLongitude = (longitude: number) => {
   return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
-const getRelativeDateSuffix = (abbreviated: boolean) => {
-  return {
-    day: abbreviated ? "d" : "days",
-    month: abbreviated ? "mo" : "months",
-    year: abbreviated ? "Y" : "years",
-  };
-};
+const ageUnit = (
+  count: number,
+  unit: "years" | "months" | "weeks" | "days",
+  abbreviated = false,
+) =>
+  abbreviated ? t(`age_${unit}_short`, { count }) : t(`age_${unit}`, { count });
 
 export const formatPatientAge = (
   obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
-  const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
       ? new Date(obj.date_of_birth)
       : new Date(obj.year_of_birth!, 0, 1),
   );
-
   const end =
     "deceased_datetime" in obj && obj.deceased_datetime
-      ? dayjs(new Date(obj.deceased_datetime))
-      : dayjs(new Date());
+      ? dayjs(obj.deceased_datetime)
+      : dayjs();
 
   const years = end.diff(start, "years");
-  if (years) {
-    return `${years} ${suffixes.year}`;
-  }
-
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
   if (!obj.date_of_birth) {
-    return abbreviated
-      ? `Born ${obj.year_of_birth}`
-      : `Born on ${obj.year_of_birth}`;
+    return `${obj.year_of_birth} (${ageUnit(years, "years", true)})`;
   }
 
-  const month = end.diff(start, "month");
-  const day = end.diff(start.add(month, "month"), "day");
-  if (month) {
-    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  const totalDays = end.diff(start, "day");
+  const months = end.diff(start, "month");
+
+  // > 18 years: years only
+  if (years >= 18) {
+    return ageUnit(years, "years", abbreviated);
   }
-  return `${day}${suffixes.day}`;
+
+  // 2–18 years (inclusive): years and months
+  if (years >= 2) {
+    const remainingMonths = months - years * 12;
+    const yearStr = ageUnit(years, "years", abbreviated);
+    if (remainingMonths === 0) return yearStr;
+    return `${yearStr} ${ageUnit(remainingMonths, "months", abbreviated)}`;
+  }
+
+  // 1–2 years (inclusive, i.e. 365 days to 2 years): months and days
+  if (months >= 12) {
+    const remainingDays = end.diff(start.add(months, "month"), "day");
+    const monthStr = ageUnit(months, "months", abbreviated);
+    if (remainingDays === 0) return monthStr;
+    return `${monthStr} ${ageUnit(remainingDays, "days", abbreviated)}`;
+  }
+
+  // 29 days to < 12 months: weeks and days
+  if (totalDays >= 29) {
+    const weeks = Math.floor(totalDays / 7);
+    const remainingDays = totalDays % 7;
+    const weekStr = ageUnit(weeks, "weeks", abbreviated);
+    if (remainingDays === 0) return weekStr;
+    return `${weekStr} ${ageUnit(remainingDays, "days", abbreviated)}`;
+  }
+
+  // 0–28 days (inclusive): days only
+  return ageUnit(totalDays, "days", abbreviated);
+};
+
+/**
+ * Returns a verbose breakdown of a patient's age for use in tooltips.
+ * Format: years/months/days breakdown, largest-unit-first, leading zero-units omitted.
+ * Returns null if only year_of_birth is known (no date_of_birth).
+ */
+export const formatPatientAgeBreakdown = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+): string | null => {
+  if (!obj.date_of_birth) return null;
+
+  // Parse date-only ISO strings directly with dayjs to avoid UTC-midnight shift
+  const start = dayjs(obj.date_of_birth);
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(obj.deceased_datetime)
+      : dayjs();
+
+  const years = end.diff(start, "year");
+  const months = end.diff(start.add(years, "year"), "month");
+  const days = end.diff(start.add(years, "year").add(months, "month"), "day");
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(ageUnit(years, "years"));
+  if (months > 0) parts.push(ageUnit(months, "months"));
+  if (days > 0 || parts.length === 0) parts.push(ageUnit(days, "days"));
+
+  return parts.join(", ");
 };
 
 /**

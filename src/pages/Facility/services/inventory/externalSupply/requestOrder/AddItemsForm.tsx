@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
+
+import careConfig from "@careConfig";
 
 import {
   Table,
@@ -22,11 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -34,6 +38,7 @@ import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { Box, Check, Trash2 } from "lucide-react";
 
 const supplyRequestFormSchema = z.object({
@@ -54,18 +59,33 @@ interface AddItemsFormProps {
   requestOrderId: string;
   onSuccess: () => void;
   updateOrderStatus: (status: RequestOrderStatus) => void;
-  disableApproveButton: boolean;
-  showEmptyState: boolean;
+  isUpdatingOrder: boolean;
 }
 
 export function AddItemsForm({
   requestOrderId,
   onSuccess,
   updateOrderStatus,
-  disableApproveButton,
-  showEmptyState,
+  isUpdatingOrder,
 }: AddItemsFormProps) {
   const { t } = useTranslation();
+
+  const {
+    data: supplyRequestsCountData,
+    isLoading: isLoadingSupplyRequestsCount,
+    isFetching: isFetchingSupplyRequests,
+  } = useQuery({
+    queryKey: ["supplyRequests", requestOrderId, "count-supplyRequests"],
+    queryFn: query(supplyRequestApi.listSupplyRequest, {
+      queryParams: {
+        order: requestOrderId,
+        limit: 1,
+      },
+    }),
+  });
+
+  const supplyRequestsCount = supplyRequestsCountData?.count ?? 0;
+  const disableApproveButton = isUpdatingOrder || supplyRequestsCount === 0;
 
   const form = useForm<SupplyRequestFormValues>({
     resolver: zodResolver(supplyRequestFormSchema),
@@ -78,6 +98,9 @@ export function AddItemsForm({
     control: form.control,
     name: "requests",
   });
+
+  const hasReachedUpsertLimit =
+    supplyRequestsCount + fields.length >= careConfig.maxDatapointsPerUpsert;
 
   const { mutate: createSupplyRequests, isPending: isCreating } = useMutation({
     mutationFn: async (
@@ -125,21 +148,24 @@ export function AddItemsForm({
 
   return (
     <div className="space-y-2">
-      {showEmptyState && fields.length === 0 && (
-        <EmptyState
-          icon={<Box className="text-primary size-5" />}
-          title={t("no_supply_requests_found")}
-          description={t("add_items_to_get_started")}
-          action={
-            <ProductKnowledgeSelect
-              onChange={handleAddItem}
-              className="text-primary-800 border-primary-600"
-              placeholder={t("add_from_item_list")}
-              disableFavorites
-            />
-          }
-        />
-      )}
+      {!isLoadingSupplyRequestsCount &&
+        supplyRequestsCount === 0 &&
+        fields.length === 0 && (
+          <EmptyState
+            icon={<Box className="text-primary size-5" />}
+            title={t("no_supply_requests_found")}
+            description={t("add_items_to_get_started")}
+            action={
+              <ProductKnowledgeSelect
+                onChange={handleAddItem}
+                className="text-primary-800 border-primary-600"
+                placeholder={t("add_from_item_list")}
+                disableFavorites
+                disabled={isCreating}
+              />
+            }
+          />
+        )}
       <div className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmitSupplyRequests)}>
@@ -208,59 +234,83 @@ export function AddItemsForm({
               </div>
             )}
 
-            <ProductKnowledgeSelect
-              onChange={handleAddItem}
-              className="text-secondary-800 border-secondary-600 w-64! h-11 text-md"
-              placeholder={t("add_item")}
-              disableFavorites
-            />
-
-            {fields.length > 0 ? (
-              <>
-                <Separator className="my-2 bg-gray-200" />
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      form.reset();
-                    }}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isCreating || fields.length === 0}
-                  >
-                    <Check className="mr-2 h-4 w-4" />
-                    {isCreating ? t("creating") : t("save_list")}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="mt-2 flex flex-col gap-2">
-                <p>-{t("or")}-</p>
-                <div className="flex flex-row gap-2 justify-between bg-white p-2 items-center border border-gray-200 rounded-md">
-                  <div className="flex flex-col gap-2">
-                    <p className="font-bold">
-                      {t("review_and_finalise_request")}
-                    </p>
-                    <span className="text-sm text-gray-500">
-                      {t("review_and_finalise_request_description")}
-                    </span>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      updateOrderStatus(RequestOrderStatus.pending)
-                    }
-                    disabled={disableApproveButton}
-                  >
-                    {t("mark_as_approved")}
-                    <ShortcutBadge actionId="mark-as" />
-                  </Button>
-                </div>
+            {isFetchingSupplyRequests ? (
+              <div className="space-y-2">
+                <Skeleton className="h-11 w-64" />
+                <Skeleton className="h-16 w-full" />
               </div>
+            ) : (
+              <>
+                {hasReachedUpsertLimit ? (
+                  <UpsertLimitCallout>
+                    {t("max_items_per_request_limit", {
+                      count: careConfig.maxDatapointsPerUpsert,
+                    })}
+                  </UpsertLimitCallout>
+                ) : (
+                  <ProductKnowledgeSelect
+                    onChange={handleAddItem}
+                    className="text-secondary-800 border-secondary-600 w-64! h-11 text-md"
+                    placeholder={t("add_item")}
+                    disableFavorites
+                    disabled={isCreating}
+                  />
+                )}
+
+                {fields.length > 0 ? (
+                  <>
+                    <Separator className="my-2 bg-gray-200" />
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          form.reset();
+                        }}
+                      >
+                        {t("cancel")}
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={
+                          isCreating ||
+                          isFetchingSupplyRequests ||
+                          fields.length === 0 ||
+                          supplyRequestsCount + fields.length >
+                            careConfig.maxDatapointsPerUpsert
+                        }
+                      >
+                        <Check className="mr-2 h-4 w-4" />
+                        {isCreating ? t("creating") : t("save_list")}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="mt-2 flex flex-col gap-2">
+                    {!hasReachedUpsertLimit && <p>-{t("or")}-</p>}
+                    <div className="flex flex-row gap-2 justify-between bg-white p-2 items-center border border-gray-200 rounded-md">
+                      <div className="flex flex-col gap-2">
+                        <p className="font-bold">
+                          {t("review_and_finalise_request")}
+                        </p>
+                        <span className="text-sm text-gray-500">
+                          {t("review_and_finalise_request_description")}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          updateOrderStatus(RequestOrderStatus.pending)
+                        }
+                        disabled={disableApproveButton}
+                      >
+                        {t("mark_as_approved")}
+                        <ShortcutBadge actionId="mark-as" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </form>
         </Form>

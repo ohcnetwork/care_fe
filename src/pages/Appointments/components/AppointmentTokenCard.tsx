@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { formatPatientAge } from "@/Utils/utils";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,17 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  getPatientIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import {
   AppointmentRead,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
-import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
+import { renderTokenNumber, TokenRead } from "@/types/tokens/token/token";
 import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
 import { Link } from "raviger";
@@ -93,7 +96,7 @@ const TokenCard = ({
                   {patient.name || "--"}
                 </p>
                 <p className="pl-1 text-sm text-gray-600 font-medium">
-                  {formatPatientAge(patient, true)},{" "}
+                  <PatientAge patient={patient} />,{" "}
                   {t(`GENDER__${patient.gender}`)}
                 </p>
                 {patientExtensionData.map((data) => {
@@ -106,22 +109,16 @@ const TokenCard = ({
                     </div>
                   );
                 })}
-                {patientWithIdentifiers?.instance_identifiers
-                  ?.filter(
-                    (identifier) =>
-                      identifier.config.config.use ===
-                      PatientIdentifierUse.official,
-                  )
-                  .map((identifier) => (
-                    <div key={identifier.config.id}>
-                      <Label className="text-gray-600 text-sm">
-                        {identifier.config.config.display}:
-                      </Label>
-                      <p className="font-semibold text-sm">
-                        {identifier.value}
-                      </p>
-                    </div>
-                  ))}
+                {getPatientIdentifiers(patientWithIdentifiers, {
+                  use: PatientIdentifierUse.official,
+                }).map((identifier) => (
+                  <div key={identifier.config.id}>
+                    <Label className="text-gray-600 text-sm">
+                      {identifier.config.config.display}:
+                    </Label>
+                    <p className="font-semibold text-sm">{identifier.value}</p>
+                  </div>
+                ))}
                 {inPrintMode && patient.address?.trim() && (
                   <div>
                     <Label className="text-gray-600 text-sm">

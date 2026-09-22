@@ -13,7 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
+import type { PrescriptionList } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import query from "@/Utils/request/query";
@@ -46,7 +46,7 @@ interface PrescriptionListSelectorProps {
   encounterId: string;
   facilityId?: string;
   selectedPrescriptionId?: string;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
 }
 
 export default function PrescriptionListSelector({
@@ -92,7 +92,7 @@ export default function PrescriptionListSelector({
   });
 
   const handleSelectPrescription = React.useCallback(
-    (prescription: PrescritionList | undefined) => {
+    (prescription: PrescriptionList | undefined) => {
       onSelectPrescription(prescription);
       setOpenDrawer(false);
     },
@@ -116,7 +116,7 @@ export default function PrescriptionListSelector({
   return (
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
-        <PrescriptionList
+        <PrescriptionListComponent
           prescriptions={prescriptions}
           selectedPrescriptionId={selectedPrescriptionId}
           onSelectPrescription={onSelectPrescription}
@@ -181,10 +181,10 @@ export default function PrescriptionListSelector({
               <DrawerTitle>{t("prescription")}</DrawerTitle>
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
-              <PrescriptionList
+              <PrescriptionListComponent
+                prescriptions={prescriptions}
                 loadMoreRef={loadMoreRef}
                 isFetchingNextPage={isFetchingNextPage}
-                prescriptions={prescriptions}
                 selectedPrescriptionId={selectedPrescriptionId}
                 onSelectPrescription={handleSelectPrescription}
               />
@@ -202,16 +202,16 @@ interface PrescriptionListItem {
   tags?: TagConfig[];
 }
 
-function PrescriptionList({
+function PrescriptionListComponent({
   prescriptions,
   selectedPrescriptionId,
   onSelectPrescription,
   isFetchingNextPage,
   loadMoreRef,
 }: {
-  prescriptions: PrescritionList[];
+  prescriptions: PrescriptionList[];
   selectedPrescriptionId: string | undefined;
-  onSelectPrescription: (prescription: PrescritionList | undefined) => void;
+  onSelectPrescription: (prescription: PrescriptionList | undefined) => void;
   isFetchingNextPage: boolean;
   loadMoreRef: React.Ref<HTMLDivElement>;
 }) {

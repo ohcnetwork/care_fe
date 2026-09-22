@@ -237,14 +237,16 @@ export const EncounterShow = (props: Props) => {
           />
           {selectedEncounter && (
             <div className="flex max-md:flex-col items-end justify-center gap-4">
-              <PLUGIN_Component
-                __name="PatientInfoCardQuickActions"
-                encounter={selectedEncounter}
-                className={cn(
-                  buttonVariants({ variant: "primary_gradient" }),
-                  "text-base font-semibold rounded-md w-full",
-                )}
-              />
+              <div className="w-full md:w-auto">
+                <PLUGIN_Component
+                  __name="PatientInfoCardQuickActions"
+                  encounter={selectedEncounter}
+                  className={cn(
+                    buttonVariants({ variant: "primary_gradient" }),
+                    "text-base font-semibold rounded-md w-full md:w-auto",
+                  )}
+                />
+              </div>
 
               <EncounterCommandDialog
                 encounter={selectedEncounter}
@@ -269,9 +271,9 @@ export const EncounterShow = (props: Props) => {
         </Card>
         <PatientDeceasedInfo patient={patient} />
       </div>
-      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
+      <div className="flex min-w-0 flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
-        <div className="w-full">
+        <div className="w-full min-w-0">
           <div className="hidden lg:block">
             {isSelectedEncounterLoading ? (
               <Skeleton className="h-10 w-md" />
