@@ -44,53 +44,28 @@ const LOCAL_PLUGIN_SOURCE_EXTENSIONS = [
   ".cts",
 ];
 
-const LOCAL_PLUGIN_MANIFEST_FILES = ["manifest.tsx", "manifest.ts"] as const;
-
 function toImportName(slug: string) {
   return `${slug.replace(/[^a-zA-Z0-9]+(.)/g, (_, char: string) => char.toUpperCase())}Manifest`;
 }
 
-function resolveLocalPluginManifestPath(pluginRoot: string) {
-  for (const fileName of LOCAL_PLUGIN_MANIFEST_FILES) {
-    const manifestPath = path.join(pluginRoot, "src", fileName);
-
-    if (fs.existsSync(manifestPath)) {
-      return manifestPath;
-    }
-  }
-
-  return null;
-}
-
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .flatMap((entry) => {
-      const slug = entry.name;
-      const pluginRoot = path.join(appsDir, slug);
-      const manifestPath = resolveLocalPluginManifestPath(pluginRoot);
-
-      if (!manifestPath) {
-        return [];
-      }
-
-      return [
-        {
-          slug,
-          importName: toImportName(slug),
-          manifestPath,
-          publicDir: path.join(pluginRoot, "public"),
-        },
-      ];
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
+      return {
+        slug,
+        importName: toImportName(slug),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
+      };
     })
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -145,8 +120,8 @@ function isPluginManifestPath(rootDir: string, filePath: string) {
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    LOCAL_PLUGIN_MANIFEST_FILES.some((fileName) =>
-      normalizedFilePath.endsWith(`/src/${fileName}`),
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
     )
   );
 }
