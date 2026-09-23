@@ -34,6 +34,7 @@ permissions:
 checkout: false
 imports:
   - .github/agents/care-review.agent.md
+max-daily-ai-credits: 5000
 engine:
   id: copilot
   harness:
