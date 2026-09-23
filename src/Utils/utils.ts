@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { differenceInMinutes, format } from "date-fns";
+import { differenceInMinutes, format, isValid, parseISO } from "date-fns";
 import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
@@ -14,6 +14,15 @@ import { navigate } from "raviger";
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
 const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
+
+/**
+ * Guards against invalid dates from unvalidated query params (e.g. ?..._after=lol)
+ */
+export function parseValidISO(value: string | undefined) {
+  if (!value) return undefined;
+  const date = parseISO(value);
+  return isValid(date) ? date : undefined;
+}
 
 type DateLike = Parameters<typeof dayjs>[0];
 
