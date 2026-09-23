@@ -248,6 +248,12 @@ export function EncounterQuestion({
 
   const selectableEncounterStatuses = Object.values(EncounterStatus).filter(
     (encounterStatus) => {
+      if (encounter.status === EncounterStatus.DISCHARGED) {
+        return (
+          encounterStatus === EncounterStatus.DISCHARGED ||
+          encounterStatus === EncounterStatus.IN_PROGRESS
+        );
+      }
       if (isCurrentStatusNonSelectable) {
         return encounterStatus === encounter.status;
       }
@@ -269,9 +275,7 @@ export function EncounterQuestion({
                 status: value,
               })
             }
-            disabled={
-              disabled || encounter.status === EncounterStatus.DISCHARGED
-            }
+            disabled={disabled}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("select_status")} />
