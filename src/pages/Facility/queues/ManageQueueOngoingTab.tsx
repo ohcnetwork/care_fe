@@ -68,9 +68,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   });
   const [qParams, setQueryParams] = useQueryParams();
   const { autoRefresh, search, patient, patient_name } = qParams;
-  const [mobileSection, setMobileSection] = useState<"waiting" | "serving">(
-    "waiting",
-  );
+  const [mobileSection, setMobileSection] = useState<
+    "waiting" | "serving" | "recall"
+  >("waiting");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const activeFilterCount = [search, patient].filter(Boolean).length;
   const { data: summary } = useQuery({
@@ -138,16 +138,43 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
       <Tabs
         value={mobileSection}
         onValueChange={(value) =>
-          setMobileSection(value as "waiting" | "serving")
+          setMobileSection(value as "waiting" | "serving" | "recall")
         }
         className="lg:hidden"
       >
-        <TabsList className="w-full">
+        <TabsList className="w-full h-11 border border-gray-200 p-0">
           <TabsTrigger value="waiting" className="flex-1">
             {t("waiting")}
+            <Badge
+              variant="indigo"
+              size="sm"
+              className="flex items-center justify-center size-5"
+            >
+              {summary &&
+                getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="serving" className="flex-1">
-            {t("called_plus_now_serving")}
+            {t("serving")}
+            <Badge
+              variant="green"
+              size="sm"
+              className="flex items-center justify-center size-5"
+            >
+              {summary &&
+                getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="recall" className="flex-1">
+            {t("recall")}
+            <Badge
+              variant="secondary"
+              size="sm"
+              className="flex items-center justify-center size-5"
+            >
+              {summary &&
+                getTokenQueueStatusCount(summary, TokenStatus.UNFULFILLED)}
+            </Badge>
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -277,6 +304,33 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 </div>
               ))}
             </div>
+          </QueueColumn>
+        </div>
+
+        {/* Recall tokens list: mobile-only, desktop uses the awaiting-recall dialog instead */}
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-w-0 lg:hidden",
+            mobileSection === "recall" ? "flex" : "hidden",
+          )}
+        >
+          <QueueColumn title={t("recall")}>
+            <OngoingQueueTokenCardsList
+              facilityId={facilityId}
+              queueId={queueId}
+              qParams={{
+                sub_queue_is_null: true,
+                status: TokenStatus.UNFULFILLED,
+              }}
+              emptyState={
+                <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
+                  <DoorOpenIcon className="size-6 text-gray-700" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {t("no_patient_is_in_recall")}
+                  </span>
+                </div>
+              }
+            />
           </QueueColumn>
         </div>
       </div>
