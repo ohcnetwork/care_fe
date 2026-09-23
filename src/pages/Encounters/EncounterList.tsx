@@ -253,27 +253,31 @@ export function EncounterList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const encounterListQueryParams = {
+    ...buildQueryParams(
+      facilityId,
+      status,
+      priority,
+      created_date_after,
+      created_date_before,
+      organization,
+      care_team_user,
+    ),
+    encounter_class: encounterClass,
+    ...(searchWith && searchValue.trim()
+      ? { [searchWith]: searchValue.trim() }
+      : {}),
+    limit: resultsPerPage,
+    offset: ((qParams.page || 1) - 1) * resultsPerPage,
+    tags: qParams.tags,
+    tags_behavior: qParams.tags_behavior,
+    patient_filter: patient_filter,
+  };
+
   const { data: queryEncounters, isFetching } = useQuery({
-    queryKey: ["encounters", facilityId, encounterClass, qParams],
+    queryKey: ["encounters", encounterListQueryParams],
     queryFn: query.debounced(encounterApi.list, {
-      queryParams: {
-        ...buildQueryParams(
-          facilityId,
-          status,
-          priority,
-          created_date_after,
-          created_date_before,
-          organization,
-          care_team_user,
-        ),
-        encounter_class: encounterClass,
-        ...(searchWith && { [searchWith]: searchValue || undefined }),
-        limit: resultsPerPage,
-        offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        tags: qParams.tags,
-        tags_behavior: qParams.tags_behavior,
-        patient_filter: patient_filter,
-      },
+      queryParams: encounterListQueryParams,
     }),
     enabled: !propEncounters && !encounter_id,
   });
@@ -526,7 +530,7 @@ export function EncounterList({
         <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-visible">
           <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
                 <div className="relative w-full sm:w-auto sm:min-w-60 **:data-[slot=command-input-wrapper]:px-0">
                   <Command
                     shouldFilter={false}
