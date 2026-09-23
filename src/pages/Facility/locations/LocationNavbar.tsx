@@ -142,7 +142,6 @@ export default function LocationNavbar({
         mine: true,
         mode: "kind",
       },
-      pageSize: 100,
     }),
   });
 

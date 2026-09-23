@@ -24,6 +24,7 @@ import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceT
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 import query from "@/Utils/request/query";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface DeviceSearchProps {
   facilityId: string;
@@ -59,7 +60,7 @@ function DeviceCommandContent({
         value={search}
         onValueChange={setSearch}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus
+        autoFocus={!isIOSDevice}
       />
       {isPending ? (
         <CardListSkeleton count={3} />
