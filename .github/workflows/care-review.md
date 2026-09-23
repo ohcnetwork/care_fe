@@ -45,11 +45,17 @@ on:
 # copilot-pull-request-reviewer post under their own App tokens and DO fire issue_comment. Without
 # this filter, every one of their comments starts a billed run that reads the whole agent file and
 # then noops. The prompt-level bot rule stays as a second line of defence.
+#
+# Fork inline replies are skipped HERE. `pull_request_review_comment` withholds COPILOT_GITHUB_TOKEN
+# when the PR head is a fork, so this workflow would fail the secret check and turn the run red.
+# `pull_request_target` still reviews those PRs (that event keeps the secret), and the fork-reply
+# bridge answers the inline reply. Same-repo review comments keep the secret and stay here.
 if: >
   ${{ github.repository == 'ohcnetwork/care_fe' &&
       (github.event.pull_request == null || github.event.pull_request.draft == false) &&
       (github.event.comment == null || github.event.comment.user.type != 'Bot') &&
-      (github.event.issue == null || github.event.issue.pull_request != null) }}
+      (github.event.issue == null || github.event.issue.pull_request != null) &&
+      (github.event_name != 'pull_request_review_comment' || github.event.pull_request.head.repo.full_name == github.repository) }}
 # Concurrency, overriding gh-aw's default of one per-PR group shared by ALL triggers.
 #
 # The default keys the group on `issue.number || pr.number || run_id` with cancel-in-progress, so
