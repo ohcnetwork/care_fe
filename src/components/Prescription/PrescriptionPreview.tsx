@@ -21,6 +21,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
@@ -211,19 +212,16 @@ export const PrescriptionPreview = ({
                 }
                 isStrong
               />
-              {patient.instance_identifiers
-                ?.filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <DetailRow
-                    key={identifier.config.id}
-                    label={identifier.config.config.display}
-                    value={identifier.value}
-                    isStrong
-                  />
-                ))}
+              {getPatientIdentifiers(patient, {
+                use: PatientIdentifierUse.official,
+              }).map((identifier) => (
+                <DetailRow
+                  key={identifier.config.id}
+                  label={identifier.config.config.display}
+                  value={identifier.value}
+                  isStrong
+                />
+              ))}
               {prescriptions.length === 1 && (
                 <DetailRow
                   label={t("encounter_date")}
