@@ -170,9 +170,9 @@ jobs:
 
       # Fork gate — the load-bearing decision. Same-repo replies are answered by care-review
       # DIRECTLY (they keep their secret), so bridging them would post a SECOND, duplicate reply.
-      # Only fork PRs lose the secret and need this bridge. The artifact's head_repo is
-      # attacker-controlled (a fork can change Stage 1), so always resolve the head repository
-      # through the API. If it is not a fork, stop here.
+      # Capture already skips same-repo heads on the event payload; this API check remains because a
+      # planted Capture.yml can omit that skip. Always resolve head.repo through the API — do not
+      # trust the artifact. If it is not a fork, stop here.
       - name: Fork gate
         id: fork
         if: steps.bind.outputs.bound == 'true'

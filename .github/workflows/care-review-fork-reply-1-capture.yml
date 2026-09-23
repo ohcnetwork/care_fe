@@ -10,11 +10,12 @@
 # agent (Stage 3).
 #
 # This stage is deliberately dumb and powerless. It holds NO token (`permissions: {}`) — proving the
-# untrusted fork side needs nothing GitHub withholds — and makes NO fork/own-thread decisions. All
-# filtering that needs a token or an API call (is this actually a fork PR? is it addressed to
-# care-review via @mention or a care-review review thread?) happens in Stage 2, which runs in
-# trusted base context and must skip Stage 3 unless that gate passes. Same division of labour the
-# repo already uses for pr-review-trigger.yml -> pr-automation.yml and the Cloudflare preview bridge.
+# untrusted fork side needs nothing GitHub withholds. The job `if:` only uses event payload (repo,
+# bot, head.repo) so same-repo inline comments — already answered by care-review — do not spin
+# Capture+Dispatch. "Is this addressed to care-review?" still needs a token/API, so Stage 2 owns
+# that and must not dispatch Stage 3 unless it passes. A hostile Capture.yml can drop the head.repo
+# skip; Stage 2's API fork gate is the trusted copy. Same split as pr-review-trigger.yml ->
+# pr-automation.yml and the Cloudflare preview bridge.
 name: CARE Reply Bridge — Capture
 
 on:
@@ -25,16 +26,17 @@ on:
 # Stage 2 as an artifact, never as a token-bearing action.
 permissions: {}
 
-# Cheap trigger-level gate only. Upstream-repo, skip bots (their comments would spin the bridge for
-# nothing — see care-review.md's bot rationale). Fork-detection and "is this addressed to
-# care-review?" are NOT here — they need a token, so Stage 2 owns them and must not dispatch the
-# Copilot agent until that gate passes.
+# Cheap trigger-level gate only. Upstream-repo, skip bots (see care-review.md's bot rationale), skip
+# same-repo heads (care-review already answers those; inverse of care-review.md's fork skip, same
+# field as cloudflare-preview.yml). Addressed-to-reviewer is NOT here — it needs a token, so Stage 2
+# owns it and must not dispatch the Copilot agent until that gate passes.
 jobs:
   capture:
     runs-on: ubuntu-latest
     if: >-
       ${{ github.repository == 'ohcnetwork/care_fe' &&
-          github.event.comment.user.type != 'Bot' }}
+          github.event.comment.user.type != 'Bot' &&
+          github.event.pull_request.head.repo.full_name != github.repository }}
     steps:
       # Pointers only. Stage 2 re-fetches the comment via the API by id, so the attacker-controlled
       # body never crosses this boundary and never needs to be logged.

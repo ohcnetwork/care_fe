@@ -67,9 +67,13 @@ if: >
 # The override is the DEFAULT group with one thing appended: `-${{ github.event.comment.id || 'review' }}`.
 # That trailing segment is a coalescing fallback, not an event-name branch — comment-bearing events
 # (issue_comment, pull_request_review_comment) carry `comment.id`; push/PR/dispatch do not, so they
-# fall to the literal `review`:
-#   - push / PR / dispatch (no comment) -> `…-<pr>-review`       one slot per PR; a newer push cancels
+# fall to the literal `review`. The leading id is `issue.number || pr.number || run_id`:
+#   - push / PR (no comment)            -> `…-<pr>-review`       one slot per PR; a newer push cancels
 #     the stale review (latest commit wins), and no comment can land in this slot.
+#   - dispatch (no issue/PR/comment)    -> `…-<run_id>-review`   one slot per run. Manual dispatch is
+#     deliberately unserialised: it does not share the PR's review slot, so it can run alongside a
+#     push-triggered review of the same PR. (gh-aw may pass aw_context on dispatch; this group does
+#     not read it.)
 #   - comment events (comment.id set)   -> `…-<pr>-<comment_id>` one slot PER comment, so a comment
 #     never cancels the review, nor another reply. Deliberately NOT keyed on head SHA: that would give
 #     each commit its own slot and defeat newer-push-cancels-stale-review, billing every superseded commit.
