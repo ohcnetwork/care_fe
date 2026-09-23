@@ -135,5 +135,22 @@ test.describe("Encounter Keyboard Shortcuts", () => {
         "active",
       );
     });
+
+    test("should open Mark as Completed dialog using 'm c' shortcut", async ({
+      page,
+    }) => {
+      await page.keyboard.press("m");
+      await page.keyboard.press("c");
+
+      await expect(
+        page.getByRole("alertdialog", { name: "Mark as Complete" }),
+      ).toBeVisible();
+
+      await expect(
+        page.getByText(
+          "This action will close Appointment, Token and Encounter",
+        ),
+      ).toBeVisible();
+    });
   });
 });
