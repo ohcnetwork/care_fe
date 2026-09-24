@@ -147,28 +147,20 @@ export function EncounterQuestion({
   });
 
   useEffect(() => {
-    if (
+    const shouldSetEndDate =
       encounter.status === EncounterStatus.DISCHARGED ||
-      encounter.status === EncounterStatus.COMPLETED ||
-      encounter.status === EncounterStatus.CANCELLED ||
       encounter.status === EncounterStatus.DISCONTINUED ||
-      encounter.status === EncounterStatus.ENTERED_IN_ERROR
-    ) {
-      if (!encounter.period.end) {
-        handleUpdateEncounter({
-          period: {
-            ...encounter.period,
-            end: new Date().toISOString(),
-          },
-        });
-      }
-    } else {
-      handleUpdateEncounter({
-        period: {
-          ...encounter.period,
-          end: undefined,
-        },
-      });
+      encounter.status === EncounterStatus.COMPLETED;
+
+    // Cancellation and invalidation do not represent a clinical end.
+    const end = shouldSetEndDate
+      ? encounter.period.end ||
+        encounterData?.period.end ||
+        new Date().toISOString()
+      : undefined;
+
+    if (end !== encounter.period.end) {
+      handleUpdateEncounter({ period: { ...encounter.period, end } });
     }
   }, [encounter.status]);
 
