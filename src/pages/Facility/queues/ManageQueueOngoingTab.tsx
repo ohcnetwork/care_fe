@@ -28,10 +28,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
-import {
-  getTokenQueueStatusCount,
-  useTokenListInfiniteQuery,
-} from "@/pages/Facility/queues/utils";
+import { useTokenListInfiniteQuery } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
@@ -67,19 +64,12 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     facilityId,
   });
   const [qParams, setQueryParams] = useQueryParams();
-  const { autoRefresh, search, patient, patient_name } = qParams;
+  const { search, patient, patient_name } = qParams;
   const [mobileSection, setMobileSection] = useState<
     "waiting" | "serving" | "recall"
   >("waiting");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const activeFilterCount = [search, patient].filter(Boolean).length;
-  const { data: summary } = useQuery({
-    queryKey: ["token-queue-summary", facilityId, queueId],
-    queryFn: query(tokenQueueApi.summary, {
-      pathParams: { facility_id: facilityId, id: queueId },
-    }),
-    refetchInterval: autoRefresh === "true" ? 10000 : false,
-  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,36 +135,42 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         <TabsList className="w-full h-11 border border-gray-200 p-0">
           <TabsTrigger value="waiting" className="flex-1">
             {t("waiting")}
-            <Badge
-              variant="indigo"
-              size="sm"
-              className="flex items-center justify-center size-5"
-            >
-              {summary &&
-                getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
-            </Badge>
+            <SubQueueCountBadge
+              facilityId={facilityId}
+              queueId={queueId}
+              qParams={{
+                sub_queue_is_null: true,
+                status: TokenStatus.CREATED,
+                patient_name: search || "",
+                patient: patient,
+              }}
+            />
           </TabsTrigger>
           <TabsTrigger value="serving" className="flex-1">
             {t("serving")}
-            <Badge
+            <SubQueueCountBadge
+              facilityId={facilityId}
+              queueId={queueId}
+              qParams={{
+                status: TokenStatus.IN_PROGRESS,
+                patient_name: search || "",
+                patient: patient,
+              }}
               variant="green"
-              size="sm"
-              className="flex items-center justify-center size-5"
-            >
-              {summary &&
-                getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
-            </Badge>
+            />
           </TabsTrigger>
           <TabsTrigger value="recall" className="flex-1">
             {t("recall")}
-            <Badge
+            <SubQueueCountBadge
+              facilityId={facilityId}
+              queueId={queueId}
+              qParams={{
+                status: TokenStatus.UNFULFILLED,
+                patient_name: search || "",
+                patient: patient,
+              }}
               variant="secondary"
-              size="sm"
-              className="flex items-center justify-center size-5"
-            >
-              {summary &&
-                getTokenQueueStatusCount(summary, TokenStatus.UNFULFILLED)}
-            </Badge>
+            />
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -199,8 +195,21 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         >
           <QueueColumn
             title={
-              <div className="ml-2 mb-2 text-base font-semibold text-gray-950">
-                {t("waiting")}
+              <div className="hidden lg:flex items-center gap-2">
+                <Label className="text-gray-950 text-base font-semibold">
+                  {t("waiting")}
+                </Label>
+                <SubQueueCountBadge
+                  facilityId={facilityId}
+                  queueId={queueId}
+                  qParams={{
+                    sub_queue_is_null: true,
+                    status: TokenStatus.CREATED,
+                    patient_name: search || "",
+                    patient: patient,
+                  }}
+                  variant="indigo"
+                />
               </div>
             }
           >
@@ -337,8 +346,10 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                       <SubQueueCountBadge
                         facilityId={facilityId}
                         queueId={queueId}
-                        subQueueId={subQueue.id}
-                        status={TokenStatus.UNFULFILLED}
+                        qParams={{
+                          status: TokenStatus.UNFULFILLED,
+                          sub_queue: subQueue.id,
+                        }}
                       />
                     </div>
                     <div className="flex flex-col gap-3 pt-2">
@@ -568,8 +579,10 @@ function AwaitingRecallTrigger({
         <SubQueueCountBadge
           facilityId={facilityId}
           queueId={queueId}
-          subQueueId={subQueueId}
-          status={TokenStatus.UNFULFILLED}
+          qParams={{
+            status: TokenStatus.UNFULFILLED,
+            sub_queue: subQueueId,
+          }}
         />
       </div>
       <AwaitingRecallDialog
@@ -677,27 +690,25 @@ function AwaitingRecallDialog({
 function SubQueueCountBadge({
   facilityId,
   queueId,
-  subQueueId,
-  status,
+  qParams,
   variant,
 }: {
   facilityId: string;
   queueId: string;
-  subQueueId: string;
-  status: TokenStatus;
   variant?: React.ComponentProps<typeof Badge>["variant"];
+  qParams?: Record<string, unknown>;
 }) {
   const { data } = useTokenListInfiniteQuery({
     facilityId,
     queueId,
-    qParams: { status, sub_queue: subQueueId },
+    qParams,
   });
 
   return (
     <Badge
       variant={variant}
       size="sm"
-      className="flex items-center justify-center w-5 h-auto rounded-[4px]"
+      className="flex items-center justify-center rounded-[4px] size-5.5"
     >
       {data?.pages[0]?.count ?? 0}
     </Badge>
@@ -732,8 +743,10 @@ function NowServingSection({
         <SubQueueCountBadge
           facilityId={facilityId}
           queueId={queueId}
-          subQueueId={subQueueId}
-          status={TokenStatus.IN_PROGRESS}
+          qParams={{
+            status: TokenStatus.IN_PROGRESS,
+            sub_queue: subQueueId,
+          }}
           variant={count > 0 ? "green" : undefined}
         />
       </div>
@@ -808,8 +821,10 @@ function UpNextSection({
         <SubQueueCountBadge
           facilityId={facilityId}
           queueId={queueId}
-          subQueueId={subQueueId}
-          status={TokenStatus.CREATED}
+          qParams={{
+            status: TokenStatus.CREATED,
+            sub_queue: subQueueId,
+          }}
         />
       </div>
       <OngoingQueueTokenCardsList
