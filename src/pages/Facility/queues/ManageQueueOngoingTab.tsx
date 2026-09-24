@@ -179,6 +179,16 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </TabsList>
       </Tabs>
 
+      {/* Mobile: service point selector */}
+      {(mobileSection === "serving" || mobileSection === "recall") && (
+        <div className="flex flex-col gap-2 lg:hidden">
+          <Label className="text-gray-950 text-sm font-medium">
+            {t("service_points")}
+          </Label>
+          <ServicePointsDropDown />
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-4 lg:overflow-x-auto w-full">
         {/* Waiting tokens list */}
         <div
@@ -187,7 +197,13 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             mobileSection === "waiting" ? "flex" : "hidden lg:flex",
           )}
         >
-          <QueueColumn title={t("waiting")}>
+          <QueueColumn
+            title={
+              <div className="ml-2 mb-2 text-base font-semibold text-gray-950">
+                {t("waiting")}
+              </div>
+            }
+          >
             <OngoingQueueTokenCardsList
               facilityId={facilityId}
               queueId={queueId}
@@ -198,7 +214,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 patient: patient,
               }}
               emptyState={
-                <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
+                <div className="flex flex-col gap-2 mb-1 items-center justify-center bg-gray-200 rounded-lg py-10 border border-gray-300">
                   <DoorOpenIcon className="size-6 text-gray-700" />
                   <span className="text-sm font-semibold text-gray-700">
                     {t("no_patient_is_waiting")}
@@ -217,8 +233,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           )}
         >
           <QueueColumn
+            className="bg-transparent border-0 lg:bg-gray-100 lg:border lg:border-gray-200 px-0 pt-0"
             title={
-              <div className="flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2">
                 <Label className="text-gray-950 text-base font-semibold">
                   {t("service_points")}
                 </Label>
@@ -231,7 +248,11 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 </Badge>
               </div>
             }
-            options={<ServicePointsDropDown />}
+            options={
+              <div className="hidden lg:block">
+                <ServicePointsDropDown />
+              </div>
+            }
           >
             <div className="flex flex-col gap-4">
               {assignedServicePoints.map((subQueue) => (
@@ -240,7 +261,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                     <div className="flex items-start justify-between gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
                       <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-1.5 -ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
+                          <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
                           <span className="text-base font-semibold text-gray-950 truncate">
                             {subQueue.name}
                           </span>
@@ -291,23 +312,57 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             mobileSection === "recall" ? "flex" : "hidden",
           )}
         >
-          <QueueColumn title={t("recall")}>
-            <OngoingQueueTokenCardsList
-              facilityId={facilityId}
-              queueId={queueId}
-              qParams={{
-                sub_queue_is_null: true,
-                status: TokenStatus.UNFULFILLED,
-              }}
-              emptyState={
-                <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">
-                  <DoorOpenIcon className="size-6 text-gray-700" />
-                  <span className="text-sm font-semibold text-gray-700">
-                    {t("no_patient_is_in_recall")}
-                  </span>
+          <QueueColumn
+            title={<div className="sr-only">{t("recall")}</div>}
+            options={
+              <div className="hidden lg:block">
+                <ServicePointsDropDown />
+              </div>
+            }
+            className="bg-transparent border-0 lg:bg-gray-100 lg:border lg:border-gray-200 px-0 pt-0"
+          >
+            <div className="flex flex-col gap-4">
+              {assignedServicePoints.map((subQueue) => (
+                <div key={subQueue.id} className="flex flex-col gap-4">
+                  <div className="flex flex-col px-1 pt-1 rounded-lg bg-gray-300/30 border border-gray-300">
+                    <div className="flex items-start gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
+                          <span className="text-base font-semibold text-gray-950 truncate">
+                            {subQueue.name}
+                          </span>
+                        </div>
+                      </div>
+                      <SubQueueCountBadge
+                        facilityId={facilityId}
+                        queueId={queueId}
+                        subQueueId={subQueue.id}
+                        status={TokenStatus.UNFULFILLED}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-3 pt-2">
+                      <OngoingQueueTokenCardsList
+                        facilityId={facilityId}
+                        queueId={queueId}
+                        qParams={{
+                          status: TokenStatus.UNFULFILLED,
+                          sub_queue: subQueue.id,
+                        }}
+                        emptyState={
+                          <div className="flex flex-col mb-1 gap-2 items-center justify-center bg-gray-200 rounded-md py-3 border border-gray-300">
+                            <DoorOpenIcon className="size-6 text-gray-700" />
+                            <span className="text-sm font-semibold text-gray-700 text-center">
+                              {t("no_tokens_awaiting_recall")}
+                            </span>
+                          </div>
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-              }
-            />
+              ))}
+            </div>
           </QueueColumn>
         </div>
       </div>
@@ -390,20 +445,27 @@ export function QueueColumn({
   title,
   children,
   options,
+  className,
 }: {
   title: React.ReactNode;
   children: React.ReactNode;
   options?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-lg bg-gray-100 border border-gray-200 w-full lg:min-w-xs lg:flex-1">
+    <div
+      className={cn(
+        "flex flex-col lg:gap-3 pt-3 px-1 lg:p-3 rounded-lg bg-gray-100 border border-gray-200 w-full lg:min-w-xs lg:flex-1",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold">{title}</span>
         </div>
         {options}
       </div>
-      <div className="lg:h-[calc(100vh-21.5rem)] lg:overflow-y-auto pb-2">
+      <div className="lg:h-[calc(100vh-21.5rem)] lg:overflow-y-auto lg:pb-2">
         {children}
       </div>
     </div>
@@ -494,7 +556,7 @@ function AwaitingRecallTrigger({
 
   return (
     <>
-      <div className="flex items-center mr-1">
+      <div className="hidden lg:flex items-center mr-1">
         <Button
           variant="link"
           size="sm"
