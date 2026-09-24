@@ -79,7 +79,8 @@ function GovtOrganizationLevel({
     ? selectedOrg.metadata.govt_org_type
     : index === 0
       ? "default"
-      : previousOrg?.metadata?.govt_org_children_type || "default";
+      : previousOrg?.metadata?.govt_org_children_type ||
+        (index === 1 ? "district" : "default");
 
   return (
     <div className="mt-2">
