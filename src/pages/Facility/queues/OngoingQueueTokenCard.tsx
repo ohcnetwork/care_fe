@@ -322,6 +322,68 @@ function OngoingQueueTokenCardInner({
   );
 }
 
+export function TokenDetailsDialog({
+  facilityId,
+  token,
+  open,
+  onOpenChange,
+}: {
+  facilityId: string;
+  token: TokenRead | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const isMobile = useBreakpoints({ default: true, sm: false });
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEnteredInErrorDialog, setShowEnteredInErrorDialog] =
+    useState(false);
+
+  if (!token) {
+    return null;
+  }
+
+  return (
+    <>
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="flex flex-col items-center px-3 pb-2">
+            <div className="w-full overflow-y-auto max-h-[80dvh]">
+              <TokenContent
+                facilityId={facilityId}
+                token={token}
+                setShowCancelDialog={setShowCancelDialog}
+                setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="flex flex-col items-center px-3 pb-2 max-h-[90dvh] overflow-y-auto">
+            <TokenContent
+              facilityId={facilityId}
+              token={token}
+              setShowCancelDialog={setShowCancelDialog}
+              setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+      <CancelTokenDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        token={token}
+      />
+      <EnteredInErrorDialog
+        open={showEnteredInErrorDialog}
+        onOpenChange={setShowEnteredInErrorDialog}
+        facilityId={facilityId}
+        token={token}
+      />
+    </>
+  );
+}
+
 function EnteredInErrorDialog({
   open,
   onOpenChange,

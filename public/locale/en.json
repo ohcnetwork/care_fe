@@ -1082,6 +1082,7 @@
   "calculation": "Calculation",
   "calculation_preview": "Calculation Preview",
   "call_next_patient": "Serve Next Patient",
+  "call_next_patient_description": "Select a service point to serve the next waiting patient.",
   "call_patient": "Call Patient",
   "call_to": "Call to {{name}}",
   "called": "Called",

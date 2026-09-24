@@ -3,11 +3,6 @@ import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleRe
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -21,12 +16,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
+import {
+  OngoingQueueTokenCardsList,
+  TokenDetailsDialog,
+} from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import {
   getTokenQueueStatusCount,
@@ -38,18 +35,11 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ChevronDownIcon,
-  DoorOpenIcon,
-  EyeIcon,
-  Megaphone,
-  SearchIcon,
-  SettingsIcon,
-  SlidersHorizontalIcon,
-} from "lucide-react";
+import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CallNextPatientDialog } from "./CallNextPatientDialog";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
 import { useQueueServicePoints } from "./useQueueServicePoints";
 
@@ -67,12 +57,10 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     facilityId,
   });
   const [qParams, setQueryParams] = useQueryParams();
-  const { autoRefresh, search, patient, patient_name } = qParams;
+  const { autoRefresh, patient, patient_name } = qParams;
   const [mobileSection, setMobileSection] = useState<
     "waiting" | "serving" | "recall"
   >("waiting");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const activeFilterCount = [search, patient].filter(Boolean).length;
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
@@ -82,56 +70,21 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Mobile/tablet: collapsible filter trigger */}
-      <Collapsible
-        open={filtersOpen}
-        onOpenChange={setFiltersOpen}
-        className="lg:hidden"
-      >
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between h-9 text-sm font-medium"
-          >
-            <span className="flex items-center gap-2">
-              <SlidersHorizontalIcon className="size-4" />
-              {t("search_patients")}
-              {activeFilterCount > 0 && (
-                <Badge variant="primary" size="sm">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </span>
-            <ChevronDownIcon
-              className={cn(
-                "size-4 transition-transform",
-                filtersOpen && "rotate-180",
-              )}
-            />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-3">
-          <FilterControls
-            search={search}
-            patient={patient}
-            patientName={patient_name}
-            qParams={qParams}
-            setQueryParams={setQueryParams}
-            hideSearchLabel
-          />
-        </CollapsibleContent>
-      </Collapsible>
-
+    <div
+      className={cn(
+        "flex flex-col gap-4",
+        mobileSection === "waiting" && "pb-20 lg:pb-0",
+      )}
+    >
       {/* Desktop: inline filters */}
       <div className="hidden lg:flex flex-col lg:flex-row justify-between items-stretch lg:items-start mt-2 gap-4">
         <FilterControls
-          search={search}
           patient={patient}
           patientName={patient_name}
           qParams={qParams}
           setQueryParams={setQueryParams}
         />
+        <ServeNextPatientButton facilityId={facilityId} queueId={queueId} />
       </div>
 
       {/* Mobile/tablet section toggle */}
@@ -189,6 +142,20 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </div>
       )}
 
+      {mobileSection === "waiting" && (
+        <div className="flex flex-col gap-3 lg:hidden">
+          <FilterControls
+            patient={patient}
+            patientName={patient_name}
+            qParams={qParams}
+            setQueryParams={setQueryParams}
+          />
+          <div className="fixed inset-x-0 bottom-0 z-10 px-4 py-2 bg-white border-t border-gray-200">
+            <ServeNextPatientButton facilityId={facilityId} queueId={queueId} />
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-4 lg:overflow-x-auto w-full">
         {/* Waiting tokens list */}
         <div
@@ -210,7 +177,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               qParams={{
                 sub_queue_is_null: true,
                 status: TokenStatus.CREATED,
-                patient_name: search || "",
                 patient: patient,
               }}
               emptyState={
@@ -371,14 +337,11 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
 }
 
 function FilterControls({
-  search,
   patient,
   patientName,
   qParams,
   setQueryParams,
-  hideSearchLabel,
 }: {
-  search: string | undefined;
   patient: string | undefined;
   patientName: string | undefined;
   qParams: Record<string, string | undefined>;
@@ -386,58 +349,36 @@ function FilterControls({
     params: Record<string, string | undefined>,
     options?: { overwrite?: boolean; replace?: boolean },
   ) => void;
-  hideSearchLabel?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <>
-      <div className="flex flex-col gap-2 w-full">
-        {!hideSearchLabel && (
-          <Label className="text-gray-950 text-sm font-medium">
-            {t("search_patients")}
-          </Label>
-        )}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative w-full sm:w-64">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search_by_patient_name")}
-              value={search || ""}
-              onChange={(e) =>
-                setQueryParams(
-                  { search: e.target.value || "" },
-                  { overwrite: false, replace: true },
-                )
-              }
-              className="pl-10 w-full h-9"
-            />
-          </div>
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientNameVal) => {
-              if (patientId && patientNameVal) {
-                setQueryParams(
-                  {
-                    patient: patientId,
-                    patient_name: patientNameVal,
-                  },
-                  { overwrite: false, replace: true },
-                );
-              } else {
-                const next = { ...qParams };
-                delete next.patient;
-                delete next.patient_name;
-                setQueryParams(next, { replace: true });
-              }
-            }}
-            placeholder={t("filter_by_identifier")}
-            className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-            patientId={patient}
-            patientName={patientName}
-          />
-        </div>
-      </div>
-    </>
+    <div className="flex flex-col gap-2">
+      <Label className="text-gray-950 text-sm font-medium">
+        {t("search_patients")}
+      </Label>
+      <PatientIdentifierFilter
+        onSelect={(patientId, patientNameVal) => {
+          if (patientId && patientNameVal) {
+            setQueryParams(
+              {
+                patient: patientId,
+                patient_name: patientNameVal,
+              },
+              { overwrite: false, replace: true },
+            );
+          } else {
+            const next = { ...qParams };
+            delete next.patient;
+            delete next.patient_name;
+            setQueryParams(next, { replace: true });
+          }
+        }}
+        placeholder={t("filter_by_identifier")}
+        className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+        patientId={patient}
+        patientName={patientName}
+      />
+    </div>
   );
 }
 
@@ -587,11 +528,13 @@ function CallNextPatientButton({
   subQueueId,
   facilityId,
   queueId,
+  onSuccess,
   ...props
 }: {
   subQueueId: string;
   facilityId: string;
   queueId: string;
+  onSuccess?: (token: TokenRead) => void;
 } & React.ComponentProps<typeof Button>) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
@@ -606,13 +549,14 @@ function CallNextPatientButton({
     mutationFn: mutate(tokenQueueApi.setNextTokenToSubQueue, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
-    onSuccess: () => {
+    onSuccess: (data: TokenRead) => {
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],
       });
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
+      onSuccess?.(data);
     },
   });
 
@@ -627,6 +571,81 @@ function CallNextPatientButton({
         });
       }}
     />
+  );
+}
+
+function ServeNextPatientButton({
+  facilityId,
+  queueId,
+}: {
+  facilityId: string;
+  queueId: string;
+}) {
+  const { t } = useTranslation();
+  const { assignedServicePoints } = useQueueServicePoints();
+  const [openServicePointSelector, setOpenServicePointSelector] =
+    useState(false);
+  const [servedToken, setServedToken] = useState<TokenRead | null>(null);
+  const [showServedTokenDialog, setShowServedTokenDialog] = useState(false);
+
+  const handleServed = (token: TokenRead) => {
+    setServedToken(token);
+    setShowServedTokenDialog(true);
+  };
+
+  if (assignedServicePoints.length === 0) {
+    return null;
+  }
+
+  if (assignedServicePoints.length === 1) {
+    return (
+      <>
+        <CallNextPatientButton
+          subQueueId={assignedServicePoints[0].id}
+          facilityId={facilityId}
+          queueId={queueId}
+          variant="primary"
+          className="w-full"
+          onSuccess={handleServed}
+        >
+          <Megaphone />
+          {t("call_next_patient")}
+        </CallNextPatientButton>
+        <TokenDetailsDialog
+          facilityId={facilityId}
+          token={servedToken}
+          open={showServedTokenDialog}
+          onOpenChange={setShowServedTokenDialog}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        variant="primary"
+        className="w-full"
+        onClick={() => setOpenServicePointSelector(true)}
+      >
+        <Megaphone />
+        {t("call_next_patient")}
+      </Button>
+      <CallNextPatientDialog
+        open={openServicePointSelector}
+        onOpenChange={setOpenServicePointSelector}
+        subQueues={assignedServicePoints}
+        facilityId={facilityId}
+        queueId={queueId}
+        onSuccess={handleServed}
+      />
+      <TokenDetailsDialog
+        facilityId={facilityId}
+        token={servedToken}
+        open={showServedTokenDialog}
+        onOpenChange={setShowServedTokenDialog}
+      />
+    </>
   );
 }
 
