@@ -77,7 +77,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
       )}
     >
       {/* Desktop: inline filters */}
-      <div className="hidden lg:flex flex-col lg:flex-row justify-between items-stretch lg:items-start mt-2 gap-4">
+      <div className="hidden lg:flex flex-col lg:flex-row justify-between items-stretch lg:items-end mt-2 gap-4">
         <FilterControls
           patient={patient}
           patientName={patient_name}
@@ -605,7 +605,7 @@ function ServeNextPatientButton({
           facilityId={facilityId}
           queueId={queueId}
           variant="primary"
-          className="w-full"
+          className="w-full lg:w-auto"
           onSuccess={handleServed}
         >
           <Megaphone />
@@ -625,7 +625,7 @@ function ServeNextPatientButton({
     <>
       <Button
         variant="primary"
-        className="w-full"
+        className="w-full lg:w-auto"
         onClick={() => setOpenServicePointSelector(true)}
       >
         <Megaphone />
