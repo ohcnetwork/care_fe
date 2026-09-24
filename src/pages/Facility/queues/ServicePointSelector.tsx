@@ -1,19 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import RadioInput from "@/components/ui/RadioInput";
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { SubQueuePickerDialog } from "@/pages/Facility/queues/SubQueuePickerDialog";
 import { useUpdateToken } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
@@ -71,7 +56,6 @@ export const ServicePointSelector = ({
   action: ServicePointSelectorAction;
 }) => {
   const { t } = useTranslation();
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { title, description, successMessage } = ACTION_TO_CONTENT[action];
 
@@ -117,61 +101,16 @@ export const ServicePointSelector = ({
     });
   };
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="text-base text-left">
-              {t(title)}
-            </DrawerTitle>
-            <DrawerDescription className="text-sm text-gray-600 text-left">
-              {t(description)}
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="overflow-y-auto max-h-[50vh] p-3 pb-6">
-            <RadioInput
-              options={subQueues.map((subQueue) => ({
-                label: subQueue.name,
-                value: subQueue.id,
-              }))}
-              required
-              onValueChange={handleSelect}
-              value={selectedSubQueueId}
-              className="flex flex-col gap-3"
-              classNameInput="p-2"
-              disabled={isPending}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{t(title)}</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            {t(description)}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto max-h-[50vh] p-3">
-          <RadioInput
-            options={subQueues.map((subQueue) => ({
-              label: subQueue.name,
-              value: subQueue.id,
-            }))}
-            required
-            onValueChange={handleSelect}
-            value={selectedSubQueueId}
-            className="flex flex-col gap-3"
-            classNameInput="p-2"
-            disabled={isPending}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
+    <SubQueuePickerDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      subQueues={subQueues}
+      value={selectedSubQueueId}
+      onValueChange={handleSelect}
+      disabled={isPending}
+    />
   );
 };
