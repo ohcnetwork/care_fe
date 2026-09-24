@@ -408,7 +408,7 @@ function FinishedTokenOptions({
                 {
                   status: TokenStatus.UNFULFILLED,
                   note: token.note,
-                  sub_queue: null,
+                  sub_queue: token.sub_queue?.id || null,
                 },
                 {
                   onSuccess: () => toast.success(t("token_recalled_later")),

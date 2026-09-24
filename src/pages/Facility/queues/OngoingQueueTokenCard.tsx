@@ -133,7 +133,7 @@ function useTokenActions({
             {
               status: TokenStatus.UNFULFILLED,
               note: token.note,
-              sub_queue: null,
+              sub_queue: token.sub_queue?.id || null,
             },
             { onSuccess: () => toast.success(t("token_recalled_later")) },
           ),
@@ -397,7 +397,7 @@ export function OngoingQueueTokenCardsList({
   const tokens = data?.pages.flatMap((page) => page.results) ?? [];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       {tokens.length > 0 ? (
         <>
           {header}
@@ -408,7 +408,7 @@ export function OngoingQueueTokenCardsList({
               facilityId={facilityId}
             />
           ))}
-          <div ref={ref} className="-mt-3" />
+          <div ref={ref} className="-mt-1" />
         </>
       ) : (
         emptyState
@@ -443,7 +443,7 @@ const TokenTrigger = ({
         }
       }}
       className={cn(
-        "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-lg shadow hover:cursor-pointer hover:shadow-md",
+        "relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 bg-white rounded-md shadow hover:cursor-pointer hover:shadow-md",
         token.status === TokenStatus.IN_PROGRESS && "border border-primary-500",
         className,
       )}
@@ -451,22 +451,26 @@ const TokenTrigger = ({
       {token.status === TokenStatus.IN_PROGRESS && (
         <span
           aria-hidden="true"
-          className="absolute top-4 left-0 inset-y-6 w-1 rounded-r-lg bg-primary-500 h-5"
+          className="absolute top-4 -ml-3.25 inset-y-6 w-1 rounded-r-xs bg-primary-600 h-4"
         />
       )}
       <div className="flex sm:contents items-start justify-between w-full">
-        <div className="flex flex-col items-start gap-1 min-w-0">
+        <div className="flex flex-col items-start min-w-0">
           <span className="text-gray-950 font-semibold">
             {token.patient ? token.patient.name : renderTokenNumber(token)}
           </span>
           {token.patient && (
-            <span className="text-sm text-gray-700">
+            <span className="text-sm font-medium text-gray-700">
               {formatPatientAge(token.patient, true)},{" "}
               {t(`GENDER__${token.patient.gender}`)}
             </span>
           )}
         </div>
-        <ArrowRight size={20} className="sm:hidden text-gray-950 mr-2" />
+        <ArrowRight
+          strokeWidth={1.75}
+          size={20}
+          className="sm:hidden text-gray-950 mr-2"
+        />
       </div>
 
       <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
@@ -490,7 +494,7 @@ const TokenTrigger = ({
           className={cn(
             "flex w-full sm:w-auto gap-2 items-center justify-center py-1 px-3 bg-gray-100 border border-gray-200 rounded-md whitespace-nowrap text-black",
             getQueueTokenStatus(token) === QueueTokenStatus.SERVING &&
-              "bg-primary-100 border border-primary-400 text-primary-900",
+              "bg-primary-50 border border-primary-300 text-primary-900",
           )}
         >
           <span
@@ -509,11 +513,17 @@ const TokenTrigger = ({
               {t(`token_status__${getQueueTokenStatus(token)}`)}
             </span>
           </span>
-          <span className="text-lg font-bold ">{renderTokenNumber(token)}</span>
+          <span className="text-lg font-bold font-mono">
+            {renderTokenNumber(token)}
+          </span>
         </div>
       </div>
 
-      <ArrowRight size={20} className="hidden sm:block shrink-0" />
+      <ArrowRight
+        strokeWidth={1.75}
+        size={20}
+        className="hidden sm:block shrink-0"
+      />
     </div>
   );
 };
@@ -656,12 +666,14 @@ const TokenContent = ({
               variant="outline_primary"
               className="flex-1 gap-1"
               onClick={() => {
-                if (assignedServicePoints.length === 1) {
+                // A recalled token already knows its service point, so no need to ask again
+                if (token.sub_queue || assignedServicePoints.length === 1) {
                   updateToken(
                     {
                       status: TokenStatus.CREATED,
                       note: token.note,
-                      sub_queue: assignedServicePoints[0].id,
+                      sub_queue:
+                        token.sub_queue?.id ?? assignedServicePoints[0].id,
                     },
                     {
                       onSuccess: () =>
@@ -684,12 +696,14 @@ const TokenContent = ({
               variant="primary"
               className="flex-1"
               onClick={() => {
-                if (assignedServicePoints.length === 1) {
+                // A recalled token already knows its service point, so no need to ask again
+                if (token.sub_queue || assignedServicePoints.length === 1) {
                   updateToken(
                     {
                       status: TokenStatus.IN_PROGRESS,
                       note: token.note,
-                      sub_queue: assignedServicePoints[0].id,
+                      sub_queue:
+                        token.sub_queue?.id ?? assignedServicePoints[0].id,
                     },
                     {
                       onSuccess: () => toast.success(t("token_now_serving")),
