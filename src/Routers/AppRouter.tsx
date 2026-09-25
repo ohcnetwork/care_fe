@@ -1,12 +1,12 @@
 import careConfig from "@careConfig";
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
-
-import IconIndex from "@/CAREUI/icons/Index";
+import { lazy, Suspense } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
@@ -27,8 +27,14 @@ import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
-import { LicensesPage } from "@/pages/Licenses/Licenses";
-import UserDashboard from "@/pages/UserDashboard";
+
+const IconIndex = lazy(() => import("@/CAREUI/icons/Index"));
+const LicensesPage = lazy(() =>
+  import("@/pages/Licenses/Licenses").then((module) => ({
+    default: module.LicensesPage,
+  })),
+);
+const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
 
 // List of paths and patterns where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = [
@@ -166,7 +172,7 @@ export default function AppRouter() {
           </div>
           <div className="p-3 mt-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
+              <Suspense fallback={<Loading />}>{pages}</Suspense>
             </ErrorBoundary>
           </div>
         </main>

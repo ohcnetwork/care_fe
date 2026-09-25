@@ -1,3 +1,5 @@
+import "reactflow/dist/style.css";
+
 import { ChevronDown, ChevronRight, Hospital, Pencil } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

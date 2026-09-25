@@ -1,18 +1,55 @@
+import { lazy } from "react";
+
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
-import EncounterHistory from "@/components/Patient/PatientDetailsTab/EncounterHistory";
-import { ClinicalHistory } from "./ClinicalHistory";
-
-import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
-import { Accounts } from "./Accounts";
-import { PatientFilesTab } from "./PatientFiles";
-import { PatientNotesTab } from "./PatientNotes";
-import { PatientUsers } from "./PatientUsers";
-import { ResourceRequests } from "./ResourceRequests";
-import { Updates } from "./patientUpdates";
+const Demography = lazy(() =>
+  import("@/components/Patient/PatientDetailsTab/Demography").then(
+    (module) => ({
+      default: module.Demography,
+    }),
+  ),
+);
+const EncounterHistory = lazy(
+  () => import("@/components/Patient/PatientDetailsTab/EncounterHistory"),
+);
+const ClinicalHistory = lazy(() =>
+  import("./ClinicalHistory").then((module) => ({
+    default: module.ClinicalHistory,
+  })),
+);
+const BookingsList = lazy(() =>
+  import("@/pages/Appointments/BookAppointment/BookingsList").then(
+    (module) => ({
+      default: module.BookingsList,
+    }),
+  ),
+);
+const Accounts = lazy(() =>
+  import("./Accounts").then((module) => ({ default: module.Accounts })),
+);
+const PatientFilesTab = lazy(() =>
+  import("./PatientFiles").then((module) => ({
+    default: module.PatientFilesTab,
+  })),
+);
+const PatientNotesTab = lazy(() =>
+  import("./PatientNotes").then((module) => ({
+    default: module.PatientNotesTab,
+  })),
+);
+const PatientUsers = lazy(() =>
+  import("./PatientUsers").then((module) => ({ default: module.PatientUsers })),
+);
+const ResourceRequests = lazy(() =>
+  import("./ResourceRequests").then((module) => ({
+    default: module.ResourceRequests,
+  })),
+);
+const Updates = lazy(() =>
+  import("./patientUpdates").then((module) => ({ default: module.Updates })),
+);
 
 export interface PatientProps {
   facilityId?: string;

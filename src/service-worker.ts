@@ -6,11 +6,30 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 import { clientsClaim } from "workbox-core";
+import { ExpirationPlugin } from "workbox-expiration";
 import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { CacheFirst } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
 precacheAndRoute(self.__WB_MANIFEST);
+
+registerRoute(
+  ({ request, url }) =>
+    url.origin === self.location.origin &&
+    url.pathname.startsWith("/assets/") &&
+    (request.destination === "script" || request.destination === "style"),
+  new CacheFirst({
+    cacheName: "care-code",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 256,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
+  }),
+);
 
 clientsClaim();
 
