@@ -1,0 +1,91 @@
+.print-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.print-page-table {
+  width: 100%;
+  border-collapse: collapse;
+  flex: 1;
+}
+
+.print-page-table > :is(thead, tbody, tfoot) > tr > td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.print-page-footer {
+  padding-top: 16px;
+}
+
+.print-footer-spacer {
+  display: none;
+}
+
+@media print {
+  /* Remove preview chrome and transformed/scrolling ancestors from pagination. */
+  body:has(.print-page) *:has(#section-to-print) {
+    display: block !important;
+    position: static !important;
+    transform: none !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  body:has(.print-page)
+    *:not(:has(#section-to-print)):not(#section-to-print):not(
+      #section-to-print *
+    ) {
+    display: none !important;
+  }
+
+  #section-to-print:has(.print-page) {
+    position: static;
+    break-inside: auto;
+    width: 100% !important;
+    overflow: visible;
+    font-size: 10pt;
+  }
+
+  #section-to-print .print-page {
+    display: block;
+    min-height: 0 !important;
+  }
+
+  #section-to-print .print-page-table {
+    table-layout: fixed;
+    font-size: inherit;
+  }
+
+  #section-to-print .print-page-table > :is(thead, tbody, tfoot) > tr > td {
+    padding: 0;
+  }
+
+  .print-page-table > thead {
+    display: table-header-group;
+    break-inside: avoid;
+  }
+
+  .print-page-table > tfoot {
+    display: table-footer-group;
+    break-inside: avoid;
+  }
+
+  .print-footer-spacer {
+    display: block;
+    height: var(--print-footer-height, 0px);
+  }
+
+  .print-page-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+}
