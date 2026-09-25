@@ -83,7 +83,6 @@ export function CompleteServiceRequestDialog({
         onOpenChange={handleOpenChange}
         title={t("add_completion_note")}
         description={t("service_request_completion_note_description")}
-        dialogContentClassName="shadow-lg border-white/20 sm:max-w-lg"
       >
         <div className="space-y-2">
           <p className="text-sm font-medium text-gray-900">

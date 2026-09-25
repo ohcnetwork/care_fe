@@ -22,7 +22,6 @@ interface ResponsiveDialogProps {
   onOpenChange: (open: boolean) => void;
   title: React.ReactNode;
   description?: React.ReactNode;
-  dialogContentClassName?: string;
   children: React.ReactNode;
 }
 
@@ -32,7 +31,6 @@ export function ResponsiveDialog({
   onOpenChange,
   title,
   description,
-  dialogContentClassName,
   children,
 }: ResponsiveDialogProps) {
   const isMobile = useBreakpoints({ default: true, lg: false });
@@ -53,7 +51,7 @@ export function ResponsiveDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={dialogContentClassName}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
