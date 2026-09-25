@@ -82,4 +82,49 @@ test.describe("Questionnaire v2 versions", () => {
       ).toBeVisible();
     });
   });
+
+  test("property saves keep the revision; only a question change bumps it", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    // The revision renders in both the header badge and the properties sidebar.
+    const revision = (n: number) =>
+      page.getByText(`v${n}`, { exact: true }).first();
+    let detailUrl = "";
+
+    await test.step("A new questionnaire starts at v1", async () => {
+      detailUrl = await createQuestionnaire(page, {
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+        title: `QV2 Property Revisions ${Date.now()}`,
+      });
+      await expect(revision(1)).toBeVisible();
+    });
+
+    await test.step("Description and status saves stay on v1", async () => {
+      await page
+        .getByRole("textbox", { name: "Description" })
+        .fill(faker.lorem.sentence());
+      await page
+        .getByRole("radiogroup", { name: "Status" })
+        .getByRole("radio", { name: "Draft" })
+        .click();
+      await page.getByRole("button", { name: "Save Questionnaire" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      await page.goto(detailUrl);
+      await expect(revision(1)).toBeVisible();
+      await expect(page.getByText("v2", { exact: true })).toHaveCount(0);
+    });
+
+    await test.step("A question save moves it to v2", async () => {
+      await openQuestionBuilder(page);
+      await page.getByRole("button", { name: "Add First Question" }).click();
+      await page
+        .getByRole("textbox", { name: "Question Title" })
+        .pressSequentially(faker.lorem.words(3));
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      await page.goto(detailUrl);
+      await expect(revision(2)).toBeVisible();
+    });
+  });
 });
