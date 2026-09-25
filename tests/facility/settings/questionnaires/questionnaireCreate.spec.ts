@@ -56,4 +56,40 @@ test.describe("Questionnaire v2 create (facility)", () => {
       );
     });
   });
+
+  test("questions can only be added once the questionnaire exists", async ({
+    page,
+  }) => {
+    const addAffordances = [
+      "Add First Question",
+      "Add new question",
+      "Add Section",
+      "Edit Questions",
+      "Import Questions",
+    ];
+
+    await test.step("The create page explains the order and offers no add button", async () => {
+      await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
+      await expect(
+        page.getByText(
+          "Save the questionnaire, then use Edit Questions to add questions.",
+        ),
+      ).toBeVisible();
+      for (const name of addAffordances) {
+        await expect(page.getByRole("button", { name })).toHaveCount(0);
+      }
+    });
+
+    await test.step("After saving, the detail page offers Edit Questions", async () => {
+      await page
+        .getByRole("textbox", { name: "Title" })
+        .pressSequentially(`QV2 No Questions Yet ${Date.now()}`);
+      await page.getByRole("button", { name: "Save Questionnaire" }).click();
+      await expectToast(page, "Questionnaire created successfully");
+      await page.waitForURL(/\/settings\/questionnaires\/[0-9a-f-]+$/);
+      await expect(
+        page.getByRole("button", { name: "Edit Questions" }),
+      ).toBeVisible();
+    });
+  });
 });

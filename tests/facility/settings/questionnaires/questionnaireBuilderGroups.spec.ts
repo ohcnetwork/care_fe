@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaireAndOpenBuilder,
+  getQuestionnaireViaApi,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -32,6 +35,69 @@ function editorCard(page: Page) {
 }
 
 test.describe("Questionnaire v2 builder groups", () => {
+  test("Add Section creates a single-column group that holds sub-questions", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const sectionTitle = `Section ${stamp}`;
+    const childTitle = `Section child ${stamp}`;
+    const nav = page.getByRole("navigation");
+    const titleInput = page.getByRole("textbox", { name: "Question Title" });
+
+    const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Section ${stamp}`,
+    });
+
+    await test.step("Add Section selects a new Group question", async () => {
+      await nav.getByRole("button", { name: "Add Section" }).click();
+      await expect(titleInput).toHaveValue("");
+      await expect(page.getByRole("combobox").first()).toContainText("Group");
+      await expect(
+        editorCard(page)
+          .getByRole("combobox")
+          .filter({ hasText: "Single column" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Add Sub-Question" }),
+      ).toBeVisible();
+      await titleInput.pressSequentially(sectionTitle);
+    });
+
+    await test.step("Add Sub-Question nests a String question under it", async () => {
+      await page.getByRole("button", { name: "Add Sub-Question" }).click();
+      await titleInput.pressSequentially(childTitle);
+      await expect(page.getByRole("combobox").first()).toContainText("String");
+      await expect(nav.getByRole("button", { name: childTitle })).toContainText(
+        "1.1",
+      );
+    });
+
+    await test.step("Saved as a group with one sub-question", async () => {
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      const { questions } = await getQuestionnaireViaApi(
+        detailUrl.split("/").pop()!,
+      );
+      expect(questions).toHaveLength(1);
+      expect(questions[0]).toMatchObject({ text: sectionTitle, type: "group" });
+      expect(questions[0].questions).toMatchObject([
+        { text: childTitle, type: "string" },
+      ]);
+    });
+
+    await test.step("Preview lays the section out in a single column", async () => {
+      await page.getByRole("button", { name: "Preview" }).click();
+      await expect(
+        page.locator("fieldset").filter({ hasText: childTitle }),
+      ).toBeVisible();
+      await expect(page.locator('fieldset[class*="grid-cols-2"]')).toHaveCount(
+        0,
+      );
+    });
+  });
+
   test("sub-questions support bulk select, clear and bulk delete", async ({
     page,
   }) => {
