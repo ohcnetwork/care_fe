@@ -970,7 +970,7 @@ const AppointmentActions = ({
         {/* Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={t("actions")}>
               <DotsVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
