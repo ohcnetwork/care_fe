@@ -8,9 +8,14 @@ interface RadioInputProps extends React.ComponentProps<typeof RadioGroup> {
     label: string;
     value: string;
   }[];
+  classNameInput?: string;
 }
 
-export default function RadioInput({ options, ...props }: RadioInputProps) {
+export default function RadioInput({
+  options,
+  classNameInput,
+  ...props
+}: RadioInputProps) {
   return (
     <RadioGroup
       {...props}
@@ -35,7 +40,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             }
           }}
         >
-          <div className="flex items-center space-x-2">
+          <div className={cn("flex items-center space-x-2", classNameInput)}>
             <RadioGroupItem
               value={option.value.toString()}
               id={option.value}
