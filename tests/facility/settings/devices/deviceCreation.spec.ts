@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -203,5 +204,38 @@ test.describe("Facility Devices Management", () => {
       .filter({ has: registeredNameLabel })
       .getByText("This field is required");
     await expect(registeredNameError).toBeVisible();
+  });
+
+  test("Clear contact validation error when switching contact type", async ({
+    page,
+  }) => {
+    await test.step("Enter an invalid email contact", async () => {
+      await page.getByRole("link", { name: "Add Device" }).click();
+      await page.getByRole("button", { name: "Add Contact Point" }).click();
+
+      const contactType = page
+        .getByRole("combobox")
+        .filter({ hasText: "Phone" });
+      await contactType.click();
+      await page.getByRole("option", { name: "Email", exact: true }).click();
+
+      const emailInput = page.getByPlaceholder("Enter email address");
+      await emailInput.fill("invalid-email");
+      await expect(getFieldErrorMessage(emailInput)).toContainText(
+        /valid email/i,
+      );
+    });
+
+    await test.step("Switch type and clear the stale error", async () => {
+      const contactType = page
+        .getByRole("combobox")
+        .filter({ hasText: "Email" });
+      await contactType.click();
+      await page.getByRole("option", { name: "URL", exact: true }).click();
+
+      const urlInput = page.getByPlaceholder("Enter URL");
+      await expect(urlInput).toHaveValue("invalid-email");
+      await expect(getFieldErrorMessage(urlInput)).toBeHidden();
+    });
   });
 });
