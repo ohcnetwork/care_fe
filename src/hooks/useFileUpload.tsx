@@ -5,6 +5,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -29,6 +30,7 @@ import fileApi from "@/types/files/fileApi";
 export type FileUploadOptions = {
   multiple?: boolean;
   type: FileType;
+  inputId?: string;
   category?: FileCategory;
   onUpload?: (file: FileReadMinimal) => void;
   // if allowed, will fallback to the name of the file if a seperate filename is not defined.
@@ -80,6 +82,7 @@ export default function useFileUpload(
     category = FileCategory.UNSPECIFIED,
     multiple,
     allowNameFallback = true,
+    inputId,
   } = options;
 
   const { t } = useTranslation();
@@ -324,11 +327,13 @@ export default function useFileUpload(
     }
   };
 
-  const clearFiles = () => {
+  // Stable identity so consumers can safely list it in effect dependency
+  // arrays without triggering re-runs on every render.
+  const clearFiles = useCallback(() => {
     setFiles([]);
     setError(null);
     setUploadFileNames([]);
-  };
+  }, []);
 
   const Dialogues = (
     <>
@@ -355,7 +360,7 @@ export default function useFileUpload(
   const Input = (props: FileInputProps) => (
     <input
       {...props}
-      id={`file_upload_${fileType}`}
+      id={inputId ?? `file_upload_${fileType}`}
       title={t("change_file")}
       onChange={onFileChange}
       type="file"

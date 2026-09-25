@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import BackButton from "@/components/Common/BackButton";
@@ -89,17 +90,15 @@ export default function DiagnosticReportView({
           <ArrowLeft />
           <span>{t("back")}</span>
         </BackButton>
-        <Button
-          variant="outline"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`,
-            )
-          }
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          {t("print")}
-          <ShortcutBadge actionId="print-report" />
+        <Button variant="outline" asChild>
+          <Link
+            href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`}
+            className="flex items-center gap-2"
+          >
+            <Printer className="size-4 mr-2" />
+            {t("print")}
+            <ShortcutBadge actionId="print-report" />
+          </Link>
         </Button>
       </div>
 
@@ -168,11 +167,15 @@ export default function DiagnosticReportView({
                 </div>
               )}
               {report.conclusion && (
-                <div className="col-span-full">
+                <div className="col-span-full min-w-0">
                   <div className="text-sm font-medium text-gray-500">
                     {t("conclusion")}
                   </div>
-                  <div className="whitespace-pre-wrap">{report.conclusion}</div>
+                  <Markdown
+                    richText
+                    content={report.conclusion}
+                    className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+                  />
                 </div>
               )}
             </div>
