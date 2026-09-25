@@ -64,7 +64,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
     <div
       className={cn(
         "flex flex-col gap-4",
-        mobileSection === "waiting" && hasServicePoints && "pb-20 lg:pb-0",
+        mobileSection !== "recall" && hasServicePoints && "pb-20 lg:pb-0",
       )}
     >
       {/* Desktop: inline filters */}
