@@ -95,6 +95,7 @@ export function getTabs(
       case "files":
         return { ...tab, visible: canReadEncounter || canViewClinicalData };
       case "clinical_history":
+      case "notes":
         return { ...tab, visible: canViewClinicalData };
       case "updates":
         return {
