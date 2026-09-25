@@ -66,7 +66,11 @@ jobs:
         run: npm ci --prefer-offline
 
       - name: Build application
-        run: npm run build
+        # Build with the E2E config-override seam enabled so the per-file
+        # `window.__CARE_E2E_CONFIG__` overrides in the patient-registration
+        # specs are active. The seam is inert unless a spec injects overrides,
+        # so this does not affect any other test.
+        run: npm run build:e2e
         env:
           NODE_ENV: production
 
@@ -103,6 +107,15 @@ jobs:
           repository: ohcnetwork/care
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
+
+      - name: Use quay.io mirror for MinIO image
+        # Docker Hub's `minio/minio` now requires authentication for anonymous
+        # pulls, which breaks `docker compose up`. quay.io mirrors the same
+        # image and is still anonymously pullable. Remove once the backend
+        # compose references a pullable image.
+        run: |
+          sed -i 's#image: minio/minio:#image: quay.io/minio/minio:#' care/docker-compose.yaml
+          grep -n "minio/minio" care/docker-compose.yaml
 
       - name: Cache Docker images
         id: docker-cache
