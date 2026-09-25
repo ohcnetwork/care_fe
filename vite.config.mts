@@ -49,26 +49,23 @@ function toImportName(slug: string) {
 }
 
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const slug = entry.name;
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
       return {
         slug,
         importName: toImportName(slug),
-        manifestPath: path.join(appsDir, slug, "src", "manifest.tsx"),
-        publicDir: path.join(appsDir, slug, "public"),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
       };
     })
-    .filter((plugin) => fs.existsSync(plugin.manifestPath))
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -123,7 +120,9 @@ function isPluginManifestPath(rootDir: string, filePath: string) {
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    normalizedFilePath.endsWith("/src/manifest.tsx")
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
   );
 }
 
