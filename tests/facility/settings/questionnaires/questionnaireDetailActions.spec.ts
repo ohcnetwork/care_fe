@@ -175,5 +175,18 @@ test.describe("Questionnaire v2 detail page actions", () => {
         statusGroup.getByRole("radio", { name: "Retired" }),
       ).toHaveAttribute("aria-checked", "true");
     });
+
+    await test.step("The admin list files it under Retired, not Active", async () => {
+      await page.goto("/admin/questionnaires");
+      await page.getByPlaceholder("Search Questionnaires").fill(title);
+      await expect(page.getByText("No questionnaires found")).toBeVisible();
+      await page
+        .getByRole("radiogroup", { name: "Status" })
+        .getByRole("radio", { name: "Retired" })
+        .click();
+      await expect(page.locator('[data-slot="table-body"]')).toContainText(
+        title,
+      );
+    });
   });
 });
