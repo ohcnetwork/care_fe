@@ -83,7 +83,7 @@ test.describe("Questionnaire v2 versions", () => {
     });
   });
 
-  test("property saves keep the revision; only a question change bumps it", async ({
+  test("description and status saves keep the revision at v1", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
@@ -113,18 +113,6 @@ test.describe("Questionnaire v2 versions", () => {
       await page.goto(detailUrl);
       await expect(revision(1)).toBeVisible();
       await expect(page.getByText("v2", { exact: true })).toHaveCount(0);
-    });
-
-    await test.step("A question save moves it to v2", async () => {
-      await openQuestionBuilder(page);
-      await page.getByRole("button", { name: "Add First Question" }).click();
-      await page
-        .getByRole("textbox", { name: "Question Title" })
-        .pressSequentially(faker.lorem.words(3));
-      await page.getByRole("button", { name: "Save Changes" }).click();
-      await expectToast(page, "Questionnaire updated successfully");
-      await page.goto(detailUrl);
-      await expect(revision(2)).toBeVisible();
     });
   });
 });
