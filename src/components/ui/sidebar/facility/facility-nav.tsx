@@ -207,6 +207,7 @@ function generateFacilityLinks(
     ...links,
     ...pluginLinks.map((l) => ({
       ...l,
+      name: t(l.name),
       url: `${baseUrl}/${l.url}`,
     })),
   ];
