@@ -1,6 +1,7 @@
-import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
+import { getPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
 
 import { Question, QuestionType } from "@/types/questionnaire/question";
+import { isCoreStructuredType } from "@/types/questionnaire/structured";
 
 /**
  * Types the renderer never records a response for: `initializeResponses`
@@ -61,8 +62,9 @@ const SAVE_CHECKS: SaveCheck[] = [
     // reappears the moment its plugin is enabled again).
     predicate: (question) =>
       question.type === "structured" &&
-      !!question.structured_type &&
-      !resolveStructuredType(question.structured_type),
+      (!question.structured_type ||
+        (!isCoreStructuredType(question.structured_type) &&
+          !getPluginStructuredType(question.structured_type))),
     messageKey: "structured_type_unknown",
   },
   {

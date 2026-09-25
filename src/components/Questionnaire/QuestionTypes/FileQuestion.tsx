@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -128,7 +128,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
     compress: false,
   });
 
-  useEffect(() => {
+  const appendSelectedFiles = useEffectEvent(() => {
     if (fileUpload.files.length === 0) return;
     // The uploader holds only newly selected files. The response owns the
     // complete list, including files retained while navigating the form.
@@ -158,6 +158,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
       );
     }
     fileUpload.clearFiles();
+  });
+
+  useEffect(() => {
+    appendSelectedFiles();
   }, [fileUpload.files]);
 
   return (

@@ -321,6 +321,37 @@ describe("actions in the builder state", () => {
     assert.equal(imported.actions, state.actions);
   });
 
+  it("re-importing questions remaps retained action conditions and templates", () => {
+    const previous = {
+      ...state,
+      actions: [
+        {
+          condition: "q_original == 1",
+          instructions: [
+            {
+              slug: "show_message",
+              context: "self",
+              params: { message: '{{ f"Value: {q_original}" }}' },
+            },
+          ],
+        },
+      ],
+    };
+    const next = builderReducer(previous, {
+      type: "replaceAll",
+      questions: [
+        q({ id: "imported", link_id: "replacement", type: "integer" }),
+      ],
+      linkIdMap: new Map([["original", "replacement"]]),
+    });
+    assert.equal(next.actions[0].condition, "q_replacement == 1");
+    assert.equal(
+      next.actions[0].instructions[0].params.message,
+      '{{ f"Value: {q_replacement}" }}',
+    );
+    assert.equal(previous.actions[0].condition, "q_original == 1");
+  });
+
   it("renameLinkId follows the rename through enable_when and action refs", () => {
     // The legacy-id case: nothing can reference `q_Q-fever` (not a name),
     // so only enable_when targets follow the first rename…

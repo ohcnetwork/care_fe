@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import {
   checkVisibility,
+  createQuestionnaireEncounter,
   expectFieldError,
   fillStringField,
   submitAndExpectSuccess,
@@ -9,24 +10,16 @@ import {
   verifySubmittedValues,
 } from "tests/helper/questionnaire";
 import { questionBlock } from "tests/helper/questionnaireV2";
-import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 import { getQuestionnaireId } from "tests/support/questionnaireId";
-
-// Every test in this file submits responses to the same shared encounter and
-// the second asserts a hidden dependent is ABSENT from the response
-// overview — running them in parallel lets another test's submission leak
-// into that overview. Opt out of fullyParallel to keep the file sequential.
-test.describe.configure({ mode: "default" });
 
 test.describe("Enable When — 'exists' operator (answer: false)", () => {
   test.use({ storageState: "tests/.auth/user.json" });
 
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const encounterId = getEncounterId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
     // The fill route fetches by external_id (slug lookup is not supported).
     const questionnaireId = await getQuestionnaireId();
 

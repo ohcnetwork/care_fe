@@ -141,7 +141,7 @@ test.describe("Questionnaire v2 import and clone", () => {
       await expect(
         page
           .getByRole("radiogroup", { name: "Status" })
-          .getByRole("radio", { name: "Active" }),
+          .getByRole("radio", { name: "Draft" }),
       ).toHaveAttribute("aria-checked", "true");
       await expect(page.getByText(importedQuestionOneText)).toBeVisible();
       await expect(page.getByText(importedQuestionTwoText)).toBeVisible();

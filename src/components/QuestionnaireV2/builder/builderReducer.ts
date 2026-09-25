@@ -29,7 +29,11 @@ export type BuilderAction =
    *  enable_when target and action reference — the Actions panel uses it
    *  to make a legacy `Q-…` id nameable from an expression. */
   | { type: "renameLinkId"; id: string; linkId: string }
-  | { type: "replaceAll"; questions: Question[] }
+  | {
+      type: "replaceAll";
+      questions: Question[];
+      linkIdMap?: Map<string, string>;
+    }
   | { type: "select"; id: string | null }
   | {
       type: "addQuestion";
@@ -305,12 +309,15 @@ export function builderReducer(
       };
     }
 
-    // Import replaces the question tree only — actions are questionnaire
-    // configuration, not part of an imported questions file.
+    // Preserve questionnaire actions while remapping references to re-imported
+    // questions. Unrelated references remain visible to save-time validation.
     case "replaceAll":
       return {
         ...state,
         questions: action.questions,
+        actions: action.linkIdMap
+          ? remapActionLinkIds(state.actions, action.linkIdMap)
+          : state.actions,
         selectedId: action.questions[0]?.id ?? null,
         dirty: true,
       };

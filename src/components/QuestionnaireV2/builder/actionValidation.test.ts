@@ -124,4 +124,46 @@ describe("findActionIssues", () => {
     );
     assert.deepEqual(issues, []);
   });
+
+  it("blocks imported instructions that need a context the trigger cannot reach", () => {
+    const tagEncounter = {
+      ...logging,
+      slug: "tag_encounter",
+      context: "Encounter",
+      input_schema: {},
+    };
+    const action = {
+      condition: "True",
+      instructions: [{ slug: "tag_encounter", params: {}, context: "self" }],
+    };
+    assert.deepEqual(
+      findActionIssues([action], {
+        questions: [],
+        instructions: [tagEncounter],
+        contextPaths: [
+          { path: "self", contextType: "Appointment" },
+          { path: "patient", contextType: "Patient" },
+        ],
+      }),
+      [{ index: 0, messageKey: "action_instruction_incompatible" }],
+    );
+    assert.deepEqual(
+      findActionIssues([action], {
+        questions: [],
+        instructions: [tagEncounter],
+        contextPaths: [
+          { path: "self", contextType: "EncounterQuestionnaire" },
+          { path: "encounter", contextType: "Encounter" },
+        ],
+      }),
+      [],
+    );
+    assert.deepEqual(
+      findActionIssues([action], {
+        questions: [],
+        instructions: [tagEncounter],
+      }),
+      [],
+    );
+  });
 });

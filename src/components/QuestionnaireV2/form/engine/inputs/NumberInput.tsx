@@ -41,8 +41,10 @@ export function NumberInput({
       aria-required={question.required || undefined}
       inputMode={question.type === "decimal" ? "decimal" : "numeric"}
       pattern="[0-9]*[.]?[0-9]*"
-      value={value?.toString() ?? ""}
-      step={question.type === "integer" ? 1 : undefined}
+      // Keep a numeric value so React preserves equivalent in-progress text
+      // such as "0.0" instead of replacing it with "0" between keystrokes.
+      value={value ?? ""}
+      step={question.type === "integer" ? 1 : "any"}
       disabled={disabled}
       onChange={handleChange}
     />

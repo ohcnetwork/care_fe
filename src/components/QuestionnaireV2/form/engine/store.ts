@@ -11,6 +11,7 @@
  */
 import type { Getter, Setter } from "jotai";
 import { atom, useAtom, useAtomValue } from "jotai";
+import { selectAtom } from "jotai/utils";
 import { useMemo } from "react";
 
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -20,6 +21,10 @@ import {
 } from "@/types/questionnaire/form";
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+
+import { entryIsAnswered } from "./inputs/answeredEntry";
+
+export { entryHasContent } from "./inputs/answeredEntry";
 
 export const questionnaireAtom = atom<QuestionnaireRead | null>(null);
 export const responsesAtom = atom<Record<string, QuestionnaireResponse>>({});
@@ -361,16 +366,6 @@ export function useHasVisibleTopLevelQuestions(): boolean {
   return useAtomValue(hasVisibleAtom);
 }
 
-/** Whether one recorded entry carries an actual answer — non-empty
- *  scalar, or a non-empty array (structured/repeat values). Shared with
- *  form/validation.ts so the required check and the outline's completion
- *  icons agree on what "answered" means. */
-export function entryHasContent(entry: ResponseValue): boolean {
-  if (entry.value === undefined || entry.value === null || entry.value === "")
-    return false;
-  return !Array.isArray(entry.value) || entry.value.length > 0;
-}
-
 /**
  * Ids of every question with at least one recorded answer — the fill
  * outline's completion icons subscribe to this. Derived per render of the
@@ -383,7 +378,7 @@ export function useAnsweredQuestionIds(): Set<string> {
       atom((get) => {
         const answered = new Set<string>();
         for (const [id, response] of Object.entries(get(responsesAtom))) {
-          if (response.values.some(entryHasContent)) answered.add(id);
+          if (response.values?.some(entryIsAnswered)) answered.add(id);
         }
         return answered;
       }),
@@ -395,8 +390,12 @@ export function useAnsweredQuestionIds(): Set<string> {
 export function useQuestionErrors(questionId: string) {
   const questionErrorsAtom = useMemo(
     () =>
-      atom((get) =>
-        get(errorsAtom).filter((error) => error.question_id === questionId),
+      selectAtom(
+        errorsAtom,
+        (errors) => errors.filter((error) => error.question_id === questionId),
+        (previous, next) =>
+          previous.length === next.length &&
+          previous.every((error, index) => error === next[index]),
       ),
     [questionId],
   );

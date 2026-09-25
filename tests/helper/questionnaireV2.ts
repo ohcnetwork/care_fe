@@ -95,7 +95,7 @@ export interface CreateQuestionnaireOptions {
   basePath: string;
   /** Generate unique titles per PLAYWRIGHT_GUIDE (faker/Date.now). */
   title: string;
-  /** Status radio to pick before saving (display label); default Active. */
+  /** Status radio to pick before saving (display label); default Draft. */
   status?: "Active" | "Draft" | "Retired";
 }
 

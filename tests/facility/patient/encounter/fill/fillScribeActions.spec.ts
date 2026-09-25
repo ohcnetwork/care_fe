@@ -9,6 +9,7 @@ import path from "node:path";
 test.use({ storageState: "tests/.auth/user.json" });
 
 const harnessFilename = `fillActionHarness-${crypto.randomUUID()}.tsx`;
+const clinicalTypes = ["diagnosis", "symptom", "allergy_intolerance"] as const;
 
 const harnessSource = `
 import React, { useCallback, useEffect } from "react";
@@ -33,6 +34,7 @@ const questions = [
   { id: "time", link_id: "time", text: "Time", type: "time" },
   { id: "diagnosis", link_id: "diagnosis", text: "Diagnoses", type: "structured", structured_type: "diagnosis" },
   { id: "symptom", link_id: "symptom", text: "Symptoms", type: "structured", structured_type: "symptom" },
+  { id: "allergy_intolerance", link_id: "allergy_intolerance", text: "Allergies", type: "structured", structured_type: "allergy_intolerance" },
 ];
 const questionnaire = { id: "scribe", slug: "scribe", title: "Scribe integration", version: "1", status: "active", subject_type: "encounter", questions };
 const forms = [{ key: "scribe", isPrimary: true, questionnaire }];
@@ -84,14 +86,21 @@ function existingClinicalRow(type: string) {
     id: `existing-${type}`,
     code: {
       code: `existing-${type}`,
-      system: "test",
+      // Legacy records can render even when they no longer pass the schema
+      // for incoming rows. Appending must not revalidate this record.
+      system: "",
       display: `Existing ${type}`,
     },
     clinical_status: "active",
     verification_status: "confirmed",
     severity: "moderate",
+    criticality: "low",
     category:
-      type === "diagnosis" ? "encounter_diagnosis" : "problem_list_item",
+      type === "allergy_intolerance"
+        ? "food"
+        : type === "diagnosis"
+          ? "encounter_diagnosis"
+          : "problem_list_item",
     encounter: "scribe-encounter",
     created_date: "2026-09-08T00:00:00Z",
   };
@@ -101,6 +110,15 @@ async function setAnswer(page: Page, linkId: string, values: unknown[]) {
   return page.evaluate(
     (input) => (window as HarnessWindow).fillActionHarness.invoke(input),
     { link_id: linkId, values },
+  );
+}
+
+async function getClinicalRows(page: Page, linkId: string) {
+  return page.evaluate(
+    (key) =>
+      (window as HarnessWindow).fillActionHarness.responses()[key].values[0]
+        .value as unknown[],
+    linkId,
   );
 }
 
@@ -115,7 +133,7 @@ test.beforeEach(async ({ page, request }, testInfo) => {
   await writeFile(fixturePath, harnessSource);
   const modulePath = `/${path.relative(process.cwd(), fixturePath)}`;
   await page.route("**/api/v1/**", (route) => {
-    const type = ["diagnosis", "symptom"].find((candidate) =>
+    const type = clinicalTypes.find((candidate) =>
       new URL(route.request().url()).pathname.includes(`/${candidate}/`),
     );
     return route.fulfill({
@@ -144,7 +162,7 @@ test.beforeEach(async ({ page, request }, testInfo) => {
       page.evaluate(() => !!(window as HarnessWindow).fillActionHarness),
     )
     .toBe(true);
-  for (const type of ["diagnosis", "symptom"]) {
+  for (const type of clinicalTypes) {
     await expect(
       page
         .locator(`[data-question-id="${type}"]`)
@@ -218,8 +236,8 @@ for (const timezoneId of ["America/Los_Angeles", "Asia/Kolkata"]) {
   });
 }
 
-for (const type of ["diagnosis", "symptom"]) {
-  test(`Scribe ${type} rows render and duplicates preserve the current answer`, async ({
+for (const type of clinicalTypes) {
+  test(`Scribe ${type} rows append and update without replacing other answers`, async ({
     page,
   }) => {
     const label = `Scribe ${type}`;
@@ -228,63 +246,127 @@ for (const type of ["diagnosis", "symptom"]) {
       clinical_status: "active",
       verification_status: "confirmed",
       severity: "moderate",
+      criticality: "low",
       category:
-        type === "diagnosis" ? "encounter_diagnosis" : "problem_list_item",
+        type === "allergy_intolerance"
+          ? "food"
+          : type === "diagnosis"
+            ? "encounter_diagnosis"
+            : "problem_list_item",
       onset: { onset_datetime: "2026-09-08" },
       note: "Captured by Scribe",
     };
-    await test.step("Reject a duplicate of an existing clinical record", async () => {
-      const { id: existingId, ...existing } = existingClinicalRow(type);
-      expect(await setAnswer(page, type, [existing])).toMatchObject({
-        ok: false,
-        error: expect.stringContaining("Duplicate"),
-      });
-      const summary = await page.evaluate(() =>
-        (window as HarnessWindow).fillActionHarness.list(),
-      );
-      expect(
-        summary.data[0].questions.find((question) => question.link_id === type),
-      ).toMatchObject({
-        structured_type: type,
-        values: [expect.objectContaining({ id: existingId })],
-      });
-    });
-    await test.step("Write a structured row through the registered action", async () => {
+    const other = {
+      ...row,
+      code: {
+        ...row.code,
+        code: `another-${type}`,
+        display: `Another ${type}`,
+      },
+    };
+    const existing = (await getClinicalRows(page, type))[0];
+    const table = page
+      .locator(`[data-question-id="${type}"]`)
+      .getByRole("table");
+
+    await test.step("Append to a saved legacy row without revalidating it", async () => {
       expect(await setAnswer(page, type, [row])).toEqual({ ok: true });
+      const rows = await getClinicalRows(page, type);
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toEqual(existing);
+      await expect(table.getByText(label, { exact: true })).toBeVisible();
       await expect(
-        page
-          .locator(`[data-question-id="${type}"]`)
-          .getByRole("table")
-          .getByText(label, { exact: true }),
+        table.getByText(`Existing ${type}`, { exact: true }),
       ).toBeVisible();
     });
-    await test.step("Replace unsaved rows idempotently and reject duplicate batch rows", async () => {
-      expect(await setAnswer(page, type, [row])).toEqual({ ok: true });
-      const other = {
+
+    await test.step("Append another row without resending the unsaved answer", async () => {
+      expect(await setAnswer(page, type, [other])).toEqual({ ok: true });
+      const rows = await getClinicalRows(page, type);
+      expect(rows).toHaveLength(3);
+      expect(rows[0]).toEqual(existing);
+      expect(rows[1]).toMatchObject(row);
+      expect(rows[2]).toMatchObject(other);
+      await expect(table.getByText(label, { exact: true })).toBeVisible();
+      await expect(
+        table.getByText(`Another ${type}`, { exact: true }),
+      ).toBeVisible();
+    });
+
+    await test.step("Update the saved row by code and retain its record id", async () => {
+      const updated = {
         ...row,
-        code: { ...row.code, code: "new-code", display: "Another finding" },
+        code: {
+          ...row.code,
+          code: `existing-${type}`,
+          display: `Existing ${type}`,
+        },
+        note: "Updated by code",
       };
-      expect(await setAnswer(page, type, [row, other])).toEqual({ ok: true });
-      const before = await page.evaluate(
-        (key) => (window as HarnessWindow).fillActionHarness.responses()[key],
-        type,
-      );
+      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+      const rows = await getClinicalRows(page, type);
+      expect(rows).toHaveLength(3);
+      expect(rows[0]).toMatchObject({ ...updated, id: `existing-${type}` });
+      expect(rows[1]).toMatchObject(row);
+      expect(rows[2]).toMatchObject(other);
+      await expect(
+        table.getByText(`Existing ${type}`, { exact: true }),
+      ).toHaveCount(1);
+    });
+
+    await test.step("Update the saved row by id when its code changes", async () => {
+      const updated = {
+        ...row,
+        id: `existing-${type}`,
+        code: {
+          ...row.code,
+          code: `corrected-${type}`,
+          display: `Corrected ${type}`,
+        },
+        note: "Updated by id",
+      };
+      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+      const rows = await getClinicalRows(page, type);
+      expect(rows).toHaveLength(3);
+      expect(rows[0]).toMatchObject(updated);
+      expect(rows[1]).toMatchObject(row);
+      expect(rows[2]).toMatchObject(other);
+      await expect(
+        table.getByText(`Corrected ${type}`, { exact: true }),
+      ).toHaveCount(1);
+      await expect(
+        table.getByText(`Existing ${type}`, { exact: true }),
+      ).toHaveCount(0);
+    });
+
+    await test.step("Update an unsaved row by code without duplicating it", async () => {
+      const updated = { ...row, note: "Updated unsaved answer" };
+      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+      expect(await setAnswer(page, type, [updated])).toEqual({ ok: true });
+      const rows = await getClinicalRows(page, type);
+      expect(rows).toHaveLength(3);
+      expect(rows[1]).toMatchObject(updated);
+      expect(rows[2]).toMatchObject(other);
+      await expect(table.getByText(label, { exact: true })).toHaveCount(1);
+    });
+
+    await test.step("Reject malformed updates and duplicate batch rows atomically", async () => {
+      const before = await getClinicalRows(page, type);
+      expect(
+        (
+          await setAnswer(page, type, [
+            { ...row, code: { ...row.code, system: "" } },
+          ])
+        ).ok,
+      ).toBe(false);
+      expect(await getClinicalRows(page, type)).toEqual(before);
       expect(await setAnswer(page, type, [row, other, other])).toMatchObject({
         ok: false,
         error: expect.stringContaining("Duplicate"),
       });
-      expect(
-        await page.evaluate(
-          (key) => (window as HarnessWindow).fillActionHarness.responses()[key],
-          type,
-        ),
-      ).toEqual(before);
-      await expect(
-        page
-          .locator(`[data-question-id="${type}"]`)
-          .getByRole("table")
-          .getByText(label, { exact: true }),
-      ).toHaveCount(1);
+      expect(await getClinicalRows(page, type)).toEqual(before);
+      expect(await setAnswer(page, type, [])).toEqual({ ok: true });
+      expect(await getClinicalRows(page, type)).toEqual(before);
     });
   });
 }

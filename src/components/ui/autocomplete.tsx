@@ -217,14 +217,14 @@ export default function Autocomplete({
               role="combobox"
               aria-expanded={open}
               className={cn(
-                "w-full justify-between border-gray-300 shadow-xs py-4.5! font-normal",
+                "w-full min-w-0 justify-between border-gray-300 shadow-xs py-4.5! font-normal",
                 className,
                 selectedOption && "rounded-r-none",
               )}
               disabled={disabled}
               type="button"
             >
-              <span className="overflow-hidden">
+              <span className="overflow-hidden truncate">
                 {value
                   ? freeInput
                     ? inputValue || value
@@ -250,7 +250,7 @@ export default function Autocomplete({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-l-none border-l-0 text-gray-400 h-auto"
+            className="rounded-l-none border-l-0 text-gray-400 border-gray-300 shadow-none h-auto"
             onClick={handleClear}
             title={t("clear")}
             hidden={disabled}
@@ -259,7 +259,7 @@ export default function Autocomplete({
             <span className="sr-only">{t("clear")}</span>
           </Button>
         ) : (
-          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50 pointer-events-none" />
         )}
       </div>
     );
@@ -311,7 +311,7 @@ export default function Autocomplete({
         <Button
           variant="outline"
           size="icon"
-          className="rounded-l-none border-l-0 text-gray-400 h-auto"
+          className="rounded-l-none border-l-0 text-gray-400 border-gray-300 shadow-none h-auto"
           onClick={handleClear}
           title={t("clear")}
           hidden={disabled}
@@ -322,14 +322,14 @@ export default function Autocomplete({
       ) : (
         <>
           {shortcutId ? (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <div className="flex items-center justify-center gap-1">
                 <ShortcutBadge actionId={shortcutId} />
                 <CaretSortIcon className="size-3 shrink-0 opacity-50" />
               </div>
             </div>
           ) : (
-            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50 pointer-events-none" />
           )}
         </>
       )}

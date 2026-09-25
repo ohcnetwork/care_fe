@@ -24,10 +24,8 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import {
-  StructuredAnswerView,
-  storedStructuredAnswer,
-} from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
+import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";

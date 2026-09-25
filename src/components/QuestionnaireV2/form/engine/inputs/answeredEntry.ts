@@ -1,6 +1,11 @@
-import { entryHasContent } from "@/components/QuestionnaireV2/form/engine/store";
-
 import type { ResponseValue } from "@/types/questionnaire/form";
+
+/** Whether an entry carries a non-empty scalar or structured row array. */
+export function entryHasContent(entry: ResponseValue): boolean {
+  if (entry.value === undefined || entry.value === null || entry.value === "")
+    return false;
+  return !Array.isArray(entry.value) || entry.value.length > 0;
+}
 
 /**
  * Whether one recorded entry counts as an answer. Defined once, beside the

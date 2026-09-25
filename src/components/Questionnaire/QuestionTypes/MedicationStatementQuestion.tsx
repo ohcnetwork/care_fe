@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -181,7 +181,8 @@ export function MedicationStatementQuestion({
     enabled: !isPreview,
   });
 
-  useEffect(() => {
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
     if (
       patientMedications?.results &&
       (initializeQuestionnaireResponseCB ||
@@ -192,6 +193,10 @@ export function MedicationStatementQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications]);
 
   const handleAddMedication = (medication: Code) => {
@@ -492,6 +497,7 @@ export function MedicationStatementQuestion({
           buttonLabel={t("medication_history")}
           onAddSelected={handleAddHistoricalMedications}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
 

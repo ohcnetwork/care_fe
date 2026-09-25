@@ -72,11 +72,11 @@ export function WorkspaceHeader({
           variant="outline"
           size="sm"
           onClick={onSearch}
-          aria-label={t("search")}
+          aria-label={t("search_page_actions")}
           className="ml-auto size-8 shrink-0 gap-2 rounded-lg border-neutral-300 bg-white p-0 text-neutral-500 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400 sm:h-9 sm:w-52 sm:justify-start sm:px-3"
         >
           <Search className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{t("search")}</span>
+          <span className="hidden sm:inline">{t("search_page_actions")}</span>
         </Button>
       )}
     </header>

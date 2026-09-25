@@ -228,7 +228,9 @@ test.describe("Facility value sets", () => {
           has: page.getByText(name, { exact: true }),
         });
         await expect(row).toHaveCount(1);
-        await expect(row.getByText(parentSlug, { exact: true })).toBeVisible();
+        await expect(
+          row.getByText(`Slug: ${parentSlug}`, { exact: true }),
+        ).toBeVisible();
       });
     } finally {
       await deleteFacilityValueSetsBySlug(facilityId, parentSlug);

@@ -100,10 +100,9 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
    * never exercises the intermediate states a real typist produces — these
    * type character by character instead.
    *
-   * NumberInput keeps only the parsed `number` and re-renders
-   * `value.toString()`, so every intermediate string that is not its own
-   * round-trip ("0.", "1.30") is rewritten between keystrokes and the
-   * remaining characters land against a truncated value.
+   * Passing a stringified numeric value back to React used to overwrite
+   * intermediate text ("0.0", "1.30") between keystrokes, so remaining
+   * characters landed against a truncated value.
    */
   test("decimal input preserves a value typed character by character", async ({
     page,
@@ -195,6 +194,11 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
     });
 
     await test.step("Entering a value keeps the default unit", async () => {
+      await input.pressSequentially("0.01", { delay: 50 });
+      await expect(input).toHaveValue("0.01");
+      await input.fill("");
+      await input.pressSequentially("1.30001", { delay: 50 });
+      await expect(input).toHaveValue("1.30001");
       await input.fill("250");
       await expect(input).toHaveValue("250");
       await expect(unitTrigger).toContainText("milligram");

@@ -8,7 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -586,7 +586,8 @@ export function AllergyQuestion({
     enabled: !isPreview,
   });
 
-  useEffect(() => {
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
     if (
       patientAllergies?.results &&
       (initializeQuestionnaireResponseCB ||
@@ -602,6 +603,10 @@ export function AllergyQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientAllergies]);
 
   const handleAddAllergy = (code: Code) => {

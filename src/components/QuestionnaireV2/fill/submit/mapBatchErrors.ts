@@ -25,6 +25,32 @@ export interface MappedBatchErrors {
 
 const STRUCTURED_REFERENCE_PREFIX = "structured:";
 
+/** Django validation errors may wrap another { type, msg } inside `msg`.
+ * Only extracted text reaches React; unknown objects use the normal fallback. */
+function readErrorMessage(value: unknown): string | undefined {
+  if (typeof value === "string") return value || undefined;
+  if (!value || typeof value !== "object") return undefined;
+  if ("msg" in value) {
+    const message = readErrorMessage(value.msg);
+    if (message) return message;
+  }
+  return "error" in value ? readErrorMessage(value.error) : undefined;
+}
+
+function errorMessage(error: BatchRequestError, fallback: string): string {
+  return (
+    readErrorMessage(error.msg) ?? readErrorMessage(error.error) ?? fallback
+  );
+}
+
+function locatedErrorMessage(
+  error: BatchRequestError,
+  fallback: string,
+): string {
+  const message = errorMessage(error, fallback);
+  return error.loc ? `${error.loc.join(" > ")}: ${message}` : message;
+}
+
 /**
  * Map failed batch sub-requests back to the page. Every failure feeds the
  * server-error panel; failures that identify a question additionally feed
@@ -50,14 +76,11 @@ export function mapBatchErrors(
       const errors = result.data.flatMap((d) => d.errors || []);
       if (errors.length > 0) {
         message = errors
-          .map((e) => (e.loc ? `${e.loc.join(" > ")}: ${e.msg}` : e.msg))
+          .map((error) => locatedErrorMessage(error, fallbackMessage))
           .join(", ");
       }
     } else if (result.data?.errors?.length) {
-      const first = result.data.errors[0];
-      message = first.loc
-        ? `${first.loc.join(" > ")}: ${first.msg}`
-        : first.msg || first.error || fallbackMessage;
+      message = locatedErrorMessage(result.data.errors[0], fallbackMessage);
     }
 
     serverErrors.push({
@@ -83,7 +106,7 @@ export function mapBatchErrors(
         if (error.question_id) {
           questionErrors.push({
             question_id: error.question_id,
-            error: error.msg || error.error || fallbackMessage,
+            error: errorMessage(error, fallbackMessage),
             type: error.type ?? "server_error",
           });
         }

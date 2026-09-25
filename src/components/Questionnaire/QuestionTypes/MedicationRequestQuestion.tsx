@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -388,7 +388,8 @@ export function MedicationRequestQuestion({
     enabled: !isPreview && !!prescriptionId,
   });
 
-  useEffect(() => {
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
     if (
       prescriptionId &&
       patientMedications?.results &&
@@ -411,6 +412,10 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications, prescriptionId]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
@@ -1123,6 +1128,7 @@ export function MedicationRequestQuestion({
               buttonLabel={t("medication_history")}
               onAddSelected={handleAddHistoricalMedications}
               disableAPI={isPreview}
+              disabled={disabled}
             />
             {questionnaireSlug && (
               <ManageResponseTemplatesSheet

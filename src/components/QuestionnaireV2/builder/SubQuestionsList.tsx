@@ -128,7 +128,7 @@ export function SubQuestionsList({
         {children.map((child, index) => (
           <div
             key={child.id}
-            className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 bg-white p-2"
+            className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2"
           >
             <Checkbox
               checked={effectiveChecked.has(child.id)}
@@ -138,13 +138,12 @@ export function SubQuestionsList({
             <span className="w-6 shrink-0 text-sm text-gray-500">
               {index + 1}.
             </span>
-            {/* On phones the title takes its own full-width line (badges
-                beneath it) so it never gets squeezed to zero width by the
-                inline badges and buttons. */}
-            <div className="flex min-w-0 flex-1 basis-full flex-col items-start gap-1 sm:basis-auto sm:flex-row sm:items-center sm:gap-2">
+            {/* Keep the title and badges in one flexible column so row
+                actions never wrap below a long subquestion title. */}
+            <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
               <button
                 type="button"
-                className="w-full min-w-0 truncate text-left text-sm text-gray-900 sm:flex-1"
+                className="w-full min-w-0 truncate text-left text-sm text-gray-900"
                 onClick={() => dispatch({ type: "select", id: child.id })}
               >
                 {child.text || (
@@ -153,7 +152,7 @@ export function SubQuestionsList({
                   </span>
                 )}
               </button>
-              <div className="flex shrink-0 gap-1">
+              <div className="flex max-w-full flex-wrap gap-1">
                 <QuestionTypeBadge
                   type={child.type}
                   structuredType={child.structured_type}

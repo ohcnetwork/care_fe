@@ -32,6 +32,7 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
 import { ResourceQuestionnaireResponse } from "@/types/questionnaire/resourceQuestionnaireResponseApi";
 
+import { ResourceResponseActions } from "./ResourceResponseActions";
 import ResourceResponseDetails from "./ResourceResponseDetails";
 import { ResourceResponseSubjectType } from "./types";
 
@@ -277,6 +278,10 @@ export default function ResourceResponseViewer({
                 </h3>
                 <ResourceResponseDetails response={visibleResponse} />
               </section>
+              <ResourceResponseActions
+                key={visibleResponse.id}
+                response={visibleResponse}
+              />
             </div>
           ) : null}
         </div>

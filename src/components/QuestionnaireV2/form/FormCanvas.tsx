@@ -13,6 +13,8 @@ import { QuestionnaireFormProvider, useFormRenderer } from "./FormContext";
 import { QuestionBlock } from "./QuestionBlock";
 import type { FormMode, RendererSubject } from "./types";
 
+const EMPTY_CHROME: FormChrome = {};
+
 /** Presentation slots shared by every canvas entry point. */
 export interface CanvasSlots {
   /** Replaces the default "no questions" text (the studio passes its
@@ -55,7 +57,7 @@ export function QuestionnaireFormRenderer({
   revealHidden,
   inert,
   initialResponses,
-  chrome = {},
+  chrome = EMPTY_CHROME,
   emptyState,
   hideHeader,
   headerHint,
@@ -88,7 +90,7 @@ export function QuestionnaireFormRenderer({
  * (the outline's preview mode reads live enable_when hidden ids).
  */
 export function QuestionnaireFormCanvas({
-  chrome = {},
+  chrome = EMPTY_CHROME,
   emptyState,
   hideHeader,
   headerHint,

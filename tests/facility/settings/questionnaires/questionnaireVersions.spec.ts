@@ -106,7 +106,7 @@ test.describe("Questionnaire v2 versions", () => {
         .fill(faker.lorem.sentence());
       await page
         .getByRole("radiogroup", { name: "Status" })
-        .getByRole("radio", { name: "Draft" })
+        .getByRole("radio", { name: "Active" })
         .click();
       await page.getByRole("button", { name: "Save Questionnaire" }).click();
       await expectToast(page, "Questionnaire updated successfully");

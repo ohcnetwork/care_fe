@@ -1,28 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { cn } from "@/lib/utils";
 
@@ -30,62 +14,30 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
-import {
-  BuilderState,
-  builderReducer,
-  findQuestion,
-} from "@/components/QuestionnaireV2/builder/builderReducer";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
 
-import {
-  findFirstInvalidQuestion,
-  findInvalidQuestions,
-} from "@/components/QuestionnaireV2/builder/saveValidation";
+import { findFirstInvalidQuestion } from "@/components/QuestionnaireV2/builder/saveValidation";
 import { QuestionnaireFormProvider } from "@/components/QuestionnaireV2/form/FormContext";
-import {
-  DetailFormValues,
-  questionnaireBasicSchema,
-} from "@/components/QuestionnaireV2/manage/questionnaireFormSchema";
-import { useUpdateQuestionnaire } from "@/components/QuestionnaireV2/manage/useUpdateQuestionnaire";
 import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
-import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
-import { buildUpdateBody } from "@/components/QuestionnaireV2/shared/buildUpdateBody";
-import {
-  findQuestionNumber,
-  findTopLevelIndex,
-  numberQuestions,
-} from "@/components/QuestionnaireV2/shared/questionTree";
-import {
-  getStructuredTypesVersion,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+import { useDisableSmoothScroll } from "@/components/QuestionnaireV2/shared/useDisableSmoothScroll";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
-import {
-  actionContextTypeFor,
-  normalizeQuestionnaireActions,
-} from "@/types/questionnaire/actions";
+import { actionContextTypeFor } from "@/types/questionnaire/actions";
 import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import query from "@/Utils/request/query";
 
-import { useQuery } from "@tanstack/react-query";
-
-import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/useActionRegistry";
 import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
 import { StudioCanvas } from "./StudioCanvas";
+import { StudioMobileQuestionNav } from "./StudioMobileQuestionNav";
 import { StudioOutline } from "./StudioOutline";
 import { StudioTopBar } from "./StudioTopBar";
-
-const INITIAL_STATE: BuilderState = {
-  questions: [],
-  actions: [],
-  selectedId: null,
-  dirty: false,
-};
+import { useStudioDraft } from "./useStudioDraft";
+import { useStudioIssues } from "./useStudioIssues";
+import { useStudioSelection } from "./useStudioSelection";
 
 /**
  * WYSIWYG questionnaire builder: left outline, live form canvas, and right
@@ -100,6 +52,7 @@ export function QuestionnaireStudioPage({
   id: string;
 }) {
   const { t } = useTranslation();
+  useDisableSmoothScroll();
 
   const {
     data: questionnaire,
@@ -110,50 +63,43 @@ export function QuestionnaireStudioPage({
     queryFn: query(questionnaireApi.get, { pathParams: { id } }),
   });
 
-  const [state, reactDispatch] = useReducer(builderReducer, INITIAL_STATE);
-
-  // Counts user edits only, letting `onSaved` detect whether anything changed
-  // while the PUT was in flight. Resets are exempt because they come from load,
-  // background re-seed, Discard and post-save synchronization.
-  const dispatchSeqRef = useRef(0);
-  const dispatch: typeof reactDispatch = (action) => {
-    if (action.type !== "reset") {
-      dispatchSeqRef.current += 1;
-    }
-    reactDispatch(action);
-  };
-
-  useEffect(() => {
-    // Skip while the user has unsaved edits (`state.dirty`) — otherwise a
-    // background refetch that returns a new `questionnaire` reference (e.g.
-    // refetchOnReconnect after a network blip) would silently discard them.
-    // The post-save path resets explicitly (see the mutation's onSuccess
-    // below) after dirty has already been cleared, so this guard doesn't
-    // block that path. The metadata form protects itself the same way via
-    // its `values` binding + `keepDirtyValues`.
-    if (questionnaire && !state.dirty) {
-      dispatch({
-        type: "reset",
-        questions: questionnaire.questions,
-        actions: normalizeQuestionnaireActions(questionnaire.actions),
-        keepSelectedId: state.selectedId,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionnaire]);
-
-  const metaSchema = useMemo(() => questionnaireBasicSchema(t), [t]);
-  const form = useForm<DetailFormValues>({
-    resolver: zodResolver(metaSchema),
-    values: questionnaire
-      ? {
-          title: questionnaire.title,
-          slug: questionnaire.slug,
-          description: questionnaire.description ?? "",
-          status: questionnaire.status,
-        }
-      : undefined,
-    resetOptions: { keepDirtyValues: true },
+  const {
+    state,
+    dispatch,
+    form,
+    draft,
+    organizationDraft,
+    setOrganizationDraft,
+    dirty,
+    isPending,
+    saveDraft,
+    discardDraft,
+  } = useStudioDraft({ id, scope, questionnaire });
+  const {
+    studioDispatch,
+    setInspectorTarget,
+    openActionIndex,
+    setOpenActionIndex,
+    scrollRequest,
+    selectQuestion,
+    revealQuestion,
+    revealAction,
+    selectedQuestion,
+    selectedNumber,
+    panel,
+    formSelected,
+  } = useStudioSelection(state, dispatch);
+  const {
+    issues,
+    issueKeysByQuestionId,
+    registry,
+    contextPaths,
+    actionIssues,
+    actionLinkIds,
+  } = useStudioIssues({
+    questions: state.questions,
+    actions: state.actions,
+    subjectType: questionnaire?.subject_type,
   });
 
   const [queryParams, setQueryParams] = useQueryParams();
@@ -162,16 +108,6 @@ export function QuestionnaireStudioPage({
     mode === "preview" ? "preview" : "edit",
   );
   const [importOpen, setImportOpen] = useState(importParam === "1");
-  const [inspectorTarget, setInspectorTarget] = useState<
-    "form" | "question" | "actions"
-  >("question");
-  // The expanded card in the Actions panel — owned here so an issue click
-  // from the top bar can open the right one.
-  const [openActionIndex, setOpenActionIndex] = useState<number | null>(null);
-  const [scrollRequest, setScrollRequest] = useState<{
-    id: string;
-    nonce: number;
-  } | null>(null);
 
   useEffect(() => {
     // The dialog's open state above already captured `?import=1` — strip it
@@ -183,7 +119,6 @@ export function QuestionnaireStudioPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dirty = state.dirty || form.formState.isDirty;
   useNavigationPrompt(dirty, t("unsaved_changes_warning"));
 
   const { canWrite, isLoading: isPermissionLoading } =
@@ -194,157 +129,6 @@ export function QuestionnaireStudioPage({
   // Discard), so offering it would collect edits that can never be persisted
   // and then prompt about them on the way out.
   const view = canWrite ? requestedView : "preview";
-
-  // Creating or importing questions selects them in the reducer — the
-  // inspector must follow, or it would stay on Form settings showing
-  // nothing about the question that just appeared.
-  const studioDispatch: typeof dispatch = (action) => {
-    if (
-      action.type === "addQuestion" ||
-      action.type === "duplicateQuestion" ||
-      action.type === "replaceAll"
-    ) {
-      setInspectorTarget("question");
-    }
-    dispatch(action);
-  };
-
-  // Live draft for the canvas: a fresh identity per edit is exactly what
-  // drives the form provider's live sync (it merges responses rather than
-  // wiping them, so this is safe on every keystroke). Title/description
-  // ride along from the metadata form so the canvas header is as realtime
-  // as the questions.
-  const [metaTitle, metaDescription] = useWatch({
-    control: form.control,
-    name: ["title", "description"],
-  });
-  const draft = useMemo(
-    () =>
-      questionnaire
-        ? {
-            ...questionnaire,
-            title: metaTitle || questionnaire.title,
-            description: metaDescription ?? questionnaire.description,
-            questions: state.questions,
-          }
-        : undefined,
-    [questionnaire, state.questions, metaTitle, metaDescription],
-  );
-
-  // The unknown-structured-type rule reads the plugin registry, which fills
-  // in only after the federation manifests resolve — later than the first
-  // render of a cold-loaded questionnaire. Without re-running on that, a
-  // plugin-typed question would show false "Unknown structured type"
-  // warnings (outline icons, canvas chips, issues popover) until an edit
-  // happened to invalidate the memo.
-  const structuredTypesVersion = useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
-  );
-  // `findInvalidQuestions` walks the whole question tree with every save
-  // rule on every render — a full DFS + per-rule scans on EACH keystroke,
-  // since `state.questions` gets a fresh identity per dispatch. Deferring
-  // the input lets typing stay unblocked while this recompute lags a tick
-  // behind; it feeds only the issues POPOVER/outline warnings display, not
-  // Save's gating — `handleSave` below calls `findFirstInvalidQuestion`
-  // directly on the live (non-deferred) `state.questions`, so a click
-  // always blocks on the CURRENT tree even while this memo is still
-  // catching up.
-  const deferredQuestions = useDeferredValue(state.questions);
-  const issues = useMemo(() => {
-    // Referenced so the dependency is a real read, not one exhaustive-deps
-    // would call spurious: the registry lookup happens inside
-    // `findInvalidQuestions`, where the rule cannot see it.
-    void structuredTypesVersion;
-    return findInvalidQuestions(deferredQuestions);
-  }, [deferredQuestions, structuredTypesVersion]);
-  // First failing rule per question — powers the outline warning icons and
-  // the canvas error chips alongside the top bar's popover.
-  const issueKeysByQuestionId = useMemo(
-    () =>
-      new Map(
-        issues.map(({ question, messageKey }) => [question.id, messageKey]),
-      ),
-    [issues],
-  );
-
-  // What the backend can run and what an action may read; the actions'
-  // own save rules ride the same deferred tree as the question rules.
-  const registry = useActionRegistry();
-  const actionIssues = useMemo(
-    () =>
-      findActionIssues(state.actions, {
-        questions: deferredQuestions,
-        instructions: registry.instructions,
-      }),
-    [state.actions, deferredQuestions, registry.instructions],
-  );
-  // Questions an action reads — the outline marks them so an author
-  // retitling or deleting one knows something depends on it.
-  const actionLinkIds = useMemo(
-    () => new Set(state.actions.flatMap(actionReferencedLinkIds)),
-    [state.actions],
-  );
-
-  // Snapshot of `dispatchSeqRef` taken the instant the save PUT is fired
-  // (see `handleSave`) — compared against the live ref in `onSaved` below.
-  const saveDispatchSeqRef = useRef(0);
-  // The metadata (`title`/`slug`/`description`/`status`) actually included
-  // in that same PUT — the form side's equivalent snapshot. A plain
-  // `form.formState.isDirty` boolean can't do this job: it reads the same
-  // `true` both before AND after a SECOND in-flight edit lands on a field
-  // that was already dirty when Save was clicked (e.g. title "A" → Save →
-  // still in flight → title "B"), so a before/after equality check on it
-  // would miss that second edit and let the reset clobber "B". Comparing
-  // the actual submitted values against the form's LIVE values instead
-  // (via `form.getValues()`, an uncontrolled ref read — never stale)
-  // catches every case: unchanged, changed once, or changed again.
-  const saveMetaRef = useRef<DetailFormValues | null>(null);
-  const metaMatches = (a: DetailFormValues, b: DetailFormValues) =>
-    a.title === b.title &&
-    a.slug === b.slug &&
-    a.description === b.description &&
-    a.status === b.status;
-
-  const { mutate: save, isPending } = useUpdateQuestionnaire(id, (updated) => {
-    // A reducer dispatch landed while this PUT was in flight (the author
-    // kept editing — e.g. a question change) — `state` is now ahead of
-    // what `updated` reflects, so resetting to it would silently discard
-    // those in-flight edits.
-    const questionsEditedDuringFlight =
-      dispatchSeqRef.current !== saveDispatchSeqRef.current;
-    // Same idea for the metadata form — its live values now differ from
-    // what this PUT actually submitted, so resetting it would discard an
-    // in-flight Form-settings edit (Title/Slug/Description/Status).
-    const metaEditedDuringFlight =
-      !saveMetaRef.current ||
-      !metaMatches(saveMetaRef.current, form.getValues());
-
-    // The two sides are independent: an edit to only one must not block
-    // the other's reset. The cache write in useUpdateQuestionnaire's
-    // onSuccess (setQueryData) already ran before this callback, so
-    // metadata read straight from the query cache — the revision badge
-    // and the Save button's next-version chip, both driven by the
-    // `questionnaire` prop, not `state`/`form` — updates regardless of
-    // what either check below decides.
-    if (!questionsEditedDuringFlight) {
-      dispatch({
-        type: "reset",
-        questions: updated.questions,
-        actions: normalizeQuestionnaireActions(updated.actions),
-        keepSelectedId: state.selectedId,
-      });
-    }
-    if (!metaEditedDuringFlight) {
-      form.reset({
-        title: updated.title,
-        slug: updated.slug,
-        description: updated.description ?? "",
-        status: updated.status,
-      });
-    }
-  });
 
   const backPath = `${scope.basePath}/${id}`;
 
@@ -364,20 +148,6 @@ export function QuestionnaireStudioPage({
     [scope.facilityId],
   );
 
-  const revealQuestion = (questionId: string) => {
-    dispatch({ type: "select", id: questionId });
-    setInspectorTarget("question");
-    setScrollRequest((previous) => ({
-      id: questionId,
-      nonce: (previous?.nonce ?? 0) + 1,
-    }));
-  };
-
-  const revealAction = (index: number) => {
-    setInspectorTarget("actions");
-    setOpenActionIndex(index);
-  };
-
   const handleSave = () => {
     if (!questionnaire) return;
 
@@ -395,6 +165,7 @@ export function QuestionnaireStudioPage({
     const actionIssue = findActionIssues(state.actions, {
       questions: state.questions,
       instructions: registry.instructions,
+      contextPaths,
     })[0];
     if (actionIssue) {
       toast.error(t(actionIssue.messageKey));
@@ -403,48 +174,12 @@ export function QuestionnaireStudioPage({
       return;
     }
 
-    form.handleSubmit(
-      (meta) => {
-        // Snapshot right before the PUT fires (mutate() starts the request
-        // synchronously) — any dispatch, or any form field left differing
-        // from `meta` after this point, is an in-flight edit `onSaved`
-        // must not clobber.
-        saveDispatchSeqRef.current = dispatchSeqRef.current;
-        saveMetaRef.current = meta;
-        save(
-          buildUpdateBody(questionnaire, {
-            questions: state.questions,
-            actions: state.actions,
-            title: meta.title,
-            slug: meta.slug,
-            description: meta.description,
-            status: meta.status,
-          }),
-        );
-      },
-      () => {
-        // Metadata invalid (e.g. slug out of bounds) — surface the fields.
-        setView("edit");
-        setInspectorTarget("form");
-        toast.error(t("form_settings_invalid"));
-      },
-    )();
-  };
-
-  const handleDiscard = () => {
-    if (!questionnaire) return;
-    dispatch({
-      type: "reset",
-      questions: questionnaire.questions,
-      actions: normalizeQuestionnaireActions(questionnaire.actions),
-      keepSelectedId: state.selectedId,
-    });
-    form.reset({
-      title: questionnaire.title,
-      slug: questionnaire.slug,
-      description: questionnaire.description ?? "",
-      status: questionnaire.status,
-    });
+    form.handleSubmit(saveDraft, () => {
+      // Metadata invalid (e.g. slug out of bounds) — surface the fields.
+      setView("edit");
+      setInspectorTarget("form");
+      toast.error(t("form_settings_invalid"));
+    })();
   };
 
   // isPermissionLoading folds in so write affordances (Save Changes, Import)
@@ -468,29 +203,7 @@ export function QuestionnaireStudioPage({
     );
   }
 
-  const selectedQuestion = state.selectedId
-    ? findQuestion(state.questions, state.selectedId)
-    : undefined;
-  // Which inspector shows: Actions when asked for; otherwise Form settings
-  // stands in whenever no question is selected.
-  const panel: "form" | "question" | "actions" =
-    inspectorTarget === "actions"
-      ? "actions"
-      : inspectorTarget === "form" || !selectedQuestion
-        ? "form"
-        : "question";
-  const formSelected = panel === "form";
   const editing = view === "edit";
-  const topLevelIndex = state.selectedId
-    ? findTopLevelIndex(state.questions, state.selectedId)
-    : 0;
-  // The selected question's own dotted number (e.g. "3.1." for a nested
-  // child) — falls back to the top-level ancestor's ordinal for questions
-  // nested deeper than `findQuestionNumber` numbers (grandchildren+).
-  const selectedNumber =
-    (state.selectedId &&
-      findQuestionNumber(state.questions, state.selectedId)) ||
-    `${topLevelIndex + 1}.`;
 
   return (
     <QuestionnaireFormProvider
@@ -503,10 +216,10 @@ export function QuestionnaireStudioPage({
       {/* Fullscreen shell (the route opts out of the app sidebar in
           AppRouter's PATHS_WITHOUT_SIDEBAR): the reference design's
           viewport-filling frame — fixed top bar, three independently
-          scrolling columns. z-40 keeps portals (dialogs, popovers, toasts
+          scrolling columns, from md up. z-40 keeps portals (dialogs, popovers, toasts
           at z-50) above it. */}
-      <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-white">
-        <header className="shrink-0">
+      <div className="min-h-dvh flex flex-col bg-white md:fixed md:inset-0 md:z-40 md:overflow-hidden">
+        <header className="sticky top-0 z-10 shrink-0">
           <StudioTopBar
             questionnaire={questionnaire}
             questions={state.questions}
@@ -526,7 +239,7 @@ export function QuestionnaireStudioPage({
             isSaving={isPending}
             canWrite={canWrite}
             onSave={handleSave}
-            onDiscard={handleDiscard}
+            onDiscard={discardDraft}
             backPath={backPath}
           />
         </header>
@@ -535,45 +248,14 @@ export function QuestionnaireStudioPage({
             phone user who drills into a nested sub-question has no way back
             to the parent or its siblings. */}
         {editing && state.questions.length > 0 && (
-          <div className="flex shrink-0 items-center gap-2 border-b border-gray-200 px-3 py-2 md:hidden">
-            <div className="min-w-0 flex-1">
-              <Select
-                value={state.selectedId ?? undefined}
-                onValueChange={(selectedId) => {
-                  dispatch({ type: "select", id: selectedId });
-                  setInspectorTarget("question");
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("select_question")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {numberQuestions(state.questions).flatMap((item) =>
-                    [item, ...item.children].map(({ question, number }) => (
-                      <SelectItem key={question.id} value={question.id}>
-                        {number} {question.text || t("untitled_question")}
-                      </SelectItem>
-                    )),
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Below md the outline (and its add affordances) is hidden and
-                the canvas with its append zones only exists at lg — this is
-                the one add-question path on a phone. */}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="shrink-0"
-              aria-label={t("add_new_question")}
-              onClick={() =>
-                studioDispatch({ type: "addQuestion", parentId: null })
-              }
-            >
-              <Plus className="size-4" />
-            </Button>
-          </div>
+          <StudioMobileQuestionNav
+            questions={state.questions}
+            selectedId={state.selectedId}
+            onSelectQuestion={selectQuestion}
+            onAddQuestion={() =>
+              studioDispatch({ type: "addQuestion", parentId: null })
+            }
+          />
         )}
 
         <div className="flex min-h-0 flex-1">
@@ -622,6 +304,9 @@ export function QuestionnaireStudioPage({
                   questionnaire={questionnaire}
                   form={form}
                   canWrite={canWrite}
+                  isSaving={isPending}
+                  organizationDraft={organizationDraft}
+                  onOrganizationsChange={setOrganizationDraft}
                   exportQuestionnaire={() => ({
                     ...questionnaire,
                     ...form.getValues(),
@@ -664,10 +349,7 @@ export function QuestionnaireStudioPage({
               selectedId={
                 editing && panel !== "question" ? null : state.selectedId
               }
-              onSelectQuestion={(questionId) => {
-                dispatch({ type: "select", id: questionId });
-                setInspectorTarget("question");
-              }}
+              onSelectQuestion={selectQuestion}
               dispatch={studioDispatch}
               questions={state.questions}
               issueKeysByQuestionId={issueKeysByQuestionId}
@@ -693,8 +375,8 @@ export function QuestionnaireStudioPage({
         <ImportQuestionsDialog
           open={importOpen}
           onOpenChange={setImportOpen}
-          onImport={(questions) => {
-            studioDispatch({ type: "replaceAll", questions });
+          onImport={(questions, linkIdMap) => {
+            studioDispatch({ type: "replaceAll", questions, linkIdMap });
             toast.success(t("questionnaire_imported_successfully"));
           }}
         />

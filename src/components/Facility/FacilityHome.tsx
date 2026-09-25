@@ -1,52 +1,32 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, ChevronDown, ImageIcon, Printer } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import ContactLink from "@/components/Common/ContactLink";
 import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import FacilityDeleteDialog from "@/components/Facility/FacilityDeleteDialog";
-import PrintTemplateSheet from "@/components/Facility/PrintTemplateSheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { FeatureBadge } from "@/pages/Facility/Utils";
 import { FacilitySettingsOverview } from "@/pages/Facility/settings/general/FacilitySettingsOverview";
-import EditFacilitySheet from "@/pages/Organization/components/EditFacilitySheet";
-import { FACILITY_FEATURE_TYPES } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
-import { renderGeoOrganizations } from "@/types/organization/organization";
 
-import { FacilityMapsLink } from "./FacilityMapLink";
+import { FacilityHomeActions } from "./FacilityHomeActions";
+import { FacilityHomeOverview } from "./FacilityHomeOverview";
 
 interface FacilityHomeProps {
   facilityId: string;
@@ -209,92 +189,13 @@ export const FacilityHome = ({
       aspectRatio={16 / 9}
     />
   );
-  const editAction = (
-    <EditFacilitySheet
-      facilityId={facilityId}
-      trigger={
-        <Button
-          className={cn(
-            "cursor-pointer font-semibold",
-            isSettings && settingsButtonClassName,
-            isSettings &&
-              "col-span-2 border-emerald-950 bg-emerald-800 text-white hover:bg-emerald-900 hover:text-white sm:col-span-1",
-          )}
-          variant="outline"
-          size="sm"
-        >
-          <CareIcon icon="l-pen" />
-          {t("edit_facility_details")}
-        </Button>
-      }
-    />
-  );
-  const configurationAction = (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "cursor-pointer font-semibold",
-            isSettings && settingsButtonClassName,
-          )}
-          aria-label={isSettings ? t("configurations") : "More Options"}
-          type="button"
-        >
-          {t("configurations")}
-          <ChevronDown className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className={cn(
-          "w-full min-w-48",
-          isSettings && "rounded-lg border-neutral-200 shadow-md",
-        )}
-      >
-        <DropdownMenuGroup className="flex flex-col gap-1">
-          <PrintTemplateSheet
-            facility={facilityData}
-            trigger={
-              <button
-                type="button"
-                className={cn(
-                  "hover:bg-gray-100 hover:text-gray-900 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-                  isSettings &&
-                    "min-h-12 text-neutral-950 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-indigo-500 md:min-h-10",
-                )}
-              >
-                <Printer className="size-4 text-gray-500" />
-                {t("print_templates")}
-              </button>
-            }
-          />
-          <PLUGIN_Component
-            __name="FacilityHomeActions"
-            facility={facilityData}
-            className="flex justify-start items-center border border-gray-200 rounded-md p-2 shadow-sm"
-          />
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
   const facilityActions = canUpdateFacility ? (
-    <>
-      {isSettings && editAction}
-      {isSettings && (
-        <Button
-          variant="outline"
-          className={settingsButtonClassName}
-          onClick={() => setEditCoverImage(true)}
-        >
-          <ImageIcon className="size-5" />
-          {t("edit_cover_photo")}
-        </Button>
-      )}
-      {configurationAction}
-      {!isSettings && editAction}
-    </>
+    <FacilityHomeActions
+      facility={facilityData}
+      isSettings={isSettings}
+      buttonClassName={isSettings ? settingsButtonClassName : undefined}
+      onEditCoverImage={() => setEditCoverImage(true)}
+    />
   ) : null;
 
   if (isSettings) {
@@ -315,199 +216,13 @@ export const FacilityHome = ({
   return (
     <div>
       {coverImageDialog}
-      <div className="container mx-auto pt-2">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <Card className="border-none bg-transparent shadow-none">
-            <div className="group rounded-2xl relative h-64 w-full bg-linear-to-br from-emerald-400 via-emerald-500 to-emerald-600">
-              {facilityData?.read_cover_image_url ? (
-                <>
-                  <img
-                    src={facilityData.read_cover_image_url}
-                    alt={facilityData?.name}
-                    className="h-full w-full object-cover rounded-2xl"
-                  />
-                  <div className="absolute rounded-2xl inset-0 bg-linear-to-t from-black/60 via-black/30 to-transparent transition-opacity group-hover:opacity-70" />
-                </>
-              ) : (
-                <div className="relative rounded-2xl  h-full w-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.2),transparent)]" />
-              )}
-              <div className="absolute bottom-0 left-0 translate-x-0 translate-y-1/3">
-                <div className="sm:px-4 px-8 inline-flex rounded-xl">
-                  <Avatar
-                    name={facilityData.name}
-                    className="size-20 md:size-24 rounded-xl border-4 border-white shadow-lg"
-                  />
-                </div>
-              </div>
-
-              <div className="absolute bottom-0 left-0 translate-x-0 ml-32">
-                <div className="flex flex-wrap items-center gap-4 md:gap-6">
-                  <div className="flex-1 min-w-0 mb-2">
-                    <div className="text-white">
-                      <TooltipComponent content={facilityData?.name}>
-                        <h1 className="text-lg sm:text-sm md:text-2xl lg:text-3xl font-bold">
-                          {facilityData?.name}
-                        </h1>
-                      </TooltipComponent>
-                      <TooltipComponent
-                        content={facilityData?.facility_type}
-                        side="right"
-                        align="center"
-                        sideOffset={4}
-                      >
-                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70 inline-block">
-                          {facilityData?.facility_type}
-                        </h2>
-                      </TooltipComponent>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute right-0 bottom-0 p-1 text-white [@media(max-width:55rem)]:top-0">
-                {canUpdateFacility && (
-                  <Button
-                    variant="link"
-                    onClick={() => setEditCoverImage(true)}
-                    aria-label={t("edit_cover_photo")}
-                    size="sm"
-                  >
-                    <CareIcon
-                      icon="l-pen"
-                      className="text-white"
-                      aria-hidden="true"
-                    />
-                    <span className="underline text-white">
-                      {t("edit_cover_photo")}
-                    </span>
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end max-sm:flex-col-reverse flex-wrap sm:gap-2">
-              {canUpdateFacility && (
-                <div className="flex gap-1 max-sm:flex-col mt-10 sm:mt-4">
-                  {facilityActions}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div className="flex flex-col [@media(min-width:60rem)]:flex-row gap-3">
-                <Card className="basis-1/2">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="col-span-1 sm:col-span-2 flex flex-col">
-                        <span className="font-semibold">{t("address")}</span>
-                        <span className="text-gray-700 whitespace-pre-wrap wrap-break-word text-sm">
-                          {facilityData.address}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col mt-2">
-                        <span className="font-semibold">
-                          {t("mobile_number")}
-                        </span>
-                        <span className="text-gray-700 truncate text-sm">
-                          <ContactLink
-                            tel={formatPhoneNumberIntl(
-                              String(facilityData?.phone_number),
-                            )}
-                          />
-                        </span>
-                      </div>
-                      {facilityData?.latitude && facilityData?.longitude && (
-                        <div className="flex flex-col mt-2">
-                          <span className="font-semibold">
-                            {t("location_details")}
-                          </span>
-                          <span className="text-sm">
-                            <FacilityMapsLink
-                              latitude={facilityData.latitude}
-                              longitude={facilityData.longitude}
-                            />
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="basis-1/2 ">
-                  <CardContent>
-                    <div className="grid grid-cols-1 mt-6 sm:grid-cols-2 gap-4">
-                      {facilityData.geo_organization &&
-                        renderGeoOrganizations(
-                          facilityData.geo_organization,
-                        ).map((item, index) => (
-                          <div key={index} className="flex flex-col">
-                            <span className="font-semibold truncate">
-                              {item.label}
-                            </span>
-                            <span className="text-gray-700 text-sm truncate">
-                              {item.value}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {facilityData?.features?.some((feature: number) =>
-                FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
-              ) && (
-                <Card>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="font-semibold text-lg">
-                      {t("features")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {facilityData.features?.map((featureId: number) => (
-                        <FeatureBadge key={featureId} featureId={featureId} />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {facilityData?.description && (
-                <Card>
-                  <CardContent className="mt-4 wrap-break-word">
-                    <Markdown
-                      content={facilityData.description}
-                      className="text-sm"
-                    />
-                  </CardContent>
-                </Card>
-              )}
-              {user.is_superuser && (
-                <Card className="border-2 border-red-400">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="font-semibold text-lg">
-                      {t("danger_zone")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border rounded-md border-gray-300">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {t("delete_facility")}
-                        </p>
-                        <p className="text-sm text-gray-700">
-                          {t("delete_facility_description")}
-                        </p>
-                      </div>
-                      <FacilityDeleteDialog facility={facilityData} />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
+      <FacilityHomeOverview
+        facility={facilityData}
+        actions={facilityActions}
+        canUpdateFacility={canUpdateFacility}
+        canDelete={user.is_superuser}
+        onEditCoverImage={() => setEditCoverImage(true)}
+      />
     </div>
   );
 };

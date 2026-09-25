@@ -55,6 +55,7 @@ async function addQuestionnaire(page: Page, title: RegExp) {
 
 interface BatchRequestBody {
   requests: {
+    reference_id: string;
     url: string;
     body: { results?: { values: { value?: string }[] }[] };
   }[];
@@ -215,5 +216,70 @@ test.describe("P1-4: submit freeze", () => {
     await expect(noteButton).toBeEnabled();
     await noteInput.fill(`${note}-retry`);
     await expect(noteInput).toHaveValue(`${note}-retry`);
+  });
+
+  test("nested server validation errors preserve answers and allow a retry", async ({
+    page,
+  }) => {
+    const note = `Rejected-${faker.string.alphanumeric(10)}`;
+    const noteInput = questionBlock(page, NOTE_LABEL).getByRole("textbox");
+    await noteInput.fill(note);
+    const submitted: BatchRequestBody[] = [];
+    await page.route("**/api/v1/batch_requests/", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      const body = route.request().postDataJSON() as BatchRequestBody;
+      submitted.push(body);
+      if (submitted.length === 1) {
+        // Exact backend shape for a questionnaire made inactive before save.
+        return route.fulfill({
+          status: 400,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              {
+                reference_id: body.requests[0].reference_id,
+                status_code: 400,
+                data: {
+                  errors: [
+                    {
+                      type: "validation_error",
+                      msg: {
+                        type: "questionnaire_inactive",
+                        msg: "Questionnaire is inactive",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+        });
+      }
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ results: [] }),
+      });
+    });
+
+    const save = page.getByRole("button", { name: "Save Changes" });
+    await save.click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Questionnaire is inactive" }),
+    ).toBeVisible();
+    await expect(noteInput).toHaveValue(note);
+    await expect(noteInput).toBeEnabled();
+    await noteInput.fill(`${note}-retry`);
+    await save.click();
+    await expectToast(page, "Questionnaire submitted successfully");
+    await page.waitForURL(/\/updates$/);
+    expect(submitted).toHaveLength(2);
+    expect(
+      submitted[1].requests.flatMap((request) =>
+        (request.body.results ?? []).flatMap((result) =>
+          result.values.map((value) => value.value),
+        ),
+      ),
+    ).toContain(`${note}-retry`);
   });
 });

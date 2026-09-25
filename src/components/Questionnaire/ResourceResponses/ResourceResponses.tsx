@@ -1,60 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowDownWideNarrow,
   Building2,
-  ChevronRight,
-  ClipboardList,
-  FileText,
   Loader2,
   MapPin,
   Monitor,
   RefreshCw,
-  SearchX,
 } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Pagination from "@/components/Common/Pagination";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { ResourceFormPicker } from "@/components/Questionnaire/ResourceFormPicker";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName } from "@/Utils/utils";
-import { DeviceDetail } from "@/types/device/device";
-import deviceApi from "@/types/device/deviceApi";
-import { FacilityRead } from "@/types/facility/facility";
-import facilityApi from "@/types/facility/facilityApi";
-import { LocationRead } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
-import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
-import resourceQuestionnaireResponseApi, {
-  ResourceQuestionnaireResponse,
-} from "@/types/questionnaire/resourceQuestionnaireResponseApi";
-
-import ResourceResponseFilters, {
-  ResourceResponseFilterValues,
-} from "./ResourceResponseFilters";
+import ResourceResponseFilters from "./ResourceResponseFilters";
 import ResourceResponseViewer from "./ResourceResponseViewer";
-import { getResponsePreview } from "./response";
 import { ResourceResponseSubjectType } from "./types";
+
+import { ResourceResponseTable } from "./ResourceResponseTable";
+import { ResourceResponsesEmptyState } from "./ResourceResponsesEmptyState";
+import { useResourceResponseParams } from "./useResourceResponseParams";
+import { useResourceResponseQueries } from "./useResourceResponseQueries";
 
 interface ResourceResponsesProps {
   facilityId: string;
@@ -74,158 +45,39 @@ export function ResourceResponses({
   contextHref,
 }: ResourceResponsesProps) {
   const { t } = useTranslation();
-  const [params, setParams] = useQueryParams();
-  const parsedPage = Number(params.page);
-  const page =
-    Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
-  const responseId = params.response || undefined;
-  const filters: ResourceResponseFilterValues = {
-    questionnaire: params.questionnaire || undefined,
-    questionnaireTitle: params.questionnaire_title || undefined,
-    createdBy: params.created_by || undefined,
-    creatorName: params.creator_name || undefined,
-    status: Object.values(QuestionnaireResponseStatus).includes(params.status)
-      ? (params.status as QuestionnaireResponseStatus)
-      : undefined,
-  };
-  const hasFilters = !!(
-    filters.questionnaire ||
-    filters.createdBy ||
-    filters.status
-  );
-
-  const updateParams = (
-    patch: Record<string, string | undefined>,
-    replace = false,
-  ) => {
-    setParams(
-      Object.fromEntries(
-        Object.entries({ ...params, ...patch }).filter(
-          ([, value]) => value !== undefined && value !== "",
-        ),
-      ),
-      { replace },
-    );
-  };
-  const handleFiltersChange = (
-    patch: Partial<ResourceResponseFilterValues>,
-  ) => {
-    const next = { ...filters, ...patch };
-    updateParams({
-      questionnaire: next.questionnaire,
-      questionnaire_title: next.questionnaire
-        ? next.questionnaireTitle
-        : undefined,
-      created_by: next.createdBy,
-      creator_name: next.createdBy ? next.creatorName : undefined,
-      status: next.status,
-      page: undefined,
-      response: undefined,
-    });
-  };
-  const clearFilters = () =>
-    handleFiltersChange({
-      questionnaire: undefined,
-      questionnaireTitle: undefined,
-      createdBy: undefined,
-      creatorName: undefined,
-      status: undefined,
-    });
-
-  const subjectQuery = useQuery<LocationRead | DeviceDetail | FacilityRead>({
-    queryKey:
-      subjectType === "facility"
-        ? ["facility", facilityId]
-        : [subjectType, facilityId, subjectId],
-    queryFn: ({ signal }) => {
-      if (subjectType === "facility") {
-        return query(facilityApi.get, {
-          pathParams: { facilityId },
-        })({ signal });
-      }
-      if (subjectType === "location") {
-        return query(locationApi.get, {
-          pathParams: { facility_id: facilityId, id: subjectId },
-        })({ signal });
-      }
-      return query(deviceApi.retrieve, {
-        pathParams: { facility_id: facilityId, id: subjectId },
-      })({ signal });
-    },
+  const {
+    page,
+    responseId,
+    filters,
+    hasFilters,
+    updateParams,
+    handleFiltersChange,
+    clearFilters,
+  } = useResourceResponseParams();
+  const {
+    subjectQuery,
+    resolvedSubjectName,
+    responsesQuery,
+    responses,
+    responseFromList,
+    detailQuery,
+    selectedResponse,
+    selectedIndex,
+  } = useResourceResponseQueries({
+    facilityId,
+    subjectType,
+    subjectId,
+    subjectName,
+    page,
+    pageSize: PAGE_SIZE,
+    responseId,
+    filters,
   });
-  const resolvedSubjectName =
-    subjectName ??
-    (subjectQuery.data &&
-      ("name" in subjectQuery.data
-        ? subjectQuery.data.name
-        : subjectQuery.data.registered_name));
   const SubjectIcon = {
     location: MapPin,
     device: Monitor,
     facility: Building2,
   }[subjectType];
-  const responsesQuery = useQuery<
-    PaginatedResponse<ResourceQuestionnaireResponse>
-  >({
-    queryKey: [
-      "resourceResponses",
-      facilityId,
-      subjectType,
-      subjectId,
-      {
-        page,
-        questionnaire: filters.questionnaire,
-        created_by: filters.createdBy,
-        status: filters.status,
-      },
-    ],
-    queryFn: query(resourceQuestionnaireResponseApi.list, {
-      queryParams: {
-        subject_type: subjectType,
-        subject_id: subjectId,
-        questionnaire: filters.questionnaire,
-        created_by: filters.createdBy,
-        status: filters.status,
-        limit: PAGE_SIZE,
-        offset: (page - 1) * PAGE_SIZE,
-      },
-    }),
-    enabled: !!subjectQuery.data && !subjectQuery.isError,
-    placeholderData: (previousData, previousQuery) =>
-      previousQuery?.queryKey[1] === facilityId &&
-      previousQuery.queryKey[2] === subjectType &&
-      previousQuery.queryKey[3] === subjectId
-        ? previousData
-        : undefined,
-  });
-  const responses = responsesQuery.data?.results ?? [];
-  const responseFromList = responses.find(
-    (response) => response.id === responseId,
-  );
-  const detailQuery = useQuery({
-    queryKey: [
-      "resourceResponses",
-      facilityId,
-      subjectType,
-      subjectId,
-      "detail",
-      responseId,
-    ],
-    queryFn: query(resourceQuestionnaireResponseApi.get, {
-      pathParams: { id: responseId ?? "" },
-      queryParams: { subject_type: subjectType, subject_id: subjectId },
-    }),
-    enabled:
-      !!responseId &&
-      !!subjectQuery.data &&
-      !subjectQuery.isError &&
-      !responseFromList,
-    retry: false,
-  });
-  const selectedResponse = responseFromList ?? detailQuery.data ?? null;
-  const selectedIndex = responses.findIndex(
-    (response) => response.id === responseId,
-  );
   const isLoading = subjectQuery.isPending || responsesQuery.isLoading;
   const isError = subjectQuery.isError || responsesQuery.isError;
   const isUpdating = responsesQuery.isFetching && !isLoading;
@@ -340,208 +192,24 @@ export function ResourceResponses({
               <TableSkeleton count={5} />
             </div>
           ) : responses.length === 0 ? (
-            <div className="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center">
-              <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                {hasFilters ? (
-                  <SearchX className="size-6" />
-                ) : (
-                  <ClipboardList className="size-6" />
-                )}
-              </div>
-              <h3 className="text-base font-semibold text-neutral-950">
-                {hasFilters
-                  ? t("no_matching_responses")
-                  : t("no_responses_found")}
-              </h3>
-              <p className="mt-2 max-w-sm text-sm leading-relaxed text-neutral-600">
-                {hasFilters
-                  ? t("no_matching_responses_description")
-                  : t(`${subjectType}_responses_empty_description`)}
-              </p>
-              {hasFilters ? (
-                <Button
-                  variant="outline"
-                  className="mt-5 h-12 border-neutral-400 text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10"
-                  onClick={clearFilters}
-                >
-                  {t("clear_filters")}
-                </Button>
-              ) : page > 1 ? (
-                <Button
-                  variant="outline"
-                  className="mt-5 h-12 border-neutral-400 text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10"
-                  onClick={() => updateParams({ page: undefined })}
-                >
-                  {t("back_to_first_page")}
-                </Button>
-              ) : (
-                <ResourceFormPicker
-                  facilityId={facilityId}
-                  subjectType={subjectType}
-                  subjectId={subjectId}
-                  disabled={!subjectQuery.data || subjectQuery.isError}
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="mt-5 h-12 border-neutral-400 text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10"
-                      disabled={!subjectQuery.data || subjectQuery.isError}
-                    >
-                      {t("submit_forms")}
-                    </Button>
-                  }
-                />
-              )}
-            </div>
+            <ResourceResponsesEmptyState
+              facilityId={facilityId}
+              subjectType={subjectType}
+              subjectId={subjectId}
+              hasFilters={hasFilters}
+              page={page}
+              disabled={!subjectQuery.data || subjectQuery.isError}
+              onClearFilters={clearFilters}
+              onFirstPage={() => updateParams({ page: undefined })}
+            />
           ) : (
-            <div
-              aria-busy={isUpdating}
-              className={cn(responsesQuery.isPlaceholderData && "opacity-60")}
-            >
-              <Table>
-                <TableHeader className="bg-neutral-50">
-                  <TableRow className="border-neutral-200 hover:bg-transparent">
-                    <TableHead className="h-10 px-4 text-sm font-medium text-neutral-950">
-                      {t("questionnaire")}
-                    </TableHead>
-                    <TableHead className="hidden h-10 text-sm font-medium text-neutral-950 lg:table-cell">
-                      {t("submitted_by")}
-                    </TableHead>
-                    <TableHead className="hidden h-10 text-sm font-medium text-neutral-950 md:table-cell">
-                      {t("submitted_on")}
-                    </TableHead>
-                    <TableHead className="hidden h-10 text-sm font-medium text-neutral-950 md:table-cell">
-                      {t("status")}
-                    </TableHead>
-                    <TableHead className="w-20 px-4 text-right">
-                      <span className="sr-only">{t("view_response")}</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {responses.map((response) => {
-                    const author = formatName(response.created_by);
-                    const preview = getResponsePreview(response, t);
-                    const enteredInError =
-                      response.status ===
-                      QuestionnaireResponseStatus.EnteredInError;
-                    const statusBadge = (
-                      <Badge
-                        size="xs"
-                        variant={enteredInError ? "destructive" : "green"}
-                        className={cn(
-                          "h-5 rounded-sm px-2 py-0",
-                          enteredInError
-                            ? "border-red-500/45"
-                            : "border-green-500/40",
-                        )}
-                      >
-                        {t(response.status)}
-                      </Badge>
-                    );
-                    return (
-                      <TableRow
-                        key={response.id}
-                        data-response-id={response.id}
-                        data-state={
-                          response.id === responseId ? "selected" : undefined
-                        }
-                        className="group cursor-pointer border-neutral-200 hover:bg-neutral-100/50 focus-within:bg-neutral-100/50 data-[state=selected]:bg-neutral-100"
-                        onClick={() => {
-                          if (!responsesQuery.isPlaceholderData)
-                            updateParams({ response: response.id });
-                        }}
-                      >
-                        <TableCell className="max-w-sm whitespace-normal px-4 py-4">
-                          <div className="flex items-start gap-3">
-                            <div className="hidden size-9 shrink-0 items-center justify-center rounded-lg border border-neutral-100 bg-neutral-50 text-neutral-500 sm:flex">
-                              <FileText className="size-4" aria-hidden="true" />
-                            </div>
-                            <div className="min-w-0 space-y-1.5">
-                              <p
-                                id={`response-title-${response.id}`}
-                                className="break-words font-medium leading-snug text-neutral-950"
-                              >
-                                {response.questionnaire.title}
-                              </p>
-                              {preview && (
-                                <p className="line-clamp-1 break-all text-xs leading-relaxed text-neutral-500">
-                                  {preview}
-                                </p>
-                              )}
-                              <p className="text-xs text-neutral-500 lg:hidden">
-                                {author}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-2 md:hidden">
-                                <span className="text-xs text-neutral-500">
-                                  {response.created_date
-                                    ? formatDateTime(
-                                        response.created_date,
-                                        "DD MMM YYYY, h:mm A",
-                                      )
-                                    : t("unknown")}
-                                </span>
-                                {statusBadge}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                          <div className="flex items-center gap-2.5">
-                            <Avatar
-                              name={author}
-                              className="size-7 shrink-0 rounded-full"
-                            />
-                            <span
-                              className="max-w-40 truncate text-neutral-700"
-                              title={author}
-                            >
-                              {author}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <p className="text-neutral-700">
-                            {response.created_date
-                              ? formatDateTime(
-                                  response.created_date,
-                                  "DD MMM YYYY",
-                                )
-                              : t("unknown")}
-                          </p>
-                          {response.created_date && (
-                            <p className="mt-1 text-xs text-neutral-500">
-                              {formatDateTime(response.created_date, "h:mm A")}
-                            </p>
-                          )}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {statusBadge}
-                        </TableCell>
-                        <TableCell className="px-3 text-right sm:px-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-12 gap-1 text-sm text-neutral-950 underline underline-offset-4 hover:bg-neutral-200/75 hover:text-neutral-950 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10"
-                            disabled={responsesQuery.isPlaceholderData}
-                            aria-describedby={`response-title-${response.id}`}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              updateParams({ response: response.id });
-                            }}
-                          >
-                            {t("view")}
-                            <ChevronRight
-                              className="size-4"
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+            <ResourceResponseTable
+              responses={responses}
+              responseId={responseId}
+              isUpdating={isUpdating}
+              isPlaceholderData={responsesQuery.isPlaceholderData}
+              onSelect={(id) => updateParams({ response: id })}
+            />
           )}
 
           {!isError &&

@@ -1,11 +1,9 @@
-import { History, Plus, X } from "lucide-react";
+import { Check, Loader2, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
@@ -18,16 +16,12 @@ import type {
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
 
-import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
-import { DraftRestoreBar } from "./DraftRestoreBar";
-import { DroppedAnswersList } from "./DroppedAnswersList";
 import { FillFormSection } from "./FillFormSection";
 import { FillHeader } from "./FillHeader";
 import {
   FillOutlineNavProvider,
   FillOutlineOverlay,
 } from "./FillOutlineOverlay";
-import { FillShell } from "./FillShell";
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
 import type { DroppedDraftAnswer } from "./draft/draftMerge";
@@ -35,112 +29,13 @@ import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
 import type { FillSubject } from "./subject";
-import { isPatientBound, rendererSubjectOf } from "./subject";
+import { rendererSubjectOf } from "./subject";
 import { useSubmitFillSession } from "./submit/useSubmitFillSession";
 import { useFillActions } from "./useFillActions";
 import { useFillSessionForms } from "./useFillSessionForms";
 
-const FILL_TAB_TRIGGER_CLASSES =
-  "h-11 shrink-0 rounded-t-lg rounded-b-none border-gray-300 bg-gray-50 px-2.5 py-2 text-xs data-[state=inactive]:text-gray-700! data-[state=inactive]:hover:bg-white data-[state=active]:border-b-white data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-none focus-visible:z-10 focus-visible:ring-inset sm:px-4 sm:text-sm";
-
-/** The canvas title and its unsaved-work badge. One fragment shared by the
- *  two header branches (tab strip where a patient gives us a clinical
- *  history tab, plain label otherwise) so the chip can never drift out of
- *  one of them. */
-function QuestionnaireTitleWithDraftBadge({ dirty }: { dirty: boolean }) {
-  const { t } = useTranslation();
-  return (
-    <>
-      {t("questionnaire_one")}
-      {dirty && (
-        <Badge
-          size="xs"
-          className="ml-1 rounded-sm border-transparent bg-indigo-100 px-1.5 py-0 text-indigo-900"
-        >
-          {t("draft")}
-        </Badge>
-      )}
-    </>
-  );
-}
-
-/**
- * "Questionnaire was updated — reload" notice. `onReload` is a hard page
- * reload, deliberately NOT an in-place swap of the mounted session's
- * `questionnaire` reference — a hot-swap would race `FormContext.tsx`'s
- * live-sync effect over the same `responsesAtom` (see the
- * `questionnaireStale` comment in `FillPageBody`). A full reload flushes
- * to the local draft first (the same `pagehide` handler autosave already
- * installs) and lets the ordinary mount flow's `loadFillDraft` merge take
- * it from there.
- */
-function QuestionnaireUpdatedBanner({
-  onReload,
-  onDismiss,
-  frozen,
-}: {
-  onReload: () => void;
-  onDismiss: () => void;
-  frozen: boolean;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="mx-auto mb-4 flex w-full max-w-3xl items-start gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-      <div className="min-w-0 flex-1">
-        <p>{t("fill_questionnaire_updated_banner")}</p>
-      </div>
-      <Button type="button" size="sm" onClick={onReload} disabled={frozen}>
-        {t("fill_questionnaire_reload")}
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        aria-label={t("close")}
-        onClick={onDismiss}
-      >
-        <X className="size-4" />
-      </Button>
-    </div>
-  );
-}
-
-/**
- * What a directly resumed draft could not restore. Ordinary local recovery
- * shows these details in the restore prompt; direct resume still needs to
- * account for omitted answers without asking the clinician to resume twice.
- */
-function DraftDropNotice({
-  dropped,
-  structuredSkipped = false,
-  onDismiss,
-}: {
-  dropped: DroppedDraftAnswer[];
-  structuredSkipped?: boolean;
-  onDismiss: () => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="mx-auto mb-4 flex w-full max-w-3xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      <History aria-hidden className="mt-0.5 size-4 shrink-0" />
-      <div className="min-w-0 flex-1 space-y-1">
-        {structuredSkipped && <p>{t("fill_draft_structured_skipped")}</p>}
-        {dropped.length > 0 && <DroppedAnswersList dropped={dropped} />}
-      </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        aria-label={t("close")}
-        onClick={onDismiss}
-      >
-        <X className="size-4" />
-      </Button>
-    </div>
-  );
-}
+import { FillSessionNotices } from "./FillSessionNotices";
+import { FillSessionTabs } from "./FillSessionTabs";
 
 interface FillPageBodyProps {
   questionnaire: QuestionnaireRead;
@@ -159,6 +54,9 @@ interface FillPageBodyProps {
   serverDraftDropped?: DroppedDraftAnswer[];
   continueDraftId?: string;
   exitTarget: string;
+  contextRefreshFailed: boolean;
+  isRetryingContext: boolean;
+  onRetryContext: () => void;
 }
 
 /**
@@ -180,16 +78,11 @@ export function FillPageBody({
   serverDraftDropped,
   continueDraftId,
   exitTarget,
+  contextRefreshFailed,
+  isRetryingContext,
+  onRetryContext,
 }: FillPageBodyProps) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<"questionnaire" | "history">("questionnaire");
-  // History mounts on first activation and stays mounted after (hidden) —
-  // eager mounting would fire its queries and leak its text into the DOM
-  // for sessions that never open it, while unmount-on-switch would blank
-  // adapted structured widgets that keep local state.
-  const [historyMounted, setHistoryMounted] = useState(false);
-  const [dropNoticeDismissed, setDropNoticeDismissed] = useState(false);
-
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
   const handleStore = useCallback((key: string, store: FormStore | null) => {
@@ -227,7 +120,6 @@ export function FillPageBody({
   // session never persists locally, so a reload has nothing to restore
   // from.
   const primaryForm = forms.find((form) => form.isPrimary);
-  const [reloadBannerDismissed, setReloadBannerDismissed] = useState(false);
   const questionnaireStale =
     !!primaryForm &&
     !continueDraftId &&
@@ -313,11 +205,6 @@ export function FillPageBody({
   // cannot be discarded with a payload that did not contain them.
   const frozen = isPending || serverDraftSave.isSavingDraft;
 
-  const draftDropped =
-    serverDraftDropped ?? (resumeLocalDraft ? localDraft?.dropped : undefined);
-  const draftStructuredSkipped =
-    resumeLocalDraft && localDraft?.structuredSkipped;
-
   useNavigationPrompt(
     autosave.dirty && !import.meta.env.DEV,
     t("unsaved_changes"),
@@ -334,170 +221,156 @@ export function FillPageBody({
   });
 
   return (
-    // Tabs wraps the shell so its Radix context reaches both the strip in
-    // FillShell's `tabs` slot and the TabsContent panels below.
-    <Tabs
-      value={tab}
-      onValueChange={(value) => {
-        if (value === "history") setHistoryMounted(true);
-        setTab(value as typeof tab);
-      }}
+    <FillSessionTabs
+      patientId={patientId}
+      facilityId={facilityId}
+      dirty={autosave.dirty}
+      onClose={() => navigate(exitTarget)}
     >
-      <FillShell
-        onClose={() => navigate(exitTarget)}
-        tabs={
-          // The clinical history tab exists only where there IS a patient
-          // — a location/device/facility fill gets the plain title in the
-          // same slot, draft badge included.
-          patientId ? (
-            <TabsList className="flex h-auto items-end justify-start gap-1 rounded-none bg-transparent p-0 sm:gap-1.5">
-              <TabsTrigger
-                value="questionnaire"
-                className={FILL_TAB_TRIGGER_CLASSES}
-              >
-                <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
-              </TabsTrigger>
-              <TabsTrigger value="history" className={FILL_TAB_TRIGGER_CLASSES}>
-                {t("patient_clinical_history")}
-              </TabsTrigger>
-            </TabsList>
-          ) : (
-            <div className="flex items-center py-1.5 text-sm font-medium text-gray-900">
-              <QuestionnaireTitleWithDraftBadge dirty={autosave.dirty} />
-            </div>
-          )
-        }
-      >
-        {/* The form panel stays mounted across switches (forceMount +
-            hidden): some adapted structured widgets keep local state they
-            never rehydrate from the response — an unmount would blank
-            them. */}
-        <TabsContent
-          value="questionnaire"
-          forceMount
-          className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
-        >
-          <div className="flex min-h-0 flex-1 flex-col bg-white">
-            <FillHeader
-              patient={patient}
-              encounter={encounter}
-              facilityId={facilityId}
-              onCancel={() => navigate(exitTarget)}
-              onSubmit={() => void submit()}
-              isSubmitting={isPending}
-              onSaveDraft={
-                serverDraftSave.canSaveDraft
-                  ? serverDraftSave.saveDraft
-                  : undefined
-              }
-              isSavingDraft={serverDraftSave.isSavingDraft}
+      <div className="flex min-h-0 flex-1 flex-col bg-white">
+        <FillHeader
+          patient={patient}
+          encounter={encounter}
+          facilityId={facilityId}
+          onCancel={() => navigate(exitTarget)}
+          onSubmit={() => {
+            if (!contextRefreshFailed) void submit();
+          }}
+          saveDisabled={contextRefreshFailed}
+          isSubmitting={isPending}
+          onSaveDraft={
+            serverDraftSave.canSaveDraft
+              ? () => {
+                  if (!contextRefreshFailed) serverDraftSave.saveDraft();
+                }
+              : undefined
+          }
+          isSavingDraft={serverDraftSave.isSavingDraft}
+        />
+        <FillOutlineNavProvider scrollContainer={scrollHost}>
+          <div className="relative flex min-h-0 flex-1">
+            <FillOutlineOverlay
+              onPanelHost={setOutlineHost}
+              onRailHost={setRailHost}
             />
-            <FillOutlineNavProvider scrollContainer={scrollHost}>
-              <div className="relative flex min-h-0 flex-1">
-                <FillOutlineOverlay
-                  onPanelHost={setOutlineHost}
-                  onRailHost={setRailHost}
-                />
-                <section
-                  ref={setScrollHost}
-                  aria-label={t("form_canvas")}
-                  className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
-                >
-                  {questionnaireStale && !reloadBannerDismissed && (
-                    <QuestionnaireUpdatedBanner
-                      onReload={() => window.location.reload()}
-                      onDismiss={() => setReloadBannerDismissed(true)}
-                      frozen={frozen}
-                    />
-                  )}
-                  {(!!draftDropped?.length || draftStructuredSkipped) &&
-                    !dropNoticeDismissed && (
-                      <DraftDropNotice
-                        dropped={draftDropped ?? []}
-                        structuredSkipped={draftStructuredSkipped}
-                        onDismiss={() => setDropNoticeDismissed(true)}
-                      />
-                    )}
-                  {autosave.restoredDraft && !resumeLocalDraft && (
-                    <DraftRestoreBar
-                      draft={autosave.restoredDraft}
-                      onResume={autosave.resumeRestoredDraft}
-                      onDiscard={autosave.discardRestoredDraft}
-                      onDismiss={autosave.dismissRestoreBar}
-                      frozen={frozen}
-                    />
-                  )}
-                  <ServerErrorsPanel errors={serverErrors} />
-                  {forms.map((form) => (
-                    <FillFormSection
-                      key={form.key}
-                      form={form}
-                      subject={rendererSubject}
-                      outlineHost={outlineHost}
-                      railHost={railHost}
-                      outlineLabel={
-                        forms.length > 1 ? form.questionnaire.title : undefined
-                      }
-                      onStore={handleStore}
-                      onRemove={forms.length > 1 ? removeForm : undefined}
-                      frozen={frozen}
-                    />
-                  ))}
-                  {/* A resumed SERVER draft is one questionnaire's
-                    submission by construction — no adding to it. */}
-                  {!continueDraftId && (
-                    <div className="mx-auto flex w-full max-w-3xl justify-center">
-                      <QuestionnaireSearch
-                        subjectType={pickerSubjectType}
-                        facilityId={
-                          isPatientBound(subject) ? undefined : facilityId
-                        }
-                        onSelect={addQuestionnaireFromPicker}
-                        // The default trigger is a `role="combobox"` button,
-                        // and combobox takes no name from its contents — it
-                        // would reach screen readers unnamed. This one is a
-                        // plain button, so its label IS its name.
-                        trigger={
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="border-primary-600 text-primary-800"
-                            disabled={frozen}
-                          >
-                            <Plus className="size-4" />
-                            {t("add_questionnaire")}
-                          </Button>
-                        }
-                      />
-                    </div>
-                  )}
-                  {/* Renders nothing unless a plugin provides Scribe. */}
-                  <PLUGIN_Component
-                    __name="Scribe"
-                    actions={descriptors}
-                    invoke={invoke}
-                  />
-                </section>
-              </div>
-            </FillOutlineNavProvider>
-          </div>
-        </TabsContent>
-
-        {patientId && (
-          <TabsContent
-            value="history"
-            forceMount={historyMounted || undefined}
-            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-[state=inactive]:hidden md:px-6"
-          >
-            {historyMounted && (
-              <ClinicalHistoryTab
-                patientId={patientId}
-                facilityId={facilityId}
+            <section
+              ref={setScrollHost}
+              aria-label={t("form_canvas")}
+              className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
+            >
+              <FillSessionNotices
+                questionnaireStale={questionnaireStale}
+                frozen={frozen}
+                resumeLocalDraft={resumeLocalDraft}
+                localDraft={localDraft}
+                serverDraftDropped={serverDraftDropped}
+                restoredDraft={autosave.restoredDraft}
+                onResumeDraft={autosave.resumeRestoredDraft}
+                onDiscardDraft={autosave.discardRestoredDraft}
+                onDismissRestore={autosave.dismissRestoreBar}
+                contextRefreshFailed={contextRefreshFailed}
+                isRetryingContext={isRetryingContext}
+                onRetryContext={onRetryContext}
               />
+              <ServerErrorsPanel errors={serverErrors} />
+              {forms.map((form) => (
+                <FillFormSection
+                  key={form.key}
+                  form={form}
+                  subject={rendererSubject}
+                  outlineHost={outlineHost}
+                  railHost={railHost}
+                  outlineLabel={
+                    forms.length > 1 ? form.questionnaire.title : undefined
+                  }
+                  onStore={handleStore}
+                  onRemove={forms.length > 1 ? removeForm : undefined}
+                  frozen={frozen}
+                />
+              ))}
+              {/* A resumed SERVER draft is one questionnaire's
+                    submission by construction — no adding to it. */}
+              {!continueDraftId && (
+                <div className="mx-auto flex w-full max-w-3xl justify-center">
+                  <QuestionnaireSearch
+                    subjectType={pickerSubjectType}
+                    facilityId={facilityId}
+                    onSelect={addQuestionnaireFromPicker}
+                    // The default trigger is a `role="combobox"` button,
+                    // and combobox takes no name from its contents — it
+                    // would reach screen readers unnamed. This one is a
+                    // plain button, so its label IS its name.
+                    trigger={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-primary-600 text-primary-800"
+                        disabled={frozen}
+                      >
+                        <Plus className="size-4" />
+                        {t("add_questionnaire")}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+              {/* Renders nothing unless a plugin provides Scribe. */}
+              <PLUGIN_Component
+                __name="Scribe"
+                actions={descriptors}
+                invoke={invoke}
+              />
+            </section>
+          </div>
+        </FillOutlineNavProvider>
+        {/* Phone-only action row: visible only on small screens */}
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 bg-white p-3 md:hidden">
+          <Button
+            type="button"
+            variant="ghost"
+            className="font-semibold underline underline-offset-4"
+            onClick={() => navigate(exitTarget)}
+          >
+            {t("cancel")}
+          </Button>
+          {serverDraftSave.canSaveDraft && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (!contextRefreshFailed) serverDraftSave.saveDraft();
+              }}
+              disabled={
+                isPending ||
+                serverDraftSave.isSavingDraft ||
+                contextRefreshFailed
+              }
+            >
+              {serverDraftSave.isSavingDraft && (
+                <Loader2 className="size-4 animate-spin" />
+              )}
+              {t("save_as_draft")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={() => {
+              if (!contextRefreshFailed) void submit();
+            }}
+            disabled={
+              isPending || serverDraftSave.isSavingDraft || contextRefreshFailed
+            }
+            className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
             )}
-          </TabsContent>
-        )}
-      </FillShell>
-    </Tabs>
+            {t("save_changes")}
+          </Button>
+        </div>
+      </div>
+    </FillSessionTabs>
   );
 }

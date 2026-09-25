@@ -1,6 +1,5 @@
 import { StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -22,10 +21,10 @@ import { ValueSetVariantChooser } from "@/components/Questionnaire/ValueSetVaria
 
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
-import valueSetApi from "@/types/valueSet/valueSetApi";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { Loader2 } from "lucide-react";
+
+import { useValueSetPreferences } from "./useValueSetPreferences";
+import { useValueSetSearchResults } from "./useValueSetSearchResults";
 
 // Use codes for "fully specified name" variants that are too verbose to show as synonyms
 const EXCLUDED_USE_CODES = new Set([
@@ -97,6 +96,7 @@ interface Props {
   onSearchChange: (value: string) => void;
   title?: string;
   placeholder?: string;
+  inputRef?: Ref<HTMLInputElement>;
 }
 
 interface ItemProps {
@@ -118,6 +118,7 @@ const Item = ({
   showCode,
   search,
 }: ItemProps) => {
+  const { t } = useTranslation();
   const { primary, secondary } = getBestMatchDisplay(option, search);
 
   return (
@@ -139,13 +140,16 @@ const Item = ({
 
         <button
           type="button"
+          aria-label={t(
+            isFavourite ? "remove_from_favorites" : "add_to_favorites",
+          )}
           disabled={disableFavourite}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             onFavourite();
           }}
-          className="hover:text-primary-500 transition-all text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          className="hover:text-primary-500 transition-colors text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isFavourite ? <StarFilledIcon /> : <StarIcon />}
         </button>
@@ -165,150 +169,42 @@ export default function ValueSetSearchContent({
   onSearchChange,
   placeholder,
   title,
+  inputRef,
 }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
-  const [itemToRemove, setItemToRemove] = useState<CodeConceptMinimal | null>(
-    null,
-  );
-  const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
   // Outside a facility route this is undefined, and the backend falls back to
   // instance-level valuesets.
   const { facilityId } = useCurrentFacilitySilently();
 
-  const pinnedSearchQuery = useQuery({
-    queryKey: ["valueset", pinnedValuesetId, "expand", count, search],
-    queryFn: query.debounced(valueSetApi.expand, {
-      pathParams: { id: pinnedValuesetId ?? "" },
-      body: {
-        count,
-        search: search + searchPostFix,
-      },
-    }),
-    enabled: !!pinnedValuesetId,
-  });
-
-  const slugSearchQuery = useQuery({
-    queryKey: ["valueset", system, facilityId, "expand_slug", count, search],
-    queryFn: query.debounced(valueSetApi.expandSlug, {
-      body: {
-        slug: system,
-        facility: facilityId,
-        count,
-        search: search + searchPostFix,
-      },
-    }),
-    enabled: !pinnedValuesetId && !!system,
-  });
-
-  const searchQuery = pinnedValuesetId ? pinnedSearchQuery : slugSearchQuery;
-
-  // The slug -> valueset mapping does not vary with the search term, so it is
-  // resolved on its own key. Deriving it from slugSearchQuery would drop it on
-  // every keystroke, and the write endpoints are still id-keyed.
-  const resolveQuery = useQuery({
-    queryKey: ["valueset", "resolve", system, facilityId],
-    queryFn: query(valueSetApi.expandSlug, {
-      body: { slug: system, facility: facilityId, search: "", count: 1 },
-      silent: true,
-    }),
-    enabled: !pinnedValuesetId && !!system,
-    staleTime: Infinity,
-  });
-
-  const valuesetId = pinnedValuesetId ?? resolveQuery.data?.valueset.id;
-
-  // Keyed by whichever identifier addressed the read, so a pinned picker and a
-  // slug picker of the same valueset hold separate entries.
-  const favouritesKey = [
-    "valueset",
-    pinnedValuesetId ?? system,
+  const { searchQuery, resolveQuery, valuesetId } = useValueSetSearchResults({
+    system,
+    pinnedValuesetId,
     facilityId,
-    "favourites",
-  ];
-  const recentsKey = [
-    "valueset",
-    pinnedValuesetId ?? system,
+    count,
+    search,
+    searchPostFix,
+  });
+
+  const {
+    favouritesQuery,
+    recentsQuery,
+    addFavouriteMutation,
+    removeFavouriteMutation,
+    clearFavouritesMutation,
+    addRecentMutation,
+    canMutatePreferences,
+    itemToRemove,
+    setItemToRemove,
+    showBulkClearConfirm,
+    setShowBulkClearConfirm,
+  } = useValueSetPreferences({
+    system,
+    pinnedValuesetId,
     facilityId,
-    "recents",
-  ];
-
-  const favouritesQuery = useQuery({
-    queryKey: favouritesKey,
-    queryFn: pinnedValuesetId
-      ? query(valueSetApi.favourites, {
-          pathParams: { id: pinnedValuesetId },
-        })
-      : query(valueSetApi.favouritesBySlug, {
-          queryParams: { slug: system, facility: facilityId },
-          // An unresolvable slug already surfaces through the search request.
-          silent: true,
-        }),
-    enabled: !!pinnedValuesetId || !!system,
+    valuesetId,
   });
-
-  const addFavouriteMutation = useMutation({
-    mutationFn: mutate(valueSetApi.addFavourite, {
-      pathParams: { id: valuesetId ?? "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favouritesKey });
-    },
-  });
-
-  const removeFavouriteMutation = useMutation({
-    mutationFn: mutate(valueSetApi.removeFavourite, {
-      pathParams: { id: valuesetId ?? "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favouritesKey });
-      setItemToRemove(null);
-    },
-    onError: () => {
-      setItemToRemove(null);
-    },
-  });
-
-  const clearFavouritesMutation = useMutation({
-    mutationFn: mutate(valueSetApi.clearFavourites, {
-      pathParams: { id: valuesetId ?? "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: favouritesKey });
-      setShowBulkClearConfirm(false);
-    },
-    onError: () => {
-      setShowBulkClearConfirm(false);
-    },
-  });
-
-  const recentsQuery = useQuery({
-    queryKey: recentsKey,
-    queryFn: pinnedValuesetId
-      ? query(valueSetApi.recentViews, {
-          pathParams: { id: pinnedValuesetId },
-        })
-      : query(valueSetApi.recentViewsBySlug, {
-          queryParams: { slug: system, facility: facilityId },
-          silent: true,
-        }),
-    enabled: !!pinnedValuesetId || !!system,
-  });
-
-  const addRecentMutation = useMutation({
-    mutationFn: mutate(valueSetApi.addRecentView, {
-      pathParams: { id: valuesetId ?? "" },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: recentsKey });
-    },
-  });
-
-  // The starred column renders before the slug resolves, so every id-keyed
-  // write has to be held back until there is an id to address.
-  const canMutatePreferences = !!valuesetId;
 
   const seenCodes = new Set<string>();
   const searchResults = searchQuery.data?.results || [];
@@ -330,6 +226,24 @@ export default function ValueSetSearchContent({
   const favourites = favouritesQuery.data?.filter((favourite) =>
     favourite.display?.toLowerCase().includes(searchLower),
   );
+
+  const favouriteCodes = new Set(favouritesQuery.data?.map(({ code }) => code));
+  const handleFavourite = (option: CodeConceptMinimal) => {
+    if (!canMutatePreferences) return;
+    if (favouriteCodes.has(option.code)) setItemToRemove(option);
+    else addFavouriteMutation.mutate(option);
+  };
+  const handleSelect = (option: CodeConceptMinimal, matchSearch: boolean) => {
+    const display = matchSearch
+      ? getBestMatchDisplay(option, search).primary
+      : option.display;
+    onSelect({
+      code: option.code,
+      display: display || option.display || "",
+      system: option.system || "",
+    });
+    if (canMutatePreferences) addRecentMutation.mutate(option);
+  };
 
   return (
     <Command filter={() => 1}>
@@ -354,6 +268,7 @@ export default function ValueSetSearchContent({
       </div>
       <div className="border-b border-gray-200">
         <CommandInput
+          ref={inputRef}
           placeholder={placeholder}
           className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
           onValueChange={onSearchChange}
@@ -396,33 +311,10 @@ export default function ValueSetSearchContent({
                     option={option}
                     showCode={showCode}
                     search={search}
-                    onSelect={() => {
-                      const { primary } = getBestMatchDisplay(option, search);
-                      onSelect({
-                        code: option.code,
-                        display: primary || option.display || "",
-                        system: option.system || "",
-                      });
-                      if (canMutatePreferences) {
-                        addRecentMutation.mutate(option);
-                      }
-                    }}
+                    onSelect={() => handleSelect(option, true)}
                     disableFavourite={!canMutatePreferences}
-                    onFavourite={() => {
-                      const isFavorited = favouritesQuery.data?.find(
-                        (favourite) => favourite.code === option.code,
-                      );
-                      if (isFavorited) {
-                        setItemToRemove(option);
-                      } else {
-                        addFavouriteMutation.mutate(option);
-                      }
-                    }}
-                    isFavourite={
-                      !!favouritesQuery.data?.find(
-                        (favourite) => favourite.code === option.code,
-                      )
-                    }
+                    onFavourite={() => handleFavourite(option)}
+                    isFavourite={favouriteCodes.has(option.code)}
                   />
                 ))}
               </CommandGroup>
@@ -472,32 +364,10 @@ export default function ValueSetSearchContent({
                   option={option}
                   showCode={showCode}
                   search={search}
-                  onSelect={() => {
-                    onSelect({
-                      code: option.code,
-                      display: option.display || "",
-                      system: option.system || "",
-                    });
-                    if (canMutatePreferences) {
-                      addRecentMutation.mutate(option);
-                    }
-                  }}
+                  onSelect={() => handleSelect(option, false)}
                   disableFavourite={!canMutatePreferences}
-                  onFavourite={() => {
-                    const isFavorited = favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    );
-                    if (isFavorited) {
-                      setItemToRemove(option);
-                    } else {
-                      addFavouriteMutation.mutate(option);
-                    }
-                  }}
-                  isFavourite={
-                    !!favouritesQuery.data?.find(
-                      (favourite) => favourite.code === option.code,
-                    )
-                  }
+                  onFavourite={() => handleFavourite(option)}
+                  isFavourite={favouriteCodes.has(option.code)}
                 />
               ))}
             </CommandGroup>

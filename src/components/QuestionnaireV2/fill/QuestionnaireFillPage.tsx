@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Plus } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,32 +7,16 @@ import { Button } from "@/components/ui/button";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 
-import {
-  formSubmissionKeys,
-  questionnaireKeys,
-} from "@/components/QuestionnaireV2/queryKeys";
-
-import useAuthUser from "@/hooks/useAuthUser";
-
-import query from "@/Utils/request/query";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import patientApi from "@/types/emr/patient/patientApi";
-import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
-import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
-import { sweepExpiredFillDrafts } from "./draft/fillDraftCache";
-import { fillDraftScopeKey } from "./draft/fillDraftCore";
-import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
-import { loadFillDraft } from "./draft/fillDraftStore";
-import type { ServerDraftState } from "./draft/serverDraft";
-import { parseServerDraft } from "./draft/serverDraft";
 import type { FillSubject } from "./subject";
-import { exitTargetOf, isPatientBound, subjectKeyOf } from "./subject";
+import { exitTargetOf, isPatientBound } from "./subject";
+
+import { useFillPageDrafts } from "./useFillPageDrafts";
+import { useFillPageQueries } from "./useFillPageQueries";
 
 interface FillPageProps {
   /** What this fill is FOR — the union carries exactly the ids the
@@ -72,114 +54,39 @@ export function QuestionnaireFillPage({
       toDischarge,
     },
   ] = useQueryParams();
-  const user = useAuthUser();
-
   const patientBound = isPatientBound(subject) ? subject : undefined;
   // Server drafts are patient/encounter records — a resource subject can
   // only have local drafts, so the query param is ignored there.
   const continueDraftId = patientBound ? continueDraftParam : undefined;
   const resumeLocalDraft = resumeLocalDraftParam === "true" && !continueDraftId;
 
-  useEffect(() => {
-    sweepExpiredFillDrafts();
-  }, []);
-
-  const fixedQuestionnaire = questionnaireId
-    ? FIXED_QUESTIONNAIRES[questionnaireId]
-    : undefined;
-
   const {
-    data: fetchedQuestionnaire,
-    isLoading: isQuestionnaireLoading,
-    isError: isQuestionnaireError,
-  } = useQuery({
-    queryKey: questionnaireKeys.detail(questionnaireId ?? ""),
-    queryFn: query(questionnaireApi.get, {
-      pathParams: { id: questionnaireId ?? "" },
-    }),
-    enabled: !!questionnaireId && !fixedQuestionnaire,
-  });
-
-  const encounterId =
-    subject.type === "encounter" ? subject.encounterId : undefined;
-  const {
-    data: encounter,
-    isLoading: isEncounterLoading,
-    isError: isEncounterError,
-  } = useQuery({
-    queryKey: ["encounter", encounterId],
-    queryFn: query(encounterApi.get, {
-      pathParams: { id: encounterId ?? "" },
-      queryParams: {
-        facility: subject.type === "encounter" ? subject.facilityId : "",
-      },
-    }),
-    enabled: !!encounterId,
-  });
-
-  // Patient-subject fills have no encounter to borrow the patient from;
-  // resource subjects have no patient at all.
-  const { data: fetchedPatient, isError: isPatientError } = useQuery({
-    queryKey: ["patient", patientBound?.patientId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientBound?.patientId ?? "" },
-    }),
-    enabled: subject.type === "patient",
-  });
-
-  const {
-    data: serverDraft,
-    // isLoading, NOT isFetching: a background refetch (window focus, cache
-    // invalidation) flips isFetching while data is still present, and the
-    // skeleton branch below would unmount the whole session — every form
-    // store and every answer typed since resume — mid-edit.
-    isLoading: isServerDraftLoading,
-    isError: isServerDraftError,
-  } = useQuery({
-    queryKey: formSubmissionKeys.detail(continueDraftId),
-    queryFn: query(formSubmissionApi.get, {
-      pathParams: { external_id: continueDraftId ?? "" },
-    }),
-    enabled: !!continueDraftId,
-  });
-
-  const questionnaire = fixedQuestionnaire ?? fetchedQuestionnaire;
-  const patient = encounter?.patient ?? fetchedPatient;
-
-  // Server draft (continue_draft) supersedes any local draft.
-  const serverDraftState = useMemo<ServerDraftState | undefined>(
-    () =>
-      continueDraftId && serverDraft && questionnaire
-        ? parseServerDraft(serverDraft, questionnaire)
-        : undefined,
-    [continueDraftId, serverDraft, questionnaire],
-  );
-
-  // These query parameters change the record or workflow a widget edits,
-  // even when the encounter and questionnaire remain the same.
-  const contextParams = new URLSearchParams();
-  if (prescription) contextParams.set("prescription", prescription);
-  if (toDischarge === "true") contextParams.set("toDischarge", "true");
-  const contextKey = contextParams.toString() || undefined;
-  const scope: FillDraftScope | undefined = questionnaire
-    ? {
-        userId: user.id,
-        subjectKey: subjectKeyOf(subject),
-        entryQuestionnaireId: questionnaire.id,
-        contextKey,
-      }
-    : undefined;
-
-  // Load once per user, subject, questionnaire and editing context.
-  // Autosave writes do not change these dependencies.
-  const scopeKey = scope ? fillDraftScopeKey(scope) : undefined;
-  const localDraft = useMemo<LoadedFillDraft | undefined>(
-    () =>
-      scopeKey && scope && questionnaire && !continueDraftId
-        ? loadFillDraft(scope, questionnaire.questions)
-        : undefined,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [scopeKey, continueDraftId, resumeLocalDraft],
+    questionnaire,
+    patient,
+    encounter,
+    encounterId,
+    serverDraft,
+    isQuestionnaireLoading,
+    isQuestionnaireError,
+    isEncounterLoading,
+    isEncounterError,
+    isPatientError,
+    isServerDraftLoading,
+    isServerDraftError,
+    contextRefreshFailed,
+    isRetryingContext,
+    retryContext,
+  } = useFillPageQueries({ subject, questionnaireId, continueDraftId });
+  const { scope, sessionKey, localDraft, serverDraftState } = useFillPageDrafts(
+    {
+      subject,
+      questionnaire,
+      continueDraftId,
+      serverDraft,
+      resumeLocalDraft,
+      prescription,
+      toDischarge,
+    },
   );
 
   const exitTarget = exitTargetOf(subject);
@@ -201,7 +108,7 @@ export function QuestionnaireFillPage({
               from aria-label. */}
           <QuestionnaireSearch
             subjectType={pickerSubjectType}
-            facilityId={patientBound ? undefined : subject.facilityId}
+            facilityId={subject.facilityId}
             trigger={
               <Button
                 type="button"
@@ -336,7 +243,7 @@ export function QuestionnaireFillPage({
     // under the NEW draft scope, and the next autosave would file one
     // questionnaire's answers under the other's draft key.
     <FillPageBody
-      key={`${scopeKey}--${continueDraftId ?? ""}--${resumeLocalDraft}`}
+      key={sessionKey}
       questionnaire={questionnaire}
       patient={patient}
       encounter={encounter}
@@ -357,6 +264,9 @@ export function QuestionnaireFillPage({
       }
       continueDraftId={continueDraftId}
       exitTarget={exitTarget}
+      contextRefreshFailed={contextRefreshFailed}
+      isRetryingContext={isRetryingContext}
+      onRetryContext={retryContext}
     />
   );
 }

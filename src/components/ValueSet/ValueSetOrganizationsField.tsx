@@ -45,12 +45,13 @@ export function ValueSetOrganizationsField({
     }),
   });
 
-  const { mutate: setFacilityOrganizations } = useMutation({
+  const { mutate: setFacilityOrganizations, isPending } = useMutation({
     mutationFn: mutate(valueSetApi.setFacilityOrganizations, {
       pathParams: { id: valuesetId },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      // Keep editing disabled until the controlled IDs reflect this save.
+      await queryClient.invalidateQueries({
         queryKey: valueSetOrganizationsKey(valuesetId),
       });
       toast.success(t("organizations_updated"));
@@ -72,15 +73,19 @@ export function ValueSetOrganizationsField({
         {t("departments_with_access_hint")}
       </p>
       {canWrite ? (
-        <FacilityOrganizationSelector
-          facilityId={facilityId}
-          value={currentIds}
-          currentOrganizations={current?.results}
-          optional
-          onChange={(ids) =>
-            setFacilityOrganizations({ facility_organizations: ids ?? [] })
-          }
-        />
+        <fieldset disabled={!current || isPending} aria-busy={isPending}>
+          <FacilityOrganizationSelector
+            facilityId={facilityId}
+            value={currentIds}
+            currentOrganizations={current?.results}
+            optional
+            onChange={(ids) => {
+              // Portaled picker controls sit outside the disabled fieldset.
+              if (!current || isPending) return;
+              setFacilityOrganizations({ facility_organizations: ids ?? [] });
+            }}
+          />
+        </fieldset>
       ) : (
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-gray-200 p-1.5">
           {currentIds.length === 0 && (

@@ -1,5 +1,11 @@
+import { faker } from "@faker-js/faker";
 import { type Page, expect } from "@playwright/test";
-import { questionBlock } from "tests/helper/questionnaireV2";
+import { setTimeout as delay } from "node:timers/promises";
+import {
+  adminApiHeaders,
+  apiBaseUrl,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 /**
@@ -9,6 +15,86 @@ import { expectToast } from "tests/helper/ui";
  * renders every question title in the outline sidebar, so bare
  * `getByText(label)` matches twice.
  */
+
+/**
+ * Gives a fill test its own patient and response history. Sharing an
+ * encounter lets concurrent tests change the values shown on Updates;
+ * sharing a patient eventually hits the backend's active-encounter limit.
+ */
+export async function createQuestionnaireEncounter(
+  facilityId: string,
+): Promise<{ patientId: string; encounterId: string }> {
+  const headers = adminApiHeaders();
+  const organizationsResponse = await fetch(
+    `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
+    { headers },
+  );
+  if (!organizationsResponse.ok) {
+    throw new Error(
+      `Failed to fetch questionnaire patient organizations: ${organizationsResponse.status}`,
+    );
+  }
+  const organizations = (await organizationsResponse.json()) as {
+    results: { id: string }[];
+  };
+  const geoOrganization = organizations.results[0]?.id;
+  if (!geoOrganization) {
+    throw new Error("No government organization for questionnaire patient");
+  }
+  const patientBody = JSON.stringify({
+    name: `Questionnaire Test ${faker.string.alphanumeric(12)}`,
+    gender: "male",
+    phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
+    date_of_birth: "1990-01-15",
+    geo_organization: geoOrganization,
+    identifiers: [],
+  });
+  let patientId: string;
+  for (let attempt = 0; ; attempt++) {
+    const patientResponse = await fetch(`${apiBaseUrl()}/api/v1/patient/`, {
+      method: "POST",
+      headers,
+      body: patientBody,
+    });
+    if (patientResponse.ok) {
+      patientId = ((await patientResponse.json()) as { id: string }).id;
+      break;
+    }
+    const error = await patientResponse.text();
+    // The backend serializes patient creation with a global lock. Only
+    // retry its explicit pre-create rejection, never an ambiguous failure.
+    if (
+      attempt >= 4 ||
+      patientResponse.status !== 400 ||
+      !error.includes("Patient creation failed, try again after a while")
+    ) {
+      throw new Error(
+        `Failed to create questionnaire patient: ${patientResponse.status} — ${error}`,
+      );
+    }
+    await delay(250 * (attempt + 1));
+  }
+  const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      patient: patientId,
+      facility: facilityId,
+      status: "in_progress",
+      encounter_class: "amb",
+      period: { start: new Date().toISOString() },
+      priority: "routine",
+      organizations: [],
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Failed to create questionnaire encounter: ${response.status} — ${await response.text()}`,
+    );
+  }
+  const encounterId = ((await response.json()) as { id: string }).id;
+  return { patientId, encounterId };
+}
 
 /**
  * Fills a string (single-line) input field identified by its label.

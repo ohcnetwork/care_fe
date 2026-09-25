@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
 
-import { Question, QuestionType } from "@/types/questionnaire/question";
+import { Question } from "@/types/questionnaire/question";
+
+import { NON_REPEATABLE_TYPES } from "./questionTypeRules";
 
 interface BehaviourSettingsCardProps {
   question: Question;
@@ -44,14 +46,6 @@ const DATA_CAPTURE_FLAGS: readonly BehaviourFlag[] = [
   { key: "collect_performer", label: "collect_performer" },
   { key: "collect_method", label: "collect_method" },
   { key: "collect_body_site", label: "collect_body_site" },
-];
-
-/** Types that never offer the Repeats flag. */
-export const NON_REPEATABLE_TYPES: readonly QuestionType[] = [
-  "boolean",
-  "group",
-  "display",
-  "structured",
 ];
 
 export function BehaviourSettingsCard({

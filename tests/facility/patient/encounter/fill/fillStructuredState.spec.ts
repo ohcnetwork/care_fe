@@ -113,7 +113,7 @@ for (const encounterClass of ["amb", "imp"]) {
           json: {
             ...encounter,
             encounter_class: encounterClass,
-            status: "cancelled",
+            status: "discontinued",
             period: { start: "2025-01-01T00:00:00Z", end: periodEnd },
           },
         }),
@@ -136,14 +136,16 @@ for (const encounterClass of ["amb", "imp"]) {
 
     await section
       .getByRole("combobox")
-      .filter({ hasText: "Cancelled" })
+      .filter({ hasText: "Discontinued" })
       .click();
     for (const unavailableStatus of ["Completed", "Unknown", "Discharged"]) {
       await expect(
         page.getByRole("option", { name: unavailableStatus, exact: true }),
       ).toHaveCount(0);
     }
-    await page.getByRole("option", { name: "Cancelled", exact: true }).click();
+    await page
+      .getByRole("option", { name: "Discontinued", exact: true })
+      .click();
 
     const identifier = section.getByPlaceholder("Ip/op/obs/emr number", {
       exact: true,
@@ -168,7 +170,7 @@ for (const encounterClass of ["amb", "imp"]) {
       (request) => request.url === `/api/v1/encounter/${getEncounterId()}/`,
     );
     expect(encounterRequest?.body).toMatchObject({
-      status: "cancelled",
+      status: "discontinued",
       period: { end: periodEnd },
       external_identifier: editedIdentifier,
     });
@@ -365,7 +367,7 @@ test("diagnosis edits survive remount and local draft recovery while fresh serve
   ).toHaveText("Severe");
 });
 
-test("charge rows and quantities survive remount and local draft recovery", async ({
+test("charge rows retain identity on removal and survive remount and local draft recovery", async ({
   page,
 }) => {
   const definition = {
@@ -391,17 +393,35 @@ test("charge rows and quantities survive remount and local draft recovery", asyn
   );
   await openConditionalSection(page, "charge_item");
   const section = questionBlock(page, SECTION_LABEL);
-  await section
-    .getByRole("combobox")
-    .filter({ hasText: /Add charges/ })
-    .click();
-  await page.getByRole("dialog").getByRole("combobox").fill(definition.title);
-  await page
-    .getByRole("option", { name: definition.title, exact: true })
-    .click();
+  const addCharge = async () => {
+    await section
+      .getByRole("combobox")
+      .filter({ hasText: /Add charges/ })
+      .click();
+    await page.getByRole("dialog").getByRole("combobox").fill(definition.title);
+    await page
+      .getByRole("option", { name: definition.title, exact: true })
+      .click();
+  };
+  await addCharge();
   const row = section.getByRole("row", { name: /Draft recovery charge/ });
+  await row.getByRole("spinbutton").fill("2");
+  await addCharge();
+  await expect(row).toHaveCount(2);
+  await row.nth(1).getByRole("spinbutton").fill("3");
+  const retainedInput = await row
+    .nth(1)
+    .getByRole("spinbutton")
+    .elementHandle();
+  await row.first().getByRole("button").last().click();
+  await page.getByRole("menuitem", { name: "Remove", exact: true }).click();
+  await expect(row).toHaveCount(1);
+  // Changing a sibling's position must not remount this row's controls.
+  expect(await retainedInput!.evaluate((input) => input.isConnected)).toBe(
+    true,
+  );
   const quantity = row.getByRole("spinbutton");
-  await quantity.fill("3");
+  await expect(quantity).toHaveValue("3");
   await remountSection(page);
   await expect(quantity).toHaveValue("3");
   await page.reload();

@@ -91,7 +91,11 @@ export function useFillSessionForms({
   const [retainedSnapshots, setRetainedSnapshots] = useState<
     DraftFormSnapshot[]
   >([]);
+  // A picker selection can consume a snapshot while its resume fetch is still
+  // pending. Track that identity so the late fetch cannot restore it again.
+  const pendingRestores = useRef(new Map<string, DraftFormSnapshot>());
   const dropRetainedSnapshot = useCallback((questionnaireId: string) => {
+    pendingRestores.current.delete(questionnaireId);
     setRetainedSnapshots((previous) =>
       previous.filter((entry) => entry.questionnaireId !== questionnaireId),
     );
@@ -112,6 +116,9 @@ export function useFillSessionForms({
    *  failure keeps it retained for a later retry. */
   const onResumeAddedForms = useCallback(
     (snapshots: DraftFormSnapshot[]) => {
+      for (const snapshot of snapshots) {
+        pendingRestores.current.set(snapshot.questionnaireId, snapshot);
+      }
       setRetainedSnapshots((previous) => {
         const seen = new Set(previous.map((entry) => entry.questionnaireId));
         return [
@@ -121,45 +128,51 @@ export function useFillSessionForms({
           ),
         ];
       });
+      const restoreExistingForm = (snapshot: DraftFormSnapshot) => {
+        const existing = formsRef.current.find(
+          (form) => form.key === snapshot.questionnaireId,
+        );
+        if (existing) {
+          if (
+            String(existing.questionnaire.version) !==
+            snapshot.questionnaireVersion
+          ) {
+            dropRetainedSnapshot(snapshot.questionnaireId);
+            toast.warning(
+              t("fill_draft_form_dropped", {
+                title: existing.questionnaire.title,
+              }),
+            );
+            return true;
+          }
+          const store = getStore(existing.key);
+          if (store) {
+            store.set(
+              responsesAtom,
+              preserveExcludedStructured(
+                store.get(responsesAtom),
+                mergeDraftIntoSeed(
+                  existing.questionnaire.questions,
+                  snapshot.responses,
+                ),
+              ),
+            );
+            dropRetainedSnapshot(snapshot.questionnaireId);
+          }
+          return true;
+        }
+        return false;
+      };
       void (async () => {
         for (const snapshot of snapshots) {
-          // Already in the session (the clinician added it by hand before
-          // pressing Resume): apply the snapshot to the live store the
-          // same way the primary form's resume overlay does — dropping it
-          // silently would erase the drafted answers from the stored
-          // draft on the very next persist.
-          const existing = formsRef.current.find(
-            (form) => form.key === snapshot.questionnaireId,
-          );
-          if (existing) {
-            if (
-              String(existing.questionnaire.version) !==
-              snapshot.questionnaireVersion
-            ) {
-              dropRetainedSnapshot(snapshot.questionnaireId);
-              toast.warning(
-                t("fill_draft_form_dropped", {
-                  title: existing.questionnaire.title,
-                }),
-              );
-              continue;
-            }
-            const store = getStore(existing.key);
-            if (store) {
-              store.set(
-                responsesAtom,
-                preserveExcludedStructured(
-                  store.get(responsesAtom),
-                  mergeDraftIntoSeed(
-                    existing.questionnaire.questions,
-                    snapshot.responses,
-                  ),
-                ),
-              );
-            }
-            dropRetainedSnapshot(snapshot.questionnaireId);
+          if (
+            pendingRestores.current.get(snapshot.questionnaireId) !== snapshot
+          ) {
             continue;
           }
+          // The same merge handles forms present before Resume and forms that
+          // appear while an asynchronous fetch is outstanding.
+          if (restoreExistingForm(snapshot)) continue;
           try {
             const fetched = await queryClient.fetchQuery({
               queryKey: questionnaireKeys.detail(snapshot.questionnaireId),
@@ -167,6 +180,12 @@ export function useFillSessionForms({
                 pathParams: { id: snapshot.questionnaireId },
               }),
             });
+            if (
+              pendingRestores.current.get(snapshot.questionnaireId) !== snapshot
+            ) {
+              continue;
+            }
+            if (restoreExistingForm(snapshot)) continue;
             if (String(fetched.version) !== snapshot.questionnaireVersion) {
               dropRetainedSnapshot(snapshot.questionnaireId);
               toast.warning(
@@ -180,6 +199,11 @@ export function useFillSessionForms({
             );
             dropRetainedSnapshot(snapshot.questionnaireId);
           } catch {
+            if (
+              pendingRestores.current.get(snapshot.questionnaireId) !== snapshot
+            ) {
+              continue;
+            }
             // Treat fetch failures as transient: keep the snapshot in the stored
             // draft so the next persist cannot erase it. The stored title is
             // the best available label; fall back to the id when absent.

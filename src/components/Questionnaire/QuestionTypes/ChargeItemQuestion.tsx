@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, MoreVertical, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
@@ -28,6 +29,12 @@ import {
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
+
+import {
+  EMPTY_ROW_KEYS,
+  dropRowKey,
+  growRowKeys,
+} from "@/components/QuestionnaireV2/form/engine/rowKeys";
 
 import query from "@/Utils/request/query";
 
@@ -219,6 +226,12 @@ export function ChargeItemQuestion({
   const chargeItems =
     (questionnaireResponse.values?.[0]?.value as
       ApplyChargeItemDefinitionRequestWithObject[] | undefined) ?? [];
+  // Duplicate definitions are valid; each row keeps its own identity on removal.
+  const [rowKeys, setRowKeys] = useState(() =>
+    growRowKeys(EMPTY_ROW_KEYS, chargeItems.length),
+  );
+  const currentRowKeys = growRowKeys(rowKeys, chargeItems.length);
+  if (currentRowKeys !== rowKeys) setRowKeys(currentRowKeys);
 
   const updateChargeItems = (
     items: ApplyChargeItemDefinitionRequestWithObject[],
@@ -242,6 +255,7 @@ export function ChargeItemQuestion({
   };
 
   const handleRemoveChargeItem = (index: number) => {
+    setRowKeys((previous) => dropRowKey(previous, chargeItems.length, index));
     updateChargeItems(chargeItems.filter((_, i) => i !== index));
   };
 
@@ -272,7 +286,7 @@ export function ChargeItemQuestion({
           <TableBody>
             {chargeItems.map((chargeItem, index) => (
               <ChargeItemForm
-                key={`${chargeItem.charge_item_definition}-${index}`}
+                key={currentRowKeys.keys[index]}
                 chargeItem={chargeItem}
                 onUpdate={(updates) => handleUpdateChargeItem(index, updates)}
                 onRemove={() => handleRemoveChargeItem(index)}

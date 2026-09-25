@@ -7,7 +7,7 @@ import {
 
 export interface BatchRequestError {
   question_id?: string;
-  msg?: string;
+  msg?: string | BatchRequestError;
   error?: string;
   type?: string;
   loc?: string[];

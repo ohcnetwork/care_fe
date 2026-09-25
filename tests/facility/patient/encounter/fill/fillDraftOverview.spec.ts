@@ -440,7 +440,7 @@ test("discard confirms and removes only the selected local or server draft", asy
   await localRow.getByRole("button", { name: /^Discard / }).click();
   await page
     .getByRole("alertdialog")
-    .getByRole("button", { name: "Discard", exact: true })
+    .getByRole("button", { name: /^Discard\b/ })
     .click();
   await expect(localRow).toHaveCount(0);
   expect(
@@ -463,7 +463,7 @@ test("discard confirms and removes only the selected local or server draft", asy
   await serverRow.getByRole("button", { name: /^Discard / }).click();
   await page
     .getByRole("alertdialog")
-    .getByRole("button", { name: "Discard", exact: true })
+    .getByRole("button", { name: /^Discard\b/ })
     .click();
   await expect(serverRow).toHaveCount(0);
   expect(fixture.updates).toEqual([

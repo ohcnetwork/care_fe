@@ -10,7 +10,13 @@
  * against the schema and re-checks the scope before any `run` below is
  * reached.
  */
-import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { z } from "zod";
 
 import type {
@@ -27,10 +33,10 @@ import {
   useRegisterAction,
 } from "@/lib/actions";
 
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 import {
   buildLinkIndex,
   clearQuestionErrorsInState,
-  entryHasContent,
   isQuestionEnabledInState,
   responsesAtom,
   structuredRenderFailedAtom,
@@ -451,10 +457,14 @@ interface FormQuestionSummary {
   text: string;
   type: string;
   structured_type?: string;
-  /** Existing rows let agents preserve record ids when replacing a section. */
+  /** Current answers, including record ids for structured row updates. */
   values?: unknown[];
   required: boolean;
   options?: string[];
+  /** True for a choice question that accepts more than one selection
+   *  (`Question.repeats`) — the answer is written as a `values` array in
+   *  one `questionnaire.response.set` call, never one call per option. */
+  repeats?: boolean;
   answered: boolean;
   /** False while the question's (or an ancestor's) enable_when conditions
    *  are unmet — it is not on the clinician's canvas and a write to it
@@ -465,6 +475,7 @@ interface FormQuestionSummary {
   /** False when an ancestor group's own conditions are unmet — no amount
    *  of re-evaluating this question's own conditions can fix that. */
   ancestors_enabled: boolean;
+  /** The question's helper text, stored as `Question.description`. */
   description?: string;
 }
 
@@ -517,7 +528,8 @@ export function listFormsSummary(
                   }),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
-              answered: !!responses[question.id]?.values.some(entryHasContent),
+              ...(question.repeats ? { repeats: true } : {}),
+              answered: !!responses[question.id]?.values?.some(entryIsAnswered),
               enabled,
               ...(question.enable_when?.length
                 ? {
@@ -564,7 +576,9 @@ export function useFillActions({
   // Registered actions can outlive the render that supplied them. Check
   // the live save state when an asynchronous Scribe result reaches us.
   const frozenRef = useRef(frozen);
-  frozenRef.current = frozen;
+  useLayoutEffect(() => {
+    frozenRef.current = frozen;
+  }, [frozen]);
   const patientId = isPatientBound(subject) ? subject.patientId : undefined;
   const encounterId =
     subject.type === "encounter" ? subject.encounterId : undefined;
@@ -582,7 +596,7 @@ export function useFillActions({
       return {
         id: "questionnaire.response.set",
         description:
-          "Replace a question's answers in the open questionnaire session, addressed by link_id. Structured questions accept request objects, one per row; include existing rows and their ids when updating. File uploads are not supported.",
+          "Set a question's answers in the open questionnaire session, addressed by link_id. Diagnosis, symptom, and allergy_intolerance rows are added or updated by id (or code when no id is supplied), preserving omitted rows and saved ids. Send only complete new or changed rows; only those rows are validated. Other answers are replaced. File uploads are not supported.",
         parameters: {
           questionnaire_id: {
             type: "string",
@@ -596,7 +610,7 @@ export function useFillActions({
           values: {
             type: "array of string|number|boolean|object",
             description:
-              "One scalar per repeat, or one request object per structured row (time_of_death uses ISO datetime strings). Date: YYYY-MM-DD; dateTime: YYYY-MM-DDTHH:mm[:ss] with optional timezone; time: HH:mm[:ss]. Empty array clears the answer.",
+              "One scalar per repeat, or one request object per structured row (time_of_death uses ISO datetime strings). Date: YYYY-MM-DD; dateTime: YYYY-MM-DDTHH:mm[:ss] with optional timezone; time: HH:mm[:ss]. An empty array leaves diagnosis, symptom, and allergy_intolerance rows unchanged; it clears other answers.",
             required: true,
           },
           note: {
@@ -625,7 +639,7 @@ export function useFillActions({
       return {
         id: "questionnaire.forms.list",
         description:
-          "List the questionnaires open in this fill session and their questions, with each question's link id, type, options, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids, to preserve when replacing answers. A question gated by enable_when also includes its own conditions and ancestors_enabled, so a dependent question can be answered in the same turn as its trigger.",
+          "List the questionnaires open in this fill session and their questions, with each question's link id, description, type, options, current values, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids for updates. A question gated by enable_when also includes its own conditions, enable_behavior, and ancestors_enabled, so a dependent question can be answered in the same turn as its trigger.",
         parameters: {},
         schema: listFormsSchema,
         scope,

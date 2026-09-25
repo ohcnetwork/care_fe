@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Eye, Pencil, PlusIcon, Search } from "lucide-react";
-// Module-level `navigate` and `basePath="/"` on Link: inside the nested
-// facility-settings router, raviger's `useNavigate()` and `<Link>` prepend
-// that router's base path to absolute URLs, which would double the path.
-import { Link, navigate } from "raviger";
+import { PlusIcon, Search } from "lucide-react";
+// `basePath="/"` keeps absolute links independent of the nested facility router.
+import { Link } from "raviger";
 import { ReactNode, useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -55,7 +53,7 @@ import query from "@/Utils/request/query";
 import { valuesOf } from "@/Utils/utils";
 
 import { useCanWriteValueSet } from "./useCanWriteValueSet";
-import { ValueSetPreview } from "./ValueSetPreview";
+import { ValueSetListActions } from "./ValueSetListActions";
 
 /** Inside a facility the list can show the facility's own sets or the
  *  instance sets it may customize. */
@@ -249,59 +247,6 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
 
   const valuesets = response?.results || [];
 
-  const renderActions = (valueset: ValueSetRead) => {
-    if (source === "instance" && scope.authContext === "facility") {
-      // Instance sets are not editable from a facility (the backend
-      // reserves them for superusers) — inspect, or customize a copy.
-      return (
-        <>
-          <ValueSetPreview
-            valueset={valueset}
-            trigger={
-              <Button variant="outline" size="sm">
-                <Eye className="size-4 mr-0" />
-                {t("preview")}
-              </Button>
-            }
-          />
-          {canWrite && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(`${scope.basePath}/create?parent=${valueset.id}`)
-              }
-            >
-              <Copy className="size-4 mr-0" />
-              {t("customize")}
-            </Button>
-          )}
-        </>
-      );
-    }
-    const readOnly = !canWrite;
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate(`${scope.basePath}/${valueset.id}/edit`)}
-        className="hover:bg-primary-50"
-      >
-        {readOnly ? (
-          <>
-            <Eye className="size-4 mr-0" />
-            {t("view")}
-          </>
-        ) : (
-          <>
-            <Pencil className="size-4 mr-0" />
-            {t("edit")}
-          </>
-        )}
-      </Button>
-    );
-  };
-
   const rowsProps: RowsProps = {
     valuesets,
     isLoading,
@@ -309,7 +254,14 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
       source === "facility" && canWrite
         ? t("no_facility_valuesets")
         : t("adjust_valueset_filters"),
-    renderActions,
+    renderActions: (valueset) => (
+      <ValueSetListActions
+        valueset={valueset}
+        scope={scope}
+        isSharedCatalogue={source === "instance"}
+        canWrite={canWrite}
+      />
+    ),
   };
 
   return (

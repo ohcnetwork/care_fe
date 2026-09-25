@@ -19,6 +19,21 @@ export const ACTION_CONFIGURATION_CONTEXTS = [
 export type ActionConfigurationContext =
   (typeof ACTION_CONFIGURATION_CONTEXTS)[number];
 
+/** Standalone triggers implemented for this release. Patient context
+ * fields used by appointments/questionnaires are independent of this list. */
+export const SUPPORTED_ACTION_CONFIGURATION_CONTEXTS = ["APPOINTMENT"] as const;
+
+export type SupportedActionConfigurationContext =
+  (typeof SUPPORTED_ACTION_CONFIGURATION_CONTEXTS)[number];
+
+export function isSupportedActionConfigurationContext(
+  context: string,
+): context is SupportedActionConfigurationContext {
+  return SUPPORTED_ACTION_CONFIGURATION_CONTEXTS.some(
+    (supported) => supported === context,
+  );
+}
+
 /** The registry context type each option evaluates under — what its
  *  conditions and instructions resolve against (`ACTION_CONTEXT_CLASS` on
  *  the viewsets). PATIENT is declared but no endpoint runs it yet. */
@@ -56,7 +71,7 @@ export interface ActionConfigurationRetrieve extends ActionConfigurationRead {
  *  creation only; the update spec does not carry them. */
 export interface ActionConfigurationCreate extends ActionConfigurationBase {
   performable: boolean;
-  action_context: ActionConfigurationContext;
+  action_context: SupportedActionConfigurationContext;
   facility?: string | null;
 }
 

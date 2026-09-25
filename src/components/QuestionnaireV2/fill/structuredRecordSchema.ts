@@ -11,6 +11,7 @@ const requester = record.extend({ id: text });
  * remains in each structured definition; display/context fields survive. */
 export const structuredRecordSchemas: Partial<Record<string, z.ZodType>> = {
   allergy_intolerance: record.extend({
+    id: text.optional(),
     code,
     clinical_status: text,
     verification_status: text,

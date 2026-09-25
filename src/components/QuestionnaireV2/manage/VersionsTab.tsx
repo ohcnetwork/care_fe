@@ -22,7 +22,7 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
-import { relativeTime } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 
 interface VersionsTabProps {
   scope: QuestionnaireScope;
@@ -79,14 +79,33 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   );
   const totalRevisions = revisions?.count ?? pastRevisions.length;
 
-  /** `{username} · {relative time}`; a bare username reads as attribution
-   *  ("Last edited by …") while the backend doesn't return modified_date. */
-  const metaLine = (username?: string, date?: string): string => {
-    if (username && date) return `${username} · ${relativeTime(date)}`;
-    if (date) return relativeTime(date);
-    if (username) return t("last_edited_by", { name: username });
-    return "";
-  };
+  const auditDetails = (record: QuestionnaireRead) => (
+    <dl className="mt-2 space-y-1 text-sm text-gray-500">
+      {record.created_by && (
+        <div>
+          <dt className="inline font-medium">{t("created_by")}: </dt>
+          <dd className="inline">{record.created_by?.username}</dd>
+        </div>
+      )}
+      {(record.updated_by || record.modified_date) && (
+        <div>
+          <dt className="inline font-medium">{t("last_modified_by")}: </dt>
+          <dd className="inline">
+            {record.updated_by?.username}
+            {record.modified_date && (
+              <>
+                {" "}
+                ·{" "}
+                <time dateTime={record.modified_date}>
+                  {formatDateTime(record.modified_date)}
+                </time>
+              </>
+            )}
+          </dd>
+        </div>
+      )}
+    </dl>
+  );
 
   return (
     <div className="max-w-3xl space-y-4">
@@ -115,17 +134,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                       {t(questionnaire.status)}
                     </Badge>
                   </div>
-                  {metaLine(
-                    questionnaire.updated_by?.username,
-                    questionnaire.modified_date,
-                  ) && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      {metaLine(
-                        questionnaire.updated_by?.username,
-                        questionnaire.modified_date,
-                      )}
-                    </p>
-                  )}
+                  {auditDetails(questionnaire)}
                 </div>
                 <div className="flex shrink-0 gap-2">
                   {/* The studio opens read-only without write permission, so
@@ -182,17 +191,7 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                             badge rather than the real historical status. */}
                         <Badge variant="secondary">{t("retired")}</Badge>
                       </div>
-                      {metaLine(
-                        revision.updated_by?.username,
-                        revision.modified_date,
-                      ) && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          {metaLine(
-                            revision.updated_by?.username,
-                            revision.modified_date,
-                          )}
-                        </p>
-                      )}
+                      {auditDetails(revision)}
                     </div>
                     <div className="flex shrink-0 gap-2">
                       {/* Full-page readonly viewer (QuestionnaireRevisionPage)

@@ -184,7 +184,7 @@ describe("structured fill values", () => {
     }
   });
 
-  it("rejects duplicate diagnosis and symptom codes in one write or current values", () => {
+  it("rejects duplicate batch rows and updates matching saved clinical records", () => {
     for (const type of ["diagnosis", "symptom"] as const) {
       assert.equal(
         coerce(type, [clinicalRecord(), clinicalRecord()]).ok,
@@ -192,7 +192,7 @@ describe("structured fill values", () => {
       );
       assert.equal(
         coerce(type, [clinicalRecord()], [clinicalRecord({ id: "saved" })]).ok,
-        false,
+        true,
       );
       assert.equal(
         coerce(
@@ -228,7 +228,7 @@ describe("structured fill values", () => {
     );
   });
 
-  it("retains unsaved rows while adding new rows and accepts repeating the same full replacement", () => {
+  it("accepts repeating existing unsaved rows without adding duplicates", () => {
     for (const type of ["diagnosis", "symptom"] as const) {
       const first = clinicalRecord();
       const second = clinicalRecord({
@@ -242,6 +242,170 @@ describe("structured fill values", () => {
       assert.equal(coerce(type, [first, second], [first]).ok, true);
       assert.equal(coerce(type, [first, second], [first, second]).ok, true);
     }
+  });
+
+  for (const type of ["diagnosis", "symptom", "allergy_intolerance"] as const) {
+    const record = (
+      overrides: Record<string, unknown> = {},
+    ): Record<string, unknown> => ({
+      ...(type === "allergy_intolerance"
+        ? structuredRows.allergy_intolerance
+        : clinicalRecord()),
+      ...overrides,
+    });
+    const rowsOf = (result: ReturnType<typeof coerce>) => {
+      if (!result.ok) assert.fail(result.error);
+      return result.value.value as Record<string, unknown>[];
+    };
+
+    it(`${type}: appends rows while preserving invalid legacy and unsaved rows unchanged`, () => {
+      const legacy = record({
+        id: "legacy",
+        code: { code: "legacy" },
+        note: 123,
+        dirty: false,
+      });
+      const unsaved = record({ code: { ...code, code: "unsaved" } });
+      const incoming = record();
+      let validations = 0;
+      const rows = rowsOf(
+        coerce(type, [incoming], [legacy, unsaved], {
+          validate: (data, questionId, required) => {
+            validations++;
+            assert.equal(data.length, 1);
+            assert.equal(
+              (data[0] as { code: typeof code }).code.code,
+              code.code,
+            );
+            assert.equal(questionId, "question");
+            assert.equal(required, true);
+            return [];
+          },
+        }),
+      );
+      assert.equal(validations, 1);
+      assert.equal(rows.length, 3);
+      assert.equal(rows[0], legacy);
+      assert.equal(rows[1], unsaved);
+      assert.deepEqual(rows[2].code, code);
+    });
+
+    it(`${type}: updates by code or id in place, retaining saved ids and unrelated rows`, () => {
+      const saved = record({ id: "saved" });
+      const unrelated = record({ code: { ...code, code: "unrelated" } });
+      const update = record({ note: "Updated" });
+      const rows = rowsOf(coerce(type, [update], [saved, unrelated]));
+      assert.equal(rows.length, 2);
+      assert.equal(rows[0].id, "saved");
+      assert.equal(rows[0].note, "Updated");
+      assert.equal(rows[1], unrelated);
+      assert.equal(saved.note, undefined);
+
+      const newCode = { ...code, code: "corrected" };
+      const updated = rowsOf(
+        coerce(type, [record({ id: "saved", code: newCode })], rows),
+      );
+      assert.equal(updated.length, 2);
+      assert.equal(updated[0].id, "saved");
+      assert.deepEqual(updated[0].code, newCode);
+      assert.equal(updated[1], unrelated);
+
+      const unsaved = rowsOf(coerce(type, [update], [record(), unrelated]));
+      assert.equal(unsaved.length, 2);
+      assert.equal(unsaved[0].note, "Updated");
+      assert.equal(unsaved[1], unrelated);
+    });
+
+    it(`${type}: leaves rows alone for empty input and validates changed rows`, () => {
+      const saved = record({ id: "saved" });
+      const rows = rowsOf(
+        coerce(type, [], [saved], {
+          validate: () => {
+            assert.fail("No changed rows to validate");
+          },
+        }),
+      );
+      assert.deepEqual(rows, [saved]);
+      assert.equal(rows[0], saved);
+      assert.equal(
+        coerce(type, [record({ id: "saved", code: {} })], [saved]).ok,
+        false,
+      );
+      for (const id of [123, "", null]) {
+        assert.equal(coerce(type, [record({ id })], [saved]).ok, false);
+      }
+      assert.equal(
+        coerce(type, [record({ id: "saved" })], [saved], {
+          validate: () => [
+            { question_id: "question", error: "Invalid update" },
+          ],
+        }).ok,
+        false,
+      );
+    });
+
+    it(`${type}: rejects conflicting ids, repeated ids, and code collisions atomically`, () => {
+      const saved = record({ id: "saved" });
+      const other = record({ id: "other", code: { ...code, code: "other" } });
+      for (const incoming of [
+        [record(), record()],
+        [record({ id: "saved" }), record({ id: "saved", code: other.code })],
+        [record({ id: "new-id" })],
+        [record({ id: "other" })],
+      ]) {
+        const existing = structuredClone([saved, other]);
+        assert.equal(coerce(type, incoming, existing).ok, false);
+        assert.deepEqual(existing, [saved, other]);
+      }
+    });
+
+    it(`${type}: preserves entered-in-error records when adding the same code again`, () => {
+      const saved = record({
+        id: "saved",
+        verification_status: "entered_in_error",
+      });
+      const rows = rowsOf(coerce(type, [record()], [saved]));
+      assert.equal(rows.length, 2);
+      assert.equal(rows[0], saved);
+      assert.equal(rows[1].id, undefined);
+    });
+
+    it(`${type}: updates a saved row to entered-in-error by code idempotently`, () => {
+      const saved = record({ id: "saved" });
+      const update = record({ verification_status: "entered_in_error" });
+      const rows = rowsOf(coerce(type, [update], [saved]));
+      assert.equal(rows.length, 1);
+      assert.equal(rows[0].id, "saved");
+      assert.equal(rows[0].verification_status, "entered_in_error");
+      assert.deepEqual(rowsOf(coerce(type, [update], rows)), rows);
+
+      const historical = record({
+        id: "historical",
+        verification_status: "entered_in_error",
+      });
+      const withHistory = rowsOf(coerce(type, [update], [historical, saved]));
+      assert.equal(withHistory.length, 2);
+      assert.equal(withHistory[0], historical);
+      assert.equal(withHistory[1].id, "saved");
+      assert.equal(withHistory[1].verification_status, "entered_in_error");
+      // Several historical records with the same code require an explicit
+      // id; never guess which to update or append another duplicate.
+      assert.equal(coerce(type, [update], withHistory).ok, false);
+    });
+  }
+
+  it("retains replacement and clearing behavior for other structured types", () => {
+    const old = { ...structuredRows.medication_statement, id: "saved" };
+    const replacement = {
+      ...structuredRows.medication_statement,
+      dosage_text: "Updated",
+    };
+    const result = coerce("medication_statement", [replacement], [old]);
+    assert.equal(result.ok, true);
+    if (result.ok) assert.deepEqual(result.value.value, [replacement]);
+    const cleared = coerce("medication_statement", [], [old]);
+    assert.equal(cleared.ok, true);
+    if (cleared.ok) assert.deepEqual(cleared.value.value, []);
   });
 
   it("uses the proposed status when replacing a saved row marked in error", () => {

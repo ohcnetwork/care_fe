@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { navigate, usePath } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 import {
@@ -183,14 +183,17 @@ export default function AuthUserProvider({
     },
   });
 
-  const patientLogin = (tokenData: TokenData, redirectUrl: string) => {
-    setPatientToken(tokenData);
-    localStorage.setItem(
-      LocalStorageKeys.patientTokenKey,
-      JSON.stringify(tokenData),
-    );
-    navigate(redirectUrl);
-  };
+  const patientLogin = useCallback(
+    (tokenData: TokenData, redirectUrl: string) => {
+      setPatientToken(tokenData);
+      localStorage.setItem(
+        LocalStorageKeys.patientTokenKey,
+        JSON.stringify(tokenData),
+      );
+      navigate(redirectUrl);
+    },
+    [],
+  );
 
   /**
    * End the session and return to the login form. `clearDrafts` separates a
@@ -269,24 +272,37 @@ export default function AuthUserProvider({
     };
   }, [endSessionKeepingDrafts]);
 
+  const contextValue = useMemo(
+    () => ({
+      signIn,
+      signOut,
+      endSessionKeepingDrafts,
+      verifyMFA,
+      isAuthenticating,
+      isVerifyingMFA,
+      user,
+      patientLogin,
+      patientToken,
+    }),
+    [
+      signIn,
+      signOut,
+      endSessionKeepingDrafts,
+      verifyMFA,
+      isAuthenticating,
+      isVerifyingMFA,
+      user,
+      patientLogin,
+      patientToken,
+    ],
+  );
+
   if (isLoading) {
     return <Loading />;
   }
 
   return (
-    <AuthUserContext.Provider
-      value={{
-        signIn,
-        signOut,
-        endSessionKeepingDrafts,
-        verifyMFA,
-        isAuthenticating,
-        isVerifyingMFA,
-        user,
-        patientLogin,
-        patientToken,
-      }}
-    >
+    <AuthUserContext.Provider value={contextValue}>
       {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
     </AuthUserContext.Provider>
   );

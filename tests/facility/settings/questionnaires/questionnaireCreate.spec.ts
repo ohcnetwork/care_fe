@@ -21,6 +21,11 @@ test.describe("Questionnaire v2 create (facility)", () => {
     await test.step("Open create form", async () => {
       await page.getByRole("button", { name: "Create Questionnaire" }).click();
       await page.waitForURL(/\/settings\/questionnaires\/new$/);
+      await expect(
+        page
+          .getByRole("radiogroup", { name: "Status" })
+          .getByRole("radio", { name: "Draft", exact: true }),
+      ).toBeChecked();
     });
 
     await test.step("Fill and submit, picking a non-default subject type", async () => {
@@ -50,6 +55,10 @@ test.describe("Questionnaire v2 create (facility)", () => {
 
     await test.step("List, scoped by search, shows it", async () => {
       await page.goto(`/facility/${facilityId}/settings/questionnaires`);
+      await page
+        .getByRole("radiogroup", { name: "Status" })
+        .getByRole("radio", { name: "Draft" })
+        .click();
       await page.getByPlaceholder("Search Questionnaires").fill(title);
       await expect(page.locator('[data-slot="table-body"]')).toContainText(
         title,

@@ -57,6 +57,7 @@ interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   buttonLabel?: string;
   title?: string;
   disableAPI?: boolean;
+  disabled?: boolean;
 }
 
 interface DateGroupedRecords<T extends BaseRecord> {
@@ -166,6 +167,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   buttonLabel,
   title,
   disableAPI = false,
+  disabled = false,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -207,7 +209,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         count: response.count,
       };
     },
-    enabled: isOpen && !disableAPI,
+    enabled: isOpen && !disableAPI && !disabled,
     staleTime: 0,
   });
 
@@ -292,6 +294,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   }, [state.currentOffset, activeType, updateState]);
 
   const handleAddSelected = useCallback(() => {
+    if (disabled) return;
     onAddSelected(state.selectedRecords[activeType] || []);
     updateState({
       selectedRecords: {
@@ -303,6 +306,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
     setActiveType(structuredTypes[0]?.type || "");
     resetState();
   }, [
+    disabled,
     state.selectedRecords,
     activeType,
     onAddSelected,
@@ -352,9 +356,18 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   );
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen && !disabled}
+      onOpenChange={(open) => {
+        if (!open || !disabled) setIsOpen(open);
+      }}
+    >
       <SheetTrigger asChild>
-        <Button variant="outline" className="h-8 rounded-md px-3 text-xs gap-2">
+        <Button
+          variant="outline"
+          className="h-8 rounded-md px-3 text-xs gap-2"
+          disabled={disabled}
+        >
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}
@@ -537,6 +550,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               <Button
                 onClick={handleAddSelected}
                 disabled={
+                  disabled ||
                   (state.selectedRecords[activeType] || []).length === 0
                 }
                 className="bg-emerald-600 hover:bg-emerald-700"

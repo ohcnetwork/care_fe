@@ -1,4 +1,5 @@
 import { t } from "i18next";
+import { createElement } from "react";
 import { toast } from "sonner";
 
 import type { ActionOutcome } from "@/types/questionnaire/actions";
@@ -29,10 +30,25 @@ export function presentActionOutcomes(outcomes: ActionOutcome[]) {
   if (readable.length === 0) return;
   if (readable.length > ACTION_TOASTS_BEFORE_SUMMARY) {
     toast.message(t("questionnaire_actions_ran", { count: readable.length }), {
-      description: readable
-        .slice(0, 5)
-        .map((entry) => `${entry.title}: ${entry.message}`)
-        .join("\n"),
+      description: createElement(
+        "ul",
+        { className: "mt-2 max-h-64 space-y-2 overflow-y-auto pr-2" },
+        readable.map((entry, index) =>
+          createElement(
+            "li",
+            {
+              key: index,
+              className: "border-b border-current/10 pb-2 last:border-0",
+            },
+            createElement("p", { className: "font-medium" }, entry.title),
+            createElement(
+              "p",
+              { className: "whitespace-pre-wrap" },
+              entry.message,
+            ),
+          ),
+        ),
+      ),
       duration: ACTION_TOAST_DURATION,
     });
     return;

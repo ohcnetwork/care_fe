@@ -1,23 +1,10 @@
-import {
-  ChevronDown,
-  ChevronUp,
-  MoreVertical,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,6 +23,8 @@ import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useVal
 import { ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { AnswerOption, Question } from "@/types/questionnaire/question";
+
+import { useEditorRowKeys } from "./useEditorRowKeys";
 
 interface AnswerOptionsEditorProps {
   question: Question;
@@ -134,6 +123,11 @@ export function AnswerOptionsEditor({
     questionId: string;
     mode: Mode;
   } | null>(null);
+  const options = question.answer_option ?? [];
+  const { rowKeys, removeRowKey, moveRowKey } = useEditorRowKeys(
+    question.id,
+    options.length,
+  );
 
   if (question.type === "quantity") {
     return (
@@ -152,7 +146,6 @@ export function AnswerOptionsEditor({
   const derivedMode: Mode = question.answer_value_set ? "valueset" : "custom";
   const mode: Mode =
     modeOverride?.questionId === question.id ? modeOverride.mode : derivedMode;
-  const options = question.answer_option ?? [];
 
   const handleModeChange = (next: Mode) => {
     if (next === mode) return;
@@ -197,12 +190,14 @@ export function AnswerOptionsEditor({
   };
 
   const handleDeleteOption = (index: number) => {
+    removeRowKey(index);
     updateOptions(options.filter((_, i) => i !== index));
   };
 
   const handleMoveOption = (index: number, direction: -1 | 1) => {
     const target = index + direction;
     if (target < 0 || target >= options.length) return;
+    moveRowKey(index, target);
     const next = [...options];
     [next[index], next[target]] = [next[target], next[index]];
     updateOptions(next);
@@ -238,7 +233,7 @@ export function AnswerOptionsEditor({
 
       {mode === "custom" ? (
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h5 className="text-sm font-medium text-gray-900">
               {t("set_custom_options")}
             </h5>
@@ -254,22 +249,20 @@ export function AnswerOptionsEditor({
             </Button>
           </div>
           <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
-            <Table>
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">#</TableHead>
                   <TableHead>{t("option_value")}</TableHead>
-                  <TableHead className="w-40">{t("default")}</TableHead>
-                  <TableHead className="w-24">{t("action")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {options.map((option, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={rowKeys[index]}>
                     <TableCell className="text-sm text-gray-500">
                       {index + 1}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-0 whitespace-normal">
                       <Input
                         value={option.value}
                         placeholder={t("option_value")}
@@ -277,77 +270,63 @@ export function AnswerOptionsEditor({
                           handleOptionChange(index, { value: e.target.value })
                         }
                       />
-                    </TableCell>
-                    <TableCell>
-                      <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked={!!option.initial_selected}
-                          aria-label={t("default")}
-                          onClick={() => handleSetDefault(index)}
-                          className={cn(
-                            "flex size-4 shrink-0 items-center justify-center rounded-full border",
-                            option.initial_selected
-                              ? "border-primary-700"
-                              : "border-gray-300",
-                          )}
-                        >
-                          {option.initial_selected && (
-                            <span className="size-2 rounded-full bg-primary-700" />
-                          )}
-                        </button>
-                        {option.initial_selected
-                          ? t("default")
-                          : t("set_as_default")}
-                      </label>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-0.5">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-6"
-                          disabled={index === 0}
-                          onClick={() => handleMoveOption(index, -1)}
-                          aria-label={t("move_up")}
-                        >
-                          <ChevronUp className="size-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-6"
-                          disabled={index === options.length - 1}
-                          onClick={() => handleMoveOption(index, 1)}
-                          aria-label={t("move_down")}
-                        >
-                          <ChevronDown className="size-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="size-6"
-                              aria-label={t("more_options")}
-                            >
-                              <MoreVertical className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => handleDeleteOption(index)}
-                            >
-                              <Trash2 className="size-4" />
-                              {t("delete")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                          <button
+                            type="button"
+                            role="radio"
+                            aria-checked={!!option.initial_selected}
+                            aria-label={t("default")}
+                            onClick={() => handleSetDefault(index)}
+                            className={cn(
+                              "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                              option.initial_selected
+                                ? "border-primary-700"
+                                : "border-gray-300",
+                            )}
+                          >
+                            {option.initial_selected && (
+                              <span className="size-2 rounded-full bg-primary-700" />
+                            )}
+                          </button>
+                          {option.initial_selected
+                            ? t("default")
+                            : t("set_as_default")}
+                        </label>
+                        <div className="flex shrink-0 items-center gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-6"
+                            disabled={index === 0}
+                            onClick={() => handleMoveOption(index, -1)}
+                            aria-label={t("move_up")}
+                          >
+                            <ChevronUp className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-6"
+                            disabled={index === options.length - 1}
+                            onClick={() => handleMoveOption(index, 1)}
+                            aria-label={t("move_down")}
+                          >
+                            <ChevronDown className="size-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-6 text-red-600"
+                            aria-label={t("delete")}
+                            onClick={() => handleDeleteOption(index)}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
                       </div>
                     </TableCell>
                   </TableRow>

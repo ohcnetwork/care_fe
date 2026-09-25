@@ -146,7 +146,9 @@ test.describe("Admin action configurations", () => {
       await page
         .getByRole("option", { name: "Greater Than", exact: true })
         .click();
-      await page.getByRole("textbox", { name: "Condition 1 Value" }).fill("60");
+      await page
+        .getByRole("spinbutton", { name: "Condition 1 Value" })
+        .fill("60");
 
       // Adding the action preseeded the one registered instruction
       // ("Log a message"), already selected — only its message needs filling.

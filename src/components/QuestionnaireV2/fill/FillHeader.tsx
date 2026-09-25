@@ -14,6 +14,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, formatTruncatedList } from "@/Utils/utils";
+import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
@@ -39,6 +40,8 @@ interface FillHeaderProps {
    *  `draft/useSaveServerDraft`); absent → the affordance is not offered. */
   onSaveDraft?: () => void;
   isSavingDraft?: boolean;
+  /** Cached context remains visible after a failed refresh, but cannot be saved. */
+  saveDisabled?: boolean;
 }
 
 /**
@@ -57,6 +60,7 @@ export function FillHeader({
   isSubmitting,
   onSaveDraft,
   isSavingDraft = false,
+  saveDisabled = false,
 }: FillHeaderProps) {
   const { t } = useTranslation();
 
@@ -79,7 +83,7 @@ export function FillHeader({
 
   return (
     <div className="shrink-0 space-y-2 px-4 pt-3 md:px-6">
-      <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:gap-10">
+      <div className="flex-col gap-2 xl:flex-row xl:items-center xl:gap-10 hidden md:flex">
         {patient && (
           <PatientHeader
             patient={patient}
@@ -120,9 +124,18 @@ export function FillHeader({
           </div>
         )}
       </div>
+      {patient && (
+        <div className="md:hidden">
+          <PatientHoverCard
+            patient={patient}
+            facilityId={facilityId}
+            compact={{ allergiesCount: allergies?.results.length ?? 0 }}
+          />
+        </div>
+      )}
       {patient && <PatientDeceasedInfo patient={patient} />}
 
-      <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 md:flex-row md:items-center md:justify-between hidden md:flex">
         <div className="flex flex-wrap gap-4">
           {patient && (
             <div className="flex flex-col items-start gap-1">
@@ -169,7 +182,7 @@ export function FillHeader({
               type="button"
               variant="outline"
               onClick={onSaveDraft}
-              disabled={isSubmitting || isSavingDraft}
+              disabled={isSubmitting || isSavingDraft || saveDisabled}
             >
               {isSavingDraft && <Loader2 className="size-4 animate-spin" />}
               {t("save_as_draft")}
@@ -178,7 +191,7 @@ export function FillHeader({
           <Button
             type="button"
             onClick={onSubmit}
-            disabled={isSubmitting || isSavingDraft}
+            disabled={isSubmitting || isSavingDraft || saveDisabled}
             className="border border-primary-900/80 bg-gradient-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
           >
             {isSubmitting ? (

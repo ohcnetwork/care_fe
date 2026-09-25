@@ -1,8 +1,9 @@
 import type { TFunction } from "i18next";
 
+import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
+
 import {
   buildLinkIndex,
-  entryHasContent,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
@@ -45,7 +46,7 @@ export function collectActionReferenceErrors(
         enabled &&
         question.type !== "group" &&
         referenced.has(question.link_id) &&
-        !responses[question.id]?.values.some(entryHasContent)
+        !responses[question.id]?.values?.some(entryIsAnswered)
       ) {
         errors.push({
           question_id: question.id,
