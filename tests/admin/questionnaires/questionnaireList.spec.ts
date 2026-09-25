@@ -1,10 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import {
-  adminApiHeaders,
-  apiBaseUrl,
-  createQuestionnaire,
-} from "tests/helper/questionnaireV2";
+import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -157,16 +153,6 @@ test.describe("Questionnaire v2 list", () => {
       await expect(page.locator('[data-slot="table-body"]')).toContainText(
         prefix,
       );
-    });
-  });
-
-  test("can still create from the list page", async ({ page }) => {
-    const title = `QV2 List Draft UI ${Date.now()}`;
-
-    await createQuestionnaire(page, {
-      basePath: "/admin/questionnaires",
-      title,
-      status: "Draft",
     });
   });
 });

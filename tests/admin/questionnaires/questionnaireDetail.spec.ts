@@ -24,59 +24,21 @@ async function adminListRow(page: Page, title: string) {
 }
 
 test.describe("Questionnaire v2 detail", () => {
-  test("open a questionnaire from the admin list and edit its title", async ({
-    page,
-  }) => {
-    const title = `QV2 Detail ${Date.now()}`;
-
-    await test.step("Create a questionnaire to own for this test", async () => {
-      await createQuestionnaire(page, {
-        basePath: "/admin/questionnaires",
-        title,
-      });
-      await expect(page.getByText("Questionnaire Properties")).toBeVisible();
-    });
-
-    let newTitle = "";
-
-    await test.step("Edit title and save", async () => {
-      newTitle = `Edited ${faker.word.words(2)} ${Date.now()}`;
-      await page.getByRole("textbox", { name: "Title" }).fill(newTitle);
-      await page.getByRole("button", { name: "Save Questionnaire" }).click();
-      await expectToast(page, "Questionnaire updated successfully");
-    });
-
-    await test.step("Navigate list -> row -> detail and confirm the edit persisted", async () => {
-      await page.goto("/admin/questionnaires");
-      await page.getByPlaceholder("Search Questionnaires").fill(newTitle);
-
-      // The table row's role is overridden to "link" (QuestionnaireListPage
-      // wires role="link" + onClick on the TableRow), not the native "row".
-      const row = page.getByRole("link").filter({ hasText: newTitle });
-      await expect(row).toBeVisible();
-      await row.click();
-
-      await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);
-      await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
-        newTitle,
-      );
-    });
-  });
-
   test("title, slug and description edits keep the URL and show in the admin list", async ({
     page,
   }) => {
     const stamp = Date.now();
-    const newTitle = `QV2 Renamed ${stamp}`;
+    const newTitle = `Edited ${faker.word.words(2)} ${stamp}`;
     const newSlug = `qv2-renamed-${stamp}`;
     const description = `Description ${faker.lorem.words(4)}`;
     let detailUrl = "";
 
-    await test.step("Create a questionnaire", async () => {
+    await test.step("Create a questionnaire to own for this test", async () => {
       detailUrl = await createQuestionnaire(page, {
         basePath: "/admin/questionnaires",
-        title: `QV2 Identity ${stamp}`,
+        title: `QV2 Detail ${stamp}`,
       });
+      await expect(page.getByText("Questionnaire Properties")).toBeVisible();
     });
 
     await test.step("Edit title, slug and description; the URL does not move", async () => {
@@ -89,8 +51,14 @@ test.describe("Questionnaire v2 detail", () => {
       await expect(page).toHaveURL(detailUrl);
     });
 
-    await test.step("The same URL serves the edited values after a reload", async () => {
-      await page.goto(detailUrl);
+    await test.step("The admin list row shows the edits and opens the same URL", async () => {
+      // The table row's role is overridden to "link" (QuestionnaireListPage
+      // wires role="link" + onClick on the TableRow), not the native "row".
+      const row = await adminListRow(page, newTitle);
+      await expect(row).toContainText(newSlug);
+      await expect(row).toContainText(description);
+      await row.click();
+      await expect(page).toHaveURL(detailUrl);
       await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
         newTitle,
       );
@@ -100,14 +68,6 @@ test.describe("Questionnaire v2 detail", () => {
       await expect(
         page.getByRole("textbox", { name: "Description" }),
       ).toHaveValue(description);
-    });
-
-    await test.step("The admin list row shows the new title, slug and description", async () => {
-      const row = await adminListRow(page, newTitle);
-      await expect(row).toContainText(newSlug);
-      await expect(row).toContainText(description);
-      await row.click();
-      await expect(page).toHaveURL(detailUrl);
     });
   });
 

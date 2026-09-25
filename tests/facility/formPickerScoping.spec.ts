@@ -107,11 +107,13 @@ test.describe("Form pickers offer only active questionnaires of their subject ty
   });
 
   /** Searches the open picker by the prefix and asserts it lists only the
-   *  active questionnaire of `subject`. */
+   *  active questionnaire of `subject`. `checkRequest` is off for the
+   *  location/device/facility pickers, whose own specs pin the query. */
   async function expectOnlyActiveOf(
     page: Page,
     picker: Locator,
     subject: SubjectType,
+    checkRequest = true,
   ) {
     const pickerRequest = page.waitForRequest((request) => {
       const url = new URL(request.url());
@@ -123,8 +125,10 @@ test.describe("Form pickers offer only active questionnaires of their subject ty
     await picker.getByPlaceholder("Search Forms").fill(prefix);
 
     const params = new URL((await pickerRequest).url()).searchParams;
-    expect(params.get("status")).toBe("active");
-    expect(params.get("subject_type")).toBe(subject);
+    if (checkRequest) {
+      expect(params.get("status")).toBe("active");
+      expect(params.get("subject_type")).toBe(subject);
+    }
 
     await expect(
       picker
@@ -183,7 +187,7 @@ test.describe("Form pickers offer only active questionnaires of their subject ty
       .locator('[data-cy="location-overview-page"]')
       .getByRole("button", { name: /Submit forms/ })
       .click();
-    await expectOnlyActiveOf(page, resourcePicker(page), "location");
+    await expectOnlyActiveOf(page, resourcePicker(page), "location", false);
   });
 
   test("device: detail page Submit forms", async ({ page }) => {
@@ -191,7 +195,7 @@ test.describe("Form pickers offer only active questionnaires of their subject ty
     await page
       .getByRole("button", { name: "Submit forms", exact: true })
       .click();
-    await expectOnlyActiveOf(page, resourcePicker(page), "device");
+    await expectOnlyActiveOf(page, resourcePicker(page), "device", false);
   });
 
   test("facility: settings General Submit forms", async ({ page }) => {
@@ -200,6 +204,6 @@ test.describe("Form pickers offer only active questionnaires of their subject ty
       .locator('[data-cy="facility-forms"]')
       .getByRole("button", { name: /^Submit forms/ })
       .click();
-    await expectOnlyActiveOf(page, resourcePicker(page), "facility");
+    await expectOnlyActiveOf(page, resourcePicker(page), "facility", false);
   });
 });
