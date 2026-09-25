@@ -105,8 +105,8 @@ export const ServicePointSelector = ({
     <SubQueuePickerDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={title}
-      description={description}
+      title={t(title)}
+      description={t(description)}
       subQueues={subQueues}
       value={selectedSubQueueId}
       onValueChange={handleSelect}

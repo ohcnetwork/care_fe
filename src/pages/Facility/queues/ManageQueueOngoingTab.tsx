@@ -20,10 +20,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import {
-  OngoingQueueTokenCardsList,
-  TokenDetailsDialog,
-} from "@/pages/Facility/queues/OngoingQueueTokenCard";
+import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { useTokenListInfiniteQuery } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
@@ -58,12 +55,13 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const [mobileSection, setMobileSection] = useState<
     "waiting" | "serving" | "recall"
   >("waiting");
+  const hasServicePoints = assignedServicePoints.length > 0;
 
   return (
     <div
       className={cn(
         "flex flex-col gap-4",
-        mobileSection === "waiting" && "pb-20 lg:pb-0",
+        mobileSection === "waiting" && hasServicePoints && "pb-20 lg:pb-0",
       )}
     >
       {/* Desktop: inline filters */}
@@ -143,9 +141,14 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             qParams={qParams}
             setQueryParams={setQueryParams}
           />
-          <div className="fixed inset-x-0 bottom-0 z-10 px-4 py-2 bg-white border-t border-gray-200">
-            <ServeNextPatientButton facilityId={facilityId} queueId={queueId} />
-          </div>
+          {hasServicePoints && (
+            <div className="fixed inset-x-0 bottom-0 z-10 px-4 py-2 bg-white border-t border-gray-200">
+              <ServeNextPatientButton
+                facilityId={facilityId}
+                queueId={queueId}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -251,9 +254,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                         />
                         <InServiceColumnOptions
                           facilityId={facilityId}
-                          queueId={queueId}
                           subQueueId={subQueue.id}
-                          tokens={[]}
                         />
                       </div>
                     </div>
@@ -285,11 +286,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         >
           <QueueColumn
             title={<div className="sr-only">{t("recall")}</div>}
-            options={
-              <div className="hidden lg:block">
-                <ServicePointsDropDown />
-              </div>
-            }
             className="bg-transparent border-0 lg:bg-gray-100 lg:border lg:border-gray-200 px-0 pt-0"
           >
             <div className="flex flex-col gap-4">
@@ -425,9 +421,7 @@ function InServiceColumnOptions({
   subQueueId,
 }: {
   facilityId: string;
-  queueId: string;
   subQueueId: string;
-  tokens: TokenRead[];
 }) {
   const { t } = useTranslation();
 
@@ -449,7 +443,7 @@ function InServiceColumnOptions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
-          <SettingsIcon />
+          <SettingsIcon aria-label={t("set_category")} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[200px]">
@@ -483,7 +477,6 @@ function InServiceColumnOptions({
             </RadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        {/* <DropdownMenuItem>Transfer all</DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -594,13 +587,6 @@ function ServeNextPatientButton({
   const { assignedServicePoints } = useQueueServicePoints();
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
-  const [servedToken, setServedToken] = useState<TokenRead | null>(null);
-  const [showServedTokenDialog, setShowServedTokenDialog] = useState(false);
-
-  const handleServed = (token: TokenRead) => {
-    setServedToken(token);
-    setShowServedTokenDialog(true);
-  };
 
   if (assignedServicePoints.length === 0) {
     return null;
@@ -615,17 +601,10 @@ function ServeNextPatientButton({
           queueId={queueId}
           variant="primary"
           className="w-full lg:w-auto"
-          onSuccess={handleServed}
         >
           <Megaphone />
           {t("call_next_patient")}
         </CallNextPatientButton>
-        <TokenDetailsDialog
-          facilityId={facilityId}
-          token={servedToken}
-          open={showServedTokenDialog}
-          onOpenChange={setShowServedTokenDialog}
-        />
       </>
     );
   }
@@ -646,13 +625,6 @@ function ServeNextPatientButton({
         subQueues={assignedServicePoints}
         facilityId={facilityId}
         queueId={queueId}
-        onSuccess={handleServed}
-      />
-      <TokenDetailsDialog
-        facilityId={facilityId}
-        token={servedToken}
-        open={showServedTokenDialog}
-        onOpenChange={setShowServedTokenDialog}
       />
     </>
   );

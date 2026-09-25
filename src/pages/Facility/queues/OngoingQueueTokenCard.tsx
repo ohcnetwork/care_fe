@@ -79,10 +79,10 @@ function useTokenActions({
   onEnteredInErrorClick: () => void;
   assignedServicePointIds: string[];
   onChangeServicePointClick: () => void;
-}): TokenActionItem[] {
+}): { actions: TokenActionItem[]; isPending: boolean } {
   const { t } = useTranslation();
 
-  const { mutate: updateToken } = useUpdateToken(facilityId, token, {
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
     onSuccess: (data) => {
       if (data.status === TokenStatus.FULFILLED) {
         toast.success(t("token_has_been_completed"));
@@ -207,7 +207,7 @@ function useTokenActions({
     });
   }
 
-  return items;
+  return { actions: items, isPending };
 }
 
 export function OngoingQueueTokenCard({
@@ -616,7 +616,7 @@ const TokenContent = ({
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
 
-  const actions = useTokenActions({
+  const { actions, isPending: isTokenActionPending } = useTokenActions({
     facilityId,
     assignedServicePointIds,
     token,
@@ -844,6 +844,7 @@ const TokenContent = ({
                     action.danger && "text-danger-600",
                   )}
                   onClick={action.onSelect}
+                  disabled={isTokenActionPending}
                 >
                   <span>{action.icon}</span>
                   {action.label}
