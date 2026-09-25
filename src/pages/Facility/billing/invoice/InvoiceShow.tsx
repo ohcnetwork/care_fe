@@ -87,7 +87,6 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
 import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import dayjs from "@/Utils/dayjs";
 import { add, multiply, round, subtract } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -277,7 +276,7 @@ function InvoiceShow({
       charge_items: invoice?.charge_items.map((item) => item.id) || [],
       issue_date:
         status === InvoiceStatus.issued
-          ? invoice?.issue_date || dayjs().toISOString()
+          ? invoice?.issue_date || new Date().toISOString()
           : invoice?.issue_date,
     };
 
@@ -1553,7 +1552,7 @@ function InvoiceShow({
               <p className="text-xs text-gray-500">
                 {formatDateTime(
                   invoice.modified_date,
-                  "hh:mm A - MMM DD, YYYY",
+                  "hh:mm a - MMM dd, yyyy",
                 )}
               </p>
             </div>
@@ -1571,7 +1570,7 @@ function InvoiceShow({
                 {t("by_label", { label: formatName(invoice.created_by) })}
               </p>
               <p className="text-xs text-gray-500">
-                {formatDateTime(invoice.created_date, "hh:mm A - MMM DD, YYYY")}
+                {formatDateTime(invoice.created_date, "hh:mm a - MMM dd, yyyy")}
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { format, parseISO } from "date-fns";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -317,8 +317,9 @@ export const FilesPage = ({
                     <div>
                       <div className="text-gray-500">{t("date")}</div>
                       <div className="font-medium">
-                        {dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        {format(
+                          parseISO(file.created_date),
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       </div>
                     </div>
@@ -421,12 +422,13 @@ export const FilesPage = ({
                       )}
                     >
                       <TooltipComponent
-                        content={dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        content={format(
+                          parseISO(file.created_date),
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       >
                         <span>
-                          {dayjs(file.created_date).format("DD MMM YYYY ")}
+                          {format(parseISO(file.created_date), "dd MMM yyyy ")}
                         </span>
                       </TooltipComponent>
                     </TableCell>

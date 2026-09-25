@@ -740,7 +740,7 @@ function AppointmentCard({
           <p className="text-xs text-gray-500 mt-1">
             {formatDateTime(
               appointment.token_slot.start_datetime,
-              "ddd, DD MMM YYYY, HH:mm",
+              "EEE, dd MMM yyyy, HH:mm",
             )}
           </p>
         </div>

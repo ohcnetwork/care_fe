@@ -70,7 +70,7 @@ const PrescriptionContent = ({
         <span className="text-sm print:text-xs text-gray-950">
           {formatDateTime(
             prescription.created_date,
-            "DD MMM YYYY, ddd, hh:mm A",
+            "dd MMM yyyy, EEE, hh:mm a",
           )}
         </span>
       </div>
@@ -274,7 +274,7 @@ export const PrescriptionPreview = ({
       footer={
         <div className="mt-2 text-xs print:text-[10px] text-gray-900 text-center flex gap-2 justify-center">
           <span>{t("computer_generated_prescription")}</span>|
-          <span>{formatDateTime(new Date(), "MMMM D, YYYY [at] h:mm A")}</span>
+          <span>{formatDateTime(new Date(), "MMMM d, yyyy 'at' h:mm a")}</span>
         </div>
       }
     >

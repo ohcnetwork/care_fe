@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { format, parseISO } from "date-fns";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -215,8 +215,9 @@ export function ReportSubTab({
                   <div>
                     <div className="text-gray-500">{t("date")}</div>
                     <div className="font-medium">
-                      {dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                      {format(
+                        parseISO(report.created_date),
+                        "dd MMM yyyy, hh:mm a",
                       )}
                     </div>
                   </div>
@@ -303,12 +304,13 @@ export function ReportSubTab({
                     )}
                   >
                     <TooltipComponent
-                      content={dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                      content={format(
+                        parseISO(report.created_date),
+                        "dd MMM yyyy, hh:mm a",
                       )}
                     >
                       <span>
-                        {dayjs(report.created_date).format("DD MMM YYYY")}
+                        {format(parseISO(report.created_date), "dd MMM yyyy")}
                       </span>
                     </TooltipComponent>
                   </TableCell>

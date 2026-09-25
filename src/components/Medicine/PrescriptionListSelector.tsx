@@ -156,7 +156,7 @@ export default function PrescriptionListSelector({
                     <span className="text-sm font-medium whitespace-nowrap">
                       {formatDateTime(
                         selectedPrescription.created_date,
-                        "DD/MM/YYYY hh:mm A",
+                        "dd/MM/yyyy hh:mm a",
                       )}
                     </span>
 
@@ -225,7 +225,7 @@ function PrescriptionListComponent({
     },
     ...prescriptions.map((p) => ({
       id: p.id,
-      title: formatDateTime(p.created_date, "DD/MM/YYYY hh:mm A"),
+      title: formatDateTime(p.created_date, "dd/MM/yyyy hh:mm a"),
       subtitle: `${t("prescribed_by")}: ${formatName(p.prescribed_by)}`,
       tags: p.tags,
     })),

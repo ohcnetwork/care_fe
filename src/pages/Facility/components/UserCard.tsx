@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { isAfter, parseISO, subMinutes } from "date-fns";
 import { navigate } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ export function FacilityUserCard({ user, className, facilityId }: Props) {
     if (
       tokenData &&
       Object.keys(tokenData).length > 0 &&
-      dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"))
+      isAfter(parseISO(tokenData.createdAt ?? ""), subMinutes(new Date(), 14))
     ) {
       return `/facility/${facilityId}/appointments/${user.id}/book-appointment`;
     }

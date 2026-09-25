@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -201,8 +201,9 @@ export function FileListTable({
                     <div>
                       <div className="text-gray-500">{t("date")}</div>
                       <div className="font-medium">
-                        {dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        {format(
+                          parseISO(file.created_date),
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       </div>
                     </div>
@@ -305,12 +306,13 @@ export function FileListTable({
                       )}
                     >
                       <TooltipComponent
-                        content={dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        content={format(
+                          parseISO(file.created_date),
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       >
                         <span>
-                          {dayjs(file.created_date).format("DD MMM YYYY ")}
+                          {format(parseISO(file.created_date), "dd MMM yyyy ")}
                         </span>
                       </TooltipComponent>
                     </TableCell>

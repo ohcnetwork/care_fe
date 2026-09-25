@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -34,6 +34,10 @@ import {
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
+import {
+  isScheduleStartTimeInFuture,
+  isScheduleTimeBefore,
+} from "@/pages/Scheduling/dateValidation";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
@@ -68,12 +72,12 @@ export default function CreateScheduleExceptionSheet({
       reason: z.string().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
+        .min(startOfDay(new Date()), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       valid_to: z
         .date({ error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
+        .min(startOfDay(new Date()), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       start_time: z
@@ -90,9 +94,7 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const endTime = dayjs(data.end_time, "HH:mm");
-        return startTime.isBefore(endTime);
+        return isScheduleTimeBefore(data.start_time, data.end_time);
       },
       {
         message: t("start_time_must_be_before_end_time"),
@@ -102,12 +104,7 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const now = dayjs();
-        if (dayjs(data.valid_from).isSame(now, "day")) {
-          return now.isBefore(startTime);
-        }
-        return true;
+        return isScheduleStartTimeInFuture(data.valid_from, data.start_time);
       },
       {
         message: t("start_time_must_be_in_the_future"),
@@ -115,7 +112,8 @@ export default function CreateScheduleExceptionSheet({
       },
     )
     .refine(
-      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      (data) =>
+        !isBefore(startOfDay(data.valid_to), startOfDay(data.valid_from)),
       {
         path: ["valid_to"],
         message: t("valid_till_equal_or_after_valid_from"),
@@ -135,13 +133,13 @@ export default function CreateScheduleExceptionSheet({
 
   useEffect(() => {
     if (qParams.valid_from) {
-      form.setValue("valid_from", new Date(qParams.valid_from));
+      form.setValue("valid_from", parseISO(qParams.valid_from));
     }
   }, [qParams.valid_from, form]);
 
   useEffect(() => {
     if (qParams.valid_to) {
-      form.setValue("valid_to", new Date(qParams.valid_to));
+      form.setValue("valid_to", parseISO(qParams.valid_to));
     }
   }, [qParams.valid_to, form]);
 
@@ -249,7 +247,7 @@ export default function CreateScheduleExceptionSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                           disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
+                            isBefore(startOfDay(date), startOfDay(new Date()))
                           }
                         />
                         <FormMessage />
@@ -267,7 +265,7 @@ export default function CreateScheduleExceptionSheet({
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
                           disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
+                            isBefore(startOfDay(date), startOfDay(new Date()))
                           }
                         />
                         <FormMessage />

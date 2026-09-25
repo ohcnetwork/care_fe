@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,7 +33,6 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
   name: z.string().trim().min(1, "Queue name is required"),
@@ -98,7 +98,7 @@ export default function QueueFormSheet({
     if (queue && isEditMode) {
       form.reset({
         name: queue.name,
-        date: new Date(queue.date),
+        date: parseISO(queue.date),
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -228,7 +228,7 @@ export default function QueueFormSheet({
                           date={field.value}
                           onChange={field.onChange}
                           disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
+                            isBefore(startOfDay(date), startOfDay(new Date()))
                           }
                         />
                       </FormControl>
