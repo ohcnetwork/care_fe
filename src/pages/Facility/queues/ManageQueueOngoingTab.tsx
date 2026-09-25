@@ -20,7 +20,10 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
+import {
+  OngoingQueueTokenCardsList,
+  TokenDetailsDialog,
+} from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { useTokenListInfiniteQuery } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
@@ -133,7 +136,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </div>
       )}
 
-      {mobileSection === "waiting" && (
+      {(mobileSection === "waiting" || mobileSection === "serving") && (
         <div className="flex flex-col gap-3 lg:hidden">
           <FilterControls
             patient={patient}
@@ -587,6 +590,13 @@ function ServeNextPatientButton({
   const { assignedServicePoints } = useQueueServicePoints();
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
+  const [servedToken, setServedToken] = useState<TokenRead | null>(null);
+  const [showServedTokenDialog, setShowServedTokenDialog] = useState(false);
+
+  const handleServed = (token: TokenRead) => {
+    setServedToken(token);
+    setShowServedTokenDialog(true);
+  };
 
   if (assignedServicePoints.length === 0) {
     return null;
@@ -601,10 +611,17 @@ function ServeNextPatientButton({
           queueId={queueId}
           variant="primary"
           className="w-full lg:w-auto"
+          onSuccess={handleServed}
         >
           <Megaphone />
           {t("call_next_patient")}
         </CallNextPatientButton>
+        <TokenDetailsDialog
+          facilityId={facilityId}
+          token={servedToken}
+          open={showServedTokenDialog}
+          onOpenChange={setShowServedTokenDialog}
+        />
       </>
     );
   }
@@ -625,6 +642,13 @@ function ServeNextPatientButton({
         subQueues={assignedServicePoints}
         facilityId={facilityId}
         queueId={queueId}
+        onSuccess={handleServed}
+      />
+      <TokenDetailsDialog
+        facilityId={facilityId}
+        token={servedToken}
+        open={showServedTokenDialog}
+        onOpenChange={setShowServedTokenDialog}
       />
     </>
   );
