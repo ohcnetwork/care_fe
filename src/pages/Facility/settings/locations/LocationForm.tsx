@@ -30,13 +30,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  BatchRequestBody,
-  BatchRequestResponse,
-} from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   LocationFormOptions,
   type LocationWrite,
@@ -203,9 +199,8 @@ export default function LocationForm({
     },
   });
 
-  const { mutate: submitBatch, isPending: isBatchPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (data: BatchRequestResponse) => {
+  const { mutate: submitBatch, isPending: isBatchPending } = useBatchRequest({
+    onSuccess: (data) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),
       );
@@ -224,18 +219,18 @@ export default function LocationForm({
     };
 
     if (values.form === "bd" && !isEditMode && values.enableBulkCreation) {
-      const batchRequest: BatchRequestBody = {
-        requests: values.bedNames.map((bed) => ({
-          url: `/api/v1/facility/${facilityId}/location/`,
-          method: "POST",
-          reference_id: parentId ? `Location ${parentId}` : "Location",
+      const requests: BatchRequestObject<LocationWrite>[] = values.bedNames.map(
+        (bed) => ({
+          api: locationApi.create,
+          pathParams: { facility_id: facilityId },
+          referenceId: bed.name,
           body: {
             ...data,
             name: bed.name,
           },
-        })),
-      };
-      submitBatch(batchRequest);
+        }),
+      );
+      submitBatch(requests);
       return;
     }
 
