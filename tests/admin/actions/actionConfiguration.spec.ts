@@ -63,8 +63,7 @@ async function fetchConfiguration(id: string) {
 
 /** Adds one condition on the open action and points it at the numeric
  *  "Patient › Age" context value with the given operator and value.
- *  Context values carry no answer shape, so the value control is a text
- *  box whose numeric entry compiles to a bare number literal. */
+ *  Age is a numeric context field, so the value control is a number input. */
 async function addAgeCondition(
   page: Page,
   n: number,
@@ -77,7 +76,7 @@ async function addAgeCondition(
   await page.getByRole("combobox", { name: `Condition ${n} Operator` }).click();
   await page.getByRole("option", { name: operatorLabel, exact: true }).click();
   await page
-    .getByRole("textbox", { name: `Condition ${n} Value` })
+    .getByRole("spinbutton", { name: `Condition ${n} Value` })
     .fill(String(value));
 }
 
@@ -254,7 +253,7 @@ test.describe("Admin action configurations", () => {
           .getByRole("option", { name: operator.label, exact: true })
           .click();
         await page
-          .getByRole("textbox", { name: "Condition 1 Value" })
+          .getByRole("spinbutton", { name: "Condition 1 Value" })
           .fill(String((index + 1) * 10));
         await fillMessage(page, paramLabel, `${operator.symbol} ${stamp}`);
       }
