@@ -71,7 +71,9 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void;
 }) {
   const isMobile = useIsMobile();
+  const { i18n } = useTranslation();
   const [openMobile, setOpenMobile] = React.useState(false);
+  const sidebarWidth = i18n.language.startsWith("ml") ? "20rem" : SIDEBAR_WIDTH;
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -126,7 +128,7 @@ function SidebarProvider({
         <div
           style={
             {
-              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width": sidebarWidth,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
