@@ -178,7 +178,10 @@ function ListContent({
           variant="link"
           size="md"
           className="underline"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            setSelectedValues(value);
+            setOpen(false);
+          }}
         >
           {t("cancel")}
         </Button>
@@ -212,28 +215,25 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  React.useEffect(() => {
-    setSelectedValues(value);
-  }, [value, open]);
-  React.useEffect(() => {
-    if (open == false) onValueChange(selectedValues);
-  }, [open]);
-
-  const { t } = useTranslation();
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setSelectedValues(value);
+    }
+    setOpen(nextOpen);
+  };
 
   if (isMobile) {
     return (
       <div className="w-full">
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>
             <Button
               variant="outline"
               ref={ref}
               role="combobox"
-              onClick={() => setOpen((open) => !open)}
+              onClick={() => handleOpenChange(!open)}
               className={cn(
-                "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-                open && "ring-2 ring-blue-500 border-0",
+                "flex h-auto min-h-9 w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
                 className,
               )}
               {...props}
@@ -243,17 +243,30 @@ export function MultiSelect({
                   <span className="text-sm text-gray-500 mx-3">
                     {placeholder}
                   </span>
-                ) : (
+                ) : selectionSummary ? (
                   <Badge className="m-1" variant="secondary">
-                    {selectionSummary
-                      ? selectionSummary
-                      : t("options_selected", { count: value.length })}
+                    {selectionSummary}
                   </Badge>
+                ) : (
+                  <div className="flex flex-wrap gap-1 m-1">
+                    {options
+                      .filter((option) => value.includes(option.value))
+                      .map((option) => (
+                        <Badge
+                          key={option.value}
+                          size="xs"
+                          className="px-1.5 py-0.5"
+                          variant="secondary"
+                        >
+                          {option.label}
+                        </Badge>
+                      ))}
+                  </div>
                 )}
                 {open ? (
-                  <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+                  <ChevronUp className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
                 ) : (
-                  <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+                  <ChevronDown className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
                 )}
               </div>
             </Button>
@@ -278,16 +291,15 @@ export function MultiSelect({
 
   return (
     <div className="w-full">
-      <Popover open={open} onOpenChange={setOpen} modal>
+      <Popover open={open} onOpenChange={handleOpenChange} modal>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             ref={ref}
             role="combobox"
-            onClick={() => setOpen((open) => !open)}
+            onClick={() => handleOpenChange(!open)}
             className={cn(
-              "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-              open && "ring-2 ring-blue-500 border-0",
+              "flex h-auto min-h-9 w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
               className,
             )}
             {...props}
@@ -297,17 +309,30 @@ export function MultiSelect({
                 <span className="text-sm text-gray-500 mx-3">
                   {placeholder}
                 </span>
-              ) : (
+              ) : selectionSummary ? (
                 <Badge className="m-1" variant="secondary">
-                  {selectionSummary
-                    ? selectionSummary
-                    : t("options_selected", { count: value.length })}
+                  {selectionSummary}
                 </Badge>
+              ) : (
+                <div className="flex flex-wrap gap-1 m-1">
+                  {options
+                    .filter((option) => value.includes(option.value))
+                    .map((option) => (
+                      <Badge
+                        key={option.value}
+                        size="xs"
+                        className="px-1.5 py-0.5"
+                        variant="secondary"
+                      >
+                        {option.label}
+                      </Badge>
+                    ))}
+                </div>
               )}
               {open ? (
-                <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+                <ChevronUp className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
               ) : (
-                <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+                <ChevronDown className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
               )}
             </div>
           </Button>
