@@ -1388,7 +1388,6 @@
   "component_conditions": "Component Conditions",
   "component_qualified_ranges_exist_message": "Component-level observation interpretations exist. Clear them first to add root-level interpretations.",
   "component_type": "Component Type",
-  "component_value": "Component value",
   "component_wise_breakdown": "Component Wise Breakdown",
   "component_with_index": "Component {{index}}",
   "components": "Components",
