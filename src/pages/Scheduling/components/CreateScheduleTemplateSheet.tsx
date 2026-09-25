@@ -311,9 +311,13 @@ export default function CreateScheduleTemplateSheet({
   return (
     <Sheet
       open={qParams.sheet === "create_template"}
-      onOpenChange={(open) =>
-        setQParams({ sheet: open ? "create_template" : null })
-      }
+      onOpenChange={(open) => {
+        if (!open) {
+          form.reset();
+        }
+
+        setQParams({ sheet: open ? "create_template" : null });
+      }}
     >
       <SheetTrigger asChild>
         {trigger ?? (
