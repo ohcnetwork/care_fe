@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
-import batchApi from "@/types/base/batch/batchApi";
 import {
   ServiceRequestReadSpec,
   Status,
@@ -75,17 +75,14 @@ export function useServiceRequestSpecimens({
     onSuccess: invalidateRequest,
     onError: onDraftError,
   });
-  const { mutate: executeBatch, isPending: isPrintingAllQRCodes } = useMutation(
-    {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: executeBatch, isPending: isPrintingAllQRCodes } =
+    useBatchRequest({
       onSuccess: () => {
         invalidateRequest();
         setIsQRCodeSheetOpen(true);
       },
       onError: onDraftError,
-    },
-  );
+    });
   const hasActiveSpecimen = (requirement: SpecimenDefinitionRead) =>
     request.specimens.some(
       (specimen) =>
@@ -107,14 +104,14 @@ export function useServiceRequestSpecimens({
       setIsQRCodeSheetOpen(true);
       return;
     }
-    executeBatch({
-      requests: missingDraftDefinitions.map((requirement, index) => ({
-        url: `/api/v1/facility/${facilityId}/service_request/${serviceRequestId}/create_specimen_from_definition/`,
-        method: "POST",
-        reference_id: `create_specimen_${index}`,
+    executeBatch(
+      missingDraftDefinitions.map((requirement, index) => ({
+        api: specimenApi.createSpecimenFromDefinition,
+        pathParams: { facilityId, serviceRequestId },
+        referenceId: `create_specimen_${index}`,
         body: createDraftPayload(requirement),
       })),
-    });
+    );
   };
   return {
     isQRCodeSheetOpen,
