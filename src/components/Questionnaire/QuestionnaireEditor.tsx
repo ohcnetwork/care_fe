@@ -103,7 +103,8 @@ import {
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -399,14 +400,7 @@ export default function QuestionnaireEditor({
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
-    slug: z
-      .string()
-      .trim()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, {
-        message: t("slug_format_message"),
-      }),
+    slug: slugValueSchema(),
     description: z.string().optional(),
     questions: z.array(
       z.object({
@@ -592,7 +586,7 @@ export default function QuestionnaireEditor({
     });
 
     if (field === "title") {
-      const next = generateSlug((value as string) || "", 25);
+      const next = generateSlugValue(value as string);
       form.setValue("slug", next, {
         shouldValidate: true,
         shouldDirty: false,
