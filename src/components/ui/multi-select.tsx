@@ -81,6 +81,8 @@ function ListContent({
       return options.map((o) => o.value);
     });
   };
+  const valueSet = new Set(value);
+  const selectedSet = new Set(selectedValues);
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Command className="flex-1 overflow-hidden min-h-0">
@@ -118,7 +120,7 @@ function ListContent({
             <>
               <CommandGroup heading={t("selected")}>
                 {options
-                  .filter((option) => value.includes(option.value))
+                  .filter((option) => valueSet.has(option.value))
                   .map((option) => (
                     <CommandItem
                       key={option.value}
@@ -127,7 +129,7 @@ function ListContent({
                       className="cursor-pointer h-10 flex gap-3"
                     >
                       <Checkbox
-                        checked={selectedValues.includes(option.value)}
+                        checked={selectedSet.has(option.value)}
                         className="data-[state=checked]:text-white"
                       />
 
@@ -148,7 +150,7 @@ function ListContent({
           {value.length < options.length && (
             <CommandGroup>
               {options
-                .filter((option) => !value.includes(option.value))
+                .filter((option) => !valueSet.has(option.value))
                 .map((option) => (
                   <CommandItem
                     key={option.value}
@@ -157,7 +159,7 @@ function ListContent({
                     className="cursor-pointer h-10 flex gap-3"
                   >
                     <Checkbox
-                      checked={selectedValues.includes(option.value)}
+                      checked={selectedSet.has(option.value)}
                       className="data-[state=checked]:text-white"
                     />
 
@@ -200,6 +202,73 @@ function ListContent({
   );
 }
 
+function SelectTrigger({
+  value,
+  options,
+  selectionSummary,
+  placeholder,
+  open,
+  className,
+  ref,
+  ...props
+}: ButtonProps & {
+  value: string[];
+  options: MultiSelectProps["options"];
+  selectionSummary?: string;
+  placeholder: string;
+  open: boolean;
+  className?: string;
+}) {
+  const valueSet = new Set(value);
+
+  return (
+    <Button
+      variant="outline"
+      ref={ref}
+      role="combobox"
+      className={cn(
+        "flex h-auto min-h-9 w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex justify-between items-center w-full min-w-0">
+        {value.length == 0 ? (
+          <span className="text-sm text-gray-500 mx-3">{placeholder}</span>
+        ) : selectionSummary ? (
+          <Badge
+            className="m-1 max-w-full whitespace-normal wrap-break-word"
+            variant="secondary"
+          >
+            {selectionSummary}
+          </Badge>
+        ) : (
+          <div className="flex flex-wrap gap-1 m-1 min-w-0">
+            {options
+              .filter((option) => valueSet.has(option.value))
+              .map((option) => (
+                <Badge
+                  key={option.value}
+                  size="xs"
+                  className="px-1.5 py-0.5 max-w-full whitespace-normal wrap-break-word"
+                  variant="secondary"
+                >
+                  {option.label}
+                </Badge>
+              ))}
+          </div>
+        )}
+        {open ? (
+          <ChevronUp className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
+        ) : (
+          <ChevronDown className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
+        )}
+      </div>
+    </Button>
+  );
+}
+SelectTrigger.displayName = "SelectTrigger";
+
 export function MultiSelect({
   options,
   onValueChange,
@@ -227,49 +296,17 @@ export function MultiSelect({
       <div className="w-full">
         <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>
-            <Button
-              variant="outline"
+            <SelectTrigger
+              value={value}
+              options={options}
+              selectionSummary={selectionSummary}
+              placeholder={placeholder}
+              open={open}
+              className={className}
               ref={ref}
-              role="combobox"
               onClick={() => handleOpenChange(!open)}
-              className={cn(
-                "flex h-auto min-h-9 w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-                className,
-              )}
               {...props}
-            >
-              <div className="flex justify-between items-center w-full">
-                {value.length == 0 ? (
-                  <span className="text-sm text-gray-500 mx-3">
-                    {placeholder}
-                  </span>
-                ) : selectionSummary ? (
-                  <Badge className="m-1" variant="secondary">
-                    {selectionSummary}
-                  </Badge>
-                ) : (
-                  <div className="flex flex-wrap gap-1 m-1">
-                    {options
-                      .filter((option) => value.includes(option.value))
-                      .map((option) => (
-                        <Badge
-                          key={option.value}
-                          size="xs"
-                          className="px-1.5 py-0.5"
-                          variant="secondary"
-                        >
-                          {option.label}
-                        </Badge>
-                      ))}
-                  </div>
-                )}
-                {open ? (
-                  <ChevronUp className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
-                ) : (
-                  <ChevronDown className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
-                )}
-              </div>
-            </Button>
+            />
           </DrawerTrigger>
           <DrawerContent className="px-0 pt-2 flex flex-col min-h-[50vh] max-h-[85vh]">
             <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
@@ -293,49 +330,17 @@ export function MultiSelect({
     <div className="w-full">
       <Popover open={open} onOpenChange={handleOpenChange} modal>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
+          <SelectTrigger
+            value={value}
+            options={options}
+            selectionSummary={selectionSummary}
+            placeholder={placeholder}
+            open={open}
+            className={className}
             ref={ref}
-            role="combobox"
             onClick={() => handleOpenChange(!open)}
-            className={cn(
-              "flex h-auto min-h-9 w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-              className,
-            )}
             {...props}
-          >
-            <div className="flex justify-between items-center w-full">
-              {value.length == 0 ? (
-                <span className="text-sm text-gray-500 mx-3">
-                  {placeholder}
-                </span>
-              ) : selectionSummary ? (
-                <Badge className="m-1" variant="secondary">
-                  {selectionSummary}
-                </Badge>
-              ) : (
-                <div className="flex flex-wrap gap-1 m-1">
-                  {options
-                    .filter((option) => value.includes(option.value))
-                    .map((option) => (
-                      <Badge
-                        key={option.value}
-                        size="xs"
-                        className="px-1.5 py-0.5"
-                        variant="secondary"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))}
-                </div>
-              )}
-              {open ? (
-                <ChevronUp className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
-              ) : (
-                <ChevronDown className="h-4 mx-2 shrink-0 cursor-pointer text-black" />
-              )}
-            </div>
-          </Button>
+          />
         </PopoverTrigger>
         <PopoverContent
           className="p-0 w-(--radix-popover-trigger-width) max-h-[35vh] flex flex-col overflow-hidden"
