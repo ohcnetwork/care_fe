@@ -548,17 +548,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
             <Button
               type="submit"
               variant="primary"
-              disabled={
-                id ? isUpdatePending || !form.formState.isDirty : isPending
-              }
+              disabled={id ? !form.formState.isDirty : false}
             >
-              {isPending && (
-                <CareIcon
-                  icon="l-spinner"
-                  className="mr-2 size-4 animate-spin"
-                />
-              )}
-              {isPending ? t("submitting") : t("submit")}
+              {t("submit")}
             </Button>
           </div>
         </form>
