@@ -35,7 +35,7 @@ test.describe("Product Knowledge Delete operations", () => {
   });
 
   test("quick create and delete product knowledge", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("link", { name: /add product/i }).click();
     await page.getByRole("textbox", { name: /name/i }).fill(name);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
     await page.getByText(/Base Unit/).click();

@@ -27,12 +27,6 @@ export default function ActivityDefinitionList({
     );
   };
 
-  const onCreateItem = () => {
-    navigate(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
-    );
-  };
-
   return (
     <Page title={t("activity_definitions")} hideTitleOnPage>
       <ResourceCategoryList
@@ -43,7 +37,7 @@ export default function ActivityDefinitionList({
         basePath={`/facility/${facilityId}/settings/activity_definitions`}
         baseTitle={t("activity_definition")}
         onNavigate={onNavigate}
-        onCreateItem={onCreateItem}
+        createItemHref={`/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`}
         createItemLabel={t("add_activity_definition")}
         createItemIcon="l-plus"
         emptyStateTitle={t("no_activity_definition_categories_found")}

@@ -60,7 +60,7 @@ test.describe("ValueSet Edit", () => {
     page,
   }) => {
     await page.getByRole("textbox", { name: "Search ValueSets" }).fill(name);
-    await page.getByRole("button", { name: /edit/i }).first().click();
+    await page.getByRole("link", { name: /edit/i }).first().click();
     await expect(
       page.getByRole("heading", { name: /edit valueset/i }),
     ).toBeVisible();

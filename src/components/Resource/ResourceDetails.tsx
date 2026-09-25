@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -131,24 +131,17 @@ export default function ResourceDetails({
         {/* Action Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-2 w-full">
-            <Button
-              onClick={() =>
-                navigate(`/facility/${facilityId}/resource/${id}/print`)
-              }
-              className="w-full sm:w-auto"
-            >
-              <CareIcon icon="l-file-alt" className="mr-2 size-4" />
-              {t("request_letter")}
+            <Button asChild className="w-full sm:w-auto">
+              <Link href={`/facility/${facilityId}/resource/${id}/print`}>
+                <CareIcon icon="l-file-alt" className="mr-2 size-4" />
+                {t("request_letter")}
+              </Link>
             </Button>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/resource/${id}/update`)
-              }
-            >
-              <CareIcon icon="l-pen" className="mr-2 size-4" />
-              {t("update_status")}
+            <Button variant="outline" className="w-full sm:w-auto" asChild>
+              <Link href={`/facility/${facilityId}/resource/${id}/update`}>
+                <CareIcon icon="l-pen" className="mr-2 size-4" />
+                {t("update_status")}
+              </Link>
             </Button>
           </div>
         </div>

@@ -28,7 +28,7 @@ async function createProduct(page: Page, facilityId: string): Promise<string> {
 
   await page.goto(`/facility/${facilityId}/settings/product_knowledge`);
   await page.getByRole("heading", { name: "Consumables" }).click();
-  await page.getByRole("button", { name: /add product/i }).click();
+  await page.getByRole("link", { name: /add product/i }).click();
 
   await page.getByRole("textbox", { name: /name/i }).fill(productName);
   await page.getByRole("textbox", { name: /slug/i }).fill(slug);
@@ -73,7 +73,7 @@ test.describe("Product Knowledge Edit operations", () => {
       .filter({ hasText: productName })
       .getByRole("link", { name: "View" })
       .click();
-    await page.getByRole("button", { name: "Edit" }).click();
+    await page.getByRole("link", { name: "Edit" }).click();
 
     const editedName = productName + " Edited";
     const productType = faker.helpers.arrayElement(productTypeOptions);

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -105,13 +105,6 @@ export default function AdminOrganizationList({
       });
     }
   }, [org?.parent]);
-
-  const handleParentClick = useCallback(
-    (parentId: string) => {
-      navigate(`/admin/organizations/${organizationType}/${parentId}`);
-    },
-    [organizationType],
-  );
 
   // Flat org types (role, supplier): sidebar list + detail panel
   if (isFlatOrgType) {
@@ -262,11 +255,12 @@ export default function AdminOrganizationList({
                         <BreadcrumbLink
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                          onClick={() =>
-                            navigate(`/admin/organizations/${organizationType}`)
-                          }
                         >
-                          <button type="button">{t("organizations")}</button>
+                          <Link
+                            href={`/admin/organizations/${organizationType}`}
+                          >
+                            {t("organizations")}
+                          </Link>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
@@ -276,9 +270,12 @@ export default function AdminOrganizationList({
                             <BreadcrumbLink
                               asChild
                               className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                              onClick={() => handleParentClick(parent.id)}
                             >
-                              <button type="button">{parent.name}</button>
+                              <Link
+                                href={`/admin/organizations/${organizationType}/${parent.id}`}
+                              >
+                                {parent.name}
+                              </Link>
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           <BreadcrumbSeparator />

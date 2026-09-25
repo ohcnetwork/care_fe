@@ -27,12 +27,6 @@ export default function ProductKnowledgeList({
     );
   };
 
-  const onCreateItem = () => {
-    navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}/new`,
-    );
-  };
-
   return (
     <Page title={t("product_knowledge")} hideTitleOnPage>
       <ResourceCategoryList
@@ -43,7 +37,7 @@ export default function ProductKnowledgeList({
         basePath={`/facility/${facilityId}/settings/product_knowledge`}
         baseTitle={t("product_knowledge")}
         onNavigate={onNavigate}
-        onCreateItem={onCreateItem}
+        createItemHref={`/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}/new`}
         createItemLabel={t("add_product_knowledge")}
         createItemIcon="l-plus"
         itemSearchConfig={{

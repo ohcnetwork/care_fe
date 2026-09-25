@@ -12,7 +12,7 @@ import {
   Printer,
   Truck,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -319,6 +319,20 @@ export default function MedicationReturnShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
+  const relatedInvoiceIds = [
+    ...new Set(
+      medicationDispenses.flatMap(
+        (item) => item.charge_item?.paid_invoice?.id ?? [],
+      ) || [],
+    ),
+  ].filter((id) => id !== deliveryOrder.patient_invoice_id);
+  const invoiceQueryParams = new URLSearchParams({
+    sourceUrl: basePath + "/order/" + deliveryOrderId,
+  });
+  if (relatedInvoiceIds.length > 0) {
+    invoiceQueryParams.set("relatedInvoices", relatedInvoiceIds.join(","));
+  }
+
   return (
     <Page
       title={t("medication_return")}
@@ -423,11 +437,11 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-lg font-semibold"
-                      onClick={() =>
-                        navigate(`/patient/${deliveryOrder.patient?.id}`)
-                      }
+                      asChild
                     >
-                      {deliveryOrder.patient.name}
+                      <Link href={`/patient/${deliveryOrder.patient.id}`}>
+                        {deliveryOrder.patient.name}
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -476,34 +490,14 @@ export default function MedicationReturnShow({
                     <Button
                       variant="link"
                       className="p-0 h-auto text-primary-600 font-semibold"
-                      onClick={() => {
-                        // Filter out the return invoice itself from related invoices
-                        const relatedInvoiceIds = [
-                          ...new Set(
-                            medicationDispenses.flatMap(
-                              (item) =>
-                                item.charge_item?.paid_invoice?.id ?? [],
-                            ) || [],
-                          ),
-                        ].filter(
-                          (id) => id !== deliveryOrder.patient_invoice_id,
-                        );
-                        const queryParams = new URLSearchParams({
-                          sourceUrl: basePath + "/order/" + deliveryOrderId,
-                        });
-                        if (relatedInvoiceIds.length > 0) {
-                          queryParams.set(
-                            "relatedInvoices",
-                            relatedInvoiceIds.join(","),
-                          );
-                        }
-                        navigate(
-                          `/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${queryParams.toString()}`,
-                        );
-                      }}
+                      asChild
                     >
-                      {t("view_invoice")}
-                      <ExternalLink className="ml-1 size-4" />
+                      <Link
+                        href={`/facility/${facilityId}/billing/invoices/${deliveryOrder.patient_invoice_id}?${invoiceQueryParams.toString()}`}
+                      >
+                        {t("view_invoice")}
+                        <ExternalLink className="ml-1 size-4" />
+                      </Link>
                     </Button>
                   </div>
                 </div>

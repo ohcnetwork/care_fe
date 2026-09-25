@@ -1,5 +1,5 @@
 import { Box, Eye } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -114,23 +114,20 @@ export default function DeliveryOrderTable({
               </div>
             </TableCell>
             <TableCell className="w-36">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
-                      facilityId,
-                      locationId,
-                      internal,
-                      false,
-                      isRequester,
-                      `${delivery.id}`,
-                    ),
-                  )
-                }
-              >
-                <Eye />
-                {t("view_details")}
+              <Button variant="outline" asChild>
+                <Link
+                  href={getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    isRequester,
+                    `${delivery.id}`,
+                  )}
+                >
+                  <Eye />
+                  {t("view_details")}
+                </Link>
               </Button>
             </TableCell>
           </TableRow>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -127,15 +127,13 @@ export default function ObservationDefinitionList({
                 {t("manage_observation_definitions")}
               </p>
             </div>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/observation_definitions/new`,
-                )
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_observation_definition")}
+            <Button asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/observation_definitions/new`}
+              >
+                <CareIcon icon="l-plus" className="mr-2" />
+                {t("add_observation_definition")}
+              </Link>
             </Button>
           </div>
 
