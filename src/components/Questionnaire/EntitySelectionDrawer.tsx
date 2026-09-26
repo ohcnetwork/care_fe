@@ -1,19 +1,4 @@
-/**
- * @file EntitySelectionDrawer.tsx
- *
- * This component provides a consistent mobile-friendly Drawer UI for selecting and configuring
- * medical entities like medications, allergies, symptoms, and diagnoses. It handles the common
- * pattern of:
- *
- * 1. Displaying a search interface for finding entities using ValueSetSelect
- * 2. Allowing users to select an entity and configure its details
- * 3. Providing a Drawer UI with a back button and a confirmation button
- * 4. Supporting customization through props for different entity types and behaviors
- *
- * The component is reusable and can be adapted for various entity types by passing
- * the appropriate props.
- *
- */
+/** Mobile-friendly drawer for selecting and configuring medical entities. */
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 

@@ -1,74 +1,157 @@
+import { faker } from "@faker-js/faker";
 import { type Page, expect } from "@playwright/test";
+import { setTimeout as delay } from "node:timers/promises";
+import {
+  adminApiHeaders,
+  apiBaseUrl,
+  questionBlock,
+} from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
 /**
- * Locates the question container div for a given label.
- * Questions render with id="question-{uuid}" on the wrapper div.
+ * Fill-flow interaction helpers, targeting the v2 fill page (the one-scroll
+ * form renderer). Everything scopes through `questionBlock` — the
+ * `data-question-id` leaf block for an exact label — because the page also
+ * renders every question title in the outline sidebar, so bare
+ * `getByText(label)` matches twice.
  */
-function getQuestionContainer(page: Page, labelText: string) {
-  return page
-    .getByText(labelText, { exact: true })
-    .locator("xpath=ancestor::div[contains(@id, 'question-')]");
+
+/**
+ * Gives a fill test its own patient and response history. Sharing an
+ * encounter lets concurrent tests change the values shown on Updates;
+ * sharing a patient eventually hits the backend's active-encounter limit.
+ */
+export async function createQuestionnaireEncounter(
+  facilityId: string,
+): Promise<{ patientId: string; encounterId: string }> {
+  const headers = adminApiHeaders();
+  const organizationsResponse = await fetch(
+    `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
+    { headers },
+  );
+  if (!organizationsResponse.ok) {
+    throw new Error(
+      `Failed to fetch questionnaire patient organizations: ${organizationsResponse.status}`,
+    );
+  }
+  const organizations = (await organizationsResponse.json()) as {
+    results: { id: string }[];
+  };
+  const geoOrganization = organizations.results[0]?.id;
+  if (!geoOrganization) {
+    throw new Error("No government organization for questionnaire patient");
+  }
+  const patientBody = JSON.stringify({
+    name: `Questionnaire Test ${faker.string.alphanumeric(12)}`,
+    gender: "male",
+    phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
+    date_of_birth: "1990-01-15",
+    geo_organization: geoOrganization,
+    identifiers: [],
+  });
+  let patientId: string;
+  for (let attempt = 0; ; attempt++) {
+    const patientResponse = await fetch(`${apiBaseUrl()}/api/v1/patient/`, {
+      method: "POST",
+      headers,
+      body: patientBody,
+    });
+    if (patientResponse.ok) {
+      patientId = ((await patientResponse.json()) as { id: string }).id;
+      break;
+    }
+    const error = await patientResponse.text();
+    // The backend serializes patient creation with a global lock. Only
+    // retry its explicit pre-create rejection, never an ambiguous failure.
+    if (
+      attempt >= 4 ||
+      patientResponse.status !== 400 ||
+      !error.includes("Patient creation failed, try again after a while")
+    ) {
+      throw new Error(
+        `Failed to create questionnaire patient: ${patientResponse.status} — ${error}`,
+      );
+    }
+    await delay(250 * (attempt + 1));
+  }
+  const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      patient: patientId,
+      facility: facilityId,
+      status: "in_progress",
+      encounter_class: "amb",
+      period: { start: new Date().toISOString() },
+      priority: "routine",
+      organizations: [],
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Failed to create questionnaire encounter: ${response.status} — ${await response.text()}`,
+    );
+  }
+  const encounterId = ((await response.json()) as { id: string }).id;
+  return { patientId, encounterId };
 }
 
 /**
- * Fills a string (type="text") input field identified by its label.
+ * Fills a string (single-line) input field identified by its label.
  */
 export async function fillStringField(
   page: Page,
   labelText: string,
   value: string,
 ) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  const input = container.locator('input[type="text"]').first();
-  await input.fill(value);
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("textbox").fill(value);
 }
 
 /**
  * Clears a string input field identified by its label.
  */
 export async function clearStringField(page: Page, labelText: string) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  const input = container.locator('input[type="text"]').first();
-  await input.clear();
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("textbox").clear();
 }
 
 /**
- * Asserts whether a field label is visible or hidden.
+ * Asserts whether a question is on the canvas. Hidden (enable_when-false)
+ * questions unmount entirely, so the assertion is on block count — a
+ * visible label would also exist as an outline row, which this ignores.
  */
 export async function checkVisibility(
   page: Page,
   labelText: string,
   shouldBeVisible: boolean,
 ) {
-  const label = page.getByText(labelText, { exact: true });
+  const block = questionBlock(page, labelText);
   if (shouldBeVisible) {
-    await expect(label).toBeVisible();
+    await expect(block).toBeVisible();
   } else {
-    await expect(label).not.toBeVisible();
+    await expect(block).toHaveCount(0);
   }
 }
 
 /**
- * Clicks the Submit button on the questionnaire form.
+ * Clicks the submit button on the fill page ("Save Changes" per the
+ * reference design).
  */
 export async function submitForm(page: Page) {
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
 /**
- * Asserts that a questionnaire field shows a validation error.
- * The error <p> is a sibling of the question container's parent wrapper.
+ * Asserts that a questionnaire field shows a validation error (the error
+ * paragraphs render inside the question's block).
  */
 export async function expectFieldError(page: Page, labelText: string) {
-  const wrapper = page
-    .getByText(labelText, { exact: true })
-    .locator("xpath=ancestor::div[contains(@class, 'space-y-2')]");
-  await expect(wrapper.locator("p.text-red-500")).toBeVisible();
+  await expect(
+    questionBlock(page, labelText).locator("p.text-red-600"),
+  ).toBeVisible();
 }
 
 /**
@@ -127,26 +210,23 @@ export async function verifyLabelledValues(
 }
 
 /**
- * Selects a boolean (Yes/No) radio option for a question identified by its label.
+ * Selects a boolean (Yes/No) option for a question identified by its label.
+ * The v2 boolean input is a radiogroup of chips named "Yes"/"No".
  */
 export async function selectBooleanOption(
   page: Page,
   labelText: string,
   option: "Yes" | "No",
 ) {
-  const label = page.getByText(labelText, { exact: true });
-  await label.scrollIntoViewIfNeeded();
-  const container = getQuestionContainer(page, labelText);
-  // RadioInput renders duplicate radio ids ("true"/"false") across multiple
-  // boolean questions on the same page, breaking accessible-name lookup.
-  // Click the Label text inside the container instead; the native htmlFor
-  // association triggers the underlying radio.
-  await container.getByText(option, { exact: true }).click();
+  const block = questionBlock(page, labelText);
+  await block.scrollIntoViewIfNeeded();
+  await block.getByRole("radio", { name: option, exact: true }).click();
 }
 
 /**
  * Clears a boolean selection by clicking the currently selected option again.
- * Only works when the question is not required (per RadioInput behavior).
+ * Only works when the question is not required (legacy RadioInput contract,
+ * preserved by the v2 BooleanInput).
  */
 export async function clearBooleanField(
   page: Page,

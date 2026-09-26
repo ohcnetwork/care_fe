@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, MoreVertical, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
@@ -29,7 +30,14 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
+import {
+  EMPTY_ROW_KEYS,
+  dropRowKey,
+  growRowKeys,
+} from "@/components/QuestionnaireV2/form/engine/rowKeys";
+
+import query from "@/Utils/request/query";
+
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
@@ -68,7 +76,7 @@ const CHARGE_ITEM_FIELDS = {
 } as const;
 
 interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
-  charge_item_definition_object: ChargeItemDefinitionRead;
+  charge_item_definition_object?: ChargeItemDefinitionRead;
   performer_actor_object?: UserReadMinimal;
 }
 
@@ -95,10 +103,28 @@ function ChargeItemForm({
   facilityId,
 }: ChargeItemFormProps) {
   const { t } = useTranslation();
+  const { data: restoredDefinition } = useQuery({
+    queryKey: [
+      "charge_item_definition",
+      facilityId,
+      chargeItem.charge_item_definition,
+    ],
+    queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
+      pathParams: {
+        facilityId: facilityId || "",
+        slug: chargeItem.charge_item_definition,
+      },
+    }),
+    enabled: !!facilityId,
+  });
+  const definition =
+    restoredDefinition ?? chargeItem.charge_item_definition_object;
 
   return (
     <TableRow>
-      <TableCell>{chargeItem.charge_item_definition_object.title}</TableCell>
+      <TableCell>
+        {definition?.title ?? chargeItem.charge_item_definition}
+      </TableCell>
       <TableCell>
         <Input
           type="number"
@@ -127,14 +153,10 @@ function ChargeItemForm({
           <div className="flex items-center gap-1">
             <span>
               <MonetaryDisplay
-                amount={
-                  chargeItem.charge_item_definition_object.price_components?.[0]
-                    ?.amount || 0
-                }
+                amount={definition?.price_components?.[0]?.amount || 0}
               />
             </span>
-            {chargeItem.charge_item_definition_object.price_components?.length >
-              0 && (
+            {!!definition?.price_components?.length && (
               <Popover>
                 <PopoverTrigger>
                   <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
@@ -145,9 +167,7 @@ function ChargeItemForm({
                   align="start"
                 >
                   <ChargeItemPriceDisplay
-                    priceComponents={
-                      chargeItem.charge_item_definition_object.price_components
-                    }
+                    priceComponents={definition?.price_components}
                   />
                 </PopoverContent>
               </Popover>
@@ -173,7 +193,7 @@ function ChargeItemForm({
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" disabled={disabled}>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -201,92 +221,57 @@ export function ChargeItemQuestion({
   facilityId,
   encounterId,
   errors,
-  question,
 }: ChargeItemQuestionProps) {
   const { t } = useTranslation();
-  const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
-    useState<ChargeItemDefinitionRead | null>(null);
-  const [chargeItems, setChargeItems] = useState<
-    ApplyChargeItemDefinitionRequestWithObject[]
-  >([]);
+  const chargeItems =
+    (questionnaireResponse.values?.[0]?.value as
+      ApplyChargeItemDefinitionRequestWithObject[] | undefined) ?? [];
+  // Duplicate definitions are valid; each row keeps its own identity on removal.
+  const [rowKeys, setRowKeys] = useState(() =>
+    growRowKeys(EMPTY_ROW_KEYS, chargeItems.length),
+  );
+  const currentRowKeys = growRowKeys(rowKeys, chargeItems.length);
+  if (currentRowKeys !== rowKeys) setRowKeys(currentRowKeys);
 
-  useEffect(() => {
-    if (selectedChargeItemDefinition) {
-      const newChargeItem: ApplyChargeItemDefinitionRequestWithObject = {
-        quantity: "1",
-        encounter: encounterId,
-        charge_item_definition: selectedChargeItemDefinition.slug,
-        charge_item_definition_object: selectedChargeItemDefinition,
-      };
-
-      // Automatically add the item when selected
-      const updatedChargeItems = [...chargeItems, newChargeItem];
-      setChargeItems(updatedChargeItems);
-      const updatedChargeItemsWithoutObject = updatedChargeItems.map(
-        ({
-          charge_item_definition_object: _discard,
-          performer_actor_object: _discardPerformer,
-          ...chargeItem
-        }) => chargeItem,
-      );
-      updateQuestionnaireResponseCB(
-        [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
-        questionnaireResponse.question_id,
-      );
-
-      // Reset selection after adding
-      setSelectedChargeItemDefinition(null);
-    }
-  }, [
-    selectedChargeItemDefinition,
-    encounterId,
-    chargeItems,
-    updateQuestionnaireResponseCB,
-    questionnaireResponse.question_id,
-  ]);
-
-  const handleRemoveChargeItem = (index: number) => {
-    const newChargeItems = chargeItems.filter((_, i: number) => i !== index);
-    setChargeItems(newChargeItems);
-    const updatedChargeItemsWithoutObject = newChargeItems.map(
-      ({
-        charge_item_definition_object: _discard,
-        performer_actor_object: _discardPerformer,
-        ...chargeItem
-      }) => chargeItem,
-    );
+  const updateChargeItems = (
+    items: ApplyChargeItemDefinitionRequestWithObject[],
+  ) => {
     updateQuestionnaireResponseCB(
-      [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
+      [{ type: "charge_item", value: items }],
       questionnaireResponse.question_id,
     );
+  };
+
+  const handleAddChargeItem = (definition: ChargeItemDefinitionRead) => {
+    updateChargeItems([
+      ...chargeItems,
+      {
+        quantity: "1",
+        encounter: encounterId,
+        charge_item_definition: definition.slug,
+        charge_item_definition_object: definition,
+      },
+    ]);
+  };
+
+  const handleRemoveChargeItem = (index: number) => {
+    setRowKeys((previous) => dropRowKey(previous, chargeItems.length, index));
+    updateChargeItems(chargeItems.filter((_, i) => i !== index));
   };
 
   const handleUpdateChargeItem = (
     index: number,
     updates: ApplyChargeItemDefinitionRequestWithObject,
   ) => {
-    const newChargeItems = chargeItems.map((ci, i: number) => {
-      if (i !== index) return ci;
-      return { ...ci, ...updates };
-    });
-
-    setChargeItems(newChargeItems);
-    const updatedChargeItemsWithoutObject = newChargeItems.map(
-      ({
-        charge_item_definition_object: _discard,
-        performer_actor_object: _discardPerformer,
-        ...chargeItem
-      }) => chargeItem,
-    );
-    updateQuestionnaireResponseCB(
-      [{ type: "charge_item", value: updatedChargeItemsWithoutObject }],
-      questionnaireResponse.question_id,
+    updateChargeItems(
+      chargeItems.map((item, i) =>
+        i === index ? { ...item, ...updates } : item,
+      ),
     );
   };
 
   return (
     <div className="space-y-4">
-      <QuestionLabel question={question} />
       {chargeItems.length > 0 && (
         <Table>
           <TableHeader>
@@ -301,7 +286,7 @@ export function ChargeItemQuestion({
           <TableBody>
             {chargeItems.map((chargeItem, index) => (
               <ChargeItemForm
-                key={`${chargeItem.charge_item_definition_object.title}-${index}`}
+                key={currentRowKeys.keys[index]}
                 chargeItem={chargeItem}
                 onUpdate={(updates) => handleUpdateChargeItem(index, updates)}
                 onRemove={() => handleRemoveChargeItem(index)}
@@ -319,15 +304,9 @@ export function ChargeItemQuestion({
       <div className="space-y-2 w-full">
         <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
           facilityId={facilityId}
-          value={selectedChargeItemDefinition || undefined}
           onValueChange={(selectedDef) => {
-            if (!selectedDef) {
-              setSelectedChargeItemDefinition(null);
-              return;
-            }
-            setSelectedChargeItemDefinition(
-              selectedDef as ChargeItemDefinitionRead,
-            );
+            if (!selectedDef) return;
+            handleAddChargeItem(selectedDef as ChargeItemDefinitionRead);
           }}
           placeholder={t("select_charge_item_definition")}
           disabled={disabled}

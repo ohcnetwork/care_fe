@@ -1,6 +1,14 @@
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
+import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
+import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
+import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -11,7 +19,9 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 
+import { FacilityResponses } from "./FacilityResponses";
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
 import ActivityDefinitionView from "./activityDefinition/ActivityDefinitionView";
@@ -47,7 +57,22 @@ interface SettingsLayoutProps {
 }
 
 const getRoutes = (facilityId: string) => ({
+  "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
+  "/responses": () => <FacilityResponses facilityId={facilityId} />,
+  "/questionnaire": () => (
+    <QuestionnaireFillPage subject={{ type: "facility", facilityId }} />
+  ),
+  "/questionnaire/:questionnaireId": ({
+    questionnaireId,
+  }: {
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "facility", facilityId }}
+      questionnaireId={questionnaireId}
+    />
+  ),
   "/departments": () => <FacilityOrganizationList />,
   "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
     <FacilityOrganizationList organizationId={id} currentTab={tab} />
@@ -59,6 +84,28 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
+  // Questionnaire fill for the device subject. Registered before
+  // "/devices/:id" — raviger matches routes in object order.
+  "/devices/:id/questionnaire": ({ id }: { id: string }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+    />
+  ),
+  "/devices/:id/questionnaire/:questionnaireId": ({
+    id,
+    questionnaireId,
+  }: {
+    id: string;
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+      questionnaireId={questionnaireId}
+    />
+  ),
+  "/devices/:id/responses": ({ id }: { id: string }) => (
+    <DeviceDetail facilityId={facilityId} deviceId={id} tab="responses" />
+  ),
   "/devices/:id": ({ id }: { id: string }) => (
     <DeviceDetail facilityId={facilityId} deviceId={id} />
   ),
@@ -251,6 +298,77 @@ const getRoutes = (facilityId: string) => ({
   "/tag_config/:tagId": ({ tagId }: { tagId: string }) => (
     <TagConfigView facilityId={facilityId} tagId={tagId} />
   ),
+  // NOTE: keep "/questionnaires" registered before the catch-all "*" route.
+  "/questionnaires": () => (
+    <QuestionnaireListPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" — raviger matches routes
+  // in object order, and "new" would otherwise be captured as an :id.
+  "/questionnaires/new": () => (
+    <QuestionnaireCreatePage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" for the same reason —
+  // otherwise "edit" would be captured as an :id.
+  "/questionnaires/:id/edit": ({ id }: { id: string }) => (
+    <QuestionnaireStudioPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
+  ),
+  // Registered before "/questionnaires/:id" like the routes above.
+  "/questionnaires/:id/versions/:revisionId": ({
+    id,
+    revisionId,
+  }: {
+    id: string;
+    revisionId: string;
+  }) => (
+    <QuestionnaireRevisionPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+      revisionId={revisionId}
+    />
+  ),
+  "/questionnaires/:id": ({ id }: { id: string }) => (
+    <QuestionnaireDetailPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
+  ),
+  "/valuesets": () => (
+    <ValueSetList scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  // Before "/valuesets/:id/edit" — raviger matches routes in object order.
+  "/valuesets/create": () => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  "/valuesets/:id/edit": ({ id }: { id: string }) => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} id={id} />
+  ),
   "*": () => <ErrorPage />,
 });
 
@@ -263,5 +381,5 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  return <div className="container mx-auto p-4">{routeResult}</div>;
+  return <div className="min-w-0 p-4">{routeResult}</div>;
 }

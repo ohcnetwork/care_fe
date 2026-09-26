@@ -151,31 +151,21 @@ test.describe("Token Category Edit - Permission Tests", () => {
       await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
       await page.getByRole("button", { name: "Create" }).click();
 
-      // Step 3: Click the View button of the first token category from the table
-      const viewButton = page.getByRole("link", { name: "View" }).nth(1);
-      await expect(viewButton).toBeVisible();
-      await viewButton.click();
-
-      // Wait for the view page to load by checking for Edit button
-      await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({
-        timeout: 10000,
+      await page
+        .getByRole("textbox", { name: "Search Token Categories" })
+        .fill(tokenCategoryName);
+      const createdRow = page.getByRole("row").filter({
+        has: page.getByRole("cell", { name: tokenCategoryName, exact: true }),
       });
+      await createdRow.getByRole("link", { name: "View" }).click();
 
-      // Step 4: Verify Edit button is visible on the view page
-      const editButtonOnViewPage = page.getByRole("link", { name: "Edit" });
-      await expect(editButtonOnViewPage).toBeVisible();
-
-      // Step 5: Verify Set as default button exists and is visible (if the feature exists)
-      const setAsDefaultButton = page.getByRole("button", {
-        name: /Set as default/i,
-      });
-      const setAsDefaultExists = await setAsDefaultButton
-        .isVisible()
-        .catch(() => false);
-
-      if (setAsDefaultExists) {
-        await expect(setAsDefaultButton).toBeVisible();
-      }
+      await expect(
+        page.getByRole("heading", { name: tokenCategoryName, exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Set as default", exact: true }),
+      ).toBeVisible();
     });
   });
 });

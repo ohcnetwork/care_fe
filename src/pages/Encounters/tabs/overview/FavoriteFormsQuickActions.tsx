@@ -56,7 +56,7 @@ export const FavoriteFormsQuickActions = (
         {favorites.map((form) => (
           <Link
             key={form.id}
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.slug}`}
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.id}`}
             className="inline-flex w-auto items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors text-sm font-medium text-gray-700"
           >
             <FileText className="size-3.5 text-gray-500" />

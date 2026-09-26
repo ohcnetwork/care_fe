@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -116,7 +116,6 @@ import { formatName } from "@/Utils/utils";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Question } from "@/types/questionnaire/question";
 
@@ -213,6 +212,7 @@ interface MedicationRequestQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
@@ -345,13 +345,13 @@ export function validateMedicationRequestQuestion(
 export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
   errors,
   questionnaireId: _questionnaireId,
   questionnaireSlug,
-  question,
 }: MedicationRequestQuestionProps) {
   const authUser = useAuthUser();
   const { t } = useTranslation();
@@ -388,9 +388,15 @@ export function MedicationRequestQuestion({
     enabled: !isPreview && !!prescriptionId,
   });
 
-  useEffect(() => {
-    if (prescriptionId && patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      prescriptionId &&
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "medication_request",
@@ -406,6 +412,10 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications, prescriptionId]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
@@ -898,12 +908,7 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -915,9 +920,7 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
-
+      <div className="flex flex-wrap items-center justify-end">
         {/* Add to Template Dialog */}
         <AddToTemplateDialog
           open={!!medicationToAddToTemplate}
@@ -1125,6 +1128,7 @@ export function MedicationRequestQuestion({
               buttonLabel={t("medication_history")}
               onAddSelected={handleAddHistoricalMedications}
               disableAPI={isPreview}
+              disabled={disabled}
             />
             {questionnaireSlug && (
               <ManageResponseTemplatesSheet
@@ -1452,7 +1456,7 @@ export function MedicationRequestQuestion({
             </EntitySelectionDrawer>
           </>
         ) : (
-          <div className="max-w-4xl flex gap-1">
+          <div className="flex min-w-0 w-full gap-1">
             <MedicationValueSetSelect
               placeholder={addMedicationPlaceholder}
               onSelect={handleAddMedication}
@@ -1465,7 +1469,7 @@ export function MedicationRequestQuestion({
 
       {/* Prescription Note Field - show when editing, or when creating with at least one medication */}
       {(prescriptionId || medications.length > 0) && (
-        <div className="max-w-4xl space-y-2">
+        <div className="w-full space-y-2">
           <Label htmlFor="prescription-note">{t("note")}</Label>
           {prescriptionId ? (
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">

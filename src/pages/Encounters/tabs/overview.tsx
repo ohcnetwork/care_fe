@@ -47,7 +47,7 @@ export const EncounterOverviewTab = () => {
   return (
     <div className="flex gap-3 @max-md:w-full">
       {canReadClinicalData ? (
-        <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
+        <div className="min-w-0 flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
           <div className="flex flex-col gap-4">
             {canWrite && <QuickActions />}
             {canWrite && <FavoriteFormsQuickActions />}
