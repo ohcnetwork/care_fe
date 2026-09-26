@@ -2850,5 +2850,10 @@
   "verify_code": "കോഡ് സ്ഥിരീകരിക്കുക",
   "verifying": "സ്ഥിരീകരിക്കുന്നു",
   "view_associated_encounter": "ബന്ധിച്ച എൻകൗണ്ടർ കാണുക",
-  "view_facility_details": "സൗകര്യ വിശദാംശങ്ങൾ കാണുക"
+  "view_facility_details": "സൗകര്യ വിശദാംശങ്ങൾ കാണുക",
+  "billing": "ബില്ലിംഗ്",
+  "location_requirements": "സ്ഥല ആവശ്യകതകൾ",
+  "queues": "ക്യൂകൾ",
+  "services": "സേവനങ്ങൾ",
+  "tags_proper": "ടാഗുകൾ"
 }
