@@ -1,0 +1,52 @@
+name: Temporary questionnaire audit workspace
+
+on:
+  push:
+    branches: [bodhi/questionnaire-actions]
+    paths:
+      - .github/workflows/questionnaire-audit-workspace-20260926.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 7e676b4213342e0a1ba5d2a1a727960aa46b4268
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install the branch's pinned dependencies
+        run: npm ci --prefer-offline
+
+      - name: Package source and runtime without Git credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/questionnaire-audit-workspace
+          HEAD_SHA=7e676b4213342e0a1ba5d2a1a727960aa46b4268
+          BASE_SHA=9138ca3d772fceffe1b112964e5728867e7effb1
+          MERGE_BASE=$(git merge-base "$HEAD_SHA" "$BASE_SHA")
+          git archive --format=tar.gz --output=/tmp/questionnaire-audit-workspace/head.tar.gz "$HEAD_SHA"
+          git archive --format=tar.gz --output=/tmp/questionnaire-audit-workspace/base.tar.gz "$MERGE_BASE"
+          git ls-tree -r "$HEAD_SHA" > /tmp/questionnaire-audit-workspace/head-tree.txt
+          printf 'head=%s\nbase=%s\nmerge_base=%s\n' "$HEAD_SHA" "$BASE_SHA" "$MERGE_BASE" > /tmp/questionnaire-audit-workspace/revisions.txt
+          tar -czf /tmp/questionnaire-audit-workspace/dependencies.tar.gz node_modules
+          tar -czf /tmp/questionnaire-audit-workspace/node.tar.gz -C "$(dirname "$(command -v node)")" node
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: questionnaire-audit-workspace
+          path: /tmp/questionnaire-audit-workspace/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
