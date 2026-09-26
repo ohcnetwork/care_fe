@@ -29,6 +29,7 @@ import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
+import EncounterPageHeader from "@/pages/Encounters/EncounterPageHeader";
 import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
 import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
@@ -155,6 +156,11 @@ export default function AppRouter() {
   const isServiceWorkspace =
     !!shouldShowSidebar &&
     /^\/facility\/[^/]+\/services\/[^/]+/.test(currentPath);
+  const isEncounterPage =
+    shouldShowSidebar &&
+    /^\/(facility|organization)\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/[^/]+\/?$/.test(
+      currentPath,
+    );
   const isInnerWorkspace = !!(
     isLocationWorkspace ||
     isSettingsWorkspace ||
@@ -183,6 +189,7 @@ export default function AppRouter() {
             isInnerWorkspace
               ? "min-h-svh bg-white text-neutral-950"
               : "min-h-svh bg-white text-neutral-950 md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2",
+            isEncounterPage && "bg-gray-100",
           )}
         >
           <ShortcutCommandDialog
@@ -194,6 +201,8 @@ export default function AppRouter() {
             <LocationPageHeader />
           ) : isSettingsWorkspace ? (
             <FacilitySettingsPageHeader />
+          ) : isEncounterPage ? (
+            <EncounterPageHeader onSearch={() => setCommandDialogOpen(true)} />
           ) : shouldShowSidebar ? (
             <WorkspaceHeader
               user={user}

@@ -26,10 +26,10 @@ export const ManageCareTeam = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="bg-gray-100 rounded-md">
-        <div className="flex justify-between items-center w-full text-gray-950 pl-2">
-          <span className=" font-semibold">
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div>
+        <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+          <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </span>
           {canWrite && (
@@ -39,7 +39,7 @@ export const ManageCareTeam = () => {
           )}
         </div>
       </div>
-      <div className="bg-white p-2 rounded-md shadow">
+      <div className="p-3">
         {encounter.care_team.length > 0 ? (
           <div className="flex flex-col gap-1">
             {(showAllMembers
@@ -48,7 +48,7 @@ export const ManageCareTeam = () => {
             ).map((member, index) => (
               <div
                 key={member.member.id}
-                className="flex items-center gap-2 p-2 rounded-md border border-gray-100 bg-gray-200/20"
+                className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2"
               >
                 <Avatar
                   key={member.member.id}

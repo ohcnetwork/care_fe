@@ -16,9 +16,9 @@ export const EncounterTags = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex items-center justify-between w-full pl-2">
-        <span className="font-semibold text-gray-950">
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
           {t("encounter_tags")}
         </span>
         {canEdit && (
@@ -41,7 +41,7 @@ export const EncounterTags = () => {
           />
         )}
       </div>
-      <div className="flex flex-wrap bg-white w-full p-2 rounded-md gap-2 shadow">
+      <div className="flex w-full flex-wrap gap-2 p-3">
         {encounter.tags.length > 0 ? (
           <>
             {encounter.tags.map((tag) => (

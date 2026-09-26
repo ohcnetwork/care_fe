@@ -57,6 +57,7 @@ interface Props {
   questionnaireSlug?: string;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
   subjectType?: string;
+  presentation?: "default" | "panel";
 }
 
 export function formatValue(
@@ -588,19 +589,23 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   );
 }
 
+interface ResponseCardProps {
+  item: QuestionnaireResponse;
+  patientId: string;
+  isPrintPreview?: boolean;
+  onTitleClick?: (questionnaireSlug: string) => void;
+  showTitle?: boolean;
+  presentation?: "default" | "panel";
+}
+
 export function ResponseCard({
   item,
   patientId,
   onTitleClick,
   showTitle = true,
   isPrintPreview = false,
-}: {
-  item: QuestionnaireResponse;
-  patientId: string;
-  isPrintPreview?: boolean;
-  onTitleClick?: (questionnaireSlug: string) => void;
-  showTitle?: boolean;
-}) {
+  presentation = "default",
+}: ResponseCardProps) {
   const { t } = useTranslation();
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
@@ -615,7 +620,10 @@ export function ResponseCard({
   return (
     <Card
       className={cn(
-        "shadow-none border rounded-md",
+        "shadow-none border",
+        presentation === "panel"
+          ? "overflow-hidden rounded-xl border-gray-200 bg-white"
+          : "rounded-md",
         isEnteredInError && "opacity-70",
       )}
     >
@@ -623,14 +631,22 @@ export function ResponseCard({
         <CollapsibleTrigger asChild className="cursor-pointer">
           <CardHeader
             className={cn(
-              "flex flex-row items-center py-2 px-3",
+              "flex flex-row items-center",
+              presentation === "panel"
+                ? "gap-3 space-y-0 px-4 py-3"
+                : "py-2 px-3",
+              presentation === "panel" &&
+                isExpanded &&
+                "border-b border-gray-200",
               isEnteredInError && "hover:bg-gray-50",
             )}
           >
             {showTitle && (
               <CardTitle
                 className={cn(
-                  "text-base font-medium",
+                  presentation === "panel"
+                    ? "text-sm font-bold tracking-wide text-gray-600 uppercase"
+                    : "text-base font-medium",
                   onTitleClick &&
                     !isEnteredInError &&
                     "cursor-pointer hover:bg-gray-100 rounded px-1.5 py-0.5",
@@ -672,7 +688,9 @@ export function ResponseCard({
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="px-3 pb-3 pt-0">
+          <CardContent
+            className={presentation === "panel" ? "p-4" : "px-3 pb-3 pt-0"}
+          >
             <ResponseCardContent item={item} />
           </CardContent>
         </CollapsibleContent>
@@ -691,6 +709,7 @@ export default function QuestionnaireResponsesList({
   questionnaireSlug,
   renderItem,
   subjectType = "encounter",
+  presentation = "default",
 }: Props) {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -747,6 +766,8 @@ export default function QuestionnaireResponsesList({
           <Card
             className={cn(
               "p-4",
+              presentation === "panel" &&
+                "rounded-xl border-gray-200 bg-white shadow-none",
               isPrintPreview && "shadow-none border-gray-200",
             )}
           >
@@ -766,6 +787,7 @@ export default function QuestionnaireResponsesList({
                     item={item}
                     patientId={patientId}
                     isPrintPreview={isPrintPreview}
+                    presentation={presentation}
                   />
                 )}
               </li>

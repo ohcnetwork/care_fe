@@ -28,6 +28,7 @@ interface DiagnosisListProps {
   readOnly?: boolean;
   showTimeline?: boolean;
   showViewEncounter?: boolean;
+  presentation?: "default" | "panel";
 }
 
 interface GroupedDiagnoses {
@@ -43,6 +44,7 @@ export function DiagnosisList({
   readOnly = false,
   showTimeline = false,
   showViewEncounter = true,
+  presentation = "default",
 }: DiagnosisListProps) {
   const { t } = useTranslation();
 
@@ -156,6 +158,7 @@ export function DiagnosisList({
       title={t("diagnoses")}
       readOnly={readOnly}
       className={className}
+      presentation={presentation}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
       actionButton={
         <Button

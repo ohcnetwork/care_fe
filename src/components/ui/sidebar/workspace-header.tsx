@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -19,12 +20,14 @@ interface WorkspaceHeaderProps {
   user?: CurrentUserRead;
   patient?: boolean;
   onSearch?: () => void;
+  children?: ReactNode;
 }
 
 export function WorkspaceHeader({
   user,
   patient,
   onSearch,
+  children,
 }: WorkspaceHeaderProps) {
   const { t } = useTranslation();
   const { innerWorkspace } = useAppSidebar();
@@ -47,36 +50,52 @@ export function WorkspaceHeader({
       )}
     >
       <AppSidebarToggle />
-      <span aria-hidden="true" className="h-5 w-px shrink-0 bg-neutral-200" />
-      <div className="min-w-0 max-w-[min(20rem,65vw)]">
-        {patient ? (
-          <PatientSwitcher />
-        ) : responsibilityId ? (
-          <ResponsibilitySwitcher selectedResponsibilityId={responsibilityId} />
-        ) : organization ? (
-          <OrganizationSwitcher
-            organizations={user?.organizations ?? []}
-            selectedOrganization={organization}
+      {children ?? (
+        <>
+          <span
+            aria-hidden="true"
+            className="h-5 w-px shrink-0 bg-neutral-200"
           />
-        ) : facility ? (
-          <FacilitySwitcher
-            facilities={user?.facilities ?? []}
-            selectedFacility={facility}
-          />
-        ) : (
-          <span className="truncate text-sm font-medium">{t("care")}</span>
-        )}
-      </div>
+          <div className="min-w-0 max-w-[min(20rem,65vw)]">
+            {patient ? (
+              <PatientSwitcher />
+            ) : responsibilityId ? (
+              <ResponsibilitySwitcher
+                selectedResponsibilityId={responsibilityId}
+              />
+            ) : organization ? (
+              <OrganizationSwitcher
+                organizations={user?.organizations ?? []}
+                selectedOrganization={organization}
+              />
+            ) : facility ? (
+              <FacilitySwitcher
+                facilities={user?.facilities ?? []}
+                selectedFacility={facility}
+              />
+            ) : (
+              <span className="truncate text-sm font-medium">{t("care")}</span>
+            )}
+          </div>
+        </>
+      )}
       {onSearch && (
         <Button
           variant="outline"
           size="sm"
           onClick={onSearch}
           aria-label={t("search_page_actions")}
-          className="ml-auto size-8 shrink-0 gap-2 rounded-lg border-neutral-300 bg-white p-0 text-neutral-500 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400 sm:h-9 sm:w-52 sm:justify-start sm:px-3"
+          className={cn(
+            "ml-auto size-8 shrink-0 gap-2 rounded-lg border-neutral-300 bg-white p-0 text-neutral-500 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400",
+            children
+              ? "xl:h-9 xl:w-52 xl:justify-start xl:px-3"
+              : "sm:h-9 sm:w-52 sm:justify-start sm:px-3",
+          )}
         >
           <Search className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{t("search_page_actions")}</span>
+          <span className={children ? "hidden xl:inline" : "hidden sm:inline"}>
+            {t("search_page_actions")}
+          </span>
         </Button>
       )}
     </header>

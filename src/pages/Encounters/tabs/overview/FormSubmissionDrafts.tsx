@@ -132,9 +132,14 @@ export function FormSubmissionDrafts({
   if (rows.length === 0) return null;
 
   return (
-    <section aria-label={t("draft_forms")} className="min-w-0 space-y-3">
-      <h2 className="text-lg font-semibold">{t("draft_forms")}</h2>
-      <ul className="min-w-0 divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <section
+      aria-label={t("draft_forms")}
+      className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white"
+    >
+      <h2 className="border-b border-gray-200 px-4 py-3 text-sm font-bold tracking-wide text-gray-600 uppercase">
+        {t("draft_forms")}
+      </h2>
+      <ul className="min-w-0 divide-y divide-gray-200">
         {rows.map((row) => {
           const savedAt = formatDateTime(row.savedAt);
           return (
@@ -142,7 +147,7 @@ export function FormSubmissionDrafts({
               key={`${row.source}-${row.id}`}
               data-draft-source={row.source}
               data-draft-id={row.id}
-              className="flex min-w-0 items-center gap-2 px-3 py-2 sm:gap-3"
+              className="flex min-w-0 items-center gap-2 px-4 py-3 sm:gap-3"
             >
               <span
                 className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900"

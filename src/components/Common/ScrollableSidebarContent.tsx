@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronsDown } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -50,12 +50,25 @@ export function ScrollableSidebarContent({
         </div>
       </SidebarContent>
       {hasMore && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-neutral-100 via-neutral-100/95 to-transparent pt-4 pb-1">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-neutral-100 via-neutral-100/95 to-transparent pt-2">
           <Button
             type="button"
-            variant="outline"
-            size="sm"
-            className="pointer-events-auto h-7 gap-1 rounded-full bg-white text-xs"
+            variant="ghost"
+            size="icon"
+            aria-label={t("more_navigation")}
+            className="pointer-events-auto size-10 rounded-md bg-transparent text-neutral-500 shadow-none hover:bg-transparent hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-neutral-500 [&_svg]:size-5"
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.ctrlKey &&
+                !event.metaKey &&
+                !event.altKey
+              ) {
+                // Keep native activation from being intercepted by global Enter.
+                event.stopPropagation();
+              }
+            }}
             onClick={() =>
               containerRef.current?.scrollBy({
                 top: Math.max(120, containerRef.current.clientHeight * 0.6),
@@ -66,8 +79,7 @@ export function ScrollableSidebarContent({
               })
             }
           >
-            {t("more_navigation")}
-            <ChevronDown aria-hidden className="size-3" />
+            <ChevronsDown aria-hidden="true" strokeWidth={1.5} />
           </Button>
         </div>
       )}

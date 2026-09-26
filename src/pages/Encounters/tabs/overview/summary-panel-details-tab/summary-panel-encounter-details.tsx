@@ -53,7 +53,7 @@ export const SummaryPanelEncounterDetails = () => {
   if (!encounter) return null;
   return (
     <div className="flex flex-col gap-2">
-      <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
+      <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white rounded-xl border border-gray-200 gap-4">
         <div className="flex flex-col gap-4 sm:border-r border-gray-200 pr-4">
           <div className="flex flex-row gap-8">
             <div className="flex flex-col gap-4">

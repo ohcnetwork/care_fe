@@ -25,6 +25,7 @@ interface SymptomsListProps {
   readOnly?: boolean;
   showTimeline?: boolean;
   showViewEncounter?: boolean;
+  presentation?: "default" | "panel";
 }
 
 interface GroupedSymptoms {
@@ -40,6 +41,7 @@ export function SymptomsList({
   readOnly = false,
   showTimeline = false,
   showViewEncounter = true,
+  presentation = "default",
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
@@ -151,6 +153,7 @@ export function SymptomsList({
       title={t("symptoms")}
       readOnly={readOnly}
       className={className}
+      presentation={presentation}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
       actionButton={
         <Button

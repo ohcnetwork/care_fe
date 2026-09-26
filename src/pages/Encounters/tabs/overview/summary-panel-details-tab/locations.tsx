@@ -21,9 +21,11 @@ export const Locations = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex justify-between items-center text-black pl-2">
-        <span className=" font-semibold">{t("location")}</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
+          {t("location")}
+        </span>
         <div className="flex">
           <Button variant="ghost" size="sm" onClick={viewLocationHistory}>
             <HistoryIcon className="cursor-pointer" strokeWidth={1.5} />
@@ -40,7 +42,7 @@ export const Locations = () => {
           )}
         </div>
       </div>
-      <div className="bg-white rounded-md p-2 shadow">
+      <div className="p-3">
         {encounter.current_location ? (
           <LocationTree location={encounter.current_location} />
         ) : (

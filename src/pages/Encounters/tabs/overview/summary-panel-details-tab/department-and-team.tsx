@@ -21,16 +21,18 @@ export const DepartmentsAndTeams = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
-      <div className="flex justify-between items-center pl-2 text-gray-950">
-        <span className=" font-semibold">{t("departments_and_teams")}</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
+          {t("departments_and_teams")}
+        </span>
         {canEdit && (
           <Button variant="ghost" size="sm" onClick={manageDepartments}>
             <SquarePen className="cursor-pointer" strokeWidth={1.5} />
           </Button>
         )}
       </div>
-      <div className="space-y-2 bg-white rounded-md p-2 shadow">
+      <div className="space-y-2 p-3">
         {encounter.organizations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {encounter.organizations.map((org) => (

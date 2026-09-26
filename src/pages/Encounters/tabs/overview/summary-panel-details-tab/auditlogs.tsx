@@ -12,7 +12,7 @@ export const AuditLogs = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="p-2">
+    <div className="rounded-xl border border-gray-200 bg-white p-3">
       <div className="space-y-2">
         <div>
           <p className="text-sm text-gray-500">{t("last_modified_by")}</p>

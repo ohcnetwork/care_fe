@@ -33,6 +33,7 @@ interface PatientHoverCardProps {
   facilityId?: string;
   disabled?: boolean;
   compact?: { allergiesCount: number };
+  presentation?: "default" | "encounter";
 }
 
 export function PatientHoverCard({
@@ -40,6 +41,7 @@ export function PatientHoverCard({
   facilityId,
   disabled = false,
   compact,
+  presentation = "default",
 }: PatientHoverCardProps) {
   return (
     <>
@@ -50,12 +52,14 @@ export function PatientHoverCard({
           className={cn(
             "lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             compact && "block w-full",
+            presentation === "encounter" && "min-w-0 max-w-full text-left",
           )}
         >
           <PatientHoverCardTrigger
             patient={patient}
             disabled={disabled}
             compact={compact}
+            presentation={presentation}
           />
         </DrawerTrigger>
         <DrawerContent className="flex flex-col p-4 gap-4">
@@ -70,9 +74,16 @@ export function PatientHoverCard({
       <Popover>
         <PopoverTrigger
           disabled={disabled}
-          className="hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background"
+          className={cn(
+            "hidden lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-10 focus-visible:ring-offset-background",
+            presentation === "encounter" && "min-w-0 max-w-full text-left",
+          )}
         >
-          <PatientHoverCardTrigger patient={patient} disabled={disabled} />
+          <PatientHoverCardTrigger
+            patient={patient}
+            disabled={disabled}
+            presentation={presentation}
+          />
         </PopoverTrigger>
         <PopoverContent
           className="flex flex-col border border-gray-200 shadow-lg p-4 rounded-md gap-4 w-100"
@@ -93,14 +104,38 @@ interface PatientHoverCardTriggerProps {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   disabled?: boolean;
   compact?: { allergiesCount: number };
+  presentation?: "default" | "encounter";
 }
 
 function PatientHoverCardTrigger({
   patient,
   disabled = false,
   compact,
+  presentation = "default",
 }: PatientHoverCardTriggerProps) {
   const { t } = useTranslation();
+
+  if (presentation === "encounter") {
+    return (
+      <span
+        data-slot="patient-info-hover-card-trigger"
+        className={cn(
+          "flex min-w-0 items-center gap-1.5 rounded-sm",
+          !disabled && "cursor-pointer hover:bg-gray-50 active:bg-gray-50",
+        )}
+      >
+        <span className="text-base font-semibold wrap-anywhere text-gray-950 underline underline-offset-2">
+          {patient.name}
+        </span>
+        {!disabled && (
+          <ChevronDown
+            aria-hidden="true"
+            className="size-4 shrink-0 text-gray-500"
+          />
+        )}
+      </span>
+    );
+  }
 
   if (compact) {
     const bloodGroup = shortBloodGroup(patient.blood_group);

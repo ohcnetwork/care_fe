@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { PLUGIN_Component } from "@/PluginEngine";
 
 import { EmptyState } from "@/components/ui/empty-state";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
@@ -45,9 +44,15 @@ export const EncounterOverviewTab = () => {
     plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
 
   return (
-    <div className="flex gap-3 @max-md:w-full">
-      {canReadClinicalData ? (
-        <div className="min-w-0 flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
+    <div className="flex items-start gap-5 @max-md:w-full">
+      <div className="min-w-0 flex-1">
+        <div className="mb-4 flex min-h-10 flex-wrap items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold tracking-tight text-gray-950">
+            {t("ENCOUNTER_TAB__updates")}
+          </h1>
+          {canReadClinicalData && <ClinicalHistoryOverview />}
+        </div>
+        {canReadClinicalData ? (
           <div className="flex flex-col gap-4">
             {canWrite && <QuickActions />}
             {canWrite && <FavoriteFormsQuickActions />}
@@ -59,14 +64,13 @@ export const EncounterOverviewTab = () => {
                 encounterId={encounterId}
               />
             )}
-            {<ClinicalHistoryOverview />}
 
             <div className="xl:hidden">
               <SummaryPanel />
             </div>
 
             {
-              <div className="flex flex-col gap-8 overflow-x-auto">
+              <div className="flex flex-col gap-5 overflow-x-auto">
                 {/* Show preview of devices associated with the encounter */}
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />
@@ -81,6 +85,7 @@ export const EncounterOverviewTab = () => {
                   )}
                 {/* Clinical informations */}
                 <AllergyList
+                  presentation="panel"
                   patientId={patientId}
                   encounterId={encounterId}
                   readOnly={!canWrite}
@@ -88,23 +93,27 @@ export const EncounterOverviewTab = () => {
                   showViewEncounter={false}
                 />
                 <SymptomsList
+                  presentation="panel"
                   patientId={patientId}
                   encounterId={encounterId}
                   readOnly={!canWrite}
                   showViewEncounter={false}
                 />
                 <DiagnosisList
+                  presentation="panel"
                   patientId={patientId}
                   encounterId={encounterId}
                   readOnly={!canWrite}
                   showViewEncounter={false}
                 />
                 <VitalsList
+                  presentation="panel"
                   patientId={patientId}
                   encounterId={encounterId}
                   codeGroups={vitalGroups}
                 />
                 <QuestionnaireResponsesList
+                  presentation="panel"
                   encounterId={encounterId}
                   patientId={patientId}
                   canAccess={canAccess}
@@ -112,21 +121,21 @@ export const EncounterOverviewTab = () => {
               </div>
             }
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 xl:pr-3 flex items-center justify-center">
-          <EmptyState
-            icon={<ShieldAlert className="text-gray-400 size-8" />}
-            title={t("no_permission_to_view_clinical_data")}
-            description={t("no_permission_to_view_clinical_data_description")}
-            className="h-full w-full bg-transparent"
-          />
-        </div>
-      )}
+        ) : (
+          <div className="flex-1 xl:pr-3 flex items-center justify-center">
+            <EmptyState
+              icon={<ShieldAlert className="text-gray-400 size-8" />}
+              title={t("no_permission_to_view_clinical_data")}
+              description={t("no_permission_to_view_clinical_data_description")}
+              className="h-full w-full bg-transparent"
+            />
+          </div>
+        )}
+      </div>
 
-      <ScrollArea className="w-72 hidden xl:block h-[calc(100vh-14rem-var(--encounter-header-offset))]">
+      <aside className="hidden w-72 shrink-0 xl:block">
         <SummaryPanel />
-      </ScrollArea>
+      </aside>
     </div>
   );
 };

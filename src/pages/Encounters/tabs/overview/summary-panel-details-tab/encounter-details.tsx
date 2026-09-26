@@ -30,9 +30,11 @@ export const EncounterDetails = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md pt-2 px-1 pb-1">
-      <div className="flex items-center justify-between w-full text-gray-950 pl-2">
-        <span className="font-semibold ">{t("encounter_details")}</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
+          {t("encounter_details")}
+        </span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
@@ -43,7 +45,7 @@ export const EncounterDetails = () => {
           </Button>
         )}
       </div>
-      <div className="flex flex-wrap gap-2 justify-between bg-white w-full p-2 rounded-md shadow">
+      <div className="flex w-full flex-wrap justify-between gap-3 p-3">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">{t("status")}: </span>
           <div>
@@ -112,7 +114,11 @@ export const EncounterDetails = () => {
       </div>
       {canWriteSelectedEncounter && (
         <>
-          <Button variant="outline" className="w-full" asChild>
+          <Button
+            variant="outline"
+            className="mx-3 mb-3 w-[calc(100%-1.5rem)] shadow-none"
+            asChild
+          >
             <Link
               href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
             >
