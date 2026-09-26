@@ -122,6 +122,49 @@ export async function createQuestionnaire(
   return page.url();
 }
 
+/** Seeds an active facility questionnaire straight through the API — for
+ *  specs about the studio, not about the create form. Returns its id. */
+export async function createFacilityQuestionnaireViaApi(
+  facilityId: string,
+  title: string,
+  questions: object[],
+): Promise<string> {
+  const res = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/`, {
+    method: "POST",
+    headers: adminApiHeaders(),
+    body: JSON.stringify({
+      title,
+      slug: `qv2-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      version: "1.0",
+      status: "active",
+      subject_type: "encounter",
+      auth_context: "facility",
+      facility: facilityId,
+      questions,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`questionnaire create: ${res.status} ${await res.text()}`);
+  }
+  return ((await res.json()) as { id: string }).id;
+}
+
+/** Reads a questionnaire's current server state. */
+export async function getQuestionnaireViaApi(id: string): Promise<{
+  title: string;
+  slug: string;
+  description: string | null;
+  status: string;
+  internal_revision?: number;
+  questions: Record<string, unknown>[];
+}> {
+  const res = await fetch(`${apiBaseUrl()}/api/v1/questionnaire/${id}/`, {
+    headers: adminApiHeaders(),
+  });
+  if (!res.ok) throw new Error(`questionnaire get: ${res.status}`);
+  return res.json();
+}
+
 /** From the detail page, opens the question builder (`…/{id}/edit`). */
 export async function openQuestionBuilder(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Edit Questions" }).click();

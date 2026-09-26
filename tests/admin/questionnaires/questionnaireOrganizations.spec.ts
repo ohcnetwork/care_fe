@@ -1,13 +1,71 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import * as fs from "fs";
 import {
   adminApiHeaders,
   apiBaseUrl,
   createQuestionnaire,
 } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
+import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+const NURSE_STATE = "tests/.auth/nurse.json";
+
+/** A facility department care-nurse belongs to — resolved at runtime
+ *  because it differs between fixture sets. */
+async function nurseDepartment(
+  facilityId: string,
+): Promise<{ id: string; name: string }> {
+  const state = JSON.parse(fs.readFileSync(NURSE_STATE, "utf-8"));
+  const token = state.origins[0].localStorage.find(
+    (item: { name: string }) => item.name === "care_access_token",
+  ).value;
+  const res = await fetch(
+    `${apiBaseUrl()}/api/v1/facility/${facilityId}/organizations/mine/`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  expect(res.ok).toBe(true);
+  const { results } = (await res.json()) as {
+    results: { id: string; name: string }[];
+  };
+  expect(results.length).toBeGreaterThan(0);
+  return results[0];
+}
+
+/** Asserts whether `title` is offered in the facility list and the
+ *  encounter Forms picker for the user behind `page`. */
+async function expectVisibleToUser(
+  page: Page,
+  title: string,
+  visible: boolean,
+) {
+  const facilityId = getFacilityId();
+
+  await page.goto(`/facility/${facilityId}/settings/questionnaires`);
+  await page.getByPlaceholder("Search questionnaires").fill(title);
+  if (visible) {
+    await expect(page.locator('[data-slot="table-body"]')).toContainText(title);
+  } else {
+    await expect(page.getByText("No questionnaires found")).toBeVisible();
+  }
+
+  await page.goto(
+    `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/updates`,
+  );
+  await page.getByRole("button", { name: "Forms" }).click();
+  const picker = page.getByRole("dialog");
+  await picker.getByPlaceholder("Search Forms").fill(title);
+  if (visible) {
+    await expect(
+      picker.getByRole("option").filter({ hasText: title }),
+    ).toBeVisible();
+  } else {
+    await expect(picker.getByText("No results")).toBeVisible();
+  }
+}
 
 test.describe("Questionnaire v2 organizations field", () => {
   test("instance variant adds and removes a role organization", async ({
@@ -21,6 +79,7 @@ test.describe("Questionnaire v2 organizations field", () => {
         basePath: "/admin/questionnaires",
         title,
       });
+      // Scoped: the admin sidebar also has an "Organizations" nav item.
       await expect(
         page
           .getByRole("tabpanel", { name: "Questions", exact: true })
@@ -227,5 +286,73 @@ test.describe("Questionnaire v2 organizations field", () => {
           page.locator("fieldset p").filter({ hasText: name }),
         ).toBeVisible();
     });
+  });
+
+  test("tagging the nurse's department makes an encounter questionnaire visible to them, untagging hides it", async ({
+    page,
+    browser,
+  }) => {
+    // Two users and six page loads: the default 60s budget is too tight under load.
+    test.slow();
+    const facilityId = getFacilityId();
+    const title = `QV2 Orgs Visibility ${Date.now()}`;
+    const department = await nurseDepartment(facilityId);
+    const nurseContext = await browser.newContext({
+      storageState: NURSE_STATE,
+    });
+    const nursePage = await nurseContext.newPage();
+    let detailUrl = "";
+
+    try {
+      await test.step("Admin creates an untagged active encounter questionnaire", async () => {
+        // Pickers only offer active questionnaires; new ones default to Draft.
+        detailUrl = await createQuestionnaire(page, {
+          basePath: `/facility/${facilityId}/settings/questionnaires`,
+          title,
+          status: "Active",
+        });
+      });
+
+      await test.step("Untagged: hidden from the nurse", async () => {
+        await expectVisibleToUser(nursePage, title, false);
+      });
+
+      await test.step("Admin tags the nurse's department", async () => {
+        // The nurse's department can be the facility root, which the picker
+        // never offers — so tag through the endpoint the picker calls.
+        const res = await fetch(
+          `${apiBaseUrl()}/api/v1/questionnaire/${detailUrl.split("/").pop()}/set_facility_organizations/`,
+          {
+            method: "POST",
+            headers: adminApiHeaders(),
+            body: JSON.stringify({ facility_organizations: [department.id] }),
+          },
+        );
+        expect(res.ok).toBe(true);
+      });
+
+      await test.step("Tagged: the nurse sees it in the list and encounter picker", async () => {
+        await expectVisibleToUser(nursePage, title, true);
+      });
+
+      await test.step("Admin removes the tag in the UI and saves", async () => {
+        await page.goto(detailUrl);
+        await expect(page.getByText(department.name).first()).toBeVisible();
+        await page
+          .locator("fieldset")
+          .getByRole("button", { name: "Remove organization" })
+          .click();
+        await page
+          .getByRole("button", { name: /Save (Questionnaire|Form)/ })
+          .click();
+        await expectToast(page, "Questionnaire updated successfully");
+      });
+
+      await test.step("Untagged again: hidden from the nurse", async () => {
+        await expectVisibleToUser(nursePage, title, false);
+      });
+    } finally {
+      await nurseContext.close();
+    }
   });
 });

@@ -1,12 +1,23 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  createFacilityQuestionnaireViaApi,
   createQuestionnaireAndOpenBuilder,
+  getQuestionnaireViaApi,
   questionBlock,
 } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+const BEHAVIOUR_FLAGS = ["Required", "Repeatable", "Read only"];
+const CAPTURE_FLAGS = [
+  "Component",
+  "Collect Time",
+  "Collect Performer",
+  "Collect Method",
+  "Collect Body Site",
+];
 
 /** Imports flat string questions into the freshly-opened builder. */
 async function importStringQuestions(
@@ -32,6 +43,150 @@ async function importStringQuestions(
 }
 
 test.describe("Questionnaire v2 builder navigation", () => {
+  test("a new question starts as an untitled String with every flag off", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const flag = (name: string) =>
+      page.getByRole("checkbox", { name, exact: true });
+
+    const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Defaults ${stamp}`,
+    });
+
+    const expectDefaults = async () => {
+      await expect(
+        page.getByRole("textbox", { name: "Question Title" }),
+      ).toHaveValue("");
+      await expect(page.getByRole("combobox").first()).toContainText("String");
+      for (const name of BEHAVIOUR_FLAGS) {
+        await expect(flag(name)).toHaveAttribute("aria-checked", "false");
+      }
+      await page.getByRole("tab", { name: "Coding" }).click();
+      await expect(page.getByText("Code Verified")).toHaveCount(0);
+      for (const name of CAPTURE_FLAGS) {
+        await expect(flag(name)).toHaveAttribute("aria-checked", "false");
+      }
+      await page.getByRole("tab", { name: "Question" }).click();
+    };
+
+    await test.step("Add First Question", async () => {
+      await page.getByRole("button", { name: "Add First Question" }).click();
+      await expectDefaults();
+      await page
+        .getByRole("textbox", { name: "Question Title" })
+        .pressSequentially(`First ${stamp}`);
+    });
+
+    await test.step("Add new question from the outline", async () => {
+      await page
+        .getByRole("navigation")
+        .getByRole("button", { name: "Add new question" })
+        .last()
+        .click();
+      await expectDefaults();
+      await page
+        .getByRole("textbox", { name: "Question Title" })
+        .pressSequentially(`Second ${stamp}`);
+    });
+
+    await test.step("Saved questions keep the defaults", async () => {
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      const { questions } = await getQuestionnaireViaApi(
+        detailUrl.split("/").pop()!,
+      );
+      expect(questions).toHaveLength(2);
+      for (const question of questions) {
+        expect(question.type).toBe("string");
+        for (const key of [
+          "required",
+          "repeats",
+          "read_only",
+          "is_component",
+          "collect_time",
+          "collect_performer",
+          "collect_method",
+          "collect_body_site",
+        ]) {
+          expect(question[key] ?? false, key).toBe(false);
+        }
+      }
+    });
+  });
+
+  test("Duplicate copies every property under a new id and a (copy) title", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const stamp = Date.now();
+    const title = `Source question ${stamp}`;
+    const source = {
+      id: crypto.randomUUID(),
+      link_id: "source",
+      text: title,
+      type: "choice",
+      description: `Helper ${stamp}`,
+      required: true,
+      repeats: true,
+      collect_time: true,
+      collect_performer: true,
+      answer_option: [{ value: "Alpha" }, { value: "Beta" }],
+    };
+    const id = await createFacilityQuestionnaireViaApi(
+      facilityId,
+      `QV2 Duplicate ${stamp}`,
+      [source],
+    );
+
+    await page.goto(
+      `/facility/${facilityId}/settings/questionnaires/${id}/edit`,
+    );
+
+    await test.step("Duplicate from the canvas toolbar", async () => {
+      await questionBlock(page, title).locator("label").click();
+      await page.getByRole("button", { name: "Duplicate question" }).click();
+      await expect(
+        page.getByRole("textbox", { name: "Question Title" }),
+      ).toHaveValue(`${title} (copy)`);
+    });
+
+    await test.step("The copy shows the source's settings in the inspector", async () => {
+      await expect(
+        page.getByRole("textbox", { name: /Helper text/ }),
+      ).toHaveValue(source.description);
+      for (const name of ["Required", "Repeatable"]) {
+        await expect(
+          page.getByRole("checkbox", { name, exact: true }),
+        ).toHaveAttribute("aria-checked", "true");
+      }
+    });
+
+    await test.step("After saving, the copy matches the source except id, link_id and title", async () => {
+      await page.getByRole("button", { name: "Save Changes" }).click();
+      await expectToast(page, "Questionnaire updated successfully");
+      const { questions } = await getQuestionnaireViaApi(id);
+      expect(questions).toHaveLength(2);
+      const [original, copy] = questions;
+      expect(copy.id).not.toBe(original.id);
+      expect(copy.link_id).not.toBe(original.link_id);
+      expect(copy.text).toBe(`${title} (copy)`);
+      for (const key of [
+        "type",
+        "description",
+        "required",
+        "repeats",
+        "collect_time",
+        "collect_performer",
+        "answer_option",
+      ]) {
+        expect(copy[key], key).toEqual(original[key]);
+      }
+    });
+  });
+
   test("canvas click selects a question; the floating toolbar reorders, duplicates and deletes", async ({
     page,
   }) => {
