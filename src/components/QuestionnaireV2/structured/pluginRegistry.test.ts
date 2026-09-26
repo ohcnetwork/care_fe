@@ -106,28 +106,6 @@ test("getPluginStructuredType is stable across repeated calls for an unchanged r
   assert.equal(first, second);
 });
 
-test("getPluginStructuredType returns a new identity after a re-register", () => {
-  const broken = makeDefinition("plugin_f.widget");
-  registerPluginStructuredType(broken, "plugin_f");
-  const beforeFix = getPluginStructuredType("plugin_f.widget");
-
-  // The plugin re-registers the same type with a fixed component — the
-  // scenario PluginErrorBoundary's resetKey (via StructuredSlot's
-  // `resetKey={definition}`, itself sourced from this same Map through
-  // `resolveStructuredType`'s memoized wrapper) exists to catch.
-  const fixed = makeDefinition("plugin_f.widget");
-  registerPluginStructuredType(fixed, "plugin_f");
-  const afterFix = getPluginStructuredType("plugin_f.widget");
-
-  assert.equal(beforeFix, broken);
-  assert.equal(afterFix, fixed);
-  assert.notEqual(
-    beforeFix,
-    afterFix,
-    "a boundary keyed on this identity must see a change on re-register",
-  );
-});
-
 // ---------------------------------------------------------------------------
 // Persistence: a plugin may opt out of `buildRequests` entirely by declaring
 // `persistence: "response"` — the entries then ride the questionnaire

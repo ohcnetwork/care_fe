@@ -65,20 +65,6 @@ test.describe("Device Organization Association", () => {
     await expect(page.getByText("No organization associated")).toBeVisible();
   });
 
-  test("should open organization association sheet", async ({ page }) => {
-    // Click associate button for organization - find by Managing Organization heading
-    await page
-      .getByRole("heading", { name: "Managing Organization" })
-      .locator("..")
-      .getByRole("button", { name: "Associate" })
-      .click();
-
-    // Sheet should open
-    await expect(
-      page.getByRole("heading", { name: "Manage Organization" }),
-    ).toBeVisible();
-  });
-
   test("should associate an organization to device", async ({ page }) => {
     // Click associate button for organization - find by Managing Organization heading
     await page

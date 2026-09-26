@@ -531,8 +531,18 @@ describe("structured fill values", () => {
       false,
     );
     assert.equal(coerce("diagnosis", ["Fever"]).ok, false);
-    assert.equal(coerce("encounter", [{}, {}]).ok, false);
-    assert.equal(coerce("appointment", [{}, {}]).ok, false);
+    assert.equal(
+      coerce("encounter", [structuredRows.encounter, structuredRows.encounter])
+        .ok,
+      false,
+    );
+    assert.equal(
+      coerce("appointment", [
+        structuredRows.appointment,
+        structuredRows.appointment,
+      ]).ok,
+      false,
+    );
     assert.equal(coerce("demo.custom", [{ answer: "value" }]).ok, true);
   });
 });

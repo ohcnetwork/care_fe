@@ -147,47 +147,42 @@ test.describe("ValueSet Create", () => {
     // Input details for the ValueSet
     await page.getByRole("textbox", { name: "Name *" }).fill(name);
     await page.getByRole("textbox", { name: "Slug *" }).fill(slug);
-    await page.getByRole("button", { name: "Add Rule" }).nth(1).click();
-    await page.getByRole("combobox", { name: "System" }).click();
-    await page.getByRole("option", { name: system }).click();
-    await page.getByRole("button", { name: "Add Concept" }).click();
-    await page.getByRole("textbox", { name: "Code" }).fill(code);
-    await page.getByLabel("Verify code").click();
-
-    await expect(
-      page
-        .getByRole("listitem")
-        .filter({ hasText: "Code verified successfully" }),
-    ).toBeVisible();
-
-    // Verify the code name is present in the display value
-    const displayValue = await page
-      .getByRole("textbox", { name: "Display name" })
-      .inputValue();
-    expect(displayValue).toContain(codeName);
-
-    await page.getByRole("button", { name: /valueset preview/i }).click();
-
-    await expect(
-      page.getByRole("dialog", {
-        name: /valueset preview/i,
-      }),
-    ).toBeVisible();
-
     const previewDialog = page.getByRole("dialog", {
       name: /valueset preview/i,
     });
+    const previewConcept = previewDialog
+      .getByRole("listitem")
+      .getByText(code, { exact: true });
 
-    await previewDialog
-      .getByRole("textbox", { name: "Search for a concept in this valueset" })
-      .fill(code);
-    await expect(previewDialog.getByRole("status")).toHaveText(
-      /^Showing \d+ concepts?$/,
-    );
-    await expect(
-      previewDialog.getByRole("listitem").getByText(code, { exact: true }),
-    ).toHaveCount(0);
-    await previewDialog.getByRole("button", { name: "Close" }).click();
+    for (const ruleType of ["Include rules", "Exclude rules"]) {
+      const ruleSection = page
+        .locator("section")
+        .filter({
+          has: page.getByRole("heading", { name: ruleType, exact: true }),
+        })
+        .last();
+      await ruleSection.getByRole("button", { name: "Add Rule" }).click();
+      await ruleSection.getByRole("combobox", { name: "System" }).click();
+      await page.getByRole("option", { name: system }).click();
+      await ruleSection.getByRole("button", { name: "Add Concept" }).click();
+      await ruleSection.getByRole("textbox", { name: "Code" }).fill(code);
+      await ruleSection.getByLabel("Verify code").click();
+      await expect(
+        ruleSection.getByRole("textbox", { name: "Display name" }),
+      ).toHaveValue(new RegExp(codeName, "i"));
+
+      await page.getByRole("button", { name: /valueset preview/i }).click();
+      if (ruleType === "Include rules") {
+        // Establish that this concept exists before testing its exclusion.
+        await expect(previewConcept).toBeVisible();
+      } else {
+        await expect(previewDialog.getByRole("status")).toHaveText(
+          "Showing 0 concepts",
+        );
+        await expect(previewConcept).toHaveCount(0);
+      }
+      await previewDialog.getByRole("button", { name: "Close" }).click();
+    }
   });
 
   test("verify slug validation of 5 - 25 character", async ({ page }) => {
@@ -222,6 +217,7 @@ test.describe("ValueSet Create", () => {
     await page.getByRole("textbox", { name: "Slug *" }).fill(validSlug);
     await page.getByRole("button", { name: /save/i }).click();
 
-    await expect(page).not.toHaveURL(/\/new$/);
+    await expectToast(page, /valueset created successfully/i);
+    await expect(page).toHaveURL("/admin/valuesets");
   });
 });

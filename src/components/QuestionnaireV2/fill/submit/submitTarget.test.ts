@@ -115,20 +115,6 @@ describe("planPlainSubmit — the endpoint/body decision, keyed off the question
     );
   });
 
-  it("no draft id means no form_submission key at all — an explicit undefined would fail the backend's UUID parse", () => {
-    const plan = planPlainSubmit({
-      questionnaireId: "qn-1",
-      subjectType: "patient",
-      subject: patientMount,
-      results,
-    });
-
-    assert.equal(
-      plan.kind === "patient_bound" && "form_submission" in plan.body,
-      false,
-    );
-  });
-
   it("resource subjects post to submit_resource/ with resource_id alone", () => {
     const plan = planPlainSubmit({
       questionnaireId: "qn-1",

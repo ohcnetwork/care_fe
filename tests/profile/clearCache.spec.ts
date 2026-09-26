@@ -31,10 +31,32 @@ test.describe("Clear Cache in profile successfully", () => {
     const preCaches = await page.evaluate(() => caches.keys());
     expect(preCaches).toContain("test-cache");
 
-    // Get initial service worker registrations count
-    const preRegs = await page.evaluate(
-      async () => (await navigator.serviceWorker.getRegistrations()).length,
-    );
+    // The app registers its root worker again after reload. A separate scope
+    // proves that Clear Cache actually unregisters existing workers.
+    const testScope = await page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.register(
+        "/service-worker.js",
+        { scope: "/cache-clear-test/" },
+      );
+      return registration.scope;
+    });
+    expect(
+      await page.evaluate(async () =>
+        (await navigator.serviceWorker.getRegistrations()).map(
+          (reg) => reg.scope,
+        ),
+      ),
+    ).toContain(testScope);
+    await expect
+      .poll(() =>
+        page.evaluate(async (scope) => {
+          const registrations =
+            await navigator.serviceWorker.getRegistrations();
+          return registrations.find((reg) => reg.scope === scope)?.active
+            ?.state;
+        }, testScope),
+      )
+      .toBe("activated");
 
     // Set up page reload listener
     const reloadPromise = page.waitForEvent("domcontentloaded");
@@ -58,14 +80,12 @@ test.describe("Clear Cache in profile successfully", () => {
     expect(remainingCaches).not.toContain("test-cache");
 
     // Verify service workers have been unregistered
-    const remainingRegs = await page.evaluate(
-      async () => (await navigator.serviceWorker.getRegistrations()).length,
+    const remainingScopes = await page.evaluate(async () =>
+      (await navigator.serviceWorker.getRegistrations()).map(
+        (reg) => reg.scope,
+      ),
     );
-
-    // If there were service workers before, verify they're reduced or gone
-    if (preRegs > 0) {
-      expect(remainingRegs).toBeLessThanOrEqual(preRegs);
-    }
+    expect(remainingScopes).not.toContain(testScope);
 
     // Wait for profile page to be fully loaded and verify user is still on the profile page
     await expect(

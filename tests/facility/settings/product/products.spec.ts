@@ -1,23 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Product List", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to home page (user is already authenticated)
-    await page.goto("/");
-
-    // Navigate to a facility - using a more robust selector
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-
-    // Navigate to Products via sidebar
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("link", { name: "Settings", exact: true }).click();
-    await page.getByRole("link", { name: "Product", exact: true }).click();
+    await page.goto(`/facility/${getFacilityId()}/settings/product`);
   });
 
   test("should display product categories in dropdown", async ({ page }) => {
@@ -66,7 +55,9 @@ test.describe("Product List", () => {
     });
   });
 
-  test("should allow multiple category selections", async ({ page }) => {
+  test("should reopen product categories with an existing selection", async ({
+    page,
+  }) => {
     await test.step("Select first category", async () => {
       await page
         .getByRole("combobox")
@@ -83,12 +74,8 @@ test.describe("Product List", () => {
       await page.getByLabel("Suggestions").getByText("Gloves").click();
     });
 
-    await test.step("Open dropdown again for additional selection", async () => {
-      // Reopen dropdown to select another category/product
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Search Product Knowledge" })
-        .click();
+    await test.step("Reopen dropdown with the selected product", async () => {
+      await page.getByRole("combobox").filter({ hasText: "Gloves" }).click();
 
       // Verify the dropdown is still functional
       await expect(page.getByText("Consumables")).toBeVisible();
@@ -136,26 +123,7 @@ test.describe("Product List", () => {
     });
   });
 
-  test("should handle empty search results gracefully", async ({ page }) => {
-    await test.step("Open product search", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Search Product Knowledge" })
-        .click();
-    });
-
-    await test.step("Search for non-existent category", async () => {
-      // Assert that only known categories are present and no "No results" message is shown
-      await expect(page.getByText("Consumables")).toBeVisible();
-      await expect(page.getByText("Medications")).toBeVisible();
-      // Optionally, check that "No results" is NOT visible
-      await expect(
-        page.getByText(/no results|not found|no products/i),
-      ).not.toBeVisible();
-    });
-  });
-
-  test("should maintain state during navigation in product filtering", async ({
+  test("should reset product selection when returning through settings navigation", async ({
     page,
   }) => {
     await test.step("Select category and product", async () => {
@@ -166,10 +134,19 @@ test.describe("Product List", () => {
 
       await page.getByText("Consumables").click();
       await page.getByLabel("Suggestions").getByText("Gloves").click();
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "Gloves" }),
+      ).toBeVisible();
     });
 
     await test.step("Navigate away and back", async () => {
       // Navigate to another setting, then return to Products.
+      const sidebarToggle = page
+        .locator('[data-cy="facility-settings-page-header"]')
+        .getByRole("button", { name: "Toggle Sidebar", exact: true });
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
+      }
       const sidebar = page.locator('[data-sidebar="sidebar"]');
       await sidebar.getByRole("link", { name: "General", exact: true }).click();
       await sidebar.getByRole("link", { name: "Product", exact: true }).click();

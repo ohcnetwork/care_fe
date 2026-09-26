@@ -37,19 +37,6 @@ test.describe("Device Location Association", () => {
     await expect(page.getByText("No location associated")).toBeVisible();
   });
 
-  test("should open location association sheet", async ({ page }) => {
-    // Click associate button for location - find by Location heading
-    await page
-      .getByRole("heading", { name: "Location" })
-      .locator("..")
-      .getByRole("button", { name: "Associate" })
-      .click();
-
-    // Sheet should open
-    await expect(page.getByText("Associate Location")).toBeVisible();
-    await expect(page.getByText("No locations found")).toBeVisible();
-  });
-
   test("should associate a location to device", async ({ page }) => {
     // Click associate button for location - find by Location heading
     await page

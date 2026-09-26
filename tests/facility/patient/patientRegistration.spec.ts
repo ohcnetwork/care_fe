@@ -164,16 +164,7 @@ async function fillRequiredFieldsAndSubmit(page: Page, data: PatientData) {
 
 test.describe("Patient Registration", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Patients", exact: true }).click();
-    await page.getByRole("link", { name: /search patients/i }).click();
+    await page.goto(`/facility/${getFacilityId()}/patients`);
   });
 
   test("should successfully register a new patient with all required fields", async ({
@@ -288,26 +279,6 @@ test.describe("Patient Registration", () => {
           .getByText(/patient registered successfully/i),
       ).not.toBeVisible();
     });
-  });
-
-  test("should allow patient tags selection", async ({ page }) => {
-    const patientData = generatePatientData();
-    await startRegistration(page);
-    await fillBasicInfo(page, patientData);
-    await fillDateOfBirth(page, patientData.dateOfBirth);
-
-    await test.step("Select patient tags", async () => {
-      const patientTagsSection = page.getByText("Patient Tags (Optional)");
-      if (await patientTagsSection.isVisible()) {
-        await patientTagsSection.click();
-      }
-    });
-
-    await selectBloodGroup(page, patientData.bloodGroup);
-    await fillAdditionalDetails(page, patientData);
-    await submitRegistration(page);
-
-    // TODO: Verify that selected tags are associated with the patient
   });
 
   test("should register patient with age and verify year of birth calculation and profile display", async ({
