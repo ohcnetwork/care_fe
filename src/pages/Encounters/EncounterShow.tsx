@@ -78,6 +78,7 @@ export const EncounterShow = (props: Props) => {
     patient,
     isPatientLoading,
     canWritePrimaryEncounter,
+    canWriteSelectedEncounter,
     canReadClinicalData,
     canReadSelectedEncounter,
   } = useEncounter();
@@ -289,9 +290,15 @@ export const EncounterShow = (props: Props) => {
       <div className="mt-4 flex min-w-0 flex-col gap-4">
         <EncounterDetailsHeader
           encounter={selectedEncounter}
+          currentFacilityId={facilityId}
           isLoading={isSelectedEncounterLoading}
           isHistorical={selectedEncounterId !== primaryEncounterId}
           onReturnToCurrent={() => setSelectedEncounter(null)}
+          editUrl={
+            canWriteSelectedEncounter && facilityId
+              ? `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/encounter`
+              : undefined
+          }
         />
 
         <EncounterNavigation

@@ -43,6 +43,14 @@ test.describe("Encounter navigation", () => {
       test("keeps the chosen encounter across sections and returns to the current encounter", async ({
         page,
       }) => {
+        const encounterContext = page.getByRole("region", {
+          name: "Encounter",
+          exact: true,
+        });
+        const updateEncounter = encounterContext.getByRole("link", {
+          name: "Edit encounter",
+          exact: true,
+        });
         const historicalContext = page.getByText("Viewing another encounter", {
           exact: true,
         });
@@ -50,6 +58,19 @@ test.describe("Encounter navigation", () => {
           name: "Back to current encounter",
           exact: true,
         });
+        let currentFacilityName = "";
+        await page.route(
+          `**/api/v1/encounter/${primaryEncounterId}/`,
+          async (route) => {
+            const response = await route.fetch();
+            const encounter = await response.json();
+            currentFacilityName = encounter.facility.name;
+            await route.fulfill({
+              response,
+              json: { ...encounter, period: {} },
+            });
+          },
+        );
 
         await page.goto(
           `/facility/${getFacilityId()}/patient/${patientId}/encounter/${primaryEncounterId}/updates`,
@@ -59,6 +80,53 @@ test.describe("Encounter navigation", () => {
         ).toBeVisible();
         await expect(historicalContext).not.toBeVisible();
         await expect(returnToCurrent).not.toBeVisible();
+        await expect(updateEncounter).toBeVisible();
+        expect(currentFacilityName).not.toBe("");
+        await expect(
+          encounterContext.getByText(currentFacilityName, { exact: true }),
+        ).not.toBeVisible();
+        await expect(
+          encounterContext.getByRole("button", { name: /^Encounter dates:/ }),
+        ).toHaveText(/\d{1,2} [A-Za-z]{3}.*Ongoing/);
+
+        await test.step("Read encounter status and dates using the keyboard", async () => {
+          await encounterContext
+            .getByRole("button", { name: /^Status History:/ })
+            .focus();
+          await page.keyboard.press("Enter");
+          const details = page.getByRole("dialog");
+          await expect(
+            details.getByRole("heading", { name: "Status History" }),
+          ).toBeVisible();
+          await expect(
+            details.getByText("In Progress", { exact: true }),
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(details).not.toBeVisible();
+
+          await encounterContext
+            .getByRole("button", { name: /^Encounter dates:/ })
+            .focus();
+          await page.keyboard.press("Enter");
+          await expect(
+            details.getByText("Start date", { exact: true }),
+          ).toBeVisible();
+          await expect(
+            details.getByText("Not Specified", { exact: true }),
+          ).toBeVisible();
+          await expect(
+            details.getByText("Created Date", { exact: true }),
+          ).toBeVisible();
+          await expect(
+            details.getByText("End date", { exact: true }),
+          ).toBeVisible();
+          await expect(details.getByText(/\d{1,2}:\d{2}/)).toBeVisible();
+          await expect(
+            details.getByText("Ongoing", { exact: true }),
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(details).not.toBeVisible();
+        });
 
         await test.step("Choose the historical encounter", async () => {
           await page
@@ -73,6 +141,23 @@ test.describe("Encounter navigation", () => {
           );
           await expect(historicalContext).toBeVisible();
           await expect(returnToCurrent).toBeVisible();
+          await expect(updateEncounter).not.toBeVisible();
+          await expect(
+            encounterContext.getByText(currentFacilityName, { exact: true }),
+          ).toBeVisible();
+          const dates = encounterContext.getByRole("button", {
+            name: /^Encounter dates:/,
+          });
+          await expect(dates).not.toContainText("Ongoing");
+          await dates.focus();
+          await page.keyboard.press("Enter");
+          const details = page.getByRole("dialog");
+          await expect(details.getByText(/\d{1,2}:\d{2}/)).toHaveCount(2);
+          await expect(
+            details.getByText("Created Date", { exact: true }),
+          ).not.toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(details).not.toBeVisible();
         });
 
         await test.step("Open Notes and retain the historical encounter", async () => {
@@ -143,6 +228,7 @@ test.describe("Encounter navigation", () => {
           ).toHaveAttribute("aria-selected", "true");
           await expect(historicalContext).not.toBeVisible();
           await expect(returnToCurrent).not.toBeVisible();
+          await expect(updateEncounter).toBeVisible();
         });
       });
     });
