@@ -141,7 +141,7 @@ export function ValueSetVariantChooser({
                   disabled={isPending}
                   onClick={() => setPreference(valueset.id)}
                   className={cn(
-                    "flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-gray-100 disabled:opacity-50",
+                    "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-gray-100 disabled:opacity-50",
                     selected && "font-medium",
                   )}
                 >

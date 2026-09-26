@@ -14,7 +14,7 @@ import {
 import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { SaveIssue } from "@/components/QuestionnaireV2/builder/saveValidation";
-import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { Question } from "@/types/questionnaire/question";
 import {
@@ -60,12 +60,10 @@ function IssuesList({
   // One numbering pass for the whole list — findQuestionNumber would walk
   // the tree once per issue.
   const numbers = new Map(
-    numberQuestions(questions).flatMap((item) =>
-      [item, ...item.children].map(({ question, number }) => [
-        question.id,
-        number,
-      ]),
-    ),
+    flattenNumberedQuestions(questions).map(({ question, number }) => [
+      question.id,
+      number,
+    ]),
   );
 
   return (

@@ -322,15 +322,16 @@ export function useHiddenQuestionIds(): Set<string> {
         if (!questionnaire) return hidden;
         const responses = get(responsesAtom);
         const linkIndex = get(questionIdByLinkIdAtom);
-        const walk = (questions: Question[]) => {
+        const walk = (questions: Question[], parentHidden = false) => {
           for (const question of questions) {
-            if (
-              question.disabled_display !== "protected" &&
-              !isQuestionEnabledInState(question, responses, linkIndex)
-            ) {
-              hidden.add(question.id);
-            }
-            walk(question.questions ?? []);
+            const isHidden =
+              parentHidden ||
+              (question.disabled_display !== "protected" &&
+                !isQuestionEnabledInState(question, responses, linkIndex));
+            if (isHidden) hidden.add(question.id);
+            // A hidden group's children never mount, including protected
+            // children whose own conditions would otherwise show them.
+            walk(question.questions ?? [], isHidden);
           }
         };
         walk(questionnaire.questions);

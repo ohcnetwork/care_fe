@@ -1,8 +1,6 @@
 import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +45,7 @@ function QuantityUnitsEditor({
   valueSetScope,
 }: AnswerOptionsEditorProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
   const { boundedCodes } = useValueSetExpansion(question.answer_value_set);
 
   return (
@@ -83,6 +82,7 @@ function QuantityUnitsEditor({
               <ChoiceChip
                 key={code.code}
                 control="radio"
+                name={radioGroupName}
                 label={code.display || code.code}
                 checked={question.unit?.code === code.code}
                 disabled
@@ -114,6 +114,8 @@ export function AnswerOptionsEditor({
   valueSetScope,
 }: AnswerOptionsEditorProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
+  const defaultGroupName = useId();
   // The valueset tab can be open before a valueset has actually been picked —
   // that transient UI state lives here (keyed by question id, since this
   // component instance is shared across selected questions) instead of
@@ -216,15 +218,21 @@ export function AnswerOptionsEditor({
         <p className="text-sm text-gray-500">{t("answer_options_hint")}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="radiogroup"
+        aria-label={t("answer_options")}
+        className="flex flex-wrap gap-2"
+      >
         <ChoiceChip
           control="radio"
+          name={radioGroupName}
           label={t("custom_options")}
           checked={mode === "custom"}
           onCheckedChange={() => handleModeChange("custom")}
         />
         <ChoiceChip
           control="radio"
+          name={radioGroupName}
           label={t("value_set")}
           checked={mode === "valueset"}
           onCheckedChange={() => handleModeChange("valueset")}
@@ -248,7 +256,11 @@ export function AnswerOptionsEditor({
               {t("clear_default")}
             </Button>
           </div>
-          <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
+          <div
+            role="radiogroup"
+            aria-label={t("default")}
+            className="overflow-hidden rounded-md border border-gray-200 bg-white"
+          >
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
@@ -272,23 +284,19 @@ export function AnswerOptionsEditor({
                       />
                       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                         <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                          <button
-                            type="button"
-                            role="radio"
+                          <input
+                            type="radio"
+                            name={defaultGroupName}
+                            checked={!!option.initial_selected}
                             aria-checked={!!option.initial_selected}
-                            aria-label={t("default")}
-                            onClick={() => handleSetDefault(index)}
-                            className={cn(
-                              "flex size-4 shrink-0 items-center justify-center rounded-full border",
-                              option.initial_selected
-                                ? "border-primary-700"
-                                : "border-gray-300",
-                            )}
-                          >
-                            {option.initial_selected && (
-                              <span className="size-2 rounded-full bg-primary-700" />
-                            )}
-                          </button>
+                            aria-label={t("questionnaire_default_option", {
+                              option: option.value
+                                ? `${index + 1}. ${option.value}`
+                                : index + 1,
+                            })}
+                            onChange={() => handleSetDefault(index)}
+                            className="size-4 shrink-0 accent-primary-700"
+                          />
                           {option.initial_selected
                             ? t("default")
                             : t("set_as_default")}

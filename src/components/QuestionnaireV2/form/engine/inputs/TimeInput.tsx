@@ -9,6 +9,7 @@ export function TimeInput({
   question,
   disabled,
   inputId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -35,6 +36,8 @@ export function TimeInput({
       id={inputId}
       type="time"
       aria-required={question.required || undefined}
+      aria-describedby={errorId}
+      aria-invalid={!!errorId || undefined}
       value={value}
       className="h-9"
       onChange={handleChange}

@@ -57,6 +57,22 @@ function isQuestionLike(value: unknown): value is Question {
   return true;
 }
 
+function normalizeImportedQuestion(question: Question): Question {
+  // Older exports stored value-set references as bare slugs. Normalize at
+  // the import boundary so both the editor and submitted definition use
+  // the current binding shape, including questions nested inside groups.
+  const answerValueSet: unknown = question.answer_value_set;
+  return {
+    ...question,
+    ...(typeof answerValueSet === "string"
+      ? { answer_value_set: { slug: answerValueSet } }
+      : {}),
+    ...(question.questions
+      ? { questions: question.questions.map(normalizeImportedQuestion) }
+      : {}),
+  };
+}
+
 /**
  * Accepts either a bare `{ questions: [...] }` payload or a full
  * questionnaire export (which has a `questions` array alongside its other
@@ -72,7 +88,9 @@ export function extractQuestions(
   const questions = (data as { questions: unknown }).questions;
   if (!Array.isArray(questions) || (!allowEmpty && questions.length === 0))
     return null;
-  return questions.every(isQuestionLike) ? (questions as Question[]) : null;
+  return questions.every(isQuestionLike)
+    ? questions.map(normalizeImportedQuestion)
+    : null;
 }
 
 /** Writable metadata from a full export; audit fields and scope are ignored. */

@@ -26,6 +26,22 @@ test.describe("Questionnaire v2 create (facility)", () => {
           .getByRole("radiogroup", { name: "Status" })
           .getByRole("radio", { name: "Draft", exact: true }),
       ).toBeChecked();
+      const status = page.getByRole("radiogroup", { name: "Status" });
+      const draft = status.getByRole("radio", { name: "Draft", exact: true });
+      const active = status.getByRole("radio", { name: "Active", exact: true });
+      await draft.focus();
+      await draft.press("ArrowUp");
+      await expect(active).toBeFocused();
+      await expect(active).toBeChecked();
+      await active.press("ArrowDown");
+      await expect(draft).toBeFocused();
+      await expect(draft).toBeChecked();
+      for (const name of ["Title", "Slug"]) {
+        await expect(page.getByRole("textbox", { name })).toHaveAttribute(
+          "aria-required",
+          "true",
+        );
+      }
     });
 
     await test.step("Fill and submit, picking a non-default subject type", async () => {

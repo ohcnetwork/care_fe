@@ -84,12 +84,10 @@ function ImportQuestionsContent({
   } = useQuestionImport(() => setStep("confirm"));
 
   // http(s) only — z.url() alone admits javascript:, file:, data: etc.
-  const urlSchema = z
-    .url(t("invalid_url"))
-    .refine(
-      (value) => ["http:", "https:"].includes(new URL(value).protocol),
-      t("invalid_url"),
-    );
+  const urlSchema = z.url({
+    protocol: /^https?$/,
+    error: t("invalid_url"),
+  });
 
   const handleImportFromUrl = () => {
     const result = urlSchema.safeParse(url);

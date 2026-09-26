@@ -26,18 +26,21 @@ test.describe("Questionnaire v2 detail page actions", () => {
     const toggle = page.getByRole("button", { name: "Toggle sub-questions" });
 
     await test.step("The group row shows its sub-question count", async () => {
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await expect(page.getByText("2 Sub-questions")).toBeVisible();
       await expect(page.getByText("General appearance")).not.toBeVisible();
     });
 
     await test.step("Toggling reveals the sub-question titles", async () => {
       await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
       await expect(page.getByText("General appearance")).toBeVisible();
       await expect(page.getByText("Cardiovascular")).toBeVisible();
     });
 
     await test.step("Toggling again collapses them", async () => {
       await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await expect(page.getByText("General appearance")).not.toBeVisible();
     });
   });

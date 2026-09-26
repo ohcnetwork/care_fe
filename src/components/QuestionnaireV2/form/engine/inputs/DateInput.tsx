@@ -12,6 +12,7 @@ export function DateInput({
   question,
   disabled,
   labelId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -36,7 +37,11 @@ export function DateInput({
     // stay unmodified), so the question association rides on a named
     // group — without it every date question announces as an identical
     // bare "Pick a date" stop.
-    <QuestionInputGroup labelId={labelId} required={question.required}>
+    <QuestionInputGroup
+      labelId={labelId}
+      required={question.required}
+      errorId={errorId}
+    >
       <CombinedDatePicker
         value={value}
         onChange={handleChange}

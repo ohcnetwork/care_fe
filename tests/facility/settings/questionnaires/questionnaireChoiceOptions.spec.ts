@@ -45,8 +45,26 @@ test.describe("Questionnaire v2 choice answer options", () => {
       await rowA.getByRole("textbox").fill(optionAValue);
       await rowB.getByRole("textbox").fill(optionBValue);
 
-      // Mark the second option ("Severe") as the default/pre-selected answer.
-      await rowB.getByRole("radio", { name: "Default" }).click();
+      // Default selection is one named radio group, navigable by keyboard.
+      const defaults = page.getByRole("radiogroup", {
+        name: "Default",
+        exact: true,
+      });
+      const defaultA = defaults.getByRole("radio", {
+        name: `Default option: 1. ${optionAValue}`,
+      });
+      const defaultB = defaults.getByRole("radio", {
+        name: `Default option: 2. ${optionBValue}`,
+      });
+      await defaultA.click();
+      await defaultA.press("ArrowDown");
+      await expect(defaultB).toBeFocused();
+      await expect(defaultB).toBeChecked();
+      await defaultB.press("ArrowUp");
+      await expect(defaultA).toBeFocused();
+      await expect(defaultA).toBeChecked();
+      await defaultA.press("ArrowRight");
+      await expect(defaultB).toBeChecked();
     });
 
     await test.step("Save changes", async () => {
@@ -64,9 +82,16 @@ test.describe("Questionnaire v2 choice answer options", () => {
       await expect(optionB).toHaveAttribute("aria-checked", "true");
       await expect(optionA).toHaveAttribute("aria-checked", "false");
 
-      await optionA.click();
+      await optionB.focus();
+      await optionB.press("ArrowLeft");
+      await expect(optionA).toBeFocused();
       await expect(optionA).toHaveAttribute("aria-checked", "true");
       await expect(optionB).toHaveAttribute("aria-checked", "false");
+      // Tab leaves the radio group instead of stopping at its unchecked option.
+      await optionA.press("Tab");
+      await expect(optionB).not.toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      await expect(optionA).toBeFocused();
     });
 
     await test.step("Detail overview shows the Choice type badge", async () => {

@@ -22,6 +22,7 @@ export function RepeatedQuestionInput({
   locked,
   inputId,
   labelId,
+  errorId,
   component: InputComponent,
 }: RepeatedQuestionInputProps) {
   const { t } = useTranslation();
@@ -62,6 +63,7 @@ export function RepeatedQuestionInput({
               disabled={disabled}
               inputId={index === 0 ? inputId : `${inputId}-${index}`}
               labelId={labelId}
+              errorId={errorId}
               valueIndex={index}
             />
           </div>

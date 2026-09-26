@@ -12,17 +12,25 @@ export interface TreeItem {
   children: TreeItem[];
 }
 
-/** Top-level questions get 1., 2., …; children get parent.child (1.1., 1.2.). */
+/** Stable dotted ordinals at every authored depth: 1., 1.1., 1.1.1., … */
 export function numberQuestions(questions: Question[]): TreeItem[] {
-  return questions.map((question, i) => ({
-    question,
-    number: `${i + 1}.`,
-    children: (question.questions ?? []).map((child, j) => ({
-      question: child,
-      number: `${i + 1}.${j + 1}.`,
-      children: [],
-    })),
-  }));
+  const numberLevel = (list: Question[], prefix: string): TreeItem[] =>
+    list.map((question, index) => {
+      const number = `${prefix}${index + 1}.`;
+      return {
+        question,
+        number,
+        children: numberLevel(question.questions ?? [], number),
+      };
+    });
+  return numberLevel(questions, "");
+}
+
+/** Pre-order numbered rows for flat selects, issue lists, and action labels. */
+export function flattenNumberedQuestions(questions: Question[]): TreeItem[] {
+  const flatten = (items: TreeItem[]): TreeItem[] =>
+    items.flatMap((item) => [item, ...flatten(item.children)]);
+  return flatten(numberQuestions(questions));
 }
 
 /** Pre-order depth-first search for the first question matching `predicate`
@@ -61,24 +69,16 @@ export function findTopLevelIndex(
 }
 
 /**
- * Looks up `questionId`'s own dotted number (e.g. "3." or "3.1.") from
- * `numberQuestions`'s two-level output. Returns undefined for ids nested
- * deeper than that (grandchildren+), since `numberQuestions` only numbers
- * top-level questions and their immediate children — callers should fall
- * back to the top-level ancestor's ordinal in that case.
+ * Looks up `questionId`'s own dotted number at any depth, or undefined
+ * when the question does not belong to this tree.
  */
 export function findQuestionNumber(
   questions: Question[],
   questionId: string,
 ): string | undefined {
-  for (const item of numberQuestions(questions)) {
-    if (item.question.id === questionId) return item.number;
-    const child = item.children.find(
-      (childItem) => childItem.question.id === questionId,
-    );
-    if (child) return child.number;
-  }
-  return undefined;
+  return flattenNumberedQuestions(questions).find(
+    (item) => item.question.id === questionId,
+  )?.number;
 }
 
 /** Questions that record answers (everything except `group` containers),

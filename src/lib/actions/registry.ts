@@ -105,16 +105,16 @@ export async function invokeAction(
 ): Promise<ActionRunResult> {
   const definition = actions.get(id);
   if (!definition) {
-    audit(id, scope, "unknown-action");
+    audit(id, "unknown-action");
     return { ok: false, error: `Unknown action: ${id}` };
   }
   if (!scopeMatches(definition.scope, scope)) {
-    audit(id, scope, "scope-rejected");
+    audit(id, "scope-rejected");
     return { ok: false, error: `Action ${id} is not available in this scope` };
   }
   const parsed = definition.schema.safeParse(input);
   if (!parsed.success) {
-    audit(id, scope, "schema-rejected");
+    audit(id, "schema-rejected");
     // Issue-by-issue rather than `ZodError.message` (a JSON dump): the
     // reader is a model correcting its own call.
     const problems = parsed.error.issues
@@ -125,13 +125,13 @@ export async function invokeAction(
       .join("; ");
     return { ok: false, error: `Invalid input: ${problems}` };
   }
-  audit(id, scope, "invoked");
+  audit(id, "invoked");
   try {
     const result = await definition.run(parsed.data);
-    audit(id, scope, result.ok ? "ok" : "failed");
+    audit(id, result.ok ? "ok" : "failed");
     return result;
   } catch (error) {
-    audit(id, scope, "threw");
+    audit(id, "threw");
     return {
       ok: false,
       error: error instanceof Error ? error.message : String(error),
@@ -146,11 +146,11 @@ export async function invokeAction(
  * follow-up on the plugin-action-registry decision, and this is the one
  * place that has to change when it lands.
  *
- * It records the action, the scope and the outcome — never the input or
- * the result — so a console transcript carries no record content.
+ * Client diagnostics record only the action and outcome. Patient and
+ * encounter identifiers, inputs and results stay out of the console.
  */
-function audit(id: string, scope: ActionScope, outcome: string) {
-  console.debug("[actions]", outcome, { id, scope });
+function audit(id: string, outcome: string) {
+  console.debug("[actions]", outcome, { id });
 }
 
 export function subscribeToActions(listener: () => void): () => void {

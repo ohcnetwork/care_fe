@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -102,6 +102,8 @@ function LeafBlock({
   const { inert } = useFormRenderer();
   const { QuestionAnnotation } = useFormChrome();
   const errors = useQuestionErrors(question.id);
+  const errorsId = useId();
+  const errorId = errors.length > 0 ? errorsId : undefined;
   // Text-like inputs use htmlFor; chip groups use aria-labelledby.
   const inputId = `question-input-${question.id}`;
   const labelId = `question-label-${question.id}`;
@@ -162,16 +164,21 @@ function LeafBlock({
           locked={locked}
           inputId={inputId}
           labelId={labelId}
+          errorId={errorId}
         />
       </div>
       {/* role="alert" so a validation failure is ANNOUNCED, not only
           drawn: client-side validation writes these straight into the
           store with no other live region anywhere on the fill page. */}
-      {errors.map((error, i) => (
-        <p key={i} role="alert" className="text-sm text-red-600">
-          {error.msg ?? error.error}
-        </p>
-      ))}
+      {errors.length > 0 && (
+        <div id={errorId} className="space-y-1">
+          {errors.map((error, i) => (
+            <p key={i} role="alert" className="text-sm text-red-600">
+              {error.msg ?? error.error}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

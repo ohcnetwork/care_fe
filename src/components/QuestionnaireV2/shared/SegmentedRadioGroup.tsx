@@ -24,11 +24,15 @@ export function SegmentedRadioGroup<T extends string>({
   );
 
   // ARIA APG radiogroup pattern: one Tab stop for the whole group (roving
-  // tabindex on the selected option), ArrowLeft/ArrowRight move selection.
+  // tabindex on the selected option), all arrow keys move selection.
   const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (
+      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+    )
+      return;
     event.preventDefault();
-    const delta = event.key === "ArrowRight" ? 1 : -1;
+    const delta =
+      event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
     const next = (index + delta + options.length) % options.length;
     onChange(options[next].value);
     buttonRefs.current[next]?.focus();

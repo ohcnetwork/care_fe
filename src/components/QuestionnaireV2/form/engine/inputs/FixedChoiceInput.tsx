@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -26,8 +27,10 @@ export function FixedChoiceInput({
   disabled,
   inputId,
   labelId,
+  errorId,
 }: FixedChoiceInputProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
   const [response, updateResponse] = useQuestionResponse(question.id);
 
   const entryForOption = (value: string) => ({
@@ -51,6 +54,8 @@ export function FixedChoiceInput({
       id: inputId,
       "aria-labelledby": `${labelId} ${inputId}`,
       "aria-required": question.required || undefined,
+      "aria-describedby": errorId,
+      "aria-invalid": !!errorId || undefined,
     };
     if (question.repeats) {
       return (
@@ -94,6 +99,7 @@ export function FixedChoiceInput({
       <QuestionInputGroup
         labelId={labelId}
         required={question.required}
+        errorId={errorId}
         className="flex flex-wrap gap-3"
       >
         {options.map((option) => (
@@ -123,12 +129,15 @@ export function FixedChoiceInput({
       role="radiogroup"
       aria-labelledby={labelId}
       aria-required={question.required || undefined}
+      aria-describedby={errorId}
+      aria-invalid={!!errorId || undefined}
       className="flex flex-wrap gap-3"
     >
       {options.map((option) => (
         <ChoiceChip
           key={option.value}
           control="radio"
+          name={radioGroupName}
           label={option.display ?? option.value}
           checked={selectedValue === option.value}
           disabled={disabled}

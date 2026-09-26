@@ -16,6 +16,7 @@ export function EditPreviewToggle({ view, onChange }: EditPreviewToggleProps) {
     <button
       type="button"
       onClick={() => onChange(value)}
+      aria-pressed={view === value}
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
         view === value

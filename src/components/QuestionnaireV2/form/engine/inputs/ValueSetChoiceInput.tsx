@@ -17,6 +17,7 @@ export function ValueSetChoiceInput({
   valueSet,
   disabled,
   labelId,
+  errorId,
   valueIndex,
 }: ValueSetChoiceInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -30,6 +31,8 @@ export function ValueSetChoiceInput({
   return (
     <ValueSetSelect
       aria-labelledby={labelId}
+      aria-describedby={errorId}
+      aria-invalid={!!errorId || undefined}
       system={valueSet.slug ?? ""}
       valuesetId={valueSet.external_id}
       value={entry?.coding ?? null}

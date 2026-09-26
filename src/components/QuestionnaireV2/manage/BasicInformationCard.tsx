@@ -76,7 +76,7 @@ export function BasicInformationCard<
                 <FormItem>
                   <FormLabel aria-required>{t("title")}</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={!canWrite} />
+                    <Input {...field} aria-required disabled={!canWrite} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,7 +90,7 @@ export function BasicInformationCard<
                 <FormItem>
                   <FormLabel aria-required>{t("slug")}</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={!canWrite} />
+                    <Input {...field} aria-required disabled={!canWrite} />
                   </FormControl>
                   <FormDescription className="italic">
                     {t("slug_format_message")}

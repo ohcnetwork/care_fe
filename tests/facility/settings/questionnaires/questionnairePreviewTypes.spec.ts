@@ -284,8 +284,13 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
     const no = page.getByRole("radio", { name: "No", exact: true });
     await yes.click();
     await expect(yes).toHaveAttribute("aria-checked", "true");
-    await no.click();
+    await yes.press("ArrowDown");
+    await expect(no).toBeFocused();
     await expect(no).toHaveAttribute("aria-checked", "true");
+    await expect(yes).toHaveAttribute("aria-checked", "false");
+    // Optional booleans retain the ability to return to an unanswered state.
+    await no.click();
+    await expect(no).toHaveAttribute("aria-checked", "false");
     await expect(yes).toHaveAttribute("aria-checked", "false");
   });
 

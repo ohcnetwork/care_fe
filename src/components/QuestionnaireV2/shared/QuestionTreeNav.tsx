@@ -91,6 +91,23 @@ export function QuestionTreeNav({
     );
   };
 
+  const branch = (item: TreeItem, indent = false): React.ReactNode => {
+    if (hiddenIds?.has(item.question.id)) return null;
+    const children = item.children.filter(
+      (child) => !hiddenIds?.has(child.question.id),
+    );
+    return (
+      <Fragment key={item.question.id}>
+        {row(item, indent)}
+        {children.length > 0 && (
+          <div className="ml-3 border-l border-gray-200 pl-1">
+            {children.map((child) => branch(child, true))}
+          </div>
+        )}
+      </Fragment>
+    );
+  };
+
   return (
     <nav aria-label={ariaLabel ?? title} className="w-full space-y-1">
       {title && (
@@ -99,19 +116,9 @@ export function QuestionTreeNav({
         </h3>
       )}
       {items.map((item, index) => {
-        // Hidden children drop out too — a row for a question that isn't on
-        // the page is a dead end. Numbering stays stable across hides.
-        const children = item.children.filter(
-          (child) => !hiddenIds?.has(child.question.id),
-        );
         return (
           <Fragment key={item.question.id}>
-            {row(item, false)}
-            {children.length > 0 && (
-              <div className="ml-3 border-l border-gray-200 pl-1">
-                {children.map((child) => row(child, true))}
-              </div>
-            )}
+            {branch(item)}
             {index < items.length - 1 && (
               <div className="relative my-1 border-t border-gray-100">
                 {renderSeparator?.(index)}

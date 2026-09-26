@@ -12,6 +12,7 @@ export function TextInput({
   question,
   disabled,
   inputId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const { t } = useTranslation();
@@ -37,6 +38,8 @@ export function TextInput({
     value,
     disabled,
     "aria-required": question.required || undefined,
+    "aria-describedby": errorId,
+    "aria-invalid": !!errorId || undefined,
     placeholder: t("enter_details"),
     maxLength: question.max_length,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>

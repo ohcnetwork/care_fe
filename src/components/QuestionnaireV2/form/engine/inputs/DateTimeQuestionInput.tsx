@@ -19,6 +19,7 @@ export function DateTimeQuestionInput({
   question,
   disabled,
   labelId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -66,6 +67,7 @@ export function DateTimeQuestionInput({
     <QuestionInputGroup
       labelId={labelId}
       required={question.required}
+      errorId={errorId}
       className="flex flex-col sm:flex-row gap-2"
     >
       <DatePicker
@@ -77,6 +79,8 @@ export function DateTimeQuestionInput({
       <Input
         type="time"
         aria-labelledby={labelId}
+        aria-describedby={errorId}
+        aria-invalid={!!errorId || undefined}
         className="h-9 sm:w-[150px]"
         value={formatTime(value)}
         onChange={handleTimeChange}

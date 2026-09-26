@@ -11,7 +11,7 @@ import {
   ALWAYS_CONDITION,
   lintExpression,
 } from "@/components/QuestionnaireV2/shared/actionExpression";
-import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import {
@@ -88,12 +88,10 @@ export function ActionListEditor({
         ? reachableContextValues(contextType, registry.fields)
         : [],
       numbers: new Map(
-        numberQuestions(questions).flatMap((item) =>
-          [item, ...item.children].map(({ question, number }) => [
-            question.id,
-            number,
-          ]),
-        ),
+        flattenNumberedQuestions(questions).map(({ question, number }) => [
+          question.id,
+          number,
+        ]),
       ),
     }),
     [questions, contextType, registry.fields],

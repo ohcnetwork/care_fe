@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { QuestionInputGroup } from "./engine/inputs/QuestionInputGroup";
 import {
   QUESTION_TYPE_COMPONENTS,
   type RendererInputProps,
@@ -19,10 +20,19 @@ export function QuestionAnswerInput({
   locked,
   inputId,
   labelId,
+  errorId,
 }: QuestionAnswerInputProps) {
   const { t } = useTranslation();
   if (question.type === "structured") {
-    return <StructuredSlot question={question} disabled={disabled} />;
+    return (
+      <QuestionInputGroup
+        labelId={labelId}
+        required={question.required}
+        errorId={errorId}
+      >
+        <StructuredSlot question={question} disabled={disabled} />
+      </QuestionInputGroup>
+    );
   }
 
   const InputComponent = QUESTION_TYPE_COMPONENTS[question.type];
@@ -43,6 +53,7 @@ export function QuestionAnswerInput({
         locked={locked}
         inputId={inputId}
         labelId={labelId}
+        errorId={errorId}
         component={InputComponent}
       />
     );
@@ -58,6 +69,7 @@ export function QuestionAnswerInput({
             disabled={disabled}
             inputId={inputId}
             labelId={labelId}
+            errorId={errorId}
           />
         ) : (
           <p className="p-2 text-sm italic text-gray-400">

@@ -210,7 +210,8 @@ export function sessionEditSignature(forms: FillSessionFormState[]): string {
 
 /** Persist all forms in one session. Only recoverable user input earns a
  * draft; clearing that input removes a draft this session previously wrote.
- * Returns whether this write stored a draft successfully. */
+ * Distinguishes an intentionally empty snapshot from failed persistence so
+ * the caller can warn when recoverable input was not saved. */
 export function saveFillDraft(
   scope: FillDraftScope,
   forms: FillSessionFormState[],
@@ -229,7 +230,7 @@ export function saveFillDraft(
    *  clearing on it destroys an earlier session's recoverable answers and
    *  trades them for work that cannot be drafted at all. */
   mayClear = true,
-): boolean {
+): "saved" | "empty" | "failed" {
   const { snapshots, anyContent } = snapshotSession(forms);
   const live = new Set(snapshots.map((snapshot) => snapshot.questionnaireId));
   const carried = retained.filter(
@@ -239,8 +240,8 @@ export function saveFillDraft(
     Object.values(snapshot.responses).some(draftResponseHasContent),
   );
   if (!anyContent && !carriedContent) {
-    if (mayClear) clearFillDraft(scope);
-    return false;
+    if (mayClear && !removeFillDraftCache(scope)) return "failed";
+    return "empty";
   }
   const draft: StoredFillDraft = {
     schemaVersion: FILL_DRAFT_SCHEMA_VERSION,
@@ -252,11 +253,13 @@ export function saveFillDraft(
     forms: [...snapshots, ...carried],
   };
   try {
-    return writeFillDraftCache(scope, JSON.stringify(draft));
+    return writeFillDraftCache(scope, JSON.stringify(draft))
+      ? "saved"
+      : "failed";
   } catch {
     // Quota exceeded / storage disabled — autosave is best-effort, and a
     // write that never landed earns no authority to delete later.
-    return false;
+    return "failed";
   }
 }
 

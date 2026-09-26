@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 interface QuestionInputGroupProps {
   labelId: string;
   required?: boolean;
+  errorId?: string;
   className?: string;
   children: ReactNode;
 }
@@ -13,16 +14,21 @@ interface QuestionInputGroupProps {
 export function QuestionInputGroup({
   labelId,
   required,
+  errorId,
   className,
   children,
 }: QuestionInputGroupProps) {
   const { t } = useTranslation();
   const requirementId = useId();
+  const descriptionIds = [required ? requirementId : undefined, errorId]
+    .filter(Boolean)
+    .join(" ");
   return (
     <div
       role="group"
       aria-labelledby={labelId}
-      aria-describedby={required ? requirementId : undefined}
+      aria-describedby={descriptionIds || undefined}
+      aria-invalid={!!errorId || undefined}
       className={className}
     >
       {required && (

@@ -36,6 +36,35 @@ const exported = {
 };
 
 describe("questionnaire definition import", () => {
+  it("normalizes legacy value-set slugs at every question depth without changing the source", () => {
+    const binding = { slug: "current-options", external_id: "current-id" };
+    const legacy = {
+      questions: [
+        {
+          text: "Group",
+          type: "group",
+          questions: [
+            {
+              text: "Legacy",
+              type: "choice",
+              answer_value_set: "legacy-options",
+            },
+            { text: "Current", type: "choice", answer_value_set: binding },
+          ],
+        },
+      ],
+    };
+    const questions = extractQuestions(legacy);
+    assert.deepEqual(questions?.[0].questions?.[0].answer_value_set, {
+      slug: "legacy-options",
+    });
+    assert.deepEqual(questions?.[0].questions?.[1].answer_value_set, binding);
+    assert.equal(
+      legacy.questions[0].questions[0].answer_value_set,
+      "legacy-options",
+    );
+  });
+
   it("keeps the writable definition and excludes source identity, scope and audit metadata", () => {
     const parsed = parseQuestionnaireImport(exported);
     assert.ok(parsed);

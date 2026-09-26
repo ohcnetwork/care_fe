@@ -19,6 +19,8 @@ export interface RendererInputProps {
   inputId: string;
   /** DOM id of the question label, for aria-labelledby on grouped controls. */
   labelId: string;
+  /** Present while validation errors describe this question's controls. */
+  errorId?: string;
   /**
    * Index into `response.values` this input edits. Absent means single-entry
    * mode against `values[0]`.

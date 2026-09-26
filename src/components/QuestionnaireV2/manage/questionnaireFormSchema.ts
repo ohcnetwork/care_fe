@@ -26,7 +26,7 @@ export function questionnaireBasicSchema(t: TFunction) {
     max: SLUG_MAX_LENGTH,
   });
   return z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().trim().min(1, t("field_required")),
     slug: z
       .string()
       .min(SLUG_MIN_LENGTH, characterCountMessage)

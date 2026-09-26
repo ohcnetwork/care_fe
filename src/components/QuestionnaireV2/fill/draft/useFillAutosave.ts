@@ -6,6 +6,8 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import {
   initializeResponses,
@@ -75,6 +77,7 @@ export function useFillSessionAutosave({
   retainedSnapshots,
   onResumeAddedForms,
 }: UseFillSessionAutosaveArgs) {
+  const { t } = useTranslation();
   const [dirty, setDirty] = useState(false);
   const [restoreDismissed, setRestoreDismissed] = useState(false);
   const restoredAppliedRef = useRef(false);
@@ -94,6 +97,7 @@ export function useFillSessionAutosave({
   // clinician emptying their work and must not delete a draft an earlier
   // session left under the same key — see `saveFillDraft`'s `mayClear`.
   const storedDraftRef = useRef(false);
+  const persistenceFailedRef = useRef(false);
   // Read by resumeRestoredDraft, which only ever fires from an event
   // handler well after mount.
   const restoredDraftRef = useRef(restoredDraft);
@@ -149,14 +153,20 @@ export function useFillSessionAutosave({
     const current = scopeRef.current;
     if (!current || !persistRef.current || finishedRef.current) return;
     if (restorePendingRef.current) return;
-    const stored = saveFillDraft(
+    const result = saveFillDraft(
       current,
       snapshotAll(),
       retainedRef.current,
       storedDraftRef.current,
     );
-    if (stored) storedDraftRef.current = true;
-  }, [snapshotAll]);
+    if (result === "saved") storedDraftRef.current = true;
+    if (result === "failed" && !persistenceFailedRef.current) {
+      toast.error(t("questionnaire_draft_save_failed"));
+    }
+    // Warn once per failure episode. Keep tracking edits and retrying so
+    // a later successful write can restore reload protection.
+    persistenceFailedRef.current = result === "failed";
+  }, [snapshotAll, t]);
 
   /**
    * The session SHAPE changed (a form was added or removed) or a store

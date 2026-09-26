@@ -77,6 +77,16 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "condition_target_required",
   },
   {
+    // Keep dangling conditions visible for the author to repair instead of
+    // silently discarding them when their source question is deleted.
+    predicate: (question, { typeByLinkId }) =>
+      question.enable_when?.some(
+        (condition) =>
+          !!condition.question && !typeByLinkId.has(condition.question),
+      ) ?? false,
+    messageKey: "condition_target_missing",
+  },
+  {
     // A visibility condition targeting a question that never records a
     // response (see NON_RESPONSE_TYPES) — the picker no longer offers these,
     // but saved/imported data can still carry one; it would hide the question

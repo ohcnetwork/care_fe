@@ -139,6 +139,11 @@ export function SectionCard({
         {number && <span className="mr-1 tabular-nums">{number}</span>}
         {question.text}
       </h4>
+      {question.description && (
+        <p className="px-3 pb-1.5 text-xs text-gray-500">
+          {question.description}
+        </p>
+      )}
       <fieldset
         disabled={fieldsetDisabled}
         className={cn(

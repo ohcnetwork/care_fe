@@ -1,4 +1,5 @@
 import { Check, Plus } from "lucide-react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ export function VisibilityConditionsCard({
   bare = false,
 }: VisibilityConditionsCardProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
   const enableWhen = question.enable_when ?? [];
   const { rowKeys, removeRowKey } = useEditorRowKeys(
     question.id,
@@ -79,15 +81,21 @@ export function VisibilityConditionsCard({
           <p className="text-xs font-medium text-gray-500">
             {t("show_question_when")}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div
+            role="radiogroup"
+            aria-label={t("show_question_when")}
+            className="flex flex-wrap gap-2"
+          >
             <ChoiceChip
               control="radio"
+              name={radioGroupName}
               label={t("all_conditions_and")}
               checked={enableBehavior === "all"}
               onCheckedChange={() => onChange({ enable_behavior: "all" })}
             />
             <ChoiceChip
               control="radio"
+              name={radioGroupName}
               label={t("any_condition_or")}
               checked={enableBehavior === "any"}
               onCheckedChange={() => onChange({ enable_behavior: "any" })}

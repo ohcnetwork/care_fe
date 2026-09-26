@@ -189,6 +189,7 @@ export function QuestionOverviewList({
                           className="size-6"
                           onClick={() => toggleExpanded(question.id)}
                           aria-label={t("toggle_sub_questions")}
+                          aria-expanded={isExpanded}
                         >
                           <ChevronsUpDown className="size-4" />
                         </Button>

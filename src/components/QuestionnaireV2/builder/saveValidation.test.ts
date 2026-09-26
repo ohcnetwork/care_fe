@@ -7,6 +7,39 @@ import type { Question } from "@/types/questionnaire/question";
 
 import { findInvalidQuestions } from "./saveValidation";
 
+test("deleting a visibility target blocks saving until the condition is repaired", () => {
+  const target: Question = {
+    id: "target",
+    link_id: "target",
+    text: "Target",
+    type: "string",
+  };
+  const dependent: Question = {
+    id: "dependent",
+    link_id: "dependent",
+    text: "Dependent",
+    type: "string",
+    enable_when: [{ question: "target", operator: "equals", answer: "yes" }],
+  };
+  assert.deepEqual(findInvalidQuestions([target, dependent]), []);
+  assert.deepEqual(findInvalidQuestions([dependent]), [
+    { question: dependent, messageKey: "condition_target_missing" },
+  ]);
+  assert.deepEqual(
+    findInvalidQuestions([
+      {
+        id: "group",
+        link_id: "group",
+        text: "Group",
+        type: "group",
+        questions: [target],
+      },
+      dependent,
+    ]),
+    [],
+  );
+});
+
 test("structured questions need a registered type before they can be saved", () => {
   const question: Question = {
     id: "structured-question",

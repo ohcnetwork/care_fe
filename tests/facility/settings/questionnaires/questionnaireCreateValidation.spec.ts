@@ -21,16 +21,26 @@ function trackCreateRequests(page: Page) {
 }
 
 test.describe("Questionnaire v2 create form validation", () => {
-  test("an empty title blocks the save with field errors", async ({ page }) => {
+  test("empty and whitespace-only titles block saving with field errors", async ({
+    page,
+  }) => {
     const facilityId = getFacilityId();
     const posts = trackCreateRequests(page);
 
     await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
-    await page.getByRole("button", { name: "Save Questionnaire" }).click();
+    for (const title of ["", "   "]) {
+      await page.getByRole("textbox", { name: "Title" }).fill(title);
+      // Title changes regenerate the slug; keep it valid so it cannot
+      // independently block a blank title.
+      await page
+        .getByRole("textbox", { name: "Slug" })
+        .fill(`blank-${Date.now()}`);
+      await page.getByRole("button", { name: "Save Questionnaire" }).click();
 
-    await expect(page.getByText("This field is required")).toBeVisible();
-    await expect(page).toHaveURL(/\/questionnaires\/new$/);
-    expect(posts).toHaveLength(0);
+      await expect(page.getByText("This field is required")).toBeVisible();
+      await expect(page).toHaveURL(/\/questionnaires\/new$/);
+      expect(posts).toHaveLength(0);
+    }
   });
 
   test("slug bounds and format are enforced", async ({ page }) => {

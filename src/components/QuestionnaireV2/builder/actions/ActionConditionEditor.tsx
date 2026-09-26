@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,7 @@ export function ActionConditionEditor({
   onMarkRequired,
 }: ActionConditionEditorProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
   const { questions, contextValues } = sources;
   const parsed = parseCondition(condition);
   const { rowKeys, removeRowKey } = useEditorRowKeys(
@@ -185,15 +186,21 @@ export function ActionConditionEditor({
           <p className="text-xs font-medium text-gray-500">
             {t("action_run_when")}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div
+            role="radiogroup"
+            aria-label={t("action_run_when")}
+            className="flex flex-wrap gap-2"
+          >
             <ChoiceChip
               control="radio"
+              name={radioGroupName}
               label={t("all_conditions_and")}
               checked={behavior === "all"}
               onCheckedChange={() => update(rules, "all")}
             />
             <ChoiceChip
               control="radio"
+              name={radioGroupName}
               label={t("any_condition_or")}
               checked={behavior === "any"}
               onCheckedChange={() => update(rules, "any")}

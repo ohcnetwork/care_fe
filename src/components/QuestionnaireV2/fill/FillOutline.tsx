@@ -1,4 +1,5 @@
 import { CheckCheck, Dot } from "lucide-react";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -9,19 +10,15 @@ import {
   useHiddenQuestionIds,
 } from "@/components/QuestionnaireV2/form/FormContext";
 import type { TreeItem } from "@/components/QuestionnaireV2/shared/questionTree";
-import {
-  findFirstQuestion,
-  findTopLevelIndex,
-  numberQuestions,
-} from "@/components/QuestionnaireV2/shared/questionTree";
+import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { Question } from "@/types/questionnaire/question";
 
 import { useFillOutlineNav } from "./FillOutlineOverlay";
 
 /**
- * One form's rows inside the outline overlay panel: two levels of rows with
- * completion adornments and active-state mapping for deeper descendants.
+ * One form's rows inside the outline overlay panel at every authored depth,
+ * with completion adornments and active state matching the canvas.
  * Rows stay mounted only while their question is visible.
  */
 export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
@@ -35,30 +32,6 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
     (item) => !hiddenIds.has(item.question.id),
   );
 
-  // The outline shows two levels; the scroll-spy reports any depth. An
-  // active id with its own row highlights that row, a deeper descendant
-  // highlights its top-level ancestor, another form's id highlights
-  // nothing here.
-  const hasRow = (questionId: string) =>
-    items.some(
-      (item) =>
-        item.question.id === questionId ||
-        item.children.some((child) => child.question.id === questionId),
-    );
-  const activeRowId =
-    activeQuestionId === null
-      ? null
-      : hasRow(activeQuestionId)
-        ? activeQuestionId
-        : findFirstQuestion(
-              questionnaire.questions,
-              (question) => question.id === activeQuestionId,
-            )
-          ? questionnaire.questions[
-              findTopLevelIndex(questionnaire.questions, activeQuestionId)
-            ]?.id
-          : null;
-
   const stateIcon = (question: Question) => {
     if (question.type === "group" || question.type === "display") return null;
     return answeredIds.has(question.id) ? (
@@ -69,7 +42,7 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   };
 
   const row = (item: TreeItem, indent: boolean) => {
-    const active = activeRowId === item.question.id;
+    const active = activeQuestionId === item.question.id;
     return (
       <button
         key={item.question.id}
@@ -115,25 +88,30 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
     );
   };
 
+  const branch = (item: TreeItem, indent = false): React.ReactNode => {
+    if (hiddenIds.has(item.question.id)) return null;
+    const children = item.children.filter(
+      (child) => !hiddenIds.has(child.question.id),
+    );
+    return (
+      <Fragment key={item.question.id}>
+        {row(item, indent)}
+        {children.length > 0 && (
+          <div className="ml-4 border-l border-gray-300 pl-2">
+            {children.map((child) => branch(child, true))}
+          </div>
+        )}
+      </Fragment>
+    );
+  };
+
   return (
     <nav aria-label={ariaLabel ?? t("questions")} className="w-full">
-      {items.map((item) => {
-        // Hidden children drop out too — a row for a question that isn't
-        // on the page is a dead end. Numbering stays stable across hides.
-        const children = item.children.filter(
-          (child) => !hiddenIds.has(child.question.id),
-        );
-        return (
-          <div key={item.question.id} className="py-1">
-            {row(item, false)}
-            {children.length > 0 && (
-              <div className="ml-4 border-l border-gray-300 pl-2">
-                {children.map((child) => row(child, true))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {items.map((item) => (
+        <div key={item.question.id} className="py-1">
+          {branch(item)}
+        </div>
+      ))}
     </nav>
   );
 }

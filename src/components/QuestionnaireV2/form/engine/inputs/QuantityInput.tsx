@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
@@ -22,9 +23,11 @@ export function QuantityInput({
   question,
   disabled,
   inputId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const { t } = useTranslation();
+  const radioGroupName = useId();
   const [response, updateResponse] = useQuestionResponse(question.id);
   // Discriminant check instead of a cast — a mismatched stored value renders
   // empty instead of leaking a wrong-typed value into the input.
@@ -80,6 +83,8 @@ export function QuantityInput({
           inputMode="decimal"
           pattern="[0-9]*[.]?[0-9]*"
           aria-required={question.required || undefined}
+          aria-describedby={errorId}
+          aria-invalid={!!errorId || undefined}
           value={value ?? ""}
           onChange={(e) => handleValueChange(e.target.value)}
           step="0.01"
@@ -89,12 +94,15 @@ export function QuantityInput({
         <div
           role="radiogroup"
           aria-label={t("unit")}
+          aria-describedby={errorId}
+          aria-invalid={!!errorId || undefined}
           className="flex flex-wrap gap-2 p-2"
         >
           {boundedCodes.map((code) => (
             <ChoiceChip
               key={code.code}
               control="radio"
+              name={radioGroupName}
               label={code.display || code.code}
               checked={unit?.code === code.code}
               disabled={disabled}
@@ -114,6 +122,8 @@ export function QuantityInput({
         inputMode="decimal"
         pattern="[0-9]*[.]?[0-9]*"
         aria-required={question.required || undefined}
+        aria-describedby={errorId}
+        aria-invalid={!!errorId || undefined}
         value={value ?? ""}
         onChange={(e) => handleValueChange(e.target.value)}
         step="0.01"
@@ -128,6 +138,8 @@ export function QuantityInput({
           onSelect={handleUnitChange}
           disabled={disabled}
           aria-label={t("unit")}
+          aria-describedby={errorId}
+          aria-invalid={!!errorId || undefined}
           placeholder={t("unit")}
           className="h-auto justify-between truncate rounded-l-none border-gray-300 font-normal shadow-none"
         />

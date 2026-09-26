@@ -25,6 +25,10 @@ test.describe("Fill page validation", () => {
       page,
       "Is bilateral air entry present?",
     );
+    const firstRequiredGroup = firstRequired.getByRole("radiogroup");
+    const modalityGroup = questionBlock(page, "Select Modality").getByRole(
+      "radiogroup",
+    );
     await expect(firstRequired).toBeVisible();
 
     // Submit empty: both required questions flag, first one scrolled into
@@ -39,6 +43,13 @@ test.describe("Fill page validation", () => {
       ),
     ).toBeVisible();
     await expect(firstRequired).toBeInViewport();
+    await expect(firstRequiredGroup).toHaveAccessibleDescription(
+      "This field is required",
+    );
+    await expect(firstRequiredGroup).toHaveAttribute("aria-invalid", "true");
+    await expect(modalityGroup).toHaveAccessibleDescription(
+      "This field is required",
+    );
 
     // Editing the answer clears exactly that question's error.
     await firstRequired
@@ -47,6 +58,14 @@ test.describe("Fill page validation", () => {
     await expect(
       firstRequired.getByText("This field is required"),
     ).not.toBeVisible();
+    await expect(firstRequiredGroup).toHaveAccessibleDescription("");
+    await expect(firstRequiredGroup).not.toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(modalityGroup).toHaveAccessibleDescription(
+      "This field is required",
+    );
     await expect(
       questionBlock(page, "Select Modality").getByText(
         "This field is required",

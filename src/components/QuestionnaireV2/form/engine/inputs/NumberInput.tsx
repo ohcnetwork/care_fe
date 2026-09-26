@@ -10,6 +10,7 @@ export function NumberInput({
   question,
   disabled,
   inputId,
+  errorId,
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
@@ -39,6 +40,8 @@ export function NumberInput({
       id={inputId}
       type="number"
       aria-required={question.required || undefined}
+      aria-describedby={errorId}
+      aria-invalid={!!errorId || undefined}
       inputMode={question.type === "decimal" ? "decimal" : "numeric"}
       pattern="[0-9]*[.]?[0-9]*"
       // Keep a numeric value so React preserves equivalent in-progress text

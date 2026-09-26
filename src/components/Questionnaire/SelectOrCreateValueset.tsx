@@ -56,7 +56,12 @@ export function SelectOrCreateValueset({
   }>();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { options, isFetching: isFetchingValuesets } = useScopedValueSets({
+  const {
+    options,
+    isFetching: isFetchingValuesets,
+    isError,
+    retry,
+  } = useScopedValueSets({
     facilityId: scope.facilityId,
     search: searchQuery,
   });
@@ -174,8 +179,24 @@ export function SelectOrCreateValueset({
             onSearch={setSearchQuery}
             placeholder={t("select_a_value_set")}
             isLoading={isFetchingValuesets || isLoadingCurrent}
-            noOptionsMessage={t("no_valuesets_found")}
+            noOptionsMessage={
+              isError ? t("valueset_list_load_failed") : t("no_valuesets_found")
+            }
           />
+          {isError && (
+            <div role="alert" className="mt-1.5 text-sm text-destructive">
+              <p>{t("valueset_list_load_failed")}</p>
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto p-0"
+                disabled={isFetchingValuesets}
+                onClick={retry}
+              >
+                {t("try_again")}
+              </Button>
+            </div>
+          )}
         </div>
         <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
           <SheetTrigger asChild>

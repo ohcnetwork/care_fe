@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -80,6 +81,7 @@ export function MoveQuestionsDialog({
   onMove,
 }: MoveQuestionsDialogProps) {
   const { t } = useTranslation();
+  const id = useId();
   const [moveTargetId, setMoveTargetId] = useState(defaultTargetId);
   const [movePosition, setMovePosition] = useState(0);
 
@@ -123,9 +125,11 @@ export function MoveQuestionsDialog({
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1">
-            <p className="text-xs text-gray-500">{t("group")}</p>
+            <Label htmlFor={`${id}-group`} className="text-xs text-gray-500">
+              {t("group")}
+            </Label>
             <Select value={moveTargetId} onValueChange={setMoveTargetId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${id}-group`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -138,8 +142,11 @@ export function MoveQuestionsDialog({
             </Select>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-gray-500">{t("position")}</p>
+            <Label htmlFor={`${id}-position`} className="text-xs text-gray-500">
+              {t("position")}
+            </Label>
             <Input
+              id={`${id}-position`}
               type="number"
               min={0}
               max={maxPosition}

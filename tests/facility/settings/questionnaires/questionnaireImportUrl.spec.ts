@@ -76,7 +76,7 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
     });
   });
 
-  test("a non-http(s) URL is rejected inline without fetching", async ({
+  test("malformed and non-http(s) URLs are rejected inline without fetching", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
@@ -89,14 +89,16 @@ test.describe("Questionnaire v2 import via URL and malformed payloads", () => {
     await switchToUrlMode(page);
 
     const dialog = page.getByRole("dialog", { name: "Import Questionnaire" });
-    await dialog
-      .getByRole("textbox", { name: "Paste a questionnaire JSON URL" })
-      .fill("ftp://example.com/questionnaire.json");
-    await dialog.getByRole("button", { name: "Import", exact: true }).click();
+    for (const url of ["ftp://example.com/questionnaire.json", "not-a-url"]) {
+      await dialog
+        .getByRole("textbox", { name: "Paste a questionnaire JSON URL" })
+        .fill(url);
+      await dialog.getByRole("button", { name: "Import", exact: true }).click();
 
-    await expect(dialog.getByText("Please enter a valid url")).toBeVisible();
-    // Still on the select step — no confirm summary appeared.
-    await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+      await expect(dialog.getByText("Please enter a valid url")).toBeVisible();
+      // Still on the select step — no confirm summary appeared.
+      await expect(dialog.getByText(/Question count/)).not.toBeVisible();
+    }
   });
 
   test("a fetched payload with an unknown question type is rejected", async ({

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
+import { Button } from "@/components/ui/button";
 
 import { ValueSetRead } from "@/types/valueSet/valueSet";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
@@ -38,7 +39,10 @@ export function ValueSetParentPicker({
 }: ValueSetParentPickerProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const { options, isFetching } = useScopedValueSets({ facilityId, search });
+  const { options, isFetching, isError, retry } = useScopedValueSets({
+    facilityId,
+    search,
+  });
 
   const autocompleteOptions = mergeAutocompleteOptions(
     options.map((option) => ({
@@ -65,16 +69,34 @@ export function ValueSetParentPicker({
   };
 
   return (
-    <Autocomplete
-      {...ariaProps}
-      options={autocompleteOptions}
-      value={value?.id ?? ""}
-      onChange={handleChange}
-      onSearch={setSearch}
-      isLoading={isFetching}
-      disabled={disabled}
-      placeholder={t("none")}
-      noOptionsMessage={t("no_valuesets_found")}
-    />
+    <div className="space-y-1.5">
+      <Autocomplete
+        {...ariaProps}
+        options={autocompleteOptions}
+        value={value?.id ?? ""}
+        onChange={handleChange}
+        onSearch={setSearch}
+        isLoading={isFetching}
+        disabled={disabled}
+        placeholder={t("none")}
+        noOptionsMessage={
+          isError ? t("valueset_list_load_failed") : t("no_valuesets_found")
+        }
+      />
+      {isError && (
+        <div role="alert" className="text-sm text-destructive">
+          <p>{t("valueset_list_load_failed")}</p>
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto p-0"
+            disabled={isFetching}
+            onClick={retry}
+          >
+            {t("try_again")}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

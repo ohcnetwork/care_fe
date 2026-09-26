@@ -49,7 +49,12 @@ export function useScopedValueSets({
 }: {
   facilityId?: string;
   search: string;
-}): { options: ScopedValueSet[]; isFetching: boolean } {
+}): {
+  options: ScopedValueSet[];
+  isFetching: boolean;
+  isError: boolean;
+  retry: () => void;
+} {
   const params = {
     name: search || undefined,
     status: ValueSetStatus.ACTIVE,
@@ -85,5 +90,10 @@ export function useScopedValueSets({
   return {
     options,
     isFetching: instance.isFetching || facility.isFetching,
+    isError: instance.isError || (!!facilityId && facility.isError),
+    retry: () => {
+      void instance.refetch();
+      if (facilityId) void facility.refetch();
+    },
   };
 }
