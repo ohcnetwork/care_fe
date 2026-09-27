@@ -230,29 +230,31 @@ export function MultiFilterStyleTagSelector({
     <Button
       variant="outline"
       className={cn(
-        "h-10 min-w-0 overflow-hidden",
+        "h-10 min-h-11 min-w-0 max-w-full",
         selected.length > 0 && "border-blue-300 bg-blue-50",
         className,
+        selected.length > 0 && "h-auto",
       )}
       disabled={disabled || isTagMutationInProgress}
     >
-      <div className="flex w-full min-w-0 items-center gap-2 overflow-hidden">
+      <div className="flex w-full min-w-0 items-center gap-2">
         {isTagMutationInProgress ? (
           <Loader2 className="size-3 shrink-0 animate-spin" />
         ) : (
           <TagIcon className="size-3 shrink-0" />
         )}
 
-        <div className="min-w-0 flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1">
           {isTagMutationInProgress ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
-            <div className="flex w-full min-w-0 flex-nowrap gap-1 overflow-hidden">
+            <div className="flex w-full min-w-0 flex-wrap gap-1">
               {selected.slice(0, 3).map((tag) => (
                 <TagBadge
                   key={tag.id}
                   tag={tag}
-                  className="min-w-0 truncate border-blue-300 bg-blue-100 text-blue-900"
+                  title={tag.display}
+                  className="block min-w-0 max-w-full truncate border-blue-300 bg-blue-100 text-blue-900"
                 />
               ))}
               {selected.length > 3 && (
