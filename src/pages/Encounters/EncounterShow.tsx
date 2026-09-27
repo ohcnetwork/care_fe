@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { Card } from "@/components/ui/card";
@@ -91,16 +92,6 @@ export const EncounterShow = (props: Props) => {
   const pluginTabs = useCareAppTabs<PluginEncounterTabProps>("encounterTabs");
 
   const canAccess = canReadClinicalData || canReadSelectedEncounter;
-  const hasToken = primaryEncounter?.appointment?.token;
-  // const isEncounterActive =
-  //   primaryEncounter?.appointment?.id &&
-  //   !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
-
-  const hasAppointmentId = primaryEncounter?.appointment?.id;
-
-  // Header is shown either when token is present or encounter is active and has an appointment
-  const canViewAppointmentEncounterHeader = hasToken || hasAppointmentId;
-
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
@@ -223,20 +214,18 @@ export const EncounterShow = (props: Props) => {
   }
 
   return (
-    <Page
-      title={t("encounter")}
-      className="block md:px-1 -mt-4"
-      hideTitleOnPage
-    >
-      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
-        <div className="flex items-center justify-center -mt-2 mb-2">
+    <Page title={t("encounter")} className="block md:px-1" hideTitleOnPage>
+      <WorkspaceHeaderContent>
+        {primaryEncounter.appointment ? (
           <AppointmentEncounterHeader
             canWritePrimaryEncounter={canWritePrimaryEncounter}
             appointment={primaryEncounter.appointment}
             encounter={primaryEncounter}
           />
-        </div>
-      )}
+        ) : (
+          <span className="text-sm font-medium">{t("encounter")}</span>
+        )}
+      </WorkspaceHeaderContent>
 
       <div className="flex flex-col gap-2">
         <Card className="grid gap-3 bg-white shadow-none border-gray-200 rounded-xl px-3 py-3 md:px-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">

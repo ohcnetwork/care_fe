@@ -6,7 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import {
   EncounterRead,
   EncounterStatus,
@@ -36,7 +35,6 @@ import {
   CalendarCheck,
   CalendarRange,
   CheckCircle,
-  ExternalLinkIcon,
   ListOrdered,
   ScanLine,
 } from "lucide-react";
@@ -132,23 +130,24 @@ const PatientScanButton = ({
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center">
+    <>
       <Button
+        type="button"
         variant="ghost"
         onClick={() => setScanDialogOpen(true)}
         disabled={isPending}
         aria-label={t("scan_qr")}
-        className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+        className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
       >
-        <ScanLine className="size-4 text-black" />
-        <span className="text-sm text-black">{t("scan")}</span>
+        <ScanLine className="size-4" aria-hidden="true" />
+        {t("scan")}
       </Button>
       <PatientIDScanDialog
         open={scanDialogOpen}
         onOpenChange={setScanDialogOpen}
         onScanSuccess={handleScanSuccess}
       />
-    </div>
+    </>
   );
 };
 
@@ -161,9 +160,14 @@ export const AppointmentEncounterHeader = ({
   encounter: EncounterRead;
   canWritePrimaryEncounter: boolean;
 }) => {
+  const { t } = useTranslation();
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-full sm:items-center items-stretch justify-center shadow-sm">
-      <div className="flex divide-x-2 items-stretch justify-evenly overflow-auto">
+    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 py-1">
+      <div
+        role="group"
+        aria-label={t("appointment")}
+        className="flex min-w-0 flex-wrap items-center justify-end gap-0.5"
+      >
         <PatientScanButton
           facilityId={encounter.facility.id}
           appointment={appointment}
@@ -177,11 +181,8 @@ export const AppointmentEncounterHeader = ({
         />
       </div>
       {canWritePrimaryEncounter && (
-        <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
-          <AppointmentEncounterHeaderActions
-            encounter={encounter}
-            appointment={appointment}
-          />
+        <div className="flex min-w-0 items-center">
+          <AppointmentEncounterHeaderActions encounter={encounter} />
         </div>
       )}
     </div>
@@ -190,10 +191,8 @@ export const AppointmentEncounterHeader = ({
 
 const AppointmentEncounterHeaderActions = ({
   encounter,
-  appointment,
 }: {
   encounter: EncounterRead;
-  appointment: AppointmentRead;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -228,17 +227,14 @@ const AppointmentEncounterHeaderActions = ({
   ) {
     return (
       <div
-        className={cn(
-          "w-full sm:w-auto space-x-2 text-center",
-          appointment.token && "sm:border-l-2 sm:pl-2",
-        )}
+        role="group"
+        aria-label={t("encounter_actions")}
+        className="flex min-w-0 flex-wrap items-center gap-1"
       >
-        <span className="text-sm text-black">
-          {t("do_you_want_to_start_this_encounter")}
-        </span>
         <Button
+          type="button"
           variant="outline"
-          className="w-full sm:w-auto text-sm font-semibold text-black"
+          className="h-auto min-h-8 max-w-full whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
           onClick={handleStartEncounter}
         >
           {t("start_encounter")}
@@ -249,35 +245,34 @@ const AppointmentEncounterHeaderActions = ({
 
   return (
     <div
-      className={cn(
-        "w-full sm:w-auto space-x-2 flex items-center",
-        appointment.token && "sm:border-l-2 sm:pl-2",
-      )}
+      role="group"
+      aria-label={t("encounter_actions")}
+      className="flex min-w-0 flex-wrap items-center gap-1"
     >
-      <span className="text-sm text-black">
-        {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
-          <span className="text-sm text-black">
-            {t("how_do_you_to_finish_this_visit")}
-          </span>
-        )}
-      </span>
       <Button
+        type="button"
         variant="outline"
-        className="w-full sm:w-auto"
+        className="h-auto min-h-8 max-w-full gap-1.5 whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
         disabled={isPending}
         onClick={completeEverything}
       >
-        <CheckCircle />
+        <CheckCircle aria-hidden="true" />
         {requiresDischarge ? t("mark_for_discharge") : t("complete")}
       </Button>
       {encounter.status !== EncounterStatus.COMPLETED && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <DotsVerticalIcon className="text-gray-700" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0"
+              aria-label={t("more_actions")}
+            >
+              <DotsVerticalIcon className="text-gray-700" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="min-w-[59px]" align="end">
+          <DropdownMenuContent className="max-w-[calc(100vw-2rem)]" align="end">
             {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
               <DropdownMenuItem
                 className="p-2.5"
@@ -343,72 +338,60 @@ const TokenActions = ({
   return (
     <>
       {appointment.id && (
-        <div className="flex-1 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            asChild
-            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
-          >
-            <Link href={getQueueLink(appointment)}>
-              <CalendarRange className="size-4 text-black" />
-              <span className="text-sm text-black underline">{t("list")}</span>
-              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
-            </Link>
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          asChild
+          className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
+        >
+          <Link href={getQueueLink(appointment)} basePath="/">
+            <CalendarRange className="size-4" aria-hidden="true" />
+            {t("list")}
+          </Link>
+        </Button>
       )}
       {appointment.id && (
-        <div className="flex-1 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            asChild
-            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
+        <Button
+          variant="ghost"
+          asChild
+          className="h-8 max-w-full gap-1.5 px-2 text-sm font-medium text-gray-700"
+        >
+          <Link
+            basePath="/"
+            href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
           >
-            <Link
-              href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
-            >
+            {token ? (
               <>
-                {token ? (
-                  <>
-                    <span className="text-xs sm:text-sm text-gray-600">
-                      {t("token")}:
-                    </span>
-                    <div className="flex whitespace-nowrap gap-1 items-center">
-                      <span className="text-sm text-black font-semibold underline">
-                        {renderTokenNumber(token)}
-                      </span>
-                      <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <CalendarCheck className="size-4 text-black" />
-                    <span className="text-black underline">{t("view")}</span>
-                    <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
-                  </>
-                )}
+                <span className="shrink-0 text-gray-500">{t("token")}:</span>
+                <span
+                  className="truncate font-semibold text-gray-950"
+                  title={renderTokenNumber(token)}
+                >
+                  {renderTokenNumber(token)}
+                </span>
               </>
-            </Link>
-          </Button>
-        </div>
+            ) : (
+              <>
+                <CalendarCheck className="size-4" aria-hidden="true" />
+                {t("view")}
+              </>
+            )}
+          </Link>
+        </Button>
       )}
       {token && (
-        <div className="flex-1 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            className="flex-col gap-0 size-auto sm:flex-row sm:gap-2"
-            asChild
+        <Button
+          variant="ghost"
+          className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
+          asChild
+        >
+          <Link
+            basePath="/"
+            href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
           >
-            <Link
-              basePath="/"
-              href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
-            >
-              <ListOrdered className="size-4 text-black" />
-              <span className="text-sm text-black underline">{t("queue")}</span>
-              <ExternalLinkIcon className="size-4 text-black hidden sm:block" />
-            </Link>
-          </Button>
-        </div>
+            <ListOrdered className="size-4" aria-hidden="true" />
+            {t("queue")}
+          </Link>
+        </Button>
       )}
     </>
   );

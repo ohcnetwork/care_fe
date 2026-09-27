@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { WorkspaceHeaderSlot } from "@/components/Common/WorkspaceHeaderSlot";
+
 import { Button } from "@/components/ui/button";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
@@ -13,6 +15,8 @@ import { ResponsibilitySwitcher } from "@/components/ui/sidebar/responsibility-s
 import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
+
+import { useWorkspaceHeader } from "@/context/WorkspaceHeaderContext";
 
 import { CurrentUserRead } from "@/types/user/user";
 
@@ -31,6 +35,8 @@ export function WorkspaceHeader({
 }: WorkspaceHeaderProps) {
   const { t } = useTranslation();
   const { innerWorkspace } = useAppSidebar();
+  const { hasContent } = useWorkspaceHeader();
+  const hasCustomContent = hasContent || children != null;
   const { facilityId } = useRouteParams("/facility/:facilityId");
   const { organizationId } = useRouteParams("/organization/:organizationId");
   const { responsibilityId } = useRouteParams(
@@ -46,39 +52,46 @@ export function WorkspaceHeader({
       data-cui-app-header
       className={cn(
         "sticky top-0 z-10 flex shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 text-neutral-950",
-        innerWorkspace ? "h-12" : "h-14 md:rounded-t-[14px]",
+        hasContent && "flex-wrap gap-y-1 sm:flex-nowrap",
+        innerWorkspace
+          ? "min-h-12 py-1.5"
+          : "min-h-14 py-2 md:rounded-t-[14px]",
       )}
     >
       <AppSidebarToggle />
-      {children ?? (
-        <>
-          <span
-            aria-hidden="true"
-            className="h-5 w-px shrink-0 bg-neutral-200"
-          />
-          <div className="min-w-0 max-w-[min(20rem,65vw)]">
-            {patient ? (
-              <PatientSwitcher />
-            ) : responsibilityId ? (
-              <ResponsibilitySwitcher
-                selectedResponsibilityId={responsibilityId}
-              />
-            ) : organization ? (
-              <OrganizationSwitcher
-                organizations={user?.organizations ?? []}
-                selectedOrganization={organization}
-              />
-            ) : facility ? (
-              <FacilitySwitcher
-                facilities={user?.facilities ?? []}
-                selectedFacility={facility}
-              />
-            ) : (
-              <span className="truncate text-sm font-medium">{t("care")}</span>
-            )}
-          </div>
-        </>
-      )}
+      <WorkspaceHeaderSlot>
+        {children ?? (
+          <>
+            <span
+              aria-hidden="true"
+              className="h-5 w-px shrink-0 bg-neutral-200"
+            />
+            <div className="min-w-0 max-w-[min(20rem,65vw)]">
+              {patient ? (
+                <PatientSwitcher />
+              ) : responsibilityId ? (
+                <ResponsibilitySwitcher
+                  selectedResponsibilityId={responsibilityId}
+                />
+              ) : organization ? (
+                <OrganizationSwitcher
+                  organizations={user?.organizations ?? []}
+                  selectedOrganization={organization}
+                />
+              ) : facility ? (
+                <FacilitySwitcher
+                  facilities={user?.facilities ?? []}
+                  selectedFacility={facility}
+                />
+              ) : (
+                <span className="truncate text-sm font-medium">
+                  {t("care")}
+                </span>
+              )}
+            </div>
+          </>
+        )}
+      </WorkspaceHeaderSlot>
       {onSearch && (
         <Button
           variant="outline"
@@ -87,13 +100,17 @@ export function WorkspaceHeader({
           aria-label={t("search_page_actions")}
           className={cn(
             "ml-auto size-8 shrink-0 gap-2 rounded-lg border-neutral-300 bg-white p-0 text-neutral-500 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400",
-            children
-              ? "xl:h-9 xl:w-52 xl:justify-start xl:px-3"
+            hasCustomContent
+              ? "2xl:h-9 2xl:w-52 2xl:justify-start 2xl:px-3"
               : "sm:h-9 sm:w-52 sm:justify-start sm:px-3",
           )}
         >
           <Search className="size-4" aria-hidden="true" />
-          <span className={children ? "hidden xl:inline" : "hidden sm:inline"}>
+          <span
+            className={
+              hasCustomContent ? "hidden 2xl:inline" : "hidden sm:inline"
+            }
+          >
             {t("search_page_actions")}
           </span>
         </Button>

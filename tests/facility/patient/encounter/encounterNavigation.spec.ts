@@ -1,7 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { faker } from "@faker-js/faker";
+import { expect, test, type Request } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
+
+import type { EncounterRead } from "@/types/emr/encounter/encounter";
+import type {
+  AppointmentRead,
+  AppointmentStatus,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
+import type { TokenStatus } from "@/types/tokens/token/token";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -33,6 +42,10 @@ test.describe("Encounter navigation", () => {
     pastEncounterId = (await response.json()).id;
   });
 
+  test.afterEach(async ({ page }) => {
+    await page.unrouteAll({ behavior: "wait" });
+  });
+
   for (const [layout, width] of [
     ["desktop", 1440],
     ["mobile", 390],
@@ -60,7 +73,7 @@ test.describe("Encounter navigation", () => {
         });
         let currentFacilityName = "";
         await page.route(
-          `**/api/v1/encounter/${primaryEncounterId}/`,
+          (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
           async (route) => {
             const response = await route.fetch();
             const encounter = await response.json();
@@ -178,41 +191,28 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
         });
 
-        await test.step("Use header navigation without changing the historical encounter", async () => {
-          const back = page.getByRole("button", {
-            name: "Back",
-            exact: true,
-          });
-
-          if (layout === "desktop") {
-            await page
-              .getByRole("navigation", { name: "breadcrumb" })
-              .getByRole("link", { name: "Encounter", exact: true })
-              .focus();
-          } else {
-            await back.focus();
-          }
-          await page.keyboard.press("Enter");
+        await test.step("Switch sections without the former header navigation", async () => {
+          const header = page.locator("[data-cui-app-header]");
+          await expect(
+            header.getByRole("button", { name: "Back", exact: true }),
+          ).toHaveCount(0);
+          await expect(
+            header.getByRole("navigation", { name: "breadcrumb" }),
+          ).toHaveCount(0);
+          await page
+            .getByRole("tab", { name: "Overview", exact: true })
+            .click();
           await expect(page).toHaveURL(
             (url) =>
               url.pathname.endsWith("/updates") &&
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
-
-          if (layout === "desktop") {
-            await back.focus();
-            await page.keyboard.press("Enter");
-          } else {
-            await page.getByRole("tab", { name: "Notes" }).click();
-          }
+          await page.getByRole("tab", { name: "Notes", exact: true }).click();
           await expect(page).toHaveURL(
             (url) =>
               url.pathname.endsWith("/notes") &&
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
-          await expect(
-            page.getByRole("tab", { name: "Notes" }),
-          ).toHaveAttribute("aria-selected", "true");
           await expect(historicalContext).toBeVisible();
         });
 
@@ -229,6 +229,244 @@ test.describe("Encounter navigation", () => {
           await expect(historicalContext).not.toBeVisible();
           await expect(returnToCurrent).not.toBeVisible();
           await expect(updateEncounter).toBeVisible();
+        });
+      });
+
+      test("hosts appointment actions in the app header and clears them after navigation", async ({
+        page,
+      }) => {
+        const facilityId = getFacilityId();
+        const appointmentId = faker.string.uuid();
+        const resourceId = faker.string.uuid();
+        const tokenId = faker.string.uuid();
+        const queueId = faker.string.uuid();
+        const writes: Request[] = [];
+        let facilityName = "";
+        const planned = layout === "desktop";
+        const encounterPath = `/api/v1/encounter/${primaryEncounterId}/`;
+
+        await page.route(
+          (url) => url.pathname === encounterPath,
+          async (route) => {
+            if (route.request().method() !== "GET") {
+              writes.push(route.request());
+              // Capture the frontend write boundary without changing clinical data.
+              await route.fulfill({ json: {} });
+              return;
+            }
+            const response = await route.fetch();
+            const encounter: EncounterRead = await response.json();
+            facilityName = encounter.facility.name;
+            const appointment: AppointmentRead = {
+              id: appointmentId,
+              facility: encounter.facility,
+              patient: encounter.patient,
+              resource_type: "practitioner" as SchedulableResourceType,
+              resource: { ...encounter.created_by, id: resourceId },
+              status: "in_consultation" as AppointmentStatus,
+              note: "Header action boundary fixture",
+              tags: [],
+              booked_on: "2026-09-27T10:00:00Z",
+              booked_by: encounter.created_by,
+              created_by: encounter.created_by,
+              updated_by: encounter.created_by,
+              modified_date: "2026-09-27T10:00:00Z",
+              token_slot: {
+                id: faker.string.uuid(),
+                start_datetime: "2026-09-27T10:00:00Z",
+                end_datetime: "2026-09-27T10:30:00Z",
+                allocated: 1,
+                availability: {
+                  name: faker.word.words(2),
+                  tokens_per_slot: 1,
+                  schedule: {
+                    id: faker.string.uuid(),
+                    name: faker.word.words(2),
+                  },
+                },
+              },
+              token: planned
+                ? null
+                : {
+                    id: tokenId,
+                    number: 7,
+                    note: "Token fixture",
+                    status: "IN_PROGRESS" as TokenStatus,
+                    category: {
+                      id: faker.string.uuid(),
+                      name: faker.word.words(2),
+                      shorthand: "OP",
+                      default: true,
+                      resource_type: "practitioner" as SchedulableResourceType,
+                    },
+                    queue: {
+                      id: queueId,
+                      name: faker.word.words(2),
+                      date: "2026-09-27",
+                      is_primary: true,
+                      system_generated: false,
+                    },
+                  },
+            };
+            await route.fulfill({
+              response,
+              json: {
+                ...encounter,
+                encounter_class: "amb",
+                status: planned ? "planned" : "in_progress",
+                period: { start: "2026-09-27T10:00:00Z" },
+                appointment,
+              },
+            });
+          },
+        );
+        await page.route("**/api/v1/batch_requests/", async (route) => {
+          writes.push(route.request());
+          await route.fulfill({ json: { results: [] } });
+        });
+
+        await page.goto(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${primaryEncounterId}/updates`,
+        );
+        const header = page.locator("[data-cui-app-header]");
+        const appointmentGroup = header.getByRole("group", {
+          name: "Appointment",
+          exact: true,
+        });
+        await expect(appointmentGroup).toBeVisible();
+        await expect(
+          page.getByRole("group", { name: "Appointment", exact: true }),
+        ).toHaveCount(1);
+        await expect(
+          header.getByRole("button", { name: "Back", exact: true }),
+        ).toHaveCount(0);
+        await expect(
+          header.getByRole("navigation", { name: "breadcrumb" }),
+        ).toHaveCount(0);
+        await expect(
+          header.getByRole("link", {
+            name: planned ? "View" : "Token: OP-007",
+            exact: true,
+          }),
+        ).toHaveAttribute(
+          "href",
+          `/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`,
+        );
+        if (!planned) {
+          await expect(
+            header.getByRole("link", { name: "Queue", exact: true }),
+          ).toHaveAttribute(
+            "href",
+            `/facility/${facilityId}/practitioner/${resourceId}/queues/${queueId}`,
+          );
+        }
+        await expect
+          .poll(() =>
+            page.evaluate(
+              () => document.documentElement.scrollWidth - window.innerWidth,
+            ),
+          )
+          .toBeLessThanOrEqual(0);
+
+        await test.step("Activate the portaled Scan control with Enter", async () => {
+          await header
+            .getByRole("button", { name: "Scan the QR code", exact: true })
+            .focus();
+          await page.keyboard.press("Enter");
+          await expect(
+            page.getByRole("dialog", { name: "Scan Patient QR Code" }),
+          ).toBeVisible();
+          expect(writes).toHaveLength(0);
+          await page.keyboard.press("Escape");
+          await expect(page.getByRole("dialog")).not.toBeVisible();
+        });
+
+        await test.step("Send the header action to the intended request boundary", async () => {
+          if (!planned) {
+            await header
+              .getByRole("button", { name: "More Actions", exact: true })
+              .click();
+            await expect(
+              page.getByRole("menuitem", { name: /^Close Appointment/ }),
+            ).toBeVisible();
+            await page.keyboard.press("Escape");
+          }
+          await header
+            .getByRole("button", {
+              name: planned ? "Start Encounter" : "Complete",
+              exact: true,
+            })
+            .focus();
+          await page.keyboard.press("Enter");
+          await expect.poll(() => writes.length).toBe(1);
+          const request = writes[0];
+          if (planned) {
+            expect(new URL(request.url()).pathname).toBe(encounterPath);
+            expect(request.method()).toBe("PUT");
+            expect(request.postDataJSON()).toMatchObject({
+              id: primaryEncounterId,
+              status: "in_progress",
+              encounter_class: "amb",
+            });
+          } else {
+            expect(new URL(request.url()).pathname).toBe(
+              "/api/v1/batch_requests/",
+            );
+            expect(request.method()).toBe("POST");
+            const requests = request.postDataJSON().requests;
+            expect(requests).toHaveLength(3);
+            expect(requests).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  url: encounterPath,
+                  method: "PUT",
+                  body: expect.objectContaining({ status: "completed" }),
+                }),
+                expect.objectContaining({
+                  url: `/api/v1/facility/${facilityId}/appointments/${appointmentId}/`,
+                  method: "PUT",
+                  body: {
+                    status: "fulfilled",
+                    note: "Header action boundary fixture",
+                  },
+                }),
+                expect.objectContaining({
+                  url: `/api/v1/facility/${facilityId}/token/queue/${queueId}/token/${tokenId}/`,
+                  method: "PUT",
+                  body: expect.objectContaining({
+                    status: "FULFILLED",
+                    sub_queue: null,
+                    note: "Token fixture",
+                  }),
+                }),
+              ]),
+            );
+          }
+        });
+
+        await test.step("Leave through List and release the page header", async () => {
+          const list = header.getByRole("link", { name: "List", exact: true });
+          await expect(list).toHaveAttribute(
+            "href",
+            `/facility/${facilityId}/appointments?practitioners=${resourceId}&date_from=2026-09-27&date_to=2026-09-27`,
+          );
+          await list.focus();
+          await page.keyboard.press("Enter");
+          await expect(page).toHaveURL(
+            (url) => url.pathname === `/facility/${facilityId}/appointments`,
+          );
+          await expect(
+            page.getByRole("group", { name: "Appointment", exact: true }),
+          ).toHaveCount(0);
+          await expect(
+            header.getByRole("group", {
+              name: "Encounter Actions",
+              exact: true,
+            }),
+          ).toHaveCount(0);
+          await expect(
+            header.getByText(facilityName, { exact: true }),
+          ).toBeVisible();
         });
       });
     });

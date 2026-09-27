@@ -29,7 +29,6 @@ import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
-import EncounterPageHeader from "@/pages/Encounters/EncounterPageHeader";
 import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
 import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
@@ -201,8 +200,6 @@ export default function AppRouter() {
             <LocationPageHeader />
           ) : isSettingsWorkspace ? (
             <FacilitySettingsPageHeader />
-          ) : isEncounterPage ? (
-            <EncounterPageHeader onSearch={() => setCommandDialogOpen(true)} />
           ) : shouldShowSidebar ? (
             <WorkspaceHeader
               user={user}
