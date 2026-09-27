@@ -15,6 +15,7 @@ import {
   Package,
   Receipt,
   Stethoscope,
+  Syringe,
   Tags,
   TestTubeDiagonal,
   Ticket,
@@ -35,6 +36,7 @@ interface SettingsPermissions {
   canListTokenCategories: boolean;
   canReadPatientIdentifierConfig: boolean;
   canListTemplate: boolean;
+  canReadImmunizationPolicy: boolean;
 }
 
 interface SettingsPage {
@@ -77,6 +79,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "clinical",
     pages: [
+      {
+        path: "settings/immunization-policies",
+        title: "immunization_policies",
+        icon: Syringe,
+        permission: "canReadImmunizationPolicy",
+      },
       {
         path: "settings/healthcare_services",
         title: "healthcare_services",

@@ -7,6 +7,7 @@ import {
   ListOrdered,
   Settings2,
   ShieldCheck,
+  Syringe,
   Tags,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,11 @@ function generateAdminLinks(
       name: t("action_configurations"),
       url: `${baseUrl}/actions`,
       icon: <Settings2 />,
+    },
+    {
+      name: t("immunization_policies"),
+      url: `${baseUrl}/immunization-policies`,
+      icon: <Syringe />,
     },
     {
       name: t("admin_nav_valuesets"),
