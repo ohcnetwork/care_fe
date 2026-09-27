@@ -333,7 +333,7 @@ test("Continue restores an actual autosaved multi-form session and keeps subsequ
     .poll(() => draftFormNoteText(page, addedId))
     .toBe("Original added form note from real form filling");
 
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Minimize", exact: true }).click();
   await page.waitForURL(/\/updates$/);
   await expect(localRow).toContainText("+1");
   await localRow.getByRole("button", { name: /^Continue / }).click();
@@ -350,8 +350,8 @@ test("Continue restores an actual autosaved multi-form session and keeps subsequ
 
   await primaryNote().fill("Edited primary note after Continue");
   await addedNote().fill("Edited added form note after Continue");
-  // Close before another debounce; the live edit must be flushed on exit.
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  // Minimize before another debounce; the live edit must be flushed on exit.
+  await page.getByRole("button", { name: "Minimize", exact: true }).click();
   await page.waitForURL(/\/updates$/);
   await localRow.getByRole("button", { name: /^Continue / }).click();
   await expect(primaryNote()).toHaveValue("Edited primary note after Continue");
@@ -376,7 +376,7 @@ test("Continue restores an actual structured encounter edit over its server pref
   await expect
     .poll(() => page.evaluate((key) => localStorage.getItem(key), draftKey))
     .toContain(identifier);
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Minimize", exact: true }).click();
   await page.waitForURL(/\/updates$/);
   await draftRow(page, "local", draftKey)
     .getByRole("button", { name: /^Continue / })

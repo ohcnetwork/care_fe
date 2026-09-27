@@ -1,16 +1,23 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import mutate from "@/Utils/request/mutate";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
+import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type {
   QuestionnaireRead,
   SubjectType,
@@ -25,6 +32,7 @@ import {
 import { ServerErrorsPanel } from "./ServerErrorsPanel";
 import type { FormStore } from "./StoreRegistrar";
 import type { DroppedDraftAnswer } from "./draft/draftMerge";
+import { removeFillDraftCache } from "./draft/fillDraftCache";
 import type { FillDraftScope, LoadedFillDraft } from "./draft/fillDraftStore";
 import { useFillSessionAutosave } from "./draft/useFillAutosave";
 import { useSaveServerDraft } from "./draft/useSaveServerDraft";
@@ -53,6 +61,7 @@ interface FillPageBodyProps {
    *  questionnaire — surfaced, never dropped silently. */
   serverDraftDropped?: DroppedDraftAnswer[];
   continueDraftId?: string;
+  serverDraft?: FormSubmissionRead;
   exitTarget: string;
   contextRefreshFailed: boolean;
   isRetryingContext: boolean;
@@ -77,12 +86,15 @@ export function FillPageBody({
   serverDraftResponses,
   serverDraftDropped,
   continueDraftId,
+  serverDraft,
   exitTarget,
   contextRefreshFailed,
   isRetryingContext,
   onRetryContext,
 }: FillPageBodyProps) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
   const handleStore = useCallback((key: string, store: FormStore | null) => {
@@ -200,10 +212,61 @@ export function FillPageBody({
     },
   });
 
+  const discardServerDraft = useMutation({
+    mutationFn: async (draft: FormSubmissionRead) => {
+      // Local persistence is off for a resumed server draft. Clear any
+      // earlier local copy before discarding the authoritative server copy.
+      if (scope && !removeFillDraftCache(scope)) {
+        throw new Error("Could not clear the local draft");
+      }
+      return mutate(formSubmissionApi.update, {
+        pathParams: { external_id: draft.id },
+      })({ status: "entered_in_error", response_dump: draft.response_dump });
+    },
+    onSuccess: (discarded) => {
+      autosave.finishDraft();
+      // Replacing the detail avoids a cancelled refetch restoring the
+      // old editable draft when this page unmounts during navigation.
+      queryClient.setQueryData(
+        formSubmissionKeys.detail(discarded.id),
+        discarded,
+      );
+      queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
+      navigate(exitTarget);
+    },
+    onError: () => toast.error(t("form_submission_discard_failed")),
+  });
+
   // Both saves capture the current answers and clear the local draft on
   // success. Freeze editing until either request settles so later edits
   // cannot be discarded with a payload that did not contain them.
-  const frozen = isPending || serverDraftSave.isSavingDraft;
+  const frozen =
+    isPending || serverDraftSave.isSavingDraft || discardServerDraft.isPending;
+
+  const closeSession = () => {
+    if (frozen) return;
+    if (serverDraft) {
+      discardServerDraft.mutate(serverDraft);
+    } else if (autosave.discardDraft()) {
+      navigate(exitTarget);
+    }
+  };
+  const requestClose = () => {
+    if (frozen) return;
+    if (autosave.dirty || localDraft || serverDraft) {
+      setShowCloseConfirmation(true);
+    } else {
+      closeSession();
+    }
+  };
+  const minimizeSession = () => {
+    if (frozen) return;
+    if (continueDraftId) {
+      if (!contextRefreshFailed) serverDraftSave.saveDraft();
+    } else if (autosave.minimizeDraft()) {
+      navigate(exitTarget);
+    }
+  };
 
   useNavigationPrompt(
     autosave.dirty && !import.meta.env.DEV,
@@ -220,33 +283,78 @@ export function FillPageBody({
     frozen,
   });
 
+  const formActions = (
+    <div
+      className="ml-auto flex flex-wrap items-center justify-end gap-3"
+      onKeyDown={(event) => {
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey
+        ) {
+          // Preserve native activation for the form actions.
+          event.stopPropagation();
+        }
+      }}
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        className="font-semibold underline underline-offset-4"
+        onClick={requestClose}
+        disabled={frozen}
+      >
+        {t("cancel")}
+      </Button>
+      {serverDraftSave.canSaveDraft && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            if (!contextRefreshFailed) serverDraftSave.saveDraft();
+          }}
+          disabled={frozen || contextRefreshFailed}
+        >
+          {serverDraftSave.isSavingDraft && (
+            <Loader2 className="size-4 animate-spin" />
+          )}
+          {t("save_as_draft")}
+        </Button>
+      )}
+      <Button
+        type="button"
+        onClick={() => {
+          if (!contextRefreshFailed) void submit();
+        }}
+        disabled={frozen || contextRefreshFailed}
+        className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
+      >
+        {isPending ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Check className="size-4" />
+        )}
+        {t("save_changes")}
+      </Button>
+    </div>
+  );
+
   return (
     <FillSessionTabs
       patientId={patientId}
       facilityId={facilityId}
       dirty={autosave.dirty}
-      onClose={() => navigate(exitTarget)}
+      onClose={requestClose}
+      onMinimize={minimizeSession}
+      exitDisabled={frozen}
+      minimizeDisabled={
+        !!continueDraftId &&
+        (!serverDraftSave.canSaveDraft || contextRefreshFailed)
+      }
     >
       <div className="flex min-h-0 flex-1 flex-col bg-white">
-        <FillHeader
-          patient={patient}
-          encounter={encounter}
-          facilityId={facilityId}
-          onCancel={() => navigate(exitTarget)}
-          onSubmit={() => {
-            if (!contextRefreshFailed) void submit();
-          }}
-          saveDisabled={contextRefreshFailed}
-          isSubmitting={isPending}
-          onSaveDraft={
-            serverDraftSave.canSaveDraft
-              ? () => {
-                  if (!contextRefreshFailed) serverDraftSave.saveDraft();
-                }
-              : undefined
-          }
-          isSavingDraft={serverDraftSave.isSavingDraft}
-        />
         <FillOutlineNavProvider scrollContainer={scrollHost}>
           <div className="relative flex min-h-0 flex-1">
             <FillOutlineOverlay
@@ -258,6 +366,12 @@ export function FillPageBody({
               aria-label={t("form_canvas")}
               className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
             >
+              <FillHeader
+                patient={patient}
+                encounter={encounter}
+                facilityId={facilityId}
+                actions={formActions}
+              />
               <FillSessionNotices
                 questionnaireStale={questionnaireStale}
                 frozen={frozen}
@@ -323,53 +437,31 @@ export function FillPageBody({
             </section>
           </div>
         </FillOutlineNavProvider>
-        {/* Phone-only action row: visible only on small screens */}
-        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 bg-white p-3 md:hidden">
-          <Button
-            type="button"
-            variant="ghost"
-            className="font-semibold underline underline-offset-4"
-            onClick={() => navigate(exitTarget)}
-          >
-            {t("cancel")}
-          </Button>
-          {serverDraftSave.canSaveDraft && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (!contextRefreshFailed) serverDraftSave.saveDraft();
-              }}
-              disabled={
-                isPending ||
-                serverDraftSave.isSavingDraft ||
-                contextRefreshFailed
-              }
-            >
-              {serverDraftSave.isSavingDraft && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
-              {t("save_as_draft")}
-            </Button>
-          )}
-          <Button
-            type="button"
-            onClick={() => {
-              if (!contextRefreshFailed) void submit();
-            }}
-            disabled={
-              isPending || serverDraftSave.isSavingDraft || contextRefreshFailed
-            }
-            className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
-          >
-            {isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Check className="size-4" />
-            )}
-            {t("save_changes")}
-          </Button>
-        </div>
+      </div>
+      <div
+        onKeyDown={(event) => {
+          if (
+            event.key === "Enter" &&
+            !event.shiftKey &&
+            !event.ctrlKey &&
+            !event.metaKey &&
+            !event.altKey
+          ) {
+            // Portal events bubble here: keep native dialog button activation.
+            event.stopPropagation();
+          }
+        }}
+      >
+        <ConfirmActionDialog
+          open={showCloseConfirmation}
+          onOpenChange={setShowCloseConfirmation}
+          title={t("fill_close_discard_draft")}
+          description={t("fill_close_discard_description")}
+          onConfirm={closeSession}
+          confirmText={t("discard")}
+          variant="destructive"
+          disabled={frozen}
+        />
       </div>
     </FillSessionTabs>
   );

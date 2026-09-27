@@ -17,7 +17,7 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page local autosave", () => {
-  test("leaving before the debounce completes saves the final edit after form stores unregister", async ({
+  test("Minimize and Escape preserve the final edit and confirmed Close discards it without autosaving again", async ({
     page,
   }) => {
     const questionnaireId = await getQuestionnaireIdBySlug(
@@ -34,8 +34,9 @@ test.describe("Fill page local autosave", () => {
       .toBe("Initial saved note");
 
     await input.fill("Final edit before leaving");
-    page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Minimize", exact: true })
+      .press("Enter");
     await page.waitForURL(/\/updates$/);
     await expect
       .poll(() => draftFormNoteText(page, questionnaireId))
@@ -44,6 +45,47 @@ test.describe("Fill page local autosave", () => {
     await page.goto(fillUrl);
     await page.getByRole("button", { name: "Resume", exact: true }).click();
     await expect(input).toHaveValue("Final edit before leaving");
+
+    await page.getByRole("button", { name: "Add questionnaire" }).click();
+    const forms = page.getByRole("dialog", { name: "Forms", exact: true });
+    await forms.getByPlaceholder("Search Forms").press("Escape");
+    await expect(forms).not.toBeVisible();
+    await expect(page).toHaveURL(fillUrl);
+    await expect(input).toHaveValue("Final edit before leaving");
+
+    await input.fill("Final edit before Escape");
+    await input.press("Escape");
+    await page.waitForURL(/\/updates$/);
+    await page.goto(fillUrl);
+    await page.getByRole("button", { name: "Resume", exact: true }).click();
+    await expect(input).toHaveValue("Final edit before Escape");
+
+    await page
+      .getByRole("button", { name: "Close", exact: true })
+      .press("Enter");
+    const confirmation = page.getByRole("alertdialog");
+    await confirmation.getByRole("button", { name: "Cancel" }).press("Enter");
+    await expect(confirmation).not.toBeVisible();
+    await expect(input).toHaveValue("Final edit before Escape");
+
+    // Close while another autosave is pending; unmount must not restore it.
+    await input.fill("Edit to discard before the debounce");
+    await page
+      .getByRole("button", { name: "Close", exact: true })
+      .press("Enter");
+    await confirmation
+      .getByRole("button", { name: /^Discard\b/ })
+      .press("Enter");
+    await page.waitForURL(/\/updates$/);
+    await settleAutosaveDebounce(page);
+    expect(await fillDraftCount(page)).toBe(0);
+
+    await page.goto(fillUrl);
+    await expect(input).toHaveValue("");
+    await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Resume", exact: true }),
+    ).toHaveCount(0);
   });
 
   test("dismissing the restore prompt persists work typed while autosave was paused", async ({

@@ -30,6 +30,7 @@ interface PatientHeaderProps {
   className?: string;
   isPatientPage?: boolean;
   variant?: "default" | "encounter";
+  showBloodGroup?: boolean;
 }
 
 export function PatientHeader({
@@ -38,6 +39,7 @@ export function PatientHeader({
   className,
   isPatientPage = false,
   variant = "default",
+  showBloodGroup = true,
 }: PatientHeaderProps) {
   const { t } = useTranslation();
 
@@ -73,21 +75,25 @@ export function PatientHeader({
                 ·
               </span>
               <span>{t(`GENDER__${patient.gender}`)}</span>
-              <span aria-hidden="true" className="text-gray-300">
-                ·
-              </span>
-              <Badge
-                variant={hasBloodGroup ? "danger" : "secondary"}
-                title={bloodGroupLabel}
-                className="rounded-xs border-0 px-0.5 py-0 font-mono font-normal leading-4 whitespace-nowrap"
-              >
-                <span aria-hidden="true">
-                  {hasBloodGroup
-                    ? t(`BLOOD_GROUP_SHORT__${bloodGroup}`)
-                    : bloodGroupDescription}
-                </span>
-                <span className="sr-only">{bloodGroupLabel}</span>
-              </Badge>
+              {showBloodGroup && (
+                <>
+                  <span aria-hidden="true" className="text-gray-300">
+                    ·
+                  </span>
+                  <Badge
+                    variant={hasBloodGroup ? "danger" : "secondary"}
+                    title={bloodGroupLabel}
+                    className="rounded-xs border-0 px-0.5 py-0 font-mono font-normal leading-4 whitespace-nowrap"
+                  >
+                    <span aria-hidden="true">
+                      {hasBloodGroup
+                        ? t(`BLOOD_GROUP_SHORT__${bloodGroup}`)
+                        : bloodGroupDescription}
+                    </span>
+                    <span className="sr-only">{bloodGroupLabel}</span>
+                  </Badge>
+                </>
+              )}
               <dl className="contents">
                 {identifiers.slice(0, 2).map((identifier) => (
                   <div

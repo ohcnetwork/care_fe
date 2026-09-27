@@ -221,6 +221,7 @@ export function FillOutlineOverlay({
     };
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        event.preventDefault();
         event.stopPropagation();
         setOpen(false);
         toggleRef.current?.focus();
@@ -235,12 +236,14 @@ export function FillOutlineOverlay({
     };
     root.addEventListener("pointerenter", enter);
     root.addEventListener("pointerleave", leave);
-    root.addEventListener("keydown", keydown);
+    // Capture before a portaled row reaches React's shell-level Escape
+    // handler, which would otherwise minimize the whole fill session.
+    root.addEventListener("keydown", keydown, true);
     root.addEventListener("focusout", focusout);
     return () => {
       root.removeEventListener("pointerenter", enter);
       root.removeEventListener("pointerleave", leave);
-      root.removeEventListener("keydown", keydown);
+      root.removeEventListener("keydown", keydown, true);
       root.removeEventListener("focusout", focusout);
     };
   }, [openPanel, scheduleClose]);
@@ -289,19 +292,18 @@ export function FillOutlineOverlay({
           openPanel();
         }}
         className={cn(
-          "absolute inset-y-0 left-0 z-10 w-6 rounded-r-lg transition-colors",
+          "absolute top-1/2 left-0 z-10 flex max-h-[calc(100%-2rem)] min-h-8 w-6 -translate-y-1/2 flex-col rounded-r-lg py-2 transition-colors",
           "hover:bg-gray-200/50 focus-visible:bg-gray-200/50 focus-visible:outline-none",
         )}
       >
         {/* Tick marks are decorative — the button itself carries the
-            accessible name; each form portals its segment in. h-full +
-            flexible segments distribute the ticks over the rail like a
-            minimap, so a long session compresses instead of clipping the
-            active tick off-screen. */}
+            accessible name; each form portals a compact segment here.
+            The button caps the combined height, so long sessions compress
+            their rows while short forms keep the reference's close spacing. */}
         <span
           ref={onRailHost}
           aria-hidden="true"
-          className="flex h-full min-h-0 w-full flex-col gap-6 py-8"
+          className="flex min-h-0 w-full flex-col gap-3"
         />
       </button>
       <aside

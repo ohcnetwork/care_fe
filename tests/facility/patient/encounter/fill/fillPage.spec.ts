@@ -13,23 +13,42 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page shell", () => {
   let fillUrl: string;
+  let patientName: string;
 
   test.beforeEach(async ({ page }) => {
     const questionnaireId = await getQuestionnaireIdBySlug(
       "respiratory_status-v3",
     );
     fillUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`;
+    const encounterResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/encounter/${getEncounterId()}/` && response.ok(),
+    );
     await page.goto(fillUrl);
+    patientName = (await (await encounterResponse).json()).patient.name;
     await expect(
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
   });
 
-  test("fullscreen layout: no app sidebar, outline navigates the canvas", async ({
+  test("fullscreen layout: patient details and actions scroll away while tabs remain usable", async ({
     page,
   }) => {
     // Fill routes opt out of the app sidebar (fullscreen shell).
     await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
+    const patient = page.getByRole("button", {
+      name: patientName,
+      exact: true,
+    });
+    await expect(patient).toBeInViewport();
+    const save = page.getByRole("button", {
+      name: "Save Changes",
+      exact: true,
+    });
+    const cancel = page.getByRole("button", { name: "Cancel", exact: true });
+    await expect(save).toBeInViewport();
+    await expect(cancel).toBeInViewport();
 
     // The ≥lg outline is an overlay (per the reference): a tick rail on
     // the canvas' left edge, the panel floats over the canvas on demand.
@@ -41,12 +60,18 @@ test.describe("Fill page shell", () => {
     await expect(outline).toBeVisible();
     await outline.getByRole("button", { name: /FiO2/ }).click();
     await expect(questionBlock(page, "FiO2 (%)")).toBeInViewport();
-
-    // Context header: patient identity band + primary actions.
+    await expect(patient).not.toBeInViewport();
+    await expect(save).not.toBeInViewport();
+    await expect(cancel).not.toBeInViewport();
     await expect(
-      page.getByRole("button", { name: "Save Changes" }),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
+      page.getByRole("tab", { name: "Questionnaire", exact: true }),
+    ).toBeInViewport();
+    await expect(
+      page.getByRole("button", { name: "Minimize", exact: true }),
+    ).toBeInViewport();
+    await expect(
+      page.getByRole("button", { name: "Close", exact: true }),
+    ).toBeInViewport();
 
     // Close returns to the encounter updates tab.
     await page.getByRole("button", { name: "Close", exact: true }).click();

@@ -15,6 +15,9 @@ interface FillSessionTabsProps {
   facilityId?: string;
   dirty: boolean;
   onClose: () => void;
+  onMinimize: () => void;
+  exitDisabled: boolean;
+  minimizeDisabled: boolean;
   children: ReactNode;
 }
 
@@ -24,6 +27,9 @@ export function FillSessionTabs({
   facilityId,
   dirty,
   onClose,
+  onMinimize,
+  exitDisabled,
+  minimizeDisabled,
   children,
 }: FillSessionTabsProps) {
   const { t } = useTranslation();
@@ -52,6 +58,9 @@ export function FillSessionTabs({
     >
       <FillShell
         onClose={onClose}
+        onMinimize={onMinimize}
+        exitDisabled={exitDisabled}
+        minimizeDisabled={minimizeDisabled}
         tabs={
           patientId ? (
             <TabsList className="flex h-auto items-end justify-start gap-1 rounded-none bg-transparent p-0 sm:gap-1.5">

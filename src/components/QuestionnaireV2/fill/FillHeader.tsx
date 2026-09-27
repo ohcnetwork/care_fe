@@ -1,66 +1,49 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, DropletIcon, Loader2 } from "lucide-react";
+import { Droplet } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AllergyIcon } from "@/CAREUI/icons/CustomIcons";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
+import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatTruncatedList } from "@/Utils/utils";
-import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
 
-function MetaPair({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900">{value}</span>
-    </div>
-  );
-}
-
 interface FillHeaderProps {
   patient?: PatientRead;
   encounter?: EncounterRead;
   facilityId?: string;
-  onCancel: () => void;
-  onSubmit: () => void;
-  isSubmitting: boolean;
-  /** Provided only when this session may be saved as a SERVER draft (see
-   *  `draft/useSaveServerDraft`); absent → the affordance is not offered. */
-  onSaveDraft?: () => void;
-  isSavingDraft?: boolean;
-  /** Cached context remains visible after a failed refresh, but cannot be saved. */
-  saveDisabled?: boolean;
+  actions: ReactNode;
 }
 
-/**
- * The fill page's context header per the reference: patient identity row
- * with the encounter meta pairs (start/end, hospital identifier, assigned
- * doctor), then the gray action band — blood group + confirmed-allergy
- * badges on the left (same sources as the encounter overview's clinical
- * history card), Cancel + Save Changes on the right.
- */
+function MetaPair({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-xs text-gray-500">{label}</dt>
+      <dd className="mt-0.5 text-sm font-medium wrap-anywhere text-gray-950">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
+/** Patient details followed by the reference design's clinical/action band. */
 export function FillHeader({
   patient,
   encounter,
   facilityId,
-  onCancel,
-  onSubmit,
-  isSubmitting,
-  onSaveDraft,
-  isSavingDraft = false,
-  saveDisabled = false,
+  actions,
 }: FillHeaderProps) {
   const { t } = useTranslation();
 
@@ -80,129 +63,103 @@ export function FillHeader({
   });
 
   const assignedDoctor = encounter?.care_team?.[0];
+  const bloodGroup = patient?.blood_group || "unknown";
 
   return (
-    <div className="shrink-0 space-y-2 px-4 pt-3 md:px-6">
-      <div className="flex-col gap-2 xl:flex-row xl:items-center xl:gap-10 hidden md:flex">
-        {patient && (
-          <PatientHeader
-            patient={patient}
-            facilityId={facilityId}
-            className="p-0"
-          />
-        )}
-        {encounter && (
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <MetaPair
-              label={t("start_date")}
-              value={formatDateTime(encounter.period.start)}
+    <header
+      className="space-y-4"
+      onKeyDown={(event) => {
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey
+        ) {
+          // Keep native activation for patient details and form actions.
+          event.stopPropagation();
+        }
+      }}
+    >
+      {(patient || encounter) && (
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-8">
+          {patient && (
+            <PatientHeader
+              patient={patient}
+              facilityId={facilityId}
+              variant="encounter"
+              showBloodGroup={false}
+              className="p-0 xl:max-w-3xl"
             />
-            <MetaPair
-              label={t("end_date")}
-              value={
-                encounter.period.end
+          )}
+          {encounter && (
+            <dl className="flex min-w-0 flex-wrap items-start gap-x-6 gap-y-3">
+              <MetaPair label={t("start_date")}>
+                {encounter.period.start
+                  ? formatDateTime(encounter.period.start)
+                  : t("not_specified")}
+              </MetaPair>
+              <MetaPair label={t("end_date")}>
+                {encounter.period.end
                   ? formatDateTime(encounter.period.end)
-                  : `-- (${t("ongoing")})`
-              }
-            />
-            {encounter.external_identifier && (
-              <MetaPair
-                label={t("hospital_identifier")}
-                value={encounter.external_identifier}
-              />
-            )}
-            {assignedDoctor && (
-              <MetaPair
-                label={t("assigned_doctor")}
-                value={`${formatName(assignedDoctor.member)}${
-                  assignedDoctor.role.display
-                    ? ` (${assignedDoctor.role.display})`
-                    : ""
-                }`}
-              />
+                  : t("ongoing")}
+              </MetaPair>
+              {encounter.external_identifier && (
+                <MetaPair label={t("hospital_identifier")}>
+                  {encounter.external_identifier}
+                </MetaPair>
+              )}
+              {assignedDoctor && (
+                <MetaPair label={t("assigned_doctor")}>
+                  {formatName(assignedDoctor.member)}
+                  {assignedDoctor.role.display && (
+                    <span className="font-normal">
+                      {` (${assignedDoctor.role.display})`}
+                    </span>
+                  )}
+                </MetaPair>
+              )}
+            </dl>
+          )}
+        </div>
+      )}
+      {patient && (
+        <>
+          <PatientTagsDisplay
+            patient={patient}
+            className="min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
+          />
+          <PatientDeceasedInfo patient={patient} />
+        </>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        {patient && (
+          <div className="flex min-w-0 flex-1 flex-wrap items-start gap-x-6 gap-y-3">
+            <div className="space-y-1">
+              <p className="text-xs text-gray-700">{t("blood_group")}:</p>
+              <Badge variant={bloodGroup === "unknown" ? "secondary" : "green"}>
+                <Droplet className="size-3.5 shrink-0" aria-hidden />
+                {t(`BLOOD_GROUP_LONG__${bloodGroup}`)}
+              </Badge>
+            </div>
+            {!!allergies?.results.length && (
+              <div className="min-w-0 space-y-1">
+                <p className="text-xs text-gray-700">{t("allergies")}:</p>
+                <Badge
+                  variant="yellow"
+                  className="max-w-full gap-1.5 whitespace-normal wrap-anywhere"
+                >
+                  <AllergyIcon className="size-3.5 shrink-0" aria-hidden />
+                  {allergies.results
+                    .map((allergy) => allergy.code.display)
+                    .join(", ")}
+                </Badge>
+              </div>
             )}
           </div>
         )}
+        {actions}
       </div>
-      {patient && (
-        <div className="md:hidden">
-          <PatientHoverCard
-            patient={patient}
-            facilityId={facilityId}
-            compact={{ allergiesCount: allergies?.results.length ?? 0 }}
-          />
-        </div>
-      )}
-      {patient && <PatientDeceasedInfo patient={patient} />}
-
-      <div className="flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 md:flex-row md:items-center md:justify-between hidden md:flex">
-        <div className="flex flex-wrap gap-4">
-          {patient && (
-            <div className="flex flex-col items-start gap-1">
-              <span className="text-xs font-medium text-gray-600">
-                {t("blood_group")}:
-              </span>
-              <Badge variant="yellow">
-                <DropletIcon className="size-4" strokeWidth={1.5} />
-                <span>
-                  {t(`BLOOD_GROUP_LONG__${patient.blood_group || "unknown"}`)}
-                </span>
-              </Badge>
-            </div>
-          )}
-          {!!allergies?.results.length && (
-            <div className="flex flex-col items-start gap-1">
-              <span className="text-xs font-medium text-gray-600">
-                {t("allergies")}:
-              </span>
-              <Badge variant="destructive">
-                <AllergyIcon className="size-4" />
-                <span>
-                  {formatTruncatedList(
-                    allergies.results,
-                    2,
-                    (allergy) => allergy.code.display,
-                  )}
-                </span>
-              </Badge>
-            </div>
-          )}
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            className="font-semibold underline underline-offset-4"
-            onClick={onCancel}
-          >
-            {t("cancel")}
-          </Button>
-          {onSaveDraft && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onSaveDraft}
-              disabled={isSubmitting || isSavingDraft || saveDisabled}
-            >
-              {isSavingDraft && <Loader2 className="size-4 animate-spin" />}
-              {t("save_as_draft")}
-            </Button>
-          )}
-          <Button
-            type="button"
-            onClick={onSubmit}
-            disabled={isSubmitting || isSavingDraft || saveDisabled}
-            className="border border-primary-900/80 bg-gradient-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
-          >
-            {isSubmitting ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Check className="size-4" />
-            )}
-            {t("save_changes")}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </header>
   );
 }

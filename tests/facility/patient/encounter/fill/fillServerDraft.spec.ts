@@ -298,7 +298,7 @@ test.describe("Fill page server draft", () => {
     await expect(savedRow).toHaveCount(0);
   });
 
-  test("editing a resumed server draft marks the session dirty and guards navigation", async ({
+  test("Minimize saves the latest server draft edits and confirmed Close discards the draft", async ({
     page,
   }) => {
     test.slow();
@@ -334,36 +334,38 @@ test.describe("Fill page server draft", () => {
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).not.toContainText("Draft");
 
-    // Editing is. This mode deliberately writes no local draft (the server
-    // copy is authoritative), which is exactly why the unsaved-changes
-    // guard matters here: it is the only thing standing between the
-    // clinician's edits and an unwarned navigation away.
+    // Resumed server drafts do not autosave locally. Both exit controls
+    // must therefore handle the server record rather than just navigate.
     await noteBox().fill(editedNote);
     await expect(
       page.getByRole("tab", { name: /Questionnaire/ }),
     ).toContainText("Draft");
 
-    // …and the prompt actually arms. Dismissing it cancels the navigation,
-    // so the edit is still on screen and still resumable below.
-    let dialogMessage: string | undefined;
-    page.once("dialog", async (dialog) => {
-      dialogMessage = dialog.message();
-      await dialog.dismiss();
-    });
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
-    await expect.poll(() => dialogMessage).toContain("unsaved changes");
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    const confirmation = page.getByRole("alertdialog");
+    await confirmation.getByRole("button", { name: "Cancel" }).click();
+    await expect(confirmation).not.toBeVisible();
     await expect(noteBox()).toHaveValue(editedNote);
 
-    // Complete this record without assuming the encounter has no other drafts.
-    await questionBlock(page, "Is bilateral air entry present?")
-      .getByRole("radio", { name: "no", exact: true })
-      .click();
-    await questionBlock(page, "Select Modality")
-      .getByRole("radio", { name: "invasive", exact: true })
-      .click();
-    await page.getByRole("button", { name: "Save Changes" }).click();
-    await expectToast(page, "Questionnaire submitted successfully");
+    await page.getByRole("button", { name: "Minimize", exact: true }).click();
     await page.waitForURL(/\/updates$/);
+    await serverDraftRow(page, draftId)
+      .getByRole("button", { name: /^Continue/ })
+      .click();
+    await page.waitForURL(/continue_draft=/);
+    expect(draftIdFromUrl(page.url())).toBe(draftId);
+    await expect(noteBox()).toHaveValue(editedNote);
+
+    // Even without fresh edits, Close must discard the resumed server draft.
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await confirmation.getByRole("button", { name: /^Discard\b/ }).click();
+    await page.waitForURL(/\/updates$/);
+    const discardedDraft = await fetch(
+      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+      { headers: adminApiHeaders() },
+    );
+    expect(discardedDraft.ok).toBe(true);
+    expect((await discardedDraft.json()).status).toBe("entered_in_error");
     await expect(serverDraftRow(page, draftId)).toHaveCount(0);
   });
 

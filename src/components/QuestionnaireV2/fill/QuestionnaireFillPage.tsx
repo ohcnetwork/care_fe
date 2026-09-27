@@ -263,6 +263,7 @@ export function QuestionnaireFillPage({
           : undefined
       }
       continueDraftId={continueDraftId}
+      serverDraft={serverDraft}
       exitTarget={exitTarget}
       contextRefreshFailed={contextRefreshFailed}
       isRetryingContext={isRetryingContext}

@@ -36,25 +36,25 @@ export function FillOutlineRail() {
       : null;
 
   return (
-    // justify-evenly over the segment's share of the rail height: tick
-    // spacing scales with the questionnaire instead of overflowing the
-    // fixed-height rail (the host gives each form's segment flex-1).
-    <span className="flex min-h-0 w-full flex-1 flex-col justify-evenly">
+    // Natural 16px rows keep short forms compact. Both the segment and
+    // its rows can shrink when a long session reaches the rail's height cap.
+    <span className="flex min-h-0 w-full flex-col">
       {questionnaire.questions
         .filter((question) => !hiddenIds.has(question.id))
         .map((question) => (
           // data-question-tick mirrors the canvas' data-question-id: the
           // stable hook for tests (the ticks are aria-hidden decoration,
           // so no role reaches them).
-          <span
-            key={question.id}
-            data-question-tick={question.id}
-            data-active={question.id === activeTopId || undefined}
-            className={cn(
-              "h-px w-4 bg-gray-400 transition-all duration-200 motion-reduce:transition-none",
-              question.id === activeTopId && "w-6 bg-indigo-600",
-            )}
-          />
+          <span key={question.id} className="flex h-4 min-h-0 items-center">
+            <span
+              data-question-tick={question.id}
+              data-active={question.id === activeTopId || undefined}
+              className={cn(
+                "h-px w-4 shrink-0 bg-gray-400 transition-all duration-200 motion-reduce:transition-none",
+                question.id === activeTopId && "w-6 bg-indigo-600",
+              )}
+            />
+          </span>
         ))}
     </span>
   );

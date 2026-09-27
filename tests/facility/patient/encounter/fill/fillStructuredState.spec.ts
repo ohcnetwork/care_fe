@@ -5,6 +5,7 @@ import {
   apiBaseUrl,
   questionBlock,
 } from "tests/helper/questionnaireV2";
+import { expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -25,6 +26,7 @@ async function openConditionalSection(page: Page, structuredType: string) {
       status: "active",
       subject_type: "encounter",
       auth_context: "instance",
+      actions: [],
       questions: [
         {
           id: faker.string.uuid(),
@@ -66,7 +68,7 @@ async function remountSection(page: Page) {
   await expect(questionBlock(page, SECTION_LABEL)).toBeVisible();
 }
 
-test("file names and selections survive conditional remount and adding another file", async ({
+test("file names and selections survive remount and cannot be lost through Minimize", async ({
   page,
 }) => {
   await openConditionalSection(page, "files");
@@ -86,6 +88,18 @@ test("file names and selections survive conditional remount and adding another f
     mimeType: "text/plain",
     buffer: Buffer.from("second attachment"),
   });
+  await expect(names).toHaveCount(2);
+  await expect(names.first()).toHaveValue("Original attachment");
+  await expect(section.getByText("first.txt", { exact: true })).toBeVisible();
+  await expect(section.getByText("second.txt", { exact: true })).toBeVisible();
+
+  const fillUrl = page.url();
+  await page.getByRole("button", { name: "Minimize", exact: true }).click();
+  await expectToast(
+    page,
+    "This form includes file attachments or sections that cannot be saved in a draft. Submit the form or remove those values before minimizing.",
+  );
+  await expect(page).toHaveURL(fillUrl);
   await expect(names).toHaveCount(2);
   await expect(names.first()).toHaveValue("Original attachment");
   await expect(section.getByText("first.txt", { exact: true })).toBeVisible();

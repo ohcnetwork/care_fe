@@ -17,6 +17,7 @@ import {
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 
+import { removeFillDraftCache } from "./fillDraftCache";
 import { fillDraftScopeKey } from "./fillDraftCore";
 import type {
   DraftFormSnapshot,
@@ -26,6 +27,7 @@ import type {
 } from "./fillDraftStore";
 import {
   clearFillDraft,
+  hasExcludedDraftValues,
   mergeDraftIntoSeed,
   preserveExcludedStructured,
   saveFillDraft,
@@ -166,6 +168,7 @@ export function useFillSessionAutosave({
     // Warn once per failure episode. Keep tracking edits and retrying so
     // a later successful write can restore reload protection.
     persistenceFailedRef.current = result === "failed";
+    return result;
   }, [snapshotAll, t]);
 
   /**
@@ -216,24 +219,50 @@ export function useFillSessionAutosave({
     // storesVersion re-runs the subscription when a form (un)registers.
   }, [storesVersion, forms, getStore, persistNow]);
 
-  /** Successful submit: drop the stored draft, stop all further saves,
-   *  and clear the dirty flag SYNCHRONOUSLY (flushSync) — the success
-   *  handler navigates right after this, and `useNavigationPrompt` must
-   *  already see a pristine page or it blocks the redirect.
-   *
-   *  The clear runs off `scope`, not off whether this session PERSISTED
-   *  locally: a server-draft session shares its key with the plain mount,
-   *  and a local draft left behind there would prompt Resume with answers
-   *  this submit already filed. */
-  const finishDraft = useCallback(() => {
+  /** Stop pending saves and synchronously disarm the navigation prompt
+   *  only after this explicit exit has preserved or discarded the draft. */
+  const stopSaving = useCallback(() => {
     finishedRef.current = true;
-    const current = scopeRef.current;
-    if (current) clearFillDraft(current);
     flushSync(() => {
       setDirty(false);
       setRestoreDismissed(true);
     });
   }, []);
+
+  const finishDraft = useCallback(() => {
+    // A submitted/server-saved session also supersedes any local copy
+    // left by an earlier plain mount, even when local persistence is off.
+    const current = scopeRef.current;
+    if (current) clearFillDraft(current);
+    stopSaving();
+  }, [stopSaving]);
+
+  const minimizeDraft = useCallback(() => {
+    if (hasExcludedDraftValues(snapshotAll())) {
+      toast.error(t("fill_minimize_unsupported_values"));
+      return false;
+    }
+    // Choosing what to do with an earlier draft must come before saving
+    // fresh edits over it. An untouched restore prompt can safely be left.
+    if (restorePendingRef.current && dirty) {
+      toast.error(t("fill_minimize_resolve_draft"));
+      return false;
+    }
+    if (persistNow() === "failed") return false;
+    stopSaving();
+    return true;
+  }, [dirty, persistNow, snapshotAll, stopSaving, t]);
+
+  const discardDraft = useCallback(() => {
+    const current = scopeRef.current;
+    if (current && !removeFillDraftCache(current)) {
+      toast.error(t("form_submission_discard_failed"));
+      return false;
+    }
+    // Stop the debounce/unmount flush from recreating the discarded draft.
+    stopSaving();
+    return true;
+  }, [stopSaving, t]);
 
   const discardRestoredDraft = useCallback(() => {
     const current = scopeRef.current;
@@ -311,5 +340,7 @@ export function useFillSessionAutosave({
     resumeRestoredDraft,
     /** For the submit-success path: the draft served its purpose. */
     finishDraft,
+    minimizeDraft,
+    discardDraft,
   };
 }

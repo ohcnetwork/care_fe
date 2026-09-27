@@ -184,6 +184,16 @@ export interface FillSessionFormState {
   responses: Record<string, QuestionnaireResponse>;
 }
 
+/** Explicitly minimizing may only leave once every live value is draftable. */
+export function hasExcludedDraftValues(forms: FillSessionFormState[]): boolean {
+  return forms.some((form) =>
+    Object.values(form.responses).some(
+      (response) =>
+        isDraftExcluded(response) && response.values.some(entryHasContent),
+    ),
+  );
+}
+
 function snapshotSession(forms: FillSessionFormState[]): {
   snapshots: DraftFormSnapshot[];
   anyContent: boolean;
