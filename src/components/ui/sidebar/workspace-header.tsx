@@ -52,7 +52,6 @@ export function WorkspaceHeader({
       data-cui-app-header
       className={cn(
         "sticky top-0 z-10 flex shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 text-neutral-950",
-        hasContent && "flex-wrap gap-y-1 sm:flex-nowrap",
         innerWorkspace
           ? "min-h-12 py-1.5"
           : "min-h-14 py-2 md:rounded-t-[14px]",

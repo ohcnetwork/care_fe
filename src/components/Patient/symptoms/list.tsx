@@ -178,6 +178,7 @@ export function SymptomsList({
         symptoms={symptoms}
         patientId={patientId}
         showViewEncounter={showViewEncounter}
+        compact={presentation === "panel"}
       />
       {hasNextPage && (
         <div className="flex justify-center">

@@ -207,6 +207,7 @@ export function AllergyList({
         allergies={allergies}
         patientId={patientId}
         showViewEncounter={showViewEncounter}
+        compact={presentation === "panel"}
       />
       {hasNextPage && (
         <div className="flex justify-center">

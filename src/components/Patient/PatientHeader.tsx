@@ -81,7 +81,7 @@ export function PatientHeader({
                     ·
                   </span>
                   <Badge
-                    variant={hasBloodGroup ? "danger" : "secondary"}
+                    variant="outline"
                     title={bloodGroupLabel}
                     className="rounded-xs border-0 px-0.5 py-0 font-mono font-normal leading-4 whitespace-nowrap"
                   >

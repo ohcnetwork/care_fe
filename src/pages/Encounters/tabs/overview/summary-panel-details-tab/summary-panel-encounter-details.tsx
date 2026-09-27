@@ -38,8 +38,8 @@ export const SummaryPanelEncounterDetails = () => {
   if (!encounter) return null;
 
   return (
-    <div className="grid gap-4 rounded-xl border border-gray-200 bg-white p-3 sm:grid-cols-2 xl:hidden">
-      <div className="flex min-w-0 flex-col gap-4 sm:border-r sm:border-gray-200 sm:pr-4">
+    <div className="grid gap-3 rounded-xl border border-gray-200 bg-white p-3 sm:grid-cols-2 xl:hidden">
+      <div className="flex min-w-0 flex-col gap-3 sm:border-r sm:border-gray-200 sm:pr-3">
         <div>
           <span className="text-sm font-medium text-gray-700">
             {t("dep_and_teams")}:
@@ -79,7 +79,7 @@ export const SummaryPanelEncounterDetails = () => {
           </div>
         )}
       </div>
-      <div className="flex min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-3">
         <div className="flex flex-col">
           <span className="text-sm font-medium text-gray-700">
             {t("account")}:

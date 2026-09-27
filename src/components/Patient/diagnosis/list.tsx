@@ -186,6 +186,7 @@ export function DiagnosisList({
             diagnoses={diagnoses}
             patientId={patientId}
             showViewEncounter={showViewEncounter}
+            compact={presentation === "panel"}
           />
         ) : null}
       </div>

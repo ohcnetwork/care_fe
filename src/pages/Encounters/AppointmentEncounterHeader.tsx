@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -18,6 +21,8 @@ import {
 } from "@/types/scheduling/schedule";
 
 import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import {
   encounterRequiresDischarge,
   useEncounterProgressController,
@@ -34,12 +39,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarCheck,
   CalendarRange,
+  CalendarX2,
   CheckCircle,
   ListOrdered,
+  Play,
   ScanLine,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -68,9 +75,11 @@ const getQueueLink = (appointment: AppointmentRead): string => {
 const PatientScanButton = ({
   facilityId,
   appointment,
+  compact = false,
 }: {
   facilityId: string;
   appointment: AppointmentRead;
+  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
@@ -137,10 +146,13 @@ const PatientScanButton = ({
         onClick={() => setScanDialogOpen(true)}
         disabled={isPending}
         aria-label={t("scan_qr")}
-        className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
+        className={cn(
+          "h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700",
+          compact && "size-9 p-0",
+        )}
       >
         <ScanLine className="size-4" aria-hidden="true" />
-        {t("scan")}
+        {!compact && t("scan")}
       </Button>
       <PatientIDScanDialog
         open={scanDialogOpen}
@@ -161,49 +173,15 @@ export const AppointmentEncounterHeader = ({
   canWritePrimaryEncounter: boolean;
 }) => {
   const { t } = useTranslation();
-  return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 gap-y-1 py-1">
-      <div
-        role="group"
-        aria-label={t("appointment")}
-        className="flex min-w-0 flex-wrap items-center justify-end gap-0.5"
-      >
-        <PatientScanButton
-          facilityId={encounter.facility.id}
-          appointment={appointment}
-        />
-        <TokenActions
-          patientId={encounter.patient.id}
-          facilityId={encounter.facility.id}
-          appointment={appointment}
-          resourceType={appointment.resource_type}
-          resourceId={appointment.resource.id}
-        />
-      </div>
-      {canWritePrimaryEncounter && (
-        <div className="flex min-w-0 items-center">
-          <AppointmentEncounterHeaderActions encounter={encounter} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const AppointmentEncounterHeaderActions = ({
-  encounter,
-}: {
-  encounter: EncounterRead;
-}) => {
-  const { t } = useTranslation();
+  const isCompact = useBreakpoints({ default: true, md: false });
   const queryClient = useQueryClient();
-  const requiresDischarge = encounterRequiresDischarge(encounter);
 
   const { completeEverything, completeAppointment, isPending } =
     useEncounterProgressController({
       encounter,
     });
 
-  const { mutate: startEncounter } = useMutation({
+  const { mutate: startEncounter, isPending: isStarting } = useMutation({
     mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter.id },
     }),
@@ -221,10 +199,162 @@ const AppointmentEncounterHeaderActions = ({
     });
   };
 
-  if (
+  const appointmentActions = (
+    <TokenActions
+      patientId={encounter.patient.id}
+      facilityId={encounter.facility.id}
+      appointment={appointment}
+      resourceType={appointment.resource_type}
+      resourceId={appointment.resource.id}
+      asMenuItems={isCompact}
+    />
+  );
+  const encounterActions = canWritePrimaryEncounter && (
+    <AppointmentEncounterHeaderActions
+      encounter={encounter}
+      onStart={handleStartEncounter}
+      onComplete={completeEverything}
+      onCloseAppointment={completeAppointment}
+      isPending={isPending || isStarting}
+      asMenuItems={isCompact}
+    />
+  );
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center justify-end gap-1 md:flex-wrap md:gap-x-3 md:gap-y-1 md:py-1">
+      <div
+        role="group"
+        aria-label={t("appointment")}
+        className="flex min-w-0 items-center justify-end gap-0.5 md:flex-wrap"
+      >
+        <PatientScanButton
+          facilityId={encounter.facility.id}
+          appointment={appointment}
+          compact={isCompact}
+        />
+        {!isCompact && appointmentActions}
+      </div>
+      {isCompact ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-9 shrink-0"
+              aria-label={t("more_actions")}
+            >
+              <DotsVerticalIcon aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            sideOffset={8}
+            collisionPadding={8}
+            aria-label={t("encounter_actions")}
+            className="w-72 max-w-[calc(100vw-2rem)] p-1"
+          >
+            <DropdownMenuGroup aria-label={t("appointment")}>
+              <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
+                {t("appointment")}
+              </DropdownMenuLabel>
+              {appointmentActions}
+            </DropdownMenuGroup>
+            {canWritePrimaryEncounter && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup aria-label={t("encounter_actions")}>
+                  <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
+                    {t("encounter")}
+                  </DropdownMenuLabel>
+                  {encounterActions}
+                </DropdownMenuGroup>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        encounterActions
+      )}
+    </div>
+  );
+};
+
+const AppointmentEncounterHeaderActions = ({
+  encounter,
+  onStart,
+  onComplete,
+  onCloseAppointment,
+  isPending,
+  asMenuItems = false,
+}: {
+  encounter: EncounterRead;
+  onStart: () => void;
+  onComplete: () => void;
+  onCloseAppointment: () => void;
+  isPending: boolean;
+  asMenuItems?: boolean;
+}) => {
+  const { t } = useTranslation();
+  const requiresDischarge = encounterRequiresDischarge(encounter);
+  const canStart =
     encounter.status === EncounterStatus.PLANNED ||
-    encounter.status === EncounterStatus.ON_HOLD
-  ) {
+    encounter.status === EncounterStatus.ON_HOLD;
+
+  if (asMenuItems) {
+    return canStart ? (
+      <DropdownMenuItem
+        className="min-h-11 gap-2 px-3 py-2"
+        onSelect={onStart}
+        disabled={isPending}
+      >
+        <Play aria-hidden="true" />
+        {t("start_encounter")}
+      </DropdownMenuItem>
+    ) : (
+      <>
+        <DropdownMenuItem
+          className="min-h-11 items-start gap-2 px-3 py-2"
+          onSelect={onComplete}
+          disabled={isPending}
+          aria-label={
+            requiresDischarge ? t("mark_for_discharge") : t("complete")
+          }
+        >
+          <CheckCircle className="mt-0.5" aria-hidden="true" />
+          <div className="min-w-0">
+            <div className="font-medium">
+              {requiresDischarge ? t("mark_for_discharge") : t("complete")}
+            </div>
+            <div className="text-xs text-gray-500">
+              {requiresDischarge
+                ? t("mark_for_discharge_description")
+                : t("mark_as_complete_description")}
+            </div>
+          </div>
+        </DropdownMenuItem>
+        {encounter.status !== EncounterStatus.COMPLETED &&
+          encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+            <DropdownMenuItem
+              className="min-h-11 items-start gap-2 px-3 py-2"
+              onSelect={onCloseAppointment}
+              disabled={isPending}
+              aria-label={t("close_appointment")}
+            >
+              <CalendarX2 className="mt-0.5" aria-hidden="true" />
+              <div className="min-w-0">
+                <div className="font-medium">{t("close_appointment")}</div>
+                <div className="text-xs text-gray-500">
+                  {t("close_appointment_description")}
+                </div>
+              </div>
+            </DropdownMenuItem>
+          )}
+      </>
+    );
+  }
+
+  if (canStart) {
     return (
       <div
         role="group"
@@ -235,7 +365,8 @@ const AppointmentEncounterHeaderActions = ({
           type="button"
           variant="outline"
           className="h-auto min-h-8 max-w-full whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
-          onClick={handleStartEncounter}
+          onClick={onStart}
+          disabled={isPending}
         >
           {t("start_encounter")}
         </Button>
@@ -254,7 +385,7 @@ const AppointmentEncounterHeaderActions = ({
         variant="outline"
         className="h-auto min-h-8 max-w-full gap-1.5 whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
         disabled={isPending}
-        onClick={completeEverything}
+        onClick={onComplete}
       >
         <CheckCircle aria-hidden="true" />
         {requiresDischarge ? t("mark_for_discharge") : t("complete")}
@@ -276,7 +407,7 @@ const AppointmentEncounterHeaderActions = ({
             {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
               <DropdownMenuItem
                 className="p-2.5"
-                onClick={() => completeAppointment()}
+                onClick={onCloseAppointment}
                 disabled={isPending}
               >
                 <div className="flex flex-col items-start">
@@ -291,7 +422,7 @@ const AppointmentEncounterHeaderActions = ({
             )}
             <DropdownMenuItem
               className="p-2.5"
-              onClick={() => completeEverything()}
+              onClick={onComplete}
               disabled={isPending}
             >
               <div className="flex flex-col items-start">
@@ -320,12 +451,14 @@ const TokenActions = ({
   appointment,
   resourceType,
   resourceId,
+  asMenuItems = false,
 }: {
   patientId: string;
   facilityId: string;
   appointment?: AppointmentRead;
   resourceType: SchedulableResourceType;
   resourceId: string;
+  asMenuItems?: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -338,28 +471,30 @@ const TokenActions = ({
   return (
     <>
       {appointment.id && (
-        <Button
-          variant="ghost"
-          asChild
-          className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
-        >
+        <TokenAction asMenuItem={asMenuItems}>
           <Link href={getQueueLink(appointment)} basePath="/">
             <CalendarRange className="size-4" aria-hidden="true" />
-            {t("list")}
+            {asMenuItems ? t("appointments") : t("list")}
           </Link>
-        </Button>
+        </TokenAction>
       )}
       {appointment.id && (
-        <Button
-          variant="ghost"
-          asChild
-          className="h-8 max-w-full gap-1.5 px-2 text-sm font-medium text-gray-700"
-        >
+        <TokenAction asMenuItem={asMenuItems}>
           <Link
             basePath="/"
             href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
           >
-            {token ? (
+            {asMenuItems ? (
+              <>
+                <CalendarCheck className="size-4" aria-hidden="true" />
+                {t("view_appointment")}
+                {token && (
+                  <span className="ml-auto text-xs text-gray-500">
+                    {renderTokenNumber(token)}
+                  </span>
+                )}
+              </>
+            ) : token ? (
               <>
                 <span className="shrink-0 text-gray-500">{t("token")}:</span>
                 <span
@@ -376,14 +511,10 @@ const TokenActions = ({
               </>
             )}
           </Link>
-        </Button>
+        </TokenAction>
       )}
       {token && (
-        <Button
-          variant="ghost"
-          className="h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
-          asChild
-        >
+        <TokenAction asMenuItem={asMenuItems}>
           <Link
             basePath="/"
             href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
@@ -391,8 +522,30 @@ const TokenActions = ({
             <ListOrdered className="size-4" aria-hidden="true" />
             {t("queue")}
           </Link>
-        </Button>
+        </TokenAction>
       )}
     </>
   );
 };
+
+function TokenAction({
+  asMenuItem,
+  children,
+}: {
+  asMenuItem: boolean;
+  children: ReactNode;
+}) {
+  return asMenuItem ? (
+    <DropdownMenuItem asChild className="min-h-11 gap-2 px-3 py-2">
+      {children}
+    </DropdownMenuItem>
+  ) : (
+    <Button
+      variant="ghost"
+      asChild
+      className="h-8 max-w-full shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
+    >
+      {children}
+    </Button>
+  );
+}

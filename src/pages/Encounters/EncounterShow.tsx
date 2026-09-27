@@ -229,7 +229,7 @@ export const EncounterShow = (props: Props) => {
       </WorkspaceHeaderContent>
 
       <div className="flex flex-col gap-2">
-        <Card className="grid gap-3 bg-white shadow-none border-gray-200 rounded-xl px-3 py-3 md:px-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <Card className="grid gap-2 bg-white shadow-none border-gray-200 rounded-xl px-3 py-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <PatientHeader
             patient={patient}
             variant="encounter"
@@ -277,7 +277,7 @@ export const EncounterShow = (props: Props) => {
         </Card>
         <PatientDeceasedInfo patient={patient} />
       </div>
-      <div className="mt-4 flex min-w-0 flex-col gap-4">
+      <div className="mt-2 flex min-w-0 flex-col gap-2">
         <EncounterDetailsHeader
           encounter={selectedEncounter}
           currentFacilityId={facilityId}

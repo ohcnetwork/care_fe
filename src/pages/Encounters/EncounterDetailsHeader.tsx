@@ -67,7 +67,7 @@ export default function EncounterDetailsHeader({
         }
       }}
       className={cn(
-        "rounded-xl border px-3 py-2.5 sm:px-4",
+        "rounded-xl border px-3 py-2",
         isHistorical
           ? "border-amber-300 bg-amber-50"
           : "border-gray-200 bg-white",
@@ -96,11 +96,11 @@ export default function EncounterDetailsHeader({
       {isLoading ? (
         <Skeleton className="h-9 w-full max-w-md" />
       ) : encounter ? (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-base font-semibold text-gray-950">
             {t(`encounter_class__${encounter.encounter_class}`)}
           </span>
-          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-gray-600">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-gray-600">
             {showFacility && (
               <span className="wrap-anywhere">{encounter.facility.name}</span>
             )}

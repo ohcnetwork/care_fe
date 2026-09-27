@@ -623,7 +623,7 @@ export function ResponseCard({
             className={cn(
               "flex flex-row items-center",
               presentation === "panel"
-                ? "gap-3 space-y-0 px-4 py-3"
+                ? "gap-2 space-y-0 px-3 py-2"
                 : "py-2 px-3",
               presentation === "panel" &&
                 isExpanded &&
@@ -679,7 +679,7 @@ export function ResponseCard({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent
-            className={presentation === "panel" ? "p-4" : "px-3 pb-3 pt-0"}
+            className={presentation === "panel" ? "p-2" : "px-3 pb-3 pt-0"}
           >
             <ResponseCardContent item={item} />
           </CardContent>
@@ -757,7 +757,7 @@ export default function QuestionnaireResponsesList({
             className={cn(
               "p-4",
               presentation === "panel" &&
-                "rounded-xl border-gray-200 bg-white shadow-none",
+                "rounded-xl border-gray-200 bg-white p-2 shadow-none",
               isPrintPreview && "shadow-none border-gray-200",
             )}
           >

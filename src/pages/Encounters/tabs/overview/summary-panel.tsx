@@ -21,7 +21,7 @@ export const SummaryPanel = () => {
 
   return (
     <div className="@container">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-3">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-2">
         <TabsList className="h-10 w-full sm:w-72 justify-between rounded-xl border border-gray-200 bg-white p-1">
           <TabsTrigger
             value="details"

@@ -12,7 +12,7 @@ export const SummaryPanelDetailTab = () => {
   return (
     <div>
       <SummaryPanelEncounterDetails />
-      <div className="hidden xl:flex flex-col gap-4">
+      <div className="hidden xl:flex flex-col gap-3">
         <EncounterTags />
         <Locations />
         <ManageCareTeam />

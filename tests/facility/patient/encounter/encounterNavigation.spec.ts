@@ -250,6 +250,8 @@ test.describe("Encounter navigation", () => {
         const tokenId = faker.string.uuid();
         const queueId = faker.string.uuid();
         const writes: Request[] = [];
+        let batchResponse = Promise.resolve();
+        let releaseBatchResponse: (() => void) | undefined;
         let facilityName = "";
         const planned = layout === "desktop";
         const encounterPath = `/api/v1/encounter/${primaryEncounterId}/`;
@@ -331,6 +333,7 @@ test.describe("Encounter navigation", () => {
         );
         await page.route("**/api/v1/batch_requests/", async (route) => {
           writes.push(route.request());
+          await batchResponse;
           await route.fulfill({ json: { results: [] } });
         });
 
@@ -352,9 +355,47 @@ test.describe("Encounter navigation", () => {
         await expect(
           header.getByRole("navigation", { name: "breadcrumb" }),
         ).toHaveCount(0);
+        const actionSurface =
+          layout === "mobile"
+            ? page.getByRole("menu", {
+                name: "More Actions",
+                exact: true,
+              })
+            : header;
+        if (layout === "mobile") {
+          await test.step("Keep the mobile header on one line", async () => {
+            for (const mobileWidth of [390, 320]) {
+              await page.setViewportSize({ width: mobileWidth, height: 900 });
+              await expect
+                .poll(() =>
+                  header.evaluate(
+                    (element) => element.getBoundingClientRect().height,
+                  ),
+                )
+                .toBeLessThanOrEqual(64);
+              await expect
+                .poll(() =>
+                  header.getByRole("button").evaluateAll((buttons) => {
+                    const centers = buttons.map((button) => {
+                      const { y, height } = button.getBoundingClientRect();
+                      return y + height / 2;
+                    });
+                    return centers.length
+                      ? Math.max(...centers) - Math.min(...centers)
+                      : Infinity;
+                  }),
+                )
+                .toBeLessThanOrEqual(4);
+            }
+          });
+          await header
+            .getByRole("button", { name: "More Actions", exact: true })
+            .click();
+          await expect(actionSurface).toBeVisible();
+        }
         await expect(
-          header.getByRole("link", {
-            name: planned ? "View" : "Token: OP-007",
+          actionSurface.getByRole(layout === "mobile" ? "menuitem" : "link", {
+            name: planned ? "View" : "View Appointment OP-007",
             exact: true,
           }),
         ).toHaveAttribute(
@@ -363,7 +404,10 @@ test.describe("Encounter navigation", () => {
         );
         if (!planned) {
           await expect(
-            header.getByRole("link", { name: "Queue", exact: true }),
+            actionSurface.getByRole(layout === "mobile" ? "menuitem" : "link", {
+              name: "Queue",
+              exact: true,
+            }),
           ).toHaveAttribute(
             "href",
             `/facility/${facilityId}/practitioner/${resourceId}/queues/${queueId}`,
@@ -376,6 +420,11 @@ test.describe("Encounter navigation", () => {
             ),
           )
           .toBeLessThanOrEqual(0);
+
+        if (layout === "mobile") {
+          await page.keyboard.press("Escape");
+          await expect(actionSurface).not.toBeVisible();
+        }
 
         await test.step("Activate the portaled Scan control with Enter", async () => {
           await header
@@ -391,23 +440,57 @@ test.describe("Encounter navigation", () => {
         });
 
         await test.step("Send the header action to the intended request boundary", async () => {
-          if (!planned) {
+          if (layout === "mobile") {
             await header
               .getByRole("button", { name: "More Actions", exact: true })
-              .click();
-            await expect(
-              page.getByRole("menuitem", { name: /^Close Appointment/ }),
-            ).toBeVisible();
-            await page.keyboard.press("Escape");
+              .focus();
+            await page.keyboard.press("Enter");
+            await expect(actionSurface).toBeVisible();
           }
-          await header
-            .getByRole("button", {
+          if (!planned) {
+            await expect(
+              actionSurface.getByRole("menuitem", {
+                name: /^Close Appointment/,
+              }),
+            ).toBeVisible();
+          }
+          const action = actionSurface.getByRole(
+            layout === "mobile" ? "menuitem" : "button",
+            {
               name: planned ? "Start Encounter" : "Complete",
               exact: true,
-            })
-            .focus();
-          await page.keyboard.press("Enter");
-          await expect.poll(() => writes.length).toBe(1);
+            },
+          );
+          if (layout === "mobile") {
+            batchResponse = new Promise<void>((resolve) => {
+              releaseBatchResponse = resolve;
+            });
+          }
+          try {
+            await action.focus();
+            await page.keyboard.press("Enter");
+            await expect.poll(() => writes.length).toBe(1);
+            if (layout === "mobile") {
+              await expect(actionSurface).not.toBeVisible();
+              await header
+                .getByRole("button", { name: "More Actions", exact: true })
+                .focus();
+              await page.keyboard.press("Enter");
+              await expect(actionSurface).toBeVisible();
+              await expect(action).toBeDisabled();
+              await page.keyboard.press("Escape");
+              await expect(actionSurface).not.toBeVisible();
+              await header
+                .getByRole("button", { name: "More Actions", exact: true })
+                .focus();
+              await page.keyboard.press("Enter");
+              await expect(actionSurface).toBeVisible();
+              await expect(action).toBeDisabled();
+            }
+          } finally {
+            releaseBatchResponse?.();
+          }
+          await expect(action).toBeEnabled();
           const request = writes[0];
           if (planned) {
             expect(new URL(request.url()).pathname).toBe(encounterPath);
@@ -453,8 +536,14 @@ test.describe("Encounter navigation", () => {
           }
         });
 
-        await test.step("Leave through List and release the page header", async () => {
-          const list = header.getByRole("link", { name: "List", exact: true });
+        await test.step("Open appointments and release the page header", async () => {
+          const list = actionSurface.getByRole(
+            layout === "mobile" ? "menuitem" : "link",
+            {
+              name: layout === "mobile" ? "Appointments" : "List",
+              exact: true,
+            },
+          );
           await expect(list).toHaveAttribute(
             "href",
             `/facility/${facilityId}/appointments?practitioners=${resourceId}&date_from=2026-09-27&date_to=2026-09-27`,

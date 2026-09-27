@@ -12,10 +12,7 @@ export function WorkspaceHeaderSlot({ children }: { children: ReactNode }) {
     <>
       <div
         ref={setTarget}
-        className={cn(
-          "order-last min-w-0 flex-1 basis-full sm:order-none sm:basis-auto",
-          !hasContent && "hidden",
-        )}
+        className={cn("min-w-0 flex-1", !hasContent && "hidden")}
       />
       {!hasContent && children}
     </>

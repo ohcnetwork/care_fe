@@ -44,16 +44,16 @@ export const EncounterOverviewTab = () => {
     plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
 
   return (
-    <div className="flex items-start gap-5 @max-md:w-full">
+    <div className="flex items-start gap-3 @max-md:w-full">
       <div className="min-w-0 flex-1">
-        <div className="mb-4 flex min-h-10 flex-wrap items-center justify-between gap-3">
+        <div className="mb-2 flex min-h-10 flex-wrap items-center justify-between gap-2">
           <h1 className="text-lg font-semibold tracking-tight text-gray-950">
             {t("ENCOUNTER_TAB__updates")}
           </h1>
           {canReadClinicalData && <ClinicalHistoryOverview />}
         </div>
         {canReadClinicalData ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {canWrite && <QuickActions />}
             {canWrite && <FavoriteFormsQuickActions />}
             {encounter && (
@@ -70,7 +70,7 @@ export const EncounterOverviewTab = () => {
             </div>
 
             {
-              <div className="flex flex-col gap-5 overflow-x-auto">
+              <div className="flex flex-col gap-3 overflow-x-auto">
                 {/* Show preview of devices associated with the encounter */}
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />

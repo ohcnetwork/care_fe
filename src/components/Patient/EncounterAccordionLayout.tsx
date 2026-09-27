@@ -49,7 +49,7 @@ export function EncounterAccordionLayout({
         <div
           className={cn(
             "w-full flex items-center gap-2",
-            isPanel ? "px-4 py-2" : "px-2 py-1",
+            isPanel ? "px-3 py-1" : "px-2 py-1",
             isPanel && isExpanded && "border-b border-gray-200",
           )}
         >
@@ -116,9 +116,7 @@ export function EncounterAccordionLayout({
         </div>
 
         <CollapsibleContent>
-          <CardContent className={isPanel ? "p-4" : "p-2"}>
-            {children}
-          </CardContent>
+          <CardContent className="p-2">{children}</CardContent>
         </CollapsibleContent>
       </Collapsible>
     </Card>

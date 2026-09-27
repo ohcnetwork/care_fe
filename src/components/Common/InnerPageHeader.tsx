@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
-import { useWorkspaceHeader } from "@/context/WorkspaceHeaderContext";
-
 interface InnerPageBreadcrumb {
   label: string;
   href?: string;
@@ -29,15 +27,11 @@ interface InnerPageHeaderProps {
 }
 
 export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
-  const { hasContent } = useWorkspaceHeader();
   return (
     <header
       data-cy={dataCy}
       data-cui-app-header
-      className={cn(
-        "sticky top-0 z-10 flex min-h-12 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 py-1.5 text-neutral-950",
-        hasContent && "flex-wrap gap-y-1 sm:flex-nowrap",
-      )}
+      className="sticky top-0 z-10 flex min-h-12 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 py-1.5 text-neutral-950"
     >
       <AppSidebarToggle />
       <WorkspaceHeaderSlot>

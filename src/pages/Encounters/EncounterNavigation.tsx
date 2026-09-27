@@ -50,9 +50,9 @@ export default function EncounterNavigation({
       value={currentTab}
       onValueChange={onTabChange}
       orientation={orientation}
-      className="min-w-0 gap-4 lg:flex-row"
+      className="min-w-0 gap-3 lg:flex-row"
     >
-      <div className="min-w-0 shrink-0 space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-61 lg:self-start lg:overflow-y-auto">
+      <div className="min-w-0 shrink-0 space-y-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-56 lg:self-start lg:overflow-y-auto">
         <EncounterHistorySelector />
         <TabsList
           aria-label={t("encounter_navigation")}
@@ -63,7 +63,7 @@ export default function EncounterNavigation({
               key={key}
               value={key}
               onClick={() => onTabChange(key)}
-              className="group relative h-auto min-h-11 shrink-0 justify-start gap-3 overflow-hidden rounded-[10px] border border-transparent px-3 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-200/40 hover:text-gray-950 data-[state=active]:border-gray-300 data-[state=active]:bg-gray-200/50 data-[state=active]:font-semibold data-[state=active]:text-gray-950 data-[state=active]:shadow-none data-[state=active]:hover:bg-gray-200/50 lg:w-full lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-gray-500 lg:after:opacity-0 lg:data-[state=active]:after:opacity-100"
+              className="group relative h-auto min-h-11 shrink-0 justify-start gap-2 overflow-hidden rounded-[10px] border border-transparent px-3 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-200/40 hover:text-gray-950 data-[state=active]:border-gray-300 data-[state=active]:bg-gray-200/50 data-[state=active]:font-semibold data-[state=active]:text-gray-950 data-[state=active]:shadow-none data-[state=active]:hover:bg-gray-200/50 lg:min-h-9 lg:w-full lg:py-1.5 lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-gray-500 lg:after:opacity-0 lg:data-[state=active]:after:opacity-100"
             >
               <Icon
                 aria-hidden="true"
@@ -86,7 +86,7 @@ export default function EncounterNavigation({
         <TabsContent key={key} value={key} className="@container min-w-0">
           <PageTitle title={tab.label} />
           {!tab.hideTitle && (
-            <h1 className="mb-4 text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">
+            <h1 className="mb-3 text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">
               {tab.label}
             </h1>
           )}
