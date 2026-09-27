@@ -11,12 +11,32 @@ import { getPatientId } from "tests/support/patientId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Fill page validation", () => {
-  test("required questions block submit, scroll to the first error, and clear on edit", async ({
+  test("Shift+Enter validates required questions and submits only from the active form", async ({
     page,
   }) => {
     const questionnaireId = await getQuestionnaireIdBySlug(
       "respiratory_status-v3",
     );
+    const submissions: {
+      requests: {
+        url: string;
+        body: { results?: { values: { value?: unknown }[] }[] };
+      }[];
+    }[] = [];
+    await page.route("**/api/v1/batch_requests/", async (route) => {
+      const body = route.request().postDataJSON();
+      if (
+        !body.requests.some((request: { url: string }) =>
+          request.url.includes("/submit/"),
+        )
+      ) {
+        return route.fallback();
+      }
+      submissions.push(body);
+      // This case owns keyboard dispatch and client validation. Backend
+      // acceptance remains covered by the value-serialization scenarios.
+      await route.fulfill({ json: { results: [] } });
+    });
     await page.goto(
       `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,
     );
@@ -31,9 +51,20 @@ test.describe("Fill page validation", () => {
     );
     await expect(firstRequired).toBeVisible();
 
-    // Submit empty: both required questions flag, first one scrolled into
-    // view via its data-question-id anchor.
-    await page.getByRole("button", { name: "Save Changes" }).click();
+    const noteInput = questionBlock(
+      page,
+      "Note on Bilateral Air Entry",
+    ).getByRole("textbox");
+    const save = page.getByRole("button", {
+      name: "Save Changes",
+      exact: true,
+    });
+    await expect(save).toHaveAttribute("aria-keyshortcuts", "Shift+Enter");
+
+    // The shortcut also submits from a focused field; validation still
+    // blocks missing answers and brings the first error into view.
+    await noteInput.focus();
+    await noteInput.press("Shift+Enter");
     await expect(
       firstRequired.getByText("This field is required"),
     ).toBeVisible();
@@ -43,6 +74,7 @@ test.describe("Fill page validation", () => {
       ),
     ).toBeVisible();
     await expect(firstRequired).toBeInViewport();
+    expect(submissions).toHaveLength(0);
     await expect(firstRequiredGroup).toHaveAccessibleDescription(
       "This field is required",
     );
@@ -72,12 +104,46 @@ test.describe("Fill page validation", () => {
       ),
     ).toBeVisible();
 
-    // Completing the second required question lets the submit through.
+    // Completing the second required question makes the form submittable.
     await questionBlock(page, "Select Modality")
       .getByRole("radio", { name: "oxygen_support", exact: true })
       .click();
-    await page.getByRole("button", { name: "Save Changes" }).click();
+    const note = `Keyboard note ${Date.now()}`;
+    await noteInput.fill(note);
+    await noteInput.press("End");
+    await noteInput.press("Enter");
+    await noteInput.pressSequentially("Latest answer");
+    const expectedNote = `${note}\nLatest answer`;
+    await expect(noteInput).toHaveValue(expectedNote);
+
+    // Hidden forms and visible pickers must not submit the ready answers.
+    await page.getByRole("tab", { name: "Patient Clinical History" }).click();
+    await page.keyboard.press("Shift+Enter");
+    await expect(
+      page.getByRole("tab", { name: "Responses", exact: true }),
+    ).toBeVisible();
+    await page.getByRole("tab", { name: /^Questionnaire/ }).click();
+    await page.getByRole("button", { name: "Add questionnaire" }).click();
+    const forms = page.getByRole("dialog", { name: "Forms", exact: true });
+    await forms.getByPlaceholder("Search Forms").press("Shift+Enter");
+    await expect(forms).toBeVisible();
+    await forms.getByPlaceholder("Search Forms").press("Escape");
+    await expect(forms).not.toBeVisible();
+    expect(submissions).toHaveLength(0);
+
+    await noteInput.press("Shift+Enter");
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
+    expect(submissions).toHaveLength(1);
+    const submit = submissions[0].requests.find(
+      (request) =>
+        request.url === `/api/v1/questionnaire/${questionnaireId}/submit/`,
+    );
+    expect(submit).toBeDefined();
+    expect(
+      (submit?.body.results ?? []).flatMap((result) =>
+        result.values.map((value) => value.value),
+      ),
+    ).toContain(expectedNote);
   });
 });

@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Droplet } from "lucide-react";
-import type { ReactNode } from "react";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { AllergyIcon } from "@/CAREUI/icons/CustomIcons";
@@ -25,6 +30,7 @@ interface FillHeaderProps {
   encounter?: EncounterRead;
   facilityId?: string;
   actions: ReactNode;
+  onActionsHeightChange: (height: number) => void;
 }
 
 function MetaPair({ label, children }: { label: string; children: ReactNode }) {
@@ -38,14 +44,42 @@ function MetaPair({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Patient details followed by the reference design's clinical/action band. */
+/** Patient details scroll away; the sibling clinical/action strip stays visible. */
 export function FillHeader({
   patient,
   encounter,
   facilityId,
   actions,
+  onActionsHeightChange,
 }: FillHeaderProps) {
   const { t } = useTranslation();
+  const actionsRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = actionsRef.current;
+    if (!element) return;
+    const measure = () => {
+      const height = Math.ceil(element.getBoundingClientRect().height);
+      if (height > 0) onActionsHeightChange(height);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onActionsHeightChange]);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      // Keep native activation for patient details and form actions.
+      event.stopPropagation();
+    }
+  };
 
   const patientId = patient?.id;
   const { data: allergies } = useQuery({
@@ -66,84 +100,78 @@ export function FillHeader({
   const bloodGroup = patient?.blood_group || "unknown";
 
   return (
-    <header
-      className="space-y-4"
-      onKeyDown={(event) => {
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey &&
-          !event.ctrlKey &&
-          !event.metaKey &&
-          !event.altKey
-        ) {
-          // Keep native activation for patient details and form actions.
-          event.stopPropagation();
-        }
-      }}
-    >
+    <>
       {(patient || encounter) && (
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-8">
+        <header className="space-y-3" onKeyDown={handleKeyDown}>
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-6">
+            {patient && (
+              <PatientHeader
+                patient={patient}
+                facilityId={facilityId}
+                variant="encounter"
+                showBloodGroup={false}
+                className="p-0 xl:max-w-3xl"
+              />
+            )}
+            {encounter && (
+              <dl className="flex min-w-0 flex-wrap items-start gap-x-6 gap-y-3">
+                <MetaPair label={t("start_date")}>
+                  {encounter.period.start
+                    ? formatDateTime(encounter.period.start)
+                    : t("not_specified")}
+                </MetaPair>
+                <MetaPair label={t("end_date")}>
+                  {encounter.period.end
+                    ? formatDateTime(encounter.period.end)
+                    : t("ongoing")}
+                </MetaPair>
+                {encounter.external_identifier && (
+                  <MetaPair label={t("hospital_identifier")}>
+                    {encounter.external_identifier}
+                  </MetaPair>
+                )}
+                {assignedDoctor && (
+                  <MetaPair label={t("assigned_doctor")}>
+                    {formatName(assignedDoctor.member)}
+                    {assignedDoctor.role.display && (
+                      <span className="font-normal">
+                        {` (${assignedDoctor.role.display})`}
+                      </span>
+                    )}
+                  </MetaPair>
+                )}
+              </dl>
+            )}
+          </div>
           {patient && (
-            <PatientHeader
-              patient={patient}
-              facilityId={facilityId}
-              variant="encounter"
-              showBloodGroup={false}
-              className="p-0 xl:max-w-3xl"
-            />
+            <>
+              <PatientTagsDisplay
+                patient={patient}
+                className="min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
+              />
+              <PatientDeceasedInfo patient={patient} />
+            </>
           )}
-          {encounter && (
-            <dl className="flex min-w-0 flex-wrap items-start gap-x-6 gap-y-3">
-              <MetaPair label={t("start_date")}>
-                {encounter.period.start
-                  ? formatDateTime(encounter.period.start)
-                  : t("not_specified")}
-              </MetaPair>
-              <MetaPair label={t("end_date")}>
-                {encounter.period.end
-                  ? formatDateTime(encounter.period.end)
-                  : t("ongoing")}
-              </MetaPair>
-              {encounter.external_identifier && (
-                <MetaPair label={t("hospital_identifier")}>
-                  {encounter.external_identifier}
-                </MetaPair>
-              )}
-              {assignedDoctor && (
-                <MetaPair label={t("assigned_doctor")}>
-                  {formatName(assignedDoctor.member)}
-                  {assignedDoctor.role.display && (
-                    <span className="font-normal">
-                      {` (${assignedDoctor.role.display})`}
-                    </span>
-                  )}
-                </MetaPair>
-              )}
-            </dl>
-          )}
-        </div>
+        </header>
       )}
-      {patient && (
-        <>
-          <PatientTagsDisplay
-            patient={patient}
-            className="min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
-          />
-          <PatientDeceasedInfo patient={patient} />
-        </>
-      )}
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+      <div
+        ref={actionsRef}
+        onKeyDown={handleKeyDown}
+        className="sticky top-(--fill-shell-header-height) z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 shadow-sm md:top-0"
+      >
         {patient && (
-          <div className="flex min-w-0 flex-1 flex-wrap items-start gap-x-6 gap-y-3">
-            <div className="space-y-1">
-              <p className="text-xs text-gray-700">{t("blood_group")}:</p>
+          <div className="flex min-w-0 basis-full flex-wrap items-center gap-x-4 gap-y-1.5 sm:flex-1">
+            <div className="flex shrink-0 items-center gap-2">
+              <p className="whitespace-nowrap text-xs text-gray-700">
+                {t("blood_group")}:
+              </p>
               <Badge variant={bloodGroup === "unknown" ? "secondary" : "green"}>
                 <Droplet className="size-3.5 shrink-0" aria-hidden />
                 {t(`BLOOD_GROUP_LONG__${bloodGroup}`)}
               </Badge>
             </div>
             {!!allergies?.results.length && (
-              <div className="min-w-0 space-y-1">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                 <p className="text-xs text-gray-700">{t("allergies")}:</p>
                 <Badge
                   variant="yellow"
@@ -160,6 +188,6 @@ export function FillHeader({
         )}
         {actions}
       </div>
-    </header>
+    </>
   );
 }

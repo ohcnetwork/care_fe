@@ -2,6 +2,8 @@ import { Minus, X } from "lucide-react";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,7 +33,29 @@ export function FillShell({
   tabs?: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   useDisableSmoothScroll();
+
+  useLayoutEffect(() => {
+    const shell = shellRef.current;
+    const header = headerRef.current;
+    if (!shell || !header) return;
+
+    const measureHeader = () => {
+      const height = Math.ceil(header.getBoundingClientRect().height);
+      if (height > 0) {
+        shell.style.setProperty("--fill-shell-header-height", `${height}px`);
+      }
+    };
+    measureHeader();
+    const observer = new ResizeObserver(measureHeader);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      shell.style.removeProperty("--fill-shell-header-height");
+    };
+  }, []);
 
   const minimizeOnEscape = useCallback(
     (event: KeyboardEvent | ReactKeyboardEvent<HTMLDivElement>) => {
@@ -94,13 +118,17 @@ export function FillShell({
   return (
     // -m-4 cancels AppRouter's page-wrapper p-4 below md, where this shell
     <div
-      className="-m-4 flex min-h-dvh flex-col bg-gray-100 md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden"
+      ref={shellRef}
+      className="-m-4 flex min-h-dvh flex-col bg-gray-100 [--fill-shell-header-height:56px] md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden"
       onKeyDown={minimizeOnEscape}
     >
       {/* min-w-0 + overflow on the strip: a long questionnaire title (or
           the two tabs) scrolls within its own row on narrow screens
           instead of pushing the close button off-viewport. */}
-      <div className="sticky top-0 z-10 flex shrink-0 items-end justify-between gap-2 bg-gray-200 px-4 pt-3 md:px-6">
+      <div
+        ref={headerRef}
+        className="sticky top-0 z-30 flex shrink-0 items-end justify-between gap-2 bg-gray-200 px-4 pt-3 md:px-6"
+      >
         <div className="min-w-0 flex-1 overflow-x-auto">{tabs ?? <div />}</div>
         <div
           className="mb-2 flex shrink-0 items-center gap-2"

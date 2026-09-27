@@ -39,11 +39,14 @@ export function useFillOutlineNav(): FillOutlineNavValue {
 /**
  * Scroll-spy over the canvas' `[data-question-id]` anchors: the active
  * question is the last block whose top sits above the tracking line
- * (96px into the scroll viewport), so it flips exactly when a block
+ * (below the sticky controls in the scroll viewport), so it flips when a block
  * scrolls under the reader's eye. Recomputes on scroll/resize and on DOM
  * mutations (enable_when showing/hiding blocks, forms added or removed).
  */
-function useActiveQuestionId(container: HTMLElement | null): string | null {
+function useActiveQuestionId(
+  container: HTMLElement | null,
+  stickyHeaderHeight: number,
+): string | null {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,7 +66,10 @@ function useActiveQuestionId(container: HTMLElement | null): string | null {
       // pass it.
       let current: HTMLElement | undefined;
       for (const block of blocks) {
-        if (block.getBoundingClientRect().top - viewportTop <= 96) {
+        if (
+          block.getBoundingClientRect().top - viewportTop <=
+          Math.max(96, stickyHeaderHeight + 16)
+        ) {
           current = block;
         }
       }
@@ -85,20 +91,22 @@ function useActiveQuestionId(container: HTMLElement | null): string | null {
       mutationObserver.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [container]);
+  }, [container, stickyHeaderHeight]);
 
   return activeId;
 }
 
 export function FillOutlineNavProvider({
   scrollContainer,
+  stickyHeaderHeight = 0,
   children,
 }: {
   /** The canvas' scrolling element — anchors are queried inside it. */
   scrollContainer: HTMLElement | null;
+  stickyHeaderHeight?: number;
   children: React.ReactNode;
 }) {
-  const spyActiveId = useActiveQuestionId(scrollContainer);
+  const spyActiveId = useActiveQuestionId(scrollContainer, stickyHeaderHeight);
   // A row click PINS its question as active: near the scroll floor the
   // chosen block can never top the viewport, so pure scroll-spy would
   // highlight an earlier question than the one the clinician just picked.

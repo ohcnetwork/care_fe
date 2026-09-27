@@ -32,7 +32,7 @@ test.describe("Fill page shell", () => {
     ).toBeVisible();
   });
 
-  test("fullscreen layout: patient details and actions scroll away while tabs remain usable", async ({
+  test("fullscreen layout: clinical context and actions stay visible while patient details scroll away", async ({
     page,
   }) => {
     // Fill routes opt out of the app sidebar (fullscreen shell).
@@ -59,10 +59,28 @@ test.describe("Fill page shell", () => {
     const outline = page.getByRole("navigation", { name: "Questions" });
     await expect(outline).toBeVisible();
     await outline.getByRole("button", { name: /FiO2/ }).click();
-    await expect(questionBlock(page, "FiO2 (%)")).toBeInViewport();
+    const targetQuestion = questionBlock(page, "FiO2 (%)");
+    await expect(targetQuestion).toBeInViewport({ ratio: 1 });
     await expect(patient).not.toBeInViewport();
-    await expect(save).not.toBeInViewport();
-    await expect(cancel).not.toBeInViewport();
+    await expect(save).toBeInViewport();
+    await expect(cancel).toBeInViewport();
+    await expect(page.getByText(/^Blood Group:?$/)).toBeInViewport();
+    // A jump must land below the pinned actions, not merely somewhere
+    // inside the viewport where the strip could cover the question.
+    await expect
+      .poll(async () => {
+        const [questionBox, saveBox, cancelBox] = await Promise.all([
+          targetQuestion.boundingBox(),
+          save.boundingBox(),
+          cancel.boundingBox(),
+        ]);
+        if (!questionBox || !saveBox || !cancelBox) return -1;
+        return (
+          questionBox.y -
+          Math.max(saveBox.y + saveBox.height, cancelBox.y + cancelBox.height)
+        );
+      })
+      .toBeGreaterThanOrEqual(0);
     await expect(
       page.getByRole("tab", { name: "Questionnaire", exact: true }),
     ).toBeInViewport();

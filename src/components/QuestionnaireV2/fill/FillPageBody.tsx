@@ -1,7 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -12,6 +19,7 @@ import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSea
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 import type { PatientRead } from "@/types/emr/patient/patient";
@@ -144,6 +152,7 @@ export function FillPageBody({
   const [outlineHost, setOutlineHost] = useState<HTMLElement | null>(null);
   const [railHost, setRailHost] = useState<HTMLElement | null>(null);
   const [scrollHost, setScrollHost] = useState<HTMLElement | null>(null);
+  const [actionsHeight, setActionsHeight] = useState(0);
 
   // The renderer's flat subject view. Memoized on its PRIMITIVES: the
   // union arrives as a fresh object literal from the route element on
@@ -243,6 +252,54 @@ export function FillPageBody({
   const frozen =
     isPending || serverDraftSave.isSavingDraft || discardServerDraft.isPending;
 
+  const saveChanges = useCallback(() => {
+    if (!frozen && !contextRefreshFailed) void submit();
+  }, [frozen, contextRefreshFailed, submit]);
+
+  useEffect(() => {
+    const saveOnShortcut = (event: KeyboardEvent) => {
+      if (
+        event.key !== "Enter" ||
+        !event.shiftKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        !scrollHost?.getClientRects().length
+      ) {
+        return;
+      }
+
+      // Pickers and dialogs own their shortcuts. The mounted questionnaire
+      // also stays hidden while clinical history is open (checked above).
+      const overlayOpen = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [data-slot="popover-content"]',
+        ),
+      ).some((element) => element.getClientRects().length > 0);
+      if (
+        overlayOpen ||
+        (event.target instanceof HTMLElement &&
+          event.target.closest(
+            'select, [role="combobox"][aria-expanded="true"]',
+          ))
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      saveChanges();
+    };
+
+    // Capture this one combination so it also works while editing a field,
+    // without enabling global letter shortcuts in text inputs.
+    document.addEventListener("keydown", saveOnShortcut, true);
+    return () => document.removeEventListener("keydown", saveOnShortcut, true);
+  }, [saveChanges, scrollHost]);
+
   const closeSession = () => {
     if (frozen) return;
     if (serverDraft) {
@@ -285,7 +342,7 @@ export function FillPageBody({
 
   const formActions = (
     <div
-      className="ml-auto flex flex-wrap items-center justify-end gap-3"
+      className="ml-auto flex flex-wrap items-center justify-end gap-2"
       onKeyDown={(event) => {
         if (
           event.key === "Enter" &&
@@ -302,6 +359,7 @@ export function FillPageBody({
       <Button
         type="button"
         variant="ghost"
+        size="sm"
         className="font-semibold underline underline-offset-4"
         onClick={requestClose}
         disabled={frozen}
@@ -312,6 +370,7 @@ export function FillPageBody({
         <Button
           type="button"
           variant="outline"
+          size="sm"
           onClick={() => {
             if (!contextRefreshFailed) serverDraftSave.saveDraft();
           }}
@@ -325,9 +384,9 @@ export function FillPageBody({
       )}
       <Button
         type="button"
-        onClick={() => {
-          if (!contextRefreshFailed) void submit();
-        }}
+        size="sm"
+        onClick={saveChanges}
+        aria-keyshortcuts="Shift+Enter"
         disabled={frozen || contextRefreshFailed}
         className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
       >
@@ -337,6 +396,12 @@ export function FillPageBody({
           <Check className="size-4" />
         )}
         {t("save_changes")}
+        <kbd
+          aria-hidden
+          className="hidden rounded border border-white/20 px-1 text-[10px] font-normal sm:inline-flex"
+        >
+          {formatKeyboardShortcut("shift+enter")}
+        </kbd>
       </Button>
     </div>
   );
@@ -355,7 +420,10 @@ export function FillPageBody({
       }
     >
       <div className="flex min-h-0 flex-1 flex-col bg-white">
-        <FillOutlineNavProvider scrollContainer={scrollHost}>
+        <FillOutlineNavProvider
+          scrollContainer={scrollHost}
+          stickyHeaderHeight={actionsHeight}
+        >
           <div className="relative flex min-h-0 flex-1">
             <FillOutlineOverlay
               onPanelHost={setOutlineHost}
@@ -364,13 +432,19 @@ export function FillPageBody({
             <section
               ref={setScrollHost}
               aria-label={t("form_canvas")}
-              className="min-w-0 flex-1 space-y-6 overflow-y-auto px-4 py-5 md:px-8"
+              className="min-w-0 flex-1 space-y-4 px-4 py-3 md:overflow-y-auto md:px-8 [&_[data-question-id]]:scroll-mt-[calc(var(--fill-shell-header-height)+var(--fill-actions-height)+0.75rem)] md:[&_[data-question-id]]:scroll-mt-[calc(var(--fill-actions-height)+0.75rem)]"
+              style={
+                {
+                  "--fill-actions-height": `${actionsHeight}px`,
+                } as CSSProperties
+              }
             >
               <FillHeader
                 patient={patient}
                 encounter={encounter}
                 facilityId={facilityId}
                 actions={formActions}
+                onActionsHeightChange={setActionsHeight}
               />
               <FillSessionNotices
                 questionnaireStale={questionnaireStale}
