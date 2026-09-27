@@ -224,8 +224,8 @@ function rewriteLocalPluginImports(rootDir: string, id: string, code: string) {
 // plugin's standalone build), strip those imports in dev. The host care_fe
 // app already provides Tailwind v4 theme/preflight/utilities and scans
 // apps/** via @source, so these imports would otherwise (a) re-run preflight
-// over the entire host page and (b) emit no utilities (the utilities.css
-// import isn't a v4 entry-point so it can't scan sources from here).
+// over the entire host page and (b) duplicate utilities. Keep a reference
+// to the theme so plugin @apply and --spacing() still compile.
 function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
   if (!id.endsWith(".css")) {
     return null;
@@ -247,7 +247,7 @@ function stripPluginTailwindImports(rootDir: string, id: string, code: string) {
     return null;
   }
 
-  return stripped;
+  return `@reference "tailwindcss";\n${stripped}`;
 }
 
 function createLocalPluginModule(rootDir: string, command: "serve" | "build") {
