@@ -80,7 +80,9 @@ test.describe("Encounter navigation", () => {
             currentFacilityName = encounter.facility.name;
             await route.fulfill({
               response,
-              json: { ...encounter, period: {} },
+              // The backend embeds an empty object for an encounter with
+              // no appointment; it is not a complete AppointmentRead.
+              json: { ...encounter, period: {}, appointment: {} },
             });
           },
         );
@@ -91,6 +93,13 @@ test.describe("Encounter navigation", () => {
         await expect(
           page.getByRole("button", { name: /Encounter History/i }),
         ).toBeVisible();
+        const header = page.locator("[data-cui-app-header]");
+        await expect(
+          header.getByText("Encounter", { exact: true }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("group", { name: "Appointment", exact: true }),
+        ).toHaveCount(0);
         await expect(historicalContext).not.toBeVisible();
         await expect(returnToCurrent).not.toBeVisible();
         await expect(updateEncounter).toBeVisible();

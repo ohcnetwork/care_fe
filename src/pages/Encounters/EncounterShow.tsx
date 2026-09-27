@@ -216,7 +216,8 @@ export const EncounterShow = (props: Props) => {
   return (
     <Page title={t("encounter")} className="block md:px-1" hideTitleOnPage>
       <WorkspaceHeaderContent>
-        {primaryEncounter.appointment ? (
+        {/* The API returns an empty object when there is no appointment. */}
+        {primaryEncounter.appointment?.id ? (
           <AppointmentEncounterHeader
             canWritePrimaryEncounter={canWritePrimaryEncounter}
             appointment={primaryEncounter.appointment}
