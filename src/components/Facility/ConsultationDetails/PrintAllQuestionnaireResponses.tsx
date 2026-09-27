@@ -11,8 +11,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
-import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -240,7 +239,7 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
           const coding = valueObj.coding;
           const unit = valueObj.unit;
 
-          if (!value && !coding) return null;
+          if ((value == null || value === "") && !coding) return null;
 
           const precedentUnit = unit ? unit : question.unit;
 
@@ -269,27 +268,6 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
   );
 }
 
-/** A response-persisted structured answer, printed through the type's own
- *  read-only rendering (note included — the type's component owns it);
- *  nothing for every other structured question, which stores nothing on
- *  the response. */
-function StoredStructuredAnswer({
-  question,
-  responses,
-}: {
-  question: Question;
-  responses: QuestionnaireResponse["responses"];
-}) {
-  const response = storedStructuredAnswer(question, responses);
-  if (!response) return null;
-  return (
-    <div className="space-y-1">
-      <div className="font-medium text-base">{question.text}</div>
-      <StructuredAnswerView question={question} response={response} />
-    </div>
-  );
-}
-
 function QuestionGroup({
   group,
   responses,
@@ -299,6 +277,34 @@ function QuestionGroup({
   responses: QuestionnaireResponse["responses"];
   level?: number;
 }) {
+  if (group.repeats) {
+    const rows =
+      responses.find((answer) => answer.question_id === group.id)
+        ?.sub_results ?? [];
+    if (!rows.length) return null;
+    return (
+      <div className="space-y-3">
+        <h4 className="text-lg font-semibold">{group.text}</h4>
+        <RegisteredGroupAnswerView
+          question={group}
+          responses={responses}
+          fallback={rows.map((row, index) => (
+            <QuestionGroup
+              key={index}
+              group={{
+                ...group,
+                repeats: false,
+                structured_type: undefined,
+                text: `${group.text} (${index + 1})`,
+              }}
+              responses={row}
+              level={level}
+            />
+          ))}
+        />
+      </div>
+    );
+  }
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
       {group.text && (
@@ -314,43 +320,46 @@ function QuestionGroup({
           {level === 0 && <Separator />}
         </div>
       )}
-      <div
-        className={cn("grid gap-2", group.styling_metadata?.containerClasses)}
-      >
-        {group.questions?.map((question) => {
-          if (question.type === "group") {
-            return (
-              <QuestionGroup
-                key={question.id}
-                group={question}
-                responses={responses}
-                level={level + 1}
-              />
-            );
-          }
+      <RegisteredGroupAnswerView
+        question={group}
+        responses={responses}
+        fallback={
+          <div
+            className={cn(
+              "grid gap-2",
+              group.styling_metadata?.containerClasses,
+            )}
+          >
+            {group.questions?.map((question) => {
+              if (question.type === "group") {
+                return (
+                  <QuestionGroup
+                    key={question.id}
+                    group={question}
+                    responses={responses}
+                    level={level + 1}
+                  />
+                );
+              }
 
-          if (question.type === "structured") {
-            return (
-              <StoredStructuredAnswer
-                key={question.id}
-                question={question}
-                responses={responses}
-              />
-            );
-          }
+              if (question.type === "structured") return null;
 
-          const response = responses.find((r) => r.question_id === question.id);
-          if (!response) return null;
+              const response = responses.find(
+                (r) => r.question_id === question.id,
+              );
+              if (!response) return null;
 
-          return (
-            <QuestionResponseValue
-              key={question.id}
-              question={question}
-              response={response}
-            />
-          );
-        })}
-      </div>
+              return (
+                <QuestionResponseValue
+                  key={question.id}
+                  question={question}
+                  response={response}
+                />
+              );
+            })}
+          </div>
+        }
+      />
     </div>
   );
 }
@@ -382,15 +391,7 @@ export function PrintableResponseCard({ item }: ResponseCardProps) {
         {item.questionnaire && (
           <div className="mt-4 space-y-4">
             {item.questionnaire?.questions.map((question: Question) => {
-              if (question.type === "structured") {
-                return (
-                  <StoredStructuredAnswer
-                    key={question.id}
-                    question={question}
-                    responses={item.responses}
-                  />
-                );
-              }
+              if (question.type === "structured") return null;
 
               if (question.type === "group") {
                 return (

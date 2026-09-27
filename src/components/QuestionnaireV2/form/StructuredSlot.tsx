@@ -1,5 +1,5 @@
 import { useStore } from "jotai";
-import { Suspense, useCallback, useEffect, useSyncExternalStore } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
@@ -14,10 +14,7 @@ import {
   useQuestionErrors,
   useQuestionResponse,
 } from "@/components/QuestionnaireV2/form/engine/store";
-import {
-  getStructuredTypesVersion,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+
 import {
   resolveStructuredSlotState,
   structuredTypeLabel,
@@ -60,14 +57,6 @@ export function StructuredSlot({
 }) {
   const { t } = useTranslation();
   const { mode, subject, questionnaire } = useFormRenderer();
-  // Plugins register their types as their remote module loads, which can
-  // land after this slot first renders — subscribing re-resolves instead of
-  // leaving a permanent "requires a plugin" notice on screen.
-  useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
-  );
   const [response, updateResponse] = useQuestionResponse(question.id);
   const store = useStore();
   const errors = useQuestionErrors(question.id);

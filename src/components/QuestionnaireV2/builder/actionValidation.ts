@@ -41,6 +41,7 @@ export interface ActionCheckContext {
 
 interface TreeIndex {
   linkIds: Set<string>;
+  repeatingChildren: Set<string>;
   /** link_ids of questions that are shown conditionally — themselves or
    *  through an enclosing group — and so can be absent from a submission
    *  however required they are. */
@@ -48,17 +49,30 @@ interface TreeIndex {
 }
 
 function indexTree(questions: Question[]): TreeIndex {
-  const index: TreeIndex = { linkIds: new Set(), conditional: new Set() };
-  const walk = (list: Question[], underCondition: boolean) => {
+  const index: TreeIndex = {
+    linkIds: new Set(),
+    conditional: new Set(),
+    repeatingChildren: new Set(),
+  };
+  const walk = (
+    list: Question[],
+    underCondition: boolean,
+    underRepeat: boolean,
+  ) => {
     for (const question of list) {
       const conditional =
         underCondition || (question.enable_when?.length ?? 0) > 0;
       index.linkIds.add(question.link_id);
       if (conditional) index.conditional.add(question.link_id);
-      walk(question.questions ?? [], conditional);
+      if (underRepeat) index.repeatingChildren.add(question.link_id);
+      walk(
+        question.questions ?? [],
+        conditional,
+        underRepeat || (question.type === "group" && !!question.repeats),
+      );
     }
   };
-  walk(questions, false);
+  walk(questions, false, false);
   return index;
 }
 
@@ -174,6 +188,13 @@ const ACTION_RULES: ActionRule[] = [
     predicate: (action, { linkIds }) =>
       actionReferencedLinkIds(action).some((linkId) => !linkIds.has(linkId)),
     messageKey: "action_issue_unknown_question",
+  },
+  {
+    predicate: (action, { repeatingChildren }) =>
+      actionReferencedLinkIds(action).some((linkId) =>
+        repeatingChildren.has(linkId),
+      ),
+    messageKey: "action_issue_repeating_group_question",
   },
   {
     predicate: (action, { conditional }) =>

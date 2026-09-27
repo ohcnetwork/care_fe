@@ -6,7 +6,13 @@ import { JSDOM } from "jsdom";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 
-import { errorsAtom, useQuestionErrors } from "./store";
+import { ResponseRowProvider } from "./responseScope";
+import {
+  errorsAtom,
+  responsesAtom,
+  useQuestionErrors,
+  useQuestionResponse,
+} from "./store";
 
 test("question errors update without rerendering unrelated question subscribers", async () => {
   const dom = new JSDOM("<!doctype html><div id='root'></div>");
@@ -77,6 +83,75 @@ test("question errors update without rerendering unrelated question subscribers"
     );
     assert.equal(errorText("first"), "");
     assert.equal(renders.second, secondRenders);
+
+    function RowInput() {
+      const [response, update] = useQuestionResponse("child");
+      const errors = useQuestionErrors("child");
+      return createElement(
+        "button",
+        {
+          onClick: () =>
+            update({ values: [{ type: "string", value: "changed" }] }),
+        },
+        `${response.values[0]?.value}: ${errors.map((error) => error.msg).join(", ")}`,
+      );
+    }
+    store.set(responsesAtom, {
+      group: {
+        question_id: "group",
+        link_id: "group",
+        structured_type: null,
+        values: [],
+        sub_results: ["first", "second"].map((value) => [
+          {
+            question_id: "child",
+            link_id: "child",
+            structured_type: null,
+            values: [{ type: "string" as const, value }],
+          },
+        ]),
+      },
+    });
+    await act(async () => {
+      store.set(errorsAtom, [
+        {
+          question_id: "child",
+          response_path: [{ questionId: "group", rowIndex: 0 }],
+          msg: "First row",
+        },
+        {
+          question_id: "child",
+          response_path: [{ questionId: "group", rowIndex: 1 }],
+          msg: "Second row",
+        },
+        { question_id: "child", msg: "Server error" },
+      ]);
+      root.render(
+        createElement(
+          Provider,
+          { store },
+          [0, 1].map((rowIndex) =>
+            createElement(ResponseRowProvider, {
+              key: rowIndex,
+              groupId: "group",
+              rowIndex,
+              children: createElement(RowInput),
+            }),
+          ),
+        ),
+      );
+    });
+    const rowButtons = () => Array.from(container.querySelectorAll("button"));
+    assert.deepEqual(
+      rowButtons().map((button) => button.textContent),
+      ["first: First row, Server error", "second: Second row, Server error"],
+    );
+    await act(async () => rowButtons()[0].click());
+    assert.deepEqual(
+      rowButtons().map((button) => button.textContent),
+      ["changed: ", "second: Second row"],
+    );
+    assert.equal(store.get(responsesAtom).child, undefined);
   } finally {
     await act(async () => root.unmount());
     dom.window.close();

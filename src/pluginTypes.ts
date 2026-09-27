@@ -1,5 +1,5 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
-import type { PluginStructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/pluginRegistry";
+import type { RegisteredGroupDefinition } from "@/components/QuestionnaireV2/groups/registry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { ActionDescriptor, ActionRunResult } from "@/lib/actions";
 import type { OverrideCondition } from "@/lib/override";
@@ -235,11 +235,8 @@ export type PluginManifest = {
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
-  /** Structured question types this plugin contributes. Each `type` must be
-   *  namespaced `{plugin_slug}.{type_name}` — bare names are core's. They
-   *  appear in the studio's type picker, render in preview and fill,
-   *  validate at submit, and build their own batch requests. */
-  structuredQuestionTypes?: readonly PluginStructuredTypeDefinition[];
+  /** Registered groups contribute ordinary child questions and their rendering. */
+  registeredQuestionGroups?: readonly RegisteredGroupDefinition[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

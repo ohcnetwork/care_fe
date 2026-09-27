@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -8,10 +8,7 @@ import careConfig from "@careConfig";
 import { FIXED_QUESTIONNAIRES } from "@/components/Questionnaire/data/StructuredFormData";
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
-import {
-  getStructuredTypesVersion,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
 import { unsupportedDraftStructuredTypes } from "@/components/QuestionnaireV2/fill/draft/unsupportedDraftStructuredTypes";
@@ -57,18 +54,6 @@ export function useSaveServerDraft({
   const encounterBound = subject.type === "encounter" ? subject : undefined;
   const primary = forms.find((form) => form.isPrimary);
 
-  // `unsupportedDraftStructuredTypes` calls `resolveStructuredType`, whose
-  // answer for a plugin-authored question changes when that plugin's
-  // remote registers or unregisters its type — subscribing (same pattern
-  // as `QuestionTypePicker.tsx` over this same registry) recomputes
-  // `canSaveDraft` when that happens, instead of caching a stale answer
-  // for the lifetime of this hook.
-  const structuredTypesVersion = useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
-  );
-
   const canSaveDraft = useMemo(() => {
     if (!careConfig.enableQuestionnaireDraft) return false;
     if (!encounterBound || !primary) return false;
@@ -90,7 +75,7 @@ export function useSaveServerDraft({
         resolveStructuredType,
       ).length === 0
     );
-  }, [encounterBound, primary, forms.length, structuredTypesVersion]);
+  }, [encounterBound, primary, forms.length]);
 
   const handleSaved = useCallback(
     (saved: FormSubmissionRead) => {

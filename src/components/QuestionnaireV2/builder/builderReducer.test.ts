@@ -14,7 +14,132 @@ import {
   builderReducer,
   migrateLegacyBooleanEnableWhen,
   normalizeExistsConditionAnswer,
+  type BuilderAction,
 } from "./builderReducer";
+
+describe("registered group schema protection", () => {
+  const child = q({ id: "child", link_id: "chart__tooth", type: "integer" });
+  const group = q({
+    id: "group",
+    link_id: "chart",
+    type: "group",
+    structured_type: "dental.chart",
+    questions: [child],
+  });
+  const state = {
+    questions: [group, q({ id: "other", type: "string" })],
+    actions: [],
+    selectedId: group.id,
+    dirty: false,
+  };
+
+  it("blocks generic descendant edits and inserting or moving fields into the group", () => {
+    const actions: BuilderAction[] = [
+      { type: "updateQuestion", id: child.id, patch: { type: "string" } },
+      { type: "renameLinkId", id: child.id, linkId: "renamed" },
+      { type: "duplicateQuestion", id: child.id },
+      { type: "removeQuestions", ids: [child.id] },
+      { type: "moveQuestion", id: child.id, direction: "up" },
+      {
+        type: "moveQuestions",
+        ids: [child.id],
+        targetParentId: null,
+        index: 0,
+      },
+      {
+        type: "moveQuestions",
+        ids: ["other"],
+        targetParentId: group.id,
+        index: 0,
+      },
+      { type: "addQuestion", parentId: group.id },
+    ];
+    for (const action of actions)
+      assert.equal(builderReducer(state, action), state, action.type);
+    assert.equal(
+      builderReducer(state, { type: "select", id: child.id }).selectedId,
+      group.id,
+    );
+  });
+
+  it("allows plug builder schema edits and whole-group operations", () => {
+    const edited = builderReducer(state, {
+      type: "updateQuestion",
+      id: group.id,
+      patch: { questions: [{ ...child, text: "Updated tooth" }] },
+    });
+    assert.equal(edited.questions[0].questions![0].text, "Updated tooth");
+    const duplicated = builderReducer(state, {
+      type: "duplicateQuestion",
+      id: group.id,
+    });
+    assert.equal(duplicated.questions.length, 3);
+    assert.equal(
+      duplicated.questions[1].questions![0].link_id,
+      `${duplicated.questions[1].link_id}__tooth`,
+    );
+    assert.equal(
+      builderReducer(state, {
+        type: "removeQuestions",
+        ids: [group.id, child.id],
+      }).questions.length,
+      1,
+    );
+    assert.equal(
+      builderReducer(state, {
+        type: "moveQuestion",
+        id: group.id,
+        direction: "down",
+      }).questions[1].id,
+      group.id,
+    );
+    const simple = builderReducer(state, {
+      type: "updateQuestion",
+      id: group.id,
+      patch: { structured_type: undefined },
+    });
+    assert.deepEqual(simple.questions[0].questions, [child]);
+    assert.equal(
+      builderReducer(simple, {
+        type: "updateQuestion",
+        id: child.id,
+        patch: { text: "Editable" },
+      }).questions[0].questions![0].text,
+      "Editable",
+    );
+  });
+
+  it("rebases child links and dependent conditions/actions when the group link changes", () => {
+    const withReferences = {
+      ...state,
+      questions: [
+        group,
+        q({
+          id: "dependent",
+          type: "string",
+          enable_when: [
+            { question: child.link_id, operator: "exists", answer: true },
+          ],
+        }),
+      ],
+      actions: [{ condition: "q_chart__tooth == 1", instructions: [] }],
+    };
+    const renamed = builderReducer(withReferences, {
+      type: "renameLinkId",
+      id: group.id,
+      linkId: "new_chart",
+    });
+    assert.equal(
+      renamed.questions[0].questions![0].link_id,
+      "new_chart__tooth",
+    );
+    assert.equal(
+      renamed.questions[1].enable_when![0].question,
+      "new_chart__tooth",
+    );
+    assert.equal(renamed.actions[0].condition, "q_new_chart__tooth == 1");
+  });
+});
 
 /** Conditions as they appear in stored data the union cannot express — the
  *  "Yes"/"No" strings earlier builder versions wrote under `exists`. */

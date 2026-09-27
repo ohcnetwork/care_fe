@@ -131,6 +131,14 @@ export function structuredResponseHasEdits(
 export function draftIntentResponse(
   response: QuestionnaireResponse,
 ): QuestionnaireResponse {
+  if (response.sub_results) {
+    return {
+      ...response,
+      sub_results: response.sub_results.map((row) =>
+        row.map(draftIntentResponse),
+      ),
+    };
+  }
   const { draft_context, ...rest } = response;
   if (draft_context && !structuredResponseHasEdits(response)) {
     return { ...rest, values: [] };

@@ -1,5 +1,5 @@
 import { MoreVertical, Trash2 } from "lucide-react";
-import { Dispatch, useState } from "react";
+import { Dispatch, Suspense, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import { AnswerOptionsEditor } from "@/components/QuestionnaireV2/builder/AnswerOptionsEditor";
@@ -25,6 +26,16 @@ import { QuestionTypePicker } from "@/components/QuestionnaireV2/builder/Questio
 import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/questionTypeRules";
 import { SubQuestionsList } from "@/components/QuestionnaireV2/builder/SubQuestionsList";
 import { VisibilityConditionsCard } from "@/components/QuestionnaireV2/builder/VisibilityConditionsCard";
+import {
+  getQuestionGroup,
+  getQuestionGroupsVersion,
+  subscribeToQuestionGroups,
+} from "@/components/QuestionnaireV2/groups/registry";
+import {
+  groupSchemaNeedsRepair,
+  instantiateGroupQuestions,
+  repairGroupSchema,
+} from "@/components/QuestionnaireV2/groups/schema";
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 import { QuestionTypeBadge } from "@/components/QuestionnaireV2/shared/QuestionTypeBadge";
 import { ValueSetScope } from "@/types/valueSet/valueSet";
@@ -77,6 +88,22 @@ export function QuestionInspector({
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState("question");
+  useSyncExternalStore(
+    subscribeToQuestionGroups,
+    getQuestionGroupsVersion,
+    getQuestionGroupsVersion,
+  );
+  const isRegisteredGroup =
+    question.type === "group" && !!question.structured_type;
+  const groupDefinition = isRegisteredGroup
+    ? getQuestionGroup(question.structured_type!)
+    : undefined;
+  const RegisteredGroupBuilder = groupDefinition?.builder;
+  const unavailableBuilder = (
+    <p className="text-sm text-gray-500">
+      {t("registered_group_builder_unavailable")}
+    </p>
+  );
   const ruleCount = question.enable_when?.length ?? 0;
   const parent = findFirstQuestion(
     allQuestions,
@@ -95,6 +122,24 @@ export function QuestionInspector({
       toast.error(t("group_type_change_blocked"));
       return;
     }
+    if (
+      patch.type === "group" &&
+      patch.structured_type &&
+      patch.structured_type !== question.structured_type
+    ) {
+      if (question.questions?.length) {
+        toast.error(t("registered_group_type_change_blocked"));
+        return;
+      }
+      const definition = getQuestionGroup(patch.structured_type);
+      if (!definition) return;
+      patch = {
+        ...patch,
+        required: definition.repeats ? question.required : false,
+        repeats: definition.repeats ?? false,
+        questions: instantiateGroupQuestions(question, definition.schema),
+      };
+    }
     // Switching to a type that never offers Repeats also clears a previously set
     // flag, so it can't linger invisibly once the chip disappears.
     const nextType = patch.type ?? question.type;
@@ -105,7 +150,7 @@ export function QuestionInspector({
     // stale `structured_type` can route fill-time structured plumbing down the
     // wrong path, while structured selections set `type` and `structured_type`
     // together.
-    if (nextType !== "structured") {
+    if (nextType !== "structured" && nextType !== "group") {
       patch = { ...patch, structured_type: undefined };
     }
     if (nextType !== "choice") {
@@ -269,7 +314,45 @@ export function QuestionInspector({
               <BehaviourToggles question={question} onChange={onChange} />
             </div>
 
-            {question.type === "group" && (
+            {groupDefinition &&
+              groupSchemaNeedsRepair(question, groupDefinition) && (
+                <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-sm text-amber-900">
+                    {t("registered_group_schema_repair_description")}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      onChange(repairGroupSchema(question, groupDefinition))
+                    }
+                  >
+                    {t("registered_group_repair_schema")}
+                  </Button>
+                </div>
+              )}
+
+            {RegisteredGroupBuilder && (
+              <PluginErrorBoundary
+                pluginName={question.structured_type!}
+                resetKey={groupDefinition}
+                fallback={unavailableBuilder}
+              >
+                <Suspense
+                  fallback={
+                    <p className="text-sm text-gray-500">{t("loading")}</p>
+                  }
+                >
+                  <RegisteredGroupBuilder
+                    question={question}
+                    onChange={onChange}
+                  />
+                </Suspense>
+              </PluginErrorBoundary>
+            )}
+            {isRegisteredGroup && !RegisteredGroupBuilder && unavailableBuilder}
+            {question.type === "group" && !isRegisteredGroup && (
               <SubQuestionsList
                 question={question}
                 dispatch={dispatch}

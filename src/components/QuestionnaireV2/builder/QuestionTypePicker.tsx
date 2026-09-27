@@ -21,12 +21,13 @@ import {
 } from "@/components/ui/popover";
 
 import { STRUCTURED_QUESTIONS } from "@/components/Questionnaire/data/StructuredFormData";
-import { QUESTION_TYPE_ICONS } from "@/components/QuestionnaireV2/shared/questionTypeIcons";
 import {
-  getStructuredTypesVersion,
-  listPluginStructuredTypes,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+  getQuestionGroup,
+  getQuestionGroupsVersion,
+  listQuestionGroups,
+  subscribeToQuestionGroups,
+} from "@/components/QuestionnaireV2/groups/registry";
+import { QUESTION_TYPE_ICONS } from "@/components/QuestionnaireV2/shared/questionTypeIcons";
 import {
   structuredDefinitionFor,
   structuredTypeLabel,
@@ -39,7 +40,6 @@ import {
 } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
 import type { StructuredTypeValue } from "@/types/questionnaire/structured";
-import { isPluginStructuredTypeName } from "@/types/questionnaire/structured";
 
 const FREQUENTLY_USED: QuestionType[] = [
   "group",
@@ -72,9 +72,7 @@ interface QuestionTypePickerProps {
   onChange: (patch: Partial<Question>) => void;
 }
 
-/** One row of the structured sub-list. Core rows keep their icon-less
- *  presentation; plugin rows carry a mark so a contributed type reads as
- *  such at a glance. */
+/** One row of the structured or registered group sub-list. */
 interface StructuredTile {
   value: StructuredTypeValue;
   label: string;
@@ -89,14 +87,11 @@ export function QuestionTypePicker({
 }: QuestionTypePickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<"list" | "structured">("list");
-  // Plugin types register as their remote module resolves — subscribing
-  // means a plugin that finishes loading with the studio already open
-  // contributes its tiles without a reload.
+  const [step, setStep] = useState<"list" | "structured" | "group">("list");
   useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
+    subscribeToQuestionGroups,
+    getQuestionGroupsVersion,
+    getQuestionGroupsVersion,
   );
 
   const frequentlyUsed = SUPPORTED_QUESTION_TYPES.filter((entry) =>
@@ -105,46 +100,38 @@ export function QuestionTypePicker({
   const otherTypes = SUPPORTED_QUESTION_TYPES.filter(
     (entry) => !FREQUENTLY_USED.includes(entry.value),
   );
-  // Only structured types declared for this questionnaire's subject_type —
-  // an out-of-subject type shows nowhere in the picker, not as a disabled
-  // tile (it can never be authored onto this questionnaire). Plugin types
-  // declare `subjects` the same way and pass through the same gate.
-  const availableStructuredQuestions: StructuredTile[] = [
-    ...STRUCTURED_QUESTIONS.filter((entry) =>
+  const availableStructuredQuestions: StructuredTile[] =
+    STRUCTURED_QUESTIONS.filter((entry) =>
       structuredDefinitionFor(entry.value).subjects.includes(subjectType),
     ).map((entry) => ({
       value: entry.value,
       label: t(`structured_type__${entry.value}`),
-    })),
-    ...listPluginStructuredTypes().flatMap((definition) =>
-      definition.subjects.includes(subjectType) &&
-      // Registration already enforced the namespace; the guard is what
-      // carries that fact into the type system (the definition's `type` is
-      // a plain string).
-      isPluginStructuredTypeName(definition.type)
-        ? [
-            {
-              value: definition.type,
-              // Plugins own their i18n — the manifest label is final text.
-              label: definition.label,
-              icon: definition.icon ?? Puzzle,
-            },
-          ]
-        : [],
-    ),
-  ];
+    }));
+  const availableGroups: StructuredTile[] = listQuestionGroups()
+    .filter((definition) => definition.subjects.includes(subjectType))
+    .map((definition) => ({
+      value: definition.type,
+      label: definition.label,
+      icon: definition.icon ?? Puzzle,
+    }));
+  const selectedGroupLabel = structuredType
+    ? (getQuestionGroup(structuredType)?.label ?? structuredType)
+    : t("simple_group");
 
   const handleSelectType = (type: QuestionType) => {
-    if (type === "structured") {
-      setStep("structured");
+    if (type === "structured" || type === "group") {
+      setStep(type);
       return;
     }
     onChange({ type, structured_type: undefined });
     setOpen(false);
   };
 
-  const handleSelectStructured = (nextStructuredType: StructuredTypeValue) => {
-    onChange({ type: "structured", structured_type: nextStructuredType });
+  const handleSelectSubtype = (nextStructuredType?: StructuredTypeValue) => {
+    onChange({
+      type: step === "group" ? "group" : "structured",
+      structured_type: nextStructuredType,
+    });
     setOpen(false);
     setStep("list");
   };
@@ -156,7 +143,9 @@ export function QuestionTypePicker({
     const activeStructured =
       type === "structured" && value === "structured" && structuredType
         ? structuredTypeLabel(structuredType, t)
-        : undefined;
+        : type === "group" && value === "group"
+          ? selectedGroupLabel
+          : undefined;
     return (
       <CommandItem
         key={type}
@@ -213,7 +202,9 @@ export function QuestionTypePicker({
               <span className="truncate text-sm font-semibold text-gray-900">
                 {value === "structured" && structuredType
                   ? structuredTypeLabel(structuredType, t)
-                  : t(`question_type__${value}`)}
+                  : value === "group"
+                    ? selectedGroupLabel
+                    : t(`question_type__${value}`)}
               </span>
               {/* The reference trigger carries the type's hint line so the
                   picker reads as a described choice, not a bare value. */}
@@ -265,29 +256,46 @@ export function QuestionTypePicker({
                 <ChevronLeft className="size-4" />
               </Button>
               <span className="text-sm font-semibold text-gray-900">
-                {t("question_type__structured")}
+                {t(
+                  step === "group"
+                    ? "question_type__group"
+                    : "question_type__structured",
+                )}
               </span>
             </div>
             <CommandList className="min-h-0 max-h-[60vh] flex-1">
               <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup>
-                {availableStructuredQuestions.map((entry) => {
+                {step === "group" && (
+                  <CommandItem
+                    value="simple-group"
+                    onSelect={() => handleSelectSubtype()}
+                  >
+                    {t("simple_group")}
+                    {value === "group" && !structuredType && (
+                      <Check className="ml-auto size-4 shrink-0" />
+                    )}
+                  </CommandItem>
+                )}
+                {(step === "group"
+                  ? availableGroups
+                  : availableStructuredQuestions
+                ).map((entry) => {
                   const Icon = entry.icon;
                   return (
                     <CommandItem
                       key={entry.value}
                       value={entry.value}
                       keywords={[entry.label]}
-                      onSelect={() => handleSelectStructured(entry.value)}
+                      onSelect={() => handleSelectSubtype(entry.value)}
                     >
                       {Icon && (
                         <Icon className="size-4 shrink-0 text-gray-500" />
                       )}
                       {entry.label}
-                      {value === "structured" &&
-                        structuredType === entry.value && (
-                          <Check className="ml-auto size-4 shrink-0" />
-                        )}
+                      {value === step && structuredType === entry.value && (
+                        <Check className="ml-auto size-4 shrink-0" />
+                      )}
                     </CommandItem>
                   );
                 })}

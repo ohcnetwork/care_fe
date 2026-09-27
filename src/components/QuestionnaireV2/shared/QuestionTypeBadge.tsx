@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import {
-  getStructuredTypesVersion,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+  getQuestionGroup,
+  getQuestionGroupsVersion,
+  subscribeToQuestionGroups,
+} from "@/components/QuestionnaireV2/groups/registry";
 import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/registry";
 
 import { QuestionType } from "@/types/questionnaire/question";
@@ -41,9 +42,9 @@ export function QuestionTypeBadge({
   // without this the badge would keep printing the raw id for the rest of
   // the page's life.
   useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
+    subscribeToQuestionGroups,
+    getQuestionGroupsVersion,
+    getQuestionGroupsVersion,
   );
   return (
     <Badge
@@ -55,7 +56,9 @@ export function QuestionTypeBadge({
     >
       {type === "structured" && structuredType
         ? structuredTypeLabel(structuredType, t)
-        : t(`question_type__${type}`)}
+        : type === "group" && structuredType
+          ? (getQuestionGroup(structuredType)?.label ?? structuredType)
+          : t(`question_type__${type}`)}
     </Badge>
   );
 }

@@ -17,12 +17,21 @@ import { useMemo } from "react";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
+  ResponsePath,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { EnableWhen, Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { entryIsAnswered } from "./inputs/answeredEntry";
+import {
+  getResponsesAtPath,
+  getScopedResponses,
+  responseMap,
+  sameResponsePath,
+  updateResponsesAtPath,
+  useResponseScope,
+} from "./responseScope";
 
 export { entryHasContent } from "./inputs/answeredEntry";
 
@@ -104,15 +113,15 @@ const questionIdByLinkIdAtom = atom((get) => {
   return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
 });
 
-/** Flatten the tree into one response per non-group question, seeding
- *  initial_selected answer options. */
+/** Flatten ordinary groups, seed choice defaults, and keep repeating groups
+ *  as containers whose child answers are created separately for each row. */
 export function initializeResponses(
   questions: Question[],
 ): Record<string, QuestionnaireResponse> {
   const responses: Record<string, QuestionnaireResponse> = {};
   const walk = (qs: Question[]) => {
     for (const question of qs) {
-      if (question.type === "group") {
+      if (question.type === "group" && !question.repeats) {
         walk(question.questions ?? []);
         continue;
       }
@@ -131,6 +140,7 @@ export function initializeResponses(
         structured_type: question.structured_type ?? null,
         link_id: question.link_id,
         values: initial,
+        ...(question.type === "group" ? { sub_results: [] } : {}),
       };
     }
   };
@@ -228,45 +238,67 @@ export function clearQuestionErrorsInState(
   get: Getter,
   set: Setter,
   questionId: string,
+  path: ResponsePath = [],
 ) {
   const errors = get(errorsAtom);
-  if (!errors.some((error) => error.question_id === questionId)) return;
+  const matches = (error: QuestionValidationError) =>
+    error.question_id === questionId &&
+    (!error.response_path || sameResponsePath(error.response_path, path));
+  if (!errors.some(matches)) return;
   set(
     errorsAtom,
-    errors.filter((error) => error.question_id !== questionId),
+    errors.filter((error) => !matches(error)),
   );
 }
 
 export function useClearQuestionErrors(questionId: string) {
+  const path = useResponseScope();
   const clearAtom = useMemo(
     () =>
       atom(null, (get, set) =>
-        clearQuestionErrorsInState(get, set, questionId),
+        clearQuestionErrorsInState(get, set, questionId, path),
       ),
-    [questionId],
+    [questionId, path],
   );
   return useAtom(clearAtom)[1];
 }
 
 export function useQuestionResponse(questionId: string) {
+  const path = useResponseScope();
   const responseAtom = useMemo(
     () =>
       atom(
-        (get) => get(responsesAtom)[questionId],
+        (get) => getResponsesAtPath(get(responsesAtom), path)[questionId],
         (get, set, update: Partial<QuestionnaireResponse>) => {
           const previous = get(responsesAtom);
-          const current = previous[questionId];
+          const current = getResponsesAtPath(previous, path)[questionId];
           if (!current) return;
-          set(responsesAtom, {
-            ...previous,
-            [questionId]: { ...current, ...update },
-          });
+          set(
+            responsesAtom,
+            updateResponsesAtPath(previous, path, { [questionId]: update }),
+          );
           // An edit supersedes any validation error recorded against this
           // question (client or server) — clear just its entries.
-          clearQuestionErrorsInState(get, set, questionId);
+          clearQuestionErrorsInState(get, set, questionId, path);
+          if (
+            update.sub_results &&
+            update.sub_results.length !== current.sub_results?.length
+          ) {
+            set(errorsAtom, (errors) =>
+              errors.filter(
+                (error) =>
+                  !error.response_path ||
+                  !sameResponsePath(
+                    error.response_path.slice(0, path.length),
+                    path,
+                  ) ||
+                  error.response_path[path.length]?.questionId !== questionId,
+              ),
+            );
+          }
         },
       ),
-    [questionId],
+    [questionId, path],
   );
   return useAtom(responseAtom);
 }
@@ -293,16 +325,17 @@ export function isQuestionEnabledInState(
 }
 
 export function useQuestionEnabled(question: Question): boolean {
+  const path = useResponseScope();
   const enabledAtom = useMemo(
     () =>
       atom((get) =>
         isQuestionEnabledInState(
           question,
-          get(responsesAtom),
+          getScopedResponses(get(responsesAtom), path),
           get(questionIdByLinkIdAtom),
         ),
       ),
-    [question],
+    [question, path],
   );
   return useAtomValue(enabledAtom);
 }
@@ -322,19 +355,35 @@ export function useHiddenQuestionIds(): Set<string> {
         if (!questionnaire) return hidden;
         const responses = get(responsesAtom);
         const linkIndex = get(questionIdByLinkIdAtom);
-        const walk = (questions: Question[], parentHidden = false) => {
+        const visible = new Set<string>();
+        const walk = (
+          questions: Question[],
+          scope: Record<string, QuestionnaireResponse>,
+          parentVisible = true,
+        ) => {
           for (const question of questions) {
-            const isHidden =
-              parentHidden ||
-              (question.disabled_display !== "protected" &&
-                !isQuestionEnabledInState(question, responses, linkIndex));
-            if (isHidden) hidden.add(question.id);
-            // A hidden group's children never mount, including protected
-            // children whose own conditions would otherwise show them.
-            walk(question.questions ?? [], isHidden);
+            const shown =
+              parentVisible &&
+              (question.disabled_display === "protected" ||
+                isQuestionEnabledInState(question, scope, linkIndex));
+            if (shown) visible.add(question.id);
+            else hidden.add(question.id);
+            if (question.type === "group" && question.repeats) {
+              const rows = scope[question.id]?.sub_results ?? [];
+              if (!rows.length) walk(question.questions ?? [], scope, false);
+              for (const row of rows)
+                walk(
+                  question.questions ?? [],
+                  { ...scope, ...responseMap(row) },
+                  shown,
+                );
+            } else {
+              walk(question.questions ?? [], scope, shown);
+            }
           }
         };
-        walk(questionnaire.questions);
+        walk(questionnaire.questions, responses);
+        visible.forEach((id) => hidden.delete(id));
         return hidden;
       }),
     [],
@@ -378,9 +427,20 @@ export function useAnsweredQuestionIds(): Set<string> {
     () =>
       atom((get) => {
         const answered = new Set<string>();
-        for (const [id, response] of Object.entries(get(responsesAtom))) {
-          if (response.values?.some(entryIsAnswered)) answered.add(id);
-        }
+        const walk = (responses: QuestionnaireResponse[]): boolean => {
+          let anyAnswered = false;
+          for (const response of responses) {
+            const childrenAnswered = (response.sub_results ?? [])
+              .map(walk)
+              .some(Boolean);
+            if (response.values?.some(entryIsAnswered) || childrenAnswered) {
+              answered.add(response.question_id);
+              anyAnswered = true;
+            }
+          }
+          return anyAnswered;
+        };
+        walk(Object.values(get(responsesAtom)));
         return answered;
       }),
     [],
@@ -389,16 +449,47 @@ export function useAnsweredQuestionIds(): Set<string> {
 }
 
 export function useQuestionErrors(questionId: string) {
+  const path = useResponseScope();
   const questionErrorsAtom = useMemo(
     () =>
       selectAtom(
         errorsAtom,
-        (errors) => errors.filter((error) => error.question_id === questionId),
+        (errors) =>
+          errors.filter(
+            (error) =>
+              error.question_id === questionId &&
+              (!error.response_path ||
+                sameResponsePath(error.response_path, path)),
+          ),
         (previous, next) =>
           previous.length === next.length &&
           previous.every((error, index) => error === next[index]),
       ),
-    [questionId],
+    [questionId, path],
   );
   return useAtomValue(questionErrorsAtom);
+}
+
+export function useScopedResponses() {
+  const path = useResponseScope();
+  const scoped = useMemo(
+    () => atom((get) => getScopedResponses(get(responsesAtom), path)),
+    [path],
+  );
+  return useAtomValue(scoped);
+}
+
+export function useScopedErrors() {
+  const path = useResponseScope();
+  const scoped = useMemo(
+    () =>
+      selectAtom(errorsAtom, (errors) =>
+        errors.filter(
+          (error) =>
+            !error.response_path || sameResponsePath(error.response_path, path),
+        ),
+      ),
+    [path],
+  );
+  return useAtomValue(scoped);
 }

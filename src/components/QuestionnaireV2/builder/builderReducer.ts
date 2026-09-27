@@ -1,6 +1,7 @@
 import { remapActionLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import {
   findFirstQuestion,
+  findRegisteredGroupParent,
   freshLinkId,
   regenerateQuestionIds,
 } from "@/components/QuestionnaireV2/shared/questionTree";
@@ -282,29 +283,43 @@ export function builderReducer(
 
     case "renameLinkId": {
       const target = findQuestion(state.questions, action.id);
-      if (!target || target.link_id === action.linkId) return state;
+      if (
+        !target ||
+        target.link_id === action.linkId ||
+        findRegisteredGroupParent(state.questions, action.id)
+      )
+        return state;
       const previous = target.link_id;
+      const linkIdMap = new Map([[previous, action.linkId]]);
+      if (target.type === "group" && target.structured_type) {
+        const prefix = `${previous}__`;
+        for (const id of collectIds(target)) {
+          const child = findQuestion(target.questions ?? [], id);
+          if (child?.link_id.startsWith(prefix)) {
+            linkIdMap.set(
+              child.link_id,
+              `${action.linkId}__${child.link_id.slice(prefix.length)}`,
+            );
+          }
+        }
+      }
       const questions = mapTree(state.questions, (list) =>
         list.map((question) => {
           const enableWhen = question.enable_when?.map((condition) =>
-            condition.question === previous
-              ? { ...condition, question: action.linkId }
+            linkIdMap.has(condition.question)
+              ? { ...condition, question: linkIdMap.get(condition.question)! }
               : condition,
           );
-          const renamed =
-            question.id === action.id
-              ? { ...question, link_id: action.linkId }
-              : question;
+          const renamed = linkIdMap.has(question.link_id)
+            ? { ...question, link_id: linkIdMap.get(question.link_id)! }
+            : question;
           return enableWhen ? { ...renamed, enable_when: enableWhen } : renamed;
         }),
       );
       return {
         ...state,
         questions,
-        actions: remapActionLinkIds(
-          state.actions,
-          new Map([[previous, action.linkId]]),
-        ),
+        actions: remapActionLinkIds(state.actions, linkIdMap),
         dirty: true,
       };
     }
@@ -323,9 +338,23 @@ export function builderReducer(
       };
 
     case "select":
-      return { ...state, selectedId: action.id };
+      return {
+        ...state,
+        selectedId: action.id
+          ? (findRegisteredGroupParent(state.questions, action.id)?.id ??
+            action.id)
+          : null,
+      };
 
     case "addQuestion": {
+      if (action.parentId) {
+        const parent = findQuestion(state.questions, action.parentId);
+        if (
+          parent?.structured_type ||
+          findRegisteredGroupParent(state.questions, action.parentId)
+        )
+          return state;
+      }
       const question = { ...newQuestion(), ...action.template };
       const questions = mapTree(state.questions, (list, parentId) => {
         if (parentId !== action.parentId) return list;
@@ -336,6 +365,7 @@ export function builderReducer(
     }
 
     case "duplicateQuestion": {
+      if (findRegisteredGroupParent(state.questions, action.id)) return state;
       const source = findQuestion(state.questions, action.id);
       if (!source) return state;
       const copy = cloneSubtree(source);
@@ -348,6 +378,7 @@ export function builderReducer(
     }
 
     case "updateQuestion": {
+      if (findRegisteredGroupParent(state.questions, action.id)) return state;
       const questions = mapTree(state.questions, (list) =>
         list.map((q) => (q.id === action.id ? { ...q, ...action.patch } : q)),
       );
@@ -355,8 +386,12 @@ export function builderReducer(
     }
 
     case "removeQuestions": {
-      const ids = new Set(action.ids);
-      const removedIds = collectSubtreeIds(state.questions, action.ids);
+      const editableIds = action.ids.filter(
+        (id) => !findRegisteredGroupParent(state.questions, id),
+      );
+      if (!editableIds.length) return state;
+      const ids = new Set(editableIds);
+      const removedIds = collectSubtreeIds(state.questions, editableIds);
       const questions = mapTree(state.questions, (list) =>
         list.filter((q) => !ids.has(q.id)),
       );
@@ -371,6 +406,7 @@ export function builderReducer(
     }
 
     case "moveQuestion": {
+      if (findRegisteredGroupParent(state.questions, action.id)) return state;
       const questions = mapTree(state.questions, (list) => {
         const index = list.findIndex((q) => q.id === action.id);
         if (index === -1) return list;
@@ -384,6 +420,16 @@ export function builderReducer(
     }
 
     case "moveQuestions": {
+      if (
+        action.ids.some((id) =>
+          findRegisteredGroupParent(state.questions, id),
+        ) ||
+        (action.targetParentId !== null &&
+          (findQuestion(state.questions, action.targetParentId)
+            ?.structured_type ||
+            findRegisteredGroupParent(state.questions, action.targetParentId)))
+      )
+        return state;
       const movedSubtreeIds = collectSubtreeIds(state.questions, action.ids);
       if (
         action.targetParentId !== null &&

@@ -15,6 +15,7 @@ import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
+import type { ResponsePath } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import { useBatchRequest } from "@/Utils/request/batch";
 import { Type } from "@/Utils/request/types";
@@ -59,11 +60,17 @@ interface UseSubmitFillSessionArgs {
  * to the input or block as well as scrolling, so keyboard and screen-reader
  * users land on the error context rather than staying on Save.
  */
-function scrollToQuestion(questionId: string) {
+function scrollToQuestion(questionId: string, responsePath?: ResponsePath) {
   setTimeout(() => {
-    const block = document.querySelector<HTMLElement>(
+    const blocks = document.querySelectorAll<HTMLElement>(
       `[data-question-id="${questionId}"]`,
     );
+    const block = responsePath?.length
+      ? Array.from(blocks).find(
+          (candidate) =>
+            candidate.dataset.responsePath === JSON.stringify(responsePath),
+        )
+      : blocks[0];
     if (!block) return;
     block.scrollIntoView({
       block: "center",
@@ -71,7 +78,9 @@ function scrollToQuestion(questionId: string) {
         ? "auto"
         : "smooth",
     });
-    const input = document.getElementById(`question-input-${questionId}`);
+    const input = block.querySelector<HTMLElement>(
+      `[id^="question-input-${questionId}"]`,
+    );
     if (input) {
       input.focus({ preventScroll: true });
       return;
@@ -215,7 +224,9 @@ export function useSubmitFillSession({
     //    required check can tell a structured question that HAS an input
     //    from one showing a notice (see form/validation.ts).
     const rendererSubject = rendererSubjectOf(subject);
-    let firstError: { formKey: string; questionId: string } | undefined;
+    let firstError:
+      | { formKey: string; questionId: string; responsePath?: ResponsePath }
+      | undefined;
     for (const form of forms) {
       const store = getStore(form.key);
       if (!store) continue;
@@ -257,6 +268,9 @@ export function useSubmitFillSession({
             inTreeOrder(form.questionnaire.questions) ??
             clientErrors[0].question_id,
         };
+        firstError.responsePath = clientErrors.find(
+          (error) => error.question_id === firstError!.questionId,
+        )?.response_path;
       }
     }
     if (firstError) {
@@ -265,7 +279,7 @@ export function useSubmitFillSession({
       // without it a screen-reader user who pressed Save Changes gets no
       // signal that the submission was rejected at all.
       toast.error(t("validation_failed"));
-      scrollToQuestion(firstError.questionId);
+      scrollToQuestion(firstError.questionId, firstError.responsePath);
       return;
     }
     setServerErrors([]);

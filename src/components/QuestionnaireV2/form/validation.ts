@@ -1,16 +1,21 @@
 import type { TFunction } from "i18next";
 
 import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
+import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { groupsNeedingSchemaUpdate } from "@/components/QuestionnaireV2/groups/schema";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
@@ -62,11 +67,44 @@ export function collectRequiredErrors(
   const linkIndex = buildLinkIndex(questions);
 
   const errors: QuestionValidationError[] = [];
-  const walk = (list: Question[]) => {
+  const walk = (
+    list: Question[],
+    scope: Record<string, QuestionnaireResponse>,
+    path: ResponsePath,
+  ) => {
     for (const question of list) {
-      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
+      if (!isQuestionEnabledInState(question, scope, linkIndex)) continue;
       if (question.type === "group") {
-        walk(question.questions ?? []);
+        if (
+          groupsNeedingSchemaUpdate(
+            [question],
+            (candidate) => candidate.id === question.id,
+          ).length
+        ) {
+          errors.push({
+            question_id: question.id,
+            response_path: path,
+            error: t("registered_group_schema_update_required"),
+          });
+          continue;
+        }
+        if (question.repeats) {
+          const rows = scope[question.id]?.sub_results ?? [];
+          if (question.required && !rows.length)
+            errors.push({
+              question_id: question.id,
+              response_path: path,
+              error: t("field_required"),
+            });
+          rows.forEach((row, rowIndex) =>
+            walk(question.questions ?? [], { ...scope, ...responseMap(row) }, [
+              ...path,
+              { questionId: question.id, rowIndex },
+            ]),
+          );
+        } else {
+          walk(question.questions ?? [], scope, path);
+        }
         continue;
       }
       if (question.type === "display" || !question.required) continue;
@@ -87,16 +125,17 @@ export function collectRequiredErrors(
       ) {
         continue;
       }
-      const values = responses[question.id]?.values ?? [];
+      const values = scope[question.id]?.values ?? [];
       const answered = values.some(entryIsAnswered);
       if (!answered) {
         errors.push({
           question_id: question.id,
+          ...(path.length ? { response_path: path } : {}),
           error: t("field_required"),
         });
       }
     }
   };
-  walk(questions);
+  walk(questions, responses, []);
   return errors;
 }

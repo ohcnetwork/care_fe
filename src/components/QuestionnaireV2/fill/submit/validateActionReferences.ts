@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 
 import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
+import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseScope";
 
 import {
   buildLinkIndex,
@@ -9,7 +10,10 @@ import {
 import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
@@ -37,25 +41,40 @@ export function collectActionReferenceErrors(
 
   const linkIndex = buildLinkIndex(questionnaire.questions);
   const errors: QuestionValidationError[] = [];
-  const walk = (questions: Question[], ancestorsEnabled: boolean) => {
+  const walk = (
+    questions: Question[],
+    ancestorsEnabled: boolean,
+    scope: Record<string, QuestionnaireResponse>,
+    path: ResponsePath,
+  ) => {
     for (const question of questions) {
       const enabled =
         ancestorsEnabled &&
-        isQuestionEnabledInState(question, responses, linkIndex);
+        isQuestionEnabledInState(question, scope, linkIndex);
       if (
         enabled &&
         question.type !== "group" &&
         referenced.has(question.link_id) &&
-        !responses[question.id]?.values?.some(entryIsAnswered)
+        !scope[question.id]?.values?.some(entryIsAnswered)
       ) {
         errors.push({
           question_id: question.id,
+          ...(path.length ? { response_path: path } : {}),
           error: t("action_reference_required"),
         });
       }
-      walk(question.questions ?? [], enabled);
+      if (question.type === "group" && question.repeats) {
+        (scope[question.id]?.sub_results ?? []).forEach((row, rowIndex) =>
+          walk(
+            question.questions ?? [],
+            enabled,
+            { ...scope, ...responseMap(row) },
+            [...path, { questionId: question.id, rowIndex }],
+          ),
+        );
+      } else walk(question.questions ?? [], enabled, scope, path);
     }
   };
-  walk(questionnaire.questions, true);
+  walk(questionnaire.questions, true, responses, []);
   return errors;
 }

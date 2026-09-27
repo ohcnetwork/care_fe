@@ -10,9 +10,12 @@ import {
 
 import type { Question } from "@/types/questionnaire/question";
 
+import { RegisteredGroupSlot } from "@/components/QuestionnaireV2/groups/RegisteredGroupSlot";
 import { useFormChrome } from "./chrome";
+import { useResponseScope } from "./engine/responseScope";
 import { useFormRenderer } from "./FormContext";
 import { QuestionAnswerInput } from "./QuestionAnswerInput";
+import { RepeatingGroup } from "./RepeatingGroup";
 import { SectionCard } from "./SectionCard";
 
 export interface QuestionBlockProps {
@@ -61,8 +64,13 @@ export const QuestionBlock = memo(function QuestionBlock(
     );
 
   if (question.type === "group") {
+    const Group = question.structured_type
+      ? RegisteredGroupSlot
+      : question.repeats
+        ? RepeatingGroup
+        : SectionCard;
     return wrap(
-      <SectionCard
+      <Group
         question={question}
         depth={depth}
         disabled={effectiveDisabled}
@@ -100,13 +108,17 @@ function LeafBlock({
   locked: boolean;
 }) {
   const { inert } = useFormRenderer();
+  const path = useResponseScope();
   const { QuestionAnnotation } = useFormChrome();
   const errors = useQuestionErrors(question.id);
   const errorsId = useId();
   const errorId = errors.length > 0 ? errorsId : undefined;
   // Text-like inputs use htmlFor; chip groups use aria-labelledby.
-  const inputId = `question-input-${question.id}`;
-  const labelId = `question-label-${question.id}`;
+  const suffix = path.length
+    ? `-row-${path.map((entry) => entry.rowIndex).join("-")}`
+    : "";
+  const inputId = `question-input-${question.id}${suffix}`;
+  const labelId = `question-label-${question.id}${suffix}`;
 
   return (
     // data-question-id is the renderer's stable per-question DOM anchor —
@@ -114,6 +126,7 @@ function LeafBlock({
     // tests scope input assertions with it.
     <div
       data-question-id={question.id}
+      data-response-path={JSON.stringify(path)}
       className={cn(
         "space-y-1.5",
         depth <= 1 && "rounded-lg border border-gray-200 bg-white p-3.5",

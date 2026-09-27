@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import { createQuestionnaireAndOpenBuilder } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
@@ -32,6 +33,85 @@ function editorCard(page: Page) {
 }
 
 test.describe("Questionnaire v2 builder groups", () => {
+  test("a missing group renderer uses ordinary repeating rows without mixing answers", async ({
+    page,
+  }) => {
+    const facilityId = getFacilityId();
+    const detailUrl = await createQuestionnaireAndOpenBuilder(page, {
+      basePath: `/facility/${facilityId}/settings/questionnaires`,
+      title: `QV2 Repeat Fallback ${Date.now()}`,
+      status: "Active",
+    });
+    await importQuestions(page, [
+      {
+        text: "Repeated findings",
+        type: "group",
+        structured_type: "missing_test.findings",
+        repeats: true,
+        link_id: "findings",
+        questions: [
+          { text: "Tooth", type: "string", link_id: "findings__tooth" },
+          {
+            text: "Finding",
+            type: "string",
+            link_id: "findings__type",
+            required: true,
+          },
+        ],
+      },
+    ]);
+    await page.getByRole("button", { name: /^Save Changes/ }).click();
+    await expectToast(page, "Questionnaire updated successfully");
+    await page.getByRole("button", { name: "Preview", exact: true }).click();
+    const canvas = page.getByRole("region", { name: "Form canvas" });
+    await canvas
+      .getByRole("button", { name: "Add Another", exact: true })
+      .click();
+    await canvas
+      .getByRole("button", { name: "Add Another", exact: true })
+      .click();
+    const rows = canvas.locator("[data-group-row]");
+    await expect(rows).toHaveCount(2);
+    await rows.nth(0).getByRole("textbox").nth(0).fill("16");
+    await rows.nth(0).getByRole("textbox").nth(1).fill("Caries");
+    await rows.nth(1).getByRole("textbox").nth(0).fill("16");
+    await rows.nth(1).getByRole("textbox").nth(1).fill("Crown");
+    await expect(rows.nth(0).getByRole("textbox").nth(1)).toHaveValue("Caries");
+    await rows
+      .nth(0)
+      .getByRole("button", { name: "Remove", exact: true })
+      .click();
+    await expect(rows).toHaveCount(1);
+    await expect(rows.nth(0).getByRole("textbox").nth(0)).toHaveValue("16");
+    await expect(rows.nth(0).getByRole("textbox").nth(1)).toHaveValue("Crown");
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
+    await page.goto(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${detailUrl.split("/").at(-1)}`,
+    );
+    await page
+      .getByRole("button", { name: "Add Another", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Add Another", exact: true })
+      .click();
+    const fillRows = page.locator("[data-group-row]");
+    await fillRows.nth(0).getByRole("textbox").nth(0).fill("16");
+    await fillRows.nth(0).getByRole("textbox").nth(1).fill("Caries");
+    await fillRows.nth(1).getByRole("textbox").nth(0).fill("16");
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    await expect(fillRows.nth(0).locator("p.text-red-600")).toHaveCount(0);
+    await expect(fillRows.nth(1).locator("p.text-red-600")).toBeVisible();
+    await expect(fillRows.nth(1).getByRole("textbox").nth(1)).toBeFocused();
+    await fillRows.nth(1).getByRole("textbox").nth(1).fill("Crown");
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    await expectToast(page, /questionnaire submitted successfully/i);
+  });
+
   test("sub-questions support bulk select, clear and bulk delete", async ({
     page,
   }) => {

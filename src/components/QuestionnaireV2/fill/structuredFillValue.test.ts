@@ -111,8 +111,6 @@ function coerce(
     requires: [],
     subjects: ["encounter"],
     draftPolicy: "serialize",
-    source: "core",
-    persistence: "batch",
     buildRequests: async () => [],
     ...overrides,
   } as ResolvedStructuredType;

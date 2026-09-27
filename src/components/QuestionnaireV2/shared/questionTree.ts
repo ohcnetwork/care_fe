@@ -55,6 +55,22 @@ function containsQuestion(question: Question, questionId: string): boolean {
   );
 }
 
+/** The registered group that owns a descendant's schema, even when its plug
+ * is unavailable. The group itself remains editable as a whole. */
+export function findRegisteredGroupParent(
+  questions: Question[],
+  questionId: string,
+): Question | undefined {
+  return findFirstQuestion(
+    questions,
+    (question) =>
+      question.type === "group" &&
+      !!question.structured_type &&
+      question.id !== questionId &&
+      containsQuestion(question, questionId),
+  );
+}
+
 /** Maps any question id (top-level or nested) to the index of its top-level
  *  ancestor in `questions` — so selecting a child in the tree nav pages to
  *  its containing top-level question. */
@@ -128,15 +144,37 @@ export function regenerateQuestionIdsWithMap(
   }: { unmappedConditions?: "drop" | "keep" } = {},
 ): { questions: Question[]; linkIdMap: Map<string, string> } {
   const linkIdMap = new Map<string, string>();
-  const mapLinkIds = (list: Question[]) => {
-    for (const question of list) {
+  const usedLinkIds = new Set<string>();
+  const copyTree = (
+    list: Question[],
+    owner?: { previous: string; next: string },
+  ): Question[] =>
+    list.map((question) => {
+      // Registered children keep their local schema keys; only the owning
+      // group prefix changes when duplicating or importing the tree.
+      const prefix = owner ? `${owner.previous}__` : undefined;
+      let linkId =
+        prefix && question.link_id?.startsWith(prefix)
+          ? `${owner!.next}__${question.link_id.slice(prefix.length)}`
+          : freshLinkId();
+      if (usedLinkIds.has(linkId)) linkId = freshLinkId();
+      usedLinkIds.add(linkId);
       if (question.link_id && !linkIdMap.has(question.link_id)) {
-        linkIdMap.set(question.link_id, freshLinkId());
+        linkIdMap.set(question.link_id, linkId);
       }
-      mapLinkIds(Array.isArray(question.questions) ? question.questions : []);
-    }
-  };
-  mapLinkIds(questions);
+      return {
+        ...question,
+        id: crypto.randomUUID(),
+        link_id: linkId,
+        questions: copyTree(
+          Array.isArray(question.questions) ? question.questions : [],
+          question.type === "group" && question.structured_type
+            ? { previous: question.link_id, next: linkId }
+            : owner,
+        ),
+      };
+    });
+  const copied = copyTree(questions);
 
   const remapEnableWhen = (
     enableWhen: EnableWhen[] | undefined,
@@ -154,26 +192,12 @@ export function regenerateQuestionIdsWithMap(
             question: linkIdMap.get(condition.question)!,
           }));
 
-  // Same DFS preorder as mapLinkIds, so the occurrence that claimed the map
-  // entry is also the first one seen here.
-  const seen = new Set<string>();
   const walk = (list: Question[]): Question[] =>
-    list.map((question) => {
-      const mapped =
-        question.link_id && !seen.has(question.link_id)
-          ? linkIdMap.get(question.link_id)
-          : undefined;
-      if (question.link_id) seen.add(question.link_id);
-      return {
-        ...question,
-        id: crypto.randomUUID(),
-        link_id: mapped ?? freshLinkId(),
-        enable_when: remapEnableWhen(question.enable_when),
-        questions: walk(
-          Array.isArray(question.questions) ? question.questions : [],
-        ),
-      };
-    });
+    list.map((question) => ({
+      ...question,
+      enable_when: remapEnableWhen(question.enable_when),
+      questions: walk(question.questions ?? []),
+    }));
 
-  return { questions: walk(questions), linkIdMap };
+  return { questions: walk(copied), linkIdMap };
 }

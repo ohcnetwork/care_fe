@@ -60,6 +60,15 @@ const valid: QuestionnaireAction = {
 const context = { questions, instructions: [logging] };
 
 describe("findActionIssues", () => {
+  it("rejects scalar references to children stored inside repeating group rows", () => {
+    const repeated = questions.map((question) =>
+      question.link_id === "vitals" ? { ...question, repeats: true } : question,
+    );
+    assert.deepEqual(
+      findActionIssues([valid], { ...context, questions: repeated }),
+      [{ index: 0, messageKey: "action_issue_repeating_group_question" }],
+    );
+  });
   it("passes a well-formed action", () => {
     assert.deepEqual(findActionIssues([valid], context), []);
   });

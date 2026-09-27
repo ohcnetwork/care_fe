@@ -6,7 +6,7 @@ import {
   removeFillDraftCache,
 } from "./fillDraftCache";
 import type { FillDraftScope } from "./fillDraftCore";
-import { FILL_DRAFT_SCHEMA_VERSION } from "./fillDraftCore";
+import { FILL_DRAFT_SCHEMA_VERSION, isDraftResponse } from "./fillDraftCore";
 
 /** Metadata only: overview consumers never receive the patient's answers. */
 export interface LocalFillDraftSummary {
@@ -25,27 +25,12 @@ function isNonemptyString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
 }
 
-function isResponseValues(value: unknown): boolean {
-  return (
-    Array.isArray(value) &&
-    value.every((entry) => isRecord(entry) && isNonemptyString(entry.type))
-  );
-}
-
 function isResponses(value: unknown): boolean {
   return (
     isRecord(value) &&
     Object.entries(value).every(
       ([id, response]) =>
-        isRecord(response) &&
-        response.question_id === id &&
-        typeof response.link_id === "string" &&
-        (response.structured_type === null ||
-          isNonemptyString(response.structured_type)) &&
-        isResponseValues(response.values) &&
-        (response.note === undefined || typeof response.note === "string") &&
-        (response.draft_context === undefined ||
-          isResponseValues(response.draft_context)),
+        isDraftResponse(response) && response.question_id === id,
     )
   );
 }

@@ -4,7 +4,7 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import type { DroppedDraftAnswer } from "./draftMerge";
 import { mergeDraftResponses } from "./draftMerge";
-import { reviveDraftResponses } from "./fillDraftCore";
+import { isDraftResponse, reviveDraftResponses } from "./fillDraftCore";
 
 export type ServerDraftState =
   | { mismatch: true }
@@ -59,13 +59,10 @@ export function parseServerDraft(
   // cache (the same record a re-save PUTs back), and `reviveDraftResponses`
   // rewrites entry values IN PLACE.
   for (const item of structuredClone(form.responses) as unknown[]) {
-    if (!isRecord(item) || typeof item.question_id !== "string") {
+    if (!isDraftResponse(item) || record[item.question_id]) {
       return { mismatch: true };
     }
-    // Beyond `question_id` the entry is trusted as a QuestionnaireResponse
-    // this page's own save path wrote; `reviveDraftResponses` defends the
-    // date fields it touches and the merge below defends the rest.
-    record[item.question_id] = item as unknown as QuestionnaireResponse;
+    record[item.question_id] = item;
   }
   const { responses, dropped } = mergeDraftResponses(
     questionnaire.questions,

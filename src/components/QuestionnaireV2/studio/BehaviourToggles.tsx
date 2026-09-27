@@ -49,7 +49,14 @@ export function BehaviourToggles({
 
   const flags = FLAGS.filter(
     (flag) =>
-      flag.key !== "repeats" || !NON_REPEATABLE_TYPES.includes(question.type),
+      (flag.key !== "repeats" ||
+        !NON_REPEATABLE_TYPES.includes(question.type)) &&
+      !(
+        question.type === "group" &&
+        question.structured_type &&
+        (flag.key === "repeats" ||
+          (flag.key === "required" && !question.repeats))
+      ),
   );
 
   return (

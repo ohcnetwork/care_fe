@@ -16,6 +16,7 @@ import {
 import type { FillDraftScope } from "./fillDraftCore";
 import {
   FILL_DRAFT_SCHEMA_VERSION,
+  isDraftResponse,
   reviveDraftResponses,
 } from "./fillDraftCore";
 import {
@@ -91,6 +92,19 @@ function partitionForDraft(responses: Record<string, QuestionnaireResponse>): {
   const safe: Record<string, QuestionnaireResponse> = {};
   let structuredSkipped = false;
   for (const [id, response] of Object.entries(responses)) {
+    if (response.sub_results) {
+      safe[id] = {
+        ...response,
+        sub_results: response.sub_results.map((row) => {
+          const partition = partitionForDraft(
+            Object.fromEntries(row.map((entry) => [entry.question_id, entry])),
+          );
+          structuredSkipped ||= partition.structuredSkipped;
+          return Object.values(partition.safe);
+        }),
+      };
+      continue;
+    }
     if (isDraftExcluded(response)) {
       if (response.values.some(entryHasContent)) structuredSkipped = true;
       // Files/plugin values may be unsafe to serialize, but their notes
@@ -112,6 +126,27 @@ export function preserveExcludedStructured(
 ): Record<string, QuestionnaireResponse> {
   const merged = { ...next };
   for (const [id, response] of Object.entries(current)) {
+    if (response.sub_results && merged[id]?.sub_results) {
+      merged[id] = {
+        ...merged[id],
+        sub_results: merged[id].sub_results!.map((row, index) =>
+          Object.values(
+            preserveExcludedStructured(
+              Object.fromEntries(
+                (response.sub_results![index] ?? []).map((entry) => [
+                  entry.question_id,
+                  entry,
+                ]),
+              ),
+              Object.fromEntries(
+                row.map((entry) => [entry.question_id, entry]),
+              ),
+            ),
+          ),
+        ),
+      };
+      continue;
+    }
     if (!response.structured_type) continue;
     const fresh = merged[id];
     // Same guard the draft overlay uses: only where the question still
@@ -178,6 +213,12 @@ function excludedEditIntent(
   responses: Record<string, QuestionnaireResponse>,
 ): unknown[] {
   return Object.values(responses).flatMap((response) => {
+    if (response.sub_results)
+      return response.sub_results.flatMap((row) =>
+        excludedEditIntent(
+          Object.fromEntries(row.map((entry) => [entry.question_id, entry])),
+        ),
+      );
     if (response.structured_type !== "files") return [];
     return response.values.flatMap((entry) => {
       if (entry.type !== "files") return [];
@@ -292,6 +333,14 @@ export function loadFillDraft(
       return undefined;
     }
     for (const form of draft.forms) {
+      if (
+        !form.responses ||
+        !Object.entries(form.responses).every(
+          ([id, response]) =>
+            isDraftResponse(response) && response.question_id === id,
+        )
+      )
+        return undefined;
       form.responses = reviveDraftResponses(form.responses);
     }
     const { dropped } = mergeDraftResponses(questions, primary.responses);

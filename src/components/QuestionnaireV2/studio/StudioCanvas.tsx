@@ -19,6 +19,10 @@ import {
   QuestionShellProps,
 } from "@/components/QuestionnaireV2/form/chrome";
 import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormCanvas";
+import {
+  findFirstQuestion,
+  findRegisteredGroupParent,
+} from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { Question } from "@/types/questionnaire/question";
 
@@ -29,6 +33,7 @@ interface StudioCanvasContextValue {
   selectedId: string | null;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
+  questions: Question[];
   /** link_id → question, one build per tree change — the logic chips
    *  resolve enable_when targets from it, per block, on every render. */
   conditionTargets: ReadonlyMap<string, Question>;
@@ -195,6 +200,13 @@ function StudioAppendZone({ parentId }: { parentId: string | null }) {
   const { t } = useTranslation();
   const studio = useStudioCanvas();
   if (!studio.editing) return null;
+  if (
+    parentId &&
+    (findFirstQuestion(studio.questions, (question) => question.id === parentId)
+      ?.structured_type ||
+      findRegisteredGroupParent(studio.questions, parentId))
+  )
+    return null;
 
   return (
     <button
@@ -290,6 +302,7 @@ export function StudioCanvas({
       selectedId,
       onSelectQuestion,
       dispatch,
+      questions,
       conditionTargets,
       issueKeysByQuestionId,
     }),
@@ -298,6 +311,7 @@ export function StudioCanvas({
       selectedId,
       onSelectQuestion,
       dispatch,
+      questions,
       conditionTargets,
       issueKeysByQuestionId,
     ],

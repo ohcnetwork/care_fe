@@ -1,3 +1,4 @@
+import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import type { TFunction } from "i18next";
 
 import {
@@ -12,7 +13,10 @@ import {
 import type { RendererSubject } from "@/components/QuestionnaireV2/form/types";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
@@ -33,11 +37,22 @@ export function collectStructuredErrors(
   const linkIndex = buildLinkIndex(questionnaire.questions);
   const errors: QuestionValidationError[] = [];
 
-  const walk = (list: Question[]) => {
+  const walk = (
+    list: Question[],
+    scope: Record<string, QuestionnaireResponse>,
+    path: ResponsePath,
+  ) => {
     for (const question of list) {
-      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
+      if (!isQuestionEnabledInState(question, scope, linkIndex)) continue;
       if (question.type === "group") {
-        walk(question.questions ?? []);
+        if (question.repeats) {
+          (scope[question.id]?.sub_results ?? []).forEach((row, rowIndex) =>
+            walk(question.questions ?? [], { ...scope, ...responseMap(row) }, [
+              ...path,
+              { questionId: question.id, rowIndex },
+            ]),
+          );
+        } else walk(question.questions ?? [], scope, path);
         continue;
       }
       if (question.type !== "structured" || !question.structured_type) {
@@ -58,6 +73,7 @@ export function collectStructuredErrors(
         if (question.required) {
           errors.push({
             question_id: question.id,
+            ...(path.length ? { response_path: path } : {}),
             error: t("structured_section_unavailable_required", {
               label: question.text,
             }),
@@ -67,14 +83,19 @@ export function collectStructuredErrors(
       }
       const definition = state.definition;
       if (!definition.validate) continue;
-      const response = responses[question.id];
+      const response = scope[question.id];
       // The recorded entries must belong to this question's type.
       if (response?.structured_type !== type) continue;
       const data = structuredDataAny(response);
       if (data.length === 0) continue;
       try {
         errors.push(
-          ...definition.validate(data, question.id, question.required ?? false),
+          ...definition
+            .validate(data, question.id, question.required ?? false)
+            .map((error) => ({
+              ...error,
+              ...(path.length ? { response_path: path } : {}),
+            })),
         );
       } catch (error) {
         // Plugin code runs here. Contain throws as one question-scoped error
@@ -86,11 +107,12 @@ export function collectStructuredErrors(
         );
         errors.push({
           question_id: question.id,
+          ...(path.length ? { response_path: path } : {}),
           error: t("structured_question_validate_failed"),
         });
       }
     }
   };
-  walk(questionnaire.questions);
+  walk(questionnaire.questions, responses, []);
   return errors;
 }

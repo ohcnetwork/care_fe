@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,14 +9,15 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
-import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
-import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+
+import { formatValue } from "./QuestionnaireResponsesList";
 
 export default function QuestionnaireResponseView({
   responseId,
@@ -50,34 +52,64 @@ export default function QuestionnaireResponseView({
     );
   }
 
-  const renderLeaf = (question: Question) => {
-    if (question.type === "structured") {
-      const stored = storedStructuredAnswer(question, formResponse.responses);
-      if (!stored) return null;
+  const renderQuestion = (
+    question: Question,
+    responses: Response[],
+  ): ReactNode => {
+    if (question.type === "structured" || question.type === "display")
+      return null;
+    if (question.type === "group") {
+      const rows = question.repeats
+        ? (responses.find((answer) => answer.question_id === question.id)
+            ?.sub_results ?? [])
+        : [responses];
       return (
-        <div key={question.id} className="space-y-1">
-          <div className="text-sm text-gray-500">{question.text}</div>
-          <StructuredAnswerView
+        <div key={question.id} className="space-y-4">
+          <h3 className="font-medium">{question.text}</h3>
+          <RegisteredGroupAnswerView
             question={question}
-            response={stored}
-            patientId={patientId}
+            responses={responses}
+            fallback={
+              <div className="grid gap-4">
+                {rows.map((row, index) => (
+                  <div key={index} className="grid gap-4">
+                    {question.repeats && (
+                      <h4 className="font-medium">
+                        {question.text} ({index + 1})
+                      </h4>
+                    )}
+                    {question.questions?.map((child) =>
+                      renderQuestion(child, row),
+                    )}
+                  </div>
+                ))}
+              </div>
+            }
           />
         </div>
       );
     }
 
-    const questionResponse = formResponse.responses.find(
+    const questionResponse = responses.find(
       (r: Response) => r.question_id === question.id,
     );
     if (!questionResponse) return null;
-
-    const value = questionResponse.values[0]?.value;
 
     return (
       <div key={question.id} className="grid grid-cols-2 gap-4">
         <div className="text-sm text-gray-500">{question.text}</div>
         <div className="font-medium">
-          {String(value)}
+          {questionResponse.values.map((entry, index) => (
+            <div key={index}>
+              {formatValue(entry.value, question.type)}
+              {entry.unit && <span className="ml-1">{entry.unit.code}</span>}
+              {entry.coding && (
+                <span className="ml-1">
+                  {entry.coding.display} ({entry.coding.code})
+                </span>
+              )}
+            </div>
+          ))}
           {questionResponse.note && (
             <span className="ml-2 text-sm text-gray-500">
               ({questionResponse.note})
@@ -118,24 +150,8 @@ export default function QuestionnaireResponseView({
 
         <Card className="p-6">
           <div className="space-y-6">
-            {formResponse.questionnaire?.questions.map((question: Question) =>
-              question.type === "group" ? (
-                <div key={question.id} className="space-y-4">
-                  <h3 className="font-medium">{question.text}</h3>
-                  <div className="grid gap-4">
-                    {question.questions?.map((child: Question) =>
-                      renderLeaf(child),
-                    )}
-                  </div>
-                </div>
-              ) : (
-                // A questionnaire may hold leaves at the top level too (a
-                // single structured question, say) — they read like a
-                // group of one.
-                <div key={question.id} className="grid gap-4">
-                  {renderLeaf(question)}
-                </div>
-              ),
+            {formResponse.questionnaire?.questions.map((question) =>
+              renderQuestion(question, formResponse.responses),
             )}
           </div>
         </Card>

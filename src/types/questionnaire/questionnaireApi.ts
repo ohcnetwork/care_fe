@@ -27,7 +27,8 @@ export interface SubmitResultValue {
 /** One question's answer(s) in a submit request body. */
 export interface SubmitResult {
   question_id: string;
-  values: SubmitResultValue[];
+  values?: SubmitResultValue[];
+  sub_results?: SubmitResult[][];
   note?: string;
   body_site?: Code;
   method?: Code;

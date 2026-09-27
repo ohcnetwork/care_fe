@@ -87,6 +87,27 @@ function put(target = scope(), overrides: Record<string, unknown> = {}) {
 }
 
 describe("local draft summaries", () => {
+  it("lists nested repeat drafts and rejects malformed row answers", () => {
+    const repeat = {
+      question_id: "group",
+      link_id: "group",
+      structured_type: "dental.chart",
+      values: [],
+      sub_results: [[form().responses.q1]],
+    };
+    put(scope(), { forms: [{ ...form(), responses: { group: repeat } }] });
+    assert.equal(listLocalFillDrafts("me", "encounter:e1").length, 1);
+    put(scope(), {
+      forms: [
+        {
+          ...form(),
+          responses: { group: { ...repeat, sub_results: [[null]] } },
+        },
+      ],
+    });
+    assert.deepEqual(listLocalFillDrafts("me", "encounter:e1"), []);
+  });
+
   it("lists only this user's exact encounter, newest first, with metadata and the primary form title", () => {
     put(scope({ userId: "another-user" }));
     put(scope({ subjectKey: "encounter:e2" }));

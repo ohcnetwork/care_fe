@@ -15,11 +15,17 @@ function isQuestionLike(value: unknown): value is Question {
   const candidate = value as {
     text?: unknown;
     type?: unknown;
+    structured_type?: unknown;
     link_id?: unknown;
     questions?: unknown;
     enable_when?: unknown;
   };
   if (typeof candidate.text !== "string") return false;
+  if (
+    candidate.structured_type != null &&
+    typeof candidate.structured_type !== "string"
+  )
+    return false;
   // Membership, not just typeof: an unknown `type` (e.g. "radio") would flow
   // into builder state and crash the type picker's TYPE_ICONS lookup, then
   // be PUT to the API on save.

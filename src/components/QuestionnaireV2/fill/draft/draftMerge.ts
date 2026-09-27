@@ -42,8 +42,11 @@ function indexQuestions(questions: Question[]): Map<string, Question> {
   const byId = new Map<string, Question>();
   const walk = (list: Question[]) => {
     for (const question of list) {
-      if (question.type !== "group") byId.set(question.id, question);
-      if (question.questions) walk(question.questions);
+      if (question.type === "group" && !question.repeats) {
+        walk(question.questions ?? []);
+      } else {
+        byId.set(question.id, question);
+      }
     }
   };
   walk(questions);
@@ -143,6 +146,8 @@ function filterAvailableEntries(
 export function draftResponseHasContent(
   response: QuestionnaireResponse,
 ): boolean {
+  if (response.sub_results?.some((row) => row.some(draftResponseHasContent)))
+    return true;
   if (response.draft_context !== undefined) {
     return structuredResponseHasEdits(response) || !!response.note;
   }
@@ -173,6 +178,34 @@ export function mergeDraftResponses(
           questionId: id,
           label: response.link_id || id,
           reason: "question_removed",
+        });
+      }
+      continue;
+    }
+
+    if (fresh.type === "group" && fresh.repeats && response.sub_results) {
+      merged[id] = {
+        ...response,
+        link_id: fresh.link_id,
+        structured_type: fresh.structured_type ?? null,
+        values: [],
+        sub_results: response.sub_results.map((row) => {
+          const result = mergeDraftResponses(
+            fresh.questions ?? [],
+            Object.fromEntries(row.map((entry) => [entry.question_id, entry])),
+          );
+          dropped.push(...result.dropped);
+          return Object.values(result.responses);
+        }),
+      };
+      continue;
+    }
+    if ((fresh.type === "group" && fresh.repeats) || response.sub_results) {
+      if (draftResponseHasContent(response)) {
+        dropped.push({
+          questionId: id,
+          label: fresh.text,
+          reason: "type_changed",
         });
       }
       continue;

@@ -8,11 +8,13 @@ import {
   useState,
 } from "react";
 
+import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import {
   initializeResponses,
   questionnaireAtom,
   responsesAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
 // Live-store hooks hosts may need (the studio outline drops
 // enable_when-hidden rows in preview; the fill outline adds completion
@@ -64,7 +66,7 @@ export function useFormRenderer(): FormContextValue {
 }
 
 /**
- * `id → signature` for every non-group question — the key that decides
+ * `id → signature` for every question — the key that decides
  * whether an in-progress answer survives a live tree update. Participates:
  * type/structured_type (a differently-shaped value must not linger),
  * answer options (value + default flag — a changed `initial_selected` must
@@ -74,14 +76,10 @@ export function useFormRenderer(): FormContextValue {
  * entries would be invisible but live), and the answer value set (swapping
  * sets would leave the old set's `coding` recorded).
  */
-function questionSignatures(questions: Question[]): Map<string, string> {
+export function questionSignatures(questions: Question[]): Map<string, string> {
   const signatures = new Map<string, string>();
   const walk = (list: Question[]) => {
     for (const question of list) {
-      if (question.type === "group") {
-        walk(question.questions ?? []);
-        continue;
-      }
       const options = (question.answer_option ?? [])
         .map((option) => `${option.value}=${option.initial_selected ? 1 : 0}`)
         .join("|");
@@ -92,6 +90,7 @@ function questionSignatures(questions: Question[]): Map<string, string> {
         question.id,
         `${question.type}:${question.structured_type ?? ""}:${question.repeats ? 1 : 0}:${valueSet}:${options}`,
       );
+      walk(question.questions ?? []);
     }
   };
   walk(questions);
@@ -107,7 +106,7 @@ function questionSignatures(questions: Question[]): Map<string, string> {
  * re-seeds that one entry so a stale value of another shape can't linger in
  * enable_when evaluation.
  */
-function syncResponses(
+export function syncResponses(
   previous: Record<string, QuestionnaireResponse>,
   previousSignatures: Map<string, string>,
   questions: Question[],
@@ -121,13 +120,34 @@ function syncResponses(
       merged[id] = seeded;
       continue;
     }
+    let next = existing;
+    if (seeded.sub_results) {
+      const children =
+        findFirstQuestion(questions, (question) => question.id === id)
+          ?.questions ?? [];
+      const rows = (existing.sub_results ?? []).map((row) => {
+        const synced = Object.values(
+          syncResponses(responseMap(row), previousSignatures, children),
+        );
+        return synced.length === row.length &&
+          synced.every((entry, index) => entry === row[index])
+          ? row
+          : synced;
+      });
+      if (
+        !existing.sub_results ||
+        rows.some((row, index) => row !== existing.sub_results![index])
+      ) {
+        next = { ...existing, sub_results: rows };
+      }
+    }
     // Preserve object identity when nothing about the entry changed, so
     // each useQuestionResponse derived atom keeps its Jotai bail-out —
     // a title keystroke in the builder must not re-render every block.
     merged[id] =
-      existing.link_id === seeded.link_id
-        ? existing
-        : { ...existing, link_id: seeded.link_id };
+      next.link_id === seeded.link_id
+        ? next
+        : { ...next, link_id: seeded.link_id };
   }
   return merged;
 }

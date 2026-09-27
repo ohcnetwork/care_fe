@@ -1,8 +1,4 @@
 import {
-  buildLinkIndex,
-  isQuestionEnabledInState,
-} from "@/components/QuestionnaireV2/form/engine/store";
-import {
   resolveStructuredSlotState,
   structuredDataAny,
 } from "@/components/QuestionnaireV2/structured/registry";
@@ -19,11 +15,11 @@ import {
 } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
-import type { SubmitResult } from "@/types/questionnaire/questionnaireApi";
 
-import { serializeResponseValues } from "./serializeValues";
+import { getQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
+import { incompatibleGroupQuestions } from "@/components/QuestionnaireV2/groups/schema";
+import { serializeQuestionResults } from "./serializeQuestionResults";
 import { planPlainSubmit } from "./submitTarget";
 
 /** Body of the completion PUT for a resumed server draft. Restore reads
@@ -116,9 +112,7 @@ export interface ComposeBatchArgs {
 
 /**
  * Assemble the one-batch submission. Structured answers become raw
- * domain-API requests via each type's `buildRequests` — except a plugin
- * type persisted on the response, whose entries join the plain answers as
- * that question's `values`; plain answers POST to the patient-bound or
+ * domain-API requests via each type's `buildRequests`; plain answers POST to the patient-bound or
  * resource-subject questionnaire submit endpoint; a resumed server draft
  * also gets its completion PUT. Only questions currently enabled by
  * enable_when contribute, including structured leaves, and a disabled
@@ -137,108 +131,71 @@ export async function composeBatch({
   // need the patient ids, and a closure cannot carry the narrowing.
   const patientBound = isPatientBound(subject) ? subject : undefined;
   const renderCtx = rendererSubjectOf(subject);
-  const linkIndex = buildLinkIndex(questionnaire.questions);
-  const isEnabled = (question: Question) =>
-    isQuestionEnabledInState(question, responses, linkIndex);
-
   const requests: StructuredBatchEntry[] = [];
-  const structuredWork: Promise<StructuredBatchEntry[]>[] = [];
-  // Everything the questionnaire submit itself records, in walk order:
-  // plain leaves (serialized below) and response-persisted structured
-  // answers (submitted as recorded).
-  const results: SubmitResult[] = [];
-
-  const walk = (questions: Question[]) => {
-    for (const question of questions) {
-      if (!isEnabled(question)) continue;
-      if (question.type === "group") {
-        walk(question.questions ?? []);
-        continue;
-      }
-      const response = responses[question.id];
-      if (!response) continue;
-
-      if (question.type === "structured" && question.structured_type) {
-        // The slot's component threw — the clinician sees a notice, not
-        // their data, and validateStructured skipped this question's
-        // `validate` for the same reason. What the UI shows as inert must
-        // not submit behind its back.
-        if (renderFailed?.has(question.id)) continue;
-        // The recorded entries must belong to this question's type.
-        if (response.structured_type !== question.structured_type) continue;
-        // The same slot-state predicate the renderer (`StructuredSlot`) and
-        // submit-time validators read. Unknown types, subject mismatches and
-        // missing context all skip here; missing context prevents calling
-        // `buildRequests` without the required ids.
-        const state = resolveStructuredSlotState(
-          question.structured_type,
-          questionnaire.subject_type,
-          renderCtx,
-        );
-        if (state.kind !== "ready") continue;
-        const definition = state.definition;
-        const data = structuredDataAny(response);
-        if (data.length === 0) continue;
-        if (definition.persistence === "response") {
-          // The entries are the answer (`PluginStructuredPersistence`):
-          // they go out on the questionnaire submit as ONE value, the
-          // entries array as JSON — the backend's submit value is a plain
-          // string. `parseStoredStructuredValue` is the inverse the
-          // response viewers apply before handing the answer back to the
-          // type's component.
-          results.push({
-            question_id: question.id,
-            values: [{ value: JSON.stringify(data) }],
-            note: response.note,
-          });
-          continue;
+  const structuredAnswers = new Map<
+    string,
+    {
+      buildRequests: StructuredRequestBuilder;
+      data: unknown[];
+      context: StructuredRequestContext;
+    }
+  >();
+  const results = serializeQuestionResults(
+    questionnaire.questions,
+    responses,
+    (question, response) => {
+      if (question.type === "group" && question.structured_type) {
+        const definition = getQuestionGroup(question.structured_type);
+        if (
+          definition &&
+          incompatibleGroupQuestions(question, definition).length
+        ) {
+          throw new Error(
+            "Registered group schema needs an editor update before submission",
+          );
         }
-        // Core types are patient-bound by construction: every core request
-        // hangs off a patient id. A plugin type may declare a resource
-        // subject; if the slot renders and validates there, its requests
-        // must not be silently discarded. Slot state reads the
-        // questionnaire's subject_type, not the session's runtime subject,
-        // so the explicit runtime gate stays on top of it.
-        if (!patientBound && definition.source !== "plugin") continue;
-        structuredWork.push(
-          buildStructuredRequests(definition.buildRequests, data, {
-            patientId: patientBound?.patientId,
+      }
+      if (
+        question.type !== "structured" ||
+        !question.structured_type ||
+        !response
+      )
+        return;
+      if (
+        renderFailed?.has(question.id) ||
+        response.structured_type !== question.structured_type
+      )
+        return;
+      const state = resolveStructuredSlotState(
+        question.structured_type,
+        questionnaire.subject_type,
+        renderCtx,
+      );
+      if (state.kind !== "ready" || !patientBound) return;
+      const data = structuredDataAny(response);
+      if (!data.length) return;
+      const existing = structuredAnswers.get(question.id);
+      if (existing) existing.data.push(...data);
+      else
+        structuredAnswers.set(question.id, {
+          buildRequests: state.definition.buildRequests,
+          data: [...data],
+          context: {
+            patientId: patientBound.patientId,
             encounterId: renderCtx.encounterId,
             facilityId: renderCtx.facilityId,
             questionId: question.id,
-          }),
-        );
-        continue;
-      }
-
-      // Every plain leaf goes through serialization; the content decision
-      // is `serializeResponseValues`' alone (its filter keeps value-,
-      // coding- and unit-carrying entries). Gating here on values[0]
-      // dropped a repeats answer wholesale when its FIRST row was cleared
-      // in place — later rows silently never submitted, while the
-      // required check (which scans every entry) reported the question
-      // answered.
-      if (!response.structured_type) {
-        const values = serializeResponseValues(response.values);
-        // Every entry turned out content-free (a repeats row cleared in
-        // place leaves `value: undefined` at its index) — there is nothing
-        // to record for this question, and an empty `values` is a server
-        // error rather than an omission.
-        if (values.length === 0) continue;
-        results.push({
-          question_id: response.question_id,
-          values,
-          note: response.note,
-          body_site: response.body_site,
-          method: response.method,
+          },
         });
-      }
-    }
-  };
-  walk(questionnaire.questions);
+    },
+  );
 
   // Structured requests first; domain mutations run before the questionnaire submit.
-  for (const entries of await Promise.all(structuredWork)) {
+  for (const entries of await Promise.all(
+    Array.from(structuredAnswers.values(), ({ buildRequests, data, context }) =>
+      buildStructuredRequests(buildRequests, data, context),
+    ),
+  )) {
     requests.push(...entries);
   }
 

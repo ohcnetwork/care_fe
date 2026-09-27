@@ -46,6 +46,8 @@ export interface QuestionnaireResponse {
   structured_type: StructuredTypeValue | null;
   link_id: string;
   values: ResponseValue[];
+  /** Repeating group instances; child question IDs repeat within each row. */
+  sub_results?: QuestionnaireResponse[][];
   /** Last server-prefilled values. Draft-only baseline used to distinguish
    * clinician edits and reconcile them with freshly fetched records. */
   draft_context?: ResponseValue[];
@@ -54,3 +56,10 @@ export interface QuestionnaireResponse {
   body_site?: Code;
   method?: Code;
 }
+
+export interface ResponsePathEntry {
+  questionId: string;
+  rowIndex: number;
+}
+
+export type ResponsePath = readonly ResponsePathEntry[];

@@ -24,8 +24,7 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { storedStructuredAnswer } from "@/components/QuestionnaireV2/structured/storedStructuredAnswer";
-import { StructuredAnswerView } from "@/components/QuestionnaireV2/structured/StructuredAnswerView";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -64,7 +63,7 @@ export function formatValue(
   value: ResponseValue["value"],
   type: string,
 ): string {
-  if (!value) return "";
+  if (value === undefined || value === null || value === "") return "";
 
   // Handle complex objects
   if (
@@ -86,7 +85,9 @@ export function formatValue(
     case "integer":
       return typeof value === "number" ? value.toString() : value.toString();
     case "boolean":
-      return value === "true" ? t("yes") : t("no");
+      return value === true || value === "true" || value === "1"
+        ? t("yes")
+        : t("no");
     case "time":
       return value.toString().slice(0, 5);
     default:
@@ -106,24 +107,43 @@ function QuestionGroup({
   isSingleGroup?: boolean;
 }) {
   const { t } = useTranslation();
-  const hasResponses = group.questions?.some((q) => {
-    if (q.type === "group") {
-      return q.questions?.some((subQ) =>
-        responses.some((r) => r.question_id === subQ.id),
-      );
-    }
-    return responses.some((r) => r.question_id === q.id);
-  });
-
-  // Structured answers a plugin type stored on the response — rendered
-  // below the table by the type's own component, full width; the table
-  // rows are for plain values.
-  const storedStructuredQuestions =
-    group.questions?.filter((question) =>
-      storedStructuredAnswer(question, responses),
-    ) ?? [];
-
-  if (!hasResponses && storedStructuredQuestions.length === 0) return null;
+  if (group.repeats) {
+    const rows =
+      responses.find((answer) => answer.question_id === group.id)
+        ?.sub_results ?? [];
+    if (!rows.length) return null;
+    return (
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold">{group.text}</h3>
+        <RegisteredGroupAnswerView
+          question={group}
+          responses={responses}
+          fallback={rows.map((row, index) => (
+            <QuestionGroup
+              key={index}
+              group={{
+                ...group,
+                repeats: false,
+                structured_type: undefined,
+                text: `${group.text} (${index + 1})`,
+              }}
+              responses={row}
+              parentTitle={parentTitle}
+              isSingleGroup={isSingleGroup}
+            />
+          ))}
+        />
+      </div>
+    );
+  }
+  const hasAnswer = (question: Question): boolean =>
+    question.type === "group"
+      ? question.repeats
+        ? !!responses.find((answer) => answer.question_id === question.id)
+            ?.sub_results?.length
+        : (question.questions?.some(hasAnswer) ?? false)
+      : responses.some((response) => response.question_id === question.id);
+  if (!hasAnswer(group)) return null;
 
   const currentTitle = parentTitle
     ? `${parentTitle} - ${group.text}`
@@ -138,8 +158,13 @@ function QuestionGroup({
       const response = responses.find((r) => r.question_id === question.id);
       if (!response) return acc;
 
-      const value = response.values[0]?.value;
-      if (!value && !response.values[0]?.coding) return acc;
+      if (
+        !response.values.some(
+          (entry) =>
+            (entry.value != null && entry.value !== "") || entry.coding,
+        )
+      )
+        return acc;
 
       acc.push(question);
       return acc;
@@ -178,7 +203,9 @@ function QuestionGroup({
     const values = response.values;
     if (!values?.length) return null;
 
-    const hasAnyValue = values.some((v) => v.value || v.coding);
+    const hasAnyValue = values.some(
+      (v) => (v.value != null && v.value !== "") || v.coding,
+    );
     if (!hasAnyValue) return null;
 
     return (
@@ -196,7 +223,7 @@ function QuestionGroup({
             {values.map((val, idx) => (
               <React.Fragment key={idx}>
                 {idx > 0 && ", "}
-                {val.value && formatValue(val.value, question.type)}
+                {formatValue(val.value, question.type)}
                 {val.unit && (
                   <span className="ml-1 text-gray-600">{val.unit.code}</span>
                 )}
@@ -240,71 +267,48 @@ function QuestionGroup({
       <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
         {group.text}
       </h3>
-      <div
-        className={cn("w-full", {
-          "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
-        })}
-      >
-        {leftQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="w-full">
-              <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
+      <RegisteredGroupAnswerView
+        question={group}
+        responses={responses}
+        fallback={
+          <div
+            className={cn("w-full", {
+              "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
+            })}
+          >
+            {leftQuestions.length > 0 && (
+              <div className="w-full">
+                <Table className="w-full">
+                  <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
+                </Table>
+              </div>
+            )}
+
+            {shouldUseTwoColumns && rightQuestions.length > 0 && (
+              <div className="w-full">
+                <Table className="w-full">
+                  <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
+                </Table>
+              </div>
+            )}
+
+            {group.questions?.map((subQuestion, idx) => {
+              if (subQuestion.type === "structured" || !subQuestion.type)
+                return null;
+              if (subQuestion.type !== "group") return null;
+
+              return (
+                <QuestionGroup
+                  key={idx}
+                  group={subQuestion}
+                  responses={responses}
+                  parentTitle={currentTitle}
+                />
+              );
+            })}
           </div>
-        )}
-
-        {shouldUseTwoColumns && rightQuestions.length > 0 && (
-          <div className="w-full">
-            <Table className="w-full">
-              <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
-            </Table>
-          </div>
-        )}
-
-        {storedStructuredQuestions.map((question) => (
-          <StoredStructuredBlock
-            key={question.id}
-            question={question}
-            responses={responses}
-          />
-        ))}
-
-        {group.questions?.map((subQuestion, idx) => {
-          if (subQuestion.type === "structured" || !subQuestion.type)
-            return null;
-          if (subQuestion.type !== "group") return null;
-
-          return (
-            <QuestionGroup
-              key={idx}
-              group={subQuestion}
-              responses={responses}
-              parentTitle={currentTitle}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/** One response-persisted structured answer: its question title, then the
- *  type's own read-only rendering (which shows the note too — the host
- *  draws no note affordance for structured questions, so the type's
- *  component owns it). Spans the card's full width. */
-function StoredStructuredBlock({
-  question,
-  responses,
-}: {
-  question: Question;
-  responses: QuestionnaireResponse["responses"];
-}) {
-  const response = storedStructuredAnswer(question, responses);
-  if (!response) return null;
-  return (
-    <div className="md:col-span-2 space-y-1 py-1.5">
-      <div className="text-sm text-gray-600 break-words">{question.text}</div>
-      <StructuredAnswerView question={question} response={response} />
+        }
+      />
     </div>
   );
 }
@@ -445,7 +449,9 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     const values = response.values;
                     if (!values?.length) return null;
 
-                    const hasAnyValue = values.some((v) => v.value || v.coding);
+                    const hasAnyValue = values.some(
+                      (v) => (v.value != null && v.value !== "") || v.coding,
+                    );
                     if (!hasAnyValue) return null;
 
                     return (
@@ -466,8 +472,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                             {values.map((val, idx) => (
                               <React.Fragment key={idx}>
                                 {idx > 0 && ", "}
-                                {val.value &&
-                                  formatValue(val.value, question.type)}
+                                {formatValue(val.value, question.type)}
                                 {val.unit && (
                                   <span className="ml-1 text-gray-600">
                                     {val.unit.code}
@@ -517,22 +522,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
     };
 
     questions.forEach((question, index) => {
-      if (question.type === "structured") {
-        if (!storedStructuredAnswer(question, item.responses)) return;
-        flushNonGroupQuestions();
-        result.push(
-          <div
-            key={question.id}
-            className="border border-gray-200 rounded-md px-3 py-1.5"
-          >
-            <StoredStructuredBlock
-              question={question}
-              responses={item.responses}
-            />
-          </div>,
-        );
-        return;
-      }
+      if (question.type === "structured") return;
 
       if (question.type === "group") {
         flushNonGroupQuestions();

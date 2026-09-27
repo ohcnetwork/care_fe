@@ -15,7 +15,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import { registerPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
+import { registerQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -150,23 +150,15 @@ export default function PluginEngine({
         overrideCleanupRef.current.push(cleanup);
       }
 
-      // Structured question types the plugin contributes. Registration
-      // throws on a non-namespaced id — one malformed definition is logged
-      // and skipped, never fatal to the app. The registering plugin's slug
-      // goes in so the registry can verify the `{plugin_slug}.` half of the
-      // id actually belongs to it: namespacing is the isolation guarantee,
-      // and it is only a guarantee if someone checks. `plugin.slug` is the
-      // trusted, backend-issued identity (see the combine above) — never
-      // `plugin.plugin`, which is a field the remote manifest declares
-      // about itself and could spoof another plugin's namespace with.
-      for (const definition of plugin.structuredQuestionTypes ?? []) {
+      // A plugin may register groups only in its own namespace.
+      for (const definition of plugin.registeredQuestionGroups ?? []) {
         try {
           overrideCleanupRef.current.push(
-            registerPluginStructuredType(definition, plugin.slug),
+            registerQuestionGroup(definition, plugin.slug),
           );
         } catch (error) {
           console.error(
-            `Invalid structured type from plugin ${plugin.slug}`,
+            `Invalid registered group from plugin ${plugin.slug}`,
             error,
           );
         }

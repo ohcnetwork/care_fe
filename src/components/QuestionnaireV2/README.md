@@ -101,16 +101,12 @@ questions, that is the bug.
   over the legacy QuestionTypes UI), context `requires`, submit-time
   `validate`, `buildRequests` and `draftPolicy`; `registry.ts` is total
   and key-correlated over `StructuredQuestionType`, so a new union member
-  refuses to compile until its definition exists. Plugins contribute
-  types at runtime (`pluginRegistry.ts`, manifest
-  `structuredQuestionTypes`, ids namespaced `{plugin_slug}.{type}`). A
-  plugin type may declare `persistence: "response"` instead of
-  `buildRequests`: `composeBatch` then submits its entries as the
-  question's one value (JSON — the backend's submit value is a string),
-  and the response viewers decode it (`storedAnswer.ts`) and mount the
-  type's `component` disabled (`StructuredAnswerView.tsx`) — a
-  frontend-only plugin can persist a type of its own this way, with no
-  backend endpoint.
+  refuses to compile until its definition exists.
+- `groups/` — plugin registrations for ordinary group questions. A manifest's
+  `registeredQuestionGroups` supplies child schema, builder and fill renderers.
+  The saved group uses `type: "group"` with a namespaced `structured_type`.
+  Core owns child values, validation, drafts and submission; repeating groups
+  store rows in `sub_results`. Missing plugins fall back to ordinary controls.
 - `shared/` — presentation primitives and the pure tree utilities
   (`questionTree.ts`), plus `buildUpdateBody.ts` and
   `downloadQuestionnaireJson.ts`. `manage/` and `builder/` depend on
@@ -279,23 +275,11 @@ reach-in.
    (`src/types/questionnaire/form.ts`).
 4. Add i18n (`structured_type__*`) and backend support.
 
-Plugins contribute types the same way but at runtime: a manifest's
-`structuredQuestionTypes` (`PluginStructuredTypeDefinition`,
-`structured/pluginRegistry.ts`) are registered by `PluginEngine`, and reach
-the picker, preview, fill, validation and submit through the one resolver
-— `resolveStructuredType`. Their ids MUST be namespaced
-`{plugin_slug}.{type_name}` (bare names are core's), and the `{plugin_slug}`
-half must be the registering plugin's OWN slug — both are enforced at
-registration, a malformed id by throwing and a foreign namespace by
-logging and skipping that one definition. Their labels are plain manifest
-strings (plugins own their
-i18n), and their entries are opaque to the host (`unknown[]`) — the
-plugin's own component, `validate` and `buildRequests` are the only code
-that reads them. A questionnaire referencing a type this deployment
-doesn't have degrades instead of breaking: fill shows a "requires a
-plugin" notice, compose skips it, validation blocks only when the question
-is required, drafts exclude it (and say so), and the studio refuses to
-save it.
+Plugins register groups through `registeredQuestionGroups`
+(`groups/registry.ts`). The registration id must use the registering plugin's
+own `{plugin_slug}.{type_name}` namespace. The builder instantiates the declared
+child questions with unique IDs and scoped link IDs. Renderers receive ordinary
+child bindings and core-managed row operations for repeating groups.
 
 ## Adding a question type
 

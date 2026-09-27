@@ -239,4 +239,49 @@ describe("resource responses with omitted default values", () => {
     assert.match(html, /Note-only answer/);
     assert.match(html, /Group/);
   });
+
+  it("renders separate nested rows through the missing registered group's fallback", () => {
+    const repeated: ResourceQuestionnaireResponse = {
+      ...response,
+      questionnaire: {
+        ...response.questionnaire,
+        questions: [
+          {
+            ...response.questionnaire.questions[0],
+            repeats: true,
+            structured_type: "missing.repeat",
+            questions: [
+              {
+                id: "nested",
+                link_id: "nested",
+                type: "group",
+                text: "Nested",
+                questions: [question("string")],
+              },
+            ],
+          },
+        ],
+      },
+      responses: [
+        {
+          question_id: "group",
+          sub_results: [
+            [{ question_id: "answer", values: [{ value: "First row" }] }],
+            [{ question_id: "answer", values: [{ value: "Second row" }] }],
+          ],
+        },
+      ],
+    };
+    const html = renderToStaticMarkup(
+      createElement(I18nextProvider, {
+        i18n,
+        children: createElement(ResourceResponseDetails, {
+          response: repeated,
+        }),
+      }),
+    );
+    assert.equal(html.match(/First row/g)?.length, 1);
+    assert.equal(html.match(/Second row/g)?.length, 1);
+    assert.equal(html.match(/Nested/g)?.length, 2);
+  });
 });

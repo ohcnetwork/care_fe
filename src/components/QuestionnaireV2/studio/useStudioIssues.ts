@@ -4,11 +4,11 @@ import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionVal
 import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
 import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/useActionRegistry";
 import { findInvalidQuestions } from "@/components/QuestionnaireV2/builder/saveValidation";
-import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import {
-  getStructuredTypesVersion,
-  subscribeToStructuredTypes,
-} from "@/components/QuestionnaireV2/structured/pluginRegistry";
+  getQuestionGroupsVersion,
+  subscribeToQuestionGroups,
+} from "@/components/QuestionnaireV2/groups/registry";
+import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import {
   actionContextTypeFor,
   QuestionnaireAction,
@@ -36,9 +36,9 @@ export function useStudioIssues({
   // warnings (outline icons, canvas chips, issues popover) until an edit
   // happened to invalidate the memo.
   const structuredTypesVersion = useSyncExternalStore(
-    subscribeToStructuredTypes,
-    getStructuredTypesVersion,
-    getStructuredTypesVersion,
+    subscribeToQuestionGroups,
+    getQuestionGroupsVersion,
+    getQuestionGroupsVersion,
   );
   // Deferring the tree keeps typing responsive while warning displays catch
   // up. The page's save handler checks the live tree synchronously instead.

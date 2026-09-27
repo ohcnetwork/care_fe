@@ -42,7 +42,11 @@ function collectAllGroupTargets(
 ): GroupTarget[] {
   const targets: GroupTarget[] = [];
   for (const question of questions) {
-    if (excludeIds.has(question.id)) continue;
+    if (
+      excludeIds.has(question.id) ||
+      (question.type === "group" && question.structured_type)
+    )
+      continue;
     if (question.type === "group") {
       targets.push({ id: question.id, label: question.text || untitledLabel });
     }

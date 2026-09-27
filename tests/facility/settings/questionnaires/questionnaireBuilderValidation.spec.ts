@@ -94,6 +94,9 @@ test.describe("Questionnaire v2 builder save validation", () => {
       // The type option's accessible name also includes its description text,
       // so this can't be an exact match — "Group" alone is still unambiguous.
       await page.getByRole("option", { name: "Group" }).click();
+      await page
+        .getByRole("option", { name: "Simple Group", exact: true })
+        .click();
     });
 
     await test.step("Save is blocked with no PUT sent", async () => {

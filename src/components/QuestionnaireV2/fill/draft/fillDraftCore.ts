@@ -29,6 +29,11 @@ export function reviveDraftResponses(
   responses: Record<string, QuestionnaireResponse>,
 ): Record<string, QuestionnaireResponse> {
   for (const response of Object.values(responses)) {
+    for (const row of response.sub_results ?? []) {
+      reviveDraftResponses(
+        Object.fromEntries(row.map((entry) => [entry.question_id, entry])),
+      );
+    }
     // Server dumps are untyped blobs — a `values`-less entry is possible
     // and must not throw the whole encounter overview.
     for (const entry of response.values ?? []) {
@@ -45,4 +50,42 @@ export function reviveDraftResponses(
     }
   }
   return responses;
+}
+
+/** Validate nested draft rows before any restore path walks their answers. */
+export function isDraftResponse(
+  value: unknown,
+): value is QuestionnaireResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value))
+    return false;
+  const response = value as Record<string, unknown>;
+  const isValues = (values: unknown) =>
+    Array.isArray(values) &&
+    values.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        typeof entry.type === "string" &&
+        entry.type.length > 0,
+    );
+  return (
+    typeof response.question_id === "string" &&
+    response.question_id.length > 0 &&
+    typeof response.link_id === "string" &&
+    (response.structured_type === null ||
+      (typeof response.structured_type === "string" &&
+        response.structured_type.length > 0)) &&
+    isValues(response.values) &&
+    (response.note === undefined || typeof response.note === "string") &&
+    (response.draft_context === undefined ||
+      isValues(response.draft_context)) &&
+    (response.sub_results === undefined ||
+      (Array.isArray(response.sub_results) &&
+        response.sub_results.every(
+          (row) =>
+            Array.isArray(row) &&
+            row.every(isDraftResponse) &&
+            new Set(row.map((entry) => entry.question_id)).size === row.length,
+        )))
+  );
 }

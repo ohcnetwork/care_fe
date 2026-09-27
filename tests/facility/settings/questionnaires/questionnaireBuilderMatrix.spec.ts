@@ -24,6 +24,11 @@ async function pickType(page: Page, type: string): Promise<void> {
   await page
     .locator(`[data-slot="command-item"][data-value="${type}"]`)
     .click();
+  if (type === "group") {
+    await page
+      .getByRole("option", { name: "Simple Group", exact: true })
+      .click();
+  }
 }
 
 test.describe("Questionnaire v2 builder authoring matrix", () => {

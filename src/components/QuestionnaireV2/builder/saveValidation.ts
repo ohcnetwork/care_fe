@@ -1,11 +1,12 @@
-import { getPluginStructuredType } from "@/components/QuestionnaireV2/structured/pluginRegistry";
-
 import { Question, QuestionType } from "@/types/questionnaire/question";
-import { isCoreStructuredType } from "@/types/questionnaire/structured";
+import {
+  isCoreStructuredType,
+  isPluginStructuredTypeName,
+} from "@/types/questionnaire/structured";
 
 /**
- * Types the renderer never records a response for: `initializeResponses`
- * (`form/engine/store.ts`) skips `group` entirely, and `display` gets an entry
+ * Types without scalar answers: repeating groups hold row containers,
+ * while ordinary groups are flattened, and `display` gets an entry
  * whose values `DisplayText` never writes — so `evaluateEnableWhen` sees
  * "unanswered" forever and a condition targeting one permanently hides its
  * question with zero feedback. The visibility card excludes them from the
@@ -56,16 +57,20 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "quantity_needs_valueset",
   },
   {
-    // A structured question whose type resolves to nothing — neither core
-    // nor a registered plugin. Saving it would persist a question no fill
-    // session can render or submit, so the studio blocks it (the type
-    // reappears the moment its plugin is enabled again).
+    // Core resource editors use structured questions; plugins use groups.
     predicate: (question) =>
       question.type === "structured" &&
       (!question.structured_type ||
-        (!isCoreStructuredType(question.structured_type) &&
-          !getPluginStructuredType(question.structured_type))),
+        !isCoreStructuredType(question.structured_type)),
     messageKey: "structured_type_unknown",
+  },
+  {
+    // Unknown plugs remain saveable: ordinary child questions are persisted.
+    predicate: (question) =>
+      question.type === "group" &&
+      question.structured_type != null &&
+      !isPluginStructuredTypeName(question.structured_type),
+    messageKey: "registered_group_type_invalid",
   },
   {
     // A visibility condition with no target question selected. Persisting

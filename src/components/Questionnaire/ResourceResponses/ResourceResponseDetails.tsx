@@ -1,6 +1,8 @@
 import { Fragment, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
+
 import { Question } from "@/types/questionnaire/question";
 import {
   ResourceQuestionnaireAnswer,
@@ -27,8 +29,10 @@ export default function ResourceResponseDetails({
       if (question.type === "group") {
         const groups = answer?.sub_results?.length
           ? answer.sub_results
-          : [answers];
-        return groups.flatMap((groupAnswers, index) => {
+          : question.repeats
+            ? []
+            : [answers];
+        const rows = groups.flatMap((groupAnswers, index) => {
           const children = renderQuestions(
             question.questions ?? [],
             groupAnswers,
@@ -36,21 +40,42 @@ export default function ResourceResponseDetails({
           if (!children.length) return [];
 
           return [
-            <section
-              key={`${question.id}-${index}`}
-              className="overflow-hidden rounded-[10px] border border-neutral-200"
-            >
-              <h4 className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold text-neutral-900">
-                {question.text}
-                {groups.length > 1 && ` (${index + 1})`}
-              </h4>
-              <div className="space-y-5 p-4">{children}</div>
-            </section>,
+            <div key={`${question.id}-${index}`} className="space-y-5">
+              {question.repeats && (
+                <h5 className="font-medium">
+                  {question.text} ({index + 1})
+                </h5>
+              )}
+              {children}
+            </div>,
           ];
         });
+        if (!rows.length) return [];
+        return [
+          <section
+            key={question.id}
+            className="overflow-hidden rounded-[10px] border border-neutral-200"
+          >
+            <h4 className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold text-neutral-900">
+              {question.text}
+            </h4>
+            <div className="space-y-5 p-4">
+              <RegisteredGroupAnswerView
+                question={question}
+                responses={answers}
+                fallback={rows}
+              />
+            </div>
+          </section>,
+        ];
       }
 
-      if (!answer || question.type === "display") return [];
+      if (
+        !answer ||
+        question.type === "display" ||
+        question.type === "structured"
+      )
+        return [];
 
       const values = (answer.values ?? [])
         .map((value) => formatResponseValue(value, question, t))

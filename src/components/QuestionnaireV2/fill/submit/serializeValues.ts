@@ -1,6 +1,6 @@
 import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 
-import { dateQueryString } from "@/Utils/utils";
+import dayjs from "@/Utils/dayjs";
 import type { ResponseValue } from "@/types/questionnaire/form";
 import type { SubmitResultValue } from "@/types/questionnaire/questionnaireApi";
 
@@ -29,7 +29,7 @@ export function serializeResponseValues(
       if (isNaN(date.getTime())) {
         return { ...entry, value: "" };
       }
-      return { ...entry, value: dateQueryString(date) };
+      return { ...entry, value: dayjs(date).format("YYYY-MM-DD") };
     }
     if (entry.type === "dateTime" && entry.value) {
       return { ...entry, value: entry.value.toISOString() };
