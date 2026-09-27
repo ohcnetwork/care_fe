@@ -186,11 +186,8 @@ export interface FillSessionFormState {
 
 /** Explicitly minimizing may only leave once every live value is draftable. */
 export function hasExcludedDraftValues(forms: FillSessionFormState[]): boolean {
-  return forms.some((form) =>
-    Object.values(form.responses).some(
-      (response) =>
-        isDraftExcluded(response) && response.values.some(entryHasContent),
-    ),
+  return forms.some(
+    (form) => partitionForDraft(form.responses).structuredSkipped,
   );
 }
 

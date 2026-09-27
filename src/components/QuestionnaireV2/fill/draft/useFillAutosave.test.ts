@@ -12,24 +12,31 @@ import { toast } from "sonner";
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import { responsesAtom } from "@/components/QuestionnaireV2/form/engine/store";
+import { FileCategory, FileType } from "@/types/files/file";
+import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 import { fillDraftStorageKey } from "./fillDraftCache";
 
 let useFillSessionAutosave: typeof import("./useFillAutosave").useFillSessionAutosave;
+let hasExcludedDraftValues: typeof import("./fillDraftStore").hasExcludedDraftValues;
 
 before(async () => {
-  // Scalar answers exercise persistence without loading browser-only
-  // structured widgets and their stylesheets in Node.
+  // Exercise draft policy without loading browser-only structured widgets
+  // and their stylesheets in Node.
   const require = createRequire(import.meta.url);
   const path =
     require.resolve("@/components/QuestionnaireV2/structured/registry");
   const previous = require.cache[path];
   const registry = new Module(path);
-  registry.exports = { resolveStructuredType: () => undefined };
+  registry.exports = {
+    resolveStructuredType: (type: string) =>
+      type === "files" ? { draftPolicy: "exclude" } : undefined,
+  };
   registry.loaded = true;
   require.cache[path] = registry;
   try {
     ({ useFillSessionAutosave } = await import("./useFillAutosave"));
+    ({ hasExcludedDraftValues } = await import("./fillDraftStore"));
   } finally {
     if (previous) require.cache[path] = previous;
     else delete require.cache[path];
@@ -44,6 +51,53 @@ before(async () => {
       },
     },
   });
+});
+
+test("minimization is blocked until files inside repeating groups are removed", () => {
+  const attachment: QuestionnaireResponse = {
+    question_id: "attachment",
+    link_id: "attachment",
+    structured_type: "files",
+    values: [
+      {
+        type: "files",
+        value: [
+          {
+            name: "Report",
+            original_name: "report.txt",
+            file_type: FileType.ENCOUNTER,
+            file_category: FileCategory.UNSPECIFIED,
+            associating_id: "visit",
+            file_data: new File(["Report contents"], "report.txt"),
+          },
+        ],
+      },
+    ],
+  };
+  const forms = [
+    {
+      questionnaire: {
+        id: "questionnaire",
+        slug: "questionnaire",
+        title: "Questionnaire",
+        status: "active" as const,
+        subject_type: "encounter" as const,
+        questions: [],
+      },
+      responses: {
+        group: {
+          question_id: "group",
+          link_id: "group",
+          structured_type: null,
+          values: [],
+          sub_results: [[attachment]],
+        },
+      },
+    },
+  ];
+  assert.equal(hasExcludedDraftValues(forms), true);
+  attachment.values = [];
+  assert.equal(hasExcludedDraftValues(forms), false);
 });
 
 test("autosave warns once while storage fails and resumes saving when storage recovers", async (t) => {
