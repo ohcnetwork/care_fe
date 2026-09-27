@@ -131,7 +131,7 @@ function CanvasBody({
     .join(" · ");
 
   const header = !hideHeader && (
-    <div className="flex items-baseline justify-between gap-3 pb-4">
+    <div className="flex flex-wrap items-start justify-between gap-3 pb-4">
       <div className="min-w-0 space-y-1">
         <h2 className="text-lg font-semibold tracking-tight text-gray-900">
           {questionnaire.title}

@@ -3,7 +3,7 @@ import { BaseServiceRequestSpec } from "@/types/emr/serviceRequest/serviceReques
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
 
-interface QuestionnaireAnswer {
+export interface QuestionnaireAnswer {
   question_id: string;
   answer: Record<string, unknown>;
   meta: Record<string, unknown>;

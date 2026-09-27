@@ -2,6 +2,8 @@ import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormC
 import type { QuestionShellProps } from "@/components/QuestionnaireV2/form/chrome";
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
+import { FormTemplateSheet } from "./templates/FormTemplateSheet";
+
 /**
  * Every question shares the canvas width. Nested structured sections span
  * their group's grid columns so wide controls are not squeezed into a cell;
@@ -20,5 +22,11 @@ function FillQuestionShell({ question, depth, children }: QuestionShellProps) {
 const FILL_CHROME = { QuestionShell: FillQuestionShell };
 
 export function FillCanvas() {
-  return <QuestionnaireFormCanvas chrome={FILL_CHROME} className="max-w-5xl" />;
+  return (
+    <QuestionnaireFormCanvas
+      chrome={FILL_CHROME}
+      className="max-w-5xl"
+      headerHint={<FormTemplateSheet />}
+    />
+  );
 }
