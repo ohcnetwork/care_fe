@@ -4,6 +4,8 @@ E2E setup, commands, and workflows for the CARE frontend. See [`AGENTS.md`](../A
 
 **Prerequisites:** Backend must be running on port 9000 (see [`local-development.md`](./local-development.md)), and a production build must exist (`npm run build`).
 
+CI uses the `CARE_BACKEND_REF` default in [the Playwright workflow](../.github/workflows/playwright.yaml). It currently points to `ENG-737`, the companion backend required by questionnaire actions; restore `develop` once that dependency lands. Manual **Playwright Tests** runs can override it with the `backend_ref` input and run regardless of changed-file filters.
+
 ```bash
 npm run playwright:install                              # Install browsers (first time)
 npm run build                                           # Build app (tests run against production build)

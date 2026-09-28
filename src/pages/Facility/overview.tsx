@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import {
   Card,
@@ -37,6 +37,7 @@ import {
   processCustomDashboardLinks,
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
@@ -48,6 +49,13 @@ interface FacilityOverviewProps {
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12
+      ? "overview_greeting_morning"
+      : hour < 18
+        ? "overview_greeting_afternoon"
+        : "overview_greeting_evening";
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
@@ -117,23 +125,25 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   );
 
   return (
-    <Page title="">
-      <div className="container mx-auto space-y-8">
+    <Page title={t("overview")} hideTitleOnPage className="md:px-0">
+      <div className="space-y-8">
         {/* Welcome Header */}
-        <div className="rounded-lg">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {t("hey_user", {
-                  user: [user.prefix, user.first_name]
-                    .filter(Boolean)
-                    .join(" "),
-                })}
-              </h1>
-              <p className="text-gray-500">
-                {t("welcome_back_to_hospital_dashboard")}
-              </p>
-            </div>
+        <div
+          data-cy="facility-overview-greeting"
+          className="rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 p-5"
+        >
+          <div className="space-y-0.5">
+            <h1 className="text-base font-normal text-neutral-600 md:text-xl wrap-break-word">
+              <Trans
+                i18nKey={greeting}
+                values={{ name: formatName(user) }}
+                components={{
+                  name: <span className="font-semibold text-neutral-950" />,
+                  wave: <span aria-hidden="true" />,
+                }}
+              />
+            </h1>
+            <p className="text-sm text-neutral-600">{t("welcome_back")}</p>
           </div>
         </div>
 

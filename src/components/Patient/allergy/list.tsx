@@ -41,6 +41,7 @@ interface AllergyListProps {
   encounterStatus?: EncounterStatus;
   showTimeline?: boolean;
   showViewEncounter?: boolean;
+  presentation?: "default" | "panel";
 }
 interface GroupedAllergies {
   [year: string]: {
@@ -65,6 +66,7 @@ export function AllergyList({
   encounterStatus,
   showTimeline = false,
   showViewEncounter = true,
+  presentation = "default",
 }: AllergyListProps) {
   const { t } = useTranslation();
 
@@ -180,6 +182,7 @@ export function AllergyList({
       title={t("allergies")}
       readOnly={readOnly}
       className={className}
+      presentation={presentation}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
       actionButton={
         <Button
@@ -204,6 +207,7 @@ export function AllergyList({
         allergies={allergies}
         patientId={patientId}
         showViewEncounter={showViewEncounter}
+        compact={presentation === "panel"}
       />
       {hasNextPage && (
         <div className="flex justify-center">

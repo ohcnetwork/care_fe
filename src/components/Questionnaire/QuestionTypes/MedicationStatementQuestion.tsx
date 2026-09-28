@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -70,7 +70,6 @@ import {
 } from "@/types/questionnaire/validation";
 
 import { PaginatedResponse } from "@/Utils/request/types";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
@@ -83,6 +82,7 @@ interface MedicationStatementQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
 }
@@ -145,6 +145,7 @@ export function validateMedicationStatementQuestion(
 export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
@@ -180,13 +181,22 @@ export function MedicationStatementQuestion({
     enabled: !isPreview,
   });
 
-  useEffect(() => {
-    if (patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications]);
 
   const handleAddMedication = (medication: Code) => {
@@ -304,12 +314,7 @@ export function MedicationStatementQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -322,8 +327,7 @@ export function MedicationStatementQuestion({
         variant="destructive"
       />
 
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
+      <div className="flex flex-wrap items-center justify-end">
         <HistoricalRecordSelector<
           MedicationRequestRead | MedicationStatementRead
         >
@@ -493,6 +497,7 @@ export function MedicationStatementQuestion({
           buttonLabel={t("medication_history")}
           onAddSelected={handleAddHistoricalMedications}
           disableAPI={isPreview}
+          disabled={disabled}
         />
       </div>
 
@@ -694,7 +699,7 @@ export function MedicationStatementQuestion({
       )}
 
       {desktopLayout ? (
-        <div className="max-w-4xl">
+        <div className="min-w-0 w-full">
           <ValueSetSelect
             system="system-medication"
             placeholder={addMedicationPlaceholder}

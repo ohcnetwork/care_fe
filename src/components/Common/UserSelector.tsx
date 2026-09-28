@@ -14,7 +14,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -35,6 +40,9 @@ import UserApi from "@/types/user/userApi";
 
 interface Props {
   selected?: UserReadMinimal;
+  selectedId?: string;
+  dialogTitle?: string;
+  appearance?: "default" | "careui";
   onChange: (user: UserReadMinimal) => void;
   placeholder?: string;
   noOptionsMessage?: string;
@@ -52,13 +60,14 @@ interface Props {
 const PAGE_LIMIT = 50;
 
 interface UserCommandContentProps {
+  appearance: "default" | "careui";
   search: string;
   setSearch: (value: string) => void;
   usersList?: UserReadMinimal[];
   isFetching: boolean;
   isFetchingNextPage: boolean;
   noOptionsMessage?: string;
-  selected?: UserReadMinimal;
+  selectedId?: string;
   onChange: (user: UserReadMinimal) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
@@ -66,13 +75,14 @@ interface UserCommandContentProps {
 }
 
 function UserCommandContent({
+  appearance,
   search,
   setSearch,
   usersList,
   isFetching,
   isFetchingNextPage,
   noOptionsMessage,
-  selected,
+  selectedId,
   onChange,
   setOpen,
   ref,
@@ -81,8 +91,14 @@ function UserCommandContent({
   const { t } = useTranslation();
 
   return (
-    <Command>
+    <Command
+      className={cn(
+        appearance === "careui" &&
+          "rounded-xl bg-white p-1 text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border [&_[data-slot=command-input-wrapper]]:border-neutral-300/30 [&_[data-slot=command-input-wrapper]]:bg-neutral-300/30 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[data-slot=command-input]]:h-full [&_[data-slot=command-group]]:text-neutral-950 [&_[data-slot=command-item]]:min-h-12 [&_[data-slot=command-item]]:text-neutral-950 md:[&_[data-slot=command-item]]:min-h-10 [&_[data-selected=true]]:bg-neutral-100",
+      )}
+    >
       <CommandInput
+        aria-label={t("search")}
         placeholder={t("search")}
         value={search}
         onValueChange={setSearch}
@@ -134,7 +150,7 @@ function UserCommandContent({
                     {user.username}
                   </span>
                 </div>
-                {selected?.id === user.id && <CheckIcon className="ml-auto" />}
+                {selectedId === user.id && <CheckIcon className="ml-auto" />}
               </div>
             </CommandItem>
           ))}
@@ -149,6 +165,9 @@ function UserCommandContent({
 
 export default function UserSelector({
   selected,
+  selectedId,
+  dialogTitle,
+  appearance = "default",
   onChange,
   placeholder,
   noOptionsMessage,
@@ -260,16 +279,26 @@ export default function UserSelector({
         <DrawerTrigger asChild className={popoverClassName}>
           {renderTriggerButton()}
         </DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent
+          className={cn(
+            "px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg",
+            appearance === "careui" &&
+              "border-neutral-200 bg-white text-neutral-950",
+          )}
+        >
+          {dialogTitle && (
+            <DrawerTitle className="sr-only">{dialogTitle}</DrawerTitle>
+          )}
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <UserCommandContent
+              appearance={appearance}
               search={search}
               setSearch={setSearch}
               usersList={usersList}
               isFetching={isFetching}
               isFetchingNextPage={isFetchingNextPage}
               noOptionsMessage={noOptionsMessage}
-              selected={selected}
+              selectedId={selectedId ?? selected?.id}
               onChange={onChange}
               setOpen={setOpen}
               ref={ref}
@@ -287,21 +316,25 @@ export default function UserSelector({
         {renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
+        aria-label={dialogTitle}
         className={cn(
           "p-0 w-(--radix-popover-trigger-width)",
+          appearance === "careui" &&
+            "rounded-xl border-neutral-200 bg-white text-neutral-950 shadow-md",
           contentClassName,
         )}
         align={contentAlign || "start"}
         sideOffset={4}
       >
         <UserCommandContent
+          appearance={appearance}
           search={search}
           setSearch={setSearch}
           usersList={usersList}
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
           noOptionsMessage={noOptionsMessage}
-          selected={selected}
+          selectedId={selectedId ?? selected?.id}
           onChange={onChange}
           setOpen={setOpen}
           ref={ref}

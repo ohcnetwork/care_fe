@@ -109,7 +109,7 @@ export function ShortcutCommandDialog({
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
-            placeholder={t("search")}
+            placeholder={t("search_page_actions")}
             className="border-none focus:ring-0 text-base sm:text-sm"
           />
         </div>

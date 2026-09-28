@@ -20,6 +20,7 @@ interface EncounterAccordionLayoutProps {
   title: string;
   editLink?: string;
   actionButton?: ReactNode;
+  presentation?: "default" | "panel";
 }
 
 export function EncounterAccordionLayout({
@@ -29,20 +30,53 @@ export function EncounterAccordionLayout({
   actionButton,
   title,
   editLink,
+  presentation = "default",
 }: EncounterAccordionLayoutProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
+  const isPanel = presentation === "panel";
 
   return (
-    <Card className={cn("border-none rounded-md", className)}>
+    <Card
+      className={cn(
+        isPanel
+          ? "rounded-xl border border-gray-200 bg-white shadow-none"
+          : "border-none rounded-md",
+        className,
+      )}
+    >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <div className="w-full flex items-center gap-2 px-2 py-1">
-          <CardHeader className="w-full flex flex-row items-center justify-between p-0 pl-2">
-            <CardTitle className="text-base mt-1">{t(title)}:</CardTitle>
+        <div
+          className={cn(
+            "w-full flex items-center gap-2",
+            isPanel ? "px-3 py-1" : "px-2 py-1",
+            isPanel && isExpanded && "border-b border-gray-200",
+          )}
+        >
+          <CardHeader
+            className={cn(
+              "w-full flex flex-row items-center justify-between p-0",
+              isPanel ? "gap-3 space-y-0" : "pl-2",
+            )}
+          >
+            <CardTitle
+              className={
+                isPanel
+                  ? "text-sm font-bold uppercase tracking-wide text-gray-600"
+                  : "text-base mt-1"
+              }
+            >
+              {t(title)}
+              {!isPanel && ":"}
+            </CardTitle>
             <div
               className={cn(
-                "flex rounded-md border border-gray-500 lg:border-0 lg:divide-x-0 mt-1",
-                (editLink || actionButton) && "divide-x divide-gray-500",
+                isPanel
+                  ? "flex shrink-0 items-center gap-1"
+                  : "flex rounded-md border border-gray-500 lg:border-0 lg:divide-x-0 mt-1",
+                !isPanel &&
+                  (editLink || actionButton) &&
+                  "divide-x divide-gray-500",
               )}
             >
               {!readOnly && editLink && (
@@ -53,7 +87,7 @@ export function EncounterAccordionLayout({
                     size="icon"
                     className="hover:bg-transparent text-gray-500 hover:text-gray-500"
                   >
-                    <Link href={editLink}>
+                    <Link href={editLink} aria-label={t("edit")}>
                       <SquarePen className="size-4" />
                     </Link>
                   </Button>

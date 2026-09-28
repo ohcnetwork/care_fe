@@ -11,7 +11,7 @@ const extractFacilityId = (path: string) => {
     return segments[2];
   }
 
-  throw new Error("'useCurrentFacility' must be used within a facility route");
+  return undefined;
 };
 
 /**
@@ -20,6 +20,18 @@ const extractFacilityId = (path: string) => {
  * @returns The current facility in context.
  */
 export default function useCurrentFacility() {
+  const context = useCurrentFacilitySilently();
+
+  if (!context.facilityId) {
+    throw new Error(
+      "'useCurrentFacility' must be used within a facility route",
+    );
+  }
+
+  return { ...context, facilityId: context.facilityId };
+}
+
+export function useCurrentFacilitySilently() {
   const path = useFullPath();
   const facilityId = extractFacilityId(path);
 
@@ -28,16 +40,9 @@ export default function useCurrentFacility() {
     queryFn: query(facilityApi.get, {
       pathParams: { facilityId: facilityId ?? "" },
     }),
+    enabled: !!facilityId,
     staleTime: 1000 * 60 * 5, // cache for 5 minutes
   });
 
   return { facilityId, facility, isFacilityLoading };
-}
-
-export function useCurrentFacilitySilently() {
-  try {
-    return useCurrentFacility();
-  } catch {
-    return { facilityId: undefined, facility: undefined };
-  }
 }

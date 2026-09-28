@@ -13,6 +13,11 @@ on:
   pull_request:
     branches: [develop, production]
   workflow_dispatch:
+    inputs:
+      backend_ref:
+        description: "CARE backend branch, tag, or commit (overrides the companion default)"
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -23,6 +28,9 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
+  # Questionnaire actions require this companion backend. Restore develop
+  # once that dependency lands, independently of the frontend branch name.
+  CARE_BACKEND_REF: ENG-737
 
 jobs:
   # Detect if test-related files changed
@@ -30,12 +38,13 @@ jobs:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
     outputs:
-      tests: ${{ steps.filter.outputs.tests }}
+      tests: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.tests == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: dorny/paths-filter@v3
         id: filter
+        if: github.event_name != 'workflow_dispatch'
         with:
           filters: |
             tests:
@@ -93,25 +102,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set backend branch
-        id: backend-branch
-        run: echo "branch=develop" >> "$GITHUB_OUTPUT"
-
       - name: Checkout care
         uses: actions/checkout@v4
         with:
           repository: ohcnetwork/care
           path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
+          ref: ${{ inputs.backend_ref || env.CARE_BACKEND_REF }}
+
+      - name: Resolve backend revision
+        id: backend-revision
+        run: echo "sha=$(git -C care rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Docker images
         id: docker-cache
         uses: actions/cache@v4
         with:
           path: /tmp/docker-cache
-          key: ${{ runner.os }}-docker-care-${{ hashFiles('care/docker/dev.Dockerfile', 'care/Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-care-
+          key: ${{ runner.os }}-docker-care-${{ steps.backend-revision.outputs.sha }}
 
       - name: Load cached Docker images
         run: |
@@ -165,7 +172,7 @@ jobs:
         run: |
           echo "Cache miss on first attempt, waiting 30s for propagation..."
           sleep 30
-      
+
       - name: Restore build cache (retry)
         if: steps.cache-restore.outputs.cache-hit != 'true'
         id: cache-restore-retry

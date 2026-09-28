@@ -29,9 +29,11 @@ export const HospitalizationDetails = () => {
   if (!hasHospitalization) return null;
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 pt-2 p-1 space-y-1">
-      <div className="flex justify-between items-center text-gray-950 pl-2">
-        <span className="font-semibold">{t("hospitalisation_details")}</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
+          {t("hospitalisation_details")}
+        </span>
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
@@ -42,7 +44,7 @@ export const HospitalizationDetails = () => {
           </Button>
         )}
       </div>
-      <div className="flex flex-col gap-2 bg-white rounded-md shadow p-2">
+      <div className="flex flex-col gap-3 p-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-950 font-semibold">
             {t("hospitalisation")}
@@ -51,7 +53,7 @@ export const HospitalizationDetails = () => {
             <Badge variant="blue">{t("re_admission")}</Badge>
           )}
         </div>
-        <div className="flex flex-row gap-2 bg-gray-100 rounded-md border border-gray-200">
+        <div className="flex flex-row gap-2 rounded-lg border border-gray-200 bg-white">
           <div className="flex flex-col p-2">
             <span className="text-sm">{t("admission_source")}</span>
             <span className="text-sm text-black font-semibold">

@@ -65,6 +65,15 @@ export const PERMISSION_READ_QUESTIONNAIRE = "can_read_questionnaire";
 export const PERMISSION_SUBMIT_QUESTIONNAIRE = "can_submit_questionnaire";
 export const PERMISSION_MANAGE_QUESTIONNAIRE = "can_manage_questionnaire";
 
+// ValueSet Permissions
+export const PERMISSION_WRITE_VALUESET = "can_write_valueset";
+
+// Immunization Policy Permissions
+export const PERMISSION_READ_IMMUNIZATION_POLICY =
+  "can_read_immunization_policy";
+export const PERMISSION_WRITE_IMMUNIZATION_POLICY =
+  "can_write_immunization_policy";
+
 // Appointment Permissions
 export const PERMISSION_LIST_BOOKING = "can_list_booking";
 export const PERMISSION_WRITE_BOOKING = "can_write_booking";
@@ -212,6 +221,14 @@ export interface Permissions {
   canSubmitQuestionnaire: boolean;
   /** Permission slug: "can_manage_questionnaire" */
   canManageQuestionnaire: boolean;
+
+  // ValueSet Permissions
+  /** Permission slug: "can_write_valueset" */
+  canWriteValueSet: boolean;
+
+  // Immunization Policy Permissions
+  canReadImmunizationPolicy: boolean;
+  canWriteImmunizationPolicy: boolean;
 
   // Appointment Permissions
   /** Permission slug: "can_list_booking" */
@@ -431,6 +448,18 @@ export function getPermissions(
     ),
     canManageQuestionnaire: hasPermission(
       PERMISSION_MANAGE_QUESTIONNAIRE,
+      permissions,
+    ),
+
+    // ValueSets
+    canWriteValueSet: hasPermission(PERMISSION_WRITE_VALUESET, permissions),
+
+    canReadImmunizationPolicy: hasPermission(
+      PERMISSION_READ_IMMUNIZATION_POLICY,
+      permissions,
+    ),
+    canWriteImmunizationPolicy: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION_POLICY,
       permissions,
     ),
 

@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { submitAndExpectSuccess } from "tests/helper/questionnaire";
 import { getFacilityId } from "tests/support/facilityId";
 import {
   frequencies,
@@ -21,7 +22,7 @@ test.describe("Edit Patient Prescription", () => {
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
     );
     await page.getByText("View Encounter").first().click();
-    await page.getByRole("tab", { name: "Medicines" }).click();
+    await page.getByRole("tab", { name: "Medications" }).click();
   });
 
   test("Remove medication from patient prescription", async ({ page }) => {
@@ -77,18 +78,15 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Submit prescription", async () => {
-      await page.getByRole("button", { name: "Submit" }).click();
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible();
+      // Prescriptions are authored on the v2 fill page — its primary action
+      // is "Save Changes" (see fill/FillHeader.tsx).
+      await submitAndExpectSuccess(page);
     });
 
     await test.step("Verify medication in All Prescriptions", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
-        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.getByRole("tab", { name: "Medications" }).click(),
         page.waitForResponse(
           (resp) =>
             resp.url().includes("/medication/prescription/") &&
@@ -139,18 +137,13 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Submit updated prescription", async () => {
-      await page.getByRole("button", { name: "Submit" }).click();
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible();
+      await submitAndExpectSuccess(page);
     });
 
     await test.step("Verify medication in stopped medications via All Prescriptions", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
-        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.getByRole("tab", { name: "Medications" }).click(),
         page.waitForResponse(
           (resp) =>
             resp.url().includes("/medication/prescription/") &&

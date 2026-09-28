@@ -197,8 +197,13 @@ export async function selectFromValueSet(
     }
   }
 
-  // Wait for options to load
-  const options = scope.getByRole("option");
+  // Scope to the requested column. Both columns render role=option, and the
+  // starred column stays mounted while a search is in flight, so an unscoped
+  // query can resolve against a starred entry instead of a search result.
+  const column = scope.getByTestId(
+    tab === "starred" ? "valueset-starred" : "valueset-search-results",
+  );
+  const options = column.getByRole("option");
   await options.first().waitFor({ state: "visible" });
 
   const count = await options.count();

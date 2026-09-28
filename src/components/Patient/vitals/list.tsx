@@ -23,6 +23,7 @@ interface VitalsListProps {
   encounterId: string;
   className?: string;
   codeGroups?: CodeGroup[];
+  presentation?: "default" | "panel";
 }
 
 interface GroupedObservations {
@@ -86,6 +87,7 @@ export const VitalsList = ({
   encounterId,
   codeGroups,
   className,
+  presentation = "default",
 }: VitalsListProps) => {
   // Extract only relevant vital codes from the code groups excluding FiO2
   const vitalCodes = codeGroups?.flatMap((group) => group.codes) ?? [];
@@ -129,6 +131,7 @@ export const VitalsList = ({
         title={t("vitals")}
         readOnly={true}
         className={className}
+        presentation={presentation}
       >
         <Skeleton className="h-[100px] w-full" />
       </EncounterAccordionLayout>
@@ -141,6 +144,7 @@ export const VitalsList = ({
       title={t("vitals")}
       readOnly={true}
       className={className}
+      presentation={presentation}
     >
       <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
       {hasNextPage && (

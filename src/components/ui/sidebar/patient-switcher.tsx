@@ -9,12 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSidebar } from "@/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -26,7 +21,7 @@ interface PatientSwitcherProps {
 
 export function PatientSwitcher({ className }: PatientSwitcherProps) {
   const { t } = useTranslation();
-  const { open, isMobile } = useSidebar();
+  const { handleMenuOpenChange } = useAppSidebar();
 
   const patientUserContext = usePatientContext();
 
@@ -35,8 +30,9 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
   }
 
   return (
-    <div className={cn("mx-2 mt-4 mb-2 flex flex-wrap flex-row", className)}>
+    <div className={cn("flex min-w-0", className)}>
       <Select
+        onOpenChange={handleMenuOpenChange}
         disabled={patientUserContext.patients?.length === 0}
         value={
           patientUserContext.selectedPatient
@@ -52,58 +48,16 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
           }
         }}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SelectTrigger
-              className={cn(!open && !isMobile && "pr-0 [&>svg]:hidden")}
-            >
-              <SelectValue
-                asChild
-                placeholder={
-                  patientUserContext.patients?.length === 0
-                    ? t("no_patients")
-                    : t("select_patient")
-                }
-              >
-                <>
-                  {(open || isMobile) && (
-                    <div className="flex flex-row justify-between items-center gap-2 w-full text-primary-800">
-                      <Avatar
-                        name={
-                          patientUserContext.selectedPatient?.name || "User"
-                        }
-                        className="size-5"
-                      />
-                      <div className="flex flex-row items-center justify-between w-full gap-2">
-                        <span className="font-semibold truncate max-w-32">
-                          {patientUserContext.selectedPatient?.name}
-                        </span>
-                        <span className="text-xs text-secondary-600">
-                          {t("switch")}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  {!open && !isMobile && (
-                    <div className="flex flex-row items-center -ml-1.5">
-                      <Avatar
-                        name={
-                          patientUserContext.selectedPatient?.name || "User"
-                        }
-                        className="size-4"
-                      />
-                    </div>
-                  )}
-                </>
-              </SelectValue>
-            </SelectTrigger>
-          </TooltipTrigger>
-          {!open && !isMobile && (
-            <TooltipContent side="right" align="center">
-              <p>{patientUserContext.selectedPatient?.name}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
+        <SelectTrigger
+          className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
+          aria-label={patientUserContext.selectedPatient.name}
+        >
+          <SelectValue placeholder={t("select_patient")}>
+            <span className="truncate">
+              {patientUserContext.selectedPatient.name}
+            </span>
+          </SelectValue>
+        </SelectTrigger>
         <SelectContent>
           {patientUserContext.patients?.map((patient) => (
             <SelectItem key={patient.id} value={patient.id}>

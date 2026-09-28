@@ -61,11 +61,24 @@ function restoreDatabase() {
 }
 
 /**
- * Refresh authentication tokens using native fetch.
+ * Refresh authentication tokens for every saved storage state using native
+ * fetch. All role states (user/nurse/facilityAdmin) must be refreshed —
+ * runs with `--no-deps` skip the setup project, and a stale nurse token
+ * fails every permission spec while the admin ones keep passing.
  */
 async function refreshTokens() {
-  const authFile = path.join(__dirname, ".auth/user.json");
+  const authDir = path.join(__dirname, ".auth");
+  if (!fs.existsSync(authDir)) {
+    console.log("⚠️ Auth directory not found, skipping token refresh");
+    return;
+  }
+  for (const file of fs.readdirSync(authDir)) {
+    if (!file.endsWith(".json")) continue;
+    await refreshTokensInFile(path.join(authDir, file));
+  }
+}
 
+async function refreshTokensInFile(authFile: string) {
   if (!fs.existsSync(authFile)) {
     console.log("⚠️ Auth file not found, skipping token refresh");
     return;
@@ -78,9 +91,7 @@ async function refreshTokens() {
       !Array.isArray(storageState.origins) ||
       storageState.origins.length === 0
     ) {
-      console.log(
-        "⚠️ No origins found in storage state, skipping token refresh",
-      );
+      // Not a storage state (e.g. a *Meta.json id file) — nothing to refresh.
       return;
     }
 
@@ -98,14 +109,14 @@ async function refreshTokens() {
     );
 
     if (!accessTokenEntry || !refreshTokenEntry) {
-      console.log("⚠️ No tokens found in storage state");
+      console.log(`⚠️ No tokens found in ${path.basename(authFile)}`);
       return;
     }
 
     const refreshToken = refreshTokenEntry.value;
     const apiUrl = process.env.REACT_CARE_API_URL || "http://localhost:9000";
 
-    console.log("🔄 Refreshing authentication tokens...");
+    console.log(`🔄 Refreshing tokens (${path.basename(authFile)})...`);
 
     const response = await fetch(`${apiUrl}/api/v1/auth/token/refresh/`, {
       method: "POST",
@@ -132,9 +143,11 @@ async function refreshTokens() {
 
       fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
 
-      console.log("✅ Tokens refreshed successfully");
+      console.log(`✅ Tokens refreshed (${path.basename(authFile)})`);
     } else {
-      console.log(`⚠️ Token refresh failed with status: ${response.status}`);
+      console.log(
+        `⚠️ Token refresh failed for ${path.basename(authFile)} with status: ${response.status}`,
+      );
     }
   } catch (error) {
     console.error("❌ Error refreshing tokens:", error);
