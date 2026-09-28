@@ -1,6 +1,7 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
 import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
 import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
@@ -57,6 +58,19 @@ interface SettingsLayoutProps {
 const getRoutes = (facilityId: string) => ({
   "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
+  "/questionnaire": () => (
+    <QuestionnaireFillPage subject={{ type: "facility", facilityId }} />
+  ),
+  "/questionnaire/:questionnaireId": ({
+    questionnaireId,
+  }: {
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "facility", facilityId }}
+      questionnaireId={questionnaireId}
+    />
+  ),
   "/departments": () => <FacilityOrganizationList />,
   "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
     <FacilityOrganizationList organizationId={id} currentTab={tab} />
@@ -68,6 +82,25 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/devices": () => <DevicesList facilityId={facilityId} />,
   "/devices/create": () => <CreateDevice facilityId={facilityId} />,
+  // Questionnaire fill for the device subject. Registered before
+  // "/devices/:id" — raviger matches routes in object order.
+  "/devices/:id/questionnaire": ({ id }: { id: string }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+    />
+  ),
+  "/devices/:id/questionnaire/:questionnaireId": ({
+    id,
+    questionnaireId,
+  }: {
+    id: string;
+    questionnaireId: string;
+  }) => (
+    <QuestionnaireFillPage
+      subject={{ type: "device", facilityId, deviceId: id }}
+      questionnaireId={questionnaireId}
+    />
+  ),
   "/devices/:id": ({ id }: { id: string }) => (
     <DeviceDetail facilityId={facilityId} deviceId={id} />
   ),

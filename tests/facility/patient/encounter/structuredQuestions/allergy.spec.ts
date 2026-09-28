@@ -58,7 +58,9 @@ test.describe("Allergy in Encounter", () => {
     await option.scrollIntoViewIfNeeded();
     await option.click();
 
-    await page.getByRole("button", { name: "Submit", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
     await expect(
       page
         .locator("li[data-sonner-toast]")

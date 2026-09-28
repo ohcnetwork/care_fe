@@ -16,7 +16,7 @@ import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { navigate } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -121,21 +121,22 @@ export const FormDialog = ({
     allQuestionnaires.find((q) => q.id === id)!,
   );
 
-  useEffect(() => {
+  const handleOpenChange = (open: boolean) => {
     if (open) {
       setSearch("");
     }
-  }, [open]);
+    setOpen(open);
+  };
 
   return (
     <>
-      <div className="flex" onClick={() => setOpen(true)}>
+      <div className="flex" onClick={() => handleOpenChange(true)}>
         {trigger}
       </div>
       <CommandDialog
         className="md:max-w-2xl"
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
@@ -155,8 +156,8 @@ export const FormDialog = ({
               <div key={questionnaire.id}>
                 <CommandGroup className="px-2">
                   <CommandItem
-                    key={questionnaire.id}
-                    value={`${questionnaire.id} - ${questionnaire.title}`}
+                    key={questionnaire.slug}
+                    value={`${questionnaire.slug} - ${questionnaire.title}`}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     onSelect={() => {
                       navigate(
