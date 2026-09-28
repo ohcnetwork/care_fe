@@ -114,6 +114,11 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         icon: FileText,
         permission: "canListTemplate",
       },
+      {
+        path: "settings/responses",
+        title: "responses",
+        icon: ClipboardList,
+      },
     ],
   },
   {

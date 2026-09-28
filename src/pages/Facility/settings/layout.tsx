@@ -21,6 +21,7 @@ import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfi
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 
+import { FacilityResponses } from "./FacilityResponses";
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
 import ActivityDefinitionView from "./activityDefinition/ActivityDefinitionView";
@@ -58,6 +59,7 @@ interface SettingsLayoutProps {
 const getRoutes = (facilityId: string) => ({
   "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
+  "/responses": () => <FacilityResponses facilityId={facilityId} />,
   "/questionnaire": () => (
     <QuestionnaireFillPage subject={{ type: "facility", facilityId }} />
   ),
@@ -100,6 +102,9 @@ const getRoutes = (facilityId: string) => ({
       subject={{ type: "device", facilityId, deviceId: id }}
       questionnaireId={questionnaireId}
     />
+  ),
+  "/devices/:id/responses": ({ id }: { id: string }) => (
+    <DeviceDetail facilityId={facilityId} deviceId={id} tab="responses" />
   ),
   "/devices/:id": ({ id }: { id: string }) => (
     <DeviceDetail facilityId={facilityId} deviceId={id} />
