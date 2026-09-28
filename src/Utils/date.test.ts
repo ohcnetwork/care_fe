@@ -102,6 +102,17 @@ test("invalid or absent query values do not throw or produce filter dates", () =
   assert.equal(relativeTime(null), "Invalid Date");
 });
 
+test("a date-only filter string stays on that local calendar day", () => {
+  assert.equal(
+    dateTimeQueryString("2026-09-29"),
+    new Date(2026, 8, 29).toISOString(),
+  );
+  assert.equal(
+    dateTimeQueryString("2026-09-29", true),
+    new Date(2026, 8, 30).toISOString(),
+  );
+});
+
 test("date filters use next local midnight, including both DST transitions", () => {
   for (const [year, month, day] of [
     [2024, 2, 10],
