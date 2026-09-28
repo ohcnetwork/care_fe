@@ -1,5 +1,3 @@
-import { navigate } from "raviger";
-
 import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
 import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
@@ -15,6 +13,7 @@ import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
 
 const AdminRoutes: AppRoutes = {
   "/admin/questionnaire": () => <QuestionnaireList />,
@@ -22,11 +21,13 @@ const AdminRoutes: AppRoutes = {
   "/admin/questionnaire/:slug/edit": ({ slug }) => (
     <QuestionnaireEditor slug={slug} />
   ),
-  "/admin/valuesets": () => <ValueSetList />,
+  "/admin/valuesets": () => <ValueSetList scope={INSTANCE_VALUESET_SCOPE} />,
   "/admin/valuesets/create": () => (
-    <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
+    <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} />
   ),
-  "/admin/valuesets/:slug/edit": ({ slug }) => <ValueSetEditor slug={slug} />,
+  "/admin/valuesets/:id/edit": ({ id }) => (
+    <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} id={id} />
+  ),
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,
   "/admin/patient_identifier_config/:id": ({ id }) => (

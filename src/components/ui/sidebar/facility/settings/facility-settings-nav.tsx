@@ -6,6 +6,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  ListChecks,
   LucideIcon,
   MapPin,
   Monitor,
@@ -100,6 +101,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "forms",
     pages: [
+      { path: "settings/valuesets", title: "valuesets", icon: ListChecks },
       {
         path: "template",
         title: "templates",
