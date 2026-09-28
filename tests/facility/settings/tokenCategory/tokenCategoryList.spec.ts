@@ -53,7 +53,7 @@ test.describe("Token Category List - Permission Tests", () => {
 
       // Verify Token Category is visible in sidebar
       const sidebarToggle = page
-        .locator('[data-cui-app-header]')
+        .locator('[data-cy="facility-settings-page-header"]')
         .getByRole("button", { name: "Toggle Sidebar", exact: true });
       await expect(sidebarToggle).toBeVisible();
       if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
@@ -110,7 +110,7 @@ test.describe("Token Category List - Permission Tests", () => {
 
       // Step 4: Verify Token Category link is NOT visible in sidebar
       const sidebarToggle = page
-        .locator('[data-cui-app-header]')
+        .locator('[data-cy="facility-settings-page-header"]')
         .getByRole("button", { name: "Toggle Sidebar", exact: true });
       await expect(sidebarToggle).toBeVisible();
       if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {

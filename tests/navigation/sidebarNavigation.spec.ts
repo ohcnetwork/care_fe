@@ -424,7 +424,7 @@ test.describe("Shared workspace navigation", () => {
       name: "location",
       endpoint: "location",
       route: "locations",
-      page: "beds",
+      page: "overview",
       query: "mode=kind&mine=true&limit=1&ordering=sort_index",
     },
   ]) {

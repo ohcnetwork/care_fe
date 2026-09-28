@@ -29,6 +29,8 @@ import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
+import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
+import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { LicensesPage } from "@/pages/Licenses/Licenses";
 import UserDashboard from "@/pages/UserDashboard";
@@ -186,7 +188,11 @@ export default function AppRouter() {
             onOpenChange={setCommandDialogOpen}
           />
           <BrowserWarning />
-          {shouldShowSidebar ? (
+          {isLocationWorkspace ? (
+            <LocationPageHeader />
+          ) : isSettingsWorkspace ? (
+            <FacilitySettingsPageHeader />
+          ) : shouldShowSidebar ? (
             <WorkspaceHeader
               user={user}
               onSearch={() => setCommandDialogOpen(true)}
