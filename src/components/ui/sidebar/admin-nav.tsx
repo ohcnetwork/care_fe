@@ -5,6 +5,7 @@ import {
   ClipboardList,
   IdCard,
   ListOrdered,
+  Settings2,
   ShieldCheck,
   Tags,
 } from "lucide-react";
@@ -25,6 +26,11 @@ function generateAdminLinks(
       name: t("questionnaire_other"),
       url: `${baseUrl}/questionnaires`,
       icon: <ClipboardList />,
+    },
+    {
+      name: t("action_configurations"),
+      url: `${baseUrl}/actions`,
+      icon: <Settings2 />,
     },
     {
       name: t("admin_nav_valuesets"),

@@ -33,8 +33,8 @@ export interface StudioTopBarProps {
   onSelectIssue: (questionId: string) => void;
   /** The actions' own save blockers — listed after the question ones;
    *  selecting one opens that action in the inspector. */
-  actionIssues?: ActionIssue[];
-  onSelectActionIssue?: (index: number) => void;
+  actionIssues: ActionIssue[];
+  onSelectActionIssue: (index: number) => void;
   dirty: boolean;
   isSaving: boolean;
   canWrite: boolean;
@@ -45,13 +45,13 @@ export interface StudioTopBarProps {
 
 function IssuesList({
   issues,
-  actionIssues = [],
+  actionIssues,
   questions,
   onSelect,
   onSelectAction,
 }: {
   issues: SaveIssue[];
-  actionIssues?: ActionIssue[];
+  actionIssues: ActionIssue[];
   questions: Question[];
   onSelect: (questionId: string) => void;
   onSelectAction: (index: number) => void;
@@ -129,8 +129,8 @@ export function StudioTopBar({
   onViewChange,
   issues,
   onSelectIssue,
-  actionIssues = [],
-  onSelectActionIssue = () => {},
+  actionIssues,
+  onSelectActionIssue,
   dirty,
   isSaving,
   canWrite,

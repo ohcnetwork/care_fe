@@ -35,13 +35,13 @@ export interface StudioOutlineProps {
   /** Whether to offer the Actions row at all — resource-subject
    *  questionnaires never run actions, so they only get the row when one
    *  is already stored (to let the author remove it). */
-  actionsRow?: boolean;
-  actionsSelected?: boolean;
-  actionCount?: number;
-  actionsHaveIssues?: boolean;
+  actionsRow: boolean;
+  actionsSelected: boolean;
+  actionCount: number;
+  actionsHaveIssues: boolean;
   /** link_ids some action reads — those rows get a cue. */
-  actionLinkIds?: ReadonlySet<string>;
-  onSelectActions?: () => void;
+  actionLinkIds: ReadonlySet<string>;
+  onSelectActions: () => void;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
 }
@@ -60,12 +60,12 @@ export function StudioOutline({
   formSelected,
   issueKeysByQuestionId,
   onSelectForm,
-  actionsRow = false,
-  actionsSelected = false,
-  actionCount = 0,
-  actionsHaveIssues = false,
-  actionLinkIds = new Set<string>(),
-  onSelectActions = () => {},
+  actionsRow,
+  actionsSelected,
+  actionCount,
+  actionsHaveIssues,
+  actionLinkIds,
+  onSelectActions,
   onSelectQuestion,
   dispatch,
 }: StudioOutlineProps) {
