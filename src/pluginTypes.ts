@@ -1,4 +1,5 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
+import type { RegisteredGroupDefinition } from "@/components/QuestionnaireV2/groups/registry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -225,6 +226,8 @@ export type PluginManifest = {
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
+  /** Registered groups contribute ordinary child questions and their rendering. */
+  registeredQuestionGroups?: readonly RegisteredGroupDefinition[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

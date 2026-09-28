@@ -1,4 +1,5 @@
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 const encounterQuestionnaire: QuestionnaireRead = {
   id: "encounter",
@@ -6,7 +7,13 @@ const encounterQuestionnaire: QuestionnaireRead = {
   version: "0.0.1",
   title: "Encounter",
   status: "active",
-  subject_type: "patient",
+  // The `encounter` structured type needs an encounter in scope (see its
+  // definition's `requires`/`subjects`) — it PUTs to the encounter it is
+  // filled against. The only surface that mounts this questionnaire is
+  // "Update Encounter", on the encounter route; a `patient` subject_type
+  // here made the renderer, the validator and the batch composer all treat
+  // the single question as out-of-subject and drop it.
+  subject_type: "encounter",
   questions: [
     {
       id: "encounter",
@@ -209,7 +216,7 @@ const appointment_questionnaire: QuestionnaireRead = {
   ],
 };
 
-export const STRUCTURED_QUESTIONS = [
+const structuredQuestionEntries = [
   {
     value: "allergy_intolerance",
     label: "Allergy Intolerance",
@@ -259,6 +266,14 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
+/** Typed against the canonical union so a value here that isn't a real
+ *  `StructuredQuestionType` (or a typo) fails to compile. */
+export const STRUCTURED_QUESTIONS: readonly {
+  value: StructuredQuestionType;
+  label: string;
+  questionnaire: QuestionnaireRead;
+}[] = structuredQuestionEntries;
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
@@ -270,8 +285,7 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
     {} as Record<string, QuestionnaireRead>,
   );
 
-export type StructuredQuestionType =
-  (typeof STRUCTURED_QUESTIONS)[number]["value"];
+export type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 export function filterStructuredQuestionnaireSlugs(slug?: string) {
   return slug &&
