@@ -68,6 +68,24 @@ Built on **shadcn/ui** + **Radix UI primitives** + **Tailwind CSS v4** (shadcn/u
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
 
+### Page content in the workspace header
+
+Pages can render controls in the shared header using `WorkspaceHeaderContent`:
+
+```tsx
+import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
+
+<WorkspaceHeaderContent>
+  <PageActions />
+</WorkspaceHeaderContent>;
+```
+
+The content replaces the default header label or breadcrumbs while mounted and
+is removed automatically when the page unmounts. It is rendered through a portal,
+so controls retain the page's React context, permissions, and state. Both the
+workspace header and inner workspace headers support this slot. Mount only the
+controls needed for the current page; they can update normally as page data changes.
+
 ## Plugin System (Module Federation)
 
 Micro-frontend architecture via `@originjs/vite-plugin-federation`. Plugins configured via `REACT_ENABLED_APPS` env var. Plugin manifests define routes, components, tabs, and devices they provide. Key files: `src/PluginEngine.tsx`, `src/pluginTypes.ts`.

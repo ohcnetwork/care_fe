@@ -1,4 +1,4 @@
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
@@ -47,6 +47,7 @@ interface SettingsLayoutProps {
 }
 
 const getRoutes = (facilityId: string) => ({
+  "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
   "/departments": () => <FacilityOrganizationList />,
   "/departments/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
@@ -263,5 +264,5 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  return <div className="container mx-auto p-4">{routeResult}</div>;
+  return <div className="min-w-0 p-4">{routeResult}</div>;
 }

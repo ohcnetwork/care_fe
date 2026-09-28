@@ -1,5 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { HeartPulse, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronsUpDown,
+  HeartPulse,
+  Loader2,
+  X,
+} from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,8 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
@@ -39,11 +45,17 @@ import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi
 export function ServiceSwitcher() {
   const { t } = useTranslation();
   const { facilityId, service } = useCurrentService();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const [selectedService, setSelectedService] = useState<
     HealthcareServiceReadSpec | undefined
   >(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const { handleMenuOpenChange } = useAppSidebar();
+  const handleDialogOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    handleMenuOpenChange(open);
+  };
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
@@ -58,65 +70,82 @@ export function ServiceSwitcher() {
         service={selectedService}
         setService={setSelectedService}
         open={openDialog}
-        setOpen={setOpenDialog}
+        setOpen={handleDialogOpenChange}
       />
-      <div className="flex flex-col items-start gap-4">
-        {state === "collapsed" ? (
+      <div
+        className={cn(
+          "flex min-w-0 flex-col gap-2 py-2",
+          !isCollapsed && "px-2",
+        )}
+      >
+        <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => navigate(fallbackUrl)}
-            className="w-8 h-8"
+            size={isCollapsed ? "icon" : "sm"}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+              navigate(fallbackUrl);
+            }}
+            className={cn(
+              "gap-1.5 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
+              isCollapsed ? "size-8" : "-ml-1 h-8 px-2",
+            )}
             aria-label={t("home")}
-            title={t("home")}
+            title={isCollapsed ? t("home") : undefined}
           >
-            <CareIcon icon="l-home-alt" />
+            <ChevronLeft className="size-4" />
+            {!isCollapsed && <span>{t("home")}</span>}
           </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-            <CareIcon icon="l-arrow-left" />
-            <span className="underline underline-offset-2">{t("home")}</span>
-          </Button>
-        )}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400"
+              onClick={() => setOpenMobile(false)}
+              aria-label={t("close_sidebar")}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
 
-        <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
+        <div className="w-full">
           <TooltipComponent
             content={selectedService?.name ?? t("select_healthcare_service")}
           >
             <Button
               variant="ghost"
               className={cn(
-                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
-                state === "expanded" && "py-6",
+                "flex h-auto w-full items-center justify-between gap-2 overflow-hidden rounded-[10px] border border-neutral-300 bg-white text-neutral-950 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-indigo-400",
+                isCollapsed ? "size-8 justify-center p-0" : "px-3 py-2.5",
               )}
               aria-label={
                 selectedService?.name ?? t("select_healthcare_service")
               }
-              onClick={() => setOpenDialog(true)}
+              aria-haspopup="dialog"
+              aria-expanded={openDialog}
+              onClick={() => handleDialogOpenChange(true)}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <HeartPulse className="size-5 text-green-600" />
-                <div
-                  className={cn(
-                    state === "collapsed" ? "hidden" : "min-w-0 flex-1",
-                  )}
-                >
+                {isCollapsed && (
+                  <HeartPulse className="mx-auto size-4 text-neutral-600" />
+                )}
+                <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
                       {t("current_service")}
                     </span>
-                    <span className="max-w-full truncate text-sm font-medium text-gray-900">
-                      {selectedService?.name}
+                    <span className="max-w-full truncate text-left text-sm font-semibold text-neutral-950">
+                      {selectedService?.name ?? t("select_healthcare_service")}
                     </span>
                   </div>
                 </div>
               </div>
-              {state === "expanded" && (
-                <CareIcon icon="l-sort" className="shrink-0" />
+              {!isCollapsed && (
+                <ChevronsUpDown className="size-4 shrink-0 text-neutral-600" />
               )}
             </Button>
           </TooltipComponent>
-          <Separator className="mt-4" />
         </div>
       </div>
     </Fragment>
