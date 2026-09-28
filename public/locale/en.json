@@ -2683,6 +2683,7 @@
   "file_preview": "File Preview",
   "file_preview_not_supported": "Can't preview this file. Try downloading it.",
   "file_saved_successfully": "File saved successfully",
+  "file_too_large": "File size is too large",
   "file_success__upload_complete": "File upload complete",
   "file_type": "File Type",
   "file_upload_error": "Error uploading file",
