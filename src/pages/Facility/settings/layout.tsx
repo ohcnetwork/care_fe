@@ -1,6 +1,8 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
+import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -11,6 +13,7 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
@@ -251,6 +254,16 @@ const getRoutes = (facilityId: string) => ({
   "/tag_config": () => <TagConfigList facilityId={facilityId} />,
   "/tag_config/:tagId": ({ tagId }: { tagId: string }) => (
     <TagConfigView facilityId={facilityId} tagId={tagId} />
+  ),
+  "/valuesets": () => (
+    <ValueSetList scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  // Before "/valuesets/:id/edit" — raviger matches routes in object order.
+  "/valuesets/create": () => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} />
+  ),
+  "/valuesets/:id/edit": ({ id }: { id: string }) => (
+    <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} id={id} />
   ),
   "*": () => <ErrorPage />,
 });
