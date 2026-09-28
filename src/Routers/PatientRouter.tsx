@@ -102,7 +102,7 @@ export default function PatientRouter() {
         <main
           id="pages"
           data-slot="sidebar-inset"
-          className="flex min-w-0 flex-1 flex-col bg-white text-neutral-950 focus:outline-hidden md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2"
+          className="flex min-w-0 flex-1 flex-col bg-white focus:outline-hidden md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2"
         >
           <BrowserWarning />
           <WorkspaceHeader patient />

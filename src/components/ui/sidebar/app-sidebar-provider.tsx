@@ -305,7 +305,7 @@ export function AppSidebarProvider({
           data-app-sidebar-preview={isOverlay}
           data-app-sidebar-ready={overlayReady}
           className={cn(
-            "bg-neutral-100 text-neutral-950 [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
+            "bg-neutral-100 [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
             pinningTransition &&
               "[&_[data-collapsible]>div:last-child]:transition-[left,right,width,top,height,box-shadow,background-color,border-radius] [&>main]:transition-[margin] [&>main]:duration-100 [&>main]:motion-reduce:transition-none",
             !isMobile &&

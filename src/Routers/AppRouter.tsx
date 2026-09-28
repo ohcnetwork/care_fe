@@ -155,18 +155,11 @@ export default function AppRouter() {
   const isServiceWorkspace =
     !!shouldShowSidebar &&
     /^\/facility\/[^/]+\/services\/[^/]+/.test(currentPath);
-  const isEncounterPage =
-    shouldShowSidebar &&
-    /^\/(facility|organization)\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/[^/]+\/?$/.test(
-      currentPath,
-    );
   const isInnerWorkspace = !!(
     isLocationWorkspace ||
     isSettingsWorkspace ||
     isServiceWorkspace
   );
-  const isLocationFormPage =
-    isLocationWorkspace && /\/(overview|responses|forms)\/?$/.test(currentPath);
 
   return (
     <AppSidebarProvider
@@ -184,11 +177,10 @@ export default function AppRouter() {
           id="pages"
           data-slot="sidebar-inset"
           className={cn(
-            "flex min-w-0 max-w-full flex-1 flex-col focus:outline-hidden",
+            "flex min-w-0 max-w-full flex-1 flex-col bg-gray-50 focus:outline-hidden",
             isInnerWorkspace
-              ? "min-h-svh bg-white text-neutral-950"
-              : "min-h-svh bg-white text-neutral-950 md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2",
-            isEncounterPage && "bg-gray-100",
+              ? "min-h-svh"
+              : "min-h-svh md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2",
           )}
         >
           <ShortcutCommandDialog
@@ -206,20 +198,7 @@ export default function AppRouter() {
               onSearch={() => setCommandDialogOpen(true)}
             />
           ) : null}
-          <div
-            className={
-              isLocationWorkspace
-                ? isLocationFormPage
-                  ? "min-w-0"
-                  : "min-w-0 p-4"
-                : isSettingsWorkspace
-                  ? /\/settings(\/|$)/.test(currentPath)
-                    ? "min-w-0"
-                    : "min-w-0 p-4"
-                  : "min-w-0 p-4"
-            }
-            data-cui-page
-          >
+          <div className={"min-w-0 py-2 px-2"} data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>
