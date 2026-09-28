@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Hash, MoreVertical } from "lucide-react";
+import { Hash, Info, MoreVertical } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -567,8 +572,16 @@ function AccountShow({
         <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("amount_due")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_balance} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p
@@ -606,8 +619,16 @@ function AccountShow({
 
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("billed_gross")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_gross} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p className="text-3xl font-bold text-gray-900">
