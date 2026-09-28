@@ -32,16 +32,19 @@ const RenderXAxisTick = ({
   x,
   y,
   payload,
+  yearBoundaryTimes,
 }: {
   x?: number | string;
   y?: number | string;
   payload?: { value: number | string };
+  yearBoundaryTimes: Set<number>;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const value = Number(payload?.value);
+  const showYear = yearBoundaryTimes.has(value);
   const dateLabel = isToday(new Date(value))
     ? t("today")
-    : format(new Date(value), "d MMM");
+    : format(new Date(value), showYear ? "d MMM yyyy" : "d MMM");
   const timeLabel = format(new Date(value), "h:mma");
   return (
     <text
@@ -151,6 +154,21 @@ export function ObservationDetailContent({
 
   const lastIndex = chartData.length - 1;
 
+  // Mark the first and last reading of each calendar year so the x-axis can show the year only there.
+  const yearBoundaryTimes = new Set<number>();
+  chartData.forEach((entry, index) => {
+    const year = new Date(entry.time).getFullYear();
+    const prevYear =
+      index > 0 ? new Date(chartData[index - 1].time).getFullYear() : null;
+    const nextYear =
+      index < chartData.length - 1
+        ? new Date(chartData[index + 1].time).getFullYear()
+        : null;
+    if (year !== prevYear || year !== nextYear) {
+      yearBoundaryTimes.add(entry.time);
+    }
+  });
+
   const isDense = chartData.length > 12;
   const chartMinWidth = chartData.length * POINT_WIDTH;
 
@@ -234,7 +252,9 @@ export function ObservationDetailContent({
                     interval={0}
                     tickLine={{ stroke: "#374151" }}
                     axisLine={{ stroke: "#6b7280" }}
-                    tick={<RenderXAxisTick />}
+                    tick={
+                      <RenderXAxisTick yearBoundaryTimes={yearBoundaryTimes} />
+                    }
                   />
                   <YAxis
                     tick={{ fontSize: 12 }}

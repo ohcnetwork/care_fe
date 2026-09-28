@@ -242,7 +242,7 @@ export const ObservationVisualizer = ({
                 patientId={patientId}
                 encounterId={encounterId}
               >
-                <span className="cursor-pointer text-sm font-medium text-left hover:underline">
+                <span className="cursor-pointer text-sm font-medium text-left underline">
                   {group.title}
                 </span>
               </ObservationDetailSheet>

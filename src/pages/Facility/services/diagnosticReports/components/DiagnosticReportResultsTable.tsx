@@ -218,7 +218,7 @@ export function DiagnosticReportResultsTable({
                 patientId={patientId}
                 encounterId={encounterId}
               >
-                <span className="cursor-pointer text-left font-medium hover:underline">
+                <span className="cursor-pointer text-left font-medium underline">
                   {observationTitle || t("observation")}
                 </span>
               </ObservationDetailSheet>

@@ -10,12 +10,14 @@ import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDe
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
+import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { ChevronRight } from "lucide-react";
 
 interface GroupedObservations {
   [key: string]: ObservationListRead[];
@@ -142,7 +144,7 @@ export const EncounterObservationsTab = () => {
               )
               .map((item: ObservationListRead) => (
                 <div key={item.id} className="flex gap-4">
-                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
+                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium text-nowrap">
                     {formatDisplayTime(item.effective_datetime)}:
                   </div>
                   {item.main_code && (
@@ -152,7 +154,7 @@ export const EncounterObservationsTab = () => {
                       patientId={patientId}
                       encounterId={encounterId}
                     >
-                      <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer">
+                      <Card className="flex justify-between items-center p-3 border-gray-200 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer">
                         <div>
                           <div className="flex items-center gap-2">
                             {item.value.value && (
@@ -180,6 +182,12 @@ export const EncounterObservationsTab = () => {
                             </div>
                           )}
                         </div>
+                        <Button
+                          variant="white"
+                          className="font-semibold rounded-full size-10 border border-gray-200 shadow-none"
+                        >
+                          <ChevronRight />
+                        </Button>
                       </Card>
                     </ObservationDetailSheet>
                   )}
