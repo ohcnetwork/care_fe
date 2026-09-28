@@ -1,19 +1,34 @@
 import { useDeferredValue, useMemo, useSyncExternalStore } from "react";
 
+import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
+import { reachableContextPaths } from "@/components/QuestionnaireV2/builder/actionVariables";
+import { useActionRegistry } from "@/components/QuestionnaireV2/builder/actions/useActionRegistry";
 import { findInvalidQuestions } from "@/components/QuestionnaireV2/builder/saveValidation";
 import {
   getQuestionGroupsVersion,
   subscribeToQuestionGroups,
 } from "@/components/QuestionnaireV2/groups/registry";
+import { actionReferencedLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
+import {
+  actionContextTypeFor,
+  QuestionnaireAction,
+} from "@/types/questionnaire/actions";
 import { Question } from "@/types/questionnaire/question";
+import { SubjectType } from "@/types/questionnaire/questionnaire";
 
 interface UseStudioIssuesOptions {
   questions: Question[];
+  actions: QuestionnaireAction[];
+  subjectType: SubjectType | undefined;
 }
 
 /** Deferred validation for outline/canvas warnings and issue navigation.
  * Save still checks the live question tree, independently of this display. */
-export function useStudioIssues({ questions }: UseStudioIssuesOptions) {
+export function useStudioIssues({
+  questions,
+  actions,
+  subjectType,
+}: UseStudioIssuesOptions) {
   // The unknown-structured-type rule reads the plugin registry, which fills
   // in only after the federation manifests resolve — later than the first
   // render of a cold-loaded questionnaire. Without re-running on that, a
@@ -45,5 +60,36 @@ export function useStudioIssues({ questions }: UseStudioIssuesOptions) {
     [issues],
   );
 
-  return { issues, issueKeysByQuestionId };
+  // What the backend can run and what an action may read; the actions'
+  // own save rules ride the same deferred tree as the question rules.
+  const registry = useActionRegistry();
+  const contextPaths = useMemo(() => {
+    if (registry.isLoading || registry.isError) return undefined;
+    const rootType = subjectType && actionContextTypeFor(subjectType);
+    return rootType ? reachableContextPaths(rootType, registry.fields) : [];
+  }, [subjectType, registry.fields, registry.isLoading, registry.isError]);
+  const actionIssues = useMemo(
+    () =>
+      findActionIssues(actions, {
+        questions: deferredQuestions,
+        instructions: registry.instructions,
+        contextPaths,
+      }),
+    [actions, deferredQuestions, registry.instructions, contextPaths],
+  );
+  // Questions an action reads — the outline marks them so an author
+  // retitling or deleting one knows something depends on it.
+  const actionLinkIds = useMemo(
+    () => new Set(actions.flatMap(actionReferencedLinkIds)),
+    [actions],
+  );
+
+  return {
+    issues,
+    issueKeysByQuestionId,
+    registry,
+    contextPaths,
+    actionIssues,
+    actionLinkIds,
+  };
 }

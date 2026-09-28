@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
 
@@ -21,11 +22,13 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { useDisableSmoothScroll } from "@/components/QuestionnaireV2/shared/useDisableSmoothScroll";
 import { useCanWriteQuestionnaire } from "@/components/QuestionnaireV2/useCanWriteQuestionnaire";
 
+import { actionContextTypeFor } from "@/types/questionnaire/actions";
 import { QuestionnaireScope } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import query from "@/Utils/request/query";
 
+import { ActionsPanel } from "./ActionsPanel";
 import { FormSettingsPanel } from "./FormSettingsPanel";
 import { QuestionInspector } from "./QuestionInspector";
 import { StudioCanvas } from "./StudioCanvas";
@@ -75,16 +78,28 @@ export function QuestionnaireStudioPage({
   const {
     studioDispatch,
     setInspectorTarget,
+    openActionIndex,
+    setOpenActionIndex,
     scrollRequest,
     selectQuestion,
     revealQuestion,
+    revealAction,
     selectedQuestion,
     selectedNumber,
     panel,
     formSelected,
   } = useStudioSelection(state, dispatch);
-  const { issues, issueKeysByQuestionId } = useStudioIssues({
+  const {
+    issues,
+    issueKeysByQuestionId,
+    registry,
+    contextPaths,
+    actionIssues,
+    actionLinkIds,
+  } = useStudioIssues({
     questions: state.questions,
+    actions: state.actions,
+    subjectType: questionnaire?.subject_type,
   });
 
   const [queryParams, setQueryParams] = useQueryParams();
@@ -146,6 +161,19 @@ export function QuestionnaireStudioPage({
       return;
     }
 
+    // Then the actions' rules — the failing action is opened in the panel.
+    const actionIssue = findActionIssues(state.actions, {
+      questions: state.questions,
+      instructions: registry.instructions,
+      contextPaths,
+    })[0];
+    if (actionIssue) {
+      toast.error(t(actionIssue.messageKey));
+      setView("edit");
+      revealAction(actionIssue.index);
+      return;
+    }
+
     form.handleSubmit(saveDraft, () => {
       // Metadata invalid (e.g. slug out of bounds) — surface the fields.
       setView("edit");
@@ -202,6 +230,11 @@ export function QuestionnaireStudioPage({
               setView("edit");
               revealQuestion(questionId);
             }}
+            actionIssues={actionIssues}
+            onSelectActionIssue={(index) => {
+              setView("edit");
+              revealAction(index);
+            }}
             dirty={dirty}
             isSaving={isPending}
             canWrite={canWrite}
@@ -234,6 +267,15 @@ export function QuestionnaireStudioPage({
               formSelected={editing && formSelected}
               issueKeysByQuestionId={issueKeysByQuestionId}
               onSelectForm={() => setInspectorTarget("form")}
+              actionsRow={
+                actionContextTypeFor(questionnaire.subject_type) !== null ||
+                state.actions.length > 0
+              }
+              actionsSelected={editing && panel === "actions"}
+              actionCount={state.actions.length}
+              actionsHaveIssues={actionIssues.length > 0}
+              actionLinkIds={actionLinkIds}
+              onSelectActions={() => setInspectorTarget("actions")}
               onSelectQuestion={revealQuestion}
               dispatch={studioDispatch}
             />
@@ -244,7 +286,19 @@ export function QuestionnaireStudioPage({
               editor surface regardless of what the canvas renders. */}
           {editing && (
             <aside className="order-2 w-full min-w-0 space-y-4 overflow-y-auto p-3 md:flex-1 lg:order-3 lg:w-[400px] lg:flex-none lg:border-l lg:border-gray-200">
-              {formSelected ? (
+              {panel === "actions" ? (
+                <ActionsPanel
+                  subjectType={questionnaire.subject_type}
+                  questions={state.questions}
+                  actions={state.actions}
+                  issues={actionIssues}
+                  openIndex={openActionIndex}
+                  onOpenIndexChange={setOpenActionIndex}
+                  registry={registry}
+                  facilityId={scope.facilityId}
+                  dispatch={dispatch}
+                />
+              ) : formSelected ? (
                 <FormSettingsPanel
                   scope={scope}
                   questionnaire={questionnaire}
