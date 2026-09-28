@@ -16,7 +16,6 @@ import {
   relativeDate,
   relativeTime,
 } from "@/Utils/date";
-import { formatDateTime as commonFormatDateTime } from "@/common/utils";
 import type { PatientRead } from "@/types/emr/patient/patient";
 
 before(async () => {
@@ -67,9 +66,22 @@ test("offset timestamps retain their instant and Date inputs are cloned", () => 
 test("formatters preserve midnight, time, literal and meridiem formatting", () => {
   assert.equal(formatDateTime("2024-02-29"), "29/02/2024");
   assert.equal(formatDateTime("2024-02-29T13:05:00"), "01:05 PM; 29/02/2024");
-  assert.equal(commonFormatDateTime("2024-02-29"), "Feb 29, 2024");
   assert.equal(
-    commonFormatDateTime("2024-02-29T13:05:00"),
+    formatDateTime(
+      "2024-02-29",
+      undefined,
+      "MMM dd, yyyy",
+      "MMM dd, yyyy, hh:mm a",
+    ),
+    "Feb 29, 2024",
+  );
+  assert.equal(
+    formatDateTime(
+      "2024-02-29T13:05:00",
+      undefined,
+      "MMM dd, yyyy",
+      "MMM dd, yyyy, hh:mm a",
+    ),
     "Feb 29, 2024, 01:05 PM",
   );
   assert.equal(
@@ -85,7 +97,7 @@ test("invalid or absent query values do not throw or produce filter dates", () =
     assert.equal(dateTimeQueryString(value), "");
   }
   assert.equal(formatDateTime("not-a-date"), "Invalid Date");
-  assert.equal(commonFormatDateTime(null), "Invalid Date");
+  assert.equal(formatDateTime(null), "Invalid Date");
   assert.equal(relativeDate("not-a-date"), "Invalid Date");
   assert.equal(relativeTime(null), "Invalid Date");
 });

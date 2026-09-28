@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import { useState } from "react";
@@ -17,6 +16,7 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -174,7 +174,7 @@ export default function PatientSelect({
 
   const getPatienDobOrAge = (patient: PublicPatientRead) => {
     if (patient.date_of_birth) {
-      return format(parseISO(patient.date_of_birth), "dd MMM yyyy");
+      return formatDateTime(patient.date_of_birth, "dd MMM yyyy");
     }
     const yearOfBirth = patient.year_of_birth;
     const age = new Date().getFullYear() - yearOfBirth!;

@@ -1,5 +1,6 @@
-import { format, parseISO } from "date-fns";
 import { Trans, useTranslation } from "react-i18next";
+
+import { formatDateTime } from "@/Utils/utils";
 
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Badge } from "@/components/ui/badge";
@@ -75,8 +76,8 @@ export const PatientDeceasedInfo = ({
         <Trans
           i18nKey="passed_away_on"
           values={{
-            date: format(parseISO(patient.deceased_datetime), "MMMM dd, yyyy"),
-            time: format(parseISO(patient.deceased_datetime), "hh:mm a"),
+            date: formatDateTime(patient.deceased_datetime, "MMMM dd, yyyy"),
+            time: formatDateTime(patient.deceased_datetime, "hh:mm a"),
           }}
         ></Trans>
       </div>

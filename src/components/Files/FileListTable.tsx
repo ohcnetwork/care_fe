@@ -1,4 +1,3 @@
-import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +27,7 @@ import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 
 import useFileManager from "@/hooks/useFileManager";
 
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
@@ -201,8 +200,8 @@ export function FileListTable({
                     <div>
                       <div className="text-gray-500">{t("date")}</div>
                       <div className="font-medium">
-                        {format(
-                          parseISO(file.created_date),
+                        {formatDateTime(
+                          file.created_date,
                           "dd MMM yyyy, hh:mm a",
                         )}
                       </div>
@@ -306,13 +305,13 @@ export function FileListTable({
                       )}
                     >
                       <TooltipComponent
-                        content={format(
-                          parseISO(file.created_date),
+                        content={formatDateTime(
+                          file.created_date,
                           "dd MMM yyyy, hh:mm a",
                         )}
                       >
                         <span>
-                          {format(parseISO(file.created_date), "dd MMM yyyy ")}
+                          {formatDateTime(file.created_date, "dd MMM yyyy ")}
                         </span>
                       </TooltipComponent>
                     </TableCell>
