@@ -43,19 +43,18 @@ test.describe("User Profile Avatar Modification", () => {
   // Helper function to save the avatar
   async function saveAvatar(page: Page): Promise<void> {
     const uploadButton = page.getByRole("button", { name: "Upload" });
+    const uploadResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/users/${username}/profile_picture/` &&
+        response.request().method() === "POST",
+    );
     await uploadButton.click();
+    expect((await uploadResponse).ok()).toBe(true);
 
     // Wait for upload to complete by checking dialog closes
     const dialog = page.getByRole("dialog", { name: "Edit Avatar" });
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
-
-    // Verify no error notification
-    const errorNotification = page
-      .getByRole("region", { name: "Notifications alt+T" })
-      .getByText(/error|failed/i);
-    await expect(errorNotification)
-      .not.toBeVisible({ timeout: 1000 })
-      .catch(() => {});
   }
 
   test.beforeEach(async ({ page }) => {

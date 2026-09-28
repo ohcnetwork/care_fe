@@ -1,23 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Product List", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to home page (user is already authenticated)
-    await page.goto("/");
-
-    // Navigate to a facility - using a more robust selector
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-
-    // Navigate to Products via sidebar
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Settings" }).click();
-    await page.getByRole("link", { name: "Product", exact: true }).click();
+    await page.goto(`/facility/${getFacilityId()}/settings/product`);
   });
 
   test("should display product categories in dropdown", async ({ page }) => {
@@ -155,7 +144,7 @@ test.describe("Product List", () => {
     });
   });
 
-  test("should maintain state during navigation in product filtering", async ({
+  test("should reset product selection when returning through settings navigation", async ({
     page,
   }) => {
     await test.step("Select category and product", async () => {
@@ -166,11 +155,22 @@ test.describe("Product List", () => {
 
       await page.getByText("Consumables").click();
       await page.getByLabel("Suggestions").getByText("Gloves").click();
+      await expect(
+        page.getByRole("combobox").filter({ hasText: "Gloves" }),
+      ).toBeVisible();
     });
 
     await test.step("Navigate away and back", async () => {
-      // Navigate to another section
-      await page.getByRole("button", { name: "Settings" }).click();
+      // Navigate to another setting, then return to Products.
+      const sidebarToggle = page
+        .locator('[data-cui-app-header]')
+        .getByRole("button", { name: "Toggle Sidebar", exact: true });
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
+      }
+      const sidebar = page.locator('[data-sidebar="sidebar"]');
+      await sidebar.getByRole("link", { name: "General", exact: true }).click();
+      await sidebar.getByRole("link", { name: "Product", exact: true }).click();
 
       // Verify the page loads correctly after navigation
       await expect(
