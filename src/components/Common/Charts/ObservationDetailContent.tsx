@@ -15,6 +15,8 @@ import {
 import { formatDateTime } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FileExclamationPointIcon } from "lucide-react";
 import {
   ResolvedObservationEntry,
   toNumericValue,
@@ -294,9 +296,10 @@ export function ObservationDetailContent({
           </div>
         </div>
       ) : (
-        <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-          {t("no_plottable_values")}
-        </div>
+        <EmptyState
+          title={t("no_plottable_values")}
+          icon={<FileExclamationPointIcon className="size-6 text-gray-400" />}
+        />
       )}
     </div>
   );

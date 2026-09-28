@@ -19,6 +19,8 @@ import { Code } from "@/types/base/code/code";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 
+import { EmptyState } from "@/components/ui/empty-state";
+import { FileExclamationPointIcon } from "lucide-react";
 import { ObservationDetailContent } from "./ObservationDetailContent";
 import { resolveObservationEntries } from "./observationDetailUtils";
 import { ObservationHistoryMatrix } from "./ObservationHistoryMatrix";
@@ -140,9 +142,10 @@ export function ObservationDetailSheet({
             <TableSkeleton count={3} />
           </div>
         ) : totalCount === 0 || codeList.length === 0 ? (
-          <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-            {t("no_data_available")}
-          </div>
+          <EmptyState
+            title={t("no_data_available")}
+            icon={<FileExclamationPointIcon className="size-6 text-gray-400" />}
+          />
         ) : (
           <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0 mt-3">
             {codeList.length > 1 ? (

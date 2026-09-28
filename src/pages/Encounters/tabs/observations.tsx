@@ -10,14 +10,13 @@ import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDe
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
-import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface GroupedObservations {
   [key: string]: ObservationListRead[];
@@ -182,12 +181,7 @@ export const EncounterObservationsTab = () => {
                             </div>
                           )}
                         </div>
-                        <Button
-                          variant="white"
-                          className="font-semibold rounded-full size-10 border border-gray-200 shadow-none"
-                        >
-                          <ChevronRight />
-                        </Button>
+                        <ArrowRight className="size-5 text-gray-700 hover:text-primary-500" />
                       </Card>
                     </ObservationDetailSheet>
                   )}
