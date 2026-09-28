@@ -66,9 +66,11 @@ export const SummaryPanelActionsTab = () => {
   }[];
 
   return (
-    <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
-      <div className="flex pl-1 @xs:hidden">
-        <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
+    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3 @sm:overflow-x-auto">
+      <div className="-mx-3 -mt-3 flex border-b border-gray-200 px-3 py-3 @xs:hidden">
+        <h6 className="text-sm font-bold uppercase tracking-wide text-gray-600">
+          {t("actions")}
+        </h6>
       </div>
       <div>
         <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">

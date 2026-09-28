@@ -31,9 +31,9 @@ export const DischargeDetails = () => {
   );
 
   return (
-    <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex justify-between items-center pl-2">
-        <span className="text-gray-950 font-semibold">
+    <div className="w-full rounded-xl border border-gray-200 bg-white">
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
           {t("discharge_details")}
         </span>
         {canWriteSelectedEncounter && (
@@ -49,7 +49,7 @@ export const DischargeDetails = () => {
           </Button>
         )}
       </div>
-      <div className="bg-white rounded-md p-2 shadow flex flex-col gap-3">
+      <div className="flex flex-col gap-3 p-3">
         {dischargeStatus ? (
           <>
             <div className="flex justify-between items-center">

@@ -11,8 +11,6 @@ import {
 
 import { formatDateTime } from "@/Utils/utils";
 import {
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_STATUS_COLORS,
   ENCOUNTER_STATUS_ICONS,
   EncounterRead,
@@ -25,15 +23,26 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
     <Popover>
       <PopoverTrigger asChild>
         <Badge
-          variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+          variant={
+            encounter.status === "in_progress"
+              ? "indigo"
+              : ENCOUNTER_STATUS_COLORS[encounter.status]
+          }
           size="sm"
-          className="cursor-pointer"
+          className="min-h-7 cursor-pointer px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+          asChild
         >
-          {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
-            className: "size-3",
-          })}
-          {t(`encounter_status__${encounter.status}`)}
-          <ChevronDown className="size-3 opacity-50" />
+          <button
+            type="button"
+            aria-label={`${t("status_history")}: ${t(`encounter_status__${encounter.status}`)}`}
+          >
+            {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
+              className: "size-3",
+              "aria-hidden": true,
+            })}
+            {t(`encounter_status__${encounter.status}`)}
+            <ChevronDown aria-hidden="true" className="size-3 opacity-50" />
+          </button>
         </Badge>
       </PopoverTrigger>
       <PopoverContent align={"start"} className="w-auto p-2">
@@ -52,25 +61,5 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
         </div>
       </PopoverContent>
     </Popover>
-  );
-};
-
-export const EncounterClassBadge = ({
-  encounter,
-}: {
-  encounter: EncounterRead;
-}) => {
-  const { t } = useTranslation();
-
-  const ClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
-
-  return (
-    <Badge
-      variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-      size="sm"
-    >
-      <ClassIcon className="size-3" />
-      {t(`encounter_class__${encounter.encounter_class}`)}
-    </Badge>
   );
 };
