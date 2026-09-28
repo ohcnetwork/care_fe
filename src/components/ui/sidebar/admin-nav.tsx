@@ -23,7 +23,7 @@ function generateAdminLinks(
     {
       section: t("configuration"),
       name: t("questionnaire_other"),
-      url: `${baseUrl}/questionnaire`,
+      url: `${baseUrl}/questionnaires`,
       icon: <ClipboardList />,
     },
     {

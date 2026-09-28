@@ -2,7 +2,7 @@
   "title": "Enable When Test",
   "slug": "enable-when-test",
   "description": "Tests enable_when with string and boolean operators: exists, equals, not_equals",
-  "version": "2.1",
+  "version": "2.2",
   "status": "active",
   "subject_type": "encounter",
   "questions": [
@@ -231,6 +231,29 @@
           "question": "B-007",
           "operator": "not_equals",
           "answer": "Yes"
+        }
+      ]
+    },
+    {
+      "id": "c1000001-0001-4000-8000-000000000001",
+      "link_id": "S-010",
+      "text": "Insurance Provider",
+      "type": "string",
+      "required": false,
+      "questions": []
+    },
+    {
+      "id": "c1000001-0001-4000-8000-000000000002",
+      "link_id": "S-011",
+      "text": "Self-Pay Reason",
+      "type": "string",
+      "required": true,
+      "questions": [],
+      "enable_when": [
+        {
+          "question": "S-010",
+          "operator": "exists",
+          "answer": false
         }
       ]
     }

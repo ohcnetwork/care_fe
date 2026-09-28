@@ -49,7 +49,7 @@ export function QuestionnaireSearch({
   placeholder,
   trigger,
   size = "default",
-  onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
+  onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
   subjectType,
   disabled,
 }: QuestionnaireSearchProps) {

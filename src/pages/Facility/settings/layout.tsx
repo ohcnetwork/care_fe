@@ -1,6 +1,11 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
+import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -254,6 +259,67 @@ const getRoutes = (facilityId: string) => ({
   "/tag_config": () => <TagConfigList facilityId={facilityId} />,
   "/tag_config/:tagId": ({ tagId }: { tagId: string }) => (
     <TagConfigView facilityId={facilityId} tagId={tagId} />
+  ),
+  // NOTE: keep "/questionnaires" registered before the catch-all "*" route.
+  "/questionnaires": () => (
+    <QuestionnaireListPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" — raviger matches routes
+  // in object order, and "new" would otherwise be captured as an :id.
+  "/questionnaires/new": () => (
+    <QuestionnaireCreatePage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+    />
+  ),
+  // Must be registered before "/questionnaires/:id" for the same reason —
+  // otherwise "edit" would be captured as an :id.
+  "/questionnaires/:id/edit": ({ id }: { id: string }) => (
+    <QuestionnaireStudioPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
+  ),
+  // Registered before "/questionnaires/:id" like the routes above.
+  "/questionnaires/:id/versions/:revisionId": ({
+    id,
+    revisionId,
+  }: {
+    id: string;
+    revisionId: string;
+  }) => (
+    <QuestionnaireRevisionPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+      revisionId={revisionId}
+    />
+  ),
+  "/questionnaires/:id": ({ id }: { id: string }) => (
+    <QuestionnaireDetailPage
+      scope={{
+        authContext: "facility",
+        facilityId,
+        basePath: `/facility/${facilityId}/settings/questionnaires`,
+      }}
+      id={id}
+    />
   ),
   "/valuesets": () => (
     <ValueSetList scope={valueSetScopeForFacility(facilityId)} />
