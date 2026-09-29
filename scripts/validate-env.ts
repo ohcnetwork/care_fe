@@ -120,7 +120,6 @@ const envSchema = z
     REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
-    REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
     REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
