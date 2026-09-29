@@ -37,7 +37,11 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { multiply } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 import UserSelector from "@/components/Common/UserSelector";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import {
@@ -129,10 +133,10 @@ export default function PaymentsData({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         created_date_after: qParams.created_date_after
-          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          ? dateTimeQueryString(qParams.created_date_after)
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          ? dateTimeQueryString(qParams.created_date_before, true)
           : undefined,
         reconciliation_type: qParams.reconciliation_type,
         method: qParams.method,
@@ -241,12 +245,8 @@ export default function PaymentsData({
     created_date:
       qParams.created_date_after || qParams.created_date_before
         ? {
-            from: qParams.created_date_after
-              ? new Date(qParams.created_date_after)
-              : undefined,
-            to: qParams.created_date_before
-              ? new Date(qParams.created_date_before)
-              : undefined,
+            from: parseLocalDate(qParams.created_date_after),
+            to: parseLocalDate(qParams.created_date_before),
           }
         : undefined,
     status: qParams.status ? [qParams.status] : undefined,

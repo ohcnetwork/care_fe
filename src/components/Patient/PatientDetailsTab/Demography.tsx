@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,7 +16,7 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
-import { formatPatientAge } from "@/Utils/utils";
+import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
@@ -205,7 +204,7 @@ export const Demography = (props: PatientProps) => {
           ),
           value: patientData.date_of_birth ? (
             <>
-              {dayjs(patientData.date_of_birth).format("DD MMM YYYY")} (
+              {formatDateTime(patientData.date_of_birth, "dd MMM yyyy")} (
               {formatPatientAge(patientData, true)})
             </>
           ) : (

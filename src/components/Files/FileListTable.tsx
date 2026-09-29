@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +27,7 @@ import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 
 import useFileManager from "@/hooks/useFileManager";
 
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
@@ -201,8 +200,9 @@ export function FileListTable({
                     <div>
                       <div className="text-gray-500">{t("date")}</div>
                       <div className="font-medium">
-                        {dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        {formatDateTime(
+                          file.created_date,
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       </div>
                     </div>
@@ -305,12 +305,13 @@ export function FileListTable({
                       )}
                     >
                       <TooltipComponent
-                        content={dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        content={formatDateTime(
+                          file.created_date,
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       >
                         <span>
-                          {dayjs(file.created_date).format("DD MMM YYYY ")}
+                          {formatDateTime(file.created_date, "dd MMM yyyy ")}
                         </span>
                       </TooltipComponent>
                     </TableCell>

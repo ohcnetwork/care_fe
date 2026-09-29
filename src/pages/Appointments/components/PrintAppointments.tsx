@@ -240,12 +240,12 @@ export function PrintAppointments({
                       <TableCell className="p-2 align-top flex flex-col gap-1">
                         {formatDateTime(
                           appointment.token_slot.start_datetime,
-                          "ddd, DD MMM YYYY",
+                          "EEE, dd MMM yyyy",
                         )}
                         <span>
                           {formatDateTime(
                             appointment.token_slot.start_datetime,
-                            "hh:mm a",
+                            "hh:mm aaa",
                           )}
                         </span>
                       </TableCell>

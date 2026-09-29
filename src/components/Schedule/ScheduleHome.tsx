@@ -42,8 +42,13 @@ import {
   humanizeStrings,
 } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
-import { endOfMonth, format, startOfMonth } from "date-fns";
-import dayjs from "dayjs";
+import {
+  endOfMonth,
+  format,
+  isBefore,
+  startOfDay,
+  startOfMonth,
+} from "date-fns";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
@@ -310,22 +315,23 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        {!dayjs(date).isBefore(dayjs(), "day") && canWriteSchedule && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setQParams({
-                tab: "exceptions",
-                sheet: "add_exception",
-                valid_from: dateQueryString(date),
-                valid_to: dateQueryString(date),
-              })
-            }
-          >
-            {t("add_exception")}
-          </Button>
-        )}
+        {!isBefore(startOfDay(date), startOfDay(new Date())) &&
+          canWriteSchedule && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setQParams({
+                  tab: "exceptions",
+                  sheet: "add_exception",
+                  valid_from: dateQueryString(date),
+                  valid_to: dateQueryString(date),
+                })
+              }
+            >
+              {t("add_exception")}
+            </Button>
+          )}
       </div>
 
       <ScrollArea className="max-h-[22rem] overflow-auto">
