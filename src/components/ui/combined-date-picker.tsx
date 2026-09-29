@@ -28,6 +28,7 @@ interface CombinedDatePickerProps {
   dateFormat?: string;
   disabled?: boolean;
   blockDate?: (date: Date) => boolean;
+  allowClear?: boolean;
 }
 
 export function CombinedDatePicker({
@@ -41,6 +42,7 @@ export function CombinedDatePicker({
   classes,
   dateFormat = "PPP",
   blockDate,
+  allowClear = false,
 }: CombinedDatePickerProps) {
   const { t } = useTranslation();
 
@@ -51,6 +53,7 @@ export function CombinedDatePicker({
   );
 
   const handleSelect = (date: Date | undefined) => {
+    if (!date && !allowClear) return;
     onChange(date);
   };
 

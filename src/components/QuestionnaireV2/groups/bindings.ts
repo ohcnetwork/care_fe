@@ -1,10 +1,14 @@
+import { sameResponsePath } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import {
   buildLinkIndex,
   initializeResponses,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
 
 import type { GroupField, RegisteredGroupDefinition } from "./registry";
@@ -144,20 +148,22 @@ export function updateGroupResponses(
   return candidate;
 }
 
+export type GroupRowAction =
+  | { type: "add"; updates: Record<string, Partial<QuestionnaireResponse>> }
+  | {
+      type: "update";
+      row: QuestionnaireResponse[];
+      updates: Record<string, Partial<QuestionnaireResponse>>;
+    }
+  | { type: "remove"; row: QuestionnaireResponse[] };
+
 /** Row references keep multiple edits/removals safe before React renders again. */
 export function updateGroupRows(
   group: Question,
   definition: RegisteredGroupDefinition,
   questions: Question[],
   responses: Record<string, QuestionnaireResponse>,
-  action:
-    | { type: "add"; updates: Record<string, Partial<QuestionnaireResponse>> }
-    | {
-        type: "update";
-        row: QuestionnaireResponse[];
-        updates: Record<string, Partial<QuestionnaireResponse>>;
-      }
-    | { type: "remove"; row: QuestionnaireResponse[] },
+  action: GroupRowAction,
 ): Record<string, QuestionnaireResponse> {
   const response = responses[group.id];
   if (!group.repeats || group.read_only || !response) return responses;
@@ -184,4 +190,42 @@ export function updateGroupRows(
     next[index] = Object.keys(initial).map((id) => updated[id]);
   }
   return { ...responses, [group.id]: { ...response, sub_results: next } };
+}
+
+/** An update clears only the edited row's changed answers; add/remove reindex every row. */
+export function retainGroupRowErrors(
+  errors: readonly QuestionValidationError[],
+  path: ResponsePath,
+  groupId: string,
+  action: GroupRowAction,
+  rows: readonly QuestionnaireResponse[][],
+  nextRows: readonly QuestionnaireResponse[][],
+): QuestionValidationError[] {
+  if (action.type === "update") {
+    const rowIndex = rows.indexOf(action.row);
+    const rowPath = [...path, { questionId: groupId, rowIndex }];
+    const changed = new Set(
+      (nextRows[rowIndex] ?? [])
+        .filter((answer) => !action.row.includes(answer))
+        .map((answer) => answer.question_id),
+    );
+    return errors.filter(
+      (error) =>
+        !changed.has(error.question_id) ||
+        (!!error.response_path &&
+          !sameResponsePath(error.response_path, rowPath)),
+    );
+  }
+  return errors.filter((error) => {
+    if (
+      sameResponsePath(error.response_path, path) &&
+      error.question_id === groupId
+    )
+      return false;
+    const rowPath = error.response_path ?? [];
+    return (
+      !sameResponsePath(rowPath.slice(0, path.length), path) ||
+      rowPath[path.length]?.questionId !== groupId
+    );
+  });
 }

@@ -25,15 +25,7 @@ import type {
   StructuredTypeDefinition,
 } from "./types";
 
-/**
- * The one registration point for structured question types. Total over
- * `StructuredQuestionType` and key-correlated (`K → Definition<K>`), so
- * adding a member to `STRUCTURED_QUESTION_TYPES` without a definition —
- * or a definition whose data/request types drift from its key — fails to
- * compile. Everything a type needs lives in its definition file:
- * component, context requirements, validation, request building, draft
- * policy.
- */
+/** Total over `StructuredQuestionType`: a new member fails to compile until it has a definition. */
 export const STRUCTURED_TYPE_REGISTRY: {
   [K in StructuredQuestionType]: StructuredTypeDefinition<K>;
 } = {
@@ -56,7 +48,6 @@ export function structuredDefinitionFor<K extends StructuredQuestionType>(
   return STRUCTURED_TYPE_REGISTRY[type];
 }
 
-/** Core structured answers are domain records handled by their definition. */
 export function structuredDataAny(
   response: QuestionnaireResponse | undefined,
 ): unknown[] {

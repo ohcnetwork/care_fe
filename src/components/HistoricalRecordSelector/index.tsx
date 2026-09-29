@@ -61,12 +61,8 @@ interface HistoricalRecordSelectorProps<T extends BaseRecord> {
 }
 
 interface DateGroupedRecords<T extends BaseRecord> {
-  /** The formatted heading, and the group's identity across pages. */
   date: string;
-  /** The ISO `created_date` the heading was formatted from — `""` for the
-   *  undated group. Ordering reads this rather than re-parsing `date`: a
-   *  formatted heading is not a date format any engine is required to
-   *  understand, so parsing it back is only accidentally sortable. */
+  /** ISO `created_date` (`""` for the undated group); sorted on this, not the formatted heading. */
   sortKey: string;
   records: T[];
 }

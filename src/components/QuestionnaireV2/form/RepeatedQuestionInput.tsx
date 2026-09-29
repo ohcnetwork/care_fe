@@ -30,15 +30,13 @@ export function RepeatedQuestionInput({
   const entryCount = Math.max(response?.values.length ?? 0, 1);
   const canRemoveEntries = (response?.values.length ?? 0) > 1;
 
-  // Rows added by editing or draft restoration claim keys at render time.
-  // Removing one carries every surviving row's local control state with it.
   const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
   const visibleRowKeys = growRowKeys(rowKeys, entryCount);
   if (visibleRowKeys !== rowKeys) setRowKeys(visibleRowKeys);
 
   const handleAddEntry = () => {
     const current = response?.values ?? [];
-    // Materialize the placeholder too so Add never swallows the visible row.
+    // Materialize the placeholder row too, so Add always adds a visible row.
     const next = current.length === 0 ? [emptyEntry()] : [...current];
     next.push(emptyEntry());
     updateResponse({ values: next });

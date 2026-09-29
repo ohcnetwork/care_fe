@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  ResponseRowProvider,
   getScopedResponses,
   responseMap,
   sameResponsePath,
@@ -16,6 +17,7 @@ import {
   useScopedResponses,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { useFormRenderer } from "@/components/QuestionnaireV2/form/FormContext";
+import { QuestionBlock } from "@/components/QuestionnaireV2/form/QuestionBlock";
 import { RepeatingGroup } from "@/components/QuestionnaireV2/form/RepeatingGroup";
 import { SectionCard } from "@/components/QuestionnaireV2/form/SectionCard";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -23,8 +25,10 @@ import type { Question } from "@/types/questionnaire/question";
 
 import {
   groupBindings,
+  retainGroupRowErrors,
   updateGroupResponses,
   updateGroupRows,
+  type GroupRowAction,
 } from "./bindings";
 import { RegisteredGroupView } from "./RegisteredGroupView";
 import {
@@ -56,13 +60,12 @@ export function RegisteredGroupSlot(props: {
   const definition = question.structured_type
     ? getQuestionGroup(question.structured_type)
     : undefined;
-  const fallback = question.repeats ? (
-    <RepeatingGroup {...props} />
-  ) : (
-    <SectionCard {...props} />
-  );
   if (!definition || !definition.subjects.includes(questionnaire.subject_type))
-    return fallback;
+    return question.repeats ? (
+      <RepeatingGroup {...props} />
+    ) : (
+      <SectionCard {...props} />
+    );
   const locked = disabled || inert || frozen || mode === "readonly";
   const scopedErrors = errors.filter((error) =>
     sameResponsePath(error.response_path, path),
@@ -88,7 +91,18 @@ export function RegisteredGroupSlot(props: {
       scoped,
       updates,
     );
-    store.set(responsesAtom, updateResponsesAtPath(current, path, next));
+    store.set(
+      responsesAtom,
+      updateResponsesAtPath(
+        current,
+        path,
+        Object.fromEntries(
+          Object.entries(next).filter(
+            ([id, response]) => response !== scoped[id],
+          ),
+        ),
+      ),
+    );
     store.set(errorsAtom, (previous) =>
       previous.filter(
         (error) =>
@@ -97,7 +111,7 @@ export function RegisteredGroupSlot(props: {
       ),
     );
   };
-  const changeRows = (action: Parameters<typeof updateGroupRows>[4]) => {
+  const changeRows = (action: GroupRowAction) => {
     if (locked) return;
     const current = store.get(responsesAtom);
     const scoped = getScopedResponses(current, path);
@@ -114,21 +128,18 @@ export function RegisteredGroupSlot(props: {
         [question.id]: next[question.id],
       }),
     );
+    const nextRows = next[question.id]?.sub_results ?? [];
     store.set(errorsAtom, (previous) =>
-      previous.filter((error) => {
-        if (
-          sameResponsePath(error.response_path, path) &&
-          error.question_id === question.id
-        )
-          return false;
-        const rowPath = error.response_path ?? [];
-        return (
-          !sameResponsePath(rowPath.slice(0, path.length), path) ||
-          rowPath[path.length]?.questionId !== question.id
-        );
-      }),
+      retainGroupRowErrors(
+        previous,
+        path,
+        question.id,
+        action,
+        scoped[question.id]?.sub_results ?? [],
+        nextRows,
+      ),
     );
-    return next[question.id]?.sub_results;
+    return nextRows;
   };
   const rows = (
     question.repeats ? (responses[question.id]?.sub_results ?? []) : []
@@ -165,6 +176,34 @@ export function RegisteredGroupSlot(props: {
   });
   const incompatible =
     incompatibleGroupQuestions(question, definition).length > 0;
+  const children = question.questions ?? [];
+  const renderChildren = () =>
+    children.map((child, index) => (
+      <QuestionBlock
+        key={child.id}
+        question={child}
+        parentId={question.id}
+        index={index}
+        siblingCount={children.length}
+        depth={props.depth + 1}
+        number={props.number ? `${props.number}${index + 1}.` : undefined}
+      />
+    ));
+  const fallback = (
+    <fieldset disabled={disabled && !inert} className="space-y-3 border-0 p-0">
+      {question.repeats
+        ? rows.map((_, index) => (
+            <ResponseRowProvider
+              key={index}
+              groupId={question.id}
+              rowIndex={index}
+            >
+              {renderChildren()}
+            </ResponseRowProvider>
+          ))
+        : renderChildren()}
+    </fieldset>
+  );
   return (
     <section
       data-question-id={question.id}

@@ -13,20 +13,14 @@ import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/st
 
 import { useFormRenderer } from "./FormContext";
 
-/** Per-question note popover — the reference design's affordance: a slim
- *  vertical rule and a free-standing icon button beside the input, never a
- *  shared frame (that read as a second border around the control). */
+/** Per-question note popover beside the input. */
 export function NoteControl({
   questionId,
   locked = false,
 }: {
   questionId: string;
-  /** The owning question's PERSISTENT lock: `read_only`, or
-   *  enable_when-disabled while `disabled_display: protected`. A question
-   *  whose input is inert must not accept a note either. Deliberately not
-   *  the input's whole disabled state — the submit freeze belongs to
-   *  `frozen` below, and folding it in here would unmount the affordance
-   *  for the length of a request. */
+  /** The question's persistent lock (`read_only` or enable_when-disabled),
+   *  not the transient submit freeze. */
   locked?: boolean;
 }) {
   const { t } = useTranslation();
@@ -34,19 +28,11 @@ export function NoteControl({
   const noteStateId = useId();
   const [response, updateResponse] = useQuestionResponse(questionId);
 
-  // Readonly mode and a locked question read the same way: an existing note
-  // stays visible, a new one can never be recorded — so with nothing to
-  // show there is no affordance at all. The submit freeze is deliberately
-  // NOT part of this: it is transient, and a control that disappears for the
-  // length of an in-flight submit takes an already-written note off screen
-  // with it. Frozen only disables (below).
   const viewOnly = mode === "readonly" || locked;
 
   if (!response) return null;
   if (viewOnly && !response.note) return null;
 
-  // The amber dot is decorative; the sr-only sibling carries the "a note
-  // exists" state through aria-describedby without changing the button name.
   const noteIndicator = response.note && (
     <>
       <span className="absolute bottom-2 right-2 size-1.5 rounded-full bg-amber-500" />

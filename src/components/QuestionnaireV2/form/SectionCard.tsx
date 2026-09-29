@@ -13,15 +13,7 @@ import { useFormChrome } from "./chrome";
 import { useFormRenderer } from "./FormContext";
 import { QuestionBlock } from "./QuestionBlock";
 
-/**
- * Group rendering on the one-scroll canvas. Top-level groups are the
- * reference design's "sections": soft card, accent bar, numbered title,
- * question count, children as white question cards. Nested groups keep the
- * old renderer's two-tone treatment. Both preserve the deployed contracts:
- * `<fieldset disabled>` threads disabled state to native children,
- * `styling_metadata.classes` decorates the wrapper, `containerClasses` lays
- * out the sub-question container — all through `sanitizeStylingClasses`.
- */
+/** Group rendering: top-level groups as sections, nested groups two-tone. */
 export function SectionCard({
   question,
   depth,
@@ -31,25 +23,16 @@ export function SectionCard({
   question: Question;
   depth: number;
   disabled: boolean;
-  /** Dotted ordinal matching the tree nav (e.g. "7."); children derive
-   *  "7.1.", "7.2.", … from it. */
+  /** Dotted ordinal matching the tree nav (e.g. "7."). */
   number?: string;
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
   const { AppendZone, QuestionAnnotation } = useFormChrome();
 
-  // On the edit canvas the inert wrapper already neutralizes the inputs;
-  // keeping the fieldset natively disabled there would also disable the
-  // selection chrome's toolbar buttons rendered inside it for child
-  // question cards of a read_only or logic-disabled group.
+  // A natively disabled fieldset would also disable the edit canvas's chrome.
   const fieldsetDisabled = disabled && !inert;
   const children = question.questions ?? [];
-  // Two different counts on purpose: the header reports every question the
-  // section contains (recursive — matching the form header's own
-  // `countLeafQuestions`, otherwise a section whose questions all sit in a
-  // sub-group reads "0 questions"), while the nested grid heuristic below
-  // sizes columns from the DIRECT children it actually lays out.
   const sectionQuestionCount = countLeafQuestions(children);
   const leafChildCount = children.filter(
     (child) => child.type !== "group",
@@ -125,8 +108,6 @@ export function SectionCard({
     );
   }
 
-  // Nested group: two-tone box — the title sits in its own darker header
-  // strip with a lighter inset body panel beneath it.
   return (
     <div
       data-question-id={question.id}

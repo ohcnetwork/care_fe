@@ -16,10 +16,6 @@ import {
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
-// Live-store hooks hosts may need (the studio outline drops
-// enable_when-hidden rows in preview; the fill outline adds completion
-// icons). Re-exported here so consumers stay on form/'s public surface —
-// the engine reach-in is this module's alone.
 export {
   useAnsweredQuestionIds,
   useHiddenQuestionIds,
@@ -37,22 +33,14 @@ interface FormContextValue {
   questionnaire: QuestionnaireRead;
   /** Render enable_when-hidden questions anyway (builder edit canvas). */
   revealHidden: boolean;
-  /** Render inputs visually but non-interactive and out of the a11y tree
-   *  (builder edit canvas — clicks land on the selection chrome instead). */
+  /** Render inputs non-interactive and out of the a11y tree (builder edit canvas). */
   inert: boolean;
-  /** The whole session is mid-submit (composing the batch or the request
-   *  itself in flight) — every question in this form freezes read-only so
-   *  an edit typed during that window can never diverge from the payload
-   *  already being sent. False everywhere but the fill flow's submit
-   *  window; every other mount (studio, preview) never sets it. */
+  /** The fill session is mid-submit: every question is read-only until it settles. */
   frozen: boolean;
 }
 
 const FormContext = createContext<FormContextValue | null>(null);
 
-/** Module-level so the subject-less default keeps one identity — a fresh
- *  `{}` per render would invalidate the memoized context value and re-render
- *  every block of the form. */
 const EMPTY_SUBJECT: RendererSubject = {};
 
 export function useFormRenderer(): FormContextValue {
@@ -65,17 +53,8 @@ export function useFormRenderer(): FormContextValue {
   return context;
 }
 
-/**
- * `id → signature` for every question — the key that decides
- * whether an in-progress answer survives a live tree update. Participates:
- * type/structured_type (a differently-shaped value must not linger),
- * answer options (value + default flag — a changed `initial_selected` must
- * reach the preview, and a recorded answer can't point at a removed
- * option), `repeats` (turning it off collapses rendering to `values[0]`
- * while enable_when and required validation still scan every entry — extra
- * entries would be invisible but live), and the answer value set (swapping
- * sets would leave the old set's `coding` recorded).
- */
+/** `id → signature` per question; a changed signature re-seeds the answer
+ *  on a live tree update. */
 export function questionSignatures(questions: Question[]): Map<string, string> {
   const signatures = new Map<string, string>();
   const walk = (list: Question[]) => {
@@ -97,15 +76,8 @@ export function questionSignatures(questions: Question[]): Map<string, string> {
   return signatures;
 }
 
-/**
- * Live-update merge — the difference from the old renderer's wholesale
- * re-seed (which wiped every in-progress answer whenever the questionnaire
- * identity changed). Entries survive when the question id still exists with
- * the same type/structured_type; added questions get fresh seeded entries
- * (`initial_selected` options); removed questions drop; a type change
- * re-seeds that one entry so a stale value of another shape can't linger in
- * enable_when evaluation.
- */
+/** Merge existing answers over a fresh seed: entries survive when the
+ *  question still exists with the same signature, otherwise they re-seed. */
 export function syncResponses(
   previous: Record<string, QuestionnaireResponse>,
   previousSignatures: Map<string, string>,
@@ -141,9 +113,7 @@ export function syncResponses(
         next = { ...existing, sub_results: rows };
       }
     }
-    // Preserve object identity when nothing about the entry changed, so
-    // each useQuestionResponse derived atom keeps its Jotai bail-out —
-    // a title keystroke in the builder must not re-render every block.
+    // Preserve identity when unchanged so subscribers bail out.
     merged[id] =
       next.link_id === seeded.link_id
         ? next
@@ -158,18 +128,9 @@ interface ProviderProps {
   subject?: RendererSubject;
   revealHidden?: boolean;
   inert?: boolean;
-  /** See `FormContextValue.frozen`. Defaults false — only the fill host's
-   *  submit window ever sets it. */
   frozen?: boolean;
-  /**
-   * Creation-time seed overrides (a restored fill draft). Applied once,
-   * merged over `initializeResponses` so the store is never observed
-   * unseeded; entries only take effect when the question id still exists
-   * with the same structured_type (both restore paths already run the
-   * draft through `mergeDraftResponses`, which drops per QUESTION and
-   * names what it dropped — this is defense in depth). Changing the prop
-   * after mount has no effect by design.
-   */
+  /** Creation-time seed overrides (a restored draft), applied once; later
+   *  changes have no effect. */
   initialResponses?: Record<string, QuestionnaireResponse>;
   children: React.ReactNode;
 }
@@ -184,8 +145,6 @@ export function QuestionnaireFormProvider({
   initialResponses,
   children,
 }: ProviderProps) {
-  // useState (not useMemo) so the store is created exactly once per instance
-  // and never observed unseeded (same rationale as the old provider).
   const [store] = useState(() => {
     const seeded = createStore();
     const responses = initializeResponses(questionnaire.questions);
@@ -202,15 +161,9 @@ export function QuestionnaireFormProvider({
     return seeded;
   });
 
-  // Live sync: every questionnaire identity change re-points the atom and
-  // merges responses instead of wiping them — this is what lets the builder
-  // feed a fresh draft object per keystroke while preview answers persist.
   const previousRef = useRef(questionnaire);
   useEffect(() => {
     if (previousRef.current === questionnaire) return;
-    // Metadata-only drafts (Form-settings title/description ride along in
-    // the studio draft) leave the question tree referentially identical —
-    // re-point the questionnaire atom, skip the response merge entirely.
     if (previousRef.current.questions === questionnaire.questions) {
       previousRef.current = questionnaire;
       store.set(questionnaireAtom, questionnaire);
@@ -231,10 +184,6 @@ export function QuestionnaireFormProvider({
     );
   }, [questionnaire, store]);
 
-  // Every canvas component consumes this context, so a fresh object literal
-  // per render would re-render every block on any host re-render (a studio
-  // keystroke, a fill-page state change) — defeating the response-identity
-  // preservation `syncResponses` above exists for.
   const value = useMemo(
     () => ({ mode, subject, questionnaire, revealHidden, inert, frozen }),
     [mode, subject, questionnaire, revealHidden, inert, frozen],

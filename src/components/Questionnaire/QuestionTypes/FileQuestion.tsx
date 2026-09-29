@@ -129,9 +129,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
   });
 
   const appendSelectedFiles = useEffectEvent(() => {
-    if (fileUpload.files.length === 0) return;
-    // The uploader holds only newly selected files. The response owns the
-    // complete list, including files retained while navigating the form.
+    if (fileUpload.files.length === 0 || fileUpload.previewing) return;
     const additions = fileUpload.files.filter(
       (file) => !values.some((value) => value.file_data === file),
     );
@@ -162,7 +160,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
 
   useEffect(() => {
     appendSelectedFiles();
-  }, [fileUpload.files]);
+  }, [fileUpload.files, fileUpload.previewing]);
 
   return (
     <div className="flex flex-col gap-2">

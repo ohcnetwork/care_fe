@@ -23,9 +23,6 @@ export function DateTimeQuestionInput({
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
-  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
-  // seeded string from answer_option) would otherwise reach formatTime and
-  // crash on date.getHours() during render.
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "dateTime" ? entry.value : undefined;
 
@@ -39,7 +36,17 @@ export function DateTimeQuestionInput({
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    if (!date) return;
+    if (!date) {
+      updateResponse({
+        values: replaceEntryAt(
+          response?.values,
+          valueIndex,
+          { type: "dateTime", value: undefined },
+          true,
+        ),
+      });
+      return;
+    }
     const next = new Date(date);
     if (value) {
       next.setHours(value.getHours());
@@ -52,7 +59,6 @@ export function DateTimeQuestionInput({
     const [hours, minutes] = e.target.value.split(":").map(Number);
     if (isNaN(hours) || isNaN(minutes)) return;
 
-    // Fresh instance — never mutate the stored Date in place.
     const next = value ? new Date(value) : new Date();
     next.setHours(hours);
     next.setMinutes(minutes);
@@ -61,9 +67,6 @@ export function DateTimeQuestionInput({
   };
 
   return (
-    // Named group for the same reason as DateInput: the picker trigger
-    // takes no id/aria props, and the bare time input would otherwise
-    // reach screen readers nameless.
     <QuestionInputGroup
       labelId={labelId}
       required={question.required}

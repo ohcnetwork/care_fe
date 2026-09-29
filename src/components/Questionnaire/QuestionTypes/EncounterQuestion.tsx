@@ -162,8 +162,6 @@ export function EncounterQuestion({
     };
   };
 
-  // A refetch provides context for draft reconciliation; it must never be
-  // reported as a clinician edit or replace a response retained on remount.
   const initializeResponse = useEffectEvent(() => {
     if (!encounterData) return;
     const initialEncounter = transformEncounterForUpdate(encounterData);
@@ -173,6 +171,8 @@ export function EncounterQuestion({
         ...initialEncounter.period,
         end: initialEncounter.period.end || new Date().toISOString(),
       };
+    }
+    if (initialEncounter.status === EncounterStatus.DISCHARGED) {
       initialEncounter.hospitalization = {
         ...initialEncounter.hospitalization,
         discharge_disposition:
@@ -200,10 +200,7 @@ export function EncounterQuestion({
     initializeResponse();
   }, [encounterData, toDischarge]);
 
-  // Older drafts could change encounter class. Normalize their values after
-  // reconciliation so hidden hospitalization edits cannot survive an immutable
-  // non-hospitalization class. Skip the pre-initialization response to avoid
-  // replacing refreshed server fields with the previous render's values.
+  // Normalize older drafts' hospitalization fields after reconciliation; skip the pre-initialization response.
   useEffect(() => {
     if (
       !encounterData ||

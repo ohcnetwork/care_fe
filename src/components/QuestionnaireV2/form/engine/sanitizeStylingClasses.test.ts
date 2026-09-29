@@ -54,3 +54,16 @@ test("builder layouts and responsive decoration remain available", () => {
     assert.equal(sanitizeStylingClasses(classes), classes);
   }
 });
+
+test("non-string input is ignored", () => {
+  for (const value of [
+    ["hidden"],
+    { classes: "grid" },
+    1,
+    null,
+    undefined,
+    "",
+  ]) {
+    assert.equal(sanitizeStylingClasses(value), undefined);
+  }
+});

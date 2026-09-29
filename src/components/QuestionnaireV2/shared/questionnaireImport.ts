@@ -3,40 +3,40 @@ import { z } from "zod";
 import { QUESTION_TYPES, Question } from "@/types/questionnaire/question";
 import { SUBJECT_TYPES } from "@/types/questionnaire/questionnaire";
 
-/**
- * Recursively narrows an unknown question-ish object down to the fields the
- * importer needs. Validation must recurse: nested `questions` reach the
- * builder tree and the PUT body unmodified, so a malformed child (missing
- * `text`, or `questions` that isn't an array) would otherwise surface as a
- * crash in the confirm step or a save that silently does nothing.
- */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Shape-only check of an imported question tree; nested `questions` recurse. */
 function isQuestionLike(value: unknown): value is Question {
-  if (typeof value !== "object" || value === null) return false;
+  if (!isRecord(value)) return false;
   const candidate = value as {
     text?: unknown;
     type?: unknown;
+    description?: unknown;
     structured_type?: unknown;
     link_id?: unknown;
     questions?: unknown;
     enable_when?: unknown;
+    answer_option?: unknown;
   };
   if (typeof candidate.text !== "string") return false;
+  if (
+    candidate.description !== undefined &&
+    typeof candidate.description !== "string"
+  )
+    return false;
   if (
     candidate.structured_type != null &&
     typeof candidate.structured_type !== "string"
   )
     return false;
-  // Membership, not just typeof: an unknown `type` (e.g. "radio") would flow
-  // into builder state and crash the type picker's TYPE_ICONS lookup, then
-  // be PUT to the API on save.
   if (
     typeof candidate.type !== "string" ||
     !(QUESTION_TYPES as readonly string[]).includes(candidate.type)
   ) {
     return false;
   }
-  // link_id is optional (regenerateQuestionIds synthesizes fresh ones), but
-  // when present it must be a string.
   if (
     candidate.link_id !== undefined &&
     typeof candidate.link_id !== "string"
@@ -48,10 +48,21 @@ function isQuestionLike(value: unknown): value is Question {
     (!Array.isArray(candidate.enable_when) ||
       !candidate.enable_when.every(
         (condition: unknown) =>
-          typeof condition === "object" &&
-          condition !== null &&
-          "question" in condition &&
-          typeof condition.question === "string",
+          isRecord(condition) &&
+          typeof condition.question === "string" &&
+          typeof condition.operator === "string",
+      ))
+  ) {
+    return false;
+  }
+  if (
+    candidate.answer_option != null &&
+    (!Array.isArray(candidate.answer_option) ||
+      !candidate.answer_option.every(
+        (option: unknown) =>
+          isRecord(option) &&
+          (typeof option.value === "string" ||
+            typeof option.value === "number"),
       ))
   ) {
     return false;
@@ -64,9 +75,7 @@ function isQuestionLike(value: unknown): value is Question {
 }
 
 function normalizeImportedQuestion(question: Question): Question {
-  // Older exports stored value-set references as bare slugs. Normalize at
-  // the import boundary so both the editor and submitted definition use
-  // the current binding shape, including questions nested inside groups.
+  // Older exports stored value-set references as bare slugs.
   const answerValueSet: unknown = question.answer_value_set;
   return {
     ...question,
@@ -79,11 +88,7 @@ function normalizeImportedQuestion(question: Question): Question {
   };
 }
 
-/**
- * Accepts either a bare `{ questions: [...] }` payload or a full
- * questionnaire export (which has a `questions` array alongside its other
- * fields) — both shapes are read the same way, through `.questions`.
- */
+/** Accepts a bare `{ questions }` payload or a full questionnaire export. */
 export function extractQuestions(
   data: unknown,
   { allowEmpty = false }: { allowEmpty?: boolean } = {},
@@ -102,8 +107,7 @@ export function extractQuestions(
 /** Writable metadata from a full export; audit fields and scope are ignored. */
 const importMetadataSchema = z.object({
   title: z.string().min(1),
-  // Slug constraints belong to the editable confirmation form, so even an
-  // older invalid slug can be corrected before any create request is sent.
+  // Slug constraints are enforced by the editable confirmation form.
   slug: z
     .string()
     .nullish()

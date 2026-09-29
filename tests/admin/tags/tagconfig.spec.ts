@@ -255,4 +255,21 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("button", { name: parentTagName }).click();
     await expect(page.getByRole("cell", { name: /Child/i })).toBeVisible();
   });
+
+  test("should display tag hierarchy correctly", async ({ page }) => {
+    const parentRows = page
+      .getByRole("row")
+      .filter({ has: page.getByRole("button") });
+    const firstParentRow = parentRows.first();
+
+    if (await firstParentRow.isVisible()) {
+      await firstParentRow.getByRole("button").click();
+      await expect(page.getByRole("button", { name: "View" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Add child tag" }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "View" }).click();
+      await expect(page.getByText("Child tags")).toBeVisible();
+    }
+  });
 });

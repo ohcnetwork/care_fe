@@ -1,13 +1,5 @@
-/**
- * `styling_metadata.classes` / `containerClasses` are questionnaire-authored
- * data — they travel through imported JSON and the API, so they must be
- * treated as untrusted input, not trusted UI code.
- *
- * Allow only ordinary layout and decoration. A positioning denylist misses
- * other ways to cover or hide controls (negative margins, transforms,
- * opacity), and arbitrary values can load remote content. The only arbitrary
- * values accepted here are the builder's two fractional-column presets.
- */
+// `styling_metadata` is questionnaire-authored (import JSON, API): allow
+// only layout and decoration utilities, never positioning or arbitrary values.
 const ALLOWED_VARIANTS = new Set(["sm", "md", "lg", "xl", "2xl"]);
 
 const ALLOWED_UTILITIES = [
@@ -34,10 +26,8 @@ function isAllowed(token: string): boolean {
   );
 }
 
-export function sanitizeStylingClasses(
-  classes: string | undefined,
-): string | undefined {
-  if (!classes) return undefined;
+export function sanitizeStylingClasses(classes: unknown): string | undefined {
+  if (typeof classes !== "string" || !classes) return undefined;
   const safe = classes.split(/\s+/).filter(isAllowed);
   return safe.length > 0 ? safe.join(" ") : undefined;
 }

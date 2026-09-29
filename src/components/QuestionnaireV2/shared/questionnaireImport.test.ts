@@ -146,6 +146,7 @@ describe("questionnaire definition import", () => {
       ["score"],
       [{}],
       [{ question: 123 }],
+      [{ question: "score", answer: 5 }],
     ]) {
       assert.equal(
         parseQuestionnaireImport({
@@ -168,6 +169,38 @@ describe("questionnaire definition import", () => {
         }),
       );
     }
+  });
+
+  it("rejects malformed answer options and descriptions", () => {
+    for (const answer_option of ["Yes,No", [{}], [null], [{ value: null }]]) {
+      assert.equal(
+        parseQuestionnaireImport({
+          ...exported,
+          questions: [{ ...exported.questions[0], answer_option }],
+        }),
+        null,
+      );
+    }
+    for (const answer_option of [
+      undefined,
+      null,
+      [],
+      [{ value: "yes", display: "Yes" }, { value: 1 }],
+    ]) {
+      assert.ok(
+        parseQuestionnaireImport({
+          ...exported,
+          questions: [{ ...exported.questions[0], answer_option }],
+        }),
+      );
+    }
+    assert.equal(
+      parseQuestionnaireImport({
+        ...exported,
+        questions: [{ ...exported.questions[0], description: ["Help"] }],
+      }),
+      null,
+    );
   });
 
   it("retains support for question-only files without treating them as full definitions", () => {

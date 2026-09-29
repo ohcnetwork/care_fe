@@ -106,6 +106,20 @@ describe("parseCondition", () => {
     }
   });
 
+  it("round-trips numbers that stringify in exponent notation", () => {
+    for (const value of [1e-7, 1e21, -2.5e-8]) {
+      const expression = compileCondition(
+        [{ ref: "q_a", operator: ">", value }],
+        "all",
+      );
+      assert.deepEqual(parseCondition(expression), {
+        rules: [{ ref: "q_a", operator: ">", value }],
+        behavior: "all",
+      });
+      assert.equal(lintExpression(expression), null);
+    }
+  });
+
   it("reads True as no rules", () => {
     assert.deepEqual(parseCondition("True"), { rules: [], behavior: "all" });
     assert.deepEqual(parseCondition("  True  "), {
@@ -181,6 +195,30 @@ describe("references", () => {
       ["a", "b"],
     );
     assert.deepEqual(referencedLinkIds('f"{q_temp} and {q_temp}"'), ["temp"]);
+  });
+
+  it("reaches refs after != and : and inside conversions, specs and conditionals", () => {
+    const cases: [string, string[]][] = [
+      ['f"{q_a != 1}"', ["a"]],
+      ['f"{q_a!r} {q_b!s:>10}"', ["a", "b"]],
+      ['f"{q_a:>{q_w}.2f}"', ["a", "w"]],
+      ['f"{q_a if q_b else q_c}"', ["a", "b", "c"]],
+      [`f"{q_a[':']} {q_b['}']}"`, ["a", "b"]],
+      ['f"{q_a:{q_w}} {q_c}"', ["a", "w", "c"]],
+      ["rf\"{q_a}\" + fR'{q_b}'", ["a", "b"]],
+    ];
+    for (const [expression, expected] of cases) {
+      assert.deepEqual(referencedLinkIds(expression), expected, expression);
+      assert.equal(lintExpression(expression), null, expression);
+    }
+    const map = new Map([["a", "z"]]);
+    assert.equal(
+      remapQuestionRefs('f"{q_a != 1:>{q_a}}"', map),
+      'f"{q_z != 1:>{q_z}}"',
+    );
+    assert.equal(remapQuestionRefs('Rf"{q_a!r}"', map), 'Rf"{q_z!r}"');
+    assert.equal(lintExpression('f"{q_a"'), "syntax");
+    assert.equal(lintExpression('f"{q_a:{q_b"'), "syntax");
   });
 
   it("collects references from the condition and templated params", () => {
@@ -305,6 +343,21 @@ describe("message templates", () => {
     });
   });
 
+  it("leaves raw f-strings and unlisted escapes to the expression editor", () => {
+    for (const expression of [
+      'rf"{q_temp}"',
+      "Fr'{q_temp}'",
+      'f"\\x41 {q_temp}"',
+      'f"\\u00e9 {q_temp}"',
+      'f"bell\\a {q_temp}"',
+    ]) {
+      assert.deepEqual(parseMessageTemplate(`{{ ${expression} }}`), {
+        kind: "expression",
+        expression,
+      });
+    }
+  });
+
   it("lists tokens", () => {
     assert.deepEqual(messageTokens("a {q_x} b {patient.age} {bad-token}"), [
       "q_x",
@@ -323,10 +376,32 @@ describe("lintExpression", () => {
     assert.equal(lintExpression("(q_a == 1"), "syntax");
     assert.equal(lintExpression("q_a == 1)"), "syntax");
     assert.equal(lintExpression('patient["age"]] > 1'), "syntax");
-    assert.equal(lintExpression("q_a is None"), "syntax");
+    assert.equal(lintExpression("q_a is None"), null);
+    assert.equal(lintExpression("q_a is not None and q_b"), null);
     assert.equal(lintExpression('q_a in ["x", "y"]'), "syntax");
     assert.equal(lintExpression("q_a == (1)"), null);
     assert.equal(lintExpression('(q_a == 1) and q_b["k"] > 2'), null);
+  });
+
+  it("flags tuple literals (evalidate rejects Tuple)", () => {
+    assert.equal(lintExpression("q_a in (1, 2)"), "syntax");
+    assert.equal(lintExpression("q_a, q_b"), "syntax");
+    assert.equal(lintExpression('q_a["k", "j"]'), "syntax");
+    assert.equal(lintExpression('f"{q_a}, {q_b}"'), null);
+  });
+
+  it("accepts closed non-canonical string literals", () => {
+    assert.equal(lintExpression(`q_a == 'say "hi"'`), null);
+    assert.equal(lintExpression(`q_a == 'it\\'s'`), null);
+    assert.equal(lintExpression('q_a == "\\x41"'), null);
+    assert.equal(parseCondition(`q_a == 'say "hi"'`), null);
+    assert.equal(parseCondition('q_a == "\\x41"'), null);
+    assert.equal(lintExpression("q_a == 'open"), "syntax");
+  });
+
+  it("reports attribute access inside f-string fields", () => {
+    assert.equal(lintExpression('f"{patient.age}"'), "attribute");
+    assert.equal(lintExpression('f"{q_a:>{q_w}}" == "x"'), null);
   });
 });
 

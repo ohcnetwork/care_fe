@@ -3,7 +3,10 @@ import type { ComponentType } from "react";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { QUESTION_TYPES, type Question } from "@/types/questionnaire/question";
-import type { SubjectType } from "@/types/questionnaire/questionnaire";
+import {
+  SUBJECT_TYPES,
+  type SubjectType,
+} from "@/types/questionnaire/questionnaire";
 import {
   PLUGIN_STRUCTURED_TYPE_PATTERN,
   type PluginStructuredTypeName,
@@ -66,6 +69,10 @@ const notify = () => {
   listeners.forEach((listener) => listener());
 };
 
+/** Lazy and memo components are objects, not functions. */
+const isComponent = (value: unknown) =>
+  typeof value === "function" || (typeof value === "object" && value !== null);
+
 export function registerQuestionGroup(
   definition: RegisteredGroupDefinition,
   ownerSlug: string,
@@ -75,6 +82,15 @@ export function registerQuestionGroup(
     definition.type.split(".")[0] !== ownerSlug
   ) {
     throw new Error(`Invalid registered group namespace: ${definition.type}`);
+  }
+  if (
+    !Array.isArray(definition.subjects) ||
+    !definition.subjects.every((subject) => SUBJECT_TYPES.includes(subject))
+  ) {
+    throw new Error(`Invalid registered group subjects: ${definition.type}`);
+  }
+  if (!isComponent(definition.component) || !isComponent(definition.builder)) {
+    throw new Error(`Invalid registered group components: ${definition.type}`);
   }
   const keys = new Set<string>();
   const validate = (questions: readonly GroupQuestionDefinition[]) => {

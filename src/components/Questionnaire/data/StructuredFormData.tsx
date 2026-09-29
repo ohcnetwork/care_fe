@@ -7,12 +7,7 @@ const encounterQuestionnaire: QuestionnaireRead = {
   version: "0.0.1",
   title: "Encounter",
   status: "active",
-  // The `encounter` structured type needs an encounter in scope (see its
-  // definition's `requires`/`subjects`) — it PUTs to the encounter it is
-  // filled against. The only surface that mounts this questionnaire is
-  // "Update Encounter", on the encounter route; a `patient` subject_type
-  // here made the renderer, the validator and the batch composer all treat
-  // the single question as out-of-subject and drop it.
+  // Must be "encounter": a `patient` subject_type makes the renderer drop the question.
   subject_type: "encounter",
   questions: [
     {
@@ -266,8 +261,6 @@ const structuredQuestionEntries = [
   },
 ] as const;
 
-/** Typed against the canonical union so a value here that isn't a real
- *  `StructuredQuestionType` (or a typo) fails to compile. */
 export const STRUCTURED_QUESTIONS: readonly {
   value: StructuredQuestionType;
   label: string;

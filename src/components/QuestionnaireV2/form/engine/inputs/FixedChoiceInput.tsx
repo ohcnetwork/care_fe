@@ -45,11 +45,8 @@ export function FixedChoiceInput({
   }));
 
   if (dropdown) {
-    // Same value shapes as the chip paths below, so enable_when and
-    // submission are indifferent to which control rendered.
-    // Self-referencing aria-labelledby: the question label first, then the
-    // trigger itself, so screen readers announce both the question and the
-    // currently selected option (a bare labelId would silence the value).
+    // aria-labelledby names the question label and then the trigger itself,
+    // so the selected option is announced too.
     const labelling = {
       id: inputId,
       "aria-labelledby": `${labelId} ${inputId}`,
@@ -80,7 +77,7 @@ export function FixedChoiceInput({
         {...labelling}
         value={response?.values[0]?.value?.toString() ?? ""}
         onChange={(value) =>
-          updateResponse({ values: [entryForOption(value)] })
+          updateResponse({ values: value ? [entryForOption(value)] : [] })
         }
         options={dropdownOptions}
         placeholder={t("select_an_option")}
@@ -88,8 +85,6 @@ export function FixedChoiceInput({
       />
     );
   }
-  // Repeats → multi-select: one `{ type: "string", value }` entry per
-  // selected option, and toggling off removes that entry.
   if (question.repeats) {
     const values = response?.values ?? [];
     const isSelected = (optionValue: string) =>

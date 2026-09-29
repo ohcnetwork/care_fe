@@ -5,6 +5,7 @@ import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseSc
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
+  renderFailedKey,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { groupsNeedingSchemaUpdate } from "@/components/QuestionnaireV2/groups/schema";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
@@ -19,27 +20,23 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
-/** Where the questionnaire is being filled — what decides whether a
- *  structured question's slot can show an input at all. */
 export interface RequiredCheckContext {
   questionnaire: QuestionnaireRead;
   subject: RendererSubject;
-  /** Question ids whose structured slot threw and is now showing the error
-   *  boundary's notice (`structuredRenderFailedAtom`). */
+  /** `structuredRenderFailedAtom`: slots showing the error boundary's notice. */
   renderFailed: ReadonlySet<string>;
 }
 
-/**
- * Whether this structured question can accept an answer on this mount.
- * Broken slots are handled by structured-specific validation so the generic
- * required check does not stack a second, vaguer required error.
- */
+/** A slot showing a notice instead of an input cannot be answered; the
+ *  structured validator reports those by name, so the generic required
+ *  check stays out of the way. */
 function structuredQuestionIsAnswerable(
   structuredType: string,
   questionId: string,
+  path: ResponsePath,
   context: RequiredCheckContext,
 ): boolean {
-  if (context.renderFailed.has(questionId)) return false;
+  if (context.renderFailed.has(renderFailedKey(questionId, path))) return false;
   const state = resolveStructuredSlotState(
     structuredType,
     context.questionnaire.subject_type,
@@ -48,16 +45,8 @@ function structuredQuestionIsAnswerable(
   return state.kind === "ready";
 }
 
-/**
- * The fill-mode validation seam. Pure function: `fill/submit/` runs it per
- * form at submit time and writes the result into that form's `errorsAtom`;
- * server-side errors merge back through the same `QuestionValidationError`
- * shape.
- *
- * Only questions that are currently enabled and record answers can be
- * required-invalid; a response counts as answered when any of its entries
- * does, by the same `entryIsAnswered` rule the submit serializer filters on.
- */
+/** Required-field errors for every enabled question, by the same
+ *  `entryIsAnswered` rule the submit serializer filters on. */
 export function collectRequiredErrors(
   questions: Question[],
   responses: Record<string, QuestionnaireResponse>,
@@ -73,7 +62,7 @@ export function collectRequiredErrors(
     path: ResponsePath,
   ) => {
     for (const question of list) {
-      if (!isQuestionEnabledInState(question, scope, linkIndex)) continue;
+      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
       if (question.type === "group") {
         if (
           groupsNeedingSchemaUpdate(
@@ -97,7 +86,7 @@ export function collectRequiredErrors(
               error: t("field_required"),
             });
           rows.forEach((row, rowIndex) =>
-            walk(question.questions ?? [], { ...scope, ...responseMap(row) }, [
+            walk(question.questions ?? [], responseMap(row), [
               ...path,
               { questionId: question.id, rowIndex },
             ]),
@@ -108,18 +97,12 @@ export function collectRequiredErrors(
         continue;
       }
       if (question.type === "display" || !question.required) continue;
-      // A structured question whose slot is showing a notice instead of an
-      // input is NOT waived here — it still blocks the submit — but the
-      // specific, named error for it is `collectStructuredErrors`' job
-      // (same resolver, every non-ready state, see its docstring). Staying
-      // out of the way here is what keeps a broken required question from
-      // ALSO surfacing a generic "this field is required" alongside the
-      // real message.
       if (
         question.structured_type &&
         !structuredQuestionIsAnswerable(
           question.structured_type,
           question.id,
+          path,
           context,
         )
       ) {
