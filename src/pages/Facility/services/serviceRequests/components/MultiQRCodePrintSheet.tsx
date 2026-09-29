@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PrintPreviewDialog } from "@/CAREUI/misc/PrintPreviewDialog";
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -106,17 +107,6 @@ export function MultiQRCodePrintSheet({
   const selectedSpecimenData = Array.from(selectedSpecimens)
     .map((id) => localSpecimens.find((s) => s.id === id))
     .filter(Boolean) as SpecimenRead[];
-
-  // useEffect to trigger window.print when isPrinting is true
-  useEffect(() => {
-    if (isPrinting && selectedSpecimenData.length > 0) {
-      const timeoutId = setTimeout(() => {
-        window.print();
-        setIsPrinting(false); // Reset after print dialog is shown/closed
-      }, 200); // Small delay to ensure DOM is updated
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isPrinting, selectedSpecimenData]);
 
   return (
     <>
@@ -256,14 +246,19 @@ export function MultiQRCodePrintSheet({
       </Sheet>
 
       {isPrinting && selectedSpecimenData.length > 0 && (
-        <div className="print-only">
+        <PrintPreviewDialog
+          open={isPrinting}
+          onOpenChange={setIsPrinting}
+          title={t("qr_codes")}
+          templateSlug="qr_codes"
+        >
           <PrintableQRCodeArea
             specimens={selectedSpecimenData}
             logoSize={logoSize}
             printSize={printSize}
             showDetails={showDetails}
           />
-        </div>
+        </PrintPreviewDialog>
       )}
     </>
   );

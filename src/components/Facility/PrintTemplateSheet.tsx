@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
+import { resolvePrintTemplate } from "@/Utils/print";
 import mutate from "@/Utils/request/mutate";
 import { FacilityRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
@@ -128,7 +129,8 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
         <SheetHeader>
           <SheetTitle>{t("print_templates")}</SheetTitle>
           <SheetDescription>
-            {t("print_templates_description")}
+            {t("print_templates_description")}{" "}
+            {t("print_template_inheritance_help")}
           </SheetDescription>
         </SheetHeader>
 
@@ -145,6 +147,9 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
             <TemplateEditor
               key={index}
               template={template}
+              effectiveTemplate={
+                resolvePrintTemplate(templates, template.slug) ?? template
+              }
               onUpdate={(updater) => updateTemplate(index, updater)}
               onRemove={() => removeTemplate(index)}
             />
@@ -178,10 +183,12 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
 
 function TemplateEditor({
   template,
+  effectiveTemplate,
   onUpdate,
   onRemove,
 }: {
   template: PrintTemplate;
+  effectiveTemplate: PrintTemplate;
   onUpdate: (updater: (tpl: PrintTemplate) => PrintTemplate) => void;
   onRemove: () => void;
 }) {
@@ -245,7 +252,10 @@ function TemplateEditor({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <PrintSetupSection template={template} onUpdate={onUpdate} />
+            <PrintSetupSection
+              template={effectiveTemplate}
+              onUpdate={onUpdate}
+            />
           </AccordionContent>
         </AccordionItem>
 
@@ -271,7 +281,10 @@ function TemplateEditor({
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <WatermarkSection template={template} onUpdate={onUpdate} />
+            <WatermarkSection
+              template={effectiveTemplate}
+              onUpdate={onUpdate}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -421,7 +434,7 @@ function PrintSetupSection({ template, onUpdate }: SectionProps) {
 
   return (
     <div className="space-y-2">
-      {template.print_setup?.auto_print && (
+      {template.print_setup?.auto_print !== undefined && (
         <div className="flex justify-end">
           <Button
             type="button"
