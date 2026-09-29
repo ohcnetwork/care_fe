@@ -1,9 +1,41 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import {
+  getEncounterCreateDialog,
+  openCreateEncounterDialog,
+} from "tests/facility/patient/encounter/encounterFormHelpers";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+async function createEncounter(
+  page: Page,
+  encounterClass: "Ambulatory" | "Inpatient",
+) {
+  await openCreateEncounterDialog(page);
+  const dialog = getEncounterCreateDialog(page);
+  await dialog
+    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
+    .click();
+
+  await Promise.all([
+    page.waitForURL(/\/encounter\/[^/]+/),
+    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
+  ]);
+
+  await expect(page.getByText("Encounter created successfully")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+}
+
+// The update form's label isn't associated with its SelectTrigger yet.
+function encounterStatusCombobox(page: Page) {
+  return page
+    .locator('label[data-slot="label"]')
+    .filter({ hasText: /^Encounter Status$/ })
+    .locator("..")
+    .getByRole("combobox");
+}
 
 test.describe("Encounter Keyboard Shortcuts", () => {
   let encounterUrl: string;
@@ -135,22 +167,36 @@ test.describe("Encounter Keyboard Shortcuts", () => {
         "active",
       );
     });
+  });
+});
 
-    test("should open Mark as Completed dialog using 'm c' shortcut", async ({
-      page,
-    }) => {
-      await page.keyboard.press("m");
-      await page.keyboard.press("c");
+test.describe("Mark as Completed Shortcut ('m c')", () => {
+  test("should open Mark as Completed dialog for a non-inpatient encounter", async ({
+    page,
+  }) => {
+    await createEncounter(page, "Ambulatory");
 
-      await expect(
-        page.getByRole("alertdialog", { name: "Mark as Complete" }),
-      ).toBeVisible();
+    await page.keyboard.press("m");
+    await page.keyboard.press("c");
 
-      await expect(
-        page.getByText(
-          "This action will close Appointment, Token and Encounter",
-        ),
-      ).toBeVisible();
-    });
+    await expect(
+      page.getByRole("alertdialog", { name: "Mark as Complete" }),
+    ).toBeVisible();
+
+    await expect(
+      page.getByText("This action will close Appointment, Token and Encounter"),
+    ).toBeVisible();
+  });
+
+  test("should navigate to update encounter page with Discharged status for an Inpatient encounter", async ({
+    page,
+  }) => {
+    await createEncounter(page, "Inpatient");
+
+    await page.keyboard.press("m");
+    await page.keyboard.press("c");
+
+    await expect(page).toHaveURL(/questionnaire\/encounter\?toDischarge=true/);
+    await expect(encounterStatusCombobox(page)).toHaveText("Discharged");
   });
 });
