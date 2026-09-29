@@ -1,45 +1,73 @@
-import careConfig from "@careConfig";
-import { useRoutes } from "raviger";
-
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
+import { Redirect, useRoutes } from "raviger";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientProfile } from "@/components/Patient/PatientProfile";
-
-import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
-import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
+import DiagnosticReportDetail from "@/pages/Patient/DiagnosticReportDetail";
+import PatientProfileSettings from "@/pages/Patient/PatientProfileSettings";
+import PatientRecords from "@/pages/Patient/PatientRecords";
+import PatientVisits from "@/pages/Patient/PatientVisits";
+import PrescriptionDetail from "@/pages/Patient/PrescriptionDetail";
+import SelectProfile from "@/pages/Patient/SelectProfile";
+import VisitSummary from "@/pages/Patient/VisitSummary";
 import PatientIndex from "@/pages/Patient/index";
+import BookFacility from "@/pages/PublicAppointments/BookFacility";
+import BookPractitioner from "@/pages/PublicAppointments/BookPractitioner";
 import PublicPatientRegistration from "@/pages/PublicAppointments/PatientRegistration";
-import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
 import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
 import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
 
+/** Routes available to a patient signed in with an OTP session. */
 const DashboardRoutes = {
-  "/nearby_facilities": () => <FacilitiesPage />,
+  "/nearby_facilities": () => <BookFacility />,
   "/facility/:facilityId/appointments/:appointmentId/success": ({
     appointmentId,
   }: {
     appointmentId: string;
   }) => <AppointmentSuccess appointmentId={appointmentId} />,
+
+  "/patient/select-profile": () => <SelectProfile />,
+  "/patient/add-profile": () => <PublicPatientRegistration />,
   "/patient/home": () => <PatientIndex />,
-  "/patient/:id": ({ id }: { id: string }) => (
-    <PatientProfile id={id} page="demography" />
-  ),
-  "/patient/:id/:tab": ({
-    id,
-    tab,
+
+  "/patient/visits": () => <PatientVisits />,
+  "/patient/visits/:appointmentId": ({
+    appointmentId,
   }: {
-    id: string;
-    tab: (typeof patientTabs)[number]["route"];
-  }) => <PatientProfile id={id} page={tab} />,
+    appointmentId: string;
+  }) => <VisitSummary appointmentId={appointmentId} />,
+
+  "/patient/profile": () => <PatientProfileSettings />,
+
+  "/patient/book/:facilityId": ({ facilityId }: { facilityId: string }) => (
+    <BookPractitioner facilityId={facilityId} />
+  ),
+
+  "/patient/records": () => <PatientRecords />,
+  "/patient/records/prescriptions/:id": ({ id }: { id: string }) => (
+    <PrescriptionDetail id={id} />
+  ),
+  "/patient/records/reports/:id": ({ id }: { id: string }) => (
+    <DiagnosticReportDetail id={id} />
+  ),
+
+  // Superseded by the records hub; kept so existing links keep working.
+  "/patient/medications": () => (
+    <Redirect to="/patient/records" query={{ tab: "prescriptions" }} />
+  ),
+  "/patient/diagnostic_reports": () => (
+    <Redirect to="/patient/records" query={{ tab: "reports" }} />
+  ),
+
+  // `/patient/:id` is deliberately NOT routed here. PatientProfile is a
+  // staff-facing component backed by authenticated facility APIs, so under an
+  // OTP session it only ever rendered an error page — and its wildcard swallowed
+  // unmatched paths like `/patient/profile`. The staff app serves those routes
+  // through AppRouter (src/Routers/routes/PatientRoutes.tsx) instead.
 };
 
 const AppointmentRoutes = {
@@ -65,13 +93,6 @@ const AppointmentRoutes = {
       appointmentId={appointmentId}
     />
   ),
-  "/facility/:facilityId/appointments/:staffId/patient-select": ({
-    facilityId,
-    staffId,
-  }: {
-    facilityId: string;
-    staffId: string;
-  }) => <PatientSelect facilityId={facilityId} staffId={staffId} />,
   "/facility/:facilityId/appointments/:staffId/patient-registration": ({
     facilityId,
     staffId,
@@ -86,49 +107,26 @@ export default function PatientRouter() {
 
   const appointmentPages = useRoutes(AppointmentRoutes);
 
-  const sidebarOpen = useSidebarState();
-
   if (!pages) {
     if (appointmentPages) {
-      return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
+      return (
+        <PatientUserProvider>
+          <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+            {appointmentPages}
+          </ErrorBoundary>
+        </PatientUserProvider>
+      );
     }
     return <PublicRouter />;
   }
 
+  // Each patient page owns its own chrome via PatientAppShell.
   return (
     <PatientUserProvider>
-      <SidebarProvider defaultOpen={sidebarOpen}>
-        <AppSidebar sidebarFor={SidebarFor.PATIENT} />
-        <main
-          id="pages"
-          className="flex-1 overflow-y-auto bg-gray-100 focus:outline-hidden md:pb-2 md:pr-2"
-        >
-          <BrowserWarning />
-          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow-sm md:hidden">
-            <div className="flex items-center">
-              <SidebarTrigger className="px-2" />
-            </div>
-            <a
-              href="/"
-              className="flex h-full w-full items-center px-4 md:hidden"
-            >
-              <img
-                className="h-8 w-auto"
-                src={careConfig.mainLogo?.dark}
-                alt="care logo"
-              />
-            </a>
-          </div>
-          <div
-            className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
-            data-cui-page
-          >
-            <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
-            </ErrorBoundary>
-          </div>
-        </main>
-      </SidebarProvider>
+      <BrowserWarning />
+      <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+        {pages}
+      </ErrorBoundary>
     </PatientUserProvider>
   );
 }

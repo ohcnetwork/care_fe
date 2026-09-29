@@ -57,6 +57,41 @@ export enum ResourceRequestCategory {
   OTHER = "other",
 }
 
+/**
+ * `ResourceRequest.priority` is stored as an integer; the referral flow maps
+ * priority >= 2 to URGENT (emergency is a separate flag). These are the
+ * selectable urgency tiers with their integer values.
+ */
+export const RESOURCE_REQUEST_PRIORITY_OPTIONS = [
+  { value: 1, labelKey: "resource_request_priority__routine", icon: "l-check" },
+  {
+    value: 2,
+    labelKey: "resource_request_priority__urgent",
+    icon: "l-exclamation-triangle",
+  },
+  {
+    value: 3,
+    labelKey: "resource_request_priority__emergency",
+    icon: "l-ambulance",
+  },
+] as const;
+
+/**
+ * Beckn transaction state the backend persists on a resource request when it is
+ * created through the Care Coordination Network referral flow.
+ */
+export interface BecknResourceExtension {
+  transactionId?: string;
+  coordinationId?: string;
+  contract?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export interface ResourceRequestExtensions {
+  beckn?: BecknResourceExtension;
+  [key: string]: unknown;
+}
+
 export interface ResourceRequestBase {
   emergency: boolean;
   title: string;
@@ -74,6 +109,7 @@ export interface ResourceRequestListRead extends ResourceRequestBase {
   assigned_facility: FacilityRead | null;
   created_date: string;
   modified_date: string;
+  extensions?: ResourceRequestExtensions;
 }
 
 export interface ResourceRequestRead extends ResourceRequestListRead {
