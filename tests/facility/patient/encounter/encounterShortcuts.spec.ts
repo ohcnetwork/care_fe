@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  dischargeDispositionCombobox,
+  encounterStatusCombobox,
   getEncounterCreateDialog,
   openCreateEncounterDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
@@ -28,13 +30,20 @@ async function createEncounter(
   await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 }
 
-// The update form's label isn't associated with its SelectTrigger yet.
-function encounterStatusCombobox(page: Page) {
-  return page
-    .locator('label[data-slot="label"]')
-    .filter({ hasText: /^Encounter Status$/ })
-    .locator("..")
-    .getByRole("combobox");
+async function markEncounterAsComplete(page: Page) {
+  await page.keyboard.press("m");
+  await page.keyboard.press("c");
+
+  const dialog = page.getByRole("alertdialog", { name: "Mark as Complete" });
+  await expect(dialog).toBeVisible();
+  await expect(
+    page.getByText("This action will close Appointment, Token and Encounter"),
+  ).toBeVisible();
+
+  await dialog.getByRole("button", { name: /^Mark as Complete/ }).click();
+  await expect(
+    page.getByText("Encounter Completed", { exact: true }),
+  ).toBeVisible();
 }
 
 test.describe("Encounter Keyboard Shortcuts", () => {
@@ -171,21 +180,10 @@ test.describe("Encounter Keyboard Shortcuts", () => {
 });
 
 test.describe("Mark as Completed Shortcut ('m c')", () => {
-  test("should open Mark as Completed dialog for a non-inpatient encounter", async ({
-    page,
-  }) => {
+  test("should complete a non-inpatient encounter", async ({ page }) => {
     await createEncounter(page, "Ambulatory");
 
-    await page.keyboard.press("m");
-    await page.keyboard.press("c");
-
-    await expect(
-      page.getByRole("alertdialog", { name: "Mark as Complete" }),
-    ).toBeVisible();
-
-    await expect(
-      page.getByText("This action will close Appointment, Token and Encounter"),
-    ).toBeVisible();
+    await markEncounterAsComplete(page);
   });
 
   test("should navigate to update encounter page with Discharged status for an Inpatient encounter", async ({
@@ -198,5 +196,19 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
 
     await expect(page).toHaveURL(/questionnaire\/encounter\?toDischarge=true/);
     await expect(encounterStatusCombobox(page)).toHaveText("Discharged");
+
+    await dischargeDispositionCombobox(page).click();
+    await page.getByRole("option", { name: "Home", exact: true }).click();
+    await page.getByRole("button", { name: "Submit", exact: true }).click();
+
+    await expect(
+      page.getByText("Questionnaire submitted successfully"),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/updates$/);
+    await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+
+    await expect(page.getByText("Discharged").nth(1)).toBeVisible();
+
+    await markEncounterAsComplete(page);
   });
 });

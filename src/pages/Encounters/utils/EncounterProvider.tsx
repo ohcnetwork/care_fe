@@ -103,7 +103,7 @@ export function EncounterProvider({
     }),
   });
 
-  const { data: primaryEncounter, isLoading: isPrimaryEncounterLoading } =
+  const { data: primaryEncounter, isFetching: isPrimaryEncounterLoading } =
     useQuery({
       queryKey: ["encounter", primaryEncounterId],
       queryFn: query(encounterApi.get, {

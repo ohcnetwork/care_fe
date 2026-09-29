@@ -53,3 +53,19 @@ export function getFutureDateButtonFromCalendar(page: Page) {
 export function getEncounterCreateDialog(page: Page) {
   return page.getByRole("dialog", { name: "Initiate Patient Encounter" });
 }
+
+function comboboxByLabel(page: Page, label: string | RegExp) {
+  return page
+    .locator('label[data-slot="label"]')
+    .filter({ hasText: label })
+    .locator("..")
+    .getByRole("combobox");
+}
+
+export function encounterStatusCombobox(page: Page) {
+  return comboboxByLabel(page, /^Encounter Status$/);
+}
+
+export function dischargeDispositionCombobox(page: Page) {
+  return comboboxByLabel(page, /^Discharge Disposition/);
+}
