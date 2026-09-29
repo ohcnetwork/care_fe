@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
+import { CustomNavLinks } from "@/components/ui/sidebar/custom-nav-links";
 import { FacilityNav } from "@/components/ui/sidebar/facility/facility-nav";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
 import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
@@ -37,6 +38,7 @@ import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import type { NavScope } from "@/types/nav/customNavLink";
 import { CurrentUserRead } from "@/types/user/user";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -95,6 +97,16 @@ export function AppSidebar({
     if (!user?.organizations || !organizationId) return undefined;
     return user.organizations.find((org) => org.id === organizationId);
   }, [user?.organizations, organizationId]);
+
+  const navScope: NavScope = (() => {
+    if (facilityLocationSidebar) return "location";
+    if (facilityServiceSidebar) return "service";
+    if (facilitySidebar) return "facility";
+    if (adminSidebar) return "admin";
+    if (patientSidebar) return "patient";
+    if (responsibilityId || selectedOrganization) return "organization";
+    return "all";
+  })();
 
   React.useEffect(() => {
     if (!user?.facilities || !facilityId || !facilitySidebar) {
@@ -190,6 +202,7 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <CustomNavLinks scope={navScope} />
         {patientSidebar ? (
           <PatientNavUser />
         ) : (
