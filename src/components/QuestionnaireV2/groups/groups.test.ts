@@ -121,7 +121,7 @@ test("saved children have unique IDs and scoped references, new fields are nulla
 
 test("backend null structured markers match ordinary children and malformed imports are rejected", () => {
   const group = makeGroup();
-  const saved = JSON.parse(JSON.stringify(group)) as Question;
+  const saved = structuredClone(group);
   Object.assign(saved.questions![0], { structured_type: null });
   assert.equal(
     compatibleGroupFields(saved, definition).teeth?.id,

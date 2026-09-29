@@ -1,5 +1,5 @@
 import { useAtomValue, useStore } from "jotai";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -10,6 +10,10 @@ import {
   updateResponsesAtPath,
   useResponseScope,
 } from "@/components/QuestionnaireV2/form/engine/responseScope";
+import {
+  EMPTY_ROW_KEYS,
+  growRowKeys,
+} from "@/components/QuestionnaireV2/form/engine/rowKeys";
 import {
   errorsAtom,
   initializeResponses,
@@ -57,6 +61,7 @@ export function RegisteredGroupSlot(props: {
     getQuestionGroupsVersion,
     getQuestionGroupsVersion,
   );
+  const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
   const definition = question.structured_type
     ? getQuestionGroup(question.structured_type)
     : undefined;
@@ -174,6 +179,8 @@ export function RegisteredGroupSlot(props: {
       },
     };
   });
+  const keys = growRowKeys(rowKeys, rows.length);
+  if (keys !== rowKeys) setRowKeys(keys);
   const incompatible =
     incompatibleGroupQuestions(question, definition).length > 0;
   const children = question.questions ?? [];
@@ -194,7 +201,7 @@ export function RegisteredGroupSlot(props: {
       {question.repeats
         ? rows.map((_, index) => (
             <ResponseRowProvider
-              key={index}
+              key={keys.keys[index]}
               groupId={question.id}
               rowIndex={index}
             >

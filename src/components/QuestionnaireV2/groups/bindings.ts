@@ -204,9 +204,10 @@ export function retainGroupRowErrors(
   if (action.type === "update") {
     const rowIndex = rows.indexOf(action.row);
     const rowPath = [...path, { questionId: groupId, rowIndex }];
+    const before = new Set(action.row);
     const changed = new Set(
       (nextRows[rowIndex] ?? [])
-        .filter((answer) => !action.row.includes(answer))
+        .filter((answer) => !before.has(answer))
         .map((answer) => answer.question_id),
     );
     return errors.filter(
