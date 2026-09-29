@@ -175,7 +175,13 @@ function StudioQuestionShell({
             )}
             <span aria-hidden className="mx-0.5 h-4 w-px bg-gray-200" />
             {toolbarButton(t("duplicate_question"), Copy, () =>
-              studio.dispatch({ type: "duplicateQuestion", id: question.id }),
+              studio.dispatch({
+                type: "duplicateQuestion",
+                id: question.id,
+                text: question.text
+                  ? t("cloned_questionnaire_title", { title: question.text })
+                  : undefined,
+              }),
             )}
             {toolbarButton(
               t("delete_question"),

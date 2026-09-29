@@ -1022,7 +1022,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-              {form.questionnaire.slug !== questionnaireSlug && (
+              {form.questionnaire.id !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"

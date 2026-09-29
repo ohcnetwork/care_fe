@@ -252,18 +252,10 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
         .then(() => true)
         .catch(() => false);
 
-      if (!searchSettled) {
-        // Environment issue (terminology sandbox down/empty) — the picker
-        // opened, which is all that can be pinned without live results.
-        test.info().annotations.push({
-          type: "environment",
-          description:
-            "UCUM search returned no results from the terminology sandbox; unit swap not exercised",
-        });
-        await page.keyboard.press("Escape");
-        await expect(unitTrigger).toContainText("milligram");
-        return;
-      }
+      test.skip(
+        !searchSettled,
+        "UCUM search returned no results from the terminology sandbox",
+      );
 
       // Pick the first hit that is not the seeded default.
       const pickedIndex = optionTexts.findIndex(

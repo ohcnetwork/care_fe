@@ -82,6 +82,18 @@ const SAVE_CHECKS: SaveCheck[] = [
     messageKey: "condition_target_required",
   },
   {
+    // An empty comparison answer can never match, so the question would be
+    // hidden forever in fill mode.
+    predicate: (question) =>
+      question.enable_when?.some(
+        (condition) =>
+          (condition.operator === "equals" ||
+            condition.operator === "not_equals") &&
+          condition.answer === "",
+      ) ?? false,
+    messageKey: "condition_answer_required",
+  },
+  {
     // Keep dangling conditions visible for the author to repair instead of
     // silently discarding them when their source question is deleted.
     predicate: (question, { typeByLinkId }) =>

@@ -19,6 +19,7 @@ function isQuestionLike(value: unknown): value is Question {
     link_id?: unknown;
     questions?: unknown;
     enable_when?: unknown;
+    answer_option?: unknown;
   };
   if (typeof candidate.text !== "string") return false;
   if (
@@ -52,6 +53,19 @@ function isQuestionLike(value: unknown): value is Question {
           condition !== null &&
           "question" in condition &&
           typeof condition.question === "string",
+      ))
+  ) {
+    return false;
+  }
+  if (
+    candidate.answer_option != null &&
+    (!Array.isArray(candidate.answer_option) ||
+      !candidate.answer_option.every(
+        (option: unknown) =>
+          typeof option === "object" &&
+          option !== null &&
+          "value" in option &&
+          typeof option.value === "string",
       ))
   ) {
     return false;

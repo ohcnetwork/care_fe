@@ -12,8 +12,7 @@ import {
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
-
-const QUESTIONNAIRE_SLUG = "enable-when-test";
+import { getQuestionnaireId } from "tests/support/questionnaireId";
 
 // Values that trigger (show) or keep safe (hide) dependent fields
 const EQUALS_TRIGGER = "Doctor"; // equals "Doctor" → dependents show
@@ -30,7 +29,7 @@ test.describe("Enable When — String Operators", () => {
     const encounterId = getEncounterId();
 
     await page.goto(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${QUESTIONNAIRE_SLUG}`,
+      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${getQuestionnaireId()}`,
     );
     await expect(page.getByText("Patient Name", { exact: true })).toBeVisible();
   });

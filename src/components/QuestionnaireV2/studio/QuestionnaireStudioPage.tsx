@@ -78,6 +78,8 @@ export function QuestionnaireStudioPage({
     scrollRequest,
     selectQuestion,
     revealQuestion,
+    focusTitle,
+    clearTitleFocus,
     selectedQuestion,
     selectedNumber,
     panel,
@@ -196,7 +198,10 @@ export function QuestionnaireStudioPage({
             questionnaire={questionnaire}
             questions={state.questions}
             view={view}
-            onViewChange={setView}
+            onViewChange={(next) => {
+              if (next === "preview") clearTitleFocus();
+              setView(next);
+            }}
             issues={issues}
             onSelectIssue={(questionId) => {
               setView("edit");
@@ -267,6 +272,7 @@ export function QuestionnaireStudioPage({
                   // selects a question programmatically.
                   key={selectedQuestion!.id}
                   question={selectedQuestion!}
+                  autoFocusTitle={focusTitle}
                   number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}

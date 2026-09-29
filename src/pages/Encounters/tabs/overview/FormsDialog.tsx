@@ -156,7 +156,7 @@ export const FormDialog = ({
                 <CommandGroup className="px-2">
                   <CommandItem
                     key={questionnaire.id}
-                    value={`${questionnaire.id} - ${questionnaire.title}`}
+                    value={`${questionnaire.slug} - ${questionnaire.title}`}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     onSelect={() => {
                       navigate(

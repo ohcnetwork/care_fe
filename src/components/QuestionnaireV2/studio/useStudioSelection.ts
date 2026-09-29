@@ -26,6 +26,9 @@ export function useStudioSelection(
     id: string;
     nonce: number;
   } | null>(null);
+  // The inspector focuses its title only after the author changed the
+  // selection themselves — never on page load or on returning from preview.
+  const [focusTitle, setFocusTitle] = useState(false);
   // Creating or importing questions selects them in the reducer — the
   // inspector must follow, or it would stay on Form settings showing
   // nothing about the question that just appeared.
@@ -38,6 +41,9 @@ export function useStudioSelection(
       ) {
         setInspectorTarget("question");
       }
+      if (action.type !== "reset" && action.type !== "updateQuestion") {
+        setFocusTitle(true);
+      }
       dispatch(action);
     },
     [dispatch],
@@ -47,6 +53,7 @@ export function useStudioSelection(
     (questionId: string) => {
       dispatch({ type: "select", id: questionId });
       setInspectorTarget("question");
+      setFocusTitle(true);
     },
     [dispatch],
   );
@@ -92,6 +99,8 @@ export function useStudioSelection(
   return {
     studioDispatch,
     setInspectorTarget,
+    focusTitle,
+    clearTitleFocus: () => setFocusTitle(false),
     openActionIndex,
     setOpenActionIndex,
     scrollRequest,

@@ -68,6 +68,7 @@ interface QuestionInspectorProps {
    *  mount's own, so a facility admin's create isn't rejected. */
   valueSetScope: ValueSetScope;
   dispatch: Dispatch<BuilderAction>;
+  autoFocusTitle?: boolean;
 }
 
 /**
@@ -85,6 +86,7 @@ export function QuestionInspector({
   subjectType,
   valueSetScope,
   dispatch,
+  autoFocusTitle,
 }: QuestionInspectorProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState("question");
@@ -249,11 +251,7 @@ export function QuestionInspector({
                 value={question.text}
                 placeholder={t("enter_question_title")}
                 onChange={(e) => onChange({ text: e.target.value })}
-                // The inspector remounts per selection (keyed by question in
-                // the page) — focusing the title keeps keyboard flow intact
-                // after canvas clicks and after delete/duplicate, where the
-                // acted-on element unmounts and focus would fall to <body>.
-                autoFocus
+                autoFocus={autoFocusTitle}
               />
             </div>
 

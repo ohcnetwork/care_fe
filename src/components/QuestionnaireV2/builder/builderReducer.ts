@@ -8,6 +8,7 @@ import {
 
 import { QuestionnaireAction } from "@/types/questionnaire/actions";
 import { EnableWhen, Question } from "@/types/questionnaire/question";
+import { swapElements } from "@/Utils/array";
 
 export interface BuilderState {
   questions: Question[];
@@ -44,7 +45,7 @@ export type BuilderAction =
        *  section" passes `{ type: "group" }` so the group lands atomically. */
       template?: Partial<Question>;
     }
-  | { type: "duplicateQuestion"; id: string }
+  | { type: "duplicateQuestion"; id: string; text?: string }
   | { type: "updateQuestion"; id: string; patch: Partial<Question> }
   | { type: "removeQuestions"; ids: string[] }
   | { type: "moveQuestion"; id: string; direction: "up" | "down" }
@@ -77,32 +78,6 @@ export function collectIds(question: Question): string[] {
 }
 
 /**
- * Boolean conditions persist the strings "Yes"/"No" — never JSON booleans.
- * Deployed evaluators normalize dependent boolean responses to "Yes"/"No"
- * before comparing, so true/false answers would never match. Applies to
- * equals/not_equals only; `exists` compares against a literal boolean
- * (`normalizeExistsConditionAnswer`). Lives here so editor display and
- * load-time migration cannot drift.
- */
-export function normalizeBooleanConditionAnswer(answer: unknown): "Yes" | "No" {
-  if (answer === true || answer === "true" || answer === "Yes") return "Yes";
-  return "No";
-}
-
-/**
- * `exists` answers persist as JSON booleans: the renderer enables an
- * `exists: false` dependent precisely when the controller has no value, and
- * the backend reaches the same reading only from a literal `false` — a
- * "No" string normalizes to True there and to "has a value" here, i.e. the
- * exact opposite of what the author picked.
- */
-export function normalizeExistsConditionAnswer(answer: unknown): boolean {
-  return (
-    answer !== false && answer !== "false" && answer !== "No" && answer !== "no"
-  );
-}
-
-/**
  * Builds a condition whose answer matches the shape its operator persists:
  * `exists` a literal boolean, equals/not_equals a string ("Yes"/"No" once the
  * target is boolean) and the comparison operators a number. Every operator or
@@ -116,21 +91,10 @@ export function buildCondition(
 ): EnableWhen {
   switch (operator) {
     case "exists":
-      return {
-        question,
-        operator,
-        answer: normalizeExistsConditionAnswer(answer),
-      };
+      return { question, operator, answer: answer === true };
     case "equals":
     case "not_equals":
-      return {
-        question,
-        operator,
-        answer:
-          typeof answer === "boolean"
-            ? normalizeBooleanConditionAnswer(answer)
-            : String(answer),
-      };
+      return { question, operator, answer: String(answer) };
     default:
       return {
         question,
@@ -141,85 +105,17 @@ export function buildCondition(
 }
 
 /**
- * Repairs enable_when answers to the convention each operator needs:
- * equals/not_equals JSON true/false (or "true"/"false") become "Yes"/"No",
- * and `exists` answers written as strings by earlier builder versions become
- * booleans again. The equals/not_equals repair is keyed off the target
- * question's type so string questions that legitimately answer "true" are
- * left alone; `exists` carries no such string, whatever the target type.
- */
-export function migrateLegacyBooleanEnableWhen(
-  questions: Question[],
-): Question[] {
-  const typeByLinkId = new Map<string, Question["type"]>();
-  const indexTypes = (list: Question[]) => {
-    for (const question of list) {
-      if (!typeByLinkId.has(question.link_id)) {
-        typeByLinkId.set(question.link_id, question.type);
-      }
-      indexTypes(question.questions ?? []);
-    }
-  };
-  indexTypes(questions);
-
-  const needsMigration = (condition: EnableWhen): boolean => {
-    // Ahead of the target-type guard: an `exists` answer is never a
-    // meaningful string, so these need repairing on non-boolean targets too.
-    if (condition.operator === "exists") {
-      return typeof condition.answer !== "boolean";
-    }
-    if (typeByLinkId.get(condition.question) !== "boolean") return false;
-    return (
-      (condition.operator === "equals" ||
-        condition.operator === "not_equals") &&
-      (typeof condition.answer === "boolean" ||
-        condition.answer === "true" ||
-        condition.answer === "false")
-    );
-  };
-
-  const migrate = (condition: EnableWhen): EnableWhen =>
-    buildCondition(
-      condition.question,
-      condition.operator,
-      // Migration must not change how a stored rule evaluates. Only a literal
-      // `false` ever read as "target is empty" — every legacy `exists` string,
-      // "No" included, already evaluated as "target is answered" in both the
-      // renderer and the backend, so it heals to `true`, not to its own
-      // author-facing reading. Below, `buildCondition` leaves equals/not_equals
-      // strings byte-identical (a string target may legitimately compare to
-      // "true"), so the boolean convention is applied here, where the target
-      // type is known to be boolean.
-      condition.operator === "exists"
-        ? true
-        : normalizeBooleanConditionAnswer(condition.answer),
-    );
-
-  return mapTree(questions, (list) =>
-    list.map((question) => {
-      if (!question.enable_when?.some(needsMigration)) return question;
-      return {
-        ...question,
-        enable_when: question.enable_when.map((condition) =>
-          needsMigration(condition) ? migrate(condition) : condition,
-        ),
-      };
-    }),
-  );
-}
-
-/**
  * Deep copy of one question subtree for the studio's Duplicate action:
  * fresh ids/link_ids via the shared regeneration walk, with enable_when
  * targets INSIDE the subtree remapped to the copies and targets OUTSIDE it
  * preserved verbatim (`unmappedConditions: "keep"`) — the duplicate keeps
  * the same visibility rules as its source.
  */
-function cloneSubtree(question: Question): Question {
+function cloneSubtree(question: Question, text?: string): Question {
   const copy = regenerateQuestionIds([question], {
     unmappedConditions: "keep",
   })[0];
-  return copy.text ? { ...copy, text: `${copy.text} (copy)` } : copy;
+  return text ? { ...copy, text } : copy;
 }
 
 /**
@@ -261,9 +157,7 @@ export function builderReducer(
 ): BuilderState {
   switch (action.type) {
     case "reset": {
-      // Boolean conditions are repaired on load; the fix lands with the next
-      // save (state stays clean — dirty: false).
-      const questions = migrateLegacyBooleanEnableWhen(action.questions);
+      const { questions } = action;
       return {
         questions,
         actions: action.actions,
@@ -368,7 +262,7 @@ export function builderReducer(
       if (findRegisteredGroupParent(state.questions, action.id)) return state;
       const source = findQuestion(state.questions, action.id);
       if (!source) return state;
-      const copy = cloneSubtree(source);
+      const copy = cloneSubtree(source, action.text);
       const questions = mapTree(state.questions, (list) => {
         const index = list.findIndex((q) => q.id === action.id);
         if (index === -1) return list;
@@ -411,10 +305,7 @@ export function builderReducer(
         const index = list.findIndex((q) => q.id === action.id);
         if (index === -1) return list;
         const target = action.direction === "up" ? index - 1 : index + 1;
-        if (target < 0 || target >= list.length) return list;
-        const next = [...list];
-        [next[index], next[target]] = [next[target], next[index]];
-        return next;
+        return swapElements(list, index, target);
       });
       return { ...state, questions, dirty: true };
     }

@@ -69,12 +69,14 @@ export function useStudioDraft({
 }: UseStudioDraftOptions) {
   const { t } = useTranslation();
   const [state, reactDispatch] = useReducer(builderReducer, INITIAL_STATE);
-  // Resets come from the server or Discard. Every other dispatch counts so
-  // an in-flight save cannot overwrite a newer edit or selection.
+  // Counts edits so an in-flight save cannot overwrite newer ones. Resets
+  // come from the server or Discard, and `select` changes nothing saved.
   const dispatchSeqRef = useRef(0);
   const dispatch = useCallback<typeof reactDispatch>(
     (action) => {
-      if (action.type !== "reset") dispatchSeqRef.current += 1;
+      if (action.type !== "reset" && action.type !== "select") {
+        dispatchSeqRef.current += 1;
+      }
       reactDispatch(action);
     },
     [reactDispatch],
@@ -132,10 +134,13 @@ export function useStudioDraft({
     const questionsEditedDuringFlight =
       dispatchSeqRef.current !== saveDispatchSeqRef.current;
     // isDirty alone cannot detect a second edit to an already-dirty field.
-    // Compare the submitted metadata to live values before resetting it.
+    // Compare the submitted metadata to the live values, parsed the same way
+    // handleSubmit parsed them (the schema trims the title).
+    const live = metaSchema.safeParse(form.getValues());
     const metaEditedDuringFlight =
       !saveMetaRef.current ||
-      !metadataMatches(saveMetaRef.current, form.getValues());
+      !live.success ||
+      !metadataMatches(saveMetaRef.current, live.data);
 
     // Each draft part resets independently. The mutation has already updated
     // the query cache, so revision badges advance even if newer edits remain.
