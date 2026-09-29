@@ -36,6 +36,7 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 
+import { Button } from "@/components/ui/button";
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationDetailSheet } from "./ObservationDetailSheet";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
@@ -235,17 +236,22 @@ export const ObservationVisualizer = ({
       {processedDataByGroup.map((group, groupIndex) => (
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               <ObservationDetailSheet
                 codes={group.codes}
                 title={group.title}
                 patientId={patientId}
                 encounterId={encounterId}
-              >
-                <span className="cursor-pointer text-sm font-medium text-left underline">
-                  {group.title}
-                </span>
-              </ObservationDetailSheet>
+                trigger={
+                  <Button
+                    variant="link"
+                    className="underline text-sm font-medium px-2"
+                  >
+                    {group.title}
+                  </Button>
+                }
+              />
+
               <Popover>
                 <PopoverTrigger className="!px-0">
                   <CareIcon

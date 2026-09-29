@@ -16,6 +16,7 @@ import {
 
 import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
 
+import { Button } from "@/components/ui/button";
 import { Code } from "@/types/base/code/code";
 
 export interface VitalsObservation {
@@ -58,11 +59,16 @@ export function VitalsTable({
                   title={code.display || code.code}
                   patientId={patientId}
                   encounterId={encounterId}
-                >
-                  <span className="cursor-pointer text-sm font-medium hover:underline">
-                    {code.display || ""}
-                  </span>
-                </ObservationDetailSheet>
+                  trigger={
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-sm font-medium p-0 h-fit"
+                    >
+                      {code.display || ""}
+                    </Button>
+                  }
+                />
 
                 <Popover>
                   <PopoverTrigger>

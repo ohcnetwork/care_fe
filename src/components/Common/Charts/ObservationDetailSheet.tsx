@@ -26,19 +26,19 @@ import { resolveObservationEntries } from "./observationDetailUtils";
 import { ObservationHistoryMatrix } from "./ObservationHistoryMatrix";
 
 interface ObservationDetailSheetProps {
-  children: React.ReactNode;
   codes: Code[];
   title: string;
   patientId: string;
   encounterId?: string;
+  trigger?: React.ReactNode;
 }
 
 export function ObservationDetailSheet({
-  children,
   codes,
   title,
   patientId,
   encounterId,
+  trigger,
 }: ObservationDetailSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -93,9 +93,7 @@ export function ObservationDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="appearance-none border-0 bg-transparent p-0 text-left text-inherit w-full">
-        {children}
-      </SheetTrigger>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-4xl flex flex-col p-0 gap-0 overflow-hidden h-dvh">
         <SheetHeader className="border-b border-gray-200 bg-white p-6 pb-4">
           <SheetTitle className="pr-8 text-xl font-bold text-gray-950">
@@ -144,6 +142,7 @@ export function ObservationDetailSheet({
         ) : totalCount === 0 || codeList.length === 0 ? (
           <EmptyState
             title={t("no_data_available")}
+            className="m-3"
             icon={<FileExclamationPointIcon className="size-6 text-gray-400" />}
           />
         ) : (

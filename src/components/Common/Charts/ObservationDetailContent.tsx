@@ -298,6 +298,7 @@ export function ObservationDetailContent({
       ) : (
         <EmptyState
           title={t("no_plottable_values")}
+          className="m-3"
           icon={<FileExclamationPointIcon className="size-6 text-gray-400" />}
         />
       )}

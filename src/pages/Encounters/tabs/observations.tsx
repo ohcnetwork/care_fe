@@ -152,38 +152,44 @@ export const EncounterObservationsTab = () => {
                       title={item.main_code.display}
                       patientId={patientId}
                       encounterId={encounterId}
-                    >
-                      <Card className="flex justify-between items-center p-3 border-gray-200 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            {item.value.value && (
-                              <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
-                                {formatValue(item.value.value, item.value_type)}
+                      trigger={
+                        <Card className="flex justify-between items-center p-4 border-gray-200 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer w-full">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              {item.value.value && (
+                                <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
+                                  {formatValue(
+                                    item.value.value,
+                                    item.value_type,
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            {item.note && (
+                              <div className="mt-1 text-sm text-gray-500">
+                                {item.note}
+                              </div>
+                            )}
+                            <div className="font-medium text-sm text-gray-600">
+                              {item.main_code?.display ||
+                                item.main_code?.code ||
+                                t("unknown")}
+                            </div>
+                            {item.data_entered_by && (
+                              <div className="text-gray-600 text-sm">
+                                {t("filed_by")}{" "}
+                                <span className="font-medium text-gray-800">
+                                  {formatName(item.data_entered_by)}
+                                </span>
                               </div>
                             )}
                           </div>
-                          {item.note && (
-                            <div className="mt-1 text-sm text-gray-500">
-                              {item.note}
-                            </div>
-                          )}
-                          <div className="font-medium text-sm text-gray-600">
-                            {item.main_code?.display ||
-                              item.main_code?.code ||
-                              t("unknown")}
+                          <div>
+                            <ArrowRight className="size-5 text-gray-700 hover:text-primary-500" />
                           </div>
-                          {item.data_entered_by && (
-                            <div className="text-gray-600 text-sm">
-                              {t("filed_by")}{" "}
-                              <span className="font-medium text-gray-800">
-                                {formatName(item.data_entered_by)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <ArrowRight className="size-5 text-gray-700 hover:text-primary-500" />
-                      </Card>
-                    </ObservationDetailSheet>
+                        </Card>
+                      }
+                    />
                   )}
                 </div>
               ))}

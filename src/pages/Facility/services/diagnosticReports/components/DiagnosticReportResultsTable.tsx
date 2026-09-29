@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
 
+import { Button } from "@/components/ui/button";
 import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   Interpretation,
@@ -197,7 +198,8 @@ export function DiagnosticReportResultsTable({
     const highlight = observation.interpretation?.highlight ?? false;
     const observationTitle =
       observation.observation_definition?.title ||
-      observation.observation_definition?.code?.display;
+      observation.observation_definition?.code?.display ||
+      t("observation");
 
     return (
       <>
@@ -217,13 +219,14 @@ export function DiagnosticReportResultsTable({
                 title={observationTitle || t("observation")}
                 patientId={patientId}
                 encounterId={encounterId}
-              >
-                <span className="cursor-pointer text-left font-medium underline">
-                  {observationTitle || t("observation")}
-                </span>
-              </ObservationDetailSheet>
+                trigger={
+                  <Button variant="link" className="font-medium underline p-0">
+                    {observationTitle}
+                  </Button>
+                }
+              />
             ) : (
-              observationTitle || t("observation")
+              observationTitle
             )}
           </TableCell>
           <TableCell className="whitespace-normal wrap-break-word align-top">
