@@ -245,7 +245,16 @@ export const structuredHandlers: {
           api: chargeItemApi.applyChargeItemDefinitions,
           pathParams: { facilityId: facilityId! },
           body: {
-            requests: chargeItems,
+            requests: chargeItems.map((item) => ({
+              charge_item_definition: item.charge_item_definition,
+              encounter: item.encounter,
+              patient: item.patient,
+              service_resource: item.service_resource,
+              service_resource_id: item.service_resource_id,
+              account: item.account,
+              quantity: item.quantity,
+              performer_actor: item.performer_actor,
+            })),
           },
           referenceId: "charge_item",
         },

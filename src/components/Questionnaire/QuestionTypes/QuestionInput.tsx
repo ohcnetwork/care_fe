@@ -438,7 +438,7 @@ export function QuestionInput({
                 className={cn("space-y-1", { "flex-1": removeButton })}
                 id={"question-" + question.id}
               >
-                {index === 0 && question.type !== "structured" && (
+                {index === 0 && (
                   <div className="px-2 pt-2 bg-gray-100 md:bg-transparent">
                     <QuestionLabel
                       question={question}

@@ -1,0 +1,67 @@
+import { useId } from "react";
+import { useTranslation } from "react-i18next";
+
+import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+
+import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
+import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
+
+import { replaceEntryAt } from "./withEntryAt";
+
+export function BooleanInput({
+  question,
+  disabled,
+  labelId,
+  errorId,
+  valueIndex,
+}: RendererInputProps) {
+  const { t } = useTranslation();
+  const radioGroupName = useId();
+  const [response, updateResponse] = useQuestionResponse(question.id);
+  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
+  // seeded string from answer_option) renders unanswered instead of crashing.
+  const entry = response?.values[valueIndex ?? 0];
+  const value = entry?.type === "boolean" ? entry.value : undefined;
+
+  const handleChange = (next: boolean) => {
+    // Re-clicking the selected option clears a non-required boolean;
+    // enable_when `exists` sources depend on this.
+    const clearing = value === next && !question.required;
+    updateResponse({
+      values: replaceEntryAt(
+        response?.values,
+        valueIndex,
+        { type: "boolean", value: clearing ? undefined : next },
+        clearing,
+      ),
+    });
+  };
+
+  return (
+    <div
+      role="radiogroup"
+      aria-labelledby={labelId}
+      aria-required={question.required || undefined}
+      aria-describedby={errorId}
+      aria-invalid={!!errorId || undefined}
+      className="flex flex-wrap gap-3"
+    >
+      <ChoiceChip
+        control="radio"
+        name={radioGroupName}
+        label={t("yes")}
+        checked={value === true}
+        disabled={disabled}
+        onCheckedChange={() => handleChange(true)}
+      />
+      <ChoiceChip
+        control="radio"
+        name={radioGroupName}
+        label={t("no")}
+        checked={value === false}
+        disabled={disabled}
+        onCheckedChange={() => handleChange(false)}
+      />
+    </div>
+  );
+}

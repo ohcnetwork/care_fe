@@ -42,6 +42,7 @@ import {
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { isCoreStructuredType } from "@/types/questionnaire/structured";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import BackButton from "@/components/Common/BackButton";
@@ -824,7 +825,10 @@ export function QuestionnaireForm({
 
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
-          if (response.structured_type) {
+          if (
+            response.structured_type &&
+            isCoreStructuredType(response.structured_type)
+          ) {
             const structuredData = response.values?.[0]?.value;
             if (Array.isArray(structuredData) && structuredData.length > 0) {
               structuredPromises.push(

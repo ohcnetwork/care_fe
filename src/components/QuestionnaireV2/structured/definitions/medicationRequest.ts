@@ -1,0 +1,54 @@
+import { validateMedicationRequestQuestion } from "@/components/Questionnaire/QuestionTypes/MedicationRequestQuestion";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
+
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
+import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import { sanitizeNote } from "./adapt";
+
+import { MedicationRequestInput } from "@/components/QuestionnaireV2/structured/inputs/MedicationRequestInput";
+
+export const medicationRequestDefinition: StructuredTypeDefinition<"medication_request"> =
+  {
+    type: "medication_request",
+    component: MedicationRequestInput,
+    requires: ["patientId", "encounterId"],
+    subjects: ["encounter"],
+    draftPolicy: "serialize",
+    validate: (medications, questionId) =>
+      validateMedicationRequestQuestion(medications, questionId),
+    buildRequests: async (
+      medications,
+      { patientId, encounterId, questionId, path },
+    ) => {
+      const dirtyMedications = medications.filter((m) => m.dirty);
+      if (!patientId || dirtyMedications.length === 0) return [];
+      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      return [
+        {
+          url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
+          method: "POST",
+          body: {
+            datapoints: dirtyMedications.map((medication) => ({
+              ...medication,
+              ...(!medication.id && {
+                create_prescription: {
+                  ...medication.create_prescription,
+                  status: PrescriptionStatus.active,
+                  alternate_identifier: prescriptionIdentifier,
+                },
+              }),
+              note: sanitizeNote(medication.note),
+              encounter: encounterId,
+              patient: patientId,
+              requester: medication.requester?.id,
+            })),
+          },
+          reference_id: structuredReferenceId(
+            "medication_request",
+            questionId,
+            path,
+          ),
+        },
+      ];
+    },
+  };

@@ -1,4 +1,5 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
+import type { RegisteredGroupDefinition } from "@/components/QuestionnaireV2/groups/registry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
@@ -121,20 +122,17 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
-// To Support additional options to create delivery orders
 export type DeliveryOrderActionsComponentType = React.FC<{
   facilityId: string;
   locationId: string;
 }>;
 
-// Sections rendered on the user profile (summary) page
 export type UserProfileSectionsComponentType = React.FC<{
   user: UserRead;
   isOwnProfile: boolean;
   className?: string;
 }>;
 
-// Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
@@ -157,11 +155,9 @@ export type SupportedPluginComponents = {
   UserProfileSections: UserProfileSectionsComponentType;
 };
 
-// Create a type for lazy-loaded components
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LazyComponent<T extends React.FC<any>> = LazyExoticComponent<T>;
 
-// Define PluginComponentMap with lazy-loaded components
 export type PluginComponentMap = {
   [K in keyof SupportedPluginComponents]?: LazyComponent<
     SupportedPluginComponents[K]
@@ -187,20 +183,14 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
-/**
- * Plugin override definition for replacing registered components
- */
 export type PluginOverride = {
-  /** The key of the component to override (must be registered with register()) */
+  /** Key the target component was registered under with `register()`. */
   component: string;
-  /** The replacement component */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacement: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
-  /** Optional conditions for when this override applies */
   condition?: OverrideCondition;
-  /** Priority (higher = takes precedence, default 0) */
+  /** Higher wins; default 0. */
   priority?: number;
-  /** Description for debugging */
   description?: string;
 };
 
@@ -223,8 +213,9 @@ export type PluginManifest = {
   >;
   encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
-  /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
+  /** Registered groups contribute ordinary child questions and their rendering. */
+  registeredQuestionGroups?: readonly RegisteredGroupDefinition[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

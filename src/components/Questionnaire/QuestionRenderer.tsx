@@ -10,6 +10,7 @@ import {
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import { isCoreStructuredType } from "@/types/questionnaire/structured";
 
 import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 
@@ -61,6 +62,7 @@ export function QuestionRenderer({
   const shouldBeFullWidth = (question: Question): boolean =>
     question.type === "structured" &&
     !!question.structured_type &&
+    isCoreStructuredType(question.structured_type) &&
     FULL_WIDTH_QUESTION_TYPES.includes(question.structured_type);
 
   return (

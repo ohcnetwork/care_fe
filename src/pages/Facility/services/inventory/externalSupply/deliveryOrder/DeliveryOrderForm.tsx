@@ -51,6 +51,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { ExtensionContexts } from "@/Utils/schema/types";
 
 const createBaseSchema = (t: (key: string) => string, internal: boolean) =>
   z.object({
@@ -146,6 +147,7 @@ export default function DeliveryOrderForm({
     () =>
       getCombinedExtensionProps(
         getExtensions(ExtensionEntityType.supply_delivery_order, "write"),
+        ExtensionContexts.supply_delivery_order_form,
       ),
     [getExtensions],
   );
@@ -175,6 +177,7 @@ export default function DeliveryOrderForm({
   const extensions = useEntityExtensions({
     entityType: ExtensionEntityType.supply_delivery_order,
     schemaType: "write",
+    context: ExtensionContexts.supply_delivery_order_form,
     form,
     existingData: existingData?.extensions as
       Record<string, Record<string, unknown>> | undefined,

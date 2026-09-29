@@ -20,6 +20,7 @@ interface FileUploadDropdownProps {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
   buttonClassName?: string;
   buttonText?: string;
+  disabled?: boolean;
 }
 
 export default function FileUploadDropdown({
@@ -29,6 +30,7 @@ export default function FileUploadDropdown({
   buttonVariant = "outline",
   buttonClassName = "flex flex-row items-center",
   buttonText,
+  disabled = false,
 }: FileUploadDropdownProps) {
   const { t } = useTranslation();
   const internalInputRef = useRef<HTMLInputElement | null>(null);
@@ -42,6 +44,7 @@ export default function FileUploadDropdown({
           type="button"
           variant={buttonVariant}
           className={buttonClassName}
+          disabled={disabled}
         >
           <CareIcon icon="l-file-upload" className="mr-1" />
           <span>{buttonText ?? t("add_files")}</span>
