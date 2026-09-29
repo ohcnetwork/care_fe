@@ -245,7 +245,7 @@ export function ManageQueuePage({
             ongoing: {
               label: t("ongoing"),
               labelSuffix: (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 hidden md:flex">
                   <AnimatedCounter count={onGoingCount} />
                 </Badge>
               ),
@@ -259,7 +259,7 @@ export function ManageQueuePage({
             completed: {
               label: t("finished"),
               labelSuffix: (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 hidden md:flex">
                   <AnimatedCounter count={finishedCount} />
                 </Badge>
               ),
