@@ -297,17 +297,18 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
     useState<GroupedMedication | null>(null);
 
   // Calculate last modified date
+  const administrationResults = administrations?.results;
   const lastModifiedDate = useMemo(() => {
-    if (!administrations?.results?.length) return null;
+    if (!administrationResults?.length) return null;
 
-    const sortedAdmins = [...administrations.results].sort(
+    const sortedAdmins = [...administrationResults].sort(
       (a, b) =>
         new Date(b.occurrence_period_start).getTime() -
         new Date(a.occurrence_period_start).getTime(),
     );
 
     return new Date(sortedAdmins[0].occurrence_period_start);
-  }, [administrations?.results]);
+  }, [administrationResults]);
 
   // Mutations
   const { mutate: discontinueMedication } = useMutation({

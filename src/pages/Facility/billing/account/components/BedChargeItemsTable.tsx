@@ -244,12 +244,13 @@ function BedChargeItemsTable({
     isLoading: boolean;
   };
 
+  const chargeItemResults = chargeItems?.results;
   const groupedChargeItems = useMemo(() => {
-    if (!chargeItems?.results?.length) {
+    if (!chargeItemResults?.length) {
       return {};
     }
-    return groupChargeItemsByLocation(chargeItems.results);
-  }, [chargeItems?.results]);
+    return groupChargeItemsByLocation(chargeItemResults);
+  }, [chargeItemResults]);
 
   const toggleItemExpand = (itemId: string) => {
     setExpandedItems((prev) => ({
