@@ -16,7 +16,7 @@ test.describe("Healthcare Services Management - Delete", () => {
 
   test("Delete an existing healthcare service", async ({ page }) => {
     const serviceName = faker.commerce.productName();
-    await page.getByRole("button", { name: "Add Healthcare Service" }).click();
+    await page.getByRole("link", { name: "Add Healthcare Service" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(serviceName);
     await page
       .getByRole("combobox")

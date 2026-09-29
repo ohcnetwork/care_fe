@@ -124,16 +124,16 @@ const RenderCard = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(
-                        `/admin/questionnaire/${questionnaire.slug}/edit`,
-                      );
-                    }}
+                    asChild
                     className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                   >
-                    <EyeIcon className="size-4 mr-1" />
-                    {t("view")}
+                    <Link
+                      href={`/admin/questionnaire/${questionnaire.slug}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <EyeIcon className="size-4 mr-1" />
+                      {t("view")}
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -204,12 +204,18 @@ const RenderTable = ({
                       {questionnaire.description}
                     </div>
                     <Button
+                      asChild
                       variant="outline"
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
                     >
-                      <EyeIcon className="size-4 mr-0" />
-                      {t("view")}
+                      <Link
+                        href={`/admin/questionnaire/${questionnaire.slug}/edit`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <EyeIcon className="size-4 mr-0" />
+                        {t("view")}
+                      </Link>
                     </Button>
                   </div>
                 </TableCell>
@@ -289,7 +295,7 @@ export function QuestionnaireList() {
             />
           </div>
 
-          <Button className="w-full sm:w-auto">
+          <Button asChild className="w-full sm:w-auto">
             <Link
               href="/admin/questionnaire/create"
               className="flex items-center gap-2"

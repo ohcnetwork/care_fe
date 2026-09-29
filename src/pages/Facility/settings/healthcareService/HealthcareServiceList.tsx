@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -55,16 +55,13 @@ export default function HealthcareServiceList({
               {t("manage_healthcare_services")}
             </p>
           </div>
-          <Button
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/healthcare_services/new`,
-              )
-            }
-            className="w-full md:w-auto mt-2 md:mt-0"
-          >
-            <CareIcon icon="l-plus" className="mr-2" />
-            {t("add_healthcare_service")}
+          <Button asChild className="w-full md:w-auto mt-2 md:mt-0">
+            <Link
+              href={`/facility/${facilityId}/settings/healthcare_services/new`}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              {t("add_healthcare_service")}
+            </Link>
           </Button>
         </div>
         <div className=" relative w-full md:w-auto mb-6">

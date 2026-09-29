@@ -135,14 +135,12 @@ export default function SettingsHealthcareServiceShow({
                 {t("delete")}
               </Button>
             )}
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}/edit`,
-                )
-              }
-            >
-              {t("edit")}
+            <Button asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}/edit`}
+              >
+                {t("edit")}
+              </Link>
             </Button>
           </div>
           <ConfirmActionDialog

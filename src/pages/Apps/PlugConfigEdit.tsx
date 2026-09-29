@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "raviger";
+import { Link, useNavigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -128,12 +128,8 @@ export function PlugConfigEdit({ slug }: Props) {
         </div>
         <div className="flex gap-2">
           <Button type="submit">{t("save")}</Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/admin/apps")}
-          >
-            {t("cancel")}
+          <Button variant="outline" asChild>
+            <Link href="/admin/apps">{t("cancel")}</Link>
           </Button>
         </div>
       </form>

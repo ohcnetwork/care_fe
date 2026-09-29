@@ -50,7 +50,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 
 const typeTestedSchema = z.object({
   is_derived: z.boolean(),
@@ -165,15 +165,7 @@ function SpecimenDefinitionFormContent({
       navigate(`/facility/${facilityId}/settings/specimen_definitions`);
     }
   },
-  onCancel = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onCancel,
 }: SpecimenDefinitionFormContentProps) {
   const { t } = useTranslation();
   const isEditMode = Boolean(specimenSlug);
@@ -870,9 +862,23 @@ function SpecimenDefinitionFormContent({
             </Card>
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                {t("cancel")}
-              </Button>
+              {onCancel ? (
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  {t("cancel")}
+                </Button>
+              ) : (
+                <Button variant="outline" asChild>
+                  <Link
+                    href={
+                      specimenSlug
+                        ? `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`
+                        : `/facility/${facilityId}/settings/specimen_definitions`
+                    }
+                  >
+                    {t("cancel")}
+                  </Link>
+                </Button>
+              )}
               <Button type="submit" disabled={isCreating || isUpdating}>
                 {t("save")}
               </Button>

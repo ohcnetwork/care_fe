@@ -16,7 +16,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   async function createStockRequest(page: Page, orderNameParam?: string) {
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     orderName = orderNameParam ?? faker.lorem.words(5);
-    await page.getByRole("button", { name: "Raise Stock Request" }).click();
+    await page.getByRole("link", { name: "Raise Stock Request" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(orderName);
     await page
       .getByRole("combobox")
@@ -93,7 +93,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .locator("table tbody tr")
       .filter({ hasText: orderName });
     await expect(orderRow.first()).toBeVisible();
-    await orderRow.first().getByRole("button", { name: "See Details" }).click();
+    await orderRow.first().getByRole("link", { name: "See Details" }).click();
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
@@ -122,7 +122,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .locator("table tbody tr")
       .filter({ hasText: orderName });
     await expect(orderRow.first()).toBeVisible();
-    await orderRow.first().getByRole("button", { name: "See Details" }).click();
+    await orderRow.first().getByRole("link", { name: "See Details" }).click();
     let tableRow1 = page.locator("table tbody tr").nth(0);
     await expect(tableRow1).toContainText("Paracetamol");
     await expect(tableRow1).toContainText("5");
@@ -153,7 +153,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await expect(incomingDeliveryRow.first()).toBeVisible();
     await incomingDeliveryRow
       .first()
-      .getByRole("button", { name: "View Details" })
+      .getByRole("link", { name: "View Details" })
       .click();
     await page
       .getByRole("row", { name: "Requested Qty." })

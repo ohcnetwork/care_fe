@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -59,14 +59,15 @@ export function FacilityUserCard({ user, className, facilityId }: Props) {
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-y-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                storeUserInLocalStorage(user);
-                navigate(returnLink);
-              }}
-            >
-              {t("book_appointment")}
+            <Button variant="outline" asChild>
+              <Link
+                href={returnLink}
+                onClick={() => storeUserInLocalStorage(user)}
+                onAuxClick={() => storeUserInLocalStorage(user)}
+                onContextMenu={() => storeUserInLocalStorage(user)}
+              >
+                {t("book_appointment")}
+              </Link>
             </Button>
           </div>
         </div>

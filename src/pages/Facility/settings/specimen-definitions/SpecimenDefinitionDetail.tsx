@@ -96,17 +96,17 @@ export function SpecimenDefinitionDetail({
           {/* Header */}
           <div className="space-y-4">
             <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/specimen_definitions`,
-                )
-              }
+              asChild
               variant="outline"
               className="text-destructive"
               size="sm"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t("back")}
+              <Link
+                href={`/facility/${facilityId}/settings/specimen_definitions`}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t("back")}
+              </Link>
             </Button>
             <div className="flex items-start justify-between p-2">
               <div>

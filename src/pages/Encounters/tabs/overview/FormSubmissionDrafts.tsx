@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -105,15 +105,12 @@ export function FormSubmissionDrafts({
                     >
                       {t("discard")}
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}?continue_draft=${submission.id}`,
-                        )
-                      }
-                    >
-                      {t("continue")}
+                    <Button size="sm" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}?continue_draft=${submission.id}`}
+                      >
+                        {t("continue")}
+                      </Link>
                     </Button>
                   </div>
                 </CardTitle>

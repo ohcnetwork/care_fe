@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +16,6 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 
 import { TemplateType } from "@/types/emr/template/template";
-import { navigate } from "raviger";
 import TemplateList from "./TemplateList";
 
 interface TemplateReportSheetProps {
@@ -59,11 +59,11 @@ export default function TemplateReportSheet({
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/template/builder/`)
-                }
+                asChild
               >
-                {t("create_template")}
+                <Link href={`/facility/${facilityId}/template/builder/`}>
+                  {t("create_template")}
+                </Link>
               </Button>
             )}
           </SheetTitle>
