@@ -11,7 +11,7 @@ import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
 
-import { isPatientBound, type FillSubject } from "./subject";
+import { isPatientBound, subjectKeyOf, type FillSubject } from "./subject";
 
 interface FillPageQueriesOptions {
   subject: FillSubject;
@@ -69,6 +69,23 @@ export function useFillPageQueries({
     enabled: !!continueDraftId,
   });
 
+  // The draft record carries no patient or encounter, but the list endpoint
+  // filters by them server-side: a `?continue_draft=` id that is not among
+  // this subject's own drafts belongs to another patient or encounter.
+  const subjectDraftsQuery = useQuery({
+    queryKey: formSubmissionKeys.subjectDrafts(subjectKeyOf(subject)),
+    queryFn: query(formSubmissionApi.list, {
+      queryParams: {
+        ...(encounterId
+          ? { encounter: encounterId }
+          : { patient: patientBound?.patientId ?? "" }),
+        status: "draft",
+        limit: 200,
+      },
+    }),
+    enabled: !!continueDraftId && !!patientBound,
+  });
+
   const questionnaire = fixedQuestionnaire ?? questionnaireQuery.data;
   const encounter = encounterQuery.data;
   const patient = encounter?.patient ?? patientQuery.data;
@@ -77,6 +94,7 @@ export function useFillPageQueries({
     encounterId ? encounterQuery : undefined,
     subject.type === "patient" ? patientQuery : undefined,
     continueDraftId ? serverDraftQuery : undefined,
+    continueDraftId ? subjectDraftsQuery : undefined,
   ].filter((result) => result?.isError);
 
   // A refetch error retains same-key cached data. Keep the session mounted
@@ -98,9 +116,18 @@ export function useFillPageQueries({
       questionnaireQuery.isError && !questionnaireQuery.data,
     isEncounterLoading: encounterQuery.isLoading,
     isEncounterError: encounterQuery.isError && !encounterQuery.data,
+    isPatientLoading: subject.type === "patient" && patientQuery.isLoading,
     isPatientError: patientQuery.isError && !patientQuery.data,
-    isServerDraftLoading: serverDraftQuery.isLoading,
-    isServerDraftError: serverDraftQuery.isError && !serverDraftQuery.data,
+    isServerDraftLoading:
+      serverDraftQuery.isLoading || subjectDraftsQuery.isLoading,
+    isServerDraftError:
+      (serverDraftQuery.isError && !serverDraftQuery.data) ||
+      (subjectDraftsQuery.isError && !subjectDraftsQuery.data),
+    serverDraftForeign:
+      !!subjectDraftsQuery.data &&
+      !subjectDraftsQuery.data.results.some(
+        (draft) => draft.id === continueDraftId,
+      ),
     contextRefreshFailed: failedQueries.length > 0,
     isRetryingContext: failedQueries.some((result) => result?.isFetching),
     retryContext,

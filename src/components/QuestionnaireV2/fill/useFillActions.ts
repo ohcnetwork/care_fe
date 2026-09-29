@@ -37,6 +37,7 @@ import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs
 import {
   getResponsesAtPath,
   getScopedResponses,
+  responseMap,
   updateResponsesAtPath,
 } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import {
@@ -87,7 +88,7 @@ function structuredEntrySize(value: unknown): number {
 const setResponseSchema = z.object({
   questionnaire_id: z.string().max(MAX_LINK_ID_LENGTH).optional(),
   link_id: z.string().max(MAX_LINK_ID_LENGTH),
-  row_index: z.number().int().min(0).optional(),
+  row_path: z.array(z.number().int().min(0)).optional(),
   values: z
     .array(
       z.union([
@@ -138,11 +139,17 @@ function coerceResponseValue(
 
     case "integer":
     case "decimal": {
-      const value = Number(raw);
-      if (Number.isNaN(value)) {
+      const value = coerceNumber(raw);
+      if (value === undefined) {
         return {
           ok: false,
           error: `"${String(raw)}" is not a number (question "${question.link_id}" is ${question.type})`,
+        };
+      }
+      if (question.type === "integer" && !Number.isInteger(value)) {
+        return {
+          ok: false,
+          error: `"${String(raw)}" is not a whole number (question "${question.link_id}" is integer)`,
         };
       }
       return { ok: true, value: { type: "number", value } };
@@ -209,13 +216,23 @@ function coerceResponseValue(
   }
 }
 
+/** Only a finite number, or a non-blank string that parses to one:
+ *  `Number("")` is 0 and `Number(true)` is 1, neither a clinical answer. */
+function coerceNumber(raw: string | number | boolean): number | undefined {
+  if (typeof raw === "boolean") return undefined;
+  if (typeof raw === "string" && raw.trim() === "") return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : undefined;
+}
+
 /** `Boolean("false")` is `true` — a silent wrong answer on a clinical form
  *  is exactly what this choke point exists to prevent, so strings are
  *  matched against the words a model actually emits and anything else is
  *  an error. */
 function coerceBoolean(raw: string | number | boolean): boolean | undefined {
   if (typeof raw === "boolean") return raw;
-  if (typeof raw === "number") return raw !== 0;
+  if (typeof raw === "number")
+    return raw === 1 || (raw === 0 ? false : undefined);
   const normalized = raw.trim().toLowerCase();
   if (["true", "yes", "y", "1"].includes(normalized)) return true;
   if (["false", "no", "n", "0"].includes(normalized)) return false;
@@ -306,22 +323,34 @@ type RowsResult =
     }
   | { ok: false; error: string };
 
-/** Resolve the row of each repeating group on the path, creating a row
- *  when `rowIndex` is the one right after the group's last row. */
+function isRepeatingGroup(question: Question): boolean {
+  return question.type === "group" && !!question.repeats;
+}
+
+/** Resolve one row per repeating group on the path (`rowPath` lists them
+ *  outermost first, missing entries mean row 0), creating a row when its
+ *  index is the one right after the group's last row. */
 function resolveRows(
   responses: Record<string, QuestionnaireResponse>,
   ancestors: Question[],
-  rowIndex: number,
+  rowPath: number[],
 ): RowsResult {
+  const groups = ancestors.filter(isRepeatingGroup);
+  if (rowPath.length > groups.length) {
+    return {
+      ok: false,
+      error: `row_path has ${rowPath.length} entries but the question sits inside ${groups.length} repeating group(s)`,
+    };
+  }
   const scope: ResponsePathEntry[] = [];
-  for (const group of ancestors) {
-    if (group.type !== "group" || !group.repeats) continue;
+  for (const [depth, group] of groups.entries()) {
+    const rowIndex = rowPath[depth] ?? 0;
     const rows =
       getResponsesAtPath(responses, scope)[group.id]?.sub_results ?? [];
     if (rowIndex > rows.length) {
       return {
         ok: false,
-        error: `Row ${rowIndex} of repeating group "${group.link_id}" does not exist; it has ${rows.length} rows and row_index ${rows.length} starts a new one`,
+        error: `Row ${rowIndex} of repeating group "${group.link_id}" does not exist; it has ${rows.length} rows and index ${rows.length} starts a new one`,
       };
     }
     if (rowIndex === rows.length) {
@@ -439,7 +468,7 @@ export async function applySetResponse(
   const rows = resolveRows(
     store.get(responsesAtom),
     path.slice(0, -1),
-    input.row_index ?? 0,
+    input.row_path ?? [],
   );
   if (!rows.ok) return rows;
   const { responses, scope } = rows;
@@ -513,6 +542,10 @@ interface FormQuestionSummary {
   link_id: string;
   text: string;
   type: string;
+  /** For a question inside repeating groups: the row this entry describes,
+   *  one index per repeating ancestor. Pass it back as `row_path` to
+   *  answer that row. */
+  row_path?: number[];
   structured_type?: string;
   /** Current answers, including record ids for structured row updates. */
   values?: unknown[];
@@ -551,11 +584,17 @@ export function listFormsSummary(
       // `ancestorsEnabled` rides down the walk for the same reason
       // `composeBatch` stops descending: a hidden group hides its whole
       // subtree, whatever the children's own conditions say.
-      const walk = (list: Question[], ancestorsEnabled: boolean) => {
+      const walk = (
+        list: Question[],
+        ancestorsEnabled: boolean,
+        scope: Record<string, QuestionnaireResponse>,
+        rowPath: number[],
+      ) => {
         for (const question of list) {
           const enabled =
             ancestorsEnabled &&
-            isQuestionEnabledInState(question, responses, linkIndex);
+            isQuestionEnabledInState(question, scope, linkIndex);
+          const response = scope[question.id];
           if (question.type !== "group") {
             const options = question.answer_option?.map(
               (option) => option.value,
@@ -564,6 +603,7 @@ export function listFormsSummary(
               link_id: question.link_id,
               text: question.text,
               type: question.type,
+              ...(rowPath.length ? { row_path: rowPath } : {}),
               ...(question.description
                 ? { description: question.description }
                 : {}),
@@ -574,19 +614,17 @@ export function listFormsSummary(
                 ? question.structured_type !== "files"
                   ? {
                       values: structuredClone(
-                        responses[question.id]?.values[0]?.value ?? [],
+                        response?.values[0]?.value ?? [],
                       ) as unknown[],
                     }
                   : {}
                 : {
-                    values: (responses[question.id]?.values ?? []).map(
-                      (v) => v.value,
-                    ),
+                    values: (response?.values ?? []).map((v) => v.value),
                   }),
               required: !!question.required,
               ...(options?.length ? { options } : {}),
               ...(question.repeats ? { repeats: true } : {}),
-              answered: !!responses[question.id]?.values?.some(entryIsAnswered),
+              answered: !!response?.values?.some(entryIsAnswered),
               enabled,
               ...(question.enable_when?.length
                 ? {
@@ -597,10 +635,26 @@ export function listFormsSummary(
               ancestors_enabled: ancestorsEnabled,
             });
           }
-          walk(question.questions ?? [], enabled);
+          const children = question.questions ?? [];
+          if (!isRepeatingGroup(question)) {
+            walk(children, enabled, scope, rowPath);
+            continue;
+          }
+          // Each row is its own answer set; an empty group still lists its
+          // children once so the agent knows which row a first write opens.
+          const rows = response?.sub_results ?? [];
+          if (rows.length === 0) {
+            walk(children, enabled, scope, [...rowPath, 0]);
+          }
+          rows.forEach((row, index) =>
+            walk(children, enabled, { ...scope, ...responseMap(row) }, [
+              ...rowPath,
+              index,
+            ]),
+          );
         }
       };
-      walk(form.questionnaire.questions, true);
+      walk(form.questionnaire.questions, true, responses, []);
       return {
         questionnaire_id: form.key,
         title: form.questionnaire.title,
@@ -664,10 +718,10 @@ export function useFillActions({
             description: "The question's link id",
             required: true,
           },
-          row_index: {
-            type: "number",
+          row_path: {
+            type: "array of number",
             description:
-              "For a question inside a repeating group: the 0-based row to write (default 0). The index right after the last row starts a new row.",
+              "For a question inside repeating groups: one 0-based row index per repeating group, outermost first, as forms.list reports it (default: row 0 at every level). An index right after a group's last row starts a new row.",
           },
           values: {
             type: "array of string|number|boolean|object",
@@ -701,7 +755,7 @@ export function useFillActions({
       return {
         id: "questionnaire.forms.list",
         description:
-          "List the questionnaires open in this fill session and their questions, with each question's link id, description, type, options, current values, whether it is already answered, and whether it is currently enabled. Structured questions also include structured_type and existing rows, including record ids for updates. A question gated by enable_when also includes its own conditions, enable_behavior, and ancestors_enabled, so a dependent question can be answered in the same turn as its trigger.",
+          "List the questionnaires open in this fill session and their questions, with each question's link id, description, type, options, current values, whether it is already answered, and whether it is currently enabled. A question inside a repeating group is listed once per row with its row_path. Structured questions also include structured_type and existing rows, including record ids for updates. A question gated by enable_when also includes its own conditions, enable_behavior, and ancestors_enabled, so a dependent question can be answered in the same turn as its trigger.",
         parameters: {},
         schema: listFormsSchema,
         scope,

@@ -61,17 +61,17 @@ export function serializeQuestionResults(
       )
         return [];
       const values = serializeResponseValues(response.values);
-      return values.length
-        ? [
-            {
-              question_id: question.id,
-              values,
-              note: response.note,
-              body_site: response.body_site,
-              method: response.method,
-            },
-          ]
-        : [];
+      if (!values.length && !response.note) return [];
+      return [
+        {
+          question_id: question.id,
+          values,
+          note: response.note,
+          body_site: response.body_site,
+          method: response.method,
+          taken_at: response.taken_at,
+        },
+      ];
     });
   };
   return walk(questions, responses, {});
