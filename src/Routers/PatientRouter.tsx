@@ -1,26 +1,49 @@
 import careConfig from "@careConfig";
 import { useRoutes } from "raviger";
+import { lazy, Suspense } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientProfile } from "@/components/Patient/PatientProfile";
+import type { patientTabs } from "@/components/Patient/PatientDetailsTab";
 
 import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
-import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
-import PatientIndex from "@/pages/Patient/index";
-import PublicPatientRegistration from "@/pages/PublicAppointments/PatientRegistration";
-import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
-import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
-import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
+
+const PatientProfile = lazy(() =>
+  import("@/components/Patient/PatientProfile").then((module) => ({
+    default: module.PatientProfile,
+  })),
+);
+const FacilitiesPage = lazy(() =>
+  import("@/pages/Facility/FacilitiesPage").then((module) => ({
+    default: module.FacilitiesPage,
+  })),
+);
+const PatientIndex = lazy(() => import("@/pages/Patient/index"));
+const PublicPatientRegistration = lazy(
+  () => import("@/pages/PublicAppointments/PatientRegistration"),
+);
+const PatientSelect = lazy(
+  () => import("@/pages/PublicAppointments/PatientSelect"),
+);
+const ScheduleAppointment = lazy(() =>
+  import("@/pages/PublicAppointments/Schedule").then((module) => ({
+    default: module.ScheduleAppointment,
+  })),
+);
+const AppointmentSuccess = lazy(() =>
+  import("@/pages/PublicAppointments/Success").then((module) => ({
+    default: module.AppointmentSuccess,
+  })),
+);
 
 const DashboardRoutes = {
   "/nearby_facilities": () => <FacilitiesPage />,
@@ -90,7 +113,11 @@ export default function PatientRouter() {
 
   if (!pages) {
     if (appointmentPages) {
-      return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
+      return (
+        <PatientUserProvider>
+          <Suspense fallback={<Loading />}>{appointmentPages}</Suspense>
+        </PatientUserProvider>
+      );
     }
     return <PublicRouter />;
   }
@@ -124,7 +151,7 @@ export default function PatientRouter() {
             data-cui-page
           >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
+              <Suspense fallback={<Loading />}>{pages}</Suspense>
             </ErrorBoundary>
           </div>
         </main>

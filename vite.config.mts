@@ -19,6 +19,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
+import { explicitManualChunks, manualChunks } from "./plugins/manualChunks";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import validateEnv from "./scripts/validate-env";
 
@@ -450,6 +451,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "decimal.js",
         ],
       }),
+      explicitManualChunks(),
       react(),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
@@ -465,6 +467,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         },
         injectManifest: {
           maximumFileSizeToCacheInBytes: 8000000,
+          // Cache code on use instead of downloading every lazy route on install.
+          globPatterns: ["**/*.html"],
         },
         manifest: {
           name: "Care",
@@ -527,6 +531,12 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       target: "es2022",
       outDir: "build",
       sourcemap: true,
+      rollupOptions: {
+        output: {
+          // Federation wraps this function to reserve its shared-module chunks.
+          manualChunks,
+        },
+      },
     },
     esbuild: {
       target: "es2022",

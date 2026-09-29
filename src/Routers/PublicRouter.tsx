@@ -1,18 +1,44 @@
 import careConfig from "@careConfig";
 import { Redirect, useRoutes } from "raviger";
+import { lazy, Suspense } from "react";
 
-import { Authenticate } from "@/components/Auth/Authenticate";
-import Login from "@/components/Auth/Login";
-import ResetPassword from "@/components/Auth/ResetPassword";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
-import InvalidReset from "@/components/ErrorPages/InvalidReset";
-import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
-import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
-import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
-import { LandingPage } from "@/pages/Landing/LandingPage";
-import { LicensesPage } from "@/pages/Licenses/Licenses";
-import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
+const Authenticate = lazy(() =>
+  import("@/components/Auth/Authenticate").then((module) => ({
+    default: module.Authenticate,
+  })),
+);
+const Login = lazy(() => import("@/components/Auth/Login"));
+const ResetPassword = lazy(() => import("@/components/Auth/ResetPassword"));
+const InvalidReset = lazy(() => import("@/components/ErrorPages/InvalidReset"));
+const SessionExpired = lazy(
+  () => import("@/components/ErrorPages/SessionExpired"),
+);
+const FacilitiesPage = lazy(() =>
+  import("@/pages/Facility/FacilitiesPage").then((module) => ({
+    default: module.FacilitiesPage,
+  })),
+);
+const FacilityDetailsPage = lazy(() =>
+  import("@/pages/Facility/FacilityDetailsPage").then((module) => ({
+    default: module.FacilityDetailsPage,
+  })),
+);
+const LandingPage = lazy(() =>
+  import("@/pages/Landing/LandingPage").then((module) => ({
+    default: module.LandingPage,
+  })),
+);
+const LicensesPage = lazy(() =>
+  import("@/pages/Licenses/Licenses").then((module) => ({
+    default: module.LicensesPage,
+  })),
+);
+const PatientLogin = lazy(
+  () => import("@/pages/PublicAppointments/auth/PatientLogin"),
+);
 
 export const routes = {
   "/": () =>
@@ -60,7 +86,7 @@ export default function PublicRouter() {
   return (
     <>
       <BrowserWarning />
-      {routeResult || <Login />}
+      <Suspense fallback={<Loading />}>{routeResult || <Login />}</Suspense>
     </>
   );
 }
