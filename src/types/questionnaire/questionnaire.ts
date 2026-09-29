@@ -119,7 +119,7 @@ export interface QuestionnaireRead extends Omit<QuestionnaireBase, "version"> {
   /** The read endpoint can return a bare number (seen with fixture data such
    *  as `0.1`); the update schema requires a string, so writers must coerce
    *  via `String()` before echoing it back (see `buildUpdateBody`). */
-  version?: string;
+  version?: string | number;
   id: string;
   /** Not yet returned by QuestionnaireReadSpec — optional, forward-compat. */
   auth_context?: QuestionnaireAuthContext;

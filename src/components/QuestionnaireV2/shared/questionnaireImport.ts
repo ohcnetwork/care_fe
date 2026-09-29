@@ -67,6 +67,19 @@ function isQuestionLike(value: unknown): value is Question {
   ) {
     return false;
   }
+  if (
+    candidate.answer_option != null &&
+    (!Array.isArray(candidate.answer_option) ||
+      !candidate.answer_option.every(
+        (option: unknown) =>
+          typeof option === "object" &&
+          option !== null &&
+          "value" in option &&
+          typeof option.value === "string",
+      ))
+  ) {
+    return false;
+  }
   if (candidate.questions !== undefined) {
     if (!Array.isArray(candidate.questions)) return false;
     return candidate.questions.every(isQuestionLike);

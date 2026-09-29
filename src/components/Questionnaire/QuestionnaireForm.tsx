@@ -389,7 +389,7 @@ export function QuestionnaireForm({
   } = useQuery({
     queryKey: ["questionnaireDetail", questionnaireSlug],
     queryFn: query(questionnaireApi.get, {
-      pathParams: { slug: questionnaireSlug ?? "" },
+      pathParams: { id: questionnaireSlug ?? "" },
     }),
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
@@ -861,7 +861,7 @@ export function QuestionnaireForm({
       if (validResponses.length > 0) {
         requests.push({
           api: questionnaireApi.submit,
-          pathParams: { slug: form.questionnaire.slug },
+          pathParams: { id: form.questionnaire.id },
           referenceId: form.questionnaire.id,
           body: {
             resource_id: encounterId ? encounterId : patientId,
@@ -1022,7 +1022,7 @@ export function QuestionnaireForm({
                   </p>
                 )}
               </div>
-              {form.questionnaire.slug !== questionnaireSlug && (
+              {form.questionnaire.id !== questionnaireSlug && (
                 <Button
                   type="button"
                   variant="ghost"

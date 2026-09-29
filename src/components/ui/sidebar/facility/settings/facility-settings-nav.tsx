@@ -3,6 +3,7 @@ import {
   Activity,
   BookOpen,
   Building2,
+  ClipboardList,
   FileText,
   HeartPulse,
   IdCard,
@@ -101,6 +102,11 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "forms",
     pages: [
+      {
+        path: "settings/questionnaires",
+        title: "questionnaire_other",
+        icon: ClipboardList,
+      },
       { path: "settings/valuesets", title: "valuesets", icon: ListChecks },
       {
         path: "template",

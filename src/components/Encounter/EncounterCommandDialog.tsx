@@ -407,10 +407,10 @@ export function EncounterCommandDialog({
         group: t("questionnaire"),
         items: [
           ...(questionnaires?.results || []).map((option) => ({
-            id: `questionnaire-${option.slug}`,
+            id: `questionnaire-${option.id}`,
             label: option.title,
             icon: <NotebookPen />,
-            shortcut: getShortcutDisplay(`questionnaire-${option.slug}`),
+            shortcut: getShortcutDisplay(`questionnaire-${option.id}`),
           })),
         ],
       });

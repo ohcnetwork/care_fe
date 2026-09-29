@@ -1,5 +1,8 @@
-import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
-import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
+import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
+import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
+import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
+import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
+import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
 
@@ -15,11 +18,35 @@ import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfi
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
 
+const INSTANCE_SCOPE = {
+  authContext: "instance",
+  basePath: "/admin/questionnaires",
+} as const;
+
 const AdminRoutes: AppRoutes = {
-  "/admin/questionnaire": () => <QuestionnaireList />,
-  "/admin/questionnaire/create": () => <QuestionnaireEditor />,
-  "/admin/questionnaire/:slug/edit": ({ slug }) => (
-    <QuestionnaireEditor slug={slug} />
+  "/admin/questionnaires": () => (
+    <QuestionnaireListPage scope={INSTANCE_SCOPE} />
+  ),
+  // Must be registered before "/admin/questionnaires/:id" — raviger matches
+  // routes in object order, and "new" would otherwise be captured as an :id.
+  "/admin/questionnaires/new": () => (
+    <QuestionnaireCreatePage scope={INSTANCE_SCOPE} />
+  ),
+  // Must be registered before "/admin/questionnaires/:id" for the same
+  // reason — otherwise "edit" would be captured as an :id.
+  "/admin/questionnaires/:id/edit": ({ id }) => (
+    <QuestionnaireStudioPage scope={INSTANCE_SCOPE} id={id} />
+  ),
+  // Registered before "/admin/questionnaires/:id" like the routes above.
+  "/admin/questionnaires/:id/versions/:revisionId": ({ id, revisionId }) => (
+    <QuestionnaireRevisionPage
+      scope={INSTANCE_SCOPE}
+      id={id}
+      revisionId={revisionId}
+    />
+  ),
+  "/admin/questionnaires/:id": ({ id }) => (
+    <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
   ),
   "/admin/valuesets": () => <ValueSetList scope={INSTANCE_VALUESET_SCOPE} />,
   "/admin/valuesets/create": () => (
