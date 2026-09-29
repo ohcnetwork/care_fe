@@ -7,8 +7,12 @@ import { cn } from "@/lib/utils";
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  // This is a workaround to prevent the select from being empty when the value is null when used along with react hook form
-  // TODO: revert this once @radix-ui/react-select solves this
+  // Workaround (still required as of @radix-ui/react-select 2.3.7): inside a <form>, Radix
+  // renders a hidden native <select> (SelectBubbleInput) that syncs its value and dispatches a
+  // "change" event. If the value is set before the matching <SelectItem> is registered (e.g.
+  // async options, form.reset), the native select resolves to "" and its onChange calls
+  // onValueChange(""), wiping the react-hook-form value. Radix forbids "" as an item value,
+  // so an empty value never comes from a real user selection and can be safely ignored.
   return (
     <SelectPrimitive.Root
       data-slot="select"
