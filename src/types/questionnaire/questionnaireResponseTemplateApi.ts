@@ -1,5 +1,6 @@
 import {
   QuestionnaireResponseTemplateCreateSpec,
+  QuestionnaireResponseTemplateKeyFilter,
   QuestionnaireResponseTemplateReadSpec,
   QuestionnaireResponseTemplateRetrieveSpec,
   QuestionnaireResponseTemplateUpdateSpec,
@@ -15,7 +16,7 @@ export const questionnaireResponseTemplateApi = {
       questionnaire?: string;
       facility: string;
       name?: string;
-      key_filter?: "medication_request" | "service_request" | "questionnaire";
+      key_filter?: QuestionnaireResponseTemplateKeyFilter;
       limit?: number;
       offset?: number;
     }>(),
@@ -29,13 +30,13 @@ export const questionnaireResponseTemplateApi = {
     path: "/api/v1/questionnaire_response_template/",
     method: HttpMethod.POST,
     TRes: Type<QuestionnaireResponseTemplateRetrieveSpec>(),
-    TReq: Type<QuestionnaireResponseTemplateCreateSpec>(),
+    TBody: Type<QuestionnaireResponseTemplateCreateSpec>(),
   },
   update: {
     path: "/api/v1/questionnaire_response_template/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<QuestionnaireResponseTemplateRetrieveSpec>(),
-    TReq: Type<QuestionnaireResponseTemplateUpdateSpec>(),
+    TBody: Type<QuestionnaireResponseTemplateUpdateSpec>(),
   },
   delete: {
     path: "/api/v1/questionnaire_response_template/{id}/",

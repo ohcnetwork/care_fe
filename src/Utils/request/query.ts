@@ -5,11 +5,24 @@ import {
   ApiRoute,
   HTTPError,
   PaginatedResponse,
+  QueryParams,
 } from "@/Utils/request/types";
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
-export async function callApi<Route extends ApiRoute<unknown, unknown>>(
+/**
+ * Low-level function to make an API call.
+ * This function handles URL construction, header generation, and response parsing.
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, body, etc.).
+ * @returns A promise that resolves to the response data.
+ * @throws {HTTPError} If the request fails.
+ * @throws {Error} If a network error occurs.
+ */
+export async function callApi<
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
+>(
   { baseUrl, path, method, noAuth, defaultQueryParams }: Route,
   options?: ApiCallOptions<Route>,
 ): Promise<Route["TRes"]> {
@@ -82,10 +95,9 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
  * });
  * ```
  */
-export default function query<Route extends ApiRoute<unknown, unknown>>(
-  route: Route,
-  options?: ApiCallOptions<Route>,
-) {
+export default function query<
+  Route extends ApiRoute<unknown, unknown, QueryParams>,
+>(route: Route, options?: ApiCallOptions<Route>) {
   return ({ signal }: { signal: AbortSignal }) => {
     return callApi(route, { ...options, signal });
   };
@@ -119,8 +131,12 @@ export default function query<Route extends ApiRoute<unknown, unknown>>(
  * - The `AbortSignal` is passed through to the underlying `fetch` call
  * - When aborted, both the `sleep` promise and the fetch request are cancelled automatically
  * - TanStack Query handles the abortion and cleanup of previous in-flight requests
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, debounceInterval, etc.).
+ * @returns A query function that can be used with TanStack Query.
  */
-const debouncedQuery = <Route extends ApiRoute<unknown, unknown>>(
+const debouncedQuery = <Route extends ApiRoute<unknown, unknown, QueryParams>>(
   route: Route,
   options?: ApiCallOptions<Route> & { debounceInterval?: number },
 ) => {
@@ -150,12 +166,19 @@ query.debounced = debouncedQuery;
  *   }),
  * });
  * ```
+ *
+ * @param route - The API route definition.
+ * @param options - Additional options for the API call (path params, query params, pageSize, maxPages, etc.).
+ * @returns A query function that can be used with TanStack Query.
  */
 const paginatedQuery = <
-  Route extends ApiRoute<PaginatedResponse<unknown>, unknown>,
+  Route extends ApiRoute<PaginatedResponse<unknown>, unknown, QueryParams>,
 >(
   route: Route,
-  options?: ApiCallOptions<Route> & { pageSize?: number; maxPages?: number },
+  options?: ApiCallOptions<Route> & {
+    pageSize?: number;
+    maxPages?: number;
+  },
 ) => {
   return async ({ signal }: { signal: AbortSignal }) => {
     const items: Route["TRes"]["results"] = [];
