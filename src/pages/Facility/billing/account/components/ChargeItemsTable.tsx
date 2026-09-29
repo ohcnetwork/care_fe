@@ -57,7 +57,13 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+  formatName,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
@@ -137,6 +143,8 @@ function ChargeItemsTable({
     disableCache: true,
   });
 
+  const { created_date_after, created_date_before } = qParams;
+
   // MultiFilter configuration
   const filters = [
     chargeItemStatusFilter("status"),
@@ -161,6 +169,17 @@ function ChargeItemsTable({
           query.created_by = user?.id || undefined;
           break;
         }
+        case "created_date": {
+          const dateRange = value as FilterDateRange | null;
+          query.created_date = undefined;
+          query.created_date_after = dateRange?.from
+            ? dateQueryString(dateRange.from)
+            : undefined;
+          query.created_date_before = dateRange?.to
+            ? dateQueryString(dateRange.to)
+            : undefined;
+          break;
+        }
       }
     }
     updateQuery(query);
@@ -180,26 +199,23 @@ function ChargeItemsTable({
       : undefined,
     created_by: [],
     created_date:
-      qParams.created_date_after || qParams.created_date_before
+      created_date_after || created_date_before
         ? {
-            from: qParams.created_date_after
-              ? new Date(qParams.created_date_after as string)
-              : undefined,
-            to: qParams.created_date_before
-              ? new Date(qParams.created_date_before as string)
-              : undefined,
+            from: parseLocalDate(created_date_after),
+            to: parseLocalDate(created_date_before),
           }
         : undefined,
   });
 
   // Convert date filter values to API query params
   const getDateQueryParams = () => {
-    const dateRange = selectedFilters.created_date?.selected as
-      FilterDateRange | undefined;
-    if (!dateRange) return {};
     return {
-      created_date_after: dateRange.from?.toISOString(),
-      created_date_before: dateRange.to?.toISOString(),
+      created_date_after: created_date_after
+        ? dateTimeQueryString(created_date_after)
+        : undefined,
+      created_date_before: created_date_before
+        ? dateTimeQueryString(created_date_before, true)
+        : undefined,
     };
   };
 
