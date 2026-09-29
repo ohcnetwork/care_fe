@@ -100,6 +100,8 @@ describe("findActionIssues", () => {
         withInstruction({ message: "{{ q_gone }}" }),
         { ...valid, condition: 'q_followup == "x"' },
         withInstruction({ message: "{{ q_inner }}" }),
+        withInstruction({ message: '{{ patient["age"] }}' }),
+        withInstruction({ message: '{{ q_temp["value"] }}' }),
       ],
       context,
     );

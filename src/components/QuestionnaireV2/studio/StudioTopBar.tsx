@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/popover";
 
 import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
-import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { SaveIssue } from "@/components/QuestionnaireV2/builder/saveValidation";
 import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
@@ -31,10 +30,6 @@ export interface StudioTopBarProps {
   onViewChange: (view: "edit" | "preview") => void;
   issues: SaveIssue[];
   onSelectIssue: (questionId: string) => void;
-  /** The actions' own save blockers — listed after the question ones;
-   *  selecting one opens that action in the inspector. */
-  actionIssues?: ActionIssue[];
-  onSelectActionIssue?: (index: number) => void;
   dirty: boolean;
   isSaving: boolean;
   canWrite: boolean;
@@ -45,16 +40,12 @@ export interface StudioTopBarProps {
 
 function IssuesList({
   issues,
-  actionIssues = [],
   questions,
   onSelect,
-  onSelectAction,
 }: {
   issues: SaveIssue[];
-  actionIssues?: ActionIssue[];
   questions: Question[];
   onSelect: (questionId: string) => void;
-  onSelectAction: (index: number) => void;
 }) {
   const { t } = useTranslation();
   // One numbering pass for the whole list — findQuestionNumber would walk
@@ -94,27 +85,6 @@ function IssuesList({
             </span>
           </button>
         ))}
-        {actionIssues.map(({ index, messageKey }) => (
-          <button
-            key={`action-${index}`}
-            type="button"
-            onClick={() => onSelectAction(index)}
-            className="flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
-          >
-            <TriangleAlert
-              aria-hidden
-              className="mt-0.5 size-3.5 shrink-0 text-amber-600"
-            />
-            <span className="min-w-0">
-              <span className="block text-sm font-medium text-gray-900">
-                {t(messageKey)}
-              </span>
-              <span className="block truncate text-xs text-gray-500">
-                {t("action_n", { n: index + 1 })}
-              </span>
-            </span>
-          </button>
-        ))}
       </div>
     </>
   );
@@ -129,8 +99,6 @@ export function StudioTopBar({
   onViewChange,
   issues,
   onSelectIssue,
-  actionIssues = [],
-  onSelectActionIssue = () => {},
   dirty,
   isSaving,
   canWrite,
@@ -140,7 +108,7 @@ export function StudioTopBar({
 }: StudioTopBarProps) {
   const { t } = useTranslation();
   const [issuesOpen, setIssuesOpen] = useState(false);
-  const issueCount = issues.length + actionIssues.length;
+  const issueCount = issues.length;
 
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white px-4 py-2.5">
@@ -193,15 +161,10 @@ export function StudioTopBar({
                   inline children would be built on every top-bar render. */}
               <IssuesList
                 issues={issues}
-                actionIssues={actionIssues}
                 questions={questions}
                 onSelect={(questionId) => {
                   setIssuesOpen(false);
                   onSelectIssue(questionId);
-                }}
-                onSelectAction={(index) => {
-                  setIssuesOpen(false);
-                  onSelectActionIssue(index);
                 }}
               />
             </PopoverContent>

@@ -115,10 +115,10 @@ function ChargeItemForm({
         slug: chargeItem.charge_item_definition,
       },
     }),
-    enabled: !!facilityId,
+    enabled: !!facilityId && !chargeItem.charge_item_definition_object,
   });
   const definition =
-    restoredDefinition ?? chargeItem.charge_item_definition_object;
+    chargeItem.charge_item_definition_object ?? restoredDefinition;
 
   return (
     <TableRow>

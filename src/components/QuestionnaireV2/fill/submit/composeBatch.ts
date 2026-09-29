@@ -226,8 +226,9 @@ export async function composeBatch({
   }
 
   // Server drafts are patient/encounter form_submission records — there is
-  // no resource-subject equivalent to complete.
-  if (continueDraftId && patientBound) {
+  // no resource-subject equivalent to complete. A draft with nothing left
+  // to submit stays a draft, so the caller's empty-batch guard can fire.
+  if (requests.length > 0 && continueDraftId && patientBound) {
     const body: FormSubmissionCompletionBody = {
       patient: patientBound.patientId,
       encounter: renderCtx.encounterId,

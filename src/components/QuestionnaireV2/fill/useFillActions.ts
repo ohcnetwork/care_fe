@@ -35,8 +35,14 @@ import {
 
 import { entryIsAnswered } from "@/components/QuestionnaireV2/form/engine/inputs/answeredEntry";
 import {
+  getResponsesAtPath,
+  getScopedResponses,
+  updateResponsesAtPath,
+} from "@/components/QuestionnaireV2/form/engine/responseScope";
+import {
   buildLinkIndex,
   clearQuestionErrorsInState,
+  initializeResponses,
   isQuestionEnabledInState,
   responsesAtom,
   structuredRenderFailedAtom,
@@ -45,6 +51,8 @@ import {
 import type { StructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 import type {
   QuestionnaireResponse,
+  ResponsePath,
+  ResponsePathEntry,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { EnableWhen, Question } from "@/types/questionnaire/question";
@@ -79,6 +87,7 @@ function structuredEntrySize(value: unknown): number {
 const setResponseSchema = z.object({
   questionnaire_id: z.string().max(MAX_LINK_ID_LENGTH).optional(),
   link_id: z.string().max(MAX_LINK_ID_LENGTH),
+  row_index: z.number().int().min(0).optional(),
   values: z
     .array(
       z.union([
@@ -289,6 +298,43 @@ function isPathEnabled(
   );
 }
 
+type RowsResult =
+  | {
+      ok: true;
+      responses: Record<string, QuestionnaireResponse>;
+      scope: ResponsePath;
+    }
+  | { ok: false; error: string };
+
+/** Resolve the row of each repeating group on the path, creating a row
+ *  when `rowIndex` is the one right after the group's last row. */
+function resolveRows(
+  responses: Record<string, QuestionnaireResponse>,
+  ancestors: Question[],
+  rowIndex: number,
+): RowsResult {
+  const scope: ResponsePathEntry[] = [];
+  for (const group of ancestors) {
+    if (group.type !== "group" || !group.repeats) continue;
+    const rows =
+      getResponsesAtPath(responses, scope)[group.id]?.sub_results ?? [];
+    if (rowIndex > rows.length) {
+      return {
+        ok: false,
+        error: `Row ${rowIndex} of repeating group "${group.link_id}" does not exist; it has ${rows.length} rows and row_index ${rows.length} starts a new one`,
+      };
+    }
+    if (rowIndex === rows.length) {
+      const row = Object.values(initializeResponses(group.questions ?? []));
+      responses = updateResponsesAtPath(responses, scope, {
+        [group.id]: { sub_results: [...rows, row] },
+      });
+    }
+    scope.push({ questionId: group.id, rowIndex });
+  }
+  return { ok: true, responses, scope };
+}
+
 /**
  * Apply one `questionnaire.response.set` call. Exported for node-side
  * assertions; the registry is the only production caller, and it has
@@ -390,8 +436,14 @@ export async function applySetResponse(
       error: `Structured question "${input.link_id}" is unavailable`,
     };
   }
-  const previous = store.get(responsesAtom);
-  const current = previous[question.id];
+  const rows = resolveRows(
+    store.get(responsesAtom),
+    path.slice(0, -1),
+    input.row_index ?? 0,
+  );
+  if (!rows.ok) return rows;
+  const { responses, scope } = rows;
+  const current = getResponsesAtPath(responses, scope)[question.id];
   if (!current) {
     // Every non-group question is seeded by `initializeResponses`, so a
     // miss means the form was swapped underneath us — writing a partial
@@ -402,7 +454,11 @@ export async function applySetResponse(
     };
   }
   if (
-    !isPathEnabled(path, previous, buildLinkIndex(form.questionnaire.questions))
+    !isPathEnabled(
+      path,
+      getScopedResponses(responses, scope),
+      buildLinkIndex(form.questionnaire.questions),
+    )
   ) {
     // Accepting the write would look like success and then vanish at
     // submit — `composeBatch` drops disabled questions.
@@ -437,18 +493,19 @@ export async function applySetResponse(
     }
   }
 
-  store.set(responsesAtom, {
-    ...previous,
-    [question.id]: {
-      ...current,
-      values,
-      ...(input.note !== undefined && { note: input.note }),
-    },
-  });
+  store.set(
+    responsesAtom,
+    updateResponsesAtPath(responses, scope, {
+      [question.id]: {
+        values,
+        ...(input.note !== undefined && { note: input.note }),
+      },
+    }),
+  );
   // The store's clear-on-edit invariant (`useQuestionResponse` does this
   // for a human edit): a corrected answer must drop the validation error
   // that flagged the old one, or the clinician sees a stale complaint.
-  clearQuestionErrorsInState(store.get, store.set, question.id);
+  clearQuestionErrorsInState(store.get, store.set, question.id, scope);
   return { ok: true };
 }
 
@@ -606,6 +663,11 @@ export function useFillActions({
             type: "string",
             description: "The question's link id",
             required: true,
+          },
+          row_index: {
+            type: "number",
+            description:
+              "For a question inside a repeating group: the 0-based row to write (default 0). The index right after the last row starts a new row.",
           },
           values: {
             type: "array of string|number|boolean|object",

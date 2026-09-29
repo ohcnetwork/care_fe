@@ -84,17 +84,16 @@ function isBlank(value: unknown): boolean {
   return template?.kind === "expression" && template.expression === "";
 }
 
-/** Every expression an action evaluates: its condition and each templated
- *  param's inner expression. */
+/** Every hand-written expression an action evaluates: its condition and
+ *  each templated param that is not a bare reference (those are checked by
+ *  the question and context rules). */
 function expressionsOf(action: QuestionnaireAction): string[] {
   const expressions = [action.condition];
   for (const instruction of action.instructions) {
     for (const value of Object.values(instruction.params)) {
       const template = parseTemplate(value);
-      if (template) {
-        expressions.push(
-          template.kind === "ref" ? template.ref : template.expression,
-        );
+      if (template?.kind === "expression") {
+        expressions.push(template.expression);
       }
     }
   }
