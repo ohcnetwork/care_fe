@@ -12,7 +12,12 @@ export type CareAppsContextType = Array<
     (({ isLoading: false } & PluginManifestWithMeta) | { isLoading: true })
 >;
 
-export const CareAppsContext = createContext<CareAppsContextType | null>(null);
+export type CareAppsContextValue = {
+  apps: CareAppsContextType;
+  isLoading: boolean;
+};
+
+export const CareAppsContext = createContext<CareAppsContextValue | null>(null);
 
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
@@ -21,8 +26,11 @@ export const useCareApps = () => {
       "'useCareApps' must be used within 'CareAppsProvider' only",
     );
   }
-  return ctx;
+  return ctx.apps;
 };
+
+export const useCareAppsLoading = () =>
+  useContext(CareAppsContext)?.isLoading ?? false;
 
 // export const useCareAppNavItems = () => {
 //   const careApps = useCareApps();
