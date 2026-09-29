@@ -1,45 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { t } from "i18next";
-import React from "react";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 
-import { formatName } from "@/Utils/utils";
-import { LocationNode } from "@/components/Location/LocationTree";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+
 import { ActivityDefinitionReadSpec } from "@/types/emr/activityDefinition/activityDefinition";
-import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
-import {
-  SERVICE_REQUEST_PRIORITY_COLORS,
-  SERVICE_REQUEST_STATUS_COLORS,
-  ServiceRequestReadSpec,
-} from "@/types/emr/serviceRequest/serviceRequest";
-import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
+import { formatName } from "@/Utils/utils";
 
-function formatSpecimenRequirements(
-  specimens: SpecimenDefinitionRead[],
-): React.ReactNode {
-  const counts = specimens.reduce(
-    (acc: { [key: string]: number }, specimen) => {
-      const type = specimen.type_collected?.display;
-      if (type) {
-        acc[type] = (acc[type] || 0) + 1;
-      }
-      return acc;
-    },
-    {},
-  );
-
-  return Object.entries(counts).map(
-    ([type, count]: [string, number], index) => (
-      <span key={type}>
-        <span className="font-semibold">{type}</span>
-        {count > 1 && <span> x {count}</span>}
-        {index < Object.entries(counts).length - 1 && ", "}
-      </span>
-    ),
-  );
-}
+import { ServiceRequestContext } from "./ServiceRequestContext";
+import { ServiceRequestRequirements } from "./ServiceRequestRequirements";
 
 interface ServiceRequestDetailsProps {
   request: ServiceRequestReadSpec;
@@ -52,25 +24,31 @@ export function ServiceRequestDetails({
   activityDefinition,
   facilityId,
 }: ServiceRequestDetailsProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
-  const observationRequirements =
-    activityDefinition?.observation_result_requirements ?? [];
+  const titleId = `service-request-title-${request.id}`;
 
   return (
-    <div className="bg-gray-100 rounded-lg border border-gray-200">
-      <div className="py-3 flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          <div className="font-semibold text-gray-600 text-xl flex items-center gap-2">
-            <div className="h-8 w-1.5 bg-gray-400 rounded-r-sm" />
-            <div className="flex items-center gap-2 text-gray-700">
-              {activityDefinition.title}
-            </div>
-          </div>
-          <div className="font-medium px-3">
-            {t("request id")}: {request.id}
-          </div>
-          <div className="px-3 mt-2 flex flex-wrap gap-1">
+    <section
+      aria-labelledby={titleId}
+      className="rounded-lg border border-gray-200 bg-gray-100"
+    >
+      <div className="relative flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-4 h-8 w-1.5 rounded-r-sm bg-gray-400"
+        />
+        <div className="min-w-0 flex-1 space-y-1">
+          <h2
+            id={titleId}
+            className="text-xl font-semibold text-gray-700 wrap-break-word"
+          >
+            {activityDefinition.title}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {t("request id")}: <span className="break-all">{request.id}</span>
+          </p>
+          <div className="flex flex-wrap gap-1 pt-1">
             <TagAssignmentSheet
               entityType="service_request"
               entityId={request.id}
@@ -85,126 +63,60 @@ export function ServiceRequestDetails({
             />
           </div>
         </div>
-        <div className="flex gap-2 items-center mr-4">
+        <div className="flex flex-wrap items-center gap-4 sm:shrink-0">
           {request.do_not_perform && (
             <Badge variant="destructive">{t("do not perform")}</Badge>
           )}
-          <div className="gap-2">
-            <div className="text-sm text-gray-600 mb-1">{t("intent")}</div>
-            <div className="flex gap-2 font-semibold">{t(request.intent)}</div>
-          </div>
+          <dl>
+            <div className="flex items-baseline gap-2 sm:block sm:space-y-1">
+              <dt className="text-sm text-gray-600">{t("intent")}</dt>
+              <dd className="font-semibold text-gray-700">
+                {t(request.intent)}
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
 
-      <div className="p-4 m-3 mt-1 bg-white rounded-lg shadow-md ">
-        <div className="flex flex-col md:flex-row">
-          <div className="flex flex-col gap-6 mb-4 min-w-[50%]">
-            <div className="flex  gap-4">
-              <div className="gap-2">
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("priority")}
-                </div>
-                <div className="flex gap-2">
-                  <Badge
-                    variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
-                  >
-                    {t(request.priority)}
-                  </Badge>
-                </div>
-              </div>
-              <div className="gap-2">
-                <div className="text-sm text-gray-600 mb-1">{t("status")}</div>
-                <div className="flex gap-2">
-                  <Badge
-                    variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}
-                  >
-                    {t(request.status)}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-gray-600 mb-1">
-                {t("observation_definitions")}
-              </div>
-              <div className="font-sm font-normal flex flex-wrap gap-1">
-                {observationRequirements.map(
-                  (test: ObservationDefinitionRead) => (
-                    <Badge key={test.id} variant="secondary">
-                      {test.title}
-                    </Badge>
-                  ),
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 mb-1">{t("specimen")}</div>
-              <div className="font-sm font-normal flex flex-wrap gap-1">
-                {formatSpecimenRequirements(specimenRequirements)}
-              </div>
-            </div>
-            {request.body_site && (
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("body_site")}
-                </div>
-                <div className="font-semibold text-gray-700">
-                  {request.body_site.display}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="border-l border-gray-200 mx-4" />
-          <div className="flex flex-col gap-6">
-            {activityDefinition.healthcare_service && (
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("healthcare_service")}
-                </div>
-                <div className="font-semibold text-gray-700">
-                  {activityDefinition.healthcare_service.name}
-                </div>
-              </div>
-            )}
-            <div>
-              <div className="text-sm text-gray-600 mb-1">
-                {t("requested by")}
-              </div>
-              <div className="font-semibold text-gray-700">
-                {request.requester && formatName(request.requester)}
-              </div>
-            </div>
-            {request.encounter.current_location && (
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("patient_location")}
-                </div>
-                <LocationNode
-                  location={request.encounter.current_location}
-                  isLast={true}
-                />
-              </div>
-            )}
-            {request.patient_instruction && (
-              <div>
-                <div className="text-sm text-gray-600 mb-1">
-                  {t("patient_instruction")}
-                </div>
-                <div className="text-sm text-gray-950">
-                  {request.patient_instruction}
-                </div>
-              </div>
-            )}
-          </div>
+      <div className="mx-3 mb-3 rounded-lg bg-white p-4 shadow-md">
+        <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+          <ServiceRequestRequirements
+            request={request}
+            activityDefinition={activityDefinition}
+          />
+          <ServiceRequestContext
+            request={request}
+            activityDefinition={activityDefinition}
+          />
         </div>
         {request.note && (
-          <div className="mt-4">
-            <div className="text-sm text-gray-600 mb-1">{t("note")}:</div>
-            <div className="text-sm text-gray-950 ">{request.note}</div>
+          <dl className="mt-5 border-t border-gray-200 pt-4 text-sm">
+            <div className="space-y-1.5">
+              <dt className="text-gray-600">{t("note")}</dt>
+              <dd className="whitespace-pre-wrap text-gray-950 wrap-break-word">
+                {request.note}
+              </dd>
+            </div>
+          </dl>
+        )}
+        {(request.created_date || request.created_by) && (
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-gray-100 pt-3 text-xs text-gray-500">
+            {request.created_date && (
+              <span>
+                {t("created_at")}:{" "}
+                <time dateTime={request.created_date}>
+                  {format(request.created_date, "MMM d, yyyy, h:mm a")}
+                </time>
+              </span>
+            )}
+            {request.created_by && (
+              <span className="min-w-0 wrap-break-word">
+                {t("created_by")}: {formatName(request.created_by)}
+              </span>
+            )}
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
