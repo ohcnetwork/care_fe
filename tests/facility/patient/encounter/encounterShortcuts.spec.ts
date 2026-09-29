@@ -5,6 +5,7 @@ import {
   getEncounterCreateDialog,
   openCreateEncounterDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -208,6 +209,15 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
 
     await expect(page.getByText("Discharged").nth(1)).toBeVisible();
+
+    const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
+    expect(encounterId).toBeTruthy();
+    const response = await page.request.get(
+      `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+      { headers: getApiHeaders() },
+    );
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).status).toBe("discharged");
 
     await markEncounterAsComplete(page);
   });
