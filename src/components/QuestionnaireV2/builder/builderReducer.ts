@@ -105,6 +105,37 @@ export function buildCondition(
 }
 
 /**
+ * Where the selection lands after removing `ids`: the previous surviving
+ * sibling of the removed entry that held the selection, else the next, else
+ * its parent. `undefined` when the selection was not inside a removed entry.
+ */
+function nearestSurvivor(
+  questions: Question[],
+  ids: Set<string>,
+  selectedId: string,
+): string | null | undefined {
+  const walk = (
+    list: Question[],
+    parentId: string | null,
+  ): string | null | undefined => {
+    for (const [index, question] of list.entries()) {
+      if (ids.has(question.id)) {
+        if (!collectIds(question).includes(selectedId)) continue;
+        const survivors = (entries: Question[]) =>
+          entries.filter((entry) => !ids.has(entry.id));
+        const before = survivors(list.slice(0, index)).at(-1);
+        const after = survivors(list.slice(index + 1))[0];
+        return (before ?? after)?.id ?? parentId;
+      }
+      const found = walk(question.questions ?? [], question.id);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+  return walk(questions, null);
+}
+
+/**
  * Deep copy of one question subtree for the studio's Duplicate action:
  * fresh ids/link_ids via the shared regeneration walk, with enable_when
  * targets INSIDE the subtree remapped to the copies and targets OUTSIDE it
@@ -293,7 +324,9 @@ export function builderReducer(
         ...state,
         questions,
         selectedId: removedIds.has(state.selectedId ?? "")
-          ? (questions[0]?.id ?? null)
+          ? (nearestSurvivor(state.questions, ids, state.selectedId!) ??
+            questions[0]?.id ??
+            null)
           : state.selectedId,
         dirty: true,
       };

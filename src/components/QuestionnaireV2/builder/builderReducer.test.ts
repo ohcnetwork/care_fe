@@ -197,6 +197,42 @@ describe("buildCondition", () => {
   });
 });
 
+describe("selection after removeQuestions", () => {
+  const tree = () => [
+    q({ id: "a", type: "string" }),
+    q({
+      id: "g",
+      type: "group",
+      questions: [
+        q({ id: "g1", type: "string" }),
+        q({ id: "g2", type: "string" }),
+      ],
+    }),
+    q({ id: "c", type: "string" }),
+  ];
+  const remove = (selectedId: string, ...ids: string[]) =>
+    builderReducer(
+      { questions: tree(), actions: [], selectedId, dirty: false },
+      { type: "removeQuestions", ids },
+    ).selectedId;
+
+  it("selects the previous sibling, else the next, else the parent", () => {
+    assert.equal(remove("c", "c"), "g");
+    assert.equal(remove("a", "a"), "g");
+    assert.equal(remove("g2", "g2"), "g1");
+    assert.equal(remove("g1", "g1", "g2"), "g");
+  });
+
+  it("follows a selection nested inside a removed group", () => {
+    assert.equal(remove("g2", "g"), "a");
+  });
+
+  it("keeps an unaffected selection and falls back to the first question", () => {
+    assert.equal(remove("a", "c"), "a");
+    assert.equal(remove("a", "a", "g", "c"), null);
+  });
+});
+
 describe("actions in the builder state", () => {
   const fever = q({ id: "Q-fever", type: "boolean" });
   const followUp = q({
