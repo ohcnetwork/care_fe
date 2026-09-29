@@ -454,14 +454,21 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         const isPhone = (system: string) =>
                           ["phone", "fax", "sms"].includes(system);
 
-                        form.clearErrors(`contact.${index}.value`);
+                        const valuePath = `contact.${index}.value` as const;
+                        const changesCategory =
+                          isPhone(value) !== isPhone(field.value);
 
                         // If the system is changing from a phone type to a non-phone type, clear the value
-                        if (isPhone(value) !== isPhone(field.value)) {
-                          form.setValue(`contact.${index}.value`, "");
+                        if (changesCategory) {
+                          form.clearErrors(valuePath);
+                          form.setValue(valuePath, "");
                         }
 
                         field.onChange(value);
+
+                        if (!changesCategory) {
+                          void form.trigger(valuePath);
+                        }
                       }}
                     >
                       <FormControl>
