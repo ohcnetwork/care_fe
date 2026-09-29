@@ -4,8 +4,9 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 3.x.x   | :white_check_mark: |
 | 2.x.x   | :white_check_mark: |
-| 1.0.x   | :white_check_mark: |
+| 1.0.x   | :x:                |
 
 ## Supported Browsers
 
@@ -23,4 +24,4 @@
 
 ## Reporting a Vulnerability
 
-Please create an issue at https://github.com/ohcnetwork/care_fe/issues/new
+Please report security vulnerabilities privately via [GitHub Security Advisories](https://github.com/ohcnetwork/care_fe/security/advisories/new) or by emailing [info@ohc.network](mailto:info@ohc.network). Please do not disclose vulnerabilities in public issues.

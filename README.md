@@ -160,7 +160,7 @@ sudo apt-get install nginx
 
    On Debian/Ubuntu, NGINX comes with a `sites-enabled/default` file which may need to be removed before the Care will begin responding to requests.
 
-If your Nginx reverse-proxy has been set up correctly, then visit the school using your browser at
+If your Nginx reverse-proxy has been set up correctly, then visit CARE using your browser at
 `http://care.localhost`.
 
 ## 📱 Patient Login in Staging
@@ -181,7 +181,7 @@ For patient login via phone number:
 
 ## Translations
 
-All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
+All strings must be encased in i18n translations. New translation strings must be specified in `public/locale/en.json`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe).
 
 #### Remote i18n configuration (optional)
 
@@ -230,7 +230,7 @@ To ensure the quality of our pull requests, we use a variety of tools:
 
 #### 🎭 Run Playwright tests
 
-To run Playwright tests locally, you'll need to setup the backend to run locally and load dummy data required for the tests. See [docs](https://github.com/ohcnetwork/care#self-hosting).
+To run Playwright tests locally, you'll need to setup the backend to run locally and load dummy data required for the tests. See [CARE Backend Documentation](https://care-be-docs.ohc.network/).
 
 Once backend is running locally, ensure your local front-end is connected to local backend by setting the `REACT_CARE_API_URL` environment variable:
 
@@ -261,9 +261,9 @@ For more details, see [tests/README.md](tests/README.md).
 
 ## 📖 Documentations
 
-- [CARE Documentation](https://docs.ohc.network/docs/care)
+- [CARE Documentation](https://docs.ohc.network/)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
-- [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
+- [E2E Testing Guide](docs/testing.md)
 
 ## 🚀 Production
 
