@@ -288,8 +288,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 </Button>
               </div>
             ))}
-            {(!singleSelection ||
-              (singleSelection && selectedOrganizations.length < 1)) &&
+            {(!singleSelection || selectedOrganizations.length < 1) &&
               (isMobile ? (
                 <>
                   <Drawer open={open} onOpenChange={setOpen}>

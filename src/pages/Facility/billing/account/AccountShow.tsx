@@ -291,8 +291,7 @@ function AccountShow({
     );
   }
 
-  const isAccountBillableAndActive =
-    !!account && isAccountActiveAndBillable(account);
+  const isAccountBillableAndActive = isAccountActiveAndBillable(account);
 
   const roundedBalance = roundWhole(account.total_balance);
   const roundedBilledGross = roundWhole(account.total_gross);
