@@ -1,8 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import {
-  ObservationListRead,
-  ObservationStatus,
-} from "@/types/emr/observation/observation";
+import { ObservationListRead } from "@/types/emr/observation/observation";
 import { toNumber } from "@/Utils/decimal";
 import { formatName } from "@/Utils/utils";
 
@@ -21,11 +18,7 @@ export function resolveObservationEntries(
   const groupedObj: Record<string, ResolvedObservationEntry[]> = {};
 
   for (const obs of results) {
-    if (
-      !obs.effective_datetime ||
-      obs.status === ObservationStatus.ENTERED_IN_ERROR
-    )
-      continue;
+    if (!obs.effective_datetime) continue;
 
     const time = new Date(obs.effective_datetime).getTime();
     const enteredBy = formatName(obs.data_entered_by);

@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 
@@ -66,6 +67,7 @@ export function ObservationDetailSheet({
         pathParams: { patientId },
         queryParams: {
           codes: codesParam,
+          status: ObservationStatus.FINAL,
           limit: String(RESULTS_PER_PAGE_LIMIT),
           offset: String(pageParam),
           ...(currentEncounterOnly && encounterId
