@@ -253,6 +253,29 @@ test.describe("Specimen Definitions Create", () => {
     ).toBeVisible();
   });
 
+  test("should reject whitespace-only input in required text fields", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    const whitespace = "   ";
+    const fields = ["Title *", "Description *"];
+
+    for (const field of fields) {
+      await page.getByRole("textbox", { name: field }).fill(whitespace);
+    }
+
+    await page.getByRole("button", { name: /save/i }).click();
+
+    for (const field of fields) {
+      const errorMessage = getFieldErrorMessage(
+        page.getByRole("textbox", { name: field }),
+      );
+      await expect(errorMessage).toBeVisible();
+      await expect(errorMessage).toHaveText("This field is required");
+    }
+  });
+
   test("should auto-populate slug from title", async ({ page }) => {
     await page.getByRole("button", { name: "Add Definition" }).click();
 
