@@ -23,12 +23,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +34,6 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { COLOR_PALETTE } from "@/components/ui/multi-filter/utils/Utils";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
@@ -86,7 +80,6 @@ export const PractitionerSelector = ({
     string | null
   >(null);
   const [showAllOrgs, setShowAllOrgs] = useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch root organizations - default to user's departments only
   const { data: organizationsResponse } = useQuery({
@@ -676,51 +669,32 @@ export const PractitionerSelector = ({
           )}
         </div>
       )}
-      {isMobile ? (
-        <Drawer
-          open={open}
-          onOpenChange={(newOpen) => {
-            setOpen(newOpen);
-            if (!newOpen) {
-              setSearchQuery("");
-              setCurrentOrganizationId(null);
-              setNavigationStack([]);
-            }
-          }}
-        >
-          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
-              {content}
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Popover
-          open={open}
-          onOpenChange={(newOpen) => {
-            setOpen(newOpen);
-            if (!newOpen) {
-              setSearchQuery("");
-              setCurrentOrganizationId(null);
-              setNavigationStack([]);
-            }
-          }}
-          modal={true}
-        >
-          <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-          <PopoverContent
-            align="start"
-            side="bottom"
-            className={cn(
-              "p-0",
-              !multiple && "w-[var(--radix-popover-trigger-width)]",
-            )}
-          >
-            {content}
-          </PopoverContent>
-        </Popover>
-      )}
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={(newOpen) => {
+          setOpen(newOpen);
+          if (!newOpen) {
+            setSearchQuery("");
+            setCurrentOrganizationId(null);
+            setNavigationStack([]);
+          }
+        }}
+        mobile="drawer"
+        desktop="popover"
+        breakpoint="sm"
+        trigger={triggerButton}
+        modal
+        align="start"
+        side="bottom"
+        mobileClassName="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg"
+        mobileBodyClassName="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto"
+        desktopClassName={cn(
+          "p-0",
+          !multiple && "w-[var(--radix-popover-trigger-width)]",
+        )}
+      >
+        {content}
+      </ResponsiveDialog>
     </div>
   );
 };

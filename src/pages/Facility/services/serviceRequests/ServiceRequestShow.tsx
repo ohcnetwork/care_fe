@@ -10,13 +10,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -51,13 +44,7 @@ import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenD
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import { DiagnosticReportForm } from "./components/DiagnosticReportForm";
 import { DiagnosticReportReview } from "./components/DiagnosticReportReview";
@@ -654,65 +641,29 @@ export default function ServiceRequestShow({
             </div>
           </div>
 
-          {isMobile ? (
-            <Sheet
-              open={isCompleteDialogOpen}
-              onOpenChange={(open) => {
-                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-              }}
-            >
-              <SheetContent side="bottom">
-                <SheetHeader>
-                  <SheetTitle>{t("add_completion_note")}</SheetTitle>
-                  <SheetDescription>
-                    {t("service_request_completion_note_description")}
-                  </SheetDescription>
-                </SheetHeader>
-                <CompletionNoteContent
-                  note={completionNote}
-                  isUpdating={isCompletingServiceRequest}
-                  onNoteChange={setCompletionNote}
-                  onComplete={() =>
-                    completeServiceRequest({
-                      status: Status.completed,
-                      note: completionNote.trim() || null,
-                      locations: request.locations.map((loc) => loc.id),
-                    })
-                  }
-                  onCancel={() => setIsCompleteDialogOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-          ) : (
-            <Dialog
-              open={isCompleteDialogOpen}
-              onOpenChange={(open) => {
-                if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-              }}
-            >
-              <DialogContent className="sm:max-w-lg shadow-lg border-white/20">
-                <DialogHeader>
-                  <DialogTitle>{t("add_completion_note")}</DialogTitle>
-                  <DialogDescription>
-                    {t("service_request_completion_note_description")}
-                  </DialogDescription>
-                </DialogHeader>
-                <CompletionNoteContent
-                  note={completionNote}
-                  isUpdating={isCompletingServiceRequest}
-                  onNoteChange={setCompletionNote}
-                  onComplete={() =>
-                    completeServiceRequest({
-                      status: Status.completed,
-                      note: completionNote.trim() || null,
-                      locations: request.locations.map((loc) => loc.id),
-                    })
-                  }
-                  onCancel={() => setIsCompleteDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          )}
+          <ResponsiveDialog
+            open={isCompleteDialogOpen}
+            onOpenChange={(open) => {
+              if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
+            }}
+            title={t("add_completion_note")}
+            description={t("service_request_completion_note_description")}
+            desktopClassName="sm:max-w-lg shadow-lg border-white/20"
+          >
+            <CompletionNoteContent
+              note={completionNote}
+              isUpdating={isCompletingServiceRequest}
+              onNoteChange={setCompletionNote}
+              onComplete={() =>
+                completeServiceRequest({
+                  status: Status.completed,
+                  note: completionNote.trim() || null,
+                  locations: request.locations.map((loc) => loc.id),
+                })
+              }
+              onCancel={() => setIsCompleteDialogOpen(false)}
+            />
+          </ResponsiveDialog>
         </>
       )}
     </div>

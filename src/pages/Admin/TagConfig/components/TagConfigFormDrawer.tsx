@@ -1,25 +1,9 @@
 import React from "react";
 
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 import { useTranslation } from "react-i18next";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
 import TagConfigForm from "@/pages/Admin/TagConfig/TagConfigForm";
 import { isIOSDevice } from "@/Utils/utils";
 
@@ -45,7 +29,6 @@ export default function TagConfigFormDrawer({
   onOpenChange: controlledOnOpenChange,
 }: TagConfigFormDrawerProps) {
   const { t } = useTranslation();
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const [internalOpen, setInternalOpen] = React.useState(false);
 
@@ -65,58 +48,32 @@ export default function TagConfigFormDrawer({
   };
 
   return (
-    <>
-      {isMobile ? (
-        <Drawer
-          open={open}
-          onOpenChange={onOpenChange}
-          repositionInputs={!isIOSDevice}
-        >
-          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent className="min-h-[65vh] max-h-[100vh]">
-            <DrawerHeader className="flex flex-row items-center justify-between">
-              <DrawerTitle className="text-xl font-semibold">
-                {title}
-              </DrawerTitle>
-              <DrawerDescription className="sr-only">
-                {configId
-                  ? t("edit_tag_config")
-                  : t("manage_tag_config_description")}
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="overflow-y-auto flex-1 px-3 pb-2">
-              <TagConfigForm
-                configId={configId}
-                parentId={parentId}
-                facilityId={facilityId}
-                onSuccess={handleSuccess}
-              />
-            </div>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetTrigger asChild>{trigger}</SheetTrigger>
-          <SheetContent className="overflow-y-auto">
-            <SheetHeader className="flex flex-row items-center justify-between">
-              <SheetTitle>{title}</SheetTitle>
-              <SheetDescription className="sr-only">
-                {configId
-                  ? t("edit_tag_config")
-                  : t("manage_tag_config_description")}
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-6 pb-6">
-              <TagConfigForm
-                configId={configId}
-                parentId={parentId}
-                facilityId={facilityId}
-                onSuccess={handleSuccess}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
-    </>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      mobile="drawer"
+      desktop="sheet"
+      breakpoint="sm"
+      repositionInputs={!isIOSDevice}
+      trigger={trigger}
+      title={title}
+      titleClassName="text-xl"
+      description={
+        configId ? t("edit_tag_config") : t("manage_tag_config_description")
+      }
+      descriptionClassName="sr-only"
+      headerClassName="flex flex-row items-center justify-between"
+      mobileClassName="min-h-[65vh] max-h-[100vh]"
+      desktopClassName="overflow-y-auto"
+      mobileBodyClassName="overflow-y-auto flex-1 px-3 pb-2"
+      desktopBodyClassName="mt-6 pb-6"
+    >
+      <TagConfigForm
+        configId={configId}
+        parentId={parentId}
+        facilityId={facilityId}
+        onSuccess={handleSuccess}
+      />
+    </ResponsiveDialog>
   );
 }
