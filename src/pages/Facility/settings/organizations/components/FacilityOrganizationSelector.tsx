@@ -601,6 +601,8 @@ export default function FacilityOrganizationSelector(
               open={open}
               onOpenChange={handleOpenChange}
               mobile="drawer"
+              title={t("select_department")}
+              headerClassName="sr-only"
               desktop="popover"
               breakpoint="sm"
               align="start"

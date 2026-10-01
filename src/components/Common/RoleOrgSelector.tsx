@@ -286,6 +286,8 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 open={open}
                 onOpenChange={handleOpenChange}
                 mobile="drawer"
+                title={t("select_organization")}
+                headerClassName="sr-only"
                 desktop="popover"
                 breakpoint="sm"
                 align="start"
