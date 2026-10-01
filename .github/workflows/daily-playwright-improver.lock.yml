@@ -89,7 +89,7 @@ jobs:
         with:
           destination: /opt/gh-aw/actions
       - name: Checkout .github and .agents folders
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           sparse-checkout: |
             .github
@@ -1136,7 +1136,7 @@ jobs:
           path: /tmp/gh-aw/
       - name: Checkout repository
         if: ((!cancelled()) && (needs.agent.result != 'skipped')) && (contains(needs.agent.outputs.output_types, 'create_pull_request'))
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           token: ${{ github.token }}
           persist-credentials: false
