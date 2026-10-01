@@ -21,19 +21,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { cn } from "@/lib/utils";
 import { Link } from "raviger";
 
@@ -296,7 +284,6 @@ export default function RequirementsSelector({
 }: RequirementsSelectorProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
   const { t } = useTranslation();
 
   const addOption = (option: RequirementItem) => {
@@ -337,35 +324,22 @@ export default function RequirementsSelector({
     </Button>
   );
 
-  return isMobile ? (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex flex-col gap-3">
-        <DrawerTrigger asChild>{renderTriggerButton}</DrawerTrigger>
-
-        {value.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {value.map((item, index) => (
-              <SelectedItemCard
-                key={`${item.value}-${index}`}
-                title={item.label}
-                link={item.link}
-                details={item.details || []}
-                onRemove={() => removeItem(index)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <DrawerContent>
-        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
-          <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
-          {description && (
-            <DrawerDescription className="mt-1.5 text-sm">
-              {description}
-            </DrawerDescription>
-          )}
-        </div>
+  return (
+    <div className="flex flex-col gap-3">
+      <ResponsiveDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        mobile="drawer"
+        desktop="popover"
+        breakpoint="sm"
+        trigger={renderTriggerButton}
+        title={title}
+        titleClassName="text-lg font-semibold"
+        description={description}
+        descriptionClassName="mt-1.5 text-sm"
+        headerClassName="flex flex-col border-b px-3 py-2 mb-1.5"
+        desktopClassName="p-0 w-[var(--radix-popover-trigger-width)]"
+      >
         <RequirementsContent
           value={value}
           options={options}
@@ -380,47 +354,21 @@ export default function RequirementsSelector({
           removeItem={removeItem}
           addOption={addOption}
         />
-      </DrawerContent>
-    </Drawer>
-  ) : (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex flex-col gap-3">
-        <PopoverTrigger asChild>{renderTriggerButton}</PopoverTrigger>
+      </ResponsiveDialog>
 
-        {value.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {value.map((item, index) => (
-              <SelectedItemCard
-                key={`${item.value}-${index}`}
-                title={item.label}
-                link={item.link}
-                details={item.details || []}
-                onRemove={() => removeItem(index)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
-        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
-          {description && <p className="mt-1.5 text-sm">{description}</p>}
+      {value.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {value.map((item, index) => (
+            <SelectedItemCard
+              key={`${item.value}-${index}`}
+              title={item.label}
+              link={item.link}
+              details={item.details || []}
+              onRemove={() => removeItem(index)}
+            />
+          ))}
         </div>
-        <RequirementsContent
-          value={value}
-          options={options}
-          isLoading={isLoading}
-          onSearch={onSearch}
-          customSelector={customSelector}
-          canCreate={canCreate}
-          isCreateSheetOpen={isCreateSheetOpen}
-          setIsCreateSheetOpen={setIsCreateSheetOpen}
-          createForm={createForm}
-          allowDuplicate={allowDuplicate}
-          removeItem={removeItem}
-          addOption={addOption}
-        />
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }
