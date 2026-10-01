@@ -7,6 +7,7 @@ on:
   pull_request_target:
     types:
       - closed
+checkout: false
 permissions: read-all
 tools:
   github:
