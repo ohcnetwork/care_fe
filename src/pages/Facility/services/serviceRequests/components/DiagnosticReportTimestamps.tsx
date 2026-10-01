@@ -1,16 +1,19 @@
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 
 interface DiagnosticReportTimestampsProps {
   report: Pick<DiagnosticReportRead, "created_date" | "modified_date">;
   compact?: boolean;
+  className?: string;
 }
 
 export function DiagnosticReportTimestamps({
   report,
   compact = false,
+  className,
 }: DiagnosticReportTimestampsProps) {
   const { t } = useTranslation();
   const createdAt = format(report.created_date, "MMM d, yyyy, h:mm a");
@@ -21,7 +24,7 @@ export function DiagnosticReportTimestamps({
 
   if (compact) {
     return (
-      <span className="text-xs font-normal text-gray-500">
+      <span className={cn(className ?? "text-xs font-normal text-gray-500")}>
         {t(hasUpdate ? "updated" : "created")}:{" "}
         <time dateTime={hasUpdate ? report.modified_date : report.created_date}>
           {hasUpdate ? updatedAt : createdAt}
@@ -31,7 +34,12 @@ export function DiagnosticReportTimestamps({
   }
 
   return (
-    <span className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-normal text-gray-500">
+    <span
+      className={cn(
+        className ??
+          "flex flex-wrap gap-x-4 gap-y-1 text-xs font-normal text-gray-500",
+      )}
+    >
       <span>
         {t("created")}: <time dateTime={report.created_date}>{createdAt}</time>
       </span>

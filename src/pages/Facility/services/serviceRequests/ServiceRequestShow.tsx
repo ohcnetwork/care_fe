@@ -3,11 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
-
 import query from "@/Utils/request/query";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
-import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
@@ -106,7 +103,7 @@ export default function ServiceRequestShow({
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <div
-        className={`mx-auto w-full p-4 max-w-4xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
+        className={`mx-auto w-full max-w-4xl ${canShowMarkAsCompleteFootBar ? "pb-28" : ""}`}
       >
         <div className="space-y-6">
           <ServiceRequestActions
@@ -115,7 +112,7 @@ export default function ServiceRequestShow({
             serviceRequestId={serviceRequestId}
             hasFinalizedReport={hasFinalizedReport}
           />
-          <div className="px-2">
+          <div className="px-2 m-0 mb-2">
             <PatientHeader
               patient={request.encounter.patient}
               facilityId={facilityId}
@@ -126,19 +123,9 @@ export default function ServiceRequestShow({
             request={request}
             activityDefinition={activityDefinition}
             facilityId={facilityId}
+            locationId={locationId}
+            disableEdit={disableEdit}
           />
-          <div className="space-y-3">
-            <ChargeItemsSection
-              facilityId={facilityId}
-              resourceId={serviceRequestId}
-              encounterId={request.encounter.id}
-              serviceResourceType={ChargeItemServiceResource.service_request}
-              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
-              patientId={request.encounter.patient.id}
-              viewOnly={disableEdit}
-              disableCreateChargeItems
-            />
-          </div>
 
           <ServiceRequestSpecimenWorkflow
             request={request}

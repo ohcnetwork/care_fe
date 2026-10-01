@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Avatar } from "@/components/Common/Avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +22,7 @@ import {
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { formatName } from "@/Utils/utils";
 
-import { DiagnosticReportTimestamps } from "./DiagnosticReportTimestamps";
+import { cn } from "@/lib/utils";
 import { ObservationHistorySheet } from "./ObservationHistorySheet";
 
 interface DiagnosticReportItemHeaderProps {
@@ -45,75 +44,56 @@ export function DiagnosticReportItemHeader({
 }: DiagnosticReportItemHeaderProps) {
   const { t } = useTranslation();
   return (
-    <CardHeader className="px-2 py-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2 rounded-md">
-        <div className="flex flex-1 items-center gap-2 min-w-0 w-full sm:w-auto">
-          <CardTitle className="min-w-0 w-full">
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-2 min-w-0 w-full text-left"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.stopPropagation();
-                  }
-                }}
-              >
-                <NotepadText className="size-6 shrink-0 text-gray-950 stroke-[1.5px]" />
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-base text-gray-950 font-medium wrap-break-word">
+    <CollapsibleTrigger asChild>
+      <CardHeader className="cursor-pointer p-2">
+        <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-2 rounded-md">
+          <div className="flex flex-1 items-center gap-2 min-w-0">
+            <CardTitle className="min-w-0 w-full">
+              <div className="flex items-start sm:items-center gap-2 min-w-0 w-full text-left">
+                <span
+                  className={cn(
+                    "flex items-center justify-center bg-gray-100 p-2.5 rounded-lg",
+                    isExpanded && "bg-gray-200",
+                  )}
+                >
+                  <NotepadText className="size-6 text-gray-600 stroke-[1.5px]" />
+                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-base text-gray-950 font-semibold wrap-break-word">
                     {isMultipleDiagnosticReport
                       ? report.code?.display
                       : report.service_request?.title}
                   </span>
-                  <DiagnosticReportTimestamps report={fullReport ?? report} />
-                </div>
-              </button>
-            </CollapsibleTrigger>
-          </CardTitle>
-        </div>
-        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-5 w-full sm:w-auto">
-          {fullReport && (
-            <div
-              className="flex items-center gap-2 min-w-0"
-              title={t("created_by_user", {
-                name: formatName(fullReport.created_by),
-              })}
-            >
-              <Avatar
-                name={formatName(fullReport.created_by, true)}
-                className="size-5 shrink-0"
-                imageUrl={fullReport.created_by.profile_picture_url}
-              />
-              <span className="text-sm text-gray-700 font-medium truncate">
-                {formatName(fullReport.created_by)}
-              </span>
-            </div>
-          )}
 
-          <div className="flex items-center gap-1 shrink-0">
-            <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
+                  {fullReport && (
+                    <span className="text-sm text-gray-700 font-normal truncate">
+                      {formatName(fullReport.created_by)}
+                    </span>
+                  )}
+
+                  <div className="mt-1.5 sm:hidden">
+                    <Badge
+                      variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+                    >
+                      {t(report.status)}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardTitle>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-1 shrink-0">
+            <Badge
+              variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
+              className="hidden sm:inline-flex"
+            >
               {t(report.status)}
             </Badge>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-10"
-                aria-label={isExpanded ? t("collapse") : t("expand")}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.stopPropagation();
-                  }
-                }}
-              >
-                {isExpanded ? (
-                  <ChevronsDownUp className="size-5" />
-                ) : (
-                  <ChevronsUpDown className="size-5" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
+            {isExpanded ? (
+              <ChevronsDownUp className="size-4 ml-2" />
+            ) : (
+              <ChevronsUpDown className="size-4 ml-2" />
+            )}
             {hasObservationHistory && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -121,6 +101,7 @@ export function DiagnosticReportItemHeader({
                     variant="ghost"
                     size="icon"
                     aria-label={t("view_observation_history")}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical className="size-4" />
                   </Button>
@@ -144,7 +125,7 @@ export function DiagnosticReportItemHeader({
             )}
           </div>
         </div>
-      </div>
-    </CardHeader>
+      </CardHeader>
+    </CollapsibleTrigger>
   );
 }

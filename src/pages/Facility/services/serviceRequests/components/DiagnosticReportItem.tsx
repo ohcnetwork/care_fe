@@ -14,6 +14,7 @@ import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticR
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import query from "@/Utils/request/query";
 
+import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import { DiagnosticReportAttachments } from "./DiagnosticReportAttachments";
 import { DiagnosticReportItemProps } from "./diagnosticReportFormTypes";
 import { DiagnosticReportItemHeader } from "./DiagnosticReportItemHeader";
@@ -77,12 +78,12 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
           }
         />
         <CollapsibleContent>
-          <CardContent className="px-2">
+          <CardContent className="px-2 pb-3">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
             />
-            <div className="space-y-6">
+            <div className="space-y-2">
               {showEditor && (
                 <>
                   <PLUGIN_Component
@@ -107,13 +108,13 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
               <div className="space-y-4">
                 {showEditor && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
-                    <CardContent className="p-4 space-y-2">
-                      <h3 className="text-base font-semibold text-gray-950">
+                    <CardContent className="p-2 space-y-2">
+                      <h3 className="text-sm font-medium text-gray-950">
                         {t("conclusion")}
                       </h3>
                       <RichTextEditor
                         label={t("conclusion")}
-                        placeholder={t("enter_conclusion")}
+                        placeholder={t("enter_conclusion_of_diagnostic_report")}
                         value={draft.conclusion}
                         onChange={draft.setConclusion}
                         disabled={isReadOnly}
@@ -141,6 +142,9 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     isReadOnly={isReadOnly}
                   />
                 </div>
+              </div>
+              <div className="flex p-2 pb-0">
+                <DiagnosticReportTimestamps report={fullReport ?? report} />
               </div>
             </div>
           </CardContent>

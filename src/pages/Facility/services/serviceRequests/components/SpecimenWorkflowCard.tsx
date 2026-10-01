@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { CircleDashed, FileText, PackageSearch, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -79,19 +79,25 @@ export function SpecimenWorkflowCard({
   return (
     <Card
       className={cn(
-        "overflow-hidden rounded-lg",
+        "overflow-hidden rounded-lg shadow-xs",
         isDiscarded && "opacity-70 bg-gray-50",
       )}
     >
       <Collapsible open={isOpen}>
         <CollapsibleTrigger
           asChild
-          className={cn(hasCollected && "cursor-pointer")}
+          className={cn((hasCollected || isDraft) && "cursor-pointer")}
         >
           {/* === Header: Changes based on collection status === */}
           <CardHeader
-            className={cn("p-4  bg-white", isOpen && "bg-gray-100")}
-            onClick={() => hasCollected && setIsOpen(!isOpen)}
+            className="p-3 bg-white"
+            onClick={() => {
+              if (hasCollected) {
+                setIsOpen(!isOpen);
+              } else if (isDraft && !disableEdit) {
+                onCollect();
+              }
+            }}
           >
             {collectedSpecimen ? (
               // --- Collected Header ---
@@ -104,45 +110,43 @@ export function SpecimenWorkflowCard({
               />
             ) : (
               // --- Pending Collection Header ---
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
-                <CardTitle className="text-base font-medium flex items-center gap-2">
-                  <PackageSearch className="size-5 text-gray-600" />
-                  <span className="truncate">
-                    {t("required")}: {requirement.title}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <div className="min-w-0">
+                  <span className="text-sm text-gray-600">
+                    {t("required")}:
                   </span>
-                </CardTitle>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="orange">
-                    <CircleDashed className="size-4 mr-1.5" />
-                    {t("collection_pending")}
-                  </Badge>
-
-                  {isDraft && (
-                    <Badge variant="secondary">
-                      <FileText className="size-4 mr-1.5 stroke-1.5" />
-                      {t("draft")}
-                    </Badge>
-                  )}
+                  <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
+                    <span className="truncate">{requirement.title}</span>
+                    {isDraft && <Badge variant="indigo">{t("draft")}</Badge>}
+                  </CardTitle>
                 </div>
 
-                <Button
-                  onClick={onCollect}
-                  variant="outline_primary"
-                  disabled={disableEdit}
-                >
-                  <Plus className="size-4" />
-                  {t("collect_specimen")}
-                  <ShortcutBadge actionId="collect-specimen" />
-                </Button>
+                <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
+                  <Badge variant="orange">{t("collection_pending")}</Badge>
+
+                  {isDraft ? (
+                    <ChevronsUpDown className="size-4 mx-2" />
+                  ) : (
+                    <Button
+                      onClick={onCollect}
+                      variant="outline_primary"
+                      disabled={disableEdit}
+                    >
+                      <Plus className="size-4" />
+                      {t("collect_specimen")}
+                      <ShortcutBadge actionId="collect-specimen" />
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
           {/* === Accordion for Instructions, Collection Details, Processing, Discard === */}
-          <CardContent className="p-2 bg-gray-100">
+          <CardContent className="p-2">
             {collectedSpecimen && (
-              <Card className="p-4 w-full my-2 shadow-none border-none rounded-md">
+              <div className="rounded-lg mb-3 p-4 text-center bg-gray-50">
                 <PrintableQRCode
                   value={
                     collectedSpecimen.accession_identifier ||
@@ -151,7 +155,7 @@ export function SpecimenWorkflowCard({
                   title={collectedSpecimen.specimen_type?.display}
                   subtitle={collectedSpecimen.specimen_definition?.title}
                 />
-              </Card>
+              </div>
             )}
             <Accordion
               type="multiple"

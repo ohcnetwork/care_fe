@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,8 @@ export function DiagnosticReportObservationInput({
   disabled,
   onValueChange,
 }: DiagnosticReportObservationInputProps) {
+  const { t } = useTranslation();
+
   return (
     <label
       htmlFor={id}
@@ -36,6 +40,7 @@ export function DiagnosticReportObservationInput({
         aria-label={label}
         aria-describedby={unit ? `${id}-unit` : undefined}
         className="field-sizing-content h-auto w-auto min-w-0 max-w-full border-none bg-transparent p-0 text-base shadow-none focus:ring-0 focus-visible:ring-0 disabled:cursor-default disabled:opacity-100 md:text-sm"
+        placeholder={t("result_value")}
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         type={
@@ -46,7 +51,10 @@ export function DiagnosticReportObservationInput({
       {unit && (
         <span
           id={`${id}-unit`}
-          className="shrink-0 text-sm text-gray-500 select-none"
+          className={cn(
+            "shrink-0 text-sm text-gray-500 select-none",
+            !value && "ml-auto",
+          )}
         >
           {unit}
         </span>

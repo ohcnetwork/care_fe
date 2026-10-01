@@ -1,4 +1,4 @@
-import { CheckCheck, Eye, FileText } from "lucide-react";
+import { CheckCheck, Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -37,17 +37,16 @@ export function SpecimenCollectionInstructions({
     <AccordionItem value="instructions" className="border-none">
       <AccordionTrigger
         className={cn(
-          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-gray-100 data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
         )}
       >
         <div className="flex items-center gap-2 flex-1 mr-4">
-          <FileText className="size-4 text-gray-500" />
           <span className="font-medium flex items-center gap-2 underline">
             {t("specimen_collection_instructions")}
             {hasCollected ? (
-              <CheckCheck className="size-4 text-blue-500" />
+              <CheckCheck className="size-4 text-blue-500 shrink-0" />
             ) : (
-              <Eye className="size-4 text-gray-500" />
+              <Eye className="size-4 text-gray-500 shrink-0" />
             )}
           </span>
         </div>
