@@ -17,6 +17,7 @@ import {
   Monitor,
   PanelsTopLeft,
   Pill,
+  Syringe,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -37,6 +38,7 @@ import EncounterNavigation, {
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/files";
+import { EncounterImmunizationsTab } from "@/pages/Encounters/tabs/immunizations";
 import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/medicines";
 import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
@@ -146,6 +148,13 @@ export const EncounterShow = (props: Props) => {
       visible: canReadClinicalData,
       component: <EncounterMedicinesTab />,
       shortcutId: "medicines",
+    },
+    immunizations: {
+      icon: Syringe,
+      label: t(`ENCOUNTER_TAB__immunizations`),
+      visible: canReadClinicalData,
+      component: <EncounterImmunizationsTab />,
+      shortcutId: "immunizations",
     },
     service_requests: {
       icon: ListChecks,

@@ -147,6 +147,7 @@
     { "key": "g p", "action": "plots", "description": "Go to Plots Tab" },
     { "key": "g o", "action": "observations", "description": "Go to Observations Tab" },
     { "key": "g m", "action": "medicines", "description": "Go to Medicines Tab" },
+    { "key": "g i", "action": "immunizations", "description": "Go to Immunizations Tab" },
     { "key": "g r", "action": "responses", "description": "Go to Responses Tab" },
     { "key": "g s", "action": "service-requests", "description": "Go to Service Requests Tab" },
     { "key": "g d", "action": "diagnostic-reports", "description": "Go to Diagnostic Reports Tab" },

@@ -45,7 +45,7 @@ function countRecommendations(template: ImmunizationPolicyTemplate): number {
 function vaccineLabels(template: ImmunizationPolicyTemplate): string[] {
   const codes = new Map<string, string>();
   const collect = (node: ImmunizationPolicyTemplate) => {
-    for (const coding of node.codes) {
+    for (const coding of node.codes ?? []) {
       codes.set(
         `${coding.system ?? ""}|${coding.code}`,
         coding.display || coding.code,

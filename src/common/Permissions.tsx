@@ -74,6 +74,11 @@ export const PERMISSION_READ_IMMUNIZATION_POLICY =
 export const PERMISSION_WRITE_IMMUNIZATION_POLICY =
   "can_write_immunization_policy";
 
+// Immunization Permissions
+export const PERMISSION_WRITE_IMMUNIZATION = "can_write_immunization";
+export const PERMISSION_WRITE_IMMUNIZATION_RECOMMENDATION =
+  "can_write_immunization_recommendation";
+
 // Appointment Permissions
 export const PERMISSION_LIST_BOOKING = "can_list_booking";
 export const PERMISSION_WRITE_BOOKING = "can_write_booking";
@@ -229,6 +234,12 @@ export interface Permissions {
   // Immunization Policy Permissions
   canReadImmunizationPolicy: boolean;
   canWriteImmunizationPolicy: boolean;
+
+  // Immunization Permissions
+  /** Permission slug: "can_write_immunization" */
+  canWriteImmunization: boolean;
+  /** Permission slug: "can_write_immunization_recommendation" */
+  canWriteImmunizationRecommendation: boolean;
 
   // Appointment Permissions
   /** Permission slug: "can_list_booking" */
@@ -460,6 +471,16 @@ export function getPermissions(
     ),
     canWriteImmunizationPolicy: hasPermission(
       PERMISSION_WRITE_IMMUNIZATION_POLICY,
+      permissions,
+    ),
+
+    // Immunizations
+    canWriteImmunization: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION,
+      permissions,
+    ),
+    canWriteImmunizationRecommendation: hasPermission(
+      PERMISSION_WRITE_IMMUNIZATION_RECOMMENDATION,
       permissions,
     ),
 

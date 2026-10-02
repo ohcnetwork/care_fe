@@ -405,6 +405,45 @@ test.describe("Immunization policy editor API contracts", () => {
     });
   });
 
+  test("lets groups omit vaccine codes while recommendations inside them still require one", async ({
+    page,
+  }) => {
+    const record = policy(null);
+    const writes = await routePolicies(page, record);
+    await routeTerminology(page);
+    await page.goto("/admin/immunization-policies/new");
+    await page.getByRole("textbox", { name: "Policy name" }).fill(record.name);
+    const root = page.getByRole("group", {
+      name: "Recommendation template",
+      exact: true,
+    });
+    await root.getByRole("combobox", { name: "Type", exact: true }).click();
+    await page.getByRole("option", { name: "Group", exact: true }).click();
+    await root.getByRole("button", { name: "Add recommendation" }).click();
+    const child = page.getByRole("group", {
+      name: "Recommendation 1",
+      exact: true,
+    });
+    const save = page.getByRole("button", { name: "Save policy" });
+
+    await save.click();
+    await expect(child.getByRole("alert")).toContainText(
+      "Select at least one vaccine code.",
+    );
+    expect(writes).toHaveLength(0);
+
+    await selectCode(page, child);
+    const [request] = await Promise.all([
+      page.waitForRequest((request) => isPolicyWrite(request, "POST")),
+      save.click(),
+    ]);
+    expect(request.postDataJSON().policy_template).toMatchObject({
+      codes: [],
+      is_group: true,
+      children: [{ codes: [vaccine], is_group: false, children: [] }],
+    });
+  });
+
   test("editing preserves coding versions and nested ids without sending facility ownership", async ({
     page,
   }) => {

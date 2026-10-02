@@ -280,6 +280,7 @@ export function PolicyTemplateEditor({
               codes={node.codes}
               onChange={(codes) => changeNode({ ...node, codes })}
               kind="vaccine"
+              required={!node.is_group}
               disabled={disabled}
               error={fieldError("codes")}
             />
