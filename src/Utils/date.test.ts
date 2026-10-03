@@ -6,7 +6,9 @@ import i18next from "i18next";
 import {
   dateQueryString,
   dateTimeQueryString,
+  facilityLocalDateQueryString,
   formatDateTime,
+  formatDateTimeInZone,
   formatPatientAge,
   formatPatientAgeBreakdown,
   isUserOnline,
@@ -230,4 +232,27 @@ test("age breakdown clamps leap-day and month-end anniversaries", () => {
     formatPatientAgeBreakdown(patient(undefined, "2024-02-03")),
     null,
   );
+});
+
+test("facility-local helpers use the scheduling timezone, not the browser zone", () => {
+  const slotInstant = "2026-09-30T04:30:00.000Z";
+  assert.equal(
+    facilityLocalDateQueryString(slotInstant, "Asia/Kolkata"),
+    "2026-09-30",
+  );
+  assert.equal(
+    formatDateTimeInZone(slotInstant, "Asia/Kolkata", "dd MMM yyyy, HH:mm"),
+    "30 Sep 2026, 10:00",
+  );
+  assert.equal(
+    formatDateTimeInZone(slotInstant, "America/Los_Angeles", "dd MMM yyyy"),
+    "29 Sep 2026",
+  );
+});
+
+test("formatDateTimeInZone ignores viewer DST when formatting clinic zone (US spring forward)", () => {
+  // 02:30 on 8 Mar 2026 in Asia/Kolkata. Fails under America/New_York if wall
+  // clock is rebuilt with new Date(y,m,d,h,…) before format.
+  const instant = "2026-03-07T21:00:00.000Z";
+  assert.equal(formatDateTimeInZone(instant, "Asia/Kolkata", "HH:mm"), "02:30");
 });

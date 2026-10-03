@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,10 +8,14 @@ import Loading from "@/components/Common/Loading";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { getUserFromLocalStorage } from "@/types/scheduling/schedule";
+import query from "@/Utils/request/query";
+import { formatDateTimeInZone, formatName } from "@/Utils/utils";
 
 export function AppointmentSuccess(props: { appointmentId: string }) {
   const { appointmentId } = props;
@@ -46,8 +49,17 @@ export function AppointmentSuccess(props: { appointmentId: string }) {
   }
 
   const appointmentTime = appointmentData.token_slot.start_datetime;
-  const appointmentDate = format(appointmentTime, "do MMMM");
-  const appointmentTimeSlot = format(appointmentTime, "hh:mm a");
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+  const appointmentDate = formatDateTimeInZone(
+    appointmentTime,
+    schedulingTimeZone,
+    "do MMMM",
+  );
+  const appointmentTimeSlot = formatSchedulingDateTime(
+    appointmentTime,
+    "hh:mm a",
+    schedulingTimeZone,
+  );
 
   return (
     <div className="mx-auto p-2 max-w-3xl">

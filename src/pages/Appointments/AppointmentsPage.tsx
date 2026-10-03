@@ -2,7 +2,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon, InfoIcon } from "lucide-react";
+import { FilterIcon, GlobeIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
@@ -78,7 +79,12 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import { dateQueryString, formatDateTime, goBack } from "@/Utils/utils";
+import {
+  dateQueryString,
+  facilityLocalDateQueryString,
+  goBack,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 import { booleanFromString } from "@/common/utils";
 import { PatientAge } from "@/components/Patient/PatientAge";
@@ -89,10 +95,7 @@ import {
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import {
-  FilterDateRange,
-  shortDateRangeOptions,
-} from "@/components/ui/multi-filter/utils/Utils";
+import { FilterDateRange } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Tooltip,
   TooltipContent,
@@ -105,6 +108,13 @@ import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+  getClinicShortDateRangeOptions,
+  getSchedulingTimeZoneAbbreviation,
+  shouldShowSchedulingTimeZoneHint,
+} from "./schedulingTimeZone";
 
 type AppointmentStatusGroup = {
   label: string;
@@ -158,12 +168,14 @@ interface Props {
 
 const getDefaultDateFilter = () => {
   const defaultDays = careConfig.appointments.defaultDateFilter;
-  const today = new Date();
+  const timeZone = getAppointmentsSchedulingTimeZone();
+  const todayYmd = facilityLocalDateQueryString(new Date(), timeZone);
+  const today = parseLocalDate(todayYmd)!;
 
   if (defaultDays === 0) {
     return {
-      date_from: dateQueryString(today),
-      date_to: dateQueryString(today),
+      date_from: todayYmd,
+      date_to: todayYmd,
     };
   }
 
@@ -180,6 +192,7 @@ const getDefaultDateFilter = () => {
 export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
 
   const practitionerFilterEnabled =
     resourceType === SchedulableResourceType.Practitioner && !resourceId;
@@ -265,7 +278,12 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       "multi",
       t("tags", { count: 2 }),
     ),
-    dateFilter("date", t("date"), shortDateRangeOptions, true),
+    dateFilter(
+      "date",
+      t("date"),
+      getClinicShortDateRangeOptions(schedulingTimeZone),
+      true,
+    ),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -284,10 +302,10 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               ...query,
               date: undefined,
               date_from: dateRange?.from
-                ? dateQueryString(dateRange?.from as Date)
+                ? dateQueryString(dateRange.from)
                 : undefined,
               date_to: dateRange?.to
-                ? dateQueryString(dateRange?.to as Date)
+                ? dateQueryString(dateRange.to)
                 : undefined,
             };
           }
@@ -309,8 +327,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     date:
       qParams.date_from || qParams.date_to
         ? {
-            from: qParams.date_from ? new Date(qParams.date_from) : undefined,
-            to: qParams.date_to ? new Date(qParams.date_to) : undefined,
+            from: parseLocalDate(qParams.date_from),
+            to: parseLocalDate(qParams.date_to),
           }
         : undefined,
   });
@@ -356,100 +374,125 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </Tabs>
       }
     >
-      <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex w-full min-w-0 flex-wrap items-start gap-4 lg:w-auto">
-          {practitionerFilterEnabled && (
-            <div className="mt-1 w-full sm:w-auto sm:min-w-60">
-              <Label className="mb-2 text-black">
-                {t("practitioner", { count: 2 })}
-              </Label>
-              <PractitionerSelector
+      <div className="mt-4 flex flex-col gap-4 border-t border-gray-200 py-4">
+        {shouldShowSchedulingTimeZoneHint(schedulingTimeZone) && (
+          <Callout
+            variant="warning"
+            badge={
+              <>
+                <GlobeIcon className="size-4 shrink-0" aria-hidden />
+                <span className="sr-only">{t("info")}</span>
+              </>
+            }
+          >
+            {t("appointment_times_in_timezone", {
+              abbreviation:
+                getSchedulingTimeZoneAbbreviation(schedulingTimeZone),
+              timezone: schedulingTimeZone.replace(/_/g, " "),
+            })}
+          </Callout>
+        )}
+        <div className="flex flex-col lg:flex-row gap-4 justify-between">
+          <div className="flex w-full min-w-0 flex-wrap items-start gap-4 lg:w-auto">
+            {practitionerFilterEnabled && (
+              <div className="mt-1 w-full sm:w-auto sm:min-w-60">
+                <Label className="mb-2 text-black">
+                  {t("practitioner", { count: 2 })}
+                </Label>
+                <PractitionerSelector
+                  facilityId={facilityId}
+                  selected={practitioners || []}
+                  onSelect={(users) => {
+                    updateQuery({
+                      practitioners: users.map((user) => user.id),
+                      slot: null,
+                    });
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Tags Filter */}
+            <div className="w-full min-w-0 sm:w-auto">
+              <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
+              <MultiFilter
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+                onOperationChange={handleOperationChange}
+                onClearAll={handleClearAll}
+                onClearFilter={handleClearFilter}
+                className="mt-2 w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+                triggerButtonClassName="self-start sm:self-center h-9"
+                clearAllButtonClassName="self-center"
+                selectedBarClassName="h-9"
                 facilityId={facilityId}
-                selected={practitioners || []}
-                onSelect={(users) => {
-                  updateQuery({
-                    practitioners: users.map((user) => user.id),
-                    slot: null,
-                  });
-                }}
               />
             </div>
-          )}
+          </div>
 
-          {/* Tags Filter */}
-          <div className="w-full min-w-0 sm:w-auto">
-            <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
-            <MultiFilter
-              selectedFilters={selectedFilters}
-              onFilterChange={handleFilterChange}
-              onOperationChange={handleOperationChange}
-              onClearAll={handleClearAll}
-              onClearFilter={handleClearFilter}
-              className="mt-2 w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
-              triggerButtonClassName="self-start sm:self-center h-9"
-              clearAllButtonClassName="self-center"
-              selectedBarClassName="h-9"
-              facilityId={facilityId}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
+              <Switch
+                checked={shouldAutoRefresh}
+                onCheckedChange={(checked) =>
+                  updateQuery({
+                    autoRefresh: checked ? "true" : "false",
+                  })
+                }
+              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help hidden md:block">
+                      <InfoIcon className="size-4 text-gray-500" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("auto_refresh_tooltip", {
+                      interval:
+                        careConfig.appointmentAndQueueRefreshInterval / 1000,
+                    })}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {activeTab === "list" && (
+              <Button
+                variant="outline"
+                disabled={
+                  !qParams.date_from ||
+                  differenceInDays(
+                    parseLocalDate(
+                      qParams.date_to ??
+                        facilityLocalDateQueryString(
+                          new Date(),
+                          schedulingTimeZone,
+                        ),
+                    )!,
+                    parseLocalDate(qParams.date_from)!,
+                  ) >= 31
+                }
+                onClick={() => {
+                  navigate("appointments/print", { query: qParams });
+                }}
+              >
+                <CareIcon icon="l-print" className="text-lg" />
+                {t("print")}
+                <ShortcutBadge actionId="print-button" />
+              </Button>
+            )}
+            <PatientIdentifierFilter
+              onSelect={(patientId, patientName) =>
+                updateQuery({ patient: patientId, patient_name: patientName })
+              }
+              placeholder={t("search_patients")}
+              className="w-full sm:w-auto"
+              patientId={qParams.patient}
+              patientName={qParams.patient_name}
+              align="end"
             />
           </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <div className="flex items-center justify-between gap-2">
-            <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
-            <Switch
-              checked={shouldAutoRefresh}
-              onCheckedChange={(checked) =>
-                updateQuery({
-                  autoRefresh: checked ? "true" : "false",
-                })
-              }
-            />
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help hidden md:block">
-                    <InfoIcon className="size-4 text-gray-500" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t("auto_refresh_tooltip", {
-                    interval:
-                      careConfig.appointmentAndQueueRefreshInterval / 1000,
-                  })}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          {activeTab === "list" && (
-            <Button
-              variant="outline"
-              disabled={
-                !qParams.date_from ||
-                differenceInDays(
-                  qParams.date_to ?? new Date(),
-                  qParams.date_from,
-                ) >= 31
-              }
-              onClick={() => {
-                navigate("appointments/print", { query: qParams });
-              }}
-            >
-              <CareIcon icon="l-print" className="text-lg" />
-              {t("print")}
-              <ShortcutBadge actionId="print-button" />
-            </Button>
-          )}
-          <PatientIdentifierFilter
-            onSelect={(patientId, patientName) =>
-              updateQuery({ patient: patientId, patient_name: patientName })
-            }
-            placeholder={t("search_patients")}
-            className="w-full sm:w-auto"
-            patientId={qParams.patient}
-            patientName={qParams.patient_name}
-            align="end"
-          />
         </div>
       </div>
 
@@ -738,7 +781,7 @@ function AppointmentCard({
             <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            {formatDateTime(
+            {formatSchedulingDateTime(
               appointment.token_slot.start_datetime,
               "EEE, dd MMM yyyy, HH:mm",
             )}
