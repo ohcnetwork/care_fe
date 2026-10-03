@@ -1,7 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +42,7 @@ export function DiagnosticReportObservationPicker({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { ref, inView } = useInView();
   const {
     data,
     isLoading,
@@ -73,6 +75,10 @@ export function DiagnosticReportObservationPicker({
     },
     enabled: open && !disabled,
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const selectedIdSet = new Set(selectedIds);
   const options = data?.pages
@@ -135,14 +141,13 @@ export function DiagnosticReportObservationPicker({
                   {t("no_observation_definitions_found")}
                 </CommandEmpty>
                 <CommandGroup>
-                  {options?.map((definition) => (
+                  {options?.map((definition, index) => (
                     <CommandItem
                       key={definition.id}
                       value={definition.id}
+                      ref={index === options.length - 1 ? ref : undefined}
                       onSelect={() => {
                         onSelect(definition);
-                        setOpen(false);
-                        setSearch("");
                       }}
                     >
                       <div className="min-w-0">
@@ -153,20 +158,15 @@ export function DiagnosticReportObservationPicker({
                       </div>
                     </CommandItem>
                   ))}
+                  {isFetchingNextPage && (
+                    <div className="text-center text-sm py-2 text-gray-500">
+                      {t("loading")}
+                    </div>
+                  )}
                 </CommandGroup>
               </>
             )}
           </CommandList>
-          {hasNextPage && !isError && (
-            <Button
-              variant="ghost"
-              className="w-full"
-              disabled={isFetchingNextPage}
-              onClick={() => fetchNextPage()}
-            >
-              {isFetchingNextPage ? t("loading") : t("load_more")}
-            </Button>
-          )}
         </Command>
       </PopoverContent>
     </Popover>

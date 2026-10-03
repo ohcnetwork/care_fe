@@ -42,7 +42,9 @@ export function ServiceRequestReportWorkflow({
       {canHaveDiagnosticReports && (
         <div className="space-y-3">
           {(observationRequirements.length > 0 || pendingReports > 0) && (
-            <h2 className="text-xl font-semibold">{t("test_results")}</h2>
+            <h5 className="text-gray-950 font-semibold">
+              {t("test_result_entries")}
+            </h5>
           )}
 
           <DiagnosticReportForm

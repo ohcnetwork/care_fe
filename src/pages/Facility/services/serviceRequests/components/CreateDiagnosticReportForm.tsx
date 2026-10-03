@@ -46,85 +46,76 @@ export const CreateDiagnosticReportForm = ({
         isExpanded && "bg-gray-100",
       )}
     >
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CardHeader className="px-2 py-4">
-          <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
-            <div className="flex items-center gap-2">
-              <CardTitle>
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 text-left"
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ")
-                        event.stopPropagation();
-                    }}
-                  >
-                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
-                    <span className="text-base/9 text-gray-950 font-medium">
-                      {t("test_results_entry")}
-                    </span>
-                  </button>
-                </CollapsibleTrigger>
-              </CardTitle>
-            </div>
-            <div className="flex items-center gap-5">
+      <Collapsible open={isExpanded}>
+        <CollapsibleTrigger asChild>
+          <CardHeader
+            className="cursor-pointer p-2"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-10"
-                  aria-label={isExpanded ? t("collapse") : t("expand")}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ")
-                      event.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(!isExpanded);
-                  }}
-                >
-                  {isExpanded ? (
-                    <ChevronsDownUp className="size-5" />
-                  ) : (
-                    <ChevronsUpDown className="size-5" />
-                  )}
-                </Button>
+                <CardTitle className="flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      "flex items-center justify-center bg-gray-100 p-2 rounded-lg",
+                      isExpanded && "bg-gray-200",
+                    )}
+                  >
+                    <NotepadText className="size-6 text-gray-600 stroke-[1.5px]" />
+                  </span>
+                  <span className="text-base/9 text-gray-950 font-medium">
+                    {t("test_results_entry")}
+                  </span>
+                </CardTitle>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {isExpanded ? (
+                  <ChevronsDownUp className="size-4 mx-3" />
+                ) : (
+                  <ChevronsUpDown className="size-4 mx-3" />
+                )}
               </div>
             </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
+        </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="px-2 bg-gray-100">
+          <CardContent className="px-2 pb-2 bg-gray-100">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
             />
 
-            <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-1">
-              <div className="flex flex-col justify-center items-center rounded-lg bg-gray-500/3 p-3 border border-gray-200 gap-2">
-                <FileUp size={24} className="text-gray-600" />
-                <p className="mt-2 text-sm text-gray-700 text-center">
+            <div className="flex flex-col gap-2 bg-gray-100/20 rounded-lg">
+              <Card className="flex flex-col items-center justify-center py-4 text-center border-dashed rounded-md shadow-none">
+                <div className="rounded-lg bg-gray-100 p-3 mb-3">
+                  <FileUp className="size-5 text-gray-600" />
+                </div>
+                <h5 className="font-medium mb-1">
                   {!hasCollectedSpecimens
                     ? t("collect_specimen_before_report")
                     : t("no_test_results_recorded")}
+                </h5>
+
+                <p className="text-sm text-gray-500">
+                  {isMultipleDiagnosticReport &&
+                    hasCollectedSpecimens &&
+                    t("select_report_type_to_create")}
                 </p>
-                {isMultipleDiagnosticReport && (
-                  <p className="mt-2 text-sm text-gray-700 text-center">
-                    {t("select_report_type_to_create")}
-                  </p>
-                )}
-                {!isMultipleDiagnosticReport && (
-                  <Button
-                    onClick={() => handleCreateReport()}
-                    disabled={disableEdit || !hasCollectedSpecimens}
-                    className="w-full sm:w-auto"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    {t("create_report")}
-                  </Button>
-                )}
-              </div>
+
+                <div className="mt-5">
+                  {!isMultipleDiagnosticReport && (
+                    <Button
+                      onClick={() => handleCreateReport()}
+                      disabled={disableEdit || !hasCollectedSpecimens}
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="size-4 mr-2" />
+                      {t("create_report")}
+                    </Button>
+                  )}
+                </div>
+              </Card>
               {isMultipleDiagnosticReport && (
                 <ReportTypePicker
                   availableReportCodes={availableReportCodes}

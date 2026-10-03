@@ -1,14 +1,19 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Info, QrCode, Scan /* User */ } from "lucide-react";
+import { CheckIcon, Eye, QrCode, Scan /* User */ } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +46,6 @@ import {
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { isNegative, round } from "@/Utils/decimal";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
@@ -259,9 +263,9 @@ export function SpecimenForm({
 
   return (
     <div>
-      <form className="space-y-8" onSubmit={handleSubmit}>
-        <div>
-          <div className="font-medium text-lg mb-2">
+      <form className="space-y-2" onSubmit={handleSubmit}>
+        <div className="bg-white shadow-xs p-3 rounded-lg">
+          <div className="font-medium text-sm text-gray-950 my-2">
             {t("specimen_identification")}
           </div>
           <Tabs
@@ -272,14 +276,14 @@ export function SpecimenForm({
             <TabsList className="w-full">
               <TabsTrigger
                 value="generate"
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm"
               >
                 <QrCode className="h-4 w-4" />
                 {t("generate_qr")}
               </TabsTrigger>
               <TabsTrigger
                 value="scan"
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm"
               >
                 <Scan className="h-4 w-4" />
                 {t("scan_existing")}
@@ -287,8 +291,8 @@ export function SpecimenForm({
             </TabsList>
             <TabsContent value="generate">
               {draftSpecimen ? (
-                <>
-                  <div className="rounded-lg bg-green-50 p-2 mb-4">
+                <div className="rounded-lg pt-2 sm:p-4 text-center sm:bg-gray-50">
+                  <div className="rounded-md bg-green-100 border border-green-300 p-2 mb-4">
                     <div className="flex items-center gap-2">
                       <Badge variant="green" className="bg-white rounded-full">
                         {t("success")}
@@ -298,14 +302,14 @@ export function SpecimenForm({
                       </span>
                     </div>
                   </div>
-                  <Card className="p-4">
+                  <div className="p-4 bg-white rounded-lg">
                     <PrintableQRCode
                       value={draftSpecimen.id}
                       title={draftSpecimen.specimen_type?.display}
                       subtitle={draftSpecimen.specimen_definition?.title}
                     />
-                  </Card>
-                </>
+                  </div>
+                </div>
               ) : (
                 <div className="rounded-lg border-2 border-dashed p-4 text-center bg-gray-50">
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-gray-500" />
@@ -339,14 +343,76 @@ export function SpecimenForm({
             </TabsContent>
           </Tabs>
         </div>
-        <div className="space-y-4">
-          <div className="font-medium text-lg mb-2">
+        <div className="space-y-4 bg-white shadow-xs p-3 rounded-lg">
+          <div className="font-medium text-sm text-gray-950 my-2">
             {t("specimen_collection_info")}
           </div>
-          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+
+          {specimenDefinition.type_tested?.container && (
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem
+                value="container-requirements"
+                className="rounded-lg border-none"
+              >
+                <AccordionTrigger className="rounded-md px-4 py-2 text-sm hover:bg-gray-100 data-[state=closed]:bg-gray-50 data-[state=open]:rounded-b-none data-[state=open]:bg-gray-50">
+                  <div className="flex flex-1 items-center gap-2 mr-4">
+                    <span className="font-medium flex items-center gap-2 underline">
+                      {t("see_container_requirements")}
+                      <Eye className="size-4 text-gray-500" />
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="rounded-b-lg bg-gray-50 px-4 pt-1 pb-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">{t("type")}: </span>
+                      {specimenDefinition.type_tested.container.description}
+                    </div>
+                    {specimenDefinition.type_tested.container.capacity && (
+                      <div>
+                        <span className="text-gray-600">
+                          {t("container_capacity")}:{" "}
+                        </span>
+                        {round(
+                          specimenDefinition.type_tested.container.capacity
+                            .value,
+                        )}{" "}
+                        {
+                          specimenDefinition.type_tested.container.capacity.unit
+                            .display
+                        }
+                      </div>
+                    )}
+                    {specimenDefinition.type_tested.container
+                      .minimum_volume && (
+                      <div>
+                        <span className="text-gray-600">
+                          {t("container_min_volume")}:{" "}
+                        </span>
+                        {specimenDefinition.type_tested.container.minimum_volume
+                          .string ||
+                          (specimenDefinition.type_tested.container
+                            .minimum_volume.quantity &&
+                            `${round(specimenDefinition.type_tested.container.minimum_volume.quantity.value)} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
+                      </div>
+                    )}
+                    {specimenDefinition.type_tested.container.preparation && (
+                      <div className="col-span-2">
+                        <span className="text-gray-600">
+                          {t("preparation")}:{" "}
+                        </span>
+                        {specimenDefinition.type_tested.container.preparation}
+                      </div>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+          <div className="space-y-4 sm:bg-gray-50 sm:p-4 rounded-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-gray-700 mb-1">
                   {t("collection_date_time")}
                 </Label>
                 <Input
@@ -369,7 +435,9 @@ export function SpecimenForm({
                 />
               </div>
               <div>
-                <Label className="text-sm text-gray-700">{t("quantity")}</Label>
+                <Label className="text-sm text-gray-700 mb-1">
+                  {t("quantity")}
+                </Label>
                 <div className="flex gap-2">
                   <div className="flex-1 max-w-36">
                     <Input
@@ -444,7 +512,9 @@ export function SpecimenForm({
             </div>
 
             <div>
-              <Label className="text-sm text-gray-700">{t("body_site")}</Label>
+              <Label className="text-sm text-gray-700 mb-1">
+                {t("body_site")}
+              </Label>
               <ValueSetSelect
                 system="system-body-site"
                 placeholder={t("select_body_site")}
@@ -457,7 +527,7 @@ export function SpecimenForm({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div className="col-span-1 md:col-span-4">
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-gray-700 mb-1">
                   {t("fasting_status")}
                 </Label>
                 <ValueSetSelect
@@ -478,7 +548,7 @@ export function SpecimenForm({
               </div>
 
               <div className="col-span-1 md:col-span-2">
-                <Label className="text-sm text-gray-700">
+                <Label className="text-sm text-gray-700 mb-1">
                   {t("fasting_duration")}
                 </Label>
                 <Input
@@ -506,56 +576,8 @@ export function SpecimenForm({
               </div>
             </div>
 
-            {specimenDefinition.type_tested?.container && (
-              <div className="mt-4 rounded-lg border bg-gray-50 p-4">
-                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
-                  <Info className="h-4 w-4" />
-                  {t("container_requirements")}
-                </div>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                  <div>
-                    <span className="text-gray-600">{t("type")}: </span>
-                    {specimenDefinition.type_tested.container.description}
-                  </div>
-                  {specimenDefinition.type_tested.container.capacity && (
-                    <div>
-                      <span className="text-gray-600">
-                        {t("container_capacity")}:{" "}
-                      </span>
-                      {round(
-                        specimenDefinition.type_tested.container.capacity.value,
-                      )}{" "}
-                      {
-                        specimenDefinition.type_tested.container.capacity.unit
-                          .display
-                      }
-                    </div>
-                  )}
-                  {specimenDefinition.type_tested.container.minimum_volume && (
-                    <div>
-                      <span className="text-gray-600">
-                        {t("container_min_volume")}:{" "}
-                      </span>
-                      {specimenDefinition.type_tested.container.minimum_volume
-                        .string ||
-                        (specimenDefinition.type_tested.container.minimum_volume
-                          .quantity &&
-                          `${round(specimenDefinition.type_tested.container.minimum_volume.quantity.value)} ${specimenDefinition.type_tested.container.minimum_volume.quantity.unit.display}`)}
-                    </div>
-                  )}
-                  {specimenDefinition.type_tested.container.preparation && (
-                    <div className="col-span-2">
-                      <span className="text-gray-600">
-                        {t("preparation")}:{" "}
-                      </span>
-                      {specimenDefinition.type_tested.container.preparation}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
             <div className="space-y-2">
-              <Label className="text-sm text-gray-700">{t("notes")}</Label>
+              <Label className="text-sm text-gray-700 mb-1">{t("notes")}</Label>
               <Textarea
                 placeholder={t("notes_placeholder")}
                 value={specimenData.specimen.note ?? ""}
@@ -567,13 +589,13 @@ export function SpecimenForm({
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={disableEdit || isPending}>
-                {t("collect")}
-                <ShortcutBadge actionId="submit-action" />
+                <CheckIcon className="size-4" />
+                {t("mark_as_collected")}
               </Button>
             </div>
           </div>

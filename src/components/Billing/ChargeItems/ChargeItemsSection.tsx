@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { LayersPlus, ReceiptIndianRupee } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -36,6 +36,7 @@ interface ChargeItemsSectionProps {
   disableCreateChargeItems?: boolean;
   disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
+  className?: string;
 }
 
 export function ChargeItemsSection({
@@ -48,6 +49,7 @@ export function ChargeItemsSection({
   disableCreateChargeItems = false,
   disableCreateChargeItemsSection = false,
   viewOnly = false,
+  className,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
   useShortcutSubContext("facility:appointment");
@@ -95,64 +97,67 @@ export function ChargeItemsSection({
     return null;
   }
 
+  const billableChargeItems = (chargeItems?.results ?? []).filter(
+    (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
+  );
+
   return (
     <>
-      <Card className="bg-white shadow-sm rounded-md p-1">
-        <CardHeader className="p-2 bg-gray-50">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle>{t("charge_items")}</CardTitle>
-            <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
-              {(chargeItems?.results ?? []).filter(
-                (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
-              ).length > 0 && (
+      <div className={className}>
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 p-0">
+          <CardTitle>
+            {chargeItems?.count
+              ? `${chargeItems.count} ${t("charge_items")}`
+              : t("add_charge_item")}
+          </CardTitle>
+          <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
+            {!disableCreateChargeItemsSection &&
+              !viewOnly &&
+              account?.results[0] &&
+              isAccountActiveAndBillable(account?.results[0]) && (
                 <Button
                   variant="outline"
                   size="sm"
                   className="ml-auto sm:ml-0"
-                  onClick={() =>
-                    setInvoiceSheetState({
-                      open: true,
-                      chargeItems:
-                        chargeItems?.results.filter(
-                          (chargeItem) =>
-                            chargeItem.status === ChargeItemStatus.billable,
-                        ) ?? [],
-                    })
-                  }
+                  onClick={() => setIsMultiAddOpen(true)}
                 >
-                  <PlusIcon className="size-4" />
-                  {t("create_invoice")}
-                  <ShortcutBadge actionId="create-an-invoice" />
+                  <LayersPlus className="size-4" />
+                  {t("add_charge_items")}
+                  <ShortcutBadge actionId="add-a-charge-item" />
                 </Button>
               )}
-              {!disableCreateChargeItemsSection &&
-                !viewOnly &&
-                account?.results[0] &&
-                isAccountActiveAndBillable(account?.results[0]) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="ml-auto sm:ml-0"
-                    onClick={() => setIsMultiAddOpen(true)}
-                  >
-                    <PlusIcon className="size-4" />
-                    {t("add_charge_items")}
-                    <ShortcutBadge actionId="add-a-charge-item" />
-                  </Button>
-                )}
-            </div>
+            {billableChargeItems.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto sm:ml-0"
+                onClick={() =>
+                  setInvoiceSheetState({
+                    open: true,
+                    chargeItems: billableChargeItems,
+                  })
+                }
+              >
+                <ReceiptIndianRupee className="size-4" />
+                {t("create_invoice")}
+                <ShortcutBadge actionId="create-an-invoice" />
+              </Button>
+            )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 p-2 px-1">
-          {chargeItems?.results.map((chargeItem) => (
+        {chargeItems?.results.map((chargeItem) => (
+          <CardContent
+            key={chargeItem.id}
+            className="divide-y divide-gray-200 p-0 mt-2 bg-white border border-gray-200 rounded-md"
+          >
             <ChargeItemCard
               key={chargeItem.id}
               chargeItem={chargeItem}
               sourceUrl={sourceUrl}
             />
-          ))}
-        </CardContent>
-      </Card>
+          </CardContent>
+        ))}
+      </div>
 
       {/* Add the sheets for invoice creation and charge items */}
       {invoiceSheetState.open && (

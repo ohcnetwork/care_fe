@@ -30,9 +30,11 @@ export function ReportTypePicker({
 }) {
   const { t } = useTranslation();
   const [selectedCode, setSelectedCode] = useState<Code | null>(null);
+  const effectiveSelectedCode =
+    availableReportCodes.length === 1 ? availableReportCodes[0] : selectedCode;
 
   return (
-    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-200 bg-gray-100 p-4">
+    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-300 bg-gray-100 p-4">
       {onDismiss && (
         <Button
           aria-label={t("close")}
@@ -52,7 +54,9 @@ export function ReportTypePicker({
           {t("select_diagnostic_report_type")}
         </Label>
         <Select
-          value={selectedCode ? reportCodeKey(selectedCode) : ""}
+          value={
+            effectiveSelectedCode ? reportCodeKey(effectiveSelectedCode) : ""
+          }
           onValueChange={(value) => {
             const code = availableReportCodes.find(
               (c) => reportCodeKey(c) === value,
@@ -76,21 +80,25 @@ export function ReportTypePicker({
         </Select>
       </div>
       <div className="flex ml-auto items-center gap-2">
-        <Button
-          variant="ghost"
-          className="underline"
-          onClick={() => setSelectedCode(null)}
-          disabled={!selectedCode}
-        >
-          {t("clear")}
-        </Button>
+        {availableReportCodes.length !== 1 && (
+          <Button
+            variant="ghost"
+            className="underline"
+            onClick={() => setSelectedCode(null)}
+            disabled={!effectiveSelectedCode}
+          >
+            {t("clear")}
+          </Button>
+        )}
         <Button
           onClick={() => {
-            if (!selectedCode) return;
-            onCreateReport(selectedCode);
+            if (!effectiveSelectedCode) return;
+            onCreateReport(effectiveSelectedCode);
             setSelectedCode(null);
           }}
-          disabled={disableEdit || !hasCollectedSpecimens || !selectedCode}
+          disabled={
+            disableEdit || !hasCollectedSpecimens || !effectiveSelectedCode
+          }
           className="w-full sm:w-auto"
         >
           <Plus className="size-4 mr-2" />
