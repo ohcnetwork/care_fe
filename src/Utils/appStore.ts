@@ -34,11 +34,9 @@ function appStoreUrl(path = ""): string {
 
 export function fetchAppStorePlugins(
   {
-    tag,
     offset = 0,
     limit = DEFAULT_PAGE_SIZE,
   }: {
-    tag?: string;
     offset?: number;
     limit?: number;
   },
@@ -47,9 +45,6 @@ export function fetchAppStorePlugins(
   const url = new URL(appStoreUrl());
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
-  if (tag) {
-    url.searchParams.set("tag", tag);
-  }
 
   return fetchAppStoreJson<AppStoreListResponse>(url.toString(), signal);
 }

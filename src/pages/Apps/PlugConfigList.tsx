@@ -162,10 +162,11 @@ function useQuickInstall() {
     onError: (error, plugin) => {
       if (error instanceof ManualSetupRequiredError) {
         toast.info(t("app_requires_manual_setup"));
+        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
       } else if (error instanceof HealthCheckError) {
         toast.error(t("health_check_unreachable_message"));
+        navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
       }
-      navigate(`/admin/apps/new?appId=${encodeURIComponent(plugin.id)}`);
     },
   });
 }
@@ -193,7 +194,11 @@ export function PlugConfigList() {
     isFetchingNextPage,
     fetchNextPage,
   } = useAppStorePlugins();
-  const { mutate: install, isPending: isInstalling } = useQuickInstall();
+  const {
+    mutate: install,
+    isPending: isInstalling,
+    variables: installingApp,
+  } = useQuickInstall();
 
   const { data: installedConfigsData, isLoading: isInstalledLoading } =
     useQuery({
@@ -420,6 +425,8 @@ export function PlugConfigList() {
                           (config) => config.slug === app.id,
                         )
                       : undefined;
+                    const isInstallingThis =
+                      isInstalling && installingApp?.id === app.id;
 
                     return (
                       <AppCard
@@ -465,10 +472,12 @@ export function PlugConfigList() {
                               </Button>
                               <Button
                                 className="flex-1"
-                                disabled={isInstalling}
+                                disabled={isInstallingThis}
                                 onClick={() => install(app)}
                               >
-                                {isInstalling ? t("installing") : t("install")}
+                                {isInstallingThis
+                                  ? t("installing")
+                                  : t("install")}
                               </Button>
                             </div>
                           )

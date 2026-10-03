@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "raviger";
+import { useNavigate, useQueryParams } from "raviger";
 import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -41,6 +41,7 @@ import {
 } from "@/Utils/plugConfig";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
 
 interface Props {
   slug: string;
@@ -48,10 +49,8 @@ interface Props {
 
 export function PlugConfigEdit({ slug }: Props) {
   const isNew = slug === "new";
-  const appId =
-    typeof window === "undefined"
-      ? null
-      : new URLSearchParams(window.location.search).get("appId");
+  const [{ appId }] = useQueryParams<{ appId?: string }>();
+  const isAppStoreConfigured = Boolean(careConfig.appStore.apiUrl);
 
   const buildTimeConfig = useMemo(
     () => getBuildTimePlugConfigs().find((config) => config.slug === slug),
@@ -68,7 +67,7 @@ export function PlugConfigEdit({ slug }: Props) {
   const { data: manifest, isLoading: isManifestLoading } = useQuery({
     queryKey: ["app-store-plugin", appId],
     queryFn: ({ signal }) => fetchAppStorePlugin(appId!, signal),
-    enabled: Boolean(appId),
+    enabled: Boolean(appId) && isAppStoreConfigured,
   });
 
   const { data: readOnlyConfigs, isLoading: isReadOnlyLoading } = useQuery({
@@ -227,7 +226,7 @@ function PlugConfigForm({
     }
   };
 
-  const canSave = !healthCheckUrl || healthStatus === "success";
+  const canSave = !isNew || !healthCheckUrl || healthStatus === "success";
   const iconUrl = manifest ? resolveAppIconUrl(manifest) : undefined;
   const configKeys = Object.keys(manifest?.frontend.config ?? {});
 
@@ -317,8 +316,14 @@ function PlugConfigForm({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">{t("slug")}</label>
+          <label
+            htmlFor="config-slug"
+            className="mb-1 block text-sm font-medium"
+          >
+            {t("slug")}
+          </label>
           <Input
+            id="config-slug"
             value={configSlug}
             onChange={(e) => setConfigSlug(e.target.value)}
             readOnly={isReadOnly || !!manifest}
@@ -336,10 +341,14 @@ function PlugConfigForm({
               <CardContent className="grid gap-4 md:grid-cols-2">
                 {configKeys.map((key) => (
                   <div key={key}>
-                    <label className="mb-1 block text-sm font-medium">
+                    <label
+                      htmlFor={`config-field-${key}`}
+                      className="mb-1 block text-sm font-medium"
+                    >
                       {key}
                     </label>
                     <Input
+                      id={`config-field-${key}`}
                       value={configValues[key] ?? ""}
                       onChange={(e) =>
                         setConfigValues((prev) => ({
@@ -356,10 +365,14 @@ function PlugConfigForm({
           )
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label
+              htmlFor="config-raw-meta"
+              className="mb-1 block text-sm font-medium"
+            >
               {t("meta_json")}
             </label>
             <Textarea
+              id="config-raw-meta"
               value={rawMeta}
               onChange={(e) => setRawMeta(e.target.value)}
               readOnly={isReadOnly}
