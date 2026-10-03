@@ -15,7 +15,14 @@ import { ActionConfigurationForm } from "@/pages/Admin/actions/ActionConfigurati
 import { ActionConfigurationList } from "@/pages/Admin/actions/ActionConfigurationList";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
-import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
+import {
+  AppStoreCategoryPage,
+  AppStoreDetailsPage,
+  AppStoreDeveloperPage,
+  FeaturedAppsPage,
+  InstalledAppsPage,
+  PlugConfigList,
+} from "@/pages/Apps/PlugConfigList";
 import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
 import ImmunizationPolicyList from "@/pages/ImmunizationPolicies/ImmunizationPolicyList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
@@ -85,7 +92,16 @@ const AdminRoutes: AppRoutes = {
   "/admin/tag_config/:id": ({ id }) => <TagConfigView tagId={id} />,
   "/admin/rbac/permissions": () => <PermissionsIndex />,
   "/admin/rbac/roles": () => <RolesIndex />,
-  "/admin/apps": () => <PlugConfigList />,
+  "/admin/apps/all": () => <PlugConfigList />,
+  "/admin/apps/featured": () => <FeaturedAppsPage />,
+  "/admin/apps": () => <InstalledAppsPage />,
+  "/admin/apps/categories/:slug": ({ slug }) => (
+    <AppStoreCategoryPage slug={slug} />
+  ),
+  "/admin/apps/developers/:slug": ({ slug }) => (
+    <AppStoreDeveloperPage slug={slug} />
+  ),
+  "/admin/apps/store/:slug": ({ slug }) => <AppStoreDetailsPage slug={slug} />,
   "/admin/apps/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   ...["govt", "product_supplier", "role"].reduce((acc: AppRoutes, type) => {
     acc[`/admin/organizations/${type}/:id`] = ({ id }) => (
