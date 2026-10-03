@@ -646,6 +646,9 @@ export default function ServiceRequestShow({
             onOpenChange={(open) => {
               if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
             }}
+            mobile="sheet"
+            desktop="dialog"
+            breakpoint="lg"
             title={t("add_completion_note")}
             description={t("service_request_completion_note_description")}
             desktopClassName="sm:max-w-lg shadow-lg border-white/20"
