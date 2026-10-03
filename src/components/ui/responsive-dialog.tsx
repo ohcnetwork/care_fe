@@ -37,30 +37,23 @@ import {
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-type MobileVariant = "drawer" | "sheet";
-type DesktopVariant = "dialog" | "popover" | "sheet";
 type Side = "top" | "right" | "bottom" | "left";
 type Align = "start" | "center" | "end";
 
-interface ResponsiveDialogProps {
+interface BaseProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Container rendered below `breakpoint`. */
-  mobile?: MobileVariant;
-  /** Container rendered at or above `breakpoint`. */
-  desktop?: DesktopVariant;
   /** Width at which the desktop container takes over. */
   breakpoint?: "sm" | "md" | "lg";
   /**
-   * Element that opens the container, rendered `asChild`. Required for the
-   * `popover` desktop variant, which anchors itself to the trigger.
+   * Gives the container its accessible name, so it is required even where a
+   * site shows no heading — pass `hideHeader` for those.
    */
-  trigger?: React.ReactNode;
-  title?: React.ReactNode;
+  title: React.ReactNode;
   description?: React.ReactNode;
+  /** Hides the header visually while keeping it for assistive technology. */
+  hideHeader?: boolean;
   children: React.ReactNode;
-  /** Rendered in the container's footer. Popover has no footer slot. */
-  footer?: React.ReactNode;
   /** Applied to the container's content on mobile. */
   mobileClassName?: string;
   /** Applied to the container's content on desktop. */
@@ -75,17 +68,53 @@ interface ResponsiveDialogProps {
   headerClassName?: string;
   titleClassName?: string;
   descriptionClassName?: string;
-  /** Popover only — placement relative to the trigger. */
-  align?: Align;
-  side?: Side;
-  sideOffset?: number;
-  /** Popover and dialog only. */
-  modal?: boolean;
-  /** Sheet only — which edge the sheet enters from. */
-  sheetSide?: Side;
-  /** Drawer only — vaul's keyboard-avoidance behaviour. */
-  repositionInputs?: boolean;
 }
+
+/** Container rendered below `breakpoint`. */
+type MobileProps =
+  | { mobile?: "sheet"; repositionInputs?: never }
+  | {
+      mobile: "drawer";
+      /** vaul's keyboard-avoidance behaviour. */
+      repositionInputs?: boolean;
+    };
+
+/** Container rendered at or above `breakpoint`. */
+type DesktopProps =
+  | {
+      desktop?: "dialog";
+      /** Element that opens the container, rendered `asChild`. */
+      trigger?: React.ReactNode;
+      footer?: React.ReactNode;
+      modal?: boolean;
+      align?: never;
+      side?: never;
+      sideOffset?: never;
+    }
+  | {
+      desktop: "popover";
+      /** The popover anchors itself to the trigger, so it cannot be omitted. */
+      trigger: React.ReactNode;
+      /** Popover has no footer slot. */
+      footer?: never;
+      modal?: boolean;
+      /** Placement relative to the trigger. */
+      align?: Align;
+      side?: Side;
+      sideOffset?: number;
+    }
+  | {
+      desktop: "sheet";
+      /** Element that opens the container, rendered `asChild`. */
+      trigger?: React.ReactNode;
+      footer?: React.ReactNode;
+      modal?: never;
+      align?: never;
+      side?: never;
+      sideOffset?: never;
+    };
+
+type ResponsiveDialogProps = BaseProps & MobileProps & DesktopProps;
 
 /**
  * Renders one container on mobile and another on desktop behind a single API,
@@ -98,6 +127,8 @@ interface ResponsiveDialogProps {
  *   mobile="drawer"
  *   desktop="popover"
  *   trigger={<Button>Pick one</Button>}
+ *   title={t("pick_one")}
+ *   hideHeader
  *   desktopClassName="p-0 w-[var(--radix-popover-trigger-width)]"
  * >
  *   {content}
@@ -113,6 +144,7 @@ export function ResponsiveDialog({
   trigger,
   title,
   description,
+  hideHeader,
   children,
   footer,
   mobileClassName,
@@ -126,63 +158,61 @@ export function ResponsiveDialog({
   side,
   sideOffset,
   modal,
-  sheetSide,
   repositionInputs,
 }: ResponsiveDialogProps) {
   const isMobile = useBreakpoints({ default: true, [breakpoint]: false });
+  const popoverTitleId = React.useId();
 
+  const container = isMobile ? mobile : desktop;
+  const contentClassName = isMobile ? mobileClassName : desktopClassName;
   const bodyClassName = isMobile ? mobileBodyClassName : desktopBodyClassName;
   const body = bodyClassName ? (
     <div className={bodyClassName}>{children}</div>
   ) : (
     children
   );
+  const headerClasses = cn(hideHeader && "sr-only", headerClassName);
 
-  if (isMobile) {
-    if (mobile === "drawer") {
-      return (
-        <Drawer
-          open={open}
-          onOpenChange={onOpenChange}
-          repositionInputs={repositionInputs}
-        >
-          {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-          <DrawerContent className={mobileClassName}>
-            {(title || description) && (
-              <DrawerHeader className={headerClassName}>
-                {title && (
-                  <DrawerTitle className={titleClassName}>{title}</DrawerTitle>
-                )}
-                {description && (
-                  <DrawerDescription className={descriptionClassName}>
-                    {description}
-                  </DrawerDescription>
-                )}
-              </DrawerHeader>
+  if (container === "drawer") {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={repositionInputs}
+      >
+        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+        <DrawerContent className={contentClassName}>
+          <DrawerHeader className={headerClasses}>
+            <DrawerTitle className={titleClassName}>{title}</DrawerTitle>
+            {description && (
+              <DrawerDescription className={descriptionClassName}>
+                {description}
+              </DrawerDescription>
             )}
-            {body}
-            {footer && <DrawerFooter>{footer}</DrawerFooter>}
-          </DrawerContent>
-        </Drawer>
-      );
-    }
+          </DrawerHeader>
+          {body}
+          {footer && <DrawerFooter>{footer}</DrawerFooter>}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
+  if (container === "sheet") {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-        <SheetContent side={sheetSide ?? "bottom"} className={mobileClassName}>
-          {(title || description) && (
-            <SheetHeader className={headerClassName}>
-              {title && (
-                <SheetTitle className={titleClassName}>{title}</SheetTitle>
-              )}
-              {description && (
-                <SheetDescription className={descriptionClassName}>
-                  {description}
-                </SheetDescription>
-              )}
-            </SheetHeader>
-          )}
+        <SheetContent
+          side={isMobile ? "bottom" : "right"}
+          className={contentClassName}
+        >
+          <SheetHeader className={headerClasses}>
+            <SheetTitle className={titleClassName}>{title}</SheetTitle>
+            {description && (
+              <SheetDescription className={descriptionClassName}>
+                {description}
+              </SheetDescription>
+            )}
+          </SheetHeader>
           {body}
           {footer && <SheetFooter>{footer}</SheetFooter>}
         </SheetContent>
@@ -190,7 +220,7 @@ export function ResponsiveDialog({
     );
   }
 
-  if (desktop === "popover") {
+  if (container === "popover") {
     return (
       <Popover open={open} onOpenChange={onOpenChange} modal={modal}>
         {trigger && <PopoverTrigger asChild>{trigger}</PopoverTrigger>}
@@ -198,72 +228,40 @@ export function ResponsiveDialog({
           align={align}
           side={side}
           sideOffset={sideOffset}
-          className={desktopClassName}
+          aria-labelledby={popoverTitleId}
+          className={contentClassName}
         >
-          {(title || description) && (
-            <div className={cn("flex flex-col gap-0.5", headerClassName)}>
-              {title && (
-                <p
-                  className={cn("font-semibold text-gray-950", titleClassName)}
-                >
-                  {title}
-                </p>
-              )}
-              {description && (
-                <p
-                  className={cn("text-sm text-gray-500", descriptionClassName)}
-                >
-                  {description}
-                </p>
-              )}
-            </div>
-          )}
+          <div className={cn("flex flex-col gap-0.5", headerClasses)}>
+            <p
+              id={popoverTitleId}
+              className={cn("font-semibold text-gray-950", titleClassName)}
+            >
+              {title}
+            </p>
+            {description && (
+              <p className={cn("text-sm text-gray-500", descriptionClassName)}>
+                {description}
+              </p>
+            )}
+          </div>
           {body}
         </PopoverContent>
       </Popover>
     );
   }
 
-  if (desktop === "sheet") {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
-        <SheetContent side={sheetSide} className={desktopClassName}>
-          {(title || description) && (
-            <SheetHeader className={headerClassName}>
-              {title && (
-                <SheetTitle className={titleClassName}>{title}</SheetTitle>
-              )}
-              {description && (
-                <SheetDescription className={descriptionClassName}>
-                  {description}
-                </SheetDescription>
-              )}
-            </SheetHeader>
-          )}
-          {body}
-          {footer && <SheetFooter>{footer}</SheetFooter>}
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={modal}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className={desktopClassName}>
-        {(title || description) && (
-          <DialogHeader className={headerClassName}>
-            {title && (
-              <DialogTitle className={titleClassName}>{title}</DialogTitle>
-            )}
-            {description && (
-              <DialogDescription className={descriptionClassName}>
-                {description}
-              </DialogDescription>
-            )}
-          </DialogHeader>
-        )}
+      <DialogContent className={contentClassName}>
+        <DialogHeader className={headerClasses}>
+          <DialogTitle className={titleClassName}>{title}</DialogTitle>
+          {description && (
+            <DialogDescription className={descriptionClassName}>
+              {description}
+            </DialogDescription>
+          )}
+        </DialogHeader>
         {body}
         {footer && <DialogFooter>{footer}</DialogFooter>}
       </DialogContent>

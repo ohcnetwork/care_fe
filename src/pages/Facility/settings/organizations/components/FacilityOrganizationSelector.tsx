@@ -602,7 +602,7 @@ export default function FacilityOrganizationSelector(
               onOpenChange={handleOpenChange}
               mobile="drawer"
               title={t("select_department")}
-              headerClassName="sr-only"
+              hideHeader
               desktop="popover"
               breakpoint="sm"
               align="start"

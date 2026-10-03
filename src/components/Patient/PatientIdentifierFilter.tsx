@@ -501,7 +501,7 @@ export default function PatientIdentifierFilter({
           onOpenChange={setOpen}
           mobile="drawer"
           title={t("search_patients")}
-          headerClassName="sr-only"
+          hideHeader
           desktop="popover"
           breakpoint="sm"
           trigger={triggerButton}

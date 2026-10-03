@@ -681,7 +681,7 @@ export const PractitionerSelector = ({
         }}
         mobile="drawer"
         title={t("select_practitioner")}
-        headerClassName="sr-only"
+        hideHeader
         desktop="popover"
         breakpoint="sm"
         trigger={triggerButton}
