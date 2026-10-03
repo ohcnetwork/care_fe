@@ -5,8 +5,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import type { LocalFillDraftSummary } from "@/components/QuestionnaireV2/fill/draft/fillDraftList";
@@ -26,6 +28,9 @@ interface FormSubmissionDraftsProps {
   facilityId: string;
   patientId: string;
   encounterId: string;
+  title?: string;
+  showEmpty?: boolean;
+  returnPage?: string;
 }
 
 interface DraftRowDetails {
@@ -66,6 +71,9 @@ export function FormSubmissionDrafts({
   facilityId,
   patientId,
   encounterId,
+  title,
+  showEmpty = false,
+  returnPage,
 }: FormSubmissionDraftsProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
@@ -74,9 +82,16 @@ export function FormSubmissionDrafts({
   const localDrafts = useLocalFillDrafts(user.id, `encounter:${encounterId}`);
   const fillBase = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire`;
 
-  const { data: formSubmissions } = useQuery({
+  const {
+    data: formSubmissions,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: formSubmissionKeys.list(encounterId),
     queryFn: query(formSubmissionApi.list, {
+      silent: true,
       queryParams: { encounter: encounterId, status: "draft" },
     }),
     enabled: !!encounterId,
@@ -104,6 +119,7 @@ export function FormSubmissionDrafts({
   const rows: DraftRow[] = localDrafts.map((draft) => {
     const params = new URLSearchParams(draft.scope.contextKey);
     params.set("resume_local_draft", "true");
+    if (returnPage) params.set("return_page", returnPage);
     return {
       source: "local",
       id: draft.key,
@@ -117,28 +133,41 @@ export function FormSubmissionDrafts({
   for (const draft of formSubmissions?.results ?? []) {
     const questionnaire = serverQuestionnaire(draft);
     if (!questionnaire || draft.status !== "draft") continue;
+    const params = new URLSearchParams({ continue_draft: draft.id });
+    if (returnPage) params.set("return_page", returnPage);
     rows.push({
       source: "server",
       id: draft.id,
       title: questionnaire.title,
       savedAt: draft.modified_date || draft.created_date,
       formCount: 1,
-      url: `${fillBase}/${encodeURIComponent(questionnaire.id)}?continue_draft=${encodeURIComponent(draft.id)}`,
+      url: `${fillBase}/${encodeURIComponent(questionnaire.id)}?${params}`,
       draft,
     });
   }
   rows.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
 
-  if (rows.length === 0) return null;
+  if (!rows.length && !isLoading && !isError && !showEmpty) return null;
+  const heading = title ?? t("draft_forms");
 
   return (
     <section
-      aria-label={t("draft_forms")}
-      className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white"
+      aria-label={heading}
+      className="@container/draft-forms min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white"
     >
       <h2 className="border-b border-gray-200 px-4 py-3 text-sm font-bold tracking-wide text-gray-600 uppercase">
-        {t("draft_forms")}
+        {heading}
       </h2>
+      {isError && (
+        <div className="p-3">
+          <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+        </div>
+      )}
+      {!rows.length && isLoading ? (
+        <Skeleton className="m-3 h-16" />
+      ) : !rows.length && !isError ? (
+        <p className="p-4 text-sm text-gray-500">{t("no_draft_forms")}</p>
+      ) : null}
       <ul className="min-w-0 divide-y divide-gray-200">
         {rows.map((row) => {
           const savedAt = formatDateTime(row.savedAt);
@@ -147,7 +176,7 @@ export function FormSubmissionDrafts({
               key={`${row.source}-${row.id}`}
               data-draft-source={row.source}
               data-draft-id={row.id}
-              className="flex min-w-0 items-center gap-2 px-4 py-3 sm:gap-3"
+              className="flex min-w-0 items-center gap-2 px-4 py-3 @sm/draft-forms:gap-3"
             >
               <span
                 className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900"
@@ -187,7 +216,7 @@ export function FormSubmissionDrafts({
                 dateTime={row.savedAt}
                 title={savedAt}
                 aria-label={`${t("saved_on")} ${savedAt}`}
-                className="hidden shrink-0 whitespace-nowrap text-xs text-gray-500 md:block"
+                className="hidden shrink-0 whitespace-nowrap text-xs text-gray-500 @xl/draft-forms:block"
               >
                 {formatDateTime(row.savedAt, "DD MMM, hh:mm A")}
               </time>
@@ -201,7 +230,9 @@ export function FormSubmissionDrafts({
                 disabled={isDiscarding}
                 onClick={() => navigate(row.url)}
               >
-                <span className="hidden sm:inline">{t("continue")}</span>
+                <span className="hidden @sm/draft-forms:inline">
+                  {t("continue")}
+                </span>
                 <ArrowUpRight className="size-4" aria-hidden />
               </Button>
               <Button

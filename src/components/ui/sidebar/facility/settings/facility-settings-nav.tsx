@@ -7,6 +7,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  LayoutDashboard,
   ListChecks,
   LucideIcon,
   MapPin,
@@ -140,6 +141,16 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         path: "settings/charge_item_definitions",
         title: "charge_item_definitions",
         icon: Receipt,
+      },
+    ],
+  },
+  {
+    label: "Advanced",
+    pages: [
+      {
+        path: "settings/workspaces",
+        title: "workspaces",
+        icon: LayoutDashboard,
       },
     ],
   },

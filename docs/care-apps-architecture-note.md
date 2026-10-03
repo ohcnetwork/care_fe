@@ -69,3 +69,182 @@ Host-to-plugin data sharing via `window` globals (set in `src/index.tsx`):
 - `window.AuthUserContext` — The React context object for auth state (`AuthUserContext`). Since `react` is a shared dependency, plugins can call `React.useContext(window.AuthUserContext)` to access `signIn`, `signOut`, `user`, etc., because the plugin component tree renders inside the host's `AuthUserProvider`.
 - `window.__CORE_ENV__` — The full `careConfig` object (API URLs, feature flags, locale settings, plugin config).
 - `window.__CARE_PLUGIN_RUNTIME__` — Plugin-specific runtime metadata (`{ meta: PlugConfigMeta }`) set by `PluginEngine` after the plugin manifest loads.
+
+## Encounter workspace widgets
+
+Core widgets reuse the same components as the standard encounter Overview. A
+change to a clinical list, form action, or details card applies to both layouts.
+System pages use their encounter route keys, such as `medicines`. All keys below
+are exact: the editor and renderer do not translate aliases.
+
+| Widget type               | Content                                                                     |
+| ------------------------- | --------------------------------------------------------------------------- |
+| `allergies`               | Patient allergies, filtered by encounter for completed encounters           |
+| `symptoms`                | Selected encounter's symptoms                                               |
+| `diagnosis`               | Selected encounter's diagnoses                                              |
+| `vitals`                  | Selected encounter's observations using the configured primary vital groups |
+| `questionnaire_responses` | Selected encounter's submitted forms                                        |
+| `service_requests`        | Selected encounter's service requests, optionally filtered by status        |
+| `quick_actions`           | Allergy, order, medication, form, symptom, and diagnosis entry shortcuts    |
+| `favorite_forms`          | The user's favorite form shortcuts                                          |
+| `draft_forms`             | Local and server drafts for the current encounter                           |
+| `encounter_tags`          | Encounter tags                                                              |
+| `locations`               | Current location and location history                                       |
+| `care_team`               | Assigned care team                                                          |
+| `departments`             | Departments and teams                                                       |
+| `hospitalization`         | Admission details                                                           |
+| `discharge`               | Discharge details                                                           |
+| `audit_logs`              | Encounter creation and update details                                       |
+| `encounter_actions`       | Encounter management and completion actions                                 |
+| `reports`                 | Available discharge summary report templates                                |
+
+Every widget accepts an optional `title`. `questionnaire_responses` also accepts
+`config.questionnaire_slug` (an exact, nonempty slug), `config.only_unstructured`
+(a boolean), and `config.limit` (an integer from 1 to 100). A limit of `1` shows
+the latest matching response; `5` shows the latest five. Responses are ordered
+newest first by the backend. With no limit, the list keeps its usual pagination.
+Omit the slug to include all forms. `only_unstructured: true` excludes structured
+clinical entries; omit it or set it to `false` to include both.
+
+`service_requests` accepts `config.status` and `config.limit` (1–100). The exact
+supported statuses are `draft`, `active`, `on_hold`, `entered_in_error`, `ended`,
+`completed`, and `revoked`. Use `active` for pending requests; omit the status to
+include all requests. A limit shows that many newest matching requests; omitting
+it enables independent Load More pagination. Each widget keeps its own filters
+and pagination, without changing the page URL or other widgets.
+
+[The four-page example](examples/encounter-workspace.json) includes ward rounds,
+side-by-side latest-one/latest-five form views, request queues, and encounter
+details. Replace its `daily-progress-note` slug with a questionnaire available in
+your installation. A smaller example:
+
+```json
+{
+  "schema_version": 1,
+  "pages": [
+    {
+      "key": "rounds",
+      "kind": "custom",
+      "title": "Ward rounds",
+      "columns": [
+        {
+          "span": 2,
+          "widgets": [
+            { "type": "vitals" },
+            { "type": "diagnosis" },
+            {
+              "type": "questionnaire_responses",
+              "title": "Progress notes",
+              "config": {
+                "questionnaire_slug": "daily-progress-note",
+                "limit": 5
+              }
+            }
+          ]
+        },
+        {
+          "span": 1,
+          "widgets": [
+            { "type": "quick_actions" },
+            { "type": "favorite_forms" },
+            { "type": "draft_forms" },
+            { "type": "care_team" },
+            { "type": "encounter_actions" }
+          ]
+        }
+      ]
+    },
+    { "key": "medicines", "kind": "system" }
+  ]
+}
+```
+
+Clinical widgets require clinical read access. The seven encounter details cards
+also allow encounter metadata read access and retain their existing edit controls.
+Quick actions, favorite forms, drafts, and encounter actions only mount in an
+editable encounter with facility and clinical access. Form links return to the
+custom page they were opened from. Reports retain template permissions and only
+load in a matching facility context. Selecting a historical encounter updates
+widget data and removes write actions. Existing full tabs with navigation or
+shared URL filters remain system pages.
+
+Plugins can provide their own UI inside a custom encounter workspace page through
+the manifest's `encounterWidgets` map. Each key is a local widget name; CARE prefixes
+it with the enabled app's authoritative `PlugConfig.slug`. For an app registered
+as `care_dental`, this manifest exposes `care_dental.odontogram`:
+
+```tsx
+import { lazy } from "react";
+import type { PluginManifest } from "@/pluginTypes";
+
+export default {
+  plugin: "Dental",
+  encounterWidgets: {
+    odontogram: lazy(() => import("./OdontogramWidget")),
+  },
+} satisfies PluginManifest;
+```
+
+Components may be eager or lazy. Local names must start with a lowercase letter,
+contain only lowercase letters, digits, and underscores, and be at most 64
+characters. A plugin slug may also contain hyphens, must start with a lowercase
+letter or digit, and must be at most 64 characters. Dots belong only between the
+slug and local name. Invalid names are ignored. Plugins cannot claim another
+plugin's namespace or implicitly replace built-in widgets such as `allergies`.
+
+A workspace can place the widget in any custom page column:
+
+```json
+{
+  "schema_version": 1,
+  "pages": [
+    {
+      "key": "dental",
+      "kind": "custom",
+      "title": "Dental chart",
+      "columns": [
+        {
+          "span": 1,
+          "widgets": [
+            {
+              "type": "care_dental.odontogram",
+              "title": "Odontogram",
+              "config": { "dentition": "permanent" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+The component receives `PluginEncounterWidgetProps` from `src/pluginTypes.ts`:
+
+- `patientId`: the open patient's ID.
+- `encounterId` and `encounter`: the selected encounter, including a historical
+  encounter when the user changes the encounter history selection.
+- `facilityId`: the current facility context, when available.
+- `title`: the optional title from the workspace widget configuration.
+- `config`: the workspace's JSON options, or an empty object when omitted.
+- `readOnly`: whether the current context permits clinical editing. The widget
+  must respect this flag for its controls; its APIs remain responsible for
+  authorization.
+
+The plugin owns its widget UI, data loading, translated default title, and config
+validation. Treat `config` as unvalidated input: check supported fields and types,
+apply suitable defaults, and show configuration errors within the widget. Use the
+selected `encounterId` for encounter-specific data and actions. The host does not
+fetch additional patient data for this contract.
+
+CARE handles workspace layout, `visible_when`, and clinical read access before
+mounting the plugin component. It isolates each widget with Suspense and a plugin
+error boundary. A loading app shows a loading state; a missing app or widget shows
+an unavailable state without removing the saved configuration. Namespaced types
+remain valid in saved workspace JSON while an app is disabled or unavailable.
+
+`useCareAppEncounterWidgets` derives available widgets directly from
+`CareAppsContext`, following app loading and removal without a separate mutable
+registry. `PluginEngine` does not need a registration or cleanup extension for
+these widgets. The manifest's display name (`plugin`) never determines namespace
+ownership.

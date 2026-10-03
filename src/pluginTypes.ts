@@ -197,6 +197,20 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+export interface PluginEncounterWidgetProps {
+  patientId: string;
+  encounterId: string;
+  encounter: EncounterRead;
+  facilityId?: string;
+  title?: string;
+  config: Record<string, unknown>;
+  readOnly: boolean;
+}
+
+export type PluginEncounterWidgetComponent =
+  | ComponentType<PluginEncounterWidgetProps>
+  | LazyExoticComponent<ComponentType<PluginEncounterWidgetProps>>;
+
 /**
  * Plugin override definition for replacing registered components
  */
@@ -231,6 +245,7 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
+  encounterWidgets?: Record<string, PluginEncounterWidgetComponent>;
   encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */

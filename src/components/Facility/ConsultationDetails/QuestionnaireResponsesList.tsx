@@ -24,6 +24,7 @@ import React, { useEffect, useState } from "react";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 import { cn } from "@/lib/utils";
 import { ResponseValue } from "@/types/questionnaire/form";
@@ -42,18 +43,24 @@ import {
 } from "@tanstack/react-query";
 import { t } from "i18next";
 import { BanIcon, ChevronDown, MoreVertical, Printer } from "lucide-react";
-import { Link } from "raviger";
+import { Link, useFullPath } from "raviger";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 interface Props {
   encounterId?: string;
+  facilityId?: string;
+  title?: string;
+  showEmpty?: boolean;
+  readOnly?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
   canAccess?: boolean;
   questionnaireSlug?: string;
+  /** Maximum total responses to show, newest first. Omit for infinite scrolling. */
+  limit?: number;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
   subjectType?: string;
   presentation?: "default" | "panel";
@@ -209,7 +216,10 @@ function QuestionGroup({
     if (!hasAnyValue) return null;
 
     return (
-      <TableRow key={question.id} className="flex flex-col md:table-row">
+      <TableRow
+        key={question.id}
+        className="flex flex-col @md/response-card:table-row"
+      >
         <TableCell className="py-1 pl-0 align-top">
           <div className="text-sm text-gray-600 break-words whitespace-normal">
             {question.text}
@@ -237,7 +247,7 @@ function QuestionGroup({
           </div>
         </TableCell>
         {response.note && (
-          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
+          <TableCell className="py-1 pr-0 align-top text-right @md/response-card:table-cell">
             <div className="flex justify-end">
               <Popover>
                 <PopoverTrigger asChild>
@@ -273,7 +283,8 @@ function QuestionGroup({
         fallback={
           <div
             className={cn("w-full", {
-              "grid md:grid-cols-2 grid-cols-1 gap-4": shouldUseTwoColumns,
+              "grid @3xl/response-card:grid-cols-2 grid-cols-1 gap-4":
+                shouldUseTwoColumns,
             })}
           >
             {leftQuestions.length > 0 && (
@@ -316,13 +327,25 @@ function QuestionGroup({
 function ResponseActionsMenu({
   item,
   patientId,
+  encounterId,
+  facilityId,
+  readOnly = false,
 }: {
   item: QuestionnaireResponse;
   patientId: string;
+  encounterId?: string;
+  facilityId?: string;
+  readOnly?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const fullPath = useFullPath();
+  const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
+  const scope = facilityId ? `/facility/${facilityId}` : routeScope;
+  const printEncounterId =
+    encounterId ?? fullPath.match(/\/encounter\/([^/?]+)/)?.[1];
+  const printBase = `${scope ?? ""}/patient/${patientId}${scope && printEncounterId ? `/encounter/${printEncounterId}` : ""}`;
 
   const isUnstructured = !!item.questionnaire;
   const isEnteredInError =
@@ -359,7 +382,7 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Link href={`questionnaire_response/${item.id}/print`}>
+          <Link href={`${printBase}/questionnaire_response/${item.id}/print`}>
             <DropdownMenuItem>
               <Printer className="size-4" />
               {t("print_this_response")}
@@ -367,7 +390,7 @@ function ResponseActionsMenu({
           </Link>
           {item.questionnaire && (
             <Link
-              href={`questionnaire/${item.questionnaire.id}/responses/print`}
+              href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
             >
               <DropdownMenuItem>
                 <Printer className="size-4" />
@@ -377,7 +400,7 @@ function ResponseActionsMenu({
               </DropdownMenuItem>
             </Link>
           )}
-          {isUnstructured && (
+          {isUnstructured && !readOnly && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -393,13 +416,16 @@ function ResponseActionsMenu({
       </DropdownMenu>
 
       <ConfirmActionDialog
-        open={showConfirmDialog}
+        open={showConfirmDialog && !readOnly}
         onOpenChange={setShowConfirmDialog}
         title={t("mark_as_entered_in_error")}
         description={t("questionnaire_response_entered_in_error_warning")}
-        onConfirm={() =>
-          updateStatus({ status: QuestionnaireResponseStatus.EnteredInError })
-        }
+        onConfirm={() => {
+          if (!readOnly)
+            updateStatus({
+              status: QuestionnaireResponseStatus.EnteredInError,
+            });
+        }}
         confirmText={t("confirm")}
         variant="destructive"
         disabled={isPending}
@@ -457,7 +483,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     return (
                       <TableRow
                         key={question.id}
-                        className="flex flex-col md:table-row"
+                        className="flex flex-col @md/response-card:table-row"
                       >
                         <TableCell className="py-1 pl-0 align-top">
                           <div className="text-sm text-gray-600 break-words whitespace-normal">
@@ -488,7 +514,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           </div>
                         </TableCell>
                         {response.note && (
-                          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
+                          <TableCell className="py-1 pr-0 align-top text-right @md/response-card:table-cell">
                             <div className="flex justify-end">
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -549,7 +575,9 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
       <div
         className={cn(
           "grid gap-3",
-          shouldUseTwoColumns ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1",
+          shouldUseTwoColumns
+            ? "grid-cols-1 @3xl/response-card:grid-cols-2"
+            : "grid-cols-1",
         )}
       >
         {/* Left Column */}
@@ -561,7 +589,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-gray-200 pt-2 text-xs text-gray-500">
+      <div className="flex flex-col @md/response-card:flex-row @md/response-card:items-center @md/response-card:justify-between border-gray-200 pt-2 text-xs text-gray-500">
         <div>
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
@@ -581,6 +609,9 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
 interface ResponseCardProps {
   item: QuestionnaireResponse;
+  encounterId?: string;
+  facilityId?: string;
+  readOnly?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onTitleClick?: (questionnaireSlug: string) => void;
@@ -591,6 +622,9 @@ interface ResponseCardProps {
 export function ResponseCard({
   item,
   patientId,
+  encounterId,
+  facilityId,
+  readOnly = false,
   onTitleClick,
   showTitle = true,
   isPrintPreview = false,
@@ -610,7 +644,7 @@ export function ResponseCard({
   return (
     <Card
       className={cn(
-        "shadow-none border",
+        "@container/response-card min-w-0 shadow-none border",
         presentation === "panel"
           ? "overflow-hidden rounded-xl border-gray-200 bg-white"
           : "rounded-md",
@@ -635,7 +669,7 @@ export function ResponseCard({
               <CardTitle
                 className={cn(
                   presentation === "panel"
-                    ? "text-sm font-bold tracking-wide text-gray-600 uppercase"
+                    ? "min-w-0 break-words text-sm font-bold tracking-wide text-gray-600 uppercase"
                     : "text-base font-medium",
                   onTitleClick &&
                     !isEnteredInError &&
@@ -660,7 +694,7 @@ export function ResponseCard({
                 {t("entered_in_error")}
               </Badge>
             )}
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               {isEnteredInError && (
                 <ChevronDown
                   className={cn(
@@ -671,7 +705,13 @@ export function ResponseCard({
               )}
               {!isPrintPreview && (
                 <div onClick={(e) => e.stopPropagation()}>
-                  <ResponseActionsMenu item={item} patientId={patientId} />
+                  <ResponseActionsMenu
+                    item={item}
+                    patientId={patientId}
+                    encounterId={encounterId}
+                    facilityId={facilityId}
+                    readOnly={readOnly}
+                  />
                 </div>
               )}
             </div>
@@ -693,10 +733,15 @@ const RESULTS_PER_PAGE_LIMIT = 10;
 export default function QuestionnaireResponsesList({
   encounterId,
   patientId,
+  facilityId,
+  title,
+  showEmpty = true,
+  readOnly = false,
   isPrintPreview = false,
   onlyUnstructured,
   canAccess = true,
   questionnaireSlug,
+  limit,
   renderItem,
   subjectType = "encounter",
   presentation = "default",
@@ -704,67 +749,126 @@ export default function QuestionnaireResponsesList({
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery({
-      queryKey: [
-        "questionnaireResponses",
-        patientId,
-        questionnaireSlug,
-        encounterId,
-      ],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(questionnaireResponseApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            ...(!isPrintPreview && {
-              limit: String(RESULTS_PER_PAGE_LIMIT),
-              offset: String(pageParam),
-            }),
-            encounter: encounterId,
-            only_unstructured: onlyUnstructured,
-            subject_type: subjectType,
-            ...(questionnaireSlug
-              ? { questionnaire_slug: questionnaireSlug }
-              : {}),
-          },
-        })({ signal });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: [
+      "questionnaireResponses",
+      patientId,
+      questionnaireSlug,
+      encounterId,
+      { onlyUnstructured, subjectType, isPrintPreview, limit },
+    ],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(questionnaireResponseApi.list, {
+        pathParams: { patientId },
+        silent: true,
+        queryParams: {
+          ...(!isPrintPreview && {
+            limit: String(
+              limit === undefined ? RESULTS_PER_PAGE_LIMIT : limit - pageParam,
+            ),
+            offset: String(pageParam),
+          }),
+          encounter: encounterId,
+          // The backend treats presence of this parameter as true.
+          only_unstructured: onlyUnstructured ? true : undefined,
+          subject_type: subjectType,
+          ...(questionnaireSlug
+            ? { questionnaire_slug: questionnaireSlug }
+            : {}),
+        },
+      })({ signal });
 
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-      select: (data) => data?.pages.flatMap((p) => p.results) || [],
-      enabled: canAccess,
-    });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (isPrintPreview) return undefined;
+      const currentOffset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      const total =
+        limit === undefined ? lastPage.count : Math.min(lastPage.count, limit);
+      return lastPage.results.length > 0 && currentOffset < total
+        ? currentOffset
+        : undefined;
+    },
+    select: (data) => {
+      // The response API orders by -created_date before applying limit/offset.
+      const responses = data.pages.flatMap((page) => page.results);
+      return limit === undefined ? responses : responses.slice(0, limit);
+    },
+    enabled: canAccess,
+  });
 
   const responses = data ?? [];
   useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+    if (
+      canAccess &&
+      (limit !== undefined || inView) &&
+      hasNextPage &&
+      !isFetching &&
+      !isError
+    )
+      fetchNextPage();
+  }, [
+    canAccess,
+    inView,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+    isError,
+    limit,
+  ]);
+
+  if (!canAccess || (!isLoading && !isError && !responses.length && !showEmpty))
+    return null;
 
   return (
-    <div>
+    <section
+      aria-label={title ?? t("questionnaire_responses")}
+      className="min-w-0 space-y-3"
+    >
+      {title && (
+        <h2 className="text-sm font-semibold text-gray-600">{title}</h2>
+      )}
+      {isError && (
+        <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+      )}
       <div className="max-w-full">
         {isLoading ? (
           <div className="grid gap-3">
-            <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+            <CardListSkeleton
+              count={Math.min(
+                RESULTS_PER_PAGE_LIMIT,
+                limit ?? RESULTS_PER_PAGE_LIMIT,
+              )}
+            />
           </div>
         ) : responses.length === 0 ? (
-          <Card
-            className={cn(
-              "p-4",
-              presentation === "panel" &&
-                "rounded-xl border-gray-200 bg-white p-2 shadow-none",
-              isPrintPreview && "shadow-none border-gray-200",
-            )}
-          >
-            <div className="text-sm font-medium text-gray-500">
-              {t("no_responses_found")}
-            </div>
-          </Card>
+          !isError && (
+            <Card
+              className={cn(
+                "p-4",
+                presentation === "panel" &&
+                  "rounded-xl border-gray-200 bg-white p-2 shadow-none",
+                isPrintPreview && "shadow-none border-gray-200",
+              )}
+            >
+              <div className="text-sm font-medium text-gray-500">
+                {t("no_responses_found")}
+              </div>
+            </Card>
+          )
         ) : (
           <ul className="grid gap-3">
             {responses.map((item: QuestionnaireResponse) => (
@@ -776,6 +880,9 @@ export default function QuestionnaireResponsesList({
                     key={item.id}
                     item={item}
                     patientId={patientId}
+                    facilityId={facilityId}
+                    encounterId={encounterId}
+                    readOnly={readOnly}
                     isPrintPreview={isPrintPreview}
                     presentation={presentation}
                   />
@@ -786,13 +893,20 @@ export default function QuestionnaireResponsesList({
             {!isPrintPreview && hasNextPage && (
               <li ref={ref} className="flex justify-center py-2">
                 {isFetchingNextPage && (
-                  <CardListSkeleton count={RESULTS_PER_PAGE_LIMIT} />
+                  <CardListSkeleton
+                    count={Math.min(
+                      RESULTS_PER_PAGE_LIMIT,
+                      limit === undefined
+                        ? RESULTS_PER_PAGE_LIMIT
+                        : limit - responses.length,
+                    )}
+                  />
                 )}
               </li>
             )}
           </ul>
         )}
       </div>
-    </div>
+    </section>
   );
 }

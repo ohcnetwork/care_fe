@@ -5,6 +5,8 @@ import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/Q
 import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
+import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
+import { WorkspaceList } from "@/components/Workspace/WorkspaceList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
@@ -19,6 +21,7 @@ import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
+import { INSTANCE_WORKSPACE_SCOPE } from "@/types/workspace/workspace";
 
 const INSTANCE_SCOPE = {
   authContext: "instance",
@@ -60,6 +63,13 @@ const AdminRoutes: AppRoutes = {
   ),
   "/admin/valuesets/:id/edit": ({ id }) => (
     <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} id={id} />
+  ),
+  "/admin/workspaces": () => <WorkspaceList scope={INSTANCE_WORKSPACE_SCOPE} />,
+  "/admin/workspaces/create": () => (
+    <WorkspaceEditor scope={INSTANCE_WORKSPACE_SCOPE} />
+  ),
+  "/admin/workspaces/:id/edit": ({ id }) => (
+    <WorkspaceEditor scope={INSTANCE_WORKSPACE_SCOPE} id={id} />
   ),
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,
