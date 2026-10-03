@@ -98,7 +98,6 @@ export function DiagnosticReportReviewContent({
               type="diagnostic_report"
               associatingId={report.id}
               canEdit={!disableEdit && !isFinal}
-              showHeader={false}
             />
           </CardContent>
         </Card>
