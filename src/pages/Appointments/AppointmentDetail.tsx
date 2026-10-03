@@ -31,6 +31,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  formatSchedulingTimeRange,
+  getAppointmentsSchedulingTimeZone,
+  getClinicDateFromInstant,
+  getSchedulingTimeZoneSuffix,
+} from "@/pages/Appointments/schedulingTimeZone";
+import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
@@ -48,6 +54,7 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { formatDateTimeInZone } from "@/Utils/date";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
@@ -192,6 +199,12 @@ export default function AppointmentDetail(props: Props) {
     return <Loading />;
   }
   const currentStatus = appointment.status;
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+  const slotStart = appointment.token_slot.start_datetime;
+  const timeZoneSuffix = getSchedulingTimeZoneSuffix(
+    schedulingTimeZone,
+    new Date(slotStart),
+  );
 
   const canCheckIn = isWithinInterval(new Date(), {
     start: subDays(appointment.token_slot.start_datetime, 1),
@@ -244,18 +257,21 @@ export default function AppointmentDetail(props: Props) {
                         (appointment &&
                           formatScheduleResourceName(appointment)) ||
                         "",
-                      date: format(
-                        appointment.token_slot.start_datetime,
+                      date: formatDateTimeInZone(
+                        slotStart,
+                        schedulingTimeZone,
                         "do MMMM",
                       ),
-                      slot_start_time: format(
-                        appointment.token_slot.start_datetime,
+                      slot_start_time: formatDateTimeInZone(
+                        slotStart,
+                        schedulingTimeZone,
                         "h:mm a",
                       ),
-                      slot_end_time: format(
+                      slot_end_time: `${formatDateTimeInZone(
                         appointment.token_slot.end_datetime,
+                        schedulingTimeZone,
                         "h:mm a",
-                      ),
+                      )}${timeZoneSuffix}`,
                     }}
                   />
                 </p>
@@ -570,6 +586,8 @@ const AppointmentDetailsContent = ({
   facility: FacilityRead;
 }) => {
   const { t } = useTranslation();
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+  const slotStart = appointment.token_slot.start_datetime;
 
   return (
     <div className="container max-w-3xl space-y-6 mt-6">
@@ -600,8 +618,9 @@ const AppointmentDetailsContent = ({
               <CalendarIcon className="size-4 text-gray-600" />
               <div>
                 <p className="font-medium">
-                  {format(
-                    appointment.token_slot.start_datetime,
+                  {formatDateTimeInZone(
+                    slotStart,
+                    schedulingTimeZone,
                     "MMMM d, yyyy",
                   )}
                 </p>
@@ -614,8 +633,12 @@ const AppointmentDetailsContent = ({
               <ClockIcon className="size-4 text-gray-500" />
               <div>
                 <p className="font-medium">
-                  {format(appointment.token_slot.start_datetime, "h:mm a")} -{" "}
-                  {format(appointment.token_slot.end_datetime, "h:mm a")}
+                  {formatSchedulingTimeRange(
+                    slotStart,
+                    appointment.token_slot.end_datetime,
+                    "h:mm a",
+                    schedulingTimeZone,
+                  )}
                 </p>
                 <p className="text-gray-600 capitalize">
                   {t("duration")}:{" "}
@@ -795,7 +818,18 @@ const AppointmentActions = ({
   const [oldNote, setRescheduleReason] = useState(appointment.note);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    getClinicDateFromInstant(appointment.token_slot.start_datetime),
+  );
+
+  useEffect(() => {
+    if (isRescheduleOpen) {
+      setSelectedDate(
+        getClinicDateFromInstant(appointment.token_slot.start_datetime),
+      );
+      setSelectedSlotId(undefined);
+    }
+  }, [isRescheduleOpen, appointment.token_slot.start_datetime]);
 
   const [note, setNote] = useState(appointment.note);
 

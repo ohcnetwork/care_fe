@@ -10,7 +10,7 @@ import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
-const env = import.meta.env;
+const env = import.meta.env ?? {};
 
 interface ILogo {
   light: string;
@@ -123,6 +123,10 @@ const careConfig = {
       env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
     ),
+
+    /** IANA timezone for appointment filters and slot display until facility TZ exists on API. */
+    schedulingTimeZone:
+      env.REACT_APPOINTMENTS_SCHEDULING_TIMEZONE || "Asia/Kolkata",
   },
 
   /**
