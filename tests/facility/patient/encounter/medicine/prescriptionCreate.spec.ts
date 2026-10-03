@@ -23,7 +23,7 @@ test.describe("Create Patient Prescription", () => {
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
     );
     await page.getByText("View Encounter").first().click();
-    await page.getByRole("tab", { name: "Medicines" }).click();
+    await page.getByRole("tab", { name: "Medications" }).click();
   });
 
   test("Add medication to patient prescription", async ({ page }) => {
@@ -90,7 +90,7 @@ test.describe("Create Patient Prescription", () => {
     await test.step("Verify medication in table", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
-        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.getByRole("tab", { name: "Medications" }).click(),
         page.waitForResponse(
           (resp) =>
             resp.url().includes("/medication/prescription/") &&
@@ -185,7 +185,7 @@ test.describe("Create Patient Prescription", () => {
     await test.step("Verify medication is not highlighted in table", async () => {
       // Wait for prescriptions API to respond after clicking tab
       await Promise.all([
-        page.getByRole("tab", { name: "Medicines" }).click(),
+        page.getByRole("tab", { name: "Medications" }).click(),
         page.waitForResponse(
           (resp) =>
             resp.url().includes("/medication/prescription/") &&
