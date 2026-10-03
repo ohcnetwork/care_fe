@@ -124,7 +124,9 @@ class ManualSetupRequiredError extends Error {
 }
 
 function hasBlankConfigValues(plugin: AppStorePlugin) {
-  return Object.values(plugin.frontend.config ?? {}).some((value) => !value);
+  return Object.values(plugin.frontend.config ?? {}).some(
+    (value) => !value.trim(),
+  );
 }
 
 function useQuickInstall() {
@@ -140,8 +142,12 @@ function useQuickInstall() {
 
       const healthCheckUrl = getHealthCheckUrl(plugin);
       if (healthCheckUrl) {
-        const response = await fetch(healthCheckUrl);
-        if (!response.ok) {
+        try {
+          const response = await fetch(healthCheckUrl);
+          if (!response.ok) {
+            throw new HealthCheckError("Health check failed");
+          }
+        } catch {
           throw new HealthCheckError("Health check failed");
         }
       }
@@ -150,6 +156,7 @@ function useQuickInstall() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["list-configs"] });
+      await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("app_installed_successfully"));
     },
     onError: (error, plugin) => {

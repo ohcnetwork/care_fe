@@ -36,6 +36,7 @@ import {
 } from "@/Utils/appStore";
 import {
   getBuildTimePlugConfigs,
+  mergePlugConfigs,
   ResolvedPlugConfig,
 } from "@/Utils/plugConfig";
 import mutate from "@/Utils/request/mutate";
@@ -70,7 +71,19 @@ export function PlugConfigEdit({ slug }: Props) {
     enabled: Boolean(appId),
   });
 
-  if (isLoading || isManifestLoading) {
+  const { data: readOnlyConfigs, isLoading: isReadOnlyLoading } = useQuery({
+    queryKey: ["list-configs"],
+    queryFn: query(plugConfigApi.list),
+    enabled: isReadOnly,
+  });
+
+  const resolvedBuildTimeConfig = isReadOnly
+    ? mergePlugConfigs(readOnlyConfigs?.configs ?? []).find(
+        (config) => config.slug === slug,
+      )
+    : buildTimeConfig;
+
+  if (isLoading || isManifestLoading || isReadOnlyLoading) {
     return <Loading />;
   }
 
@@ -81,7 +94,7 @@ export function PlugConfigEdit({ slug }: Props) {
       isNew={isNew}
       isReadOnly={isReadOnly}
       manifest={manifest}
-      buildTimeConfig={buildTimeConfig}
+      buildTimeConfig={resolvedBuildTimeConfig}
       existingConfig={existingConfig}
     />
   );
@@ -113,6 +126,7 @@ function PlugConfigForm({
   const [configValues, setConfigValues] = useState<Record<string, string>>(
     () => ({
       ...manifest?.frontend.config,
+      ...((buildTimeConfig?.meta.config as Record<string, string>) ?? {}),
       ...((existingConfig?.meta.config as Record<string, string>) ?? {}),
     }),
   );
@@ -134,6 +148,7 @@ function PlugConfigForm({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["list-configs"] });
       await queryClient.invalidateQueries({ queryKey: ["plug-config"] });
+      await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(
         isNew
           ? t("app_installed_successfully")
@@ -145,7 +160,10 @@ function PlugConfigForm({
 
   const { mutate: deleteConfig } = useMutation({
     mutationFn: mutate(plugConfigApi.delete, { pathParams: { slug } }),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["list-configs"] });
+      await queryClient.invalidateQueries({ queryKey: ["plug-config", slug] });
+      await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
       navigate("/admin/apps");
     },
@@ -174,10 +192,22 @@ function PlugConfigForm({
     }
 
     if (manifest) {
+      if (
+        Object.keys(manifest.frontend.config ?? {}).some(
+          (key) => !configValues[key]?.trim(),
+        )
+      ) {
+        toast.error(t("app_requires_manual_setup"));
+        return;
+      }
       const config = buildPlugConfig({ ...manifest, id: configSlug });
       upsertConfig({
         ...config,
-        meta: { ...config.meta, config: configValues },
+        meta: {
+          ...existingConfig?.meta,
+          ...config.meta,
+          config: configValues,
+        },
       });
       return;
     }
