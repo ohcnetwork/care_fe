@@ -163,6 +163,7 @@ export function EncounterCommandDialog({
         plots: () => navigate(buildEncounterUrl("/plots")),
         observations: () => navigate(buildEncounterUrl("/observations")),
         medicines: () => navigate(buildEncounterUrl("/medicines")),
+        immunizations: () => navigate(buildEncounterUrl("/immunizations")),
         responses: () => navigate(buildEncounterUrl("/responses")),
         files: () => navigate(buildEncounterUrl("/files")),
         notes: () => navigate(buildEncounterUrl("/notes")),
@@ -358,6 +359,12 @@ export function EncounterCommandDialog({
           id: "medicines",
           label: t("medicines"),
           shortcut: getShortcutDisplay("medicines"),
+          icon: <ArrowBigRight />,
+        },
+        {
+          id: "immunizations",
+          label: t("immunizations"),
+          shortcut: getShortcutDisplay("immunizations"),
           icon: <ArrowBigRight />,
         },
         {

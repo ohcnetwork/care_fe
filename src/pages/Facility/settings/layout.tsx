@@ -19,8 +19,11 @@ import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
 import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
+import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
+import ImmunizationPolicyList from "@/pages/ImmunizationPolicies/ImmunizationPolicyList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import { workspaceScopeForFacility } from "@/types/workspace/workspace";
 
@@ -60,6 +63,18 @@ interface SettingsLayoutProps {
 }
 
 const getRoutes = (facilityId: string) => ({
+  "/immunization-policies": () => (
+    <ImmunizationPolicyList scope={immunizationPolicyScope(facilityId)} />
+  ),
+  "/immunization-policies/new": () => (
+    <ImmunizationPolicyForm scope={immunizationPolicyScope(facilityId)} />
+  ),
+  "/immunization-policies/:id": ({ id }: { id: string }) => (
+    <ImmunizationPolicyForm
+      scope={immunizationPolicyScope(facilityId)}
+      id={id}
+    />
+  ),
   "/": () => <Redirect to={`/facility/${facilityId}/settings/general`} />,
   "/general": () => <GeneralSettings facilityId={facilityId} />,
   "/responses": () => <FacilityResponses facilityId={facilityId} />,
