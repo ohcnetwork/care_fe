@@ -86,7 +86,7 @@ export default function PluginEngine({
 
   const pluginsQuery = useQueries({
     queries: resolvedPlugins.map((config) => ({
-      queryKey: ["plugin-manifest", config.slug],
+      queryKey: ["plugin-manifest", config.slug, config.meta],
       queryFn: () => getPluginManifest(config),
     })),
     combine: (queries) =>
