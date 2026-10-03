@@ -30,16 +30,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -85,7 +78,6 @@ export default function FacilityOrganizationSelector(
   const [alreadySelected, setAlreadySelected] = useState(false);
   const [hasAutoSelectedPreferred, setHasAutoSelectedPreferred] =
     useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
   const { ref: inViewRef, inView } = useInView();
 
   // Fetch preferred organizations
@@ -605,57 +597,37 @@ export default function FacilityOrganizationSelector(
       <div className="space-y-3">
         <div className="space-y-3">
           <div className="flex flex-col gap-2">
-            {isMobile ? (
-              <>
-                <Drawer open={open} onOpenChange={setOpen}>
-                  <DrawerTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className="w-full justify-between border-dashed"
-                      onClick={() => setOpen(true)}
-                      type="button" // Prevents unintended form submission
-                    >
-                      <span className="truncate text-gray-500">
-                        {currentSelection
-                          ? currentSelection.name
-                          : t("select_department")}
-                      </span>
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-                    {renderOrganizationCommand()}
-                  </DrawerContent>
-                </Drawer>
-              </>
-            ) : (
-              <Popover open={open} onOpenChange={handleOpenChange}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between border-dashed"
-                  >
-                    <span className="truncate text-gray-500">
-                      {currentSelection
-                        ? currentSelection.name
-                        : t("select_department")}
-                    </span>
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="start"
-                  sideOffset={4}
-                  className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+            <ResponsiveDialog
+              open={open}
+              onOpenChange={handleOpenChange}
+              mobile="drawer"
+              title={t("select_department")}
+              hideHeader
+              desktop="popover"
+              breakpoint="sm"
+              align="start"
+              sideOffset={4}
+              trigger={
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between border-dashed"
+                  type="button" // Prevents unintended form submission
                 >
-                  {renderOrganizationCommand()}
-                </PopoverContent>
-              </Popover>
-            )}
+                  <span className="truncate text-gray-500">
+                    {currentSelection
+                      ? currentSelection.name
+                      : t("select_department")}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              }
+              mobileClassName="min-h-[50vh] max-h-[85vh]"
+              desktopClassName="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+            >
+              {renderOrganizationCommand()}
+            </ResponsiveDialog>
             {selectedOrganizations.map((org, index) => {
               const isPreferred = preferredOrgIds.includes(org.id);
               return (

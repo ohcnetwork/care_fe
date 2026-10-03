@@ -22,14 +22,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
@@ -39,7 +34,6 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
-import useBreakpoints from "@/hooks/useBreakpoints";
 
 import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import { Card } from "@/components/ui/card";
@@ -293,7 +287,6 @@ export default function PatientIdentifierFilter({
   const [searchTerm, setSearchTerm] = useState("");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -503,46 +496,32 @@ export default function PatientIdentifierFilter({
             <span className="hidden md:block">{t("scan")}</span>
           </Button>
         )}
-        {isMobile ? (
-          <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-              <PatientSearchSelector
-                allIdentifierConfigs={allIdentifierConfigs}
-                searchType={searchType}
-                setSearchType={setSearchType}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                isPhoneNumberConfig={isPhoneNumberConfig}
-                selectedConfig={selectedConfig}
-                handlePatientSelect={handlePatientSelect}
-                patientList={patientList}
-                isPatientFetching={isPatientFetching}
-              />
-            </DrawerContent>
-          </Drawer>
-        ) : (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent
-              className="w-80 p-0 overflow-hidden rounded-lg"
-              align={align}
-            >
-              <PatientSearchSelector
-                allIdentifierConfigs={allIdentifierConfigs}
-                searchType={searchType}
-                setSearchType={setSearchType}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                isPhoneNumberConfig={isPhoneNumberConfig}
-                selectedConfig={selectedConfig}
-                handlePatientSelect={handlePatientSelect}
-                patientList={patientList}
-                isPatientFetching={isPatientFetching}
-              />
-            </PopoverContent>
-          </Popover>
-        )}
+        <ResponsiveDialog
+          open={open}
+          onOpenChange={setOpen}
+          mobile="drawer"
+          title={t("search_patients")}
+          hideHeader
+          desktop="popover"
+          breakpoint="sm"
+          trigger={triggerButton}
+          mobileClassName="min-h-[50vh] max-h-[85vh]"
+          desktopClassName="w-80 p-0 overflow-hidden rounded-lg"
+          align={align}
+        >
+          <PatientSearchSelector
+            allIdentifierConfigs={allIdentifierConfigs}
+            searchType={searchType}
+            setSearchType={setSearchType}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            isPhoneNumberConfig={isPhoneNumberConfig}
+            selectedConfig={selectedConfig}
+            handlePatientSelect={handlePatientSelect}
+            patientList={patientList}
+            isPatientFetching={isPatientFetching}
+          />
+        </ResponsiveDialog>
         {selectedPatient && !verificationOpen && (
           <Button
             variant="ghost"
