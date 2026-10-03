@@ -162,7 +162,10 @@ function PlugConfigForm({
     mutationFn: mutate(plugConfigApi.delete, { pathParams: { slug } }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["list-configs"] });
-      await queryClient.invalidateQueries({ queryKey: ["plug-config", slug] });
+      await queryClient.invalidateQueries({
+        queryKey: ["plug-config", slug],
+        refetchType: "none",
+      });
       await queryClient.invalidateQueries({ queryKey: ["enabled-plugins"] });
       toast.success(t("config_deleted_successfully"));
       navigate("/admin/apps");
