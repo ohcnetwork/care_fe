@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: release-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: write
