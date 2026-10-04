@@ -1,6 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryKey,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -13,13 +18,15 @@ import useAuthUser from "@/hooks/useAuthUser";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import {
-  WorkspaceFacilityOrganizationsUpdate,
+  WorkspaceOrganizationRead,
   WorkspaceScope,
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+
+import { WorkspaceInstanceOrganizationSelector } from "./WorkspaceInstanceOrganizationSelector";
 
 interface AccessState {
   dirty: boolean;
@@ -27,28 +34,122 @@ interface AccessState {
 }
 
 interface WorkspaceOrganizationsFieldProps {
-  scope: Extract<WorkspaceScope, { authContext: "facility" }>;
+  scope: WorkspaceScope;
   workspaceId: string;
   disabled: boolean;
   onStateChange: (state: AccessState) => void;
 }
 
-export function WorkspaceOrganizationsField(
-  props: WorkspaceOrganizationsFieldProps,
-) {
+interface OrganizationSelectionProps<TOrganization> {
+  ids: string[];
+  organizations: TOrganization[];
+  disabled: boolean;
+  onChange: (ids: string[], organizations: TOrganization[]) => void;
+}
+
+interface WorkspaceAccessFieldProps<TOrganization> {
+  queryKey: QueryKey;
+  loadOrganizations: (context: {
+    signal: AbortSignal;
+  }) => Promise<PaginatedResponse<TOrganization>>;
+  saveOrganizations: (ids: string[]) => Promise<unknown>;
+  renderSelector: (
+    props: OrganizationSelectionProps<TOrganization>,
+  ) => ReactNode;
+  title: string;
+  hint: string;
+  emptyHint: string;
+  disabled: boolean;
+  onStateChange: (state: AccessState) => void;
+}
+
+export function WorkspaceOrganizationsField({
+  scope,
+  workspaceId,
+  disabled,
+  onStateChange,
+}: WorkspaceOrganizationsFieldProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const queryKey = [
+    "workspace-organizations",
+    user.id,
+    scope.authContext === "facility" ? scope.facilityId : "instance",
+    workspaceId,
+  ];
+  const requestOptions = {
+    pathParams: { id: workspaceId },
+    silent: (response: Response) => response.status === 403,
+  };
+
+  if (scope.authContext === "facility") {
+    return (
+      <WorkspaceAccessField<FacilityOrganizationRead>
+        key={workspaceId}
+        queryKey={queryKey}
+        loadOrganizations={query(
+          workspaceApi.getFacilityOrganizations,
+          requestOptions,
+        )}
+        saveOrganizations={(ids) =>
+          mutate(workspaceApi.setFacilityOrganizations, {
+            pathParams: { id: workspaceId },
+          })({ facility_organizations: ids })
+        }
+        title={t("departments_with_access")}
+        hint={t("workspace_departments_hint")}
+        emptyHint={t("workspace_no_departments")}
+        disabled={disabled}
+        onStateChange={onStateChange}
+        renderSelector={({ ids, organizations, onChange }) => (
+          <FacilityOrganizationSelector
+            facilityId={scope.facilityId}
+            value={ids}
+            currentOrganizations={organizations}
+            optional
+            onChange={(nextIds, nextOrganizations) =>
+              onChange(nextIds ?? [], nextOrganizations ?? organizations)
+            }
+          />
+        )}
+      />
+    );
+  }
+
+  return (
+    <WorkspaceAccessField<WorkspaceOrganizationRead>
+      key={workspaceId}
+      queryKey={queryKey}
+      loadOrganizations={query(workspaceApi.getOrganizations, requestOptions)}
+      saveOrganizations={(ids) =>
+        mutate(workspaceApi.setOrganizations, {
+          pathParams: { id: workspaceId },
+        })({ organizations: ids })
+      }
+      title={t("workspace_organizations_with_access")}
+      hint={t("workspace_organizations_hint")}
+      emptyHint={t("workspace_no_organizations")}
+      disabled={disabled}
+      onStateChange={onStateChange}
+      renderSelector={({ ids, organizations, disabled, onChange }) => (
+        <WorkspaceInstanceOrganizationSelector
+          value={ids}
+          organizations={organizations}
+          disabled={disabled}
+          onChange={onChange}
+        />
+      )}
+    />
+  );
+}
+
+function WorkspaceAccessField<TOrganization extends { id: string }>(
+  props: WorkspaceAccessFieldProps<TOrganization>,
+) {
+  const { t } = useTranslation();
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: [
-      "workspace-organizations",
-      user.id,
-      props.scope.facilityId,
-      props.workspaceId,
-    ],
-    queryFn: query(workspaceApi.getFacilityOrganizations, {
-      pathParams: { id: props.workspaceId },
-      silent: (response) => response.status === 403,
-    }),
+    queryKey: props.queryKey,
+    queryFn: props.loadOrganizations,
     retry: false,
   });
 
@@ -56,16 +157,14 @@ export function WorkspaceOrganizationsField(
 
   return (
     <section
-      className="space-y-4 rounded-lg border bg-white p-4 sm:p-5"
+      className="space-y-4 border-t border-gray-100 pt-5"
       aria-labelledby="workspace-access-heading"
     >
       <div>
-        <h2 id="workspace-access-heading" className="text-base font-semibold">
-          {t("departments_with_access")}
-        </h2>
-        <p className="mt-1 text-sm text-gray-600">
-          {t("workspace_departments_hint")}
-        </p>
+        <h3 id="workspace-access-heading" className="text-sm font-semibold">
+          {props.title}
+        </h3>
+        <p className="mt-1 text-sm text-gray-600">{props.hint}</p>
       </div>
       {isLoading ? (
         <Skeleton className="h-24 w-full" />
@@ -97,43 +196,34 @@ export function WorkspaceOrganizationsField(
   );
 }
 
-function WorkspaceOrganizationsForm({
-  scope,
-  workspaceId,
+function WorkspaceOrganizationsForm<TOrganization extends { id: string }>({
+  queryKey,
+  saveOrganizations,
+  renderSelector,
+  emptyHint,
   disabled,
   onStateChange,
   initialOrganizations,
-}: WorkspaceOrganizationsFieldProps & {
-  initialOrganizations: FacilityOrganizationRead[];
+}: WorkspaceAccessFieldProps<TOrganization> & {
+  initialOrganizations: TOrganization[];
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const user = useAuthUser();
   const [selection, setSelection] = useState<{
     ids: string[];
-    organizations: FacilityOrganizationRead[];
+    organizations: TOrganization[];
   } | null>(null);
   const savedIds = initialOrganizations.map((org) => org.id);
   const ids = selection?.ids ?? savedIds;
   const organizations = selection?.organizations ?? initialOrganizations;
   const dirty = selection !== null;
   const save = useMutation({
-    mutationFn: mutate(workspaceApi.setFacilityOrganizations, {
-      pathParams: { id: workspaceId },
-    }),
-    onSuccess: async (_, variables: WorkspaceFacilityOrganizationsUpdate) => {
-      const queryKey = [
-        "workspace-organizations",
-        user.id,
-        scope.facilityId,
-        workspaceId,
-      ];
+    mutationFn: saveOrganizations,
+    onSuccess: async (_, ids) => {
       await queryClient.cancelQueries({ queryKey });
       queryClient.setQueryData(queryKey, {
-        count: variables.facility_organizations.length,
-        results: organizations.filter((org) =>
-          variables.facility_organizations.includes(org.id),
-        ),
+        count: ids.length,
+        results: organizations.filter((org) => ids.includes(org.id)),
       });
       setSelection(null);
       queryClient.invalidateQueries({ queryKey });
@@ -157,27 +247,23 @@ function WorkspaceOrganizationsForm({
         disabled={disabled || save.isPending}
         aria-busy={save.isPending}
       >
-        <FacilityOrganizationSelector
-          facilityId={scope.facilityId}
-          value={ids}
-          currentOrganizations={organizations}
-          optional
-          onChange={(nextIds, nextOrganizations) => {
+        {renderSelector({
+          ids,
+          organizations,
+          disabled: disabled || save.isPending,
+          onChange: (nextIds, nextOrganizations) => {
             // Picker content may be portaled outside the disabled fieldset.
             if (disabled || save.isPending) return;
-            const ids = nextIds ?? [];
             setSelection(
-              ids.length === savedIds.length &&
-                ids.every((id) => savedIds.includes(id))
+              nextIds.length === savedIds.length &&
+                nextIds.every((id) => savedIds.includes(id))
                 ? null
-                : { ids, organizations: nextOrganizations ?? organizations },
+                : { ids: nextIds, organizations: nextOrganizations },
             );
-          }}
-        />
+          },
+        })}
       </fieldset>
-      {!ids.length && (
-        <p className="text-sm text-gray-500">{t("workspace_no_departments")}</p>
-      )}
+      {!ids.length && <p className="text-sm text-gray-500">{emptyHint}</p>}
       {save.isError && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -193,7 +279,7 @@ function WorkspaceOrganizationsForm({
           type="button"
           variant="outline"
           disabled={disabled || save.isPending || !dirty}
-          onClick={() => save.mutate({ facility_organizations: ids })}
+          onClick={() => save.mutate(ids)}
         >
           {save.isPending && <Loader2 className="size-4 animate-spin" />}
           {t("workspace_save_access")}

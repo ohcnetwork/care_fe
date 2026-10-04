@@ -108,10 +108,8 @@ export function EncounterWorkspaceSwitcher({
       );
       const firstPage = parsed.pages.find(
         (page) =>
-          page.kind === "custom" ||
-          (!page.hidden &&
-            (page.kind === "invalid" ||
-              systemTabs[page.key]?.visible !== false)),
+          !page.hidden &&
+          (page.kind !== "system" || systemTabs[page.key]?.visible !== false),
       );
       const target = new URL(
         firstPage ? firstPage.key : "updates",

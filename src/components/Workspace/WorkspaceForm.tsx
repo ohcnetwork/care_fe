@@ -1,8 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Braces, Loader2, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  Loader2,
+  Settings2,
+  Trash2,
+} from "lucide-react";
 import { Link, navigate, useNavigationPrompt } from "raviger";
-import { useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -25,6 +32,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -44,25 +56,22 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import mutate from "@/Utils/request/mutate";
-import {
-  createEncounterWorkspaceSchema,
-  ENCOUNTER_WIDGET_TYPES,
-} from "@/types/workspace/encounterWorkspace";
+import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
   WorkspaceAuthContext,
   WorkspaceRead,
   WorkspaceScope,
-  WorkspaceTemplate,
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 
+import { EncounterWorkspaceEditor } from "./EncounterWorkspaceEditor";
 import { WorkspaceOrganizationsField } from "./WorkspaceOrganizationsField";
+import { parseWorkspaceJson } from "./workspaceEditorUtils";
 
 interface WorkspaceFormValues {
   name: string;
@@ -78,33 +87,29 @@ interface WorkspaceFormProps {
   allowedContexts: WorkspaceAuthContext[];
 }
 
-function parseTemplate(value: string): WorkspaceTemplate {
-  const parsed: unknown = JSON.parse(value);
-  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Expected a JSON object");
-  }
-  return parsed as WorkspaceTemplate;
-}
-
 export function WorkspaceForm({
   scope,
   existing,
   allowedContexts,
 }: WorkspaceFormProps) {
   const { t } = useTranslation();
+  const formId = useId();
   const queryClient = useQueryClient();
   const user = useAuthUser();
   const pluginTabs = useCareAppTabs("encounterTabs");
   const encounterSchema = createEncounterWorkspaceSchema(
     Object.keys(pluginTabs),
   );
-  const { widgets: pluginWidgets, loadingPlugins } =
-    useCareAppEncounterWidgets();
+  const [isEditorValid, setIsEditorValid] = useState(true);
+  const [invalidTemplateSnapshot, setInvalidTemplateSnapshot] = useState<
+    string | null
+  >(null);
   const [accessState, setAccessState] = useState({
     dirty: false,
     pending: false,
   });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(!existing);
   const schema = z
     .object({
       name: z
@@ -115,7 +120,7 @@ export function WorkspaceForm({
       description: z.string(),
       template: z.string().superRefine((value, ctx) => {
         try {
-          const template = parseTemplate(value);
+          const template = parseWorkspaceJson(value);
           if ("schema_version" in template || "pages" in template) {
             const parsed = encounterSchema.safeParse(template);
             if (!parsed.success) {
@@ -154,7 +159,9 @@ export function WorkspaceForm({
       ? {
           name: existing.name,
           description: existing.description,
-          template: JSON.stringify(existing.template, null, 2),
+          template:
+            invalidTemplateSnapshot ??
+            JSON.stringify(existing.template, null, 2),
           authContext: scope.authContext,
           departmentId: "",
         }
@@ -168,29 +175,19 @@ export function WorkspaceForm({
       departmentId: "",
     },
   });
+  const { getValues } = form;
+  const handleEditorValidityChange = useCallback(
+    (valid: boolean) => {
+      setIsEditorValid(valid);
+      // Invalid inspector drafts are local to the editor. Keep their underlying
+      // template stable until a valid change reaches the form's dirty tracking.
+      setInvalidTemplateSnapshot((snapshot) =>
+        valid ? null : (snapshot ?? getValues("template")),
+      );
+    },
+    [getValues, setIsEditorValid, setInvalidTemplateSnapshot],
+  );
   const authContext = useWatch({ control: form.control, name: "authContext" });
-  const templateValue = useWatch({ control: form.control, name: "template" });
-  let unsupportedWidgets: string[] = [];
-  try {
-    const parsed = encounterSchema.safeParse(JSON.parse(templateValue));
-    if (parsed.success) {
-      const widgetTypes = parsed.data.pages.flatMap((page) =>
-        page.kind === "custom"
-          ? page.columns.flatMap((column) =>
-              column.widgets.map((widget) => widget.type),
-            )
-          : [],
-      );
-      unsupportedWidgets = [...new Set(widgetTypes)].filter(
-        (type) =>
-          !ENCOUNTER_WIDGET_TYPES.includes(type) &&
-          !pluginWidgets.has(type) &&
-          !loadingPlugins.has(type.split(".")[0]),
-      );
-    }
-  } catch {
-    // JSON validation is shown on submission or when Format JSON is used.
-  }
   const returnPath = scope.basePath;
   const contextLabel = {
     instance: t("workspace_instance_scope"),
@@ -206,7 +203,7 @@ export function WorkspaceForm({
   };
 
   const title = t(existing ? "edit_workspace" : "create_workspace");
-  const dirty = form.formState.isDirty || accessState.dirty;
+  const dirty = form.formState.isDirty || accessState.dirty || !isEditorValid;
   useNavigationPrompt(dirty, t("unsaved_changes_warning"));
 
   const save = useMutation({
@@ -214,7 +211,7 @@ export function WorkspaceForm({
       const body = {
         name: values.name,
         description: values.description,
-        template: parseTemplate(values.template),
+        template: parseWorkspaceJson(values.template),
       };
       return existing
         ? mutate(workspaceApi.update, { pathParams: { id: existing.id } })(body)
@@ -264,6 +261,8 @@ export function WorkspaceForm({
       flushSync(() => {
         form.reset(form.getValues(), { keepDirtyValues: false });
         setAccessState({ dirty: false, pending: false });
+        setIsEditorValid(true);
+        setInvalidTemplateSnapshot(null);
         setDeleteOpen(false);
       });
       queryClient.invalidateQueries({ queryKey: ["workspace-user-defaults"] });
@@ -273,27 +272,17 @@ export function WorkspaceForm({
   });
   const busy = save.isPending || remove.isPending || accessState.pending;
 
-  const formatTemplate = () => {
-    try {
-      form.setValue(
-        "template",
-        JSON.stringify(parseTemplate(form.getValues("template")), null, 2),
-        { shouldDirty: true, shouldValidate: true },
-      );
-    } catch {
-      form.setError(
-        "template",
-        { message: t("workspace_template_invalid") },
-        { shouldFocus: true },
-      );
-    }
-  };
-
   return (
-    <Page title={title} hideTitleOnPage>
-      <div className="mx-auto max-w-6xl space-y-6 px-3 py-6 sm:px-0">
-        <div className="flex flex-wrap items-center gap-3">
-          <Button asChild variant="outline" size="sm" disabled={busy}>
+    <Page title={title} hideTitleOnPage className="px-0 md:px-0">
+      <div className="mx-auto w-full max-w-[1600px] space-y-6 pb-8">
+        <header className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-3 border-b border-gray-200 bg-white/95 px-1 py-4 backdrop-blur-sm sm:gap-4">
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="shrink-0 rounded-lg border-gray-200 shadow-none"
+            disabled={busy}
+          >
             <Link
               href={returnPath}
               basePath="/"
@@ -301,250 +290,295 @@ export function WorkspaceForm({
                 if (busy) event.preventDefault();
               }}
             >
-              <ArrowLeft className="size-4" />
-              {t("back")}
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              <span className="sr-only">{t("back")}</span>
             </Link>
           </Button>
-          <h1 className="flex-1 text-2xl font-semibold tracking-tight">
-            {title}
-          </h1>
-          {!existing && (
-            <Badge variant="secondary">{contextLabel[authContext]}</Badge>
-          )}
-        </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h1 className="w-full min-w-0 text-lg font-semibold tracking-tight text-gray-950 sm:w-auto sm:text-xl">
+                {title}
+                {existing && (
+                  <>
+                    <span
+                      className="mx-2 hidden font-normal text-gray-300 sm:inline"
+                      aria-hidden="true"
+                    >
+                      /
+                    </span>
+                    <span className="block truncate text-sm font-medium text-gray-600 sm:inline sm:whitespace-normal sm:break-words sm:text-xl sm:font-semibold">
+                      {existing.name}
+                    </span>
+                  </>
+                )}
+              </h1>
+              {!existing && (
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 border-gray-200 bg-gray-50 font-medium text-gray-600"
+                >
+                  {contextLabel[authContext]}
+                </Badge>
+              )}
+            </div>
+            <p className="mt-1 hidden text-sm leading-5 text-gray-500 sm:block">
+              {t("workspace_editor_description")}
+            </p>
+          </div>
+          <div className="ml-auto flex w-full shrink-0 items-center justify-end gap-4 sm:w-auto">
+            <span
+              className="hidden items-center gap-1.5 text-xs text-gray-500 xl:flex"
+              role="status"
+            >
+              {form.formState.isDirty || !isEditorValid ? (
+                <span
+                  className="size-1.5 rounded-full bg-amber-500"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Check
+                  className="size-3.5 text-primary-700"
+                  aria-hidden="true"
+                />
+              )}
+              {t(
+                form.formState.isDirty || !isEditorValid
+                  ? "workspace_unsaved_changes"
+                  : "no_changes_to_save",
+              )}
+            </span>
+            <Button
+              type="submit"
+              form={formId}
+              disabled={
+                busy ||
+                !isEditorValid ||
+                (!!existing && !form.formState.isDirty)
+              }
+              className="h-10 w-full rounded-lg px-5 shadow-none sm:w-auto"
+            >
+              {save.isPending && <Loader2 className="size-4 animate-spin" />}
+              {t(existing ? "save_changes" : "create_workspace")}
+            </Button>
+          </div>
+        </header>
 
         <Form {...form}>
           <form
+            id={formId}
             noValidate
-            onSubmit={form.handleSubmit((values) => {
-              if (busy) return;
-              if (!existing && !allowedContexts.includes(values.authContext))
-                return;
-              save.mutate(values);
-            })}
+            onSubmit={form.handleSubmit(
+              (values) => {
+                if (busy || !isEditorValid) return;
+                if (!existing && !allowedContexts.includes(values.authContext))
+                  return;
+                save.mutate(values);
+              },
+              (errors) => {
+                if (errors.name || errors.description || errors.departmentId) {
+                  flushSync(() => setSettingsOpen(true));
+                }
+              },
+            )}
             className="space-y-6"
           >
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-              <section
-                className="space-y-5"
-                aria-labelledby="workspace-details-heading"
+            <Collapsible
+              open={settingsOpen}
+              onOpenChange={setSettingsOpen}
+              className="rounded-xl border border-gray-200 bg-white"
+              role="region"
+              aria-labelledby="workspace-settings-heading"
+            >
+              <h2 id="workspace-settings-heading">
+                <CollapsibleTrigger
+                  type="button"
+                  className="group flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 sm:px-5"
+                >
+                  <Settings2 className="size-4 shrink-0 text-gray-500" />
+                  <span>{t("workspace_general_settings")}</span>
+                  <span className="ml-auto flex items-center gap-3">
+                    {(accessState.dirty ||
+                      form.formState.dirtyFields.name ||
+                      form.formState.dirtyFields.description ||
+                      form.formState.dirtyFields.authContext ||
+                      form.formState.dirtyFields.departmentId) && (
+                      <span className="text-xs text-amber-700">
+                        {t("workspace_unsaved_changes")}
+                      </span>
+                    )}
+                    <ChevronDown className="size-4 shrink-0 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+                  </span>
+                </CollapsibleTrigger>
+              </h2>
+              <CollapsibleContent
+                forceMount
+                className="space-y-4 border-t border-gray-100 px-4 py-4 data-[state=closed]:hidden sm:px-5"
               >
-                <div>
-                  <h2
-                    id="workspace-details-heading"
-                    className="text-base font-semibold"
-                  >
-                    {t("workspace_details")}
-                  </h2>
-                  {!existing && (
-                    <p className="mt-1 text-sm text-gray-600">
-                      {contextDescription[authContext]}
-                    </p>
-                  )}
-                </div>
-                {!existing && scope.authContext === "facility" && (
+                <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
                   <FormField
                     control={form.control}
-                    name="authContext"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("workspace_ownership")}</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value: WorkspaceAuthContext) => {
-                            if (busy || !allowedContexts.includes(value))
-                              return;
-                            field.onChange(value);
-                            form.setValue("departmentId", "", {
-                              shouldDirty: true,
-                            });
-                            form.clearErrors("departmentId");
-                          }}
-                          disabled={busy}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {allowedContexts.map((context) => (
-                              <SelectItem key={context} value={context}>
-                                {contextLabel[context]}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          {t("workspace_ownership_fixed_hint")}
-                        </FormDescription>
+                        <FormLabel className="text-xs font-medium text-gray-600">
+                          {t("name")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={busy}
+                            autoComplete="off"
+                            className="h-10 bg-gray-50/50 shadow-none"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                )}
-                {!existing &&
-                  authContext === "facility_organization" &&
-                  scope.authContext === "facility" && (
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-gray-600">
+                          {t("description")}
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            disabled={busy}
+                            rows={1}
+                            className="min-h-10 resize-y bg-gray-50/50 shadow-none"
+                            placeholder={t("workspace_description_hint")}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {!existing && scope.authContext === "facility" && (
+                  <div className="grid items-start gap-5 border-t border-gray-100 pt-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="departmentId"
+                      name="authContext"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>
-                            {t("workspace_owner_department")}
+                          <FormLabel className="text-xs font-medium text-gray-600">
+                            {t("workspace_ownership")}
                           </FormLabel>
-                          <fieldset disabled={busy}>
-                            <FacilityOrganizationSelector
-                              facilityId={scope.facilityId}
-                              singleSelection
-                              optional
-                              value={field.value ? [field.value] : []}
-                              onChange={(ids) => {
-                                if (!busy) {
-                                  field.onChange(ids?.[0] ?? "");
-                                  form.clearErrors("departmentId");
-                                }
-                              }}
-                            />
-                          </fieldset>
+                          <Select
+                            value={field.value}
+                            onValueChange={(value: WorkspaceAuthContext) => {
+                              if (busy || !allowedContexts.includes(value))
+                                return;
+                              field.onChange(value);
+                              form.setValue("departmentId", "", {
+                                shouldDirty: true,
+                              });
+                              form.clearErrors("departmentId");
+                            }}
+                            disabled={busy}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-10 w-full bg-gray-50/50 shadow-none">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {allowedContexts.map((context) => (
+                                <SelectItem key={context} value={context}>
+                                  {contextLabel[context]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            {t("workspace_ownership_fixed_hint")}
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  )}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("name")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled={busy} autoComplete="off" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("description")}</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} disabled={busy} rows={5} />
-                      </FormControl>
-                      <FormDescription>
-                        {t("workspace_description_hint")}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {authContext === "facility" && !existing && (
-                  <Alert>
-                    <AlertDescription>
-                      {t("workspace_access_after_create")}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </section>
-              <section className="min-w-0 rounded-lg border bg-white p-4 sm:p-5">
-                <FormField
-                  control={form.control}
-                  name="template"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <FormLabel className="flex items-center gap-2 text-base">
-                          <Braces className="size-4" />
-                          {t("workspace_template")}
-                        </FormLabel>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={formatTemplate}
-                          disabled={busy}
-                        >
-                          {t("workspace_format_json")}
-                        </Button>
-                      </div>
-                      <FormDescription>
-                        {t("workspace_template_hint")}
-                      </FormDescription>
-                      <p className="text-sm text-gray-600">
-                        {t("encounter_workspace_template_hint")}
-                      </p>
-                      <p className="text-sm text-gray-600 break-words">
-                        {t("encounter_workspace_core_widgets", {
-                          widgets: ENCOUNTER_WIDGET_TYPES.join(", "),
-                        })}
-                      </p>
-                      {unsupportedWidgets.length > 0 && (
-                        <Alert>
-                          <AlertDescription>
-                            {t("encounter_workspace_unsupported_widgets", {
-                              widgets: unsupportedWidgets.join(", "),
-                            })}
-                          </AlertDescription>
-                        </Alert>
+                    <div className="space-y-2 text-sm leading-5 text-gray-500 md:pt-6">
+                      <p>{contextDescription[authContext]}</p>
+                      {authContext === "facility" && (
+                        <p>{t("workspace_access_after_create")}</p>
                       )}
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          disabled={busy}
-                          spellCheck={false}
-                          autoCapitalize="off"
-                          autoCorrect="off"
-                          rows={18}
-                          className="mt-3 min-h-80 resize-y font-mono text-sm leading-6"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </section>
-            </div>
+                    </div>
+                    {authContext === "facility_organization" && (
+                      <FormField
+                        control={form.control}
+                        name="departmentId"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel>
+                              {t("workspace_owner_department")}
+                            </FormLabel>
+                            <fieldset disabled={busy}>
+                              <FacilityOrganizationSelector
+                                facilityId={scope.facilityId}
+                                singleSelection
+                                optional
+                                value={field.value ? [field.value] : []}
+                                onChange={(ids) => {
+                                  if (!busy) {
+                                    field.onChange(ids?.[0] ?? "");
+                                    form.clearErrors("departmentId");
+                                  }
+                                }}
+                              />
+                            </fieldset>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+                )}
+                {!existing && scope.authContext === "instance" && (
+                  <p className="border-t border-gray-100 pt-4 text-sm leading-5 text-gray-500">
+                    {t("workspace_instance_access_after_create")}
+                  </p>
+                )}
+                {existing && (
+                  <WorkspaceOrganizationsField
+                    scope={scope}
+                    workspaceId={existing.id}
+                    disabled={save.isPending || remove.isPending}
+                    onStateChange={setAccessState}
+                  />
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            <FormField
+              control={form.control}
+              name="template"
+              render={({ field }) => (
+                <FormItem className="min-w-0">
+                  <EncounterWorkspaceEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={busy}
+                    onValidityChange={handleEditorValidityChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {save.isError && (
               <Alert variant="destructive">
                 <AlertDescription>{t("workspace_save_error")}</AlertDescription>
               </Alert>
             )}
-            <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-4">
-              <span className="mr-auto text-sm text-gray-500">
-                {t(
-                  form.formState.isDirty
-                    ? "workspace_unsaved_changes"
-                    : "no_changes_to_save",
-                )}
-              </span>
-              <Button
-                type="submit"
-                disabled={busy || (!!existing && !form.formState.isDirty)}
-              >
-                {save.isPending && <Loader2 className="size-4 animate-spin" />}
-                {t(existing ? "save_changes" : "create_workspace")}
-              </Button>
-            </div>
           </form>
         </Form>
 
-        {existing && scope.authContext === "facility" && (
-          <WorkspaceOrganizationsField
-            scope={scope}
-            workspaceId={existing.id}
-            disabled={save.isPending || remove.isPending}
-            onStateChange={setAccessState}
-          />
-        )}
-
         {existing && (
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-5">
-            <p className="text-sm text-gray-600">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-5">
+            <p className="text-xs text-gray-500">
               {t("workspace_delete_hint")}
             </p>
             <AlertDialog
@@ -554,7 +588,12 @@ export function WorkspaceForm({
               }}
             >
               <AlertDialogTrigger asChild>
-                <Button variant="outline" disabled={busy}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={busy}
+                  className="text-gray-500 hover:bg-red-50 hover:text-red-700"
+                >
                   <Trash2 className="size-4" />
                   {t("delete_workspace")}
                 </Button>

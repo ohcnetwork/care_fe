@@ -1,3 +1,4 @@
+import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
 
 export const WORKSPACE_AUTH_CONTEXTS = [
@@ -72,6 +73,19 @@ export type WorkspaceUpdate = WorkspaceBase;
 export interface WorkspaceFacilityOrganizationsUpdate {
   /** Replaces the entire association list with organizations from this facility. */
   facility_organizations: string[];
+}
+
+/** Fields used from the instance workspace's organization access response. */
+export interface WorkspaceOrganizationRead extends Pick<
+  Organization,
+  "id" | "name" | "org_type" | "active" | "level_cache" | "has_children"
+> {
+  description?: string | null;
+}
+
+export interface WorkspaceOrganizationsUpdate {
+  /** Replaces the entire association list for an instance workspace. */
+  organizations: string[];
 }
 
 export interface WorkspaceDefaultAttributesUpdate {

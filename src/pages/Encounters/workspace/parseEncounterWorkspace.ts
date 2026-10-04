@@ -1,5 +1,6 @@
 import {
   EncounterWorkspaceWidget,
+  MAX_ENCOUNTER_WORKSPACE_COLUMNS,
   RESERVED_ROUTE_KEYS,
   SYSTEM_PAGE_KEYS,
   encounterPageKeySchema,
@@ -22,6 +23,7 @@ export type RenderPage =
       key: string;
       title: string;
       icon?: string;
+      hidden?: boolean;
       columns: RenderColumn[];
       invalid: boolean;
     }
@@ -132,14 +134,18 @@ export function parseEncounterWorkspace(
     pageKeys.add(key);
     const title = titleSchema.safeParse(value.title).data;
 
+    if (
+      (value.kind === "system" || value.kind === "custom") &&
+      value.hidden !== undefined &&
+      typeof value.hidden !== "boolean"
+    ) {
+      result.pages.push({ kind: "invalid", key, title: title ?? key });
+      continue;
+    }
     if (value.kind === "system" && availableSystemKeys.has(key)) {
-      if (value.hidden !== undefined && typeof value.hidden !== "boolean") {
-        result.pages.push({ kind: "invalid", key, title: title ?? key });
-      } else {
-        if (hasExtraFields(value, ["key", "kind", "hidden"]))
-          result.invalid = true;
-        result.pages.push({ kind: "system", key, hidden: value.hidden });
-      }
+      if (hasExtraFields(value, ["key", "kind", "hidden"]))
+        result.invalid = true;
+      result.pages.push({ kind: "system", key, hidden: value.hidden === true });
       continue;
     }
     if (value.kind !== "custom") {
@@ -156,10 +162,18 @@ export function parseEncounterWorkspace(
       kind: "custom",
       key,
       title: title ?? key,
+      hidden: value.hidden === true,
       columns: [],
       invalid:
         title === undefined ||
-        hasExtraFields(value, ["key", "kind", "title", "icon", "columns"]),
+        hasExtraFields(value, [
+          "key",
+          "kind",
+          "title",
+          "icon",
+          "hidden",
+          "columns",
+        ]),
     };
     if (value.icon !== undefined) {
       if (
@@ -171,9 +185,13 @@ export function parseEncounterWorkspace(
       else page.invalid = true;
     }
     if (Array.isArray(value.columns)) {
-      if (!value.columns.length || value.columns.length > 12)
+      if (
+        !value.columns.length ||
+        value.columns.length > MAX_ENCOUNTER_WORKSPACE_COLUMNS
+      )
         page.invalid = true;
       if (value.columns.length > 12) result.invalid = true;
+      // Keep legacy layouts readable rather than silently dropping their widgets.
       page.columns = value.columns.slice(0, 12).map(parseColumn);
       // Bounded positive fractions remain usable even if their sum exceeds 12.
       if (page.columns.reduce((sum, column) => sum + column.span, 0) > 12)

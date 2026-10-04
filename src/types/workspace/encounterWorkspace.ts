@@ -24,6 +24,8 @@ export const RESERVED_ROUTE_KEYS = [
   "report",
 ];
 
+export const MAX_ENCOUNTER_WORKSPACE_COLUMNS = 4;
+
 export const ENCOUNTER_WIDGET_TYPES: readonly string[] = [
   "allergies",
   "symptoms",
@@ -80,6 +82,7 @@ const customPageSchema = z.strictObject({
   kind: z.literal("custom"),
   title: titleSchema,
   icon: z.string().min(1).max(64).optional(),
+  hidden: z.boolean().optional(),
   columns: z
     .array(
       z.strictObject({
@@ -88,7 +91,7 @@ const customPageSchema = z.strictObject({
       }),
     )
     .min(1)
-    .max(12)
+    .max(MAX_ENCOUNTER_WORKSPACE_COLUMNS)
     .refine((columns) => columns.reduce((sum, col) => sum + col.span, 0) <= 12),
 });
 

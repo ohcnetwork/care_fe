@@ -2231,9 +2231,17 @@ test.describe("Encounter workspace rendering", () => {
       await page.goto(
         `/facility/${fixture.facility.id}/settings/workspaces/${fixture.workspace.id}/edit`,
       );
-      await page
-        .getByRole("textbox", { name: "Template (JSON)", exact: true })
-        .fill(JSON.stringify(template));
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(
+        fixture.workspace.name,
+      );
+      const templateField = page.getByRole("textbox", {
+        name: "Template (JSON)",
+        exact: true,
+      });
+      if (!(await templateField.isVisible())) {
+        await page.getByRole("button", { name: "JSON", exact: true }).click();
+      }
+      await templateField.fill(JSON.stringify(template));
       await expect(
         page.getByText(
           "These widgets are unavailable and will show a notice: care_missing.review.",
@@ -2834,9 +2842,22 @@ test.describe("Encounter workspace rendering", () => {
       pages: [
         { kind: "system", key: "medicines", hidden: true },
         { kind: "system", key: "devices", hidden: true },
+        {
+          kind: "custom",
+          key: "hidden-rounds",
+          title: "Hidden rounds",
+          hidden: true,
+          columns: [
+            {
+              span: 1,
+              widgets: [{ type: "diagnosis", title: "Hidden diagnoses" }],
+            },
+          ],
+        },
       ],
     };
-    await page.goto(`${fixture.basePath}/medicines`);
+    fixture.clinicalReads.length = 0;
+    await page.goto(`${fixture.basePath}/hidden-rounds`);
     await expect(
       page.getByRole("alert").filter({
         hasText: "This workspace has no visible pages.",
@@ -2848,6 +2869,10 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("heading", { name: "Medications", exact: true }),
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("region", { name: "Hidden diagnoses", exact: true }),
+    ).toHaveCount(0);
+    expect(fixture.clinicalReads).toEqual([]);
     await expect(
       page.getByRole("button", { name: "Workspace", exact: true }),
     ).toBeVisible();

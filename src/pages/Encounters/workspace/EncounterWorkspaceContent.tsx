@@ -67,6 +67,7 @@ export function EncounterWorkspaceContent({
       } else if (page.kind === "custom") {
         tabs[page.key] = {
           label: page.title,
+          visible: !page.hidden,
           icon:
             page.icon && Object.hasOwn(customPageIcons, page.icon)
               ? customPageIcons[page.icon]

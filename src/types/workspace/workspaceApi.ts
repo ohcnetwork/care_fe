@@ -5,6 +5,8 @@ import {
   WorkspaceCreate,
   WorkspaceDefaultAttributesUpdate,
   WorkspaceFacilityOrganizationsUpdate,
+  WorkspaceOrganizationRead,
+  WorkspaceOrganizationsUpdate,
   WorkspaceRead,
   WorkspaceUpdate,
   WorkspaceUserDefaultAttributes,
@@ -49,6 +51,18 @@ export default {
     path: "/api/v1/workspace/{id}/set_facility_organizations/",
     method: HttpMethod.POST,
     TBody: Type<WorkspaceFacilityOrganizationsUpdate>(),
+    TRes: Type<Record<string, never>>(),
+  },
+  /** Instance workspaces only; requires permission to write the workspace. */
+  getOrganizations: {
+    path: "/api/v1/workspace/{id}/get_organizations/",
+    method: HttpMethod.GET,
+    TRes: Type<PaginatedResponse<WorkspaceOrganizationRead>>(),
+  },
+  setOrganizations: {
+    path: "/api/v1/workspace/{id}/set_organizations/",
+    method: HttpMethod.POST,
+    TBody: Type<WorkspaceOrganizationsUpdate>(),
     TRes: Type<Record<string, never>>(),
   },
   setDefaultAttributes: {
