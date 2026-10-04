@@ -57,7 +57,7 @@ export default function TagConfigFormDrawer({
       repositionInputs={!isIOSDevice}
       trigger={trigger}
       title={title}
-      titleClassName="text-xl"
+      titleClassName="text-xl sm:text-lg"
       description={
         configId ? t("edit_tag_config") : t("manage_tag_config_description")
       }

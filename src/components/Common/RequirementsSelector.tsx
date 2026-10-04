@@ -337,7 +337,7 @@ export default function RequirementsSelector({
         titleClassName="text-lg font-semibold"
         description={description}
         descriptionClassName="mt-1.5 text-sm"
-        headerClassName="flex flex-col gap-0 border-b px-3 py-2 mb-1.5 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-left"
+        headerClassName="flex flex-col gap-0 border-b px-3 py-2 mb-1.5 text-left"
         desktopClassName="p-0 w-[var(--radix-popover-trigger-width)]"
       >
         <RequirementsContent

@@ -16,7 +16,6 @@ import {
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
-  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -171,7 +170,9 @@ export function ResponsiveDialog({
   ) : (
     children
   );
-  const headerClasses = cn(hideHeader && "sr-only", headerClassName);
+  // `sr-only` rather than `hidden`: the title has to stay in the accessibility
+  // tree, since every container is named by it.
+  const headerClasses = hideHeader ? "sr-only" : headerClassName;
 
   if (container === "drawer") {
     return (
@@ -182,14 +183,23 @@ export function ResponsiveDialog({
       >
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent className={contentClassName}>
-          <DrawerHeader className={headerClasses}>
+          {/* A plain div rather than DrawerHeader: this drawer always opens
+              from the bottom, so the centring can be an ordinary class that
+              `headerClassName` overrides. */}
+          <div
+            data-slot="drawer-header"
+            className={cn(
+              "flex flex-col gap-0.5 p-4 text-center md:gap-1.5 md:text-left",
+              headerClasses,
+            )}
+          >
             <DrawerTitle className={titleClassName}>{title}</DrawerTitle>
             {description && (
               <DrawerDescription className={descriptionClassName}>
                 {description}
               </DrawerDescription>
             )}
-          </DrawerHeader>
+          </div>
           {body}
           {footer && <DrawerFooter>{footer}</DrawerFooter>}
         </DrawerContent>
@@ -231,15 +241,25 @@ export function ResponsiveDialog({
           aria-labelledby={popoverTitleId}
           className={contentClassName}
         >
+          {/* Popover has no title or description parts; these carry the
+              same base classes as DrawerTitle and DrawerDescription. */}
           <div className={cn("flex flex-col gap-0.5", headerClasses)}>
             <p
               id={popoverTitleId}
-              className={cn("font-semibold text-gray-950", titleClassName)}
+              className={cn(
+                "font-semibold text-gray-950 dark:text-gray-50",
+                titleClassName,
+              )}
             >
               {title}
             </p>
             {description && (
-              <p className={cn("text-sm text-gray-500", descriptionClassName)}>
+              <p
+                className={cn(
+                  "text-sm text-gray-500 dark:text-gray-400",
+                  descriptionClassName,
+                )}
+              >
                 {description}
               </p>
             )}

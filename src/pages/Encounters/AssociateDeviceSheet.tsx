@@ -75,7 +75,7 @@ export default function AssociateDeviceSheet({
       breakpoint="sm"
       trigger={children}
       title={t("associate_device")}
-      titleClassName="text-xl"
+      titleClassName="text-xl sm:text-lg"
       description={t("associate_device_description")}
       footer={footerButton}
       mobileBodyClassName="px-4 py-6"
