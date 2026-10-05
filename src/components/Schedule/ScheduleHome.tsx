@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/tooltip";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
@@ -46,6 +48,7 @@ import {
   endOfMonth,
   format,
   isBefore,
+  isSameDay,
   startOfDay,
   startOfMonth,
 } from "date-fns";
@@ -71,7 +74,8 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<ScheduleHomeQueryParams>();
   const view = qParams.tab || "schedule";
-  const [month, setMonth] = useState(new Date());
+  const clinicToday = getClinicTodayDate();
+  const [month, setMonth] = useState(clinicToday);
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { canWriteSchedule } = getPermissions(
@@ -113,164 +117,169 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 py-4 lg:grid-cols-2">
-      <Calendar
-        className="lg:order-last"
-        month={month}
-        onMonthChange={setMonth}
-        renderDay={(date: Date) => {
-          const isToday = date.toDateString() === new Date().toDateString();
+    <div className="flex flex-col gap-4 py-4">
+      <SchedulingTimeZoneCallout />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <Calendar
+          className="lg:order-last"
+          month={month}
+          onMonthChange={setMonth}
+          referenceToday={clinicToday}
+          renderDay={(date: Date) => {
+            const isToday = isSameDay(date, clinicToday);
 
-          // TODO: handle for "Closed" schedule type once we have it...
-          const templates = templatesQuery.data?.results.filter(
-            (template) =>
-              isDateInRange(date, template.valid_from, template.valid_to) &&
-              filterAvailabilitiesByDayOfWeek(template.availabilities, date)
-                .length > 0,
-          );
+            // TODO: handle for "Closed" schedule type once we have it...
+            const templates = templatesQuery.data?.results.filter(
+              (template) =>
+                isDateInRange(date, template.valid_from, template.valid_to) &&
+                filterAvailabilitiesByDayOfWeek(template.availabilities, date)
+                  .length > 0,
+            );
 
-          const unavailableExceptions =
-            exceptionsQuery.data?.results
-              .filter((exception) =>
-                isDateInRange(date, exception.valid_from, exception.valid_to),
-              )
-              .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
+            const unavailableExceptions =
+              exceptionsQuery.data?.results
+                .filter((exception) =>
+                  isDateInRange(date, exception.valid_from, exception.valid_to),
+                )
+                .sort((a, b) => a.start_time.localeCompare(b.start_time)) ?? [];
 
-          const isFullDayUnavailable = unavailableExceptions.some(
-            (exception) =>
-              exception.start_time.startsWith("00:00") &&
-              exception.end_time.startsWith("23:59"),
-          );
+            const isFullDayUnavailable = unavailableExceptions.some(
+              (exception) =>
+                exception.start_time.startsWith("00:00") &&
+                exception.end_time.startsWith("23:59"),
+            );
 
-          return (
-            <Popover>
-              <PopoverTrigger asChild>
-                <div
-                  className={cn(
-                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
-                    templatesQuery.isLoading &&
-                      "opacity-50 pointer-events-none",
-                    "transition-all duration-200 ease-in-out",
-                    "relative overflow-hidden",
-                  )}
-                >
-                  {unavailableExceptions.length > 0 && (
-                    <div
-                      className={cn(
-                        "absolute top-0 left-0 right-0 z-10",
-                        isFullDayUnavailable ? "h-full" : "h-1/4",
-                      )}
-                      style={diagonalStripes}
-                    />
-                  )}
-                  <div />
-                  <div className="flex flex-col items-center gap-2 relative z-20">
-                    <span
-                      className={cn(
-                        "text-base",
-                        isToday ? "text-gray-900" : "text-gray-500",
-                      )}
-                    >
-                      {date.getDate()}
-                    </span>
-                    <div className="flex justify-center gap-0.5">
-                      {templates?.slice(0, 5).map((template) => (
-                        <ColoredIndicator
-                          key={template.id}
-                          id={template.id}
-                          className="size-1.5 rounded-full"
-                        />
-                      ))}
+            return (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div
+                    className={cn(
+                      "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
+                      templatesQuery.isLoading &&
+                        "opacity-50 pointer-events-none",
+                      "transition-all duration-200 ease-in-out",
+                      "relative overflow-hidden",
+                    )}
+                  >
+                    {unavailableExceptions.length > 0 && (
+                      <div
+                        className={cn(
+                          "absolute top-0 left-0 right-0 z-10",
+                          isFullDayUnavailable ? "h-full" : "h-1/4",
+                        )}
+                        style={diagonalStripes}
+                      />
+                    )}
+                    <div />
+                    <div className="flex flex-col items-center gap-2 relative z-20">
+                      <span
+                        className={cn(
+                          "text-base",
+                          isToday ? "text-gray-900" : "text-gray-500",
+                        )}
+                      >
+                        {date.getDate()}
+                      </span>
+                      <div className="flex justify-center gap-0.5">
+                        {templates?.slice(0, 5).map((template) => (
+                          <ColoredIndicator
+                            key={template.id}
+                            id={template.id}
+                            className="size-1.5 rounded-full"
+                          />
+                        ))}
+                      </div>
                     </div>
+                    <div />
                   </div>
-                  <div />
-                </div>
-              </PopoverTrigger>
-              <DayDetailsPopover
-                date={date}
-                templates={templates}
-                unavailableExceptions={unavailableExceptions}
-                setQParams={setQParams}
-                resourceId={resourceId}
+                </PopoverTrigger>
+                <DayDetailsPopover
+                  date={date}
+                  clinicToday={clinicToday}
+                  templates={templates}
+                  unavailableExceptions={unavailableExceptions}
+                  setQParams={setQParams}
+                  resourceId={resourceId}
+                  facilityId={facilityId}
+                  resourceType={resourceType}
+                  canWriteSchedule={canWriteSchedule}
+                />
+              </Popover>
+            );
+          }}
+        />
+
+        <div className="space-y-4">
+          <div className="flex items-end justify-between gap-3 md:gap-0">
+            <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
+              <Button
+                variant={view === "schedule" ? "outline" : "ghost"}
+                onClick={() => setQParams({ tab: "schedule" })}
+                className={cn(
+                  view === "schedule" && "shadow-sm",
+                  "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+                )}
+              >
+                {t("schedule")}
+              </Button>
+              <Button
+                variant={view === "exceptions" ? "outline" : "ghost"}
+                onClick={() => setQParams({ tab: "exceptions" })}
+                className={cn(
+                  view === "exceptions" && "shadow-sm",
+                  "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
+                )}
+              >
+                {t("exceptions")}
+              </Button>
+            </div>
+            {view === "schedule" && canWriteSchedule && (
+              <CreateScheduleTemplateSheet
                 facilityId={facilityId}
                 resourceType={resourceType}
-                canWriteSchedule={canWriteSchedule}
+                resourceId={resourceId}
               />
-            </Popover>
-          );
-        }}
-      />
-
-      <div className="space-y-4">
-        <div className="flex items-end justify-between gap-3 md:gap-0">
-          <div className="flex bg-gray-100 rounded-lg p-0 md:p-1 gap-1 max-w-min">
-            <Button
-              variant={view === "schedule" ? "outline" : "ghost"}
-              onClick={() => setQParams({ tab: "schedule" })}
-              className={cn(
-                view === "schedule" && "shadow-sm",
-                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
-              )}
-            >
-              {t("schedule")}
-            </Button>
-            <Button
-              variant={view === "exceptions" ? "outline" : "ghost"}
-              onClick={() => setQParams({ tab: "exceptions" })}
-              className={cn(
-                view === "exceptions" && "shadow-sm",
-                "hover:bg-white text-xs sm:text-sm px-2 md:px-4",
-              )}
-            >
-              {t("exceptions")}
-            </Button>
+            )}
+            {view === "exceptions" && canWriteSchedule && (
+              <CreateScheduleExceptionSheet
+                facilityId={facilityId}
+                resourceType={resourceType}
+                resourceId={resourceId}
+              />
+            )}
           </div>
-          {view === "schedule" && canWriteSchedule && (
-            <CreateScheduleTemplateSheet
-              facilityId={facilityId}
-              resourceType={resourceType}
-              resourceId={resourceId}
-            />
-          )}
-          {view === "exceptions" && canWriteSchedule && (
-            <CreateScheduleExceptionSheet
-              facilityId={facilityId}
-              resourceType={resourceType}
-              resourceId={resourceId}
-            />
-          )}
-        </div>
 
-        <div>
-          <ScrollArea className="max-h-[calc(100vh-18rem)] overflow-auto -mr-3 pr-3 pb-4">
-            {view === "schedule" && (
-              <ScheduleTemplates
-                facilityId={facilityId}
-                resourceType={resourceType}
-                resourceId={resourceId}
-                items={
-                  templatesQuery.isLoading
-                    ? undefined
-                    : templatesQuery.data.results
-                }
-              />
-            )}
+          <div>
+            <ScrollArea className="max-h-[calc(100vh-18rem)] overflow-auto -mr-3 pr-3 pb-4">
+              {view === "schedule" && (
+                <ScheduleTemplates
+                  facilityId={facilityId}
+                  resourceType={resourceType}
+                  resourceId={resourceId}
+                  items={
+                    templatesQuery.isLoading
+                      ? undefined
+                      : templatesQuery.data.results
+                  }
+                />
+              )}
 
-            {view === "exceptions" && (
-              <ScheduleExceptions
-                items={
-                  exceptionsQuery.isLoading
-                    ? undefined
-                    : exceptionsQuery.data?.results
-                }
-                facilityId={facilityId}
-                resourceType={resourceType}
-                resourceId={resourceId}
-              />
-            )}
+              {view === "exceptions" && (
+                <ScheduleExceptions
+                  items={
+                    exceptionsQuery.isLoading
+                      ? undefined
+                      : exceptionsQuery.data?.results
+                  }
+                  facilityId={facilityId}
+                  resourceType={resourceType}
+                  resourceId={resourceId}
+                />
+              )}
 
-            <div className="h-10" />
-          </ScrollArea>
+              <div className="h-10" />
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>
@@ -279,6 +288,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
 
 function DayDetailsPopover({
   date,
+  clinicToday,
   templates,
   unavailableExceptions,
   setQParams,
@@ -288,6 +298,7 @@ function DayDetailsPopover({
   canWriteSchedule,
 }: {
   date: Date;
+  clinicToday: Date;
   templates: ScheduleTemplate[];
   unavailableExceptions: ScheduleException[];
   setQParams: (params: ScheduleHomeQueryParams) => void;
@@ -315,7 +326,7 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        {!isBefore(startOfDay(date), startOfDay(new Date())) &&
+        {!isBefore(startOfDay(date), startOfDay(clinicToday)) &&
           canWriteSchedule && (
             <Button
               variant="outline"

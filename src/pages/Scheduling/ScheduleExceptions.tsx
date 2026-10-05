@@ -17,6 +17,7 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatTimeShort } from "@/Utils/utils";
+import { getSchedulingTimeZoneSuffix } from "@/pages/Appointments/schedulingTimeZone";
 import {
   SchedulableResourceType,
   ScheduleException,
@@ -116,6 +117,7 @@ const ScheduleExceptionItem = (
               <span className="font-medium">
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
+                {getSchedulingTimeZoneSuffix()}
               </span>
               {isSameDay(fromDate, toDate) ? (
                 <>

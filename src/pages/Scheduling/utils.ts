@@ -7,6 +7,7 @@ import {
   parse,
 } from "date-fns";
 
+import { getSchedulingTimeZoneSuffix } from "@/pages/Appointments/schedulingTimeZone";
 import {
   AvailabilityDateTime,
   AvailabilitySlotType,
@@ -170,5 +171,5 @@ export const formatAvailabilityTime = (
 ) => {
   const startTime = availability[0].start_time;
   const endTime = availability[0].end_time;
-  return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}`;
+  return `${formatTimeShort(startTime)} - ${formatTimeShort(endTime)}${getSchedulingTimeZoneSuffix()}`;
 };

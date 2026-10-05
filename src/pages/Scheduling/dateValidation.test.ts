@@ -4,9 +4,41 @@ import { test } from "node:test";
 import { format, isBefore, parseISO, startOfDay } from "date-fns";
 
 import {
-  isScheduleStartTimeInFuture,
+  isScheduleStartTimeInFutureInZone,
   isScheduleTimeBefore,
 } from "./dateValidation";
+
+test("clinic start time uses the zone clock during a viewer DST gap", () => {
+  const originalTimezone = process.env.TZ;
+  process.env.TZ = "America/New_York";
+  try {
+    const now = new Date("2026-03-07T21:00:00Z");
+    const selected = parseISO("2026-03-08");
+    assert.equal(
+      isScheduleStartTimeInFutureInZone(selected, "03:00", "Asia/Kolkata", now),
+      true,
+    );
+    assert.equal(
+      isScheduleStartTimeInFutureInZone(selected, "02:30", "Asia/Kolkata", now),
+      false,
+    );
+    assert.equal(
+      isScheduleStartTimeInFutureInZone(
+        selected,
+        "invalid",
+        "Asia/Kolkata",
+        now,
+      ),
+      false,
+    );
+  } finally {
+    if (originalTimezone === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = originalTimezone;
+    }
+  }
+});
 
 for (const timezone of ["UTC", "America/New_York", "Asia/Kolkata"]) {
   test(`schedule validation uses local days and wall-clock times in ${timezone}`, (context) => {
@@ -36,21 +68,37 @@ for (const timezone of ["UTC", "America/New_York", "Asia/Kolkata"]) {
         );
 
         assert.equal(
-          isScheduleStartTimeInFuture(selectedDate, "09:30", now),
+          isScheduleStartTimeInFutureInZone(
+            selectedDate,
+            "09:30",
+            timezone,
+            now,
+          ),
           false,
         );
         assert.equal(
-          isScheduleStartTimeInFuture(selectedDate, "09:31", now),
+          isScheduleStartTimeInFutureInZone(
+            selectedDate,
+            "09:31",
+            timezone,
+            now,
+          ),
           true,
         );
         assert.equal(
-          isScheduleStartTimeInFuture(selectedDate, "invalid", now),
+          isScheduleStartTimeInFutureInZone(
+            selectedDate,
+            "invalid",
+            timezone,
+            now,
+          ),
           false,
         );
         assert.equal(
-          isScheduleStartTimeInFuture(
+          isScheduleStartTimeInFutureInZone(
             selectedDate,
             "09:30",
+            timezone,
             parseISO(`${date}T09:30:00`),
           ),
           false,
@@ -63,14 +111,24 @@ for (const timezone of ["UTC", "America/New_York", "Asia/Kolkata"]) {
       });
       assert.equal(isScheduleTimeBefore("02:30", "03:00"), true);
       assert.equal(
-        isScheduleStartTimeInFuture(parseISO("2026-03-08"), "01:01"),
+        isScheduleStartTimeInFutureInZone(
+          parseISO("2026-03-08"),
+          "01:01",
+          timezone,
+          new Date(),
+        ),
         true,
       );
       context.mock.timers.reset();
 
       const now = parseISO("2026-03-08T23:59:59");
       assert.equal(
-        isScheduleStartTimeInFuture(parseISO("2026-03-09"), "00:00", now),
+        isScheduleStartTimeInFutureInZone(
+          parseISO("2026-03-09"),
+          "00:00",
+          timezone,
+          now,
+        ),
         true,
       );
       assert.equal(

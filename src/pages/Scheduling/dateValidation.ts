@@ -1,4 +1,9 @@
-import { isBefore, isSameDay, parse } from "date-fns";
+import { format, isBefore, isValid, parse } from "date-fns";
+
+import {
+  facilityLocalDateQueryString,
+  formatDateTimeInZone,
+} from "@/Utils/date";
 
 export function isScheduleTimeBefore(
   startTime: string | undefined,
@@ -12,10 +17,18 @@ export function isScheduleTimeBefore(
   );
 }
 
-export function isScheduleStartTimeInFuture(
+/** Compare a picked calendar day and HH:mm with `now` in `timeZone`. */
+export function isScheduleStartTimeInFutureInZone(
   date: Date,
   startTime: string,
-  now = new Date(),
+  timeZone: string,
+  now: Date,
 ) {
-  return !isSameDay(date, now) || isBefore(now, parse(startTime, "HH:mm", now));
+  const parsedStart = parse(startTime, "HH:mm", new Date(2000, 0, 1));
+  if (!isValid(parsedStart)) return false;
+  const selectedDay = format(date, "yyyy-MM-dd");
+  const clinicDay = facilityLocalDateQueryString(now, timeZone);
+  if (selectedDay !== clinicDay) return true;
+  const clinicTime = formatDateTimeInZone(now, timeZone, "HH:mm");
+  return format(parsedStart, "HH:mm") > clinicTime;
 }

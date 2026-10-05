@@ -2,7 +2,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon, GlobeIcon, InfoIcon } from "lucide-react";
+import { FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -11,7 +11,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
@@ -104,6 +103,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
@@ -112,8 +112,6 @@ import {
   formatSchedulingDateTime,
   getAppointmentsSchedulingTimeZone,
   getClinicShortDateRangeOptions,
-  getSchedulingTimeZoneAbbreviation,
-  shouldShowSchedulingTimeZoneHint,
 } from "./schedulingTimeZone";
 
 type AppointmentStatusGroup = {
@@ -375,23 +373,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       }
     >
       <div className="mt-4 flex flex-col gap-4 border-t border-gray-200 py-4">
-        {shouldShowSchedulingTimeZoneHint(schedulingTimeZone) && (
-          <Callout
-            variant="warning"
-            badge={
-              <>
-                <GlobeIcon className="size-4 shrink-0" aria-hidden />
-                <span className="sr-only">{t("info")}</span>
-              </>
-            }
-          >
-            {t("appointment_times_in_timezone", {
-              abbreviation:
-                getSchedulingTimeZoneAbbreviation(schedulingTimeZone),
-              timezone: schedulingTimeZone.replace(/_/g, " "),
-            })}
-          </Callout>
-        )}
+        <SchedulingTimeZoneCallout />
         <div className="flex flex-col lg:flex-row gap-4 justify-between">
           <div className="flex w-full min-w-0 flex-wrap items-start gap-4 lg:w-auto">
             {practitionerFilterEnabled && (
