@@ -61,6 +61,13 @@ export function getDiagnosticReportCreationState({
     (isMultipleDiagnosticReport
       ? availableReportCodes.length > 0 && activeDiagnosticReports.length === 0
       : diagnosticReports.length === 0);
+  const canHaveDiagnosticReports =
+    diagnosticReports.length > 0 ||
+    (activityDefinition?.observation_result_requirements?.length ?? 0) > 0 ||
+    (activityDefinition?.diagnostic_report_codes?.length ?? 0) > 0;
+  const showResultsSection =
+    canHaveDiagnosticReports &&
+    (activeDiagnosticReports.length > 0 || showCreateReportForm);
 
   return {
     hasCollectedSpecimens,
@@ -68,5 +75,6 @@ export function getDiagnosticReportCreationState({
     availableReportCodes,
     activeDiagnosticReports,
     showCreateReportForm,
+    showResultsSection,
   };
 }

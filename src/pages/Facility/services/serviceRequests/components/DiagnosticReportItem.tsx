@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
+import { Check, NotepadText } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +18,7 @@ import { DottedDivider } from "@/components/careui/dotted-divider";
 import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import { DiagnosticReportAttachments } from "./DiagnosticReportAttachments";
 import { DiagnosticReportItemProps } from "./diagnosticReportFormTypes";
-import { DiagnosticReportItemHeader } from "./DiagnosticReportItemHeader";
+import { DiagnosticReportHeader } from "./DiagnosticReportHeader";
 import { DiagnosticReportObservations } from "./DiagnosticReportObservations";
 import { useDiagnosticReportAttachments } from "./useDiagnosticReportAttachments";
 import { useDiagnosticReportDraft } from "./useDiagnosticReportDraft";
@@ -67,12 +67,17 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <DiagnosticReportItemHeader
+        <DiagnosticReportHeader
           report={report}
-          fullReport={fullReport}
-          patientId={patientId}
+          title={
+            isMultipleDiagnosticReport
+              ? report.code?.display
+              : report.service_request?.title
+          }
+          updatedBy={fullReport?.updated_by}
+          icon={NotepadText}
           isExpanded={isExpanded}
-          isMultipleDiagnosticReport={isMultipleDiagnosticReport}
+          patientId={patientId}
           hasObservationHistory={
             draft.reportDefinitions.length > 0 ||
             !!fullReport?.observations?.length
@@ -110,9 +115,9 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                 {showEditor && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
                     <CardContent className="p-2 space-y-2">
-                      <h3 className="text-sm font-medium text-gray-950">
+                      <h6 className="font-medium text-gray-950">
                         {t("conclusion")}
-                      </h3>
+                      </h6>
                       <RichTextEditor
                         label={t("conclusion")}
                         placeholder={t("enter_conclusion_of_diagnostic_report")}
@@ -138,15 +143,7 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                   <DiagnosticReportTimestamps report={fullReport ?? report} />
                 </div>
                 {isPreliminary && (
-                  <div className="flex justify-end items-center gap-2">
-                    <Button
-                      variant="link"
-                      className="h-auto text-gray-950 underline"
-                      onClick={draft.resetDraft}
-                      disabled={isReadOnly}
-                    >
-                      {t("discard")}
-                    </Button>
+                  <div className="flex justify-end items-center">
                     <Button
                       variant="primary"
                       onClick={handleSubmit}

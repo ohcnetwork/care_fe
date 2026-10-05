@@ -1,8 +1,8 @@
 import {
   ChevronsDownUp,
   ChevronsUpDown,
+  type LucideIcon,
   MoreVertical,
-  NotepadText,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -16,33 +16,36 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
   DiagnosticReportRead,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { formatName } from "@/Utils/utils";
 
-import { cn } from "@/lib/utils";
 import { ObservationHistorySheet } from "./ObservationHistorySheet";
 
-interface DiagnosticReportItemHeaderProps {
+interface DiagnosticReportHeaderProps {
   report: DiagnosticReportRead;
-  fullReport?: DiagnosticReportRead;
-  patientId: string;
+  title?: string;
+  updatedBy?: DiagnosticReportRead["updated_by"];
+  icon: LucideIcon;
   isExpanded: boolean;
-  isMultipleDiagnosticReport: boolean;
-  hasObservationHistory: boolean;
+  patientId?: string;
+  hasObservationHistory?: boolean;
 }
 
-export function DiagnosticReportItemHeader({
+export function DiagnosticReportHeader({
   report,
-  fullReport,
-  patientId,
+  title,
+  updatedBy,
+  icon: ReportIcon,
   isExpanded,
-  isMultipleDiagnosticReport,
-  hasObservationHistory,
-}: DiagnosticReportItemHeaderProps) {
+  patientId,
+  hasObservationHistory = false,
+}: DiagnosticReportHeaderProps) {
   const { t } = useTranslation();
+
   return (
     <CollapsibleTrigger asChild>
       <CardHeader className="cursor-pointer p-2">
@@ -56,18 +59,16 @@ export function DiagnosticReportItemHeader({
                     isExpanded && "bg-gray-200",
                   )}
                 >
-                  <NotepadText className="size-6 text-gray-600 stroke-[1.5px]" />
+                  <ReportIcon className="size-6 text-gray-600 stroke-[1.5px]" />
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-base text-gray-950 font-semibold wrap-break-word">
-                    {isMultipleDiagnosticReport
-                      ? report.code?.display
-                      : report.service_request?.title}
+                    {title}
                   </span>
 
-                  {fullReport && (
+                  {updatedBy && (
                     <span className="text-sm text-gray-700 font-normal truncate">
-                      {formatName(fullReport.created_by)}
+                      {formatName(updatedBy)}
                     </span>
                   )}
 
@@ -90,18 +91,18 @@ export function DiagnosticReportItemHeader({
               {t(report.status)}
             </Badge>
             {isExpanded ? (
-              <ChevronsDownUp className="size-4 ml-2" />
+              <ChevronsDownUp className="size-4 mx-2" />
             ) : (
-              <ChevronsUpDown className="size-4 ml-2" />
+              <ChevronsUpDown className="size-4 mx-2" />
             )}
-            {hasObservationHistory && (
+            {hasObservationHistory && patientId && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
                     aria-label={t("view_observation_history")}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
                   >
                     <MoreVertical className="size-4" />
                   </Button>
@@ -112,10 +113,8 @@ export function DiagnosticReportItemHeader({
                     diagnosticReportId={report.id}
                   >
                     <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
+                      onSelect={(event) => event.preventDefault()}
+                      onClick={(event) => event.stopPropagation()}
                     >
                       {t("view_observation_history")}
                     </DropdownMenuItem>
