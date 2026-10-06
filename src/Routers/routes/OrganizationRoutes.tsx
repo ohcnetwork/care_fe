@@ -1,10 +1,25 @@
-import { AppRoutes } from "@/Routers/AppRouter";
-import OrganizationFacilities from "@/pages/Organization/OrganizationFacilities";
-import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
-import OrganizationPatients from "@/pages/Organization/OrganizationPatients";
-import OrganizationUsers from "@/pages/Organization/OrganizationUsers";
-import OrganizationView from "@/pages/Organization/OrganizationView";
-import ResponsibilityLanding from "@/pages/Organization/ResponsibilityLanding";
+import { lazy } from "react";
+
+import type { AppRoutes } from "@/Routers/AppRouter";
+
+const OrganizationFacilities = lazy(
+  () => import("@/pages/Organization/OrganizationFacilities"),
+);
+const OrganizationIndex = lazy(
+  () => import("@/pages/Organization/OrganizationIndex"),
+);
+const OrganizationPatients = lazy(
+  () => import("@/pages/Organization/OrganizationPatients"),
+);
+const OrganizationUsers = lazy(
+  () => import("@/pages/Organization/OrganizationUsers"),
+);
+const OrganizationView = lazy(
+  () => import("@/pages/Organization/OrganizationView"),
+);
+const ResponsibilityLanding = lazy(
+  () => import("@/pages/Organization/ResponsibilityLanding"),
+);
 
 const OrganizationRoutes: AppRoutes = {
   "/organization": () => <OrganizationIndex />,

@@ -1,16 +1,46 @@
-import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
-import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
-import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
-import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
-import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire";
+import { lazy } from "react";
 
-import { AppRoutes } from "@/Routers/AppRouter";
-import { EncounterShow } from "@/pages/Encounters/EncounterShow";
-import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
-import ReportViewer from "@/pages/Encounters/ReportViewer";
-import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
-
+import type { AppRoutes } from "@/Routers/AppRouter";
 import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
+
+const PrintAllQuestionnaireResponses = lazy(() =>
+  import("@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses").then(
+    (module) => ({ default: module.PrintAllQuestionnaireResponses }),
+  ),
+);
+const PrintQuestionnaireResponse = lazy(() =>
+  import("@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse").then(
+    (module) => ({ default: module.PrintQuestionnaireResponse }),
+  ),
+);
+const QuestionnaireResponseView = lazy(
+  () =>
+    import("@/components/Facility/ConsultationDetails/QuestionnaireResponseView"),
+);
+const PrintMedicationAdministration = lazy(() =>
+  import("@/components/Medicine/MedicationAdministration/PrintMedicationAdministration").then(
+    (module) => ({ default: module.PrintMedicationAdministration }),
+  ),
+);
+const EncounterQuestionnaire = lazy(
+  () => import("@/components/Patient/EncounterQuestionnaire"),
+);
+const EncounterShow = lazy(() =>
+  import("@/pages/Encounters/EncounterShow").then((module) => ({
+    default: module.EncounterShow,
+  })),
+);
+const PrintPrescription = lazy(() =>
+  import("@/pages/Encounters/PrintPrescription").then((module) => ({
+    default: module.PrintPrescription,
+  })),
+);
+const ReportViewer = lazy(() => import("@/pages/Encounters/ReportViewer"));
+const EncounterProvider = lazy(() =>
+  import("@/pages/Encounters/utils/EncounterProvider").then((module) => ({
+    default: module.EncounterProvider,
+  })),
+);
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":

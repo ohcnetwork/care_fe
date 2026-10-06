@@ -1,6 +1,8 @@
-import UserHome from "@/components/Users/UserHome";
+import { lazy } from "react";
 
-import { AppRoutes } from "@/Routers/AppRouter";
+import type { AppRoutes } from "@/Routers/AppRouter";
+
+const UserHome = lazy(() => import("@/components/Users/UserHome"));
 
 const UserRoutes: AppRoutes = {
   "/facility/:facilityId/users/:username": ({ facilityId, username }) => (
