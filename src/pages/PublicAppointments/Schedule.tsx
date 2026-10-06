@@ -25,6 +25,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName, goBack } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
 import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -276,6 +277,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           </div>
           <div className="flex-1 mx-2">
             <div className="flex flex-col gap-6">
+              <SchedulingTimeZoneCallout />
               <span className="text-base font-semibold">
                 {appointmentId
                   ? t("reschedule_appointment_with")
