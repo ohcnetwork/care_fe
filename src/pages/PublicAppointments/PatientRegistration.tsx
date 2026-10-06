@@ -28,7 +28,6 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 import { GENDERS, GENDER_TYPES } from "@/common/constants";
 import { validateName } from "@/common/validation";
 
-import { usePubSub } from "@/Utils/pubsubContext";
 import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
@@ -51,8 +50,6 @@ export default function PublicPatientRegistration(
   const [{ slotId, reason }] = useQueryParams();
 
   const queryClient = useQueryClient();
-
-  const { publish } = usePubSub();
 
   const patientUserContext = usePatientContext();
   const tokenData = patientUserContext?.tokenData;
@@ -146,7 +143,6 @@ export default function PublicPatientRegistration(
       queryClient.invalidateQueries({
         queryKey: ["patients"],
       });
-      publish("patient:upsert", data);
       createAppointment({
         patient: data.id,
         note: reason ?? "",
