@@ -28,8 +28,6 @@ import {
   FileReadMinimal,
   getVideoMimeType,
 } from "@/types/files/file";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { Printer } from "lucide-react";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 export interface StateInterface {
@@ -247,41 +245,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   )}
               </div>
               <div className="flex gap-2">
-                {file_state.extension === "pdf" && (
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(fileUrl);
-                        const blob = await response.blob();
-                        const blobUrl = window.URL.createObjectURL(blob);
-                        const iframe = document.createElement("iframe");
-                        iframe.style.display = "none";
-                        iframe.src = blobUrl;
-
-                        iframe.onload = () => {
-                          try {
-                            iframe.contentWindow?.print();
-                          } catch {
-                            window.open(blobUrl, "_blank");
-                          }
-                          setTimeout(() => {
-                            document.body.removeChild(iframe);
-                            window.URL.revokeObjectURL(blobUrl);
-                          }, 10000);
-                        };
-
-                        document.body.appendChild(iframe);
-                      } catch {
-                        toast.error(t("print_failed"));
-                      }
-                    }}
-                  >
-                    <Printer className="size-4" />
-                    <span className="hidden sm:block">{t("print")}</span>
-                    <ShortcutBadge actionId="print-button" />
-                  </Button>
-                )}
                 {file_state.extension === "pdf" && fileUrl && (
                   <Button
                     variant="outline"
