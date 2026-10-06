@@ -1,6 +1,8 @@
 import { QRCodeSVG } from "qrcode.react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PrintPreviewDialog } from "@/CAREUI/misc/PrintPreviewDialog";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -39,29 +41,7 @@ const TokenCard = ({
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
-
-  const printToken = (tokenId: string) => {
-    const printSection = document.getElementById(`print-token-${tokenId}`);
-
-    if (printSection) {
-      const style = document.createElement("style");
-      style.textContent = `
-        @media print {
-          body * { visibility: hidden; }
-          #print-token-${tokenId}, #print-token-${tokenId} * { visibility: visible; }
-          #print-token-${tokenId} {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100% !important;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-      window.print();
-      document.head.removeChild(style);
-    }
-  };
+  const [printOpen, setPrintOpen] = useState(false);
 
   return (
     <Card
@@ -183,7 +163,7 @@ const TokenCard = ({
               </Button>
               <Button
                 variant="outline"
-                onClick={() => printToken(token.id)}
+                onClick={() => setPrintOpen(true)}
                 className="text-base font-semibold text-gray-950"
               >
                 <PrinterIcon className="mr-2 size-4" />
@@ -194,6 +174,22 @@ const TokenCard = ({
           </div>
         )}
       </div>
+      {printOpen && (
+        <PrintPreviewDialog
+          open={printOpen}
+          onOpenChange={setPrintOpen}
+          title={t("token_no")}
+          facility={facility}
+          templateSlug="token"
+        >
+          <TokenCard
+            token={token}
+            facility={facility}
+            tokenActions={false}
+            showlogo={false}
+          />
+        </PrintPreviewDialog>
+      )}
     </Card>
   );
 };

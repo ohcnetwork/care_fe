@@ -1,6 +1,8 @@
 import { QRCodeSVG } from "qrcode.react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PrintPreviewDialog } from "@/CAREUI/misc/PrintPreviewDialog";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
@@ -49,6 +51,7 @@ const TokenCard = ({
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
+  const [printOpen, setPrintOpen] = useState(false);
   useShortcutSubContext();
 
   // Get patient from token or appointment (one is always defined per Props type)
@@ -244,7 +247,7 @@ const TokenCard = ({
               </Button>
               <Button
                 variant="outline"
-                onClick={() => print()}
+                onClick={() => setPrintOpen(true)}
                 className="text-base text-gray-950 font-semibold"
               >
                 <PrinterIcon className="size-4 mr-2" />
@@ -255,6 +258,22 @@ const TokenCard = ({
           </div>
         )}
       </div>
+      {printOpen && appointment && (
+        <PrintPreviewDialog
+          open={printOpen}
+          onOpenChange={setPrintOpen}
+          title={t("print_token")}
+          facility={facility}
+          templateSlug="token"
+        >
+          <TokenCard
+            token={token}
+            appointment={appointment}
+            facility={facility}
+            inPrintMode
+          />
+        </PrintPreviewDialog>
+      )}
     </Card>
   );
 };

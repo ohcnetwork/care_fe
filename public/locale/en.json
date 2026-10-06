@@ -6789,4 +6789,9 @@
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
   "℞": "℞"
+,
+  "print_export_pdf": "Export to PDF",
+  "print_export_pdf_help": "In the print dialog, choose “Save as PDF” (or your device’s PDF option). The PDF uses the same facility page size, margins, headers, and footers as printing. Turn off the browser’s own headers and footers to avoid adding the page URL."
+,
+  "print_template_inheritance_help": "The default template applies to every print document. Document templates override only their configured fields; blank page and branding settings inherit the default. Auto-print and watermark controls show their effective settings. Clearing a section restores inheritance."
 }
