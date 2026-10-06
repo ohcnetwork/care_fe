@@ -1,5 +1,6 @@
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductRead } from "@/types/inventory/product/product";
+import { RequestOrderRetrieve } from "@/types/inventory/requestOrder/requestOrder";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 
 export enum SupplyDeliveryStatus {
@@ -79,4 +80,5 @@ export interface SupplyDeliveryRead extends SupplyDeliveryBase {
   modified_date?: string;
   supply_request?: SupplyRequestRead;
   extensions: Record<string, unknown>;
+  order?: RequestOrderRetrieve;
 }
