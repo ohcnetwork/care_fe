@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
@@ -17,7 +17,7 @@ import scheduleApi from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
-import { Appointment } from "@/types/scheduling/schedule";
+import { Appointment, ScheduleResource } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
 import { AppointmentFormSection } from "./AppointmentFormSection";
 
@@ -31,6 +31,7 @@ export const BookAppointmentDetails = ({
   onSuccess,
 }: BookAppointmentDetailsProps) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const { facilityId } = useCurrentFacility();
   const [cachedServiceType, setCachedServiceType] = useAtom(
@@ -43,11 +44,24 @@ export const BookAppointmentDetails = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [hasOverlapAcknowledged, setHasOverlapAcknowledged] = useState(false);
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>({
       resource: null,
       resource_type: cachedServiceType,
     });
+
+  useEffect(() => {
+    setHasOverlapAcknowledged(false);
+  }, [selectedSlotId]);
+
+  const newResourceForConflictAlert: ScheduleResource | undefined =
+    selectedResource.resource
+      ? ({
+          resource: selectedResource.resource,
+          resource_type: selectedResource.resource_type,
+        } as ScheduleResource)
+      : undefined;
 
   useEffect(() => {
     if (
@@ -79,6 +93,13 @@ export const BookAppointmentDetails = ({
       }),
       onSuccess: (data: Appointment) => {
         toast.success(t("appointment_created_successfully"));
+        queryClient.invalidateQueries({
+          queryKey: [
+            "patient-active-appointments-for-conflict-check",
+            facilityId,
+            patientId,
+          ],
+        });
         onSuccess?.();
         navigate(
           `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
@@ -137,12 +158,20 @@ export const BookAppointmentDetails = ({
               selectedSlotId={selectedSlotId}
               onSlotSelect={setSelectedSlotId}
               selectedDate={selectedDate}
+              patientId={patientId}
+              newResource={newResourceForConflictAlert}
+              onConflictAcknowledged={() => setHasOverlapAcknowledged(true)}
             />
           </div>
         </div>
       </div>
       {selectedSlotId && (
-        <div className="hidden sm:flex p-4 shadow mt-2">
+        <div className="hidden sm:flex items-center justify-between gap-4 p-4 shadow mt-2">
+          {hasOverlapAcknowledged && (
+            <p className="text-sm text-orange-800 bg-orange-50 border border-orange-200 rounded-md px-3 py-2">
+              {t("chosen_overlapping_slots_warning")}
+            </p>
+          )}
           <div className="flex gap-4 ml-auto">
             <Button
               variant="outline"
@@ -212,27 +241,37 @@ export const BookAppointmentDetails = ({
                 selectedSlotId={selectedSlotId}
                 onSlotSelect={setSelectedSlotId}
                 selectedDate={selectedDate}
+                patientId={patientId}
+                newResource={newResourceForConflictAlert}
+                onConflictAcknowledged={() => setHasOverlapAcknowledged(true)}
               />
-              <div className="sm:hidden flex flex-row gap-2 items-center justify-around">
-                <Button
-                  variant="outline"
-                  className="w-fit"
-                  onClick={() => {
-                    setCurrentStep(1);
-                    setSelectedSlotId(undefined);
-                  }}
-                >
-                  <ArrowLeft />
-                  {t("back")}
-                </Button>
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  onClick={handleSubmit}
-                  disabled={!selectedSlotId || isCreating}
-                >
-                  {t("confirm_appointment")}
-                </Button>
+              <div className="sm:hidden flex flex-col gap-2">
+                {hasOverlapAcknowledged && (
+                  <p className="text-sm text-orange-800 bg-orange-50 border border-orange-200 rounded-md px-3 py-2">
+                    {t("chosen_overlapping_slots_warning")}
+                  </p>
+                )}
+                <div className="flex flex-row gap-2 items-center justify-around">
+                  <Button
+                    variant="outline"
+                    className="w-fit"
+                    onClick={() => {
+                      setCurrentStep(1);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    <ArrowLeft />
+                    {t("back")}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="w-full"
+                    onClick={handleSubmit}
+                    disabled={!selectedSlotId || isCreating}
+                  >
+                    {t("confirm_appointment")}
+                  </Button>
+                </div>
               </div>
             </>
           )}
