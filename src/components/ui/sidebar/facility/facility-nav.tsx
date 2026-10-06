@@ -13,7 +13,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import careConfig from "@careConfig";
-import { Logs } from "lucide-react";
+import { Logs, Network } from "lucide-react";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -98,6 +98,11 @@ function generateFacilityLinks(
       name: t("resource"),
       url: `${baseUrl}/resource`,
       icon: <CareIcon icon="d-book-open" />,
+    },
+    {
+      name: t("cc_console"),
+      url: `${baseUrl}/ccn`,
+      icon: <Network />,
     },
     {
       name: t("users"),

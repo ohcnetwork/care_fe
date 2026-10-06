@@ -20,13 +20,9 @@ import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-swit
 import { LocationNav } from "@/components/ui/sidebar/facility/location/location-nav";
 import { LocationSwitcher } from "@/components/ui/sidebar/facility/location/location-switcher";
 import { ServiceNav } from "@/components/ui/sidebar/facility/service/service-nav";
-import {
-  FacilityNavUser,
-  PatientNavUser,
-} from "@/components/ui/sidebar/nav-user";
+import { FacilityNavUser } from "@/components/ui/sidebar/nav-user";
 import { OrgNav } from "@/components/ui/sidebar/org-nav";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
-import { PatientNav } from "@/components/ui/sidebar/patient-nav";
 import {
   ResponsibilityNav,
   ResponsibilitySwitcher,
@@ -47,7 +43,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export enum SidebarFor {
   FACILITY = "facility",
-  PATIENT = "patient",
   ADMIN = "admin",
 }
 
@@ -84,7 +79,6 @@ export function AppSidebar({
     !locationId &&
     sidebarFor === SidebarFor.FACILITY;
 
-  const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
 
   const { isMobile, setOpenMobile } = useSidebar();
@@ -181,7 +175,6 @@ export function AppSidebar({
         {selectedOrganization && !responsibilityId && (
           <OrgNav organizations={user?.organizations || []} />
         )}
-        {patientSidebar && <PatientNav />}
         {adminSidebar && <AdminNav />}
         {(facilitySidebar ||
           facilityLocationSidebar ||
@@ -190,15 +183,11 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        {patientSidebar ? (
-          <PatientNavUser />
-        ) : (
-          <FacilityNavUser
-            selectedFacilityId={
-              facilitySidebar ? selectedFacility?.id : undefined
-            }
-          />
-        )}
+        <FacilityNavUser
+          selectedFacilityId={
+            facilitySidebar ? selectedFacility?.id : undefined
+          }
+        />
       </SidebarFooter>
 
       <SidebarRail />
