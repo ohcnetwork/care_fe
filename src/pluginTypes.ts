@@ -2,6 +2,7 @@ import { FilesTabsProps } from "@/components/Files/FilesTab";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import type { SupplyDeliveryFormValues } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -127,6 +128,12 @@ export type DeliveryOrderActionsComponentType = React.FC<{
   locationId: string;
 }>;
 
+export type SupplyDeliveryImportComponentType = React.FC<{
+  facilityId: string;
+  deliveryOrderId: string;
+  form: UseFormReturn<SupplyDeliveryFormValues>;
+}>;
+
 // Sections rendered on the user profile (summary) page
 export type UserProfileSectionsComponentType = React.FC<{
   user: UserRead;
@@ -155,6 +162,7 @@ export type SupportedPluginComponents = {
   PatientHomeQuickActions: PatientHomeActionsComponentType;
   DeliveryOrderActions: DeliveryOrderActionsComponentType;
   UserProfileSections: UserProfileSectionsComponentType;
+  SupplyDeliveryImport: SupplyDeliveryImportComponentType;
 };
 
 // Create a type for lazy-loaded components
