@@ -1,6 +1,6 @@
 import { Code } from "@/types/base/code/code";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
-import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionEmbedded } from "@/types/emr/observationDefinition/observationDefinition";
 import { QuestionType } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
 import { UserReadMinimal } from "@/types/user/user";
@@ -78,7 +78,7 @@ export interface ObservationListRead extends ObservationBase {
 }
 
 export interface ObservationRead extends ObservationListRead {
-  observation_definition?: ObservationDefinitionRead | null;
+  observation_definition?: ObservationDefinitionEmbedded | null;
 }
 
 export type ObservationCreate = Omit<ObservationBase, "id">;

@@ -99,15 +99,16 @@ export function ChargeItemsSection({
     <>
       <Card className="bg-white shadow-sm rounded-md p-1">
         <CardHeader className="p-2 bg-gray-50">
-          <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <CardTitle>{t("charge_items")}</CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
               {(chargeItems?.results ?? []).filter(
                 (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
               ).length > 0 && (
                 <Button
                   variant="outline"
                   size="sm"
+                  className="ml-auto sm:ml-0"
                   onClick={() =>
                     setInvoiceSheetState({
                       open: true,
@@ -119,7 +120,7 @@ export function ChargeItemsSection({
                     })
                   }
                 >
-                  <PlusIcon className="size-4 mr-2" />
+                  <PlusIcon className="size-4" />
                   {t("create_invoice")}
                   <ShortcutBadge actionId="create-an-invoice" />
                 </Button>
@@ -131,9 +132,10 @@ export function ChargeItemsSection({
                   <Button
                     variant="outline"
                     size="sm"
+                    className="ml-auto sm:ml-0"
                     onClick={() => setIsMultiAddOpen(true)}
                   >
-                    <PlusIcon className="size-4 mr-2" />
+                    <PlusIcon className="size-4" />
                     {t("add_charge_items")}
                     <ShortcutBadge actionId="add-a-charge-item" />
                   </Button>
