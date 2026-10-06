@@ -1,0 +1,6 @@
+{
+  "last_run": "2026-10-01T03:15:41.513Z",
+  "improved": ["tests/licenses/licenses.spec.ts"],
+  "gaps": [],
+  "notes": "Added initial E2E coverage for /licenses page: tab switching, SBOM loading, package/license rendering. No prior tests existed for this page."
+}
