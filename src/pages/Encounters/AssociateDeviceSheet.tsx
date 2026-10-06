@@ -6,25 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import mutate from "@/Utils/request/mutate";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DeviceSearch } from "@/pages/Facility/settings/devices/components/DeviceSelector";
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
@@ -42,7 +24,6 @@ export default function AssociateDeviceSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const [selectedDevice, setSelectedDevice] = useState<DeviceList | null>(null);
   const [open, setOpen] = useState(false);
@@ -82,47 +63,25 @@ export default function AssociateDeviceSheet({
     </Button>
   );
 
-  return isMobile ? (
-    <Drawer
+  return (
+    <ResponsiveDialog
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
         setSelectedDevice(null);
       }}
+      mobile="drawer"
+      desktop="sheet"
+      breakpoint="sm"
+      trigger={children}
+      title={t("associate_device")}
+      titleClassName="text-xl sm:text-lg"
+      description={t("associate_device_description")}
+      footer={footerButton}
+      mobileBodyClassName="px-4 py-6"
+      desktopBodyClassName="py-6"
     >
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="font-semibold text-xl">
-            {t("associate_device")}
-          </DrawerTitle>
-          <DrawerDescription>
-            {t("associate_device_description")}
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="px-4 py-6">{deviceSearch}</div>
-        <DrawerFooter>{footerButton}</DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  ) : (
-    <Sheet
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-        setSelectedDevice(null);
-      }}
-    >
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{t("associate_device")}</SheetTitle>
-          <SheetDescription>
-            {t("associate_device_description")}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="py-6">{deviceSearch}</div>
-        <SheetFooter>{footerButton}</SheetFooter>
-      </SheetContent>
-    </Sheet>
+      {deviceSearch}
+    </ResponsiveDialog>
   );
 }
