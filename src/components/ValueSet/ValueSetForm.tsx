@@ -28,9 +28,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import {
+  SNOMED_VERSIONS,
   TERMINOLOGY_SYSTEMS,
   ValueSetBase,
-  ValueSetInclude,
   ValueSetRead,
   ValueSetStatus,
 } from "@/types/valueSet/valueSet";
@@ -47,17 +47,55 @@ interface ValueSetFormProps {
   isReadOnly?: boolean;
 }
 
-interface ValueSetFormInclude extends Omit<ValueSetInclude, "version"> {
-  version: string;
+function SystemVersionField({
+  system,
+  index,
+  type,
+  form,
+  disabled,
+}: {
+  system: string;
+  index: number;
+  type: "include" | "exclude";
+  form: ReturnType<typeof useForm<ValueSetBase>>;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  if (system === TERMINOLOGY_SYSTEMS.SNOMED) {
+    return (
+      <FormField
+        control={form.control}
+        name={`compose.${type}.${index}.version`}
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormLabel>{t("version")}</FormLabel>
+            <FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={disabled}
+              >
+                <SelectTrigger ref={field.ref}>
+                  <SelectValue placeholder={t("select_version")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={SNOMED_VERSIONS.INDIAN}>
+                    {t("indian_version")}
+                  </SelectItem>
+                  <SelectItem value={SNOMED_VERSIONS.INTERNATIONAL}>
+                    {t("international_version")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  }
+  return null;
 }
-
-interface ValueSetFormData extends Omit<ValueSetBase, "compose"> {
-  compose: {
-    exclude: ValueSetFormInclude[];
-    include: ValueSetFormInclude[];
-  };
-}
-
 function ConceptFields({
   nestIndex,
   type,
@@ -66,7 +104,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: UseFormReturn<ValueSetFormData>;
+  parentForm: UseFormReturn<ValueSetBase>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -95,6 +133,7 @@ function ConceptFields({
         <div key={field.id} className="flex gap-4 items-start">
           <CodingField
             system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
+            version={parentForm.watch(`compose.${type}.${nestIndex}.version`)}
             name={`compose.${type}.${nestIndex}.concept.${index}`}
             form={parentForm}
             className="flex-1"
@@ -116,7 +155,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: UseFormReturn<ValueSetFormData>;
+  parentForm: UseFormReturn<ValueSetBase>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -213,7 +252,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: UseFormReturn<ValueSetFormData>;
+  form: UseFormReturn<ValueSetBase>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -258,7 +297,15 @@ function RuleFields({
                   <FormItem className="flex-1">
                     <FormLabel>{t("system")}</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue(
+                          `compose.${type}.${index}.version`,
+                          value === TERMINOLOGY_SYSTEMS.SNOMED
+                            ? SNOMED_VERSIONS.INDIAN
+                            : undefined,
+                        );
+                      }}
                       defaultValue={field.value}
                       disabled={disabled}
                     >
@@ -280,22 +327,13 @@ function RuleFields({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name={`compose.${type}.${index}.version`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>{t("version")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder={t("version")}
-                        disabled={disabled}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+
+              <SystemVersionField
+                system={form.watch(`compose.${type}.${index}.system`)}
+                index={index}
+                type={type}
+                form={form}
+                disabled={disabled}
               />
               <Button
                 type="button"
@@ -307,6 +345,7 @@ function RuleFields({
                 <TrashIcon className="size-4" />
               </Button>
             </div>
+
             <ConceptFields
               nestIndex={index}
               type={type}
@@ -353,7 +392,7 @@ export function ValueSetForm({
       include: z.array(
         z.object({
           system: z.string(),
-          version: z.string(),
+          version: z.string().optional(),
           concept: z
             .array(
               z.object({
@@ -376,7 +415,7 @@ export function ValueSetForm({
       exclude: z.array(
         z.object({
           system: z.string(),
-          version: z.string(),
+          version: z.string().optional(),
           concept: z
             .array(
               z.object({
@@ -399,7 +438,7 @@ export function ValueSetForm({
     }),
   });
 
-  const form = useForm<ValueSetFormData>({
+  const form = useForm<ValueSetBase>({
     resolver: zodResolver(valuesetFormSchema),
     defaultValues: {
       name: initialData?.name || "",
