@@ -310,9 +310,7 @@ export function SpecimenForm({
                 <div className="rounded-lg border-2 border-dashed p-4 text-center bg-gray-50">
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-gray-500" />
                   <p className="text-sm text-gray-500">
-                    {draftSpecimen
-                      ? t("generating_qr")
-                      : t("generate_qr_failed")}
+                    {t("generate_qr_failed")}
                   </p>
                 </div>
               )}
