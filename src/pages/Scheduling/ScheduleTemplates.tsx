@@ -15,6 +15,7 @@ import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
+import { clinicCalendarDate } from "@/pages/Appointments/schedulingTimeZone";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { getPermissions } from "@/common/Permissions";
@@ -232,10 +233,13 @@ const ScheduleTemplateItem = ({
             i18nKey="schedule_valid_from_till_range"
             values={{
               from_date: formatDateTime(
-                template.valid_from,
+                clinicCalendarDate(template.valid_from),
                 "EEE, dd MMM yyyy",
               ),
-              to_date: formatDateTime(template.valid_to, "EEE, dd MMM yyyy"),
+              to_date: formatDateTime(
+                clinicCalendarDate(template.valid_to),
+                "EEE, dd MMM yyyy",
+              ),
             }}
             components={{ strong: <strong className="font-semibold" /> }}
           />

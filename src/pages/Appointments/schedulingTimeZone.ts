@@ -47,6 +47,27 @@ export function getClinicDateFromInstant(
 }
 
 /**
+ * A stored schedule bound is either a clinic calendar day (`yyyy-MM-dd`) or a
+ * real instant. Both become the clinic yyyy-MM-dd, so a date-only string is
+ * not re-read as UTC midnight.
+ */
+export function clinicCalendarYmd(
+  value: string,
+  timeZone: string = getAppointmentsSchedulingTimeZone(),
+): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  return facilityLocalDateQueryString(value, timeZone);
+}
+
+/** Local-midnight label for a clinic calendar day or a stored instant. */
+export function clinicCalendarDate(
+  value: string,
+  timeZone: string = getAppointmentsSchedulingTimeZone(),
+): Date {
+  return parseLocalDate(clinicCalendarYmd(value, timeZone))!;
+}
+
+/**
  * Presets relative to clinic "today" (as local-midnight Date labels) so the
  * pill matches URL clinic days via isSameDay — not browser new Date().
  */

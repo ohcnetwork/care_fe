@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isBefore, parseISO, startOfDay } from "date-fns";
+import { isBefore, startOfDay } from "date-fns";
 import { Info, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -44,6 +44,10 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  clinicCalendarDate,
+  getClinicTodayDate,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { isScheduleTimeBefore } from "@/pages/Scheduling/dateValidation";
 import {
   calculateSlotDuration,
@@ -148,6 +152,7 @@ const ScheduleTemplateEditor = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const clinicToday = getClinicTodayDate();
 
   const templateFormSchema = z
     .object({
@@ -173,8 +178,8 @@ const ScheduleTemplateEditor = ({
     resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: template.name,
-      valid_from: parseISO(template.valid_from),
-      valid_to: parseISO(template.valid_to),
+      valid_from: clinicCalendarDate(template.valid_from),
+      valid_to: clinicCalendarDate(template.valid_to),
       is_public: template.is_public,
     },
   });
@@ -247,6 +252,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    today={clinicToday}
                   />
                   <FormMessage />
                 </FormItem>
@@ -262,6 +268,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    today={clinicToday}
                   />
                   <FormMessage />
                 </FormItem>

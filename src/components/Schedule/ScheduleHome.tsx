@@ -381,7 +381,6 @@ function DayDetailsPopover({
                   key={availability.id}
                   availability={availability}
                   unavailableExceptions={unavailableExceptions}
-                  date={date}
                 />
               ))}
             </div>
@@ -418,11 +417,9 @@ function DayDetailsPopover({
 function ScheduleTemplateAvailabilityItem({
   availability,
   unavailableExceptions,
-  date,
 }: {
   availability: ScheduleTemplate["availabilities"][0];
   unavailableExceptions: ScheduleException[];
-  date: Date;
 }) {
   const { t } = useTranslation();
 
@@ -453,7 +450,6 @@ function ScheduleTemplateAvailabilityItem({
   const computedSlots = computeAppointmentSlots(
     availability,
     unavailableExceptions,
-    date,
   );
 
   const availableSlots = computedSlots.filter(

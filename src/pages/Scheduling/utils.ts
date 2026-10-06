@@ -1,13 +1,9 @@
-import {
-  addMinutes,
-  differenceInMinutes,
-  format,
-  isSameDay,
-  isWithinInterval,
-  parse,
-} from "date-fns";
+import { addMinutes, differenceInMinutes, format, parse } from "date-fns";
 
-import { getSchedulingTimeZoneSuffix } from "@/pages/Appointments/schedulingTimeZone";
+import {
+  clinicCalendarYmd,
+  getSchedulingTimeZoneSuffix,
+} from "@/pages/Appointments/schedulingTimeZone";
 import {
   AvailabilityDateTime,
   AvailabilitySlotType,
@@ -17,19 +13,22 @@ import {
 import { Time } from "@/Utils/types";
 import { formatTimeShort } from "@/Utils/utils";
 
+const CLOCK_REFERENCE = new Date(2000, 0, 1);
+
 export const isDateInRange = (
   date: Date,
   startDate: string,
   endDate: string,
+  timeZone?: string,
 ) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  return (
-    isWithinInterval(date, { start, end }) ||
-    isSameDay(date, start) ||
-    isSameDay(date, end)
-  );
+  const day = format(date, "yyyy-MM-dd");
+  const start = timeZone
+    ? clinicCalendarYmd(startDate, timeZone)
+    : clinicCalendarYmd(startDate);
+  const end = timeZone
+    ? clinicCalendarYmd(endDate, timeZone)
+    : clinicCalendarYmd(endDate);
+  return day >= start && day <= end;
 };
 
 export function getDurationInMinutes(startTime: Time, endTime: Time) {
@@ -58,17 +57,16 @@ export function computeAppointmentSlots(
     slot_type: AvailabilitySlotType.Appointment;
   },
   exceptions: ScheduleException[],
-  referenceDate: Date = new Date(),
 ) {
   const startTime = parse(
     availability.availability[0].start_time,
     "HH:mm:ss",
-    referenceDate,
+    CLOCK_REFERENCE,
   );
   const endTime = parse(
     availability.availability[0].end_time,
     "HH:mm:ss",
-    referenceDate,
+    CLOCK_REFERENCE,
   );
   const slotSizeInMinutes = availability.slot_size_in_minutes;
   const slots: VirtualSlot[] = [];
@@ -82,12 +80,12 @@ export function computeAppointmentSlots(
       const exceptionStartTime = parse(
         exception.start_time,
         "HH:mm:ss",
-        referenceDate,
+        CLOCK_REFERENCE,
       );
       const exceptionEndTime = parse(
         exception.end_time,
         "HH:mm:ss",
-        referenceDate,
+        CLOCK_REFERENCE,
       );
 
       if (exceptionStartTime < slotEndTime && exceptionEndTime > time) {
@@ -159,8 +157,8 @@ export const calculateSlotDuration = (
   endTime: Time,
   numOfSlots: number = 1,
 ) => {
-  const start = parse(startTime, "HH:mm", new Date());
-  const end = parse(endTime, "HH:mm", new Date());
+  const start = parse(startTime, "HH:mm", CLOCK_REFERENCE);
+  const end = parse(endTime, "HH:mm", CLOCK_REFERENCE);
   const result = differenceInMinutes(end, start) / numOfSlots;
   return +result.toFixed(2);
 };

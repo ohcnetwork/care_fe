@@ -256,6 +256,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          today={clinicToday}
                           disabled={(date) =>
                             isBefore(startOfDay(date), startOfDay(clinicToday))
                           }
@@ -274,6 +275,7 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          today={clinicToday}
                           disabled={(date) =>
                             isBefore(startOfDay(date), startOfDay(clinicToday))
                           }

@@ -4,7 +4,10 @@ import { test } from "node:test";
 import { format, isSameDay } from "date-fns";
 
 import { parseLocalDate } from "@/Utils/date";
+import { isDateInRange } from "@/pages/Scheduling/utils";
+
 import {
+  clinicCalendarYmd,
   formatSchedulingDateTime,
   formatSchedulingTimeRange,
   getClinicShortDateRangeOptions,
@@ -139,5 +142,42 @@ test("clinic presets use India today while Wellington is already tomorrow", () =
   assert.equal(
     isSameDay(tomorrow.getDateRange().from!, parseLocalDate("2026-10-01")!),
     true,
+  );
+});
+
+test("date-only schedule bounds stay on that calendar day", () => {
+  assert.equal(clinicCalendarYmd("2026-10-05", "Asia/Kolkata"), "2026-10-05");
+  assert.equal(
+    isDateInRange(
+      parseLocalDate("2026-10-05")!,
+      "2026-10-05",
+      "2026-10-05",
+      "Asia/Kolkata",
+    ),
+    true,
+  );
+});
+
+test("a midnight IST instant counts as the clinic day, not the UTC day", () => {
+  // 2026-10-05 00:00 IST
+  const midnightIst = "2026-10-04T18:30:00Z";
+  assert.equal(clinicCalendarYmd(midnightIst, "Asia/Kolkata"), "2026-10-05");
+  assert.equal(
+    isDateInRange(
+      parseLocalDate("2026-10-05")!,
+      midnightIst,
+      midnightIst,
+      "Asia/Kolkata",
+    ),
+    true,
+  );
+  assert.equal(
+    isDateInRange(
+      parseLocalDate("2026-10-04")!,
+      midnightIst,
+      midnightIst,
+      "Asia/Kolkata",
+    ),
+    false,
   );
 });

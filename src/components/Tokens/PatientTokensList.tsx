@@ -13,6 +13,10 @@ import { DatePicker } from "@/components/ui/date-picker";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import {
+  getClinicTodayDate,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
@@ -37,7 +41,7 @@ export default function PatientTokensList({
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(getClinicTodayDate);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -97,9 +101,10 @@ export default function PatientTokensList({
           <DatePicker
             date={selectedDate}
             onChange={handleDateChange}
+            today={getClinicTodayDate()}
             className="border-gray-300"
             dateFormat={
-              selectedDate.toDateString() === new Date().toDateString()
+              dateQueryString(selectedDate) === getClinicTodayYmd()
                 ? `'Today (${selectedDate.toLocaleDateString("default", {
                     day: "2-digit",
                     month: "short",
