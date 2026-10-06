@@ -454,11 +454,12 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         const isPhone = (system: string) =>
                           ["phone", "fax", "sms"].includes(system);
 
-                        // If the system is changing from a phone type to a non-phone type, clear the value
+                        // Clear incompatible values when switching between phone and non-phone types.
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
                         }
 
+                        form.clearErrors(`contact.${index}.value`);
                         field.onChange(value);
                       }}
                     >
