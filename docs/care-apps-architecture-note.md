@@ -180,12 +180,49 @@ import type { PluginManifest } from "@/pluginTypes";
 export default {
   plugin: "Dental",
   encounterWidgets: {
-    odontogram: lazy(() => import("./OdontogramWidget")),
+    odontogram: {
+      component: lazy(() => import("./OdontogramWidget")),
+      configSchema: {
+        type: "object",
+        properties: {
+          dentition: {
+            type: "string",
+            title: "Dentition",
+            enum: ["primary", "permanent"],
+          },
+        },
+      },
+    },
   },
 } satisfies PluginManifest;
 ```
 
-Components may be eager or lazy. Local names must start with a lowercase letter,
+Each definition supplies an eager or lazy `component` and an object
+`configSchema` using the existing JSON Schema Extensions format. CARE uses the
+schema's titles, descriptions, constraints, and `x-ui` hints to render the widget
+configuration editor. Component-only entries remain supported for older plugins
+and use the JSON editor; new entries should provide a schema.
+
+The visual editor supports object properties, nested objects, arrays, primitive
+values, enums, and their validation constraints. For choices with display labels,
+use `oneOf: [{ const: "on_hold", title: "dental:status_on_hold" }, ...]`.
+Each choice must have a unique primitive `const` and a `title`; it may also have
+a `description`. Other composition, references, conditionals, and date/time
+controls fall back to JSON editing. Unknown
+saved properties are retained; schemas with `additionalProperties: false` report
+them as errors for the author to resolve. An empty object schema indicates a
+widget with no configurable options. Opening a widget never writes schema
+defaults into its config, and clearing an optional option removes its key. Keep
+runtime defaults and validation in the widget, including when configuration is
+supplied directly as workspace JSON.
+
+Schema titles, descriptions, choice titles, and static autocomplete option labels
+can be translation keys in the plugin's namespace (for example,
+`dental:show_history`). Literal text remains supported as a fallback. Nested
+fields and array items follow the same convention. Field keys, saved option
+values, and labels returned by an autocomplete API are never translated.
+
+Local names must start with a lowercase letter,
 contain only lowercase letters, digits, and underscores, and be at most 64
 characters. A plugin slug may also contain hyphens, must start with a lowercase
 letter or digit, and must be at most 64 characters. Dots belong only between the

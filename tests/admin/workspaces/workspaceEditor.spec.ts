@@ -554,13 +554,35 @@ test("instance admins can validate, create, reopen, update, and delete a workspa
   });
 });
 
-test("visual editing builds, orders, and reloads an encounter workspace without writing JSON", async ({
+test("visual editing builds, orders, and reloads an encounter workspace", async ({
   page,
 }, testInfo) => {
   const api = await mockWorkspaceApi(page);
+  const requestStatusLabel = "État des demandes";
+  const activeStatusLabel = "Actif traduit";
+  await page.route("**/locale/en.json", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      json: {
+        ...(await response.json()),
+        workspace_widget_request_status: requestStatusLabel,
+        active: activeStatusLabel,
+        schema_select_placeholder: "Choisir {{label}}",
+        workspace_config_integer_error: "Saisissez un nombre entier.",
+        workspace_config_number_maximum: "Le maximum est de {{maximum}}.",
+      },
+    });
+  });
   const name = `Clinical workspace ${faker.string.alphanumeric(8)}`;
   const pageTitle = `Ward rounds ${faker.string.alphanumeric(6)}`;
   const description = faker.lorem.sentence();
+  const opaqueConfig = {
+    compact: true,
+    priority: 3,
+    limit: { toString: "label" },
+    display_code: "5",
+  };
   const template = {
     schema_version: 1,
     pages: [
@@ -578,7 +600,7 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
               {
                 type: "service_requests",
                 title: "Active requests",
-                config: { status: "active", limit: 5 },
+                config: { status: "active" },
               },
             ],
           },
@@ -592,17 +614,11 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
                   questionnaire_slug: "daily-progress-note",
                   limit: 1,
                   only_unstructured: true,
-                  future_option: true,
                 },
               },
               {
                 type: "symptoms",
-                config: {
-                  compact: true,
-                  priority: 3,
-                  limit: { toString: "label" },
-                  display_code: "5",
-                },
+                config: opaqueConfig,
               },
             ],
           },
@@ -630,42 +646,10 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
     await library.getByRole("button", { name: label, exact: true }).click();
     await expect(library).not.toBeVisible();
   };
-  const configurationEntry = (number: number) =>
-    inspector.getByRole("group", {
-      name: `Configuration entry ${number}`,
-      exact: true,
-    });
-  const addSetting = async (number: number, key: string, value: string) => {
-    await inspector
-      .getByRole("button", { name: "Add setting", exact: true })
-      .click();
-    await inspector
-      .getByRole("textbox", { name: `Key ${number}`, exact: true })
-      .fill(key);
-    await inspector
-      .getByRole("textbox", { name: `Value ${number}`, exact: true })
-      .fill(value);
-    await expect(configurationEntry(number).getByRole("textbox")).toHaveCount(
-      2,
-    );
-    await expect(configurationEntry(number).getByRole("combobox")).toHaveCount(
-      0,
-    );
-  };
-  const expectSetting = async (number: number, key: string, value: string) => {
-    await expect(
-      inspector.getByRole("textbox", { name: `Key ${number}`, exact: true }),
-    ).toHaveValue(key);
-    await expect(
-      inspector.getByRole("textbox", { name: `Value ${number}`, exact: true }),
-    ).toHaveValue(value);
-    await expect(configurationEntry(number).getByRole("textbox")).toHaveCount(
-      2,
-    );
-    await expect(configurationEntry(number).getByRole("combobox")).toHaveCount(
-      0,
-    );
-  };
+  const configJson = inspector.getByRole("textbox", {
+    name: "Widget configuration (JSON)",
+    exact: true,
+  });
 
   await test.step("Start an empty workspace with a custom page and two columns", async () => {
     await page.goto("/admin/workspaces");
@@ -705,49 +689,18 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
 
   await test.step("Configure clinical widgets and edit their layout", async () => {
     await addWidget(1, "Symptoms");
-    await addSetting(1, "compact", "true");
     await inspector
-      .getByRole("button", { name: "Add setting", exact: true })
+      .getByText("Advanced configuration", { exact: true })
       .click();
-    await inspector
-      .getByRole("textbox", { name: "Key 2", exact: true })
-      .fill("compact");
+    const invalidConfig = '{"compact":true,"limit":{"toString":';
+    await configJson.fill(invalidConfig);
+    await expect(configJson).toHaveValue(invalidConfig);
+    await expect(configJson).toHaveAttribute("aria-invalid", "true");
     await expect(
       page.getByRole("button", { name: "Create workspace", exact: true }),
     ).toBeDisabled();
-    await inspector
-      .getByRole("textbox", { name: "Key 2", exact: true })
-      .fill("priority");
-    await inspector
-      .getByRole("textbox", { name: "Value 2", exact: true })
-      .fill("2");
-    await addSetting(3, "limit", '{"toString":');
-    await expect(
-      page.getByRole("button", { name: "Create workspace", exact: true }),
-    ).toBeDisabled();
-    await inspector
-      .getByRole("textbox", { name: "Value 3", exact: true })
-      .fill('{"toString":"label"}');
-    await expect(
-      inspector.getByRole("textbox", { name: "Value 3", exact: true }),
-    ).toHaveValue('{"toString":"label"}');
-    await addSetting(4, "display_code", '"5"');
-    await inspector
-      .getByRole("textbox", { name: "Value 2", exact: true })
-      .fill("3");
-    await expectSetting(4, "display_code", '"5"');
-    await inspector
-      .getByRole("button", { name: "Add setting", exact: true })
-      .click();
-    await inspector
-      .getByRole("button", { name: "Remove setting 5", exact: true })
-      .click();
-    await expect(
-      inspector.getByRole("group", {
-        name: "Configuration entry 5",
-        exact: true,
-      }),
-    ).toHaveCount(0);
+    await configJson.fill(JSON.stringify(opaqueConfig));
+    await expect(configJson).toHaveAttribute("aria-invalid", "false");
     await expect(
       page.getByRole("button", { name: "Create workspace", exact: true }),
     ).toBeEnabled();
@@ -769,22 +722,34 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
     await inspector
       .getByRole("textbox", { name: "Display title", exact: true })
       .fill("Progress notes");
+    await inspector
+      .getByRole("textbox", { name: "Form slug", exact: true })
+      .fill("daily-progress-note");
+    await inspector
+      .getByRole("checkbox", { name: "Form responses only", exact: true })
+      .check();
+    const responseLimit = inspector.getByRole("spinbutton", {
+      name: "Latest results",
+      exact: true,
+    });
+    await expect(responseLimit).toHaveValue("");
+    for (const [invalidLimit, message] of [
+      ["2.5", "Saisissez un nombre entier."],
+      ["101", "Le maximum est de 100."],
+    ]) {
+      await responseLimit.fill(invalidLimit);
+      await expect(responseLimit).toHaveValue(invalidLimit);
+      await expect(
+        inspector.getByText(message, { exact: true }).first(),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Create workspace", exact: true }),
+      ).toBeDisabled();
+    }
+    await responseLimit.fill("1");
     await expect(
-      inspector.getByRole("textbox", { name: "Form slug", exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      inspector.getByRole("textbox", { name: "Latest results", exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      inspector.getByRole("switch", {
-        name: "Form responses only",
-        exact: true,
-      }),
-    ).toHaveCount(0);
-    await addSetting(1, "questionnaire_slug", "daily-progress-note");
-    await addSetting(2, "limit", "1");
-    await addSetting(3, "only_unstructured", "true");
-    await addSetting(4, "future_option", "true");
+      page.getByRole("button", { name: "Create workspace", exact: true }),
+    ).toBeEnabled();
 
     const originalSymptoms = column(1)
       .getByRole("button", { name: "Configure Symptoms", exact: true })
@@ -820,11 +785,22 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
     await inspector
       .getByRole("textbox", { name: "Display title", exact: true })
       .fill("Active requests");
-    await expect(
-      inspector.getByRole("combobox", { name: "Request status", exact: true }),
-    ).toHaveCount(0);
-    await addSetting(1, "status", "active");
-    await addSetting(2, "limit", "5");
+    const requestStatus = inspector.getByRole("combobox", {
+      name: requestStatusLabel,
+      exact: true,
+    });
+    await expect(requestStatus).toHaveText(`Choisir ${requestStatusLabel}`);
+    await requestStatus.click();
+    await page
+      .getByRole("option", { name: activeStatusLabel, exact: true })
+      .click();
+    const requestLimit = inspector.getByRole("spinbutton", {
+      name: "Latest results",
+      exact: true,
+    });
+    await expect(requestLimit).toHaveValue("");
+    await requestLimit.fill("5");
+    await requestLimit.clear();
     const addColumn = page.getByRole("button", {
       name: "Add column",
       exact: true,
@@ -935,27 +911,26 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
       .getByRole("button", { name: "Configure Active requests", exact: true })
       .first()
       .click();
-    await expectSetting(1, "status", "active");
-    await expectSetting(2, "limit", "5");
+    await expect(
+      inspector.getByRole("combobox", {
+        name: requestStatusLabel,
+        exact: true,
+      }),
+    ).toHaveText(activeStatusLabel);
+    await expect(
+      inspector.getByRole("spinbutton", {
+        name: "Latest results",
+        exact: true,
+      }),
+    ).toHaveValue("");
     await column(2)
       .getByRole("button", { name: "Configure Symptoms", exact: true })
       .first()
       .click();
-    await expectSetting(1, "compact", "true");
-    await expectSetting(2, "priority", "3");
-    await expect(
-      inspector.getByRole("textbox", { name: "Key 3", exact: true }),
-    ).toHaveValue("limit");
-    await expect(configurationEntry(3).getByRole("textbox")).toHaveCount(2);
-    await expect(configurationEntry(3).getByRole("combobox")).toHaveCount(0);
-    expect(
-      JSON.parse(
-        await inspector
-          .getByRole("textbox", { name: "Value 3", exact: true })
-          .inputValue(),
-      ),
-    ).toEqual({ toString: "label" });
-    await expectSetting(4, "display_code", '"5"');
+    await inspector
+      .getByText("Advanced configuration", { exact: true })
+      .click();
+    expect(JSON.parse(await configJson.inputValue())).toEqual(opaqueConfig);
     await page.screenshot({
       path: testInfo.outputPath("workspace-config-fields-desktop.png"),
       fullPage: true,
@@ -964,10 +939,21 @@ test("visual editing builds, orders, and reloads an encounter workspace without 
       .getByRole("button", { name: "Configure Progress notes", exact: true })
       .first()
       .click();
-    await expectSetting(1, "questionnaire_slug", "daily-progress-note");
-    await expectSetting(2, "limit", "1");
-    await expectSetting(3, "only_unstructured", "true");
-    await expectSetting(4, "future_option", "true");
+    await expect(
+      inspector.getByRole("textbox", { name: "Form slug", exact: true }),
+    ).toHaveValue("daily-progress-note");
+    await expect(
+      inspector.getByRole("spinbutton", {
+        name: "Latest results",
+        exact: true,
+      }),
+    ).toHaveValue("1");
+    await expect(
+      inspector.getByRole("checkbox", {
+        name: "Form responses only",
+        exact: true,
+      }),
+    ).toBeChecked();
     await page.screenshot({
       path: testInfo.outputPath("workspace-visual-desktop.png"),
       fullPage: true,

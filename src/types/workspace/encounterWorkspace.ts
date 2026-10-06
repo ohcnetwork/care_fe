@@ -26,26 +26,7 @@ export const RESERVED_ROUTE_KEYS = [
 
 export const MAX_ENCOUNTER_WORKSPACE_COLUMNS = 4;
 
-export const ENCOUNTER_WIDGET_TYPES: readonly string[] = [
-  "allergies",
-  "symptoms",
-  "diagnosis",
-  "vitals",
-  "questionnaire_responses",
-  "service_requests",
-  "quick_actions",
-  "favorite_forms",
-  "draft_forms",
-  "encounter_tags",
-  "locations",
-  "care_team",
-  "departments",
-  "hospitalization",
-  "discharge",
-  "audit_logs",
-  "encounter_actions",
-  "reports",
-];
+export { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
 
 export const PLUGIN_ENCOUNTER_WIDGET_TYPE_PATTERN =
   /^[a-z0-9][a-z0-9_-]{0,63}\.[a-z][a-z0-9_]{0,63}$/;

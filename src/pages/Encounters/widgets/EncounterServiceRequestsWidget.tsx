@@ -1,7 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,13 +12,8 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-
-const serviceRequestsConfigSchema = z.strictObject({
-  status: z.enum(Status).exclude([Status.unknown]).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
+import { serviceRequestsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface EncounterServiceRequestsWidgetProps {
   title?: string;

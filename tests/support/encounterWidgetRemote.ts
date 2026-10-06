@@ -16,6 +16,22 @@ export async function installEncounterWidgetRemote(
       name: "Remote clinical review",
     },
   };
+  await page.route("https://encounter-widgets.test/locale/en.json", (route) =>
+    route.fulfill({
+      headers: { "Access-Control-Allow-Origin": "*" },
+      json: {
+        review_mode_title: "Mode de revue",
+        review_mode_description: "Présentation pour cette consultation",
+        review_mode_compact: "Note courte",
+        review_mode_full: "Revue complète",
+        review_priority_title: "Priorité de revue",
+        review_priority_routine: "Normale",
+        review_priority_urgent: "Urgente",
+        review_settings_title: "Paramètres de revue",
+        review_highlight_title: "Mettre en évidence",
+      },
+    }),
+  );
   let releaseLazyModule = () => {};
   const lazyModuleReady = new Promise<void>((resolve) => {
     releaseLazyModule = resolve;
@@ -67,7 +83,67 @@ export async function installEncounterWidgetRemote(
             default: {
               plugin: "Untrusted display name",
               slug: "wrong_namespace",
-              encounterWidgets: { review: Review, unstable: Unstable },
+              encounterWidgets: {
+                review: {
+                  component: Review,
+                  configSchema: {
+                    type: "object",
+                    properties: {
+                      caption: { type: "string", title: "Review caption" },
+                      render_mode: {
+                        type: "string",
+                        title: "Remote clinical review:review_mode_title",
+                        description: "Remote clinical review:review_mode_description",
+                        oneOf: [
+                          { const: "compact-note", title: "Remote clinical review:review_mode_compact" },
+                          { const: "full-review", title: "Remote clinical review:review_mode_full" },
+                        ],
+                      },
+                      priority: {
+                        type: "integer",
+                        title: "Remote clinical review:review_priority_title",
+                        oneOf: [
+                          { const: 2, title: "Remote clinical review:review_priority_routine" },
+                          { const: 7, title: "Remote clinical review:review_priority_urgent" },
+                        ],
+                      },
+                      settings: {
+                        type: "object",
+                        title: "Remote clinical review:review_settings_title",
+                        properties: {
+                          highlight: { type: "boolean", title: "Remote clinical review:review_highlight_title" },
+                        },
+                      },
+                      labels: {
+                        type: "array",
+                        title: "Review labels",
+                        items: { type: "string", title: "Review label" },
+                      },
+                      review_rows: {
+                        type: "array",
+                        title: "Review rows",
+                        minItems: 1,
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string", title: "Row name" },
+                          },
+                        },
+                      },
+                      review_optional: {
+                        type: "object",
+                        title: "Optional review",
+                        required: ["name"],
+                        properties: {
+                          name: { type: "string", title: "Optional review name" },
+                        },
+                      },
+                    },
+                    additionalProperties: true,
+                  },
+                },
+                unstable: Unstable,
+              },
               encounterTabs: { "lab.results": LabResults },
             },
           });

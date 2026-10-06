@@ -23,6 +23,42 @@ const FORMAT_TO_UI_TYPE: Record<string, UIFieldType> = {
   uri: "uri",
 };
 
+/** Recognize titled primitive choices without flattening general oneOf schemas. */
+export function getTitledEnumOptions(
+  property: JSONSchemaProperty,
+): ExtensionFieldMetadata["options"] {
+  if (!Array.isArray(property.oneOf) || !property.oneOf.length)
+    return undefined;
+  const values = new Set<unknown>();
+  const options: NonNullable<ExtensionFieldMetadata["options"]> = [];
+  for (const choice of property.oneOf) {
+    if (
+      !choice ||
+      typeof choice !== "object" ||
+      Object.keys(choice).some(
+        (key) => !["const", "title", "description"].includes(key),
+      ) ||
+      typeof choice.title !== "string" ||
+      !choice.title.trim() ||
+      (choice.description !== undefined &&
+        typeof choice.description !== "string")
+    )
+      return undefined;
+    const value = choice.const;
+    if (
+      (value !== null &&
+        typeof value !== "string" &&
+        typeof value !== "boolean" &&
+        !(typeof value === "number" && Number.isFinite(value))) ||
+      values.has(value)
+    )
+      return undefined;
+    values.add(value);
+    options.push({ value, label: choice.title });
+  }
+  return options;
+}
+
 /**
  * Extracts default values from a JSON Schema property (recursive for nested objects and arrays)
  */
@@ -107,7 +143,7 @@ function determineFieldType(property: JSONSchemaProperty): UIFieldType {
   }
 
   // If it has enum options, render as select (unless x-ui specifies radio)
-  if (property.enum && property.enum.length > 0) {
+  if (getTitledEnumOptions(property) || property.enum?.length) {
     return "select";
   }
 
@@ -206,7 +242,10 @@ function extractPropertyMetadata(
   }
 
   // Add enum options
-  if (property.enum && property.enum.length > 0) {
+  const titledOptions = getTitledEnumOptions(property);
+  if (titledOptions) {
+    fieldMeta.options = titledOptions;
+  } else if (property.enum && property.enum.length > 0) {
     fieldMeta.options = property.enum.map((value) => ({
       value,
       label: String(value),

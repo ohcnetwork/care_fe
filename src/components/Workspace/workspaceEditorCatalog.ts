@@ -21,8 +21,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { CoreWidgetConfigType } from "@/types/workspace/widgetConfigSchemas";
+
 export interface WorkspaceWidgetCatalogItem {
-  type: string;
+  type: CoreWidgetConfigType;
   labelKey: string;
   descriptionKey: string;
   icon: LucideIcon;

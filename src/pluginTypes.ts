@@ -15,6 +15,7 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserRead, UserReadMinimal } from "@/types/user/user";
+import type { JSONSchema2020 } from "@/Utils/schema/types";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { AppRoutes } from "./Routers/AppRouter";
@@ -211,6 +212,12 @@ export type PluginEncounterWidgetComponent =
   | ComponentType<PluginEncounterWidgetProps>
   | LazyExoticComponent<ComponentType<PluginEncounterWidgetProps>>;
 
+export interface PluginEncounterWidgetDefinition {
+  component: PluginEncounterWidgetComponent;
+  /** Object schema used by the workspace configuration editor. */
+  configSchema: JSONSchema2020;
+}
+
 /**
  * Plugin override definition for replacing registered components
  */
@@ -245,7 +252,12 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
-  encounterWidgets?: Record<string, PluginEncounterWidgetComponent>;
+  encounterWidgets?: Record<
+    string,
+    | PluginEncounterWidgetDefinition
+    /** @deprecated Supply a definition with configSchema for the configuration editor. */
+    | PluginEncounterWidgetComponent
+  >;
   encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */

@@ -1,5 +1,5 @@
 import { Braces, ChevronDown, Eye, Puzzle } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,16 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { EncounterWorkspaceWidget } from "@/types/workspace/encounterWorkspace";
+import { getCoreWidgetConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
-import { WorkspaceConfigFields } from "./WorkspaceConfigFields";
+import { WorkspaceSchemaFields } from "./WorkspaceSchemaFields";
 import {
   CORE_WIDGET_CATALOG,
   workspaceWidgetLabel,
 } from "./workspaceEditorCatalog";
 import { parseWorkspaceJson } from "./workspaceEditorUtils";
+import { prepareWidgetConfigSchema } from "./workspaceWidgetSchema";
+import {
+  widgetConfigErrorMessage,
+  widgetConfigIssueLabel,
+  widgetSchemaText,
+} from "./workspaceWidgetSchemaI18n";
 
 export interface WorkspaceWidgetInspectorProps {
   widget: EncounterWorkspaceWidget;
@@ -43,11 +51,21 @@ export function WorkspaceWidgetInspector({
 }: WorkspaceWidgetInspectorProps) {
   const { t } = useTranslation();
   const id = useId();
+  const { widgets: pluginWidgets } = useCareAppEncounterWidgets();
+  const pluginSchema = pluginWidgets.get(widget.type)?.configSchema;
+  const schema = useMemo(
+    () => getCoreWidgetConfigSchema(widget.type, t) ?? pluginSchema,
+    [pluginSchema, t, widget.type],
+  );
+  const preparedSchema = useMemo(
+    () => (schema ? prepareWidgetConfigSchema(schema, t) : undefined),
+    [schema, t],
+  );
+  const [advancedOpen, setAdvancedOpen] = useState(!preparedSchema);
   const [configDraft, setConfigDraft] = useState<{
     text: string;
     committed?: string;
   } | null>(null);
-  const [fieldsValid, setFieldsValid] = useState(true);
   const config = widget.config ?? {};
   const catalogItem = CORE_WIDGET_CATALOG.find(
     (item) => item.type === widget.type,
@@ -59,9 +77,34 @@ export function WorkspaceWidgetInspector({
       configDraft.committed === JSON.stringify(config))
       ? configDraft.text
       : JSON.stringify(config, null, 2);
-  const jsonError = parseConfig(configText) === undefined;
-  const valid = !jsonError && fieldsValid;
+  const editedConfig = useMemo(() => parseConfig(configText), [configText]);
+  const jsonError = editedConfig === undefined;
+  const validation = useMemo(
+    () =>
+      editedConfig &&
+      preparedSchema?.validator.safeParse(editedConfig, {
+        error: (issue) => widgetConfigErrorMessage(issue, t),
+      }),
+    [editedConfig, preparedSchema, t],
+  );
+  const issues = useMemo(
+    () => (validation && !validation.success ? validation.error.issues : []),
+    [validation],
+  );
+  const valid = !jsonError && !issues.length;
   const statuses = widget.visible_when?.["encounter.status"];
+  const updateConfig = (
+    nextConfig: Record<string, unknown>,
+    text = JSON.stringify(nextConfig, null, 2),
+  ) => {
+    const accepted =
+      preparedSchema?.validator.safeParse(nextConfig).success !== false;
+    setConfigDraft({
+      text,
+      ...(accepted ? { committed: JSON.stringify(nextConfig) } : {}),
+    });
+    if (accepted) onChange({ ...widget, config: nextConfig });
+  };
 
   useEffect(() => {
     onValidityChange?.(valid);
@@ -121,15 +164,56 @@ export function WorkspaceWidgetInspector({
         </div>
       </div>
 
-      <WorkspaceConfigFields
-        config={config}
-        disabled={disabled || jsonError}
-        onValidityChange={setFieldsValid}
-        onChange={(nextConfig) => {
-          setConfigDraft(null);
-          onChange({ ...widget, config: nextConfig });
-        }}
-      />
+      {preparedSchema ? (
+        <section
+          aria-label={t("workspace_config_title")}
+          className="space-y-4 border-b border-gray-200 p-4"
+        >
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {t("workspace_config_title")}
+          </h4>
+          {preparedSchema.fieldMetadata.length ? (
+            <WorkspaceSchemaFields
+              config={editedConfig ?? config}
+              fields={preparedSchema.fieldMetadata}
+              issues={issues}
+              disabled={disabled || jsonError}
+              onChange={updateConfig}
+            />
+          ) : (
+            <p className="text-xs leading-5 text-gray-500">
+              {schema?.description
+                ? widgetSchemaText(schema.description, t)
+                : t("workspace_widget_no_config_options")}
+            </p>
+          )}
+          {!!issues.length && (
+            <Alert variant="destructive" className="p-3">
+              <AlertDescription className="space-y-1 text-xs">
+                <p>{t("workspace_widget_config_schema_error")}</p>
+                {issues.map((issue, index) => (
+                  <p key={index}>
+                    {issue.path.length
+                      ? `${widgetConfigIssueLabel(issue.path, preparedSchema.fieldMetadata)}: `
+                      : ""}
+                    {issue.message}
+                  </p>
+                ))}
+              </AlertDescription>
+            </Alert>
+          )}
+        </section>
+      ) : (
+        <div>
+          <p className="px-4 pt-4 text-xs leading-5 text-gray-500">
+            {t(
+              schema
+                ? "workspace_widget_schema_unsupported"
+                : "workspace_widget_schema_unavailable",
+            )}
+          </p>
+        </div>
+      )}
 
       <div className="space-y-4 border-b border-gray-200 p-4">
         <h4 className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -204,7 +288,11 @@ export function WorkspaceWidgetInspector({
         )}
       </div>
 
-      <details className="group p-4" open={jsonError ? true : undefined}>
+      <details
+        className="group p-4"
+        open={advancedOpen}
+        onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+      >
         <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-gray-600 [&::-webkit-details-marker]:hidden">
           <Braces className="size-3.5" aria-hidden="true" />
           {t("workspace_widget_advanced_config")}
@@ -215,11 +303,7 @@ export function WorkspaceWidgetInspector({
         </summary>
         <div className="space-y-3 pt-3">
           <p className="text-xs leading-5 text-gray-500">
-            {t(
-              !fieldsValid
-                ? "workspace_config_finish_draft"
-                : "workspace_widget_advanced_hint",
-            )}
+            {t("workspace_widget_advanced_hint")}
           </p>
           <Label htmlFor={`${id}-config`} className="sr-only">
             {t("workspace_widget_config_json")}
@@ -227,7 +311,7 @@ export function WorkspaceWidgetInspector({
           <Textarea
             id={`${id}-config`}
             value={configText}
-            disabled={disabled || !fieldsValid}
+            disabled={disabled}
             spellCheck={false}
             autoCapitalize="off"
             autoCorrect="off"
@@ -239,11 +323,7 @@ export function WorkspaceWidgetInspector({
               setConfigDraft({ text: value });
               const parsed = parseConfig(value);
               if (parsed !== undefined) {
-                setConfigDraft({
-                  text: value,
-                  committed: JSON.stringify(parsed),
-                });
-                onChange({ ...widget, config: parsed });
+                updateConfig(parsed, value);
               }
             }}
             className="min-h-36 resize-y font-mono text-xs leading-5 shadow-none"

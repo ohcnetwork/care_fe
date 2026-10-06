@@ -1,17 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-
-const responsesConfigSchema = z
-  .object({
-    questionnaire_slug: z.string().trim().min(1).optional(),
-    only_unstructured: z.boolean().optional(),
-    limit: z.number().int().min(1).max(100).optional(),
-  })
-  .strict();
+import { responsesConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface EncounterResponsesWidgetProps {
   title?: string;

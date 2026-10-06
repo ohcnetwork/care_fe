@@ -2185,12 +2185,17 @@ test.describe("Encounter workspace rendering", () => {
   }, testInfo) => {
     const remote = await installEncounterWidgetRemote(page, {
       holdLazyModule: true,
+      holdManifest: true,
     });
     const fixture = await mockEncounterWorkspaceApi(page, {
       allowWorkspaceUpdate: true,
     });
     fixture.plugConfigs.push(remote.config);
-    const template: WorkspaceTemplate = {
+    const makeTemplate = (
+      reviewConfig: Record<string, unknown>,
+      fallbackConfig?: Record<string, unknown>,
+      includePluginPage = true,
+    ): WorkspaceTemplate => ({
       schema_version: 1,
       pages: [
         {
@@ -2208,26 +2213,40 @@ test.describe("Encounter workspace rendering", () => {
                 {
                   type: `${remote.config.slug}.review`,
                   title: "Consultant review",
-                  config: { caption: "Review before discharge" },
+                  config: reviewConfig,
                 },
                 {
                   type: `${remote.config.slug}.unstable`,
                   title: "Encounter-specific extension",
                 },
-                { type: "care_missing.review", title: "Missing extension" },
+                {
+                  type: "care_missing.review",
+                  title: "Missing extension",
+                  ...(fallbackConfig && { config: fallbackConfig }),
+                },
               ],
             },
           ],
         },
-        { kind: "system", key: "lab.results" },
+        ...(includePluginPage ? [{ kind: "system", key: "lab.results" }] : []),
       ],
+    });
+    const unknownConfig = { opaque_metadata: { nested: ["keep", 5] } };
+    const reviewConfig = {
+      ...unknownConfig,
+      caption: "Review before discharge",
+      render_mode: "full-review",
+      priority: 7,
+      settings: { highlight: true },
+      labels: ["rounds", "discharge"],
     };
+    const template = makeTemplate(reviewConfig, { display_code: "5" });
     const unavailableMessage =
       "This widget is unavailable. Its plugin may not be enabled, or the widget type may not be supported.";
     const failureMessage =
       "This widget could not be displayed. Other encounter information is still available.";
 
-    await test.step("The editor saves namespaced widgets and only warns about the absent plugin", async () => {
+    await test.step("The editor authors plugin schema fields and preserves unknown options", async () => {
       await page.goto(
         `/facility/${fixture.facility.id}/settings/workspaces/${fixture.workspace.id}/edit`,
       );
@@ -2241,17 +2260,144 @@ test.describe("Encounter workspace rendering", () => {
       if (!(await templateField.isVisible())) {
         await page.getByRole("button", { name: "JSON", exact: true }).click();
       }
-      await templateField.fill(JSON.stringify(template));
+      await templateField.fill(
+        JSON.stringify(
+          makeTemplate(
+            { ...unknownConfig, caption: "Draft review" },
+            undefined,
+            false,
+          ),
+        ),
+      );
       await expect(
         page.getByText(
           "These widgets are unavailable and will show a notice: care_missing.review.",
           { exact: true },
         ),
       ).toBeVisible();
+      await page.getByRole("button", { name: "Visual", exact: true }).click();
+      await page
+        .getByRole("button", {
+          name: "Configure Consultant review",
+          exact: true,
+        })
+        .first()
+        .click();
+      const inspector = page.getByRole("region", {
+        name: "Widget settings",
+        exact: true,
+      });
       const save = page.getByRole("button", {
         name: "Save Changes",
         exact: true,
       });
+      const configJson = inspector.getByRole("textbox", {
+        name: "Widget configuration (JSON)",
+        exact: true,
+      });
+      const pendingConfig =
+        '{"opaque_metadata":{"nested":["keep",5]},"caption":"Draft review","pending_schema":';
+      try {
+        if (!(await configJson.isVisible())) {
+          await inspector
+            .getByText("Advanced configuration", { exact: true })
+            .click();
+        }
+        await configJson.fill(pendingConfig);
+        await expect(configJson).toHaveValue(pendingConfig);
+        await expect(configJson).toHaveAttribute("aria-invalid", "true");
+        await expect(save).toBeDisabled();
+      } finally {
+        remote.releaseManifest();
+      }
+      await expect(
+        inspector.getByRole("textbox", { name: "Review caption", exact: true }),
+      ).toBeVisible();
+      if (!(await configJson.isVisible())) {
+        await inspector
+          .getByText("Advanced configuration", { exact: true })
+          .click();
+      }
+      await expect(configJson).toHaveValue(pendingConfig);
+      await expect(configJson).toHaveAttribute("aria-invalid", "true");
+      await expect(save).toBeDisabled();
+      await configJson.fill(
+        JSON.stringify({ ...unknownConfig, caption: "Draft review" }),
+      );
+      await expect(configJson).toHaveAttribute("aria-invalid", "false");
+      await expect(save).toBeEnabled();
+      await inspector
+        .getByRole("textbox", { name: "Review caption", exact: true })
+        .fill("Review before discharge");
+      await inspector
+        .getByRole("combobox", { name: "Mode de revue", exact: true })
+        .click();
+      await page
+        .getByRole("option", { name: "Revue complète", exact: true })
+        .click();
+      await expect(
+        inspector.getByText("Présentation pour cette consultation", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await inspector
+        .getByRole("combobox", { name: "Priorité de revue", exact: true })
+        .click();
+      await page.getByRole("option", { name: "Urgente", exact: true }).click();
+      await expect(
+        inspector.getByText("Paramètres de revue", { exact: true }),
+      ).toBeVisible();
+      await inspector
+        .getByRole("checkbox", { name: "Mettre en évidence", exact: true })
+        .check();
+      for (const [index, label] of [
+        "rounds",
+        "temporary",
+        "discharge",
+      ].entries()) {
+        await inspector
+          .getByText("Review labels", { exact: true })
+          .locator("..")
+          .getByRole("button", { name: "Add", exact: true })
+          .click();
+        await inspector
+          .getByRole("textbox", { name: "Review label", exact: true })
+          .nth(index)
+          .fill(label);
+      }
+      await inspector
+        .getByRole("button", {
+          name: "Remove item Review labels 2",
+          exact: true,
+        })
+        .click();
+      const labels = inspector.getByRole("textbox", {
+        name: "Review label",
+        exact: true,
+      });
+      await expect(labels).toHaveCount(2);
+      await expect(labels.nth(0)).toHaveValue("rounds");
+      await expect(labels.nth(1)).toHaveValue("discharge");
+
+      await page
+        .getByRole("button", {
+          name: "Configure Missing extension",
+          exact: true,
+        })
+        .first()
+        .click();
+      if (!(await configJson.isVisible())) {
+        await inspector
+          .getByText("Advanced configuration", { exact: true })
+          .click();
+      }
+      await configJson.fill(JSON.stringify({ display_code: "5" }));
+      await page
+        .getByRole("button", { name: "Add system page", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "lab.results", exact: true })
+        .click();
       await save.click();
       await expect(
         page.getByText("No changes to save", { exact: true }),
@@ -2264,6 +2410,49 @@ test.describe("Encounter workspace rendering", () => {
           template,
         },
       ]);
+      await page.reload();
+      await page
+        .getByRole("button", {
+          name: "Configure Consultant review",
+          exact: true,
+        })
+        .first()
+        .click();
+      await expect(
+        inspector.getByRole("textbox", { name: "Review caption", exact: true }),
+      ).toHaveValue("Review before discharge");
+      await expect(
+        inspector.getByRole("combobox", { name: "Mode de revue", exact: true }),
+      ).toHaveText("Revue complète");
+      await expect(
+        inspector.getByRole("combobox", {
+          name: "Priorité de revue",
+          exact: true,
+        }),
+      ).toHaveText("Urgente");
+      await expect(
+        inspector.getByRole("checkbox", {
+          name: "Mettre en évidence",
+          exact: true,
+        }),
+      ).toBeChecked();
+      await expect(labels).toHaveCount(2);
+      await expect(labels.nth(0)).toHaveValue("rounds");
+      await expect(labels.nth(1)).toHaveValue("discharge");
+      await inspector
+        .getByText("Advanced configuration", { exact: true })
+        .click();
+      expect(
+        JSON.parse(
+          await inspector
+            .getByRole("textbox", {
+              name: "Widget configuration (JSON)",
+              exact: true,
+            })
+            .inputValue(),
+        ),
+      ).toEqual(reviewConfig);
+      await expect(save).toBeDisabled();
     });
 
     await test.step("A lazy plugin loads independently of clinical cards and failed extensions", async () => {
