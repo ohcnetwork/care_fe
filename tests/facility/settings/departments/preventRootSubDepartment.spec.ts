@@ -20,7 +20,11 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
 
   async function openDepartment(page: Page, departmentName: string) {
     await searchDepartment(page, departmentName);
-    await page.getByRole("row").filter({ hasText: departmentName }).click();
+    await page
+      .getByRole("row")
+      .filter({ hasText: departmentName })
+      .getByRole("link", { name: departmentName, exact: true })
+      .click();
   }
 
   test("Backend should reject creating sub-department under Administration department", async ({

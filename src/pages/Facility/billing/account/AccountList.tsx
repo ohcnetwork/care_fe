@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRightSquare, PlusIcon } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -344,14 +344,14 @@ export function AccountList({
                         variant="outline"
                         size="sm"
                         className="font-semibold"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/billing/account/${account.id}`,
-                          )
-                        }
+                        asChild
                       >
-                        <ArrowUpRightSquare strokeWidth={1.5} />
-                        {t("go_to_account")}
+                        <Link
+                          href={`/facility/${facilityId}/billing/account/${account.id}`}
+                        >
+                          <ArrowUpRightSquare strokeWidth={1.5} />
+                          {t("go_to_account")}
+                        </Link>
                       </Button>
                     </div>
                   </TableCell>

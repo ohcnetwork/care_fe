@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -127,8 +127,7 @@ function ObservationDefinitionFormContent({
   existingData,
   onSuccess = () =>
     navigate(`/facility/${facilityId}/settings/observation_definitions`),
-  onCancel = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+  onCancel,
 }: {
   facilityId: string;
   observationSlug?: string;
@@ -957,9 +956,19 @@ function ObservationDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                {t("cancel")}
-              </Button>
+              {onCancel ? (
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  {t("cancel")}
+                </Button>
+              ) : (
+                <Button variant="outline" asChild>
+                  <Link
+                    href={`/facility/${facilityId}/settings/observation_definitions`}
+                  >
+                    {t("cancel")}
+                  </Link>
+                </Button>
+              )}
               <Button type="submit" disabled={isPending}>
                 {isPending
                   ? isEditMode

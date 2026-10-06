@@ -160,6 +160,12 @@ export function useKeyboardShortcuts(
 
       // Skip if typing in input fields (unless explicitly allowed)
       const target = event.target as HTMLElement;
+
+      // Preserve native keyboard activation of navigation links.
+      if (event.key === "Enter" && target.closest("a[href]")) {
+        return;
+      }
+
       const isInputField =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||

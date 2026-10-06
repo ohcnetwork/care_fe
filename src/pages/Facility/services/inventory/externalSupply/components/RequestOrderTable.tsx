@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
@@ -121,21 +121,21 @@ export default function RequestOrderTable({
               <Button
                 variant="outline"
                 className="shadow-sm font-semibold text-gray-950"
-                onClick={() =>
-                  navigate(
-                    getInventoryBasePath(
-                      facilityId,
-                      locationId,
-                      internal,
-                      true,
-                      isRequester,
-                      `${request.id}`,
-                    ),
-                  )
-                }
+                asChild
               >
-                <Eye />
-                {t("see_details")}
+                <Link
+                  href={getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    true,
+                    isRequester,
+                    `${request.id}`,
+                  )}
+                >
+                  <Eye />
+                  {t("see_details")}
+                </Link>
               </Button>
             </TableCell>
           </TableRow>

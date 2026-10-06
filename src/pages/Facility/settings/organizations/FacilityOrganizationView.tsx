@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -268,21 +268,16 @@ export default function FacilityOrganizationView({
                   </TableHeader>
                   <TableBody>
                     {children.results.map((org) => (
-                      <TableRow
-                        key={org.id}
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/settings/departments/${org.id}/departments`,
-                          )
-                        }
-                        className="hover:cursor-pointer group"
-                      >
+                      <TableRow key={org.id} className="group">
                         <TableCell>
                           <div className="font-medium flex items-center gap-2 py-2">
                             <Building className="size-4" />
-                            <span className="group-hover:underline group-hover:text-primary">
+                            <Link
+                              href={`/facility/${facilityId}/settings/departments/${org.id}/departments`}
+                              className="group-hover:underline group-hover:text-primary"
+                            >
                               {org.name}
-                            </span>
+                            </Link>
                             {org.has_children && (
                               <TooltipProvider>
                                 <Tooltip>

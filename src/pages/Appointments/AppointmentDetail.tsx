@@ -79,7 +79,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -434,28 +434,28 @@ export default function AppointmentDetail(props: Props) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                        )
-                      }
+                      asChild
                       className="flex items-center gap-2"
                     >
-                      <EyeIcon className="size-4" />
-                      {t("view_encounter")}
+                      <Link
+                        href={`/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter.id}/updates`}
+                      >
+                        <EyeIcon className="size-4" />
+                        {t("view_encounter")}
+                      </Link>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}`,
-                        )
-                      }
+                      asChild
                       className="flex items-center gap-2"
                     >
-                      <PersonIcon className="size-4" />
-                      {t("view_patient")}
+                      <Link
+                        href={`/facility/${facility.id}/patient/${appointment.patient.id}`}
+                      >
+                        <PersonIcon className="size-4" />
+                        {t("view_patient")}
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>

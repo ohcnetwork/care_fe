@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Coins, EllipsisVertical, FileIcon, Pencil } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -53,19 +53,16 @@ export interface BaseSearchableItem {
 
 function ItemCard<T extends BaseSearchableItem>({
   item,
-  onItemClick,
+  href,
 }: {
   item: T;
-  onItemClick: (item: T) => void;
+  href: string;
 }) {
   const displayTitle = item.title ?? item.name;
   return (
-    <Card
-      className="hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => onItemClick(item)}
-    >
+    <Card className="hover:shadow-md transition-shadow">
       <CardContent className="py-2 px-4">
-        <div className="flex items-center justify-between">
+        <Link href={href} className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="shrink-0">
               <div className="p-1 rounded bg-green-100 text-green-600">
@@ -81,7 +78,7 @@ function ItemCard<T extends BaseSearchableItem>({
               </span>
             </div>
           </div>
-        </div>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -225,10 +222,10 @@ function ResourceCategoryBreadcrumb({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
-            onClick={() => navigate(basePath)}
+            asChild
             className="cursor-pointer hover:underline hover:underline-offset-2"
           >
-            {baseTitle}
+            <Link href={basePath}>{baseTitle}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
@@ -279,7 +276,7 @@ interface ResourceCategoryListProps<
   basePath: string;
   baseTitle: string;
   onNavigate: (slug: string) => void;
-  onCreateItem?: () => void;
+  createItemHref?: string;
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
   allowCategoryCreate?: boolean;
@@ -298,7 +295,7 @@ export function ResourceCategoryList<
   basePath,
   baseTitle,
   onNavigate,
-  onCreateItem,
+  createItemHref,
   createItemLabel,
   createItemIcon = "l-plus",
   allowCategoryCreate = false,
@@ -434,16 +431,25 @@ export function ResourceCategoryList<
                 {t("add_category")}
               </Button>
             )}
-            {onCreateItem && (
+            {createItemHref && (
               <div className="w-full sm:w-auto">
                 <Button
                   className="w-full sm:w-auto"
-                  onClick={onCreateItem}
-                  disabled={!isLeafCategory || false}
+                  asChild={!!isLeafCategory}
+                  disabled={!isLeafCategory}
                   hidden={!isLeafCategory}
                 >
-                  <CareIcon icon={createItemIcon} className="mr-2" />
-                  {createItemLabel}
+                  {isLeafCategory ? (
+                    <Link href={createItemHref}>
+                      <CareIcon icon={createItemIcon} className="mr-2" />
+                      {createItemLabel}
+                    </Link>
+                  ) : (
+                    <>
+                      <CareIcon icon={createItemIcon} className="mr-2" />
+                      {createItemLabel}
+                    </>
+                  )}
                 </Button>
               </div>
             )}
@@ -515,7 +521,7 @@ export function ResourceCategoryList<
                   <ItemCard
                     key={item.id}
                     item={item}
-                    onItemClick={() => navigate(`${basePath}/${item.slug}`)}
+                    href={`${basePath}/${item.slug}`}
                   />
                 ))}
               </>

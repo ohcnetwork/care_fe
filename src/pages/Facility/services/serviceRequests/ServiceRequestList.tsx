@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScanQrCode } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -131,17 +131,13 @@ function ServiceRequestCard({
               </div>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/locations/${locationId}/service_requests/${request.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" />
-            {t("see_details")}
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/facility/${facilityId}/locations/${locationId}/service_requests/${request.id}`}
+            >
+              <CareIcon icon="l-edit" />
+              {t("see_details")}
+            </Link>
           </Button>
         </div>
       </CardContent>

@@ -46,7 +46,7 @@ test.describe("Specimen Definitions Create", () => {
   test("should create specimen definition with all fields", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
@@ -182,7 +182,7 @@ test.describe("Specimen Definitions Create", () => {
   test("should create specimen definition with all required fields", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
@@ -227,7 +227,7 @@ test.describe("Specimen Definitions Create", () => {
   test("should show validation errors when trying to save without required fields", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     // Click save without filling any required fields
     await page.getByRole("button", { name: /save/i }).click();
@@ -254,7 +254,7 @@ test.describe("Specimen Definitions Create", () => {
   });
 
   test("should auto-populate slug from title", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Title *" }).blur();
@@ -273,7 +273,7 @@ test.describe("Specimen Definitions Create", () => {
   });
 
   test("verify slug validation of 5 - 25 character", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page

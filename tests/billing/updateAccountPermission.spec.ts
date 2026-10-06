@@ -21,7 +21,7 @@ test.describe("Account Management Permissions", () => {
 
       // Navigate to account detail page
       await page
-        .getByRole("button", { name: /go to account/i })
+        .getByRole("link", { name: /go to account/i })
         .first()
         .click();
 
@@ -47,7 +47,7 @@ test.describe("Account Management Permissions", () => {
 
       // Navigate to account detail page
       await page
-        .getByRole("button", { name: /go to account/i })
+        .getByRole("link", { name: /go to account/i })
         .first()
         .click();
 
@@ -69,7 +69,7 @@ test.describe("Account Management Permissions", () => {
     test("cannot edit or rebalance accounts", async ({ page }) => {
       // Navigate to account detail page
       await page
-        .getByRole("button", { name: /go to account/i })
+        .getByRole("link", { name: /go to account/i })
         .first()
         .click();
 

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -468,15 +468,12 @@ function HealthcareServiceFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/healthcare_services`,
-                  )
-                }
-              >
-                {t("cancel")}
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/facility/${facilityId}/settings/healthcare_services`}
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button
                 type="submit"

@@ -13,7 +13,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
   test("Back Button in Patient Registration", async ({ page, context }) => {
     // Navigate to patient registration page
     await page.goto(`/facility/${facilityId}/patients`);
-    await page.getByRole("button", { name: /add new patient/i }).click();
+    await page.getByRole("link", { name: /add new patient/i }).click();
 
     // Verify back button IS visible (has history)
     const backButtonOriginal = page.getByRole("button", { name: /back/i });
@@ -35,8 +35,8 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     // Navigate to account show page
     await page.goto(`/facility/${facilityId}/billing/account`);
 
-    // Click on the first "Go to account" button
-    await page.getByRole("button", { name: "Go to account" }).first().click();
+    // Click on the first "Go to account" link
+    await page.getByRole("link", { name: "Go to account" }).first().click();
 
     // Verify back button IS visible (has history)
     const backButtonOriginal = page.getByRole("button", { name: /back/i });

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -35,9 +35,11 @@ export function PlugConfigList() {
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t("plug_configs")}</h1>
-        <Button onClick={() => navigate("/admin/apps/new")}>
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("add_new_config")}
+        <Button asChild>
+          <Link href="/admin/apps/new">
+            <CareIcon icon="l-plus" className="mr-2" />
+            {t("add_new_config")}
+          </Link>
         </Button>
       </div>
 
@@ -53,11 +55,13 @@ export function PlugConfigList() {
             <TableRow key={config.slug}>
               <TableCell>{config.slug}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate(`/admin/apps/${config.slug}`)}
-                >
-                  <CareIcon icon="l-pen" />
+                <Button variant="ghost" asChild>
+                  <Link
+                    href={`/admin/apps/${config.slug}`}
+                    aria-label={t("edit")}
+                  >
+                    <CareIcon icon="l-pen" />
+                  </Link>
                 </Button>
               </TableCell>
             </TableRow>

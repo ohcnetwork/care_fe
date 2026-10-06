@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -63,13 +62,11 @@ export default function ProductView({ facilityId, productId }: Props) {
             <AlertTitle>{t("error_loading_product")}</AlertTitle>
             <AlertDescription>{t("product_not_found")}</AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => navigate(`/facility/${facilityId}/settings/product`)}
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-            {t("back_to_list")}
+          <Button variant="outline" className="mt-4" asChild>
+            <Link href={`/facility/${facilityId}/settings/product`}>
+              <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+              {t("back_to_list")}
+            </Link>
           </Button>
         </div>
       </Page>
@@ -100,16 +97,13 @@ export default function ProductView({ facilityId, productId }: Props) {
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product/${product.id}/edit`,
-              )
-            }
-          >
-            <CareIcon icon="l-pen" className="mr-2 size-4" />
-            {t("edit")}
+          <Button variant="outline" asChild>
+            <Link
+              href={`/facility/${facilityId}/settings/product/${product.id}/edit`}
+            >
+              <CareIcon icon="l-pen" className="mr-2 size-4" />
+              {t("edit")}
+            </Link>
           </Button>
         </div>
 
@@ -186,17 +180,13 @@ export default function ProductView({ facilityId, productId }: Props) {
                   </p>
                 </div>
                 {product.product_knowledge.is_instance_level === false && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-eye" className="mr-2 size-4" />
-                    {t("view_details")}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      href={`/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`}
+                    >
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      {t("view_details")}
+                    </Link>
                   </Button>
                 )}
               </div>

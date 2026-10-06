@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -158,24 +158,34 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       !!(encounterSearch.key && encounterSearch.value),
   });
 
+  const getVerifyUrl = (
+    patient: PartialPatientModel | PatientListRead | PatientRead,
+    yearOfBirth?: string,
+    action?: "schedule" | "create_encounter",
+  ) => {
+    const params = new URLSearchParams();
+    Object.entries({
+      config: identifierSearch.config,
+      value: identifierSearch.value,
+      phone_number: patient.phone_number,
+      year_of_birth:
+        yearOfBirth || (patient as PatientRead).year_of_birth?.toString() || "",
+      partial_id: getPartialId(patient),
+      ...(action ? { action } : {}),
+    }).forEach(([key, value]) => {
+      if (value != null) {
+        params.set(key, value);
+      }
+    });
+    return `/facility/${facilityId}/patients/home?${params.toString()}`;
+  };
+
   const navigateToVerify = (
     patient: PartialPatientModel | PatientListRead | PatientRead,
     yearOfBirth?: string,
     action?: "schedule" | "create_encounter",
   ) => {
-    navigate(`/facility/${facilityId}/patients/home`, {
-      query: {
-        config: identifierSearch.config,
-        value: identifierSearch.value,
-        phone_number: patient.phone_number,
-        year_of_birth:
-          yearOfBirth ||
-          (patient as PatientRead).year_of_birth?.toString() ||
-          "",
-        partial_id: getPartialId(patient),
-        ...(action ? { action } : {}),
-      },
-    });
+    navigate(getVerifyUrl(patient, yearOfBirth, action));
   };
 
   const handlePatientSelect = (index: number) => {
@@ -553,17 +563,18 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                     >
                                       <Button
                                         variant="outline"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          navigateToVerify(
+                                        asChild
+                                        className="flex-1 rounded-r-none border-r-0"
+                                      >
+                                        <Link
+                                          href={getVerifyUrl(
                                             encounter.patient,
                                             undefined,
                                             "schedule",
-                                          );
-                                        }}
-                                        className="flex-1 rounded-r-none border-r-0"
-                                      >
-                                        {t("schedule_appointment")}
+                                          )}
+                                        >
+                                          {t("schedule_appointment")}
+                                        </Link>
                                       </Button>
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -579,42 +590,36 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                          <DropdownMenuItem
-                                            onSelect={(event) => {
-                                              event.preventDefault();
-                                              event.stopPropagation();
-                                              navigateToVerify(
+                                          <DropdownMenuItem asChild>
+                                            <Link
+                                              href={getVerifyUrl(
                                                 encounter.patient,
                                                 undefined,
                                                 "schedule",
-                                              );
-                                            }}
-                                          >
-                                            {t("schedule_appointment")}
+                                              )}
+                                            >
+                                              {t("schedule_appointment")}
+                                            </Link>
                                           </DropdownMenuItem>
-                                          <DropdownMenuItem
-                                            onSelect={(event) => {
-                                              event.preventDefault();
-                                              event.stopPropagation();
-                                              navigateToVerify(
+                                          <DropdownMenuItem asChild>
+                                            <Link
+                                              href={getVerifyUrl(
                                                 encounter.patient,
                                                 undefined,
                                                 "create_encounter",
-                                              );
-                                            }}
-                                          >
-                                            {t("create_encounter")}
+                                              )}
+                                            >
+                                              {t("create_encounter")}
+                                            </Link>
                                           </DropdownMenuItem>
-                                          <DropdownMenuItem
-                                            onSelect={(event) => {
-                                              event.preventDefault();
-                                              event.stopPropagation();
-                                              navigateToVerify(
+                                          <DropdownMenuItem asChild>
+                                            <Link
+                                              href={getVerifyUrl(
                                                 encounter.patient,
-                                              );
-                                            }}
-                                          >
-                                            {t("patient_home")}
+                                              )}
+                                            >
+                                              {t("patient_home")}
+                                            </Link>
                                           </DropdownMenuItem>
                                         </DropdownMenuContent>
                                       </DropdownMenu>
@@ -776,16 +781,20 @@ function AddPatientButton({
     <Button
       variant={outline ? "outline" : "primary_gradient"}
       className="gap-3 group"
-      onClick={() =>
-        navigate(`/facility/${facilityId}/patient/create`, {
-          query: phoneNumber ? { phone_number: phoneNumber } : undefined,
-        })
-      }
+      asChild
       data-shortcut-id="submit-action"
     >
-      <CareIcon icon="l-plus" className="size-4" />
-      {t("add_new_patient")}
-      <ShortcutBadge actionId="submit-action" className="bg-white" />
+      <Link
+        href={`/facility/${facilityId}/patient/create${
+          phoneNumber
+            ? `?${new URLSearchParams({ phone_number: phoneNumber }).toString()}`
+            : ""
+        }`}
+      >
+        <CareIcon icon="l-plus" className="size-4" />
+        {t("add_new_patient")}
+        <ShortcutBadge actionId="submit-action" className="bg-white" />
+      </Link>
     </Button>
   );
 }
