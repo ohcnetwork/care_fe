@@ -60,6 +60,7 @@ import medicationStatementApi from "@/types/emr/medicationStatement/medicationSt
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -83,6 +84,7 @@ interface MedicationStatementQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
   errors: QuestionValidationError[];
 }
@@ -145,6 +147,7 @@ export function validateMedicationStatementQuestion(
 export function MedicationStatementQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   patientId,
   encounterId,
@@ -185,6 +188,10 @@ export function MedicationStatementQuestion({
       updateQuestionnaireResponseCB(
         [{ type: "medication_statement", value: patientMedications.results }],
         questionnaireResponse.question_id,
+      );
+      setResponseContext(
+        questionnaireResponse.question_id,
+        patientMedications.results,
       );
     }
   }, [patientMedications]);
