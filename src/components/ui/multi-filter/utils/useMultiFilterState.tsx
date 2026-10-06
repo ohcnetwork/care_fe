@@ -7,7 +7,7 @@ export default function useMultiFilterState(
   onFilterUpdate?: (query: Record<string, unknown>) => void,
   queryParams?: Record<string, unknown>,
 ) {
-  const isInitialized = useRef(false);
+  const isInitialized = useRef(true);
   const lastQueryParams = useRef<Record<string, unknown> | undefined>(
     undefined,
   );
@@ -65,7 +65,6 @@ export default function useMultiFilterState(
       };
     }, {});
 
-    isInitialized.current = true;
     return initialState;
   });
 
