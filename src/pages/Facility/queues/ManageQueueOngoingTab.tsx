@@ -20,13 +20,10 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import {
-  OngoingQueueTokenCardsList,
-  TokenDetailsDialog,
-} from "@/pages/Facility/queues/OngoingQueueTokenCard";
+import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { useTokenListInfiniteQuery } from "@/pages/Facility/queues/utils";
-import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
+import { TokenStatus } from "@/types/tokens/token/token";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
@@ -36,7 +33,6 @@ import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CallNextPatientDialog } from "./CallNextPatientDialog";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
 import { useQueueServicePoints } from "./useQueueServicePoints";
 
@@ -58,15 +54,9 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const [mobileSection, setMobileSection] = useState<
     "waiting" | "serving" | "recall"
   >("waiting");
-  const hasServicePoints = assignedServicePoints.length > 0;
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-4",
-        mobileSection !== "recall" && hasServicePoints && "pb-20 lg:pb-0",
-      )}
-    >
+    <div className="flex flex-col gap-4">
       {/* Desktop: inline filters */}
       <div className="hidden lg:flex flex-col lg:flex-row justify-between items-stretch lg:items-end mt-2 gap-4">
         <FilterControls
@@ -75,7 +65,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
           qParams={qParams}
           setQueryParams={setQueryParams}
         />
-        <ServeNextPatientButton facilityId={facilityId} queueId={queueId} />
+        <ServicePointsDropDown />
       </div>
 
       {/* Mobile/tablet section toggle */}
@@ -136,22 +126,14 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
         </div>
       )}
 
-      {(mobileSection === "waiting" || mobileSection === "serving") && (
-        <div className="flex flex-col gap-3 lg:hidden">
+      {mobileSection === "waiting" && (
+        <div className="lg:hidden">
           <FilterControls
             patient={patient}
             patientName={patient_name}
             qParams={qParams}
             setQueryParams={setQueryParams}
           />
-          {hasServicePoints && (
-            <div className="fixed inset-x-0 bottom-0 z-10 px-4 py-2 bg-white border-t border-gray-200">
-              <ServeNextPatientButton
-                facilityId={facilityId}
-                queueId={queueId}
-              />
-            </div>
-          )}
         </div>
       )}
 
@@ -223,11 +205,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                 >
                   {assignedServicePoints.length}
                 </Badge>
-              </div>
-            }
-            options={
-              <div className="hidden lg:block">
-                <ServicePointsDropDown />
               </div>
             }
           >
@@ -533,13 +510,11 @@ function CallNextPatientButton({
   subQueueId,
   facilityId,
   queueId,
-  onSuccess,
   ...props
 }: {
   subQueueId: string;
   facilityId: string;
   queueId: string;
-  onSuccess?: (token: TokenRead) => void;
 } & React.ComponentProps<typeof Button>) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
@@ -554,14 +529,13 @@ function CallNextPatientButton({
     mutationFn: mutate(tokenQueueApi.setNextTokenToSubQueue, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
-    onSuccess: (data: TokenRead) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["infinite-tokens", facilityId, queueId],
       });
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
-      onSuccess?.(data);
     },
   });
 
@@ -576,81 +550,6 @@ function CallNextPatientButton({
         });
       }}
     />
-  );
-}
-
-function ServeNextPatientButton({
-  facilityId,
-  queueId,
-}: {
-  facilityId: string;
-  queueId: string;
-}) {
-  const { t } = useTranslation();
-  const { assignedServicePoints } = useQueueServicePoints();
-  const [openServicePointSelector, setOpenServicePointSelector] =
-    useState(false);
-  const [servedToken, setServedToken] = useState<TokenRead | null>(null);
-  const [showServedTokenDialog, setShowServedTokenDialog] = useState(false);
-
-  const handleServed = (token: TokenRead) => {
-    setServedToken(token);
-    setShowServedTokenDialog(true);
-  };
-
-  if (assignedServicePoints.length === 0) {
-    return null;
-  }
-
-  if (assignedServicePoints.length === 1) {
-    return (
-      <>
-        <CallNextPatientButton
-          subQueueId={assignedServicePoints[0].id}
-          facilityId={facilityId}
-          queueId={queueId}
-          variant="primary"
-          className="w-full lg:w-auto"
-          onSuccess={handleServed}
-        >
-          <Megaphone />
-          {t("call_next_patient")}
-        </CallNextPatientButton>
-        <TokenDetailsDialog
-          facilityId={facilityId}
-          token={servedToken}
-          open={showServedTokenDialog}
-          onOpenChange={setShowServedTokenDialog}
-        />
-      </>
-    );
-  }
-
-  return (
-    <>
-      <Button
-        variant="primary"
-        className="w-full lg:w-auto"
-        onClick={() => setOpenServicePointSelector(true)}
-      >
-        <Megaphone />
-        {t("call_next_patient")}
-      </Button>
-      <CallNextPatientDialog
-        open={openServicePointSelector}
-        onOpenChange={setOpenServicePointSelector}
-        subQueues={assignedServicePoints}
-        facilityId={facilityId}
-        queueId={queueId}
-        onSuccess={handleServed}
-      />
-      <TokenDetailsDialog
-        facilityId={facilityId}
-        token={servedToken}
-        open={showServedTokenDialog}
-        onOpenChange={setShowServedTokenDialog}
-      />
-    </>
   );
 }
 
