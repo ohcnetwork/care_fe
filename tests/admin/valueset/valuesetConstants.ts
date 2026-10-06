@@ -79,4 +79,4 @@ export const SYSTEM_OPTIONS = ["LOINC", "SNOMED", "UCUM"];
 export const STATUS_OPTIONS = ["Active", "Draft", "Retired", "Unknown"];
 
 export const MIN_SLUG_LENGTH = 5;
-export const MAX_SLUG_LENGTH = 25;
+export const MAX_SLUG_LENGTH = 50;
