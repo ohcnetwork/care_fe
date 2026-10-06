@@ -138,7 +138,7 @@ export type DeliveryOrderActionsComponentType = React.FC<{
   locationId: string;
 }>;
 
-export type SupplyDeliveryImportComponentType = React.FC<{
+export type SupplyDeliveryFormActionsComponentType = React.FC<{
   facilityId: string;
   deliveryOrderId: string;
   form: UseFormReturn<SupplyDeliveryFormValues>;
@@ -170,7 +170,7 @@ export type SupportedPluginComponents = {
   PatientHomeQuickActions: PatientHomeActionsComponentType;
   DeliveryOrderActions: DeliveryOrderActionsComponentType;
   UserProfileSections: UserProfileSectionsComponentType;
-  SupplyDeliveryImport: SupplyDeliveryImportComponentType;
+  SupplyDeliveryFormActions: SupplyDeliveryFormActionsComponentType;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

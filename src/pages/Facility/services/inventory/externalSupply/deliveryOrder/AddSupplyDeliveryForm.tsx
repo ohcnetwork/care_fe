@@ -958,7 +958,7 @@ export function AddSupplyDeliveryForm({
           <CardContent className="space-y-4 px-2 sm:px-6">
             {!origin && (
               <PLUGIN_Component
-                __name="SupplyDeliveryImport"
+                __name="SupplyDeliveryFormActions"
                 facilityId={facilityId}
                 deliveryOrderId={deliveryOrderId}
                 form={form}
