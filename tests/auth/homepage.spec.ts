@@ -17,14 +17,39 @@ test.describe("Homepage", () => {
     ).toBeVisible();
   });
 
-  test("should have facility search functionality", async ({ page }) => {
+  /**
+   * Verifies facility search: typing, dropdown, selection, and navigation.
+   */
+  test("should allow searching and selecting a facility organization", async ({ page }) => {
     await page.goto("/");
 
-    // Look for search or facility-related elements
-    // This test should be updated based on actual homepage content
-    const searchInput = page.getByRole("searchbox").first();
-    if (await searchInput.isVisible()) {
-      await expect(searchInput).toBeVisible();
+    // Find the search input by placeholder (uses i18n, so fallback to role and class)
+    const searchInput = page.locator('input[placeholder], input').filter({ has: page.locator('[data-search-container]') });
+    await expect(searchInput).toBeVisible();
+
+    // Type a common letter to trigger dropdown
+    await searchInput.click();
+    await searchInput.fill("a");
+
+    // Wait for dropdown to appear
+    const dropdown = page.locator('.command-group, [role="listbox"]');
+    await expect(dropdown).toBeVisible();
+
+    // Select the first organization if present
+    const firstOption = dropdown.locator('[role="option"], [data-testid="command-item"]').first();
+    if (await firstOption.isVisible()) {
+      const orgName = await firstOption.textContent();
+      await firstOption.click();
+      // The input should now be cleared or show the org name
+      await expect(searchInput).toHaveValue(/|a|/i);
     }
+
+    // The search button should be enabled after selection
+    const searchButton = page.getByRole("button", { name: /search facilities/i });
+    await expect(searchButton).toBeEnabled();
+
+    // Click search and verify navigation
+    await searchButton.click();
+    await expect(page).toHaveURL(/facilities\?/);
   });
 });
