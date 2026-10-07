@@ -26,13 +26,18 @@ import type {
 
 export type DateLike = string | number | Date | null | undefined;
 
+/** yyyy-MM-dd, optionally followed by a time. Not Date.toString() output. */
+const ISO_SHAPED = /^\d{4}-\d{2}-\d{2}(?:[T ].*)?$/;
+
 /** ISO date-only values represent local calendar dates, not UTC midnight. */
 export const parseDate = (value: DateLike): Date => {
   if (value === undefined) return new Date();
   if (value === null) return new Date(NaN);
   if (typeof value !== "string") return new Date(value);
   const date = parseISO(value);
-  return isValid(date) ? date : new Date(value);
+  if (isValid(date)) return date;
+  if (ISO_SHAPED.test(value)) return new Date(NaN);
+  return new Date(value);
 };
 
 export const formatDateTime = (

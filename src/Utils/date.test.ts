@@ -94,11 +94,20 @@ test("formatters preserve midnight, time, literal and meridiem formatting", () =
 });
 
 test("invalid or absent query values do not throw or produce filter dates", () => {
-  for (const value of [undefined, null, "", "not-a-date", new Date(NaN)]) {
+  for (const value of [
+    undefined,
+    null,
+    "",
+    "not-a-date",
+    "2024-02-30",
+    "2024-02-30T10:00:00",
+    new Date(NaN),
+  ]) {
     assert.equal(dateQueryString(value), "");
     assert.equal(dateTimeQueryString(value), "");
   }
   assert.equal(formatDateTime("not-a-date"), "Invalid Date");
+  assert.equal(formatDateTime("2024-02-30"), "Invalid Date");
   assert.equal(formatDateTime(null), "Invalid Date");
   assert.equal(relativeDate("not-a-date"), "Invalid Date");
   assert.equal(relativeTime(null), "Invalid Date");

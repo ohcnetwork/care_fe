@@ -14,14 +14,18 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
   PublicAppointment,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
+import query from "@/Utils/request/query";
+import { formatDateTimeInZone } from "@/Utils/utils";
 
 import AppointmentDialog from "./components/AppointmentDialog";
 
@@ -83,13 +87,17 @@ function PatientPortalIndex() {
   );
 
   const getAppointmentCard = (appointment: PublicAppointment) => {
-    const appointmentDate = formatDateTime(
-      appointment.token_slot.start_datetime,
+    const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+    const slotStart = appointment.token_slot.start_datetime;
+    const appointmentDate = formatDateTimeInZone(
+      slotStart,
+      schedulingTimeZone,
       "dd MMMM yyyy",
     );
-    const appointmentTimeSlot = formatDateTime(
-      appointment.token_slot.start_datetime,
+    const appointmentTimeSlot = formatSchedulingDateTime(
+      slotStart,
       "hh:mm aaa",
+      schedulingTimeZone,
     );
     return (
       <Card key={appointment.id} className="shadow-sm overflow-hidden">
