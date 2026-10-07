@@ -96,31 +96,32 @@ export function DiagnosticReportHeader({
               <ChevronsUpDown className="size-4 mx-2" />
             )}
             {hasObservationHistory && patientId && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t("view_observation_history")}
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <MoreVertical className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <ObservationHistorySheet
-                    patientId={patientId}
-                    diagnosticReportId={report.id}
-                  >
-                    <DropdownMenuItem
-                      onSelect={(event) => event.preventDefault()}
-                      onClick={(event) => event.stopPropagation()}
+              // Portaled menu/sheet events still bubble through the React tree to the collapsible trigger
+              <div onClick={(event) => event.stopPropagation()}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t("view_observation_history")}
                     >
-                      {t("view_observation_history")}
-                    </DropdownMenuItem>
-                  </ObservationHistorySheet>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <MoreVertical className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <ObservationHistorySheet
+                      patientId={patientId}
+                      diagnosticReportId={report.id}
+                    >
+                      <DropdownMenuItem
+                        onSelect={(event) => event.preventDefault()}
+                      >
+                        {t("view_observation_history")}
+                      </DropdownMenuItem>
+                    </ObservationHistorySheet>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
           </div>
         </div>
