@@ -21,10 +21,15 @@ import PrintFooter from "@/components/Common/PrintFooter";
 
 import query from "@/Utils/request/query";
 import {
-  dateQueryString,
+  facilityLocalDateQueryString,
   formatDateTime,
+  formatDateTimeInZone,
   formatPatientAge,
 } from "@/Utils/utils";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import {
   getPatientIdentifiers,
   PatientRead,
@@ -53,6 +58,7 @@ export function PrintAppointments({
 }: PrintAppointmentsProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
   const [qParams] = useQueryParams();
   const [selectedPatient, setSelectedPatient] = useState<PatientRead | null>(
     null,
@@ -82,7 +88,9 @@ export function PrintAppointments({
         slot: qParams.slot,
         user: qParams.practitioners ?? undefined,
         date_after: qParams.date_from,
-        date_before: qParams.date_to ?? dateQueryString(new Date()),
+        date_before:
+          qParams.date_to ??
+          facilityLocalDateQueryString(new Date(), schedulingTimeZone),
         tags: qParams.tags,
         resource_type: resourceType,
         resource_ids: qParams.practitioners ?? resourceId,
@@ -149,8 +157,8 @@ export function PrintAppointments({
               {qParams.date_from && qParams.date_to && (
                 <p className="text-gray-600">
                   {t("date_range")}:{" "}
-                  {format(new Date(qParams.date_from), "dd MMM yyyy")} -{" "}
-                  {format(new Date(qParams.date_to), "dd MMM yyyy")}
+                  {formatDateTime(qParams.date_from, "dd MMM yyyy")} -{" "}
+                  {formatDateTime(qParams.date_to, "dd MMM yyyy")}
                 </p>
               )}
               {qParams.patient && (
@@ -238,14 +246,16 @@ export function PrintAppointments({
                         </TableCell>
                       )}
                       <TableCell className="p-2 align-top flex flex-col gap-1">
-                        {formatDateTime(
+                        {formatDateTimeInZone(
                           appointment.token_slot.start_datetime,
-                          "ddd, DD MMM YYYY",
+                          schedulingTimeZone,
+                          "EEE, dd MMM yyyy",
                         )}
                         <span>
-                          {formatDateTime(
+                          {formatSchedulingDateTime(
                             appointment.token_slot.start_datetime,
-                            "hh:mm a",
+                            "hh:mm aaa",
+                            schedulingTimeZone,
                           )}
                         </span>
                       </TableCell>

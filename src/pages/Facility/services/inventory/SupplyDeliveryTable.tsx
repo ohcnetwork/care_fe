@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatDate, parseISO } from "date-fns";
 import { EllipsisVertical } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
@@ -32,6 +31,7 @@ import {
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -49,6 +49,7 @@ import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { ExtensionContexts } from "@/Utils/schema/types";
+import { formatDateTime } from "@/Utils/utils";
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -306,7 +307,7 @@ export function SupplyDeliveryTable({
                   "-"}
               </TableCell>
               <TableCell>
-                {expiry ? formatDate(parseISO(expiry), "dd/MM/yyyy") : "-"}
+                {expiry ? formatDateTime(expiry, "dd/MM/yyyy") : "-"}
               </TableCell>
               <TableCell>
                 {delivery.supply_request
@@ -324,7 +325,7 @@ export function SupplyDeliveryTable({
               <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
               <TableCell>
                 {delivery.created_date &&
-                  formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
+                  formatDateTime(delivery.created_date, "dd/MM/yyyy")}
               </TableCell>
               <TableCell>
                 <MonetaryDisplay

@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -8,7 +8,11 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
 import { add } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import {
+  formatDateTimeInZone,
+  formatName,
+  formatPatientAge,
+} from "@/Utils/utils";
 import { getPermissions } from "@/common/Permissions";
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
@@ -25,6 +29,7 @@ import {
 import { usePermissions } from "@/context/PermissionContext";
 import usePatientExtensionData from "@/hooks/usePatientExtensionData";
 import { cn } from "@/lib/utils";
+import { getAppointmentsSchedulingTimeZone } from "@/pages/Appointments/schedulingTimeZone";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -189,8 +194,9 @@ export default function AppointmentPrint(props: Props) {
             <div className="text-right text-gray-600 leading-snug">
               <div className="text-xs font-semibold text-gray-950 gap-1 flex justify-end">
                 <span>
-                  {formatDate(
+                  {formatDateTimeInZone(
                     appointment.token_slot.start_datetime,
+                    getAppointmentsSchedulingTimeZone(),
                     "dd MMM, yyyy, EEE",
                   )}
                 </span>

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isBefore, startOfDay } from "date-fns";
 import { Info, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -44,6 +44,11 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  clinicCalendarDate,
+  getClinicTodayDate,
+} from "@/pages/Appointments/schedulingTimeZone";
+import { isScheduleTimeBefore } from "@/pages/Scheduling/dateValidation";
 import {
   calculateSlotDuration,
   formatAvailabilityTime,
@@ -147,6 +152,7 @@ const ScheduleTemplateEditor = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const clinicToday = getClinicTodayDate();
 
   const templateFormSchema = z
     .object({
@@ -160,7 +166,8 @@ const ScheduleTemplateEditor = ({
       is_public: z.boolean(),
     })
     .refine(
-      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      (data) =>
+        !isBefore(startOfDay(data.valid_to), startOfDay(data.valid_from)),
       {
         message: t("to_date_equal_or_after_from_date"),
         path: ["valid_to"],
@@ -171,8 +178,8 @@ const ScheduleTemplateEditor = ({
     resolver: zodResolver(templateFormSchema),
     defaultValues: {
       name: template.name,
-      valid_from: new Date(template.valid_from),
-      valid_to: new Date(template.valid_to),
+      valid_from: clinicCalendarDate(template.valid_from),
+      valid_to: clinicCalendarDate(template.valid_to),
       is_public: template.is_public,
     },
   });
@@ -245,6 +252,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    today={clinicToday}
                   />
                   <FormMessage />
                 </FormItem>
@@ -260,6 +268,7 @@ const ScheduleTemplateEditor = ({
                   <DatePicker
                     date={field.value}
                     onChange={(date) => field.onChange(date)}
+                    today={clinicToday}
                   />
                   <FormMessage />
                 </FormItem>
@@ -580,19 +589,10 @@ const NewAvailabilityCard = ({
       is_auto_fill: z.boolean().optional(),
       num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
     })
-    .refine(
-      (data) => {
-        // Parse time strings into Date objects for comparison
-        const startTime = dayjs(data.start_time, "HH:mm");
-        const endTime = dayjs(data.end_time, "HH:mm");
-
-        return startTime.isBefore(endTime);
-      },
-      {
-        message: t("start_time_must_be_before_end_time"),
-        path: ["start_time"], // This will show the error on the start_time field
-      },
-    );
+    .refine((data) => isScheduleTimeBefore(data.start_time, data.end_time), {
+      message: t("start_time_must_be_before_end_time"),
+      path: ["start_time"], // This will show the error on the start_time field
+    });
 
   const form = useForm({
     resolver: zodResolver(formSchema),

@@ -75,8 +75,8 @@ export function formatValue(
   switch (type) {
     case "dateTime":
       return value instanceof Date
-        ? formatDateTime(value.toISOString(), "hh:mm A; DD/MM/YYYY")
-        : formatDateTime(value.toString(), "hh:mm A; DD/MM/YYYY");
+        ? formatDateTime(value.toISOString(), "hh:mm a; dd/MM/yyyy")
+        : formatDateTime(value.toString(), "hh:mm a; dd/MM/yyyy");
     case "date":
       return formatDateTime(value.toString());
     case "decimal":

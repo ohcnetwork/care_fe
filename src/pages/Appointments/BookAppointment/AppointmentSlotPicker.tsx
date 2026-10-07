@@ -12,13 +12,14 @@ import RadioInput from "@/components/ui/RadioInput";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { getAppointmentsSchedulingTimeZone } from "@/pages/Appointments/schedulingTimeZone";
 import {
   getUniqueSchedulesFromSlots,
   groupSlotsByAvailability,
 } from "@/pages/Appointments/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatDateTimeInZone } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -287,7 +288,11 @@ export const TokenSlotButton = ({
       )}
     >
       <span className="font-semibold">
-        {format(slot.start_datetime, "HH:mm")}
+        {formatDateTimeInZone(
+          slot.start_datetime,
+          getAppointmentsSchedulingTimeZone(),
+          "HH:mm",
+        )}
       </span>
       <span
         className={cn(
