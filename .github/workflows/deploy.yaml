@@ -43,4 +43,4 @@ jobs:
           push: false
           provenance: false
           cache-from: type=gha,scope=care-fe-test
-          cache-to: type=gha,mode=max,scope=care-fe-test
+          cache-to: type=gha,mode=max,scope=care-fe-test,ignore-error=true
