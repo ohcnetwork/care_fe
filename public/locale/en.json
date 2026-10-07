@@ -5332,6 +5332,7 @@
   "registered_group_schema_update_required": "This group contains fields that no longer match its registered schema. Update the questionnaire in the editor before submitting.",
   "registered_group_type_change_blocked": "Choose an empty group before selecting a registered group",
   "registered_group_type_invalid": "Registered groups need a valid plugin identifier",
+  "registered_group_validation_failed": "This group could not be validated. Try again or contact your administrator.",
   "registered_name": "Registered Name",
   "regular_medications": "Regular Medications",
   "regular_nutritional_products": "Regular Nutritional Products",

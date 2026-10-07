@@ -6,6 +6,7 @@ import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { getQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { groupsNeedingSchemaUpdate } from "@/components/QuestionnaireV2/groups/schema";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 
@@ -21,7 +22,7 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 /** Where the questionnaire is being filled — what decides whether a
  *  structured question's slot can show an input at all. */
-export interface RequiredCheckContext {
+export interface QuestionValidationContext {
   questionnaire: QuestionnaireRead;
   subject: RendererSubject;
   /** Question ids whose structured slot threw and is now showing the error
@@ -37,7 +38,7 @@ export interface RequiredCheckContext {
 function structuredQuestionIsAnswerable(
   structuredType: string,
   questionId: string,
-  context: RequiredCheckContext,
+  context: QuestionValidationContext,
 ): boolean {
   if (context.renderFailed.has(questionId)) return false;
   const state = resolveStructuredSlotState(
@@ -58,11 +59,11 @@ function structuredQuestionIsAnswerable(
  * required-invalid; a response counts as answered when any of its entries
  * does, by the same `entryIsAnswered` rule the submit serializer filters on.
  */
-export function collectRequiredErrors(
+export function collectQuestionErrors(
   questions: Question[],
   responses: Record<string, QuestionnaireResponse>,
   t: TFunction,
-  context: RequiredCheckContext,
+  context: QuestionValidationContext,
 ): QuestionValidationError[] {
   const linkIndex = buildLinkIndex(questions);
 
@@ -87,6 +88,23 @@ export function collectRequiredErrors(
             error: t("registered_group_schema_update_required"),
           });
           continue;
+        }
+        const definition = question.structured_type
+          ? getQuestionGroup(question.structured_type)
+          : undefined;
+        if (
+          definition?.validate &&
+          definition.subjects.includes(context.questionnaire.subject_type)
+        ) {
+          try {
+            errors.push(...definition.validate(question, scope, path));
+          } catch {
+            errors.push({
+              question_id: question.id,
+              response_path: path,
+              error: t("registered_group_validation_failed"),
+            });
+          }
         }
         if (question.repeats) {
           const rows = scope[question.id]?.sub_results ?? [];
