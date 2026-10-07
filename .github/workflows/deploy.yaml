@@ -17,32 +17,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   IMAGE_NAME: care_fe
-  AWS_DEFAULT_REGION: ap-south-1
-  AWS_DEFAULT_OUTPUT: json
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  EKS_CLUSTER_NAME: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
 
 jobs:
   test:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-24.04-arm
     name: Test
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-test-${{ hashFiles('package-lock.json', 'Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-test-
 
       - name: Test build
         uses: docker/build-push-action@v6
@@ -51,10 +42,5 @@ jobs:
           file: Dockerfile
           push: false
           provenance: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          cache-from: type=gha,scope=care-fe-test
+          cache-to: type=gha,mode=max,scope=care-fe-test,ignore-error=true
