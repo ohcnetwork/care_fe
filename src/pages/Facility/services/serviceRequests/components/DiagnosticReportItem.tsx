@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Save } from "lucide-react";
+import { Check, NotepadText } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,9 +14,11 @@ import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticR
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import query from "@/Utils/request/query";
 
+import { DottedDivider } from "@/components/careui/dotted-divider";
+import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import { DiagnosticReportAttachments } from "./DiagnosticReportAttachments";
 import { DiagnosticReportItemProps } from "./diagnosticReportFormTypes";
-import { DiagnosticReportItemHeader } from "./DiagnosticReportItemHeader";
+import { DiagnosticReportHeader } from "./DiagnosticReportHeader";
 import { DiagnosticReportObservations } from "./DiagnosticReportObservations";
 import { useDiagnosticReportAttachments } from "./useDiagnosticReportAttachments";
 import { useDiagnosticReportDraft } from "./useDiagnosticReportDraft";
@@ -65,24 +67,29 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <DiagnosticReportItemHeader
+        <DiagnosticReportHeader
           report={report}
-          fullReport={fullReport}
-          patientId={patientId}
+          title={
+            isMultipleDiagnosticReport
+              ? report.code?.display
+              : report.service_request?.title
+          }
+          updatedBy={fullReport?.updated_by}
+          icon={NotepadText}
           isExpanded={isExpanded}
-          isMultipleDiagnosticReport={isMultipleDiagnosticReport}
+          patientId={patientId}
           hasObservationHistory={
             draft.reportDefinitions.length > 0 ||
             !!fullReport?.observations?.length
           }
         />
         <CollapsibleContent>
-          <CardContent className="px-2">
+          <CardContent className="px-2 pb-0">
             <PLUGIN_Component
               __name="ServiceRequestAction"
               serviceRequestId={serviceRequestId}
             />
-            <div className="space-y-6">
+            <div className="space-y-2">
               {showEditor && (
                 <>
                   <PLUGIN_Component
@@ -107,13 +114,13 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
               <div className="space-y-4">
                 {showEditor && (
                   <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
-                    <CardContent className="p-4 space-y-2">
-                      <h3 className="text-base font-semibold text-gray-950">
+                    <CardContent className="p-2 space-y-2">
+                      <h6 className="font-medium text-gray-950">
                         {t("conclusion")}
-                      </h3>
+                      </h6>
                       <RichTextEditor
                         label={t("conclusion")}
-                        placeholder={t("enter_conclusion")}
+                        placeholder={t("enter_conclusion_of_diagnostic_report")}
                         value={draft.conclusion}
                         onChange={draft.setConclusion}
                         disabled={isReadOnly}
@@ -121,19 +128,8 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     </CardContent>
                   </Card>
                 )}
-                <div className="space-y-4">
-                  {isPreliminary && (
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={isReadOnly}
-                      >
-                        <Save className="size-4 mr-2" />
-                        {t("save_results")}
-                      </Button>
-                    </div>
-                  )}
+                <div className="space-y-4 pb-2">
+                  <DottedDivider className="text-gray-400" />
                   <DiagnosticReportAttachments
                     reportId={report.id}
                     attachments={attachments}
@@ -141,6 +137,23 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     isReadOnly={isReadOnly}
                   />
                 </div>
+              </div>
+              <div className="flex sm:flex-row flex-col-reverse justify-between bg-white/50 -mx-2 p-2 pt-3 border-t border-gray-300 rounded-b-lg gap-3">
+                <div className="flex justify-start items-end">
+                  <DiagnosticReportTimestamps report={fullReport ?? report} />
+                </div>
+                {isPreliminary && (
+                  <div className="flex justify-end items-center">
+                    <Button
+                      variant="primary"
+                      onClick={handleSubmit}
+                      disabled={isReadOnly}
+                    >
+                      <Check className="size-4" />
+                      {t("save_results")}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

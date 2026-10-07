@@ -1,3 +1,4 @@
+import { FileCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,17 +7,17 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import { type SavedReportSignal } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportForm";
+import { DiagnosticReportHeader } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportHeader";
 import { DiagnosticReportReviewContent } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportReviewContent";
-import { DiagnosticReportReviewHeader } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportReviewHeader";
 import {
   DiagnosticReportRead,
   DiagnosticReportStatus,
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { useDiagnosticReportReview } from "./useDiagnosticReportReview";
 
 interface DiagnosticReportReviewProps {
@@ -36,13 +37,13 @@ export function DiagnosticReportReview({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">
+      <h5 className="text-gray-950 font-semibold">
         {diagnosticReports.some(
           (report) => report.status !== DiagnosticReportStatus.final,
         )
           ? t("review_test_results")
           : t("diagnostic_report", { count: diagnosticReports.length })}
-      </h2>
+      </h5>
 
       {diagnosticReports.map((report) => (
         <DiagnosticReportReviewItem
@@ -67,7 +68,6 @@ function DiagnosticReportReviewItem({
   facilityId,
   patientId,
   serviceRequestId,
-  observationDefinitions,
   disableEdit,
   expandedReport,
 }: DiagnosticReportReviewItemProps) {
@@ -89,12 +89,10 @@ function DiagnosticReportReviewItem({
     isReportError,
     refetchReport,
     files,
-    isFilesFetched,
     isUpdatingReport,
     conclusion,
     onConclusionChange,
     observations,
-    hasContent,
     canApprove,
     onApprove,
   } = useDiagnosticReportReview({
@@ -106,8 +104,6 @@ function DiagnosticReportReviewItem({
     isExpanded,
   });
   const currentReport = fullReport ?? report;
-  const showObservationHistory =
-    observationDefinitions.length > 0 || !!currentReport.observations?.length;
 
   return (
     <Card
@@ -117,21 +113,19 @@ function DiagnosticReportReviewItem({
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <DiagnosticReportReviewHeader
+        <DiagnosticReportHeader
           report={currentReport}
-          patientId={patientId}
+          title={
+            currentReport.code?.display ?? currentReport.service_request?.title
+          }
+          updatedBy={currentReport.updated_by}
+          icon={FileCheck}
           isExpanded={isExpanded}
-          showObservationHistory={showObservationHistory}
-          isEmpty={!!fullReport && isFilesFetched && !hasContent}
         />
         <CollapsibleContent>
-          <CardContent className="px-2 bg-gray-100">
+          <CardContent className="px-2 pb-0">
             {isLoadingReport ? (
-              <div className="space-y-4 p-4">
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-              </div>
+              <TableSkeleton count={4} />
             ) : isReportError || !fullReport ? (
               <div className="space-y-2 p-4" role="alert">
                 <p>{t("something_went_wrong")}</p>

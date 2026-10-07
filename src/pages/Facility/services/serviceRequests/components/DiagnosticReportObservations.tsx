@@ -27,21 +27,13 @@ export function DiagnosticReportObservations({
       aria-labelledby={`observations-${reportId}`}
       className="rounded-lg border border-gray-200 bg-white px-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 py-3">
         <h3
           id={`observations-${reportId}`}
           className="text-base font-semibold text-gray-950"
         >
           {t("observations")}
         </h3>
-        <DiagnosticReportObservationPicker
-          facilityId={facilityId}
-          selectedIds={draft.reportDefinitions.map(
-            (definition) => definition.id,
-          )}
-          disabled={isReadOnly}
-          onSelect={draft.handleAddDefinition}
-        />
       </div>
       <div>
         {draft.reportDefinitions.map((definition) => (
@@ -56,6 +48,16 @@ export function DiagnosticReportObservations({
             )}
           />
         ))}
+      </div>
+      <div className="flex justify-end border-t border-gray-200 py-3">
+        <DiagnosticReportObservationPicker
+          facilityId={facilityId}
+          selectedIds={draft.reportDefinitions.map(
+            (definition) => definition.id,
+          )}
+          disabled={isReadOnly}
+          onSelect={draft.handleAddDefinition}
+        />
       </div>
     </section>
   );

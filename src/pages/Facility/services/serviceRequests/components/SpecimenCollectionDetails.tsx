@@ -1,4 +1,4 @@
-import { Receipt } from "lucide-react";
+import { CheckCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -6,7 +6,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -35,17 +34,14 @@ export function SpecimenCollectionDetails({
     <AccordionItem value="collection-details" className="border-none">
       <AccordionTrigger
         className={cn(
-          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-gray-100 data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
         )}
       >
         <div className="flex items-center gap-2 flex-1 mr-4">
-          <Receipt className="size-4 text-gray-500" />
-          <span className="font-medium underline">
+          <span className="font-medium flex items-center gap-2 underline">
             {t("specimen_collection")}
+            <CheckCheck className="size-4 text-blue-500 shrink-0" />
           </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="green"> 1/1 {t("collected")}</Badge>
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">

@@ -178,7 +178,6 @@ export function DiagnosticReportDetailCard({
               type="diagnostic_report"
               associatingId={report.id}
               canEdit={false}
-              showHeader={false}
             />
           </div>
         )}
