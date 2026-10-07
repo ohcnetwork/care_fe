@@ -10,12 +10,21 @@ export interface ResolvedObservationEntry {
   unit?: Code;
   enteredBy: string;
   note?: string | null;
+  /** Position of this reading among readings of the same code sharing the same time. */
+  occurrence: number;
+  /** Unique identifier of a reading, stable across renders. */
+  key: string;
 }
+
+type UnkeyedObservationEntry = Omit<
+  ResolvedObservationEntry,
+  "occurrence" | "key"
+>;
 
 export function resolveObservationEntries(
   results: ObservationListRead[],
 ): Record<string, ResolvedObservationEntry[]> {
-  const groupedObj: Record<string, ResolvedObservationEntry[]> = {};
+  const groupedObj: Record<string, UnkeyedObservationEntry[]> = {};
 
   for (const obs of results) {
     if (!obs.effective_datetime) continue;
@@ -53,11 +62,23 @@ export function resolveObservationEntries(
     }
   }
 
-  for (const entries of Object.values(groupedObj)) {
-    entries.sort((a, b) => a.time - b.time);
+  const resolved: Record<string, ResolvedObservationEntry[]> = {};
+
+  for (const [code, entries] of Object.entries(groupedObj)) {
+    // A service request can record several results for one component, so readings
+    // can share an effective time; number them in API order to keep them distinct.
+    const occurrenceByTime = new Map<number, number>();
+    resolved[code] = entries
+      .map((entry) => {
+        const occurrence = occurrenceByTime.get(entry.time) ?? 0;
+        occurrenceByTime.set(entry.time, occurrence + 1);
+        return { ...entry, occurrence, key: `${entry.time}#${occurrence}` };
+      })
+      // The API returns readings newest first; charts read oldest to newest.
+      .reverse();
   }
 
-  return groupedObj;
+  return resolved;
 }
 
 // Convert a stored observation value to a number, or null when blank/non-numeric.

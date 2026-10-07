@@ -44,27 +44,35 @@ export const ObservationHistoryMatrix = ({
   }, [inView, hasNextPage, fetchNextPage]);
 
   const { columns, rows } = useMemo(() => {
-    // One column per distinct reading time, most recent first.
-    const columnTimes = new Set<number>();
+    // One column per reading. Readings can share an effective time (several
+    // results for one component), so columns are keyed per reading, not per time.
+    const columnByKey = new Map<string, { time: number; occurrence: number }>();
+    const countByTime = new Map<number, number>();
     for (const list of Object.values(entriesByCode)) {
       for (const entry of list) {
-        columnTimes.add(entry.time);
+        if (columnByKey.has(entry.key)) continue;
+        columnByKey.set(entry.key, {
+          time: entry.time,
+          occurrence: entry.occurrence,
+        });
+        countByTime.set(entry.time, (countByTime.get(entry.time) ?? 0) + 1);
       }
     }
-    const columns = Array.from(columnTimes)
-      .sort((a, b) => b - a)
-      .map((time) => ({ key: String(time), time }));
+    const columns = Array.from(columnByKey, ([key, col]) => ({
+      key,
+      ...col,
+      isRepeated: (countByTime.get(col.time) ?? 0) > 1,
+    })).sort((a, b) => b.time - a.time || a.occurrence - b.occurrence);
 
     const rows = codes.map((code) => {
       const codeEntries = entriesByCode[code.code] ?? [];
 
-      // Index each reading by its exact time.
-      const valuesByTime: Record<
+      const valuesByKey: Record<
         string,
         { time: number; value?: string | null }
       > = {};
       for (const entry of codeEntries) {
-        valuesByTime[String(entry.time)] = {
+        valuesByKey[entry.key] = {
           time: entry.time,
           value: entry.value,
         };
@@ -73,7 +81,7 @@ export const ObservationHistoryMatrix = ({
       return {
         id: code.code,
         title: code.display || code.code,
-        valuesByTime,
+        valuesByKey,
       };
     });
 
@@ -149,6 +157,7 @@ export const ObservationHistoryMatrix = ({
                       </span>
                       <span className="font-semibold text-gray-700">
                         {format(new Date(col.time), "h:mm a")}
+                        {col.isRepeated && ` #${col.occurrence + 1}`}
                       </span>
                     </div>
                   </TableHead>
@@ -176,7 +185,7 @@ export const ObservationHistoryMatrix = ({
                   </div>
                 </TableCell>
                 {columns.map((col, index) => {
-                  const entry = row.valuesByTime[col.key];
+                  const entry = row.valuesByKey[col.key];
                   const isLatest = index === 0;
                   return (
                     <TableCell

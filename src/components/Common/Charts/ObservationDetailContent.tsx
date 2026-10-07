@@ -34,20 +34,24 @@ const RenderXAxisTick = ({
   x,
   y,
   payload,
-  yearBoundaryTimes,
+  timeByKey,
+  yearBoundaryKeys,
 }: {
   x?: number | string;
   y?: number | string;
   payload?: { value: number | string };
-  yearBoundaryTimes: Set<number>;
+  timeByKey: Map<string, number>;
+  yearBoundaryKeys: Set<string>;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const value = Number(payload?.value);
-  const showYear = yearBoundaryTimes.has(value);
-  const dateLabel = isToday(new Date(value))
+  const key = String(payload?.value);
+  const time = timeByKey.get(key);
+  if (time === undefined) return <g />;
+  const showYear = yearBoundaryKeys.has(key);
+  const dateLabel = isToday(new Date(time))
     ? t("today")
-    : format(new Date(value), showYear ? "d MMM yyyy" : "d MMM");
-  const timeLabel = format(new Date(value), "h:mma");
+    : format(new Date(time), showYear ? "d MMM yyyy" : "d MMM");
+  const timeLabel = format(new Date(time), "h:mma");
   return (
     <text
       x={x}
@@ -137,6 +141,7 @@ export function ObservationDetailContent({
       const value = toNumericValue(entry.value);
       if (value === null) return null;
       return {
+        key: entry.key,
         time: entry.time,
         value,
         enteredBy: entry.enteredBy,
@@ -147,6 +152,7 @@ export function ObservationDetailContent({
       (
         entry,
       ): entry is {
+        key: string;
         time: number;
         value: number;
         enteredBy: string;
@@ -156,8 +162,10 @@ export function ObservationDetailContent({
 
   const lastIndex = chartData.length - 1;
 
+  const timeByKey = new Map(chartData.map((entry) => [entry.key, entry.time]));
+
   // Mark the first and last reading of each calendar year so the x-axis can show the year only there.
-  const yearBoundaryTimes = new Set<number>();
+  const yearBoundaryKeys = new Set<string>();
   chartData.forEach((entry, index) => {
     const year = new Date(entry.time).getFullYear();
     const prevYear =
@@ -167,7 +175,7 @@ export function ObservationDetailContent({
         ? new Date(chartData[index + 1].time).getFullYear()
         : null;
     if (year !== prevYear || year !== nextYear) {
-      yearBoundaryTimes.add(entry.time);
+      yearBoundaryKeys.add(entry.key);
     }
   });
 
@@ -248,14 +256,17 @@ export function ObservationDetailContent({
                     }}
                   />
                   <XAxis
-                    dataKey="time"
+                    dataKey="key"
                     type="category"
                     scale="point"
                     interval={0}
                     tickLine={{ stroke: "#374151" }}
                     axisLine={{ stroke: "#6b7280" }}
                     tick={
-                      <RenderXAxisTick yearBoundaryTimes={yearBoundaryTimes} />
+                      <RenderXAxisTick
+                        timeByKey={timeByKey}
+                        yearBoundaryKeys={yearBoundaryKeys}
+                      />
                     }
                   />
                   <YAxis
