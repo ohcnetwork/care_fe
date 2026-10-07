@@ -8,6 +8,19 @@ import {
   isScheduleTimeBefore,
 } from "./dateValidation";
 
+test("a day before the clinic day is not a future start time", () => {
+  const now = new Date("2026-10-07T04:30:00Z");
+  assert.equal(
+    isScheduleStartTimeInFutureInZone(
+      parseISO("2026-10-06"),
+      "09:00",
+      "Asia/Kolkata",
+      now,
+    ),
+    false,
+  );
+});
+
 test("clinic start time uses the zone clock during a viewer DST gap", () => {
   const originalTimezone = process.env.TZ;
   process.env.TZ = "America/New_York";
@@ -122,6 +135,15 @@ for (const timezone of ["UTC", "America/New_York", "Asia/Kolkata"]) {
       context.mock.timers.reset();
 
       const now = parseISO("2026-03-08T23:59:59");
+      assert.equal(
+        isScheduleStartTimeInFutureInZone(
+          parseISO("2026-03-07"),
+          "09:00",
+          timezone,
+          now,
+        ),
+        false,
+      );
       assert.equal(
         isScheduleStartTimeInFutureInZone(
           parseISO("2026-03-09"),

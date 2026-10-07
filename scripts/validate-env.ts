@@ -31,6 +31,19 @@ const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
   message: "Must be a valid number",
 });
 
+const ianaTimeZoneSchema = z.string().refine(
+  (val) => {
+    if (val === "") return true;
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: val });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: "Must be a valid IANA timezone" },
+);
+
 const positiveNumberAsString = z.string().refine(
   (val) => {
     const n = parseInt(val, 10);
@@ -128,6 +141,7 @@ const envSchema = z
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED: booleanAsStringSchema.optional(),
     REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_APPOINTMENTS_SCHEDULING_TIMEZONE: ianaTimeZoneSchema.optional(),
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),

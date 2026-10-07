@@ -21,6 +21,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentFormSection } from "@/pages/Appointments/BookAppointment/AppointmentFormSection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
 import {
   formatSchedulingDateTime,
   getAppointmentsSchedulingTimeZone,
@@ -259,6 +260,7 @@ export function AppointmentQuestion({
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
               <div className="space-y-4">
+                <SchedulingTimeZoneCallout />
                 <AppointmentDateSelection
                   facilityId={facilityId}
                   resourceId={selectedResource.resource?.id || undefined}

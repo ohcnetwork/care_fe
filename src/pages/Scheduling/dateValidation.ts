@@ -28,7 +28,8 @@ export function isScheduleStartTimeInFutureInZone(
   if (!isValid(parsedStart)) return false;
   const selectedDay = format(date, "yyyy-MM-dd");
   const clinicDay = facilityLocalDateQueryString(now, timeZone);
-  if (selectedDay !== clinicDay) return true;
+  if (selectedDay < clinicDay) return false;
+  if (selectedDay > clinicDay) return true;
   const clinicTime = formatDateTimeInZone(now, timeZone, "HH:mm");
   return format(parsedStart, "HH:mm") > clinicTime;
 }

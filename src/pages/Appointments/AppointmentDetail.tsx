@@ -30,6 +30,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
 import {
   formatSchedulingTimeRange,
   getAppointmentsSchedulingTimeZone,
@@ -1090,6 +1091,9 @@ const AppointmentActions = ({
                       </SheetHeader>
 
                       <div className="mt-6 flex-1">
+                        <div className="mb-4 empty:hidden">
+                          <SchedulingTimeZoneCallout />
+                        </div>
                         <div className="text-sm">
                           <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
                             <Label className="font-medium">

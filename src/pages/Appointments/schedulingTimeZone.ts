@@ -146,17 +146,27 @@ export function timeZonesMatchForInstant(
 }
 
 /**
- * Show clinic-TZ hint when the viewer's zone would disagree with the configured
- * zone on wall-clock display (handles Asia/Calcutta vs Asia/Kolkata, etc.).
+ * General notices compare timezone identities, resolving aliases such as
+ * Asia/Calcutta and Asia/Kolkata. For a specific instant, compare clock displays.
  */
 export function shouldShowSchedulingTimeZoneHint(
   schedulingTimeZone: string,
   userTimeZone: string | undefined = getUserTimeZone(),
-  at: Date = new Date(),
+  at?: Date,
 ): boolean {
   if (!userTimeZone) return false;
   if (userTimeZone === schedulingTimeZone) return false;
-  return !timeZonesMatchForInstant(at, userTimeZone, schedulingTimeZone);
+  if (at) {
+    return !timeZonesMatchForInstant(at, userTimeZone, schedulingTimeZone);
+  }
+  return (
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: userTimeZone,
+    }).resolvedOptions().timeZone !==
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: schedulingTimeZone,
+    }).resolvedOptions().timeZone
+  );
 }
 
 /** Prefer common abbreviations; Intl often returns "GMT+5:30" for Kolkata. */
@@ -181,18 +191,21 @@ export function getSchedulingTimeZoneAbbreviation(
 }
 
 /**
- * " IST" (leading space) when the viewer is outside the clinic zone; otherwise "".
- * Append after formatted clinic times on cards / detail.
+ * Optional clinic timezone suffix with a leading space. Dated appointments use
+ * the instant's abbreviation; undated schedules use a stable IANA timezone name.
  */
 export function getSchedulingTimeZoneSuffix(
   schedulingTimeZone: string = getAppointmentsSchedulingTimeZone(),
-  at: Date = new Date(),
+  at?: Date,
   userTimeZone: string | undefined = getUserTimeZone(),
 ): string {
   if (!shouldShowSchedulingTimeZoneHint(schedulingTimeZone, userTimeZone, at)) {
     return "";
   }
-  return ` ${getSchedulingTimeZoneAbbreviation(schedulingTimeZone, at)}`;
+  const label = at
+    ? getSchedulingTimeZoneAbbreviation(schedulingTimeZone, at)
+    : schedulingTimeZone;
+  return ` ${label}`;
 }
 
 /** Clinic-zone datetime plus optional TZ suffix when the viewer differs. */

@@ -20,6 +20,68 @@ import {
 
 const at = new Date("2026-09-30T09:40:00.000Z");
 
+test("general hints recognize identical zones and aliases in either direction", () => {
+  for (const [clinic, viewer] of [
+    ["Asia/Kolkata", "Asia/Kolkata"],
+    ["Asia/Kolkata", "Asia/Calcutta"],
+    ["Asia/Calcutta", "Asia/Kolkata"],
+  ]) {
+    assert.equal(shouldShowSchedulingTimeZoneHint(clinic, viewer), false);
+    assert.equal(getSchedulingTimeZoneSuffix(clinic, undefined, viewer), "");
+  }
+});
+
+for (const now of ["2026-01-15T12:00:00Z", "2026-07-15T12:00:00Z"]) {
+  test(`general hints distinguish London and Abidjan on ${now}`, (t) => {
+    t.mock.timers.enable({ apis: ["Date"], now: new Date(now) });
+    assert.equal(
+      shouldShowSchedulingTimeZoneHint("Europe/London", "Africa/Abidjan"),
+      true,
+    );
+  });
+
+  test(`undated suffix uses a stable London timezone label on ${now}`, (t) => {
+    t.mock.timers.enable({ apis: ["Date"], now: new Date(now) });
+    assert.equal(
+      getSchedulingTimeZoneSuffix("Europe/London", undefined, "Africa/Abidjan"),
+      " Europe/London",
+    );
+  });
+}
+
+test("undated suffix uses the configured name rather than an abbreviation", () => {
+  assert.equal(
+    getSchedulingTimeZoneSuffix("Asia/Kolkata", undefined, "Pacific/Auckland"),
+    " Asia/Kolkata",
+  );
+});
+
+test("dated hints still compare clocks at the supplied appointment instant", () => {
+  for (const [instant, expected] of [
+    ["2026-01-15T12:00:00Z", false],
+    ["2026-07-15T12:00:00Z", true],
+  ] as const) {
+    assert.equal(
+      shouldShowSchedulingTimeZoneHint(
+        "Europe/London",
+        "Africa/Abidjan",
+        new Date(instant),
+      ),
+      expected,
+    );
+    assert.equal(
+      getSchedulingTimeZoneSuffix(
+        "Europe/London",
+        new Date(instant),
+        "Africa/Abidjan",
+      ),
+      expected
+        ? ` ${getSchedulingTimeZoneAbbreviation("Europe/London", new Date(instant))}`
+        : "",
+    );
+  }
+});
+
 test("Kolkata and Calcutta aliases match for hint purposes", () => {
   assert.equal(
     timeZonesMatchForInstant(at, "Asia/Kolkata", "Asia/Calcutta"),

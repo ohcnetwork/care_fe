@@ -12,6 +12,18 @@ import { CountryCode } from "libphonenumber-js";
 
 const env = import.meta.env ?? {};
 
+const DEFAULT_SCHEDULING_TIME_ZONE = "Asia/Kolkata";
+
+function schedulingTimeZoneFromEnv(value: string | undefined): string {
+  if (!value) return DEFAULT_SCHEDULING_TIME_ZONE;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: value });
+    return value;
+  } catch {
+    return DEFAULT_SCHEDULING_TIME_ZONE;
+  }
+}
+
 interface ILogo {
   light: string;
   dark: string;
@@ -125,8 +137,9 @@ const careConfig = {
     ),
 
     /** IANA timezone for appointment filters and slot display until facility TZ exists on API. */
-    schedulingTimeZone:
-      env.REACT_APPOINTMENTS_SCHEDULING_TIMEZONE || "Asia/Kolkata",
+    schedulingTimeZone: schedulingTimeZoneFromEnv(
+      env.REACT_APPOINTMENTS_SCHEDULING_TIMEZONE,
+    ),
   },
 
   /**
