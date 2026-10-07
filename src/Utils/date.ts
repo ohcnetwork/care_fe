@@ -1,3 +1,4 @@
+import { tz } from "@date-fns/tz";
 import {
   addDays,
   addMonths,
@@ -77,6 +78,26 @@ export const dateQueryString = (date: DateLike) => {
 /** Local midnight from a "YYYY-MM-DD" string for the calendar. */
 export const parseLocalDate = (dateYmd?: string): Date | undefined =>
   dateYmd ? parseISO(dateYmd) : undefined;
+
+/** Calendar day in `timeZone` as yyyy-MM-dd (matches backend slot day filtering). */
+export const facilityLocalDateQueryString = (
+  date: DateLike,
+  timeZone: string,
+): string => {
+  const parsed = parseDate(date);
+  if (!isValid(parsed)) return "";
+  return format(parsed, "yyyy-MM-dd", { in: tz(timeZone) });
+};
+
+export const formatDateTimeInZone = (
+  date: DateLike,
+  timeZone: string,
+  pattern: string,
+): string => {
+  const parsed = parseDate(date);
+  if (!isValid(parsed)) return "Invalid Date";
+  return format(parsed, pattern, { in: tz(timeZone) });
+};
 
 export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
   if (!date) return "";

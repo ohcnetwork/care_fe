@@ -35,7 +35,11 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import {
-  isScheduleStartTimeInFuture,
+  getAppointmentsSchedulingTimeZone,
+  getClinicTodayDate,
+} from "@/pages/Appointments/schedulingTimeZone";
+import {
+  isScheduleStartTimeInFutureInZone,
   isScheduleTimeBefore,
 } from "@/pages/Scheduling/dateValidation";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -66,18 +70,19 @@ export default function CreateScheduleExceptionSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
+  const clinicToday = getClinicTodayDate();
 
   const formSchema = z
     .object({
       reason: z.string().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
-        .min(startOfDay(new Date()), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       valid_to: z
         .date({ error: t("field_required") })
-        .min(startOfDay(new Date()), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_exception_creation_for_past_validation_error"),
         }),
       start_time: z
@@ -104,7 +109,12 @@ export default function CreateScheduleExceptionSheet({
     .refine(
       (data) => {
         if (data.unavailable_all_day) return true;
-        return isScheduleStartTimeInFuture(data.valid_from, data.start_time);
+        return isScheduleStartTimeInFutureInZone(
+          data.valid_from,
+          data.start_time,
+          getAppointmentsSchedulingTimeZone(),
+          new Date(),
+        );
       },
       {
         message: t("start_time_must_be_in_the_future"),
@@ -246,8 +256,9 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          today={clinicToday}
                           disabled={(date) =>
-                            isBefore(startOfDay(date), startOfDay(new Date()))
+                            isBefore(startOfDay(date), startOfDay(clinicToday))
                           }
                         />
                         <FormMessage />
@@ -264,8 +275,9 @@ export default function CreateScheduleExceptionSheet({
                         <DatePicker
                           date={field.value}
                           onChange={(date) => field.onChange(date)}
+                          today={clinicToday}
                           disabled={(date) =>
-                            isBefore(startOfDay(date), startOfDay(new Date()))
+                            isBefore(startOfDay(date), startOfDay(clinicToday))
                           }
                         />
                         <FormMessage />

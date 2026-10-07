@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -80,6 +81,7 @@ export default function CreateScheduleTemplateSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
+  const clinicToday = getClinicTodayDate();
 
   const weekdayFormat = useBreakpoints({
     default: "alphabet",
@@ -91,7 +93,7 @@ export default function CreateScheduleTemplateSheet({
       name: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
-        .min(startOfDay(new Date()), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_creation_for_past_validation_error"),
         }),
       valid_to: z.date({ error: t("field_required") }),
@@ -359,8 +361,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        today={clinicToday}
                         disabled={(date) =>
-                          isBefore(startOfDay(date), startOfDay(new Date()))
+                          isBefore(startOfDay(date), startOfDay(clinicToday))
                         }
                       />
                       <FormMessage />
@@ -377,8 +380,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        today={clinicToday}
                         disabled={(date) =>
-                          isBefore(startOfDay(date), startOfDay(new Date()))
+                          isBefore(startOfDay(date), startOfDay(clinicToday))
                         }
                       />
                       <FormMessage />

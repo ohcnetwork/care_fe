@@ -55,6 +55,10 @@ import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import {
+  getClinicTodayDate,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { isBefore, parseISO, startOfDay } from "date-fns";
 import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
@@ -258,8 +262,7 @@ export default function QueuesIndex({
   // Set default date to today if no date is specified
   useEffect(() => {
     if (!qParams.date) {
-      const today = new Date();
-      updateQuery({ date: dateQueryString(today) });
+      updateQuery({ date: getClinicTodayYmd() });
     }
   }, [qParams.date, updateQuery]);
 
@@ -310,10 +313,11 @@ export default function QueuesIndex({
 
   const queues = queuesResponse?.results || [];
   const subQueues = subQueuesResponse?.results || [];
+  const clinicToday = getClinicTodayDate();
   const selectedDate = qParams.date ? parseISO(qParams.date) : undefined;
   const isPast =
     !!selectedDate &&
-    isBefore(startOfDay(selectedDate), startOfDay(new Date()));
+    isBefore(startOfDay(selectedDate), startOfDay(clinicToday));
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
@@ -325,7 +329,11 @@ export default function QueuesIndex({
             <label className="text-sm font-medium text-gray-700">
               {t("date")}
             </label>
-            <DatePicker date={selectedDate} onChange={handleDateChange} />
+            <DatePicker
+              date={selectedDate}
+              onChange={handleDateChange}
+              today={clinicToday}
+            />
           </div>
 
           {/* Resource Picker - Only show for Practitioner resource type */}
