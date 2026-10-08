@@ -126,6 +126,25 @@ const Login = (props: LoginProps) => {
     localStorage.setItem(LocalStorageKeys.loginPreference, mode);
   }, [mode]);
 
+  // Auto-focus input when login tab or mode changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mode === "patient") {
+        if (isOtpSent) {
+          const otpInput = document.getElementById("otp");
+          otpInput?.focus();
+        } else {
+          const phoneInput = document.getElementById("phone");
+          phoneInput?.focus();
+        }
+      } else if (!forgotPassword) {
+        const usernameInput = document.getElementById("username");
+        usernameInput?.focus();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [mode, forgotPassword, isOtpSent]);
+
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
     mutationFn: mutate(otpApi.send),
@@ -381,6 +400,7 @@ const Login = (props: LoginProps) => {
                             name="username"
                             type="text"
                             autoComplete="username"
+                            autoFocus
                             value={form.username}
                             onChange={handleChange}
                             className={cn(
@@ -480,7 +500,7 @@ const Login = (props: LoginProps) => {
                     </TabsList>
 
                     {/* Staff Login */}
-                    <TabsContent value="staff">
+                    <TabsContent value="staff" key="staff">
                       {!forgotPassword ? (
                         <form onSubmit={handleSubmit} className="space-y-4">
                           <div className="space-y-2">
@@ -490,6 +510,7 @@ const Login = (props: LoginProps) => {
                               name="username"
                               type="text"
                               autoComplete="username"
+                              autoFocus
                               value={form.username}
                               onChange={handleChange}
                               className={cn(
@@ -567,13 +588,14 @@ const Login = (props: LoginProps) => {
                     </TabsContent>
 
                     {/* Patient Login */}
-                    <TabsContent value="patient">
+                    <TabsContent value="patient" key={`patient-${isOtpSent}`}>
                       <form onSubmit={handlePatientLogin} className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="phone">{t("phone_number")}</Label>
                           <PhoneInput
                             id="phone"
                             name="phone"
+                            autoFocus
                             value={phone}
                             onChange={(value) => {
                               setPhone(value ?? "");

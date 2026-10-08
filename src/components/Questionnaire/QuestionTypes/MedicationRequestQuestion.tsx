@@ -1706,8 +1706,8 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {desktopLayout && (
         <div
           className={cn(
-            "lg:p-4 lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm",
-            isReadOnly ? "justify-center" : "justify-between",
+            "lg:px-2 lg:py-1 flex flex-col lg:col-span-1 lg:border-r border-gray-200 font-medium text-sm min-w-0",
+            isReadOnly ? "justify-center" : "justify-start gap-1",
           )}
         >
           <span
@@ -1732,7 +1732,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </div>
       )}
       {/* Dosage */}
-      <div className="p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="p-1 lg:py-1 lg:border-r border-gray-200 min-w-0">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1858,7 +1858,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         })}
       </div>
       {/* Frequency */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("frequency")}
           <span className="text-red-500 ml-0.5">*</span>
@@ -1889,7 +1889,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         })}
       </div>
       {/* Duration */}
-      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 p-1 lg:py-1 lg:border-r border-gray-200 min-w-0">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("duration")}
         </Label>
@@ -1983,7 +1983,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {showAdvancedFields && desktopLayout && (
         <>
           {/* Instructions */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
@@ -2025,7 +2025,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Route */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
@@ -2044,7 +2044,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Site */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
@@ -2063,7 +2063,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Method */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             {medication.dosage_instruction.map((di, dIdx) => (
               <div key={dIdx}>
                 {medication.dosage_instruction.length > 1 && dIdx > 0 && (
@@ -2083,7 +2083,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             ))}
           </div>
           {/* Intent */}
-          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             <Select
               value={medication.intent}
               onValueChange={(value: MedicationRequestIntent) =>
@@ -2111,7 +2111,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             </Select>
           </div>
           {/* Authored On */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
             <CombinedDatePicker
               value={
                 medication.authored_on
@@ -2126,7 +2126,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
           {/* Requester */}
-          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden flex gap-1">
+          <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0 flex gap-1">
             <UserSelector
               selected={medication.requester}
               onChange={(user) => {
@@ -2151,7 +2151,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         </>
       )}
       {/* Notes - Always visible on desktop, at the end before remove button */}
-      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 min-w-0">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
           value={medication.note || ""}
