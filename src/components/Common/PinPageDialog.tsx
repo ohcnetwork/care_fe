@@ -88,7 +88,9 @@ function PinPageDialog({ url }: PinPageDialogProps) {
       <Button
         variant="outline"
         onClick={() => onOpenChange(true)}
-        className="hidden"
+        className="sr-only"
+        tabIndex={-1}
+        aria-label={isAlreadyPinned ? t("unpin_page") : t("pin_page")}
       >
         <ShortcutBadge actionId="pin-page" />
       </Button>
