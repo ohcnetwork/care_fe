@@ -36,7 +36,7 @@ test.describe("Allergy in Encounter", () => {
     );
     await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    await page.getByRole("link", { name: "A Allergy Allergy" }).click();
+    await page.getByRole("link", { name: "Add Allergy", exact: true }).click();
 
     // Wait for allergy intolerance API to load
     await page.waitForResponse(
