@@ -166,7 +166,7 @@ function QuestionGroup({
       if (!response) return acc;
 
       if (
-        !response.values.some(
+        !response.values?.some(
           (entry) =>
             (entry.value != null && entry.value !== "") || entry.coding,
         )
@@ -182,8 +182,8 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return false;
 
-    const value = response.values[0]?.value;
-    const coding = response.values[0]?.coding;
+    const value = response.values?.[0]?.value;
+    const coding = response.values?.[0]?.coding;
     const text = [
       value?.toString() || "",
       coding?.display || "",
@@ -207,7 +207,7 @@ function QuestionGroup({
     const response = responses.find((r) => r.question_id === question.id);
     if (!response) return null;
 
-    const values = response.values;
+    const values = response.values ?? [];
     if (!values?.length) return null;
 
     const hasAnyValue = values.some(
@@ -472,7 +472,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     );
                     if (!response) return null;
 
-                    const values = response.values;
+                    const values = response.values ?? [];
                     if (!values?.length) return null;
 
                     const hasAnyValue = values.some(

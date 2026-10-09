@@ -108,6 +108,7 @@ const envSchema = z
     REACT_APP_COVER_IMAGE: z.url(),
     REACT_APP_COVER_IMAGE_ALT: z.url(),
     REACT_SBOM_BASE_URL: z.url().optional(),
+    REACT_APP_STORE_API_URL: z.url().or(z.literal("")).optional(),
     REACT_GITHUB_URL: z.url().optional(),
     REACT_OHCN_URL: z.url().optional(),
     REACT_SENTRY_DSN: z.url().optional(),
