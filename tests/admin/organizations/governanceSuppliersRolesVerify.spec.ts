@@ -32,6 +32,20 @@ function govtOrgCards(page: Page) {
     .filter({ hasNot: page.getByText(/no organizations found/i) });
 }
 
+function govtOrgCard(page: Page, orgName: string) {
+  return govtOrgCards(page).filter({
+    has: page.getByRole("heading", { name: orgName, exact: true }),
+  });
+}
+
+async function createGovtOrganization(page: Page, orgName: string) {
+  await page.getByRole("button", { name: /add organization/i }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("textbox", { name: /name/i }).fill(orgName);
+  await dialog.getByRole("button", { name: /create organization/i }).click();
+  await expect(dialog).not.toBeVisible();
+}
+
 function firstResizablePanel(page: Page) {
   return page.locator('[data-slot="resizable-panel"]').first();
 }
@@ -69,15 +83,20 @@ async function openGovtOrgDetailByName(
   orgName: string,
   type: OrganizationType,
 ) {
-  const card = govtOrgCards(page).filter({
-    has: page.getByRole("heading", { name: orgName, exact: true }),
-  });
+  await searchInput(page, type).fill(orgName);
+  const card = govtOrgCard(page, orgName);
   await expect(card).toBeVisible();
   const link = seeDetailsLinkInCard(card);
   await expect(link).toBeVisible();
-  await clickAndWaitForUrl(page, adminOrgDetailUrlRegex(type), () =>
-    link.click(),
-  );
+  const href = await link.getAttribute("href");
+  expect(href).toBeTruthy();
+  const detailUrl = new URL(href!, page.url()).href;
+  await Promise.all([page.waitForURL(detailUrl), link.click()]);
+  await expect(page).toHaveURL(detailUrl);
+  await expect(
+    page.getByRole("heading", { name: orgName, exact: true }),
+  ).toBeVisible();
+  return detailUrl;
 }
 
 test.describe("Admin organization lists", () => {
@@ -88,37 +107,15 @@ test.describe("Admin organization lists", () => {
     const context = await browser.newContext({
       storageState: "tests/.auth/user.json",
     });
-    const page = await context.newPage();
-
-    await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    const firstCard = govtOrgCards(page).first();
-    await expect(firstCard).toBeVisible();
-
-    parentOrgName = (
-      await firstCard.getByRole("heading").first().innerText()
-    ).trim();
-    expect(parentOrgName.length).toBeGreaterThan(0);
-
-    const addOrgButton = page.getByRole("button", {
-      name: /add organization/i,
-    });
-    await expect(addOrgButton).toBeVisible();
-    await addOrgButton.click();
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    createdOrgName = faker.word.words(2);
-    await dialog.getByRole("textbox", { name: /name/i }).fill(createdOrgName);
-    await dialog.getByRole("button", { name: /create organization/i }).click();
-
-    await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/organization created successfully/i),
-    ).toBeVisible();
-
-    await context.close();
+    try {
+      const page = await context.newPage();
+      await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
+      createdOrgName = `Root ${faker.string.uuid()}`;
+      parentOrgName = createdOrgName;
+      await createGovtOrganization(page, createdOrgName);
+    } finally {
+      await context.close();
+    }
   });
 
   test("should open govt, suppliers, and responsibilities list routes", async ({
@@ -141,9 +138,8 @@ test.describe("Admin organization lists", () => {
       await gotoOrgTypeList(page, type);
 
       if (type === "govt") {
-        const parentCard = govtOrgCards(page).filter({
-          has: page.getByRole("heading", { name: parentOrgName, exact: true }),
-        });
+        await searchInput(page, type).fill(parentOrgName);
+        const parentCard = govtOrgCard(page, parentOrgName);
         await expect(parentCard).toBeVisible();
         await expect(parentCard.getByRole("heading")).toBeVisible();
         await expect(seeDetailsLinkInCard(parentCard)).toBeVisible();
@@ -293,5 +289,160 @@ test.describe("Admin organization lists", () => {
     });
     await expect(submitButton).toBeVisible();
     await expect(submitButton).toBeDisabled();
+  });
+
+  test("should create a root organization accessible from the govt list", async ({
+    page,
+  }) => {
+    const rootName = `Root ${faker.string.uuid()}`;
+
+    await test.step("Create a root from the organization list", async () => {
+      await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
+      await createGovtOrganization(page, rootName);
+    });
+
+    await test.step("Reload and verify root navigation has no ancestor", async () => {
+      await page.reload();
+      await openGovtOrgDetailByName(page, rootName, DEFAULT_ORG_TYPE);
+      const breadcrumb = page.locator('[data-slot="breadcrumb"]');
+      await expect(breadcrumb.getByRole("button")).toHaveCount(1);
+      await expect(
+        breadcrumb.getByRole("button", { name: /^organizations$/i }),
+      ).toBeVisible();
+      await expect(
+        breadcrumb.getByText(rootName, { exact: true }),
+      ).toBeVisible();
+    });
+  });
+
+  test("should create a child under the selected govt organization", async ({
+    page,
+  }) => {
+    await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
+    const parentUrl = await openGovtOrgDetailByName(
+      page,
+      createdOrgName,
+      DEFAULT_ORG_TYPE,
+    );
+    const parentId = new URL(parentUrl).pathname.split("/").pop();
+    const childName = `Child ${faker.string.uuid()}`;
+
+    await test.step("Create the child using the parent API field", async () => {
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v1/organization/" &&
+          response.request().method() === "POST" &&
+          response.request().postDataJSON()?.name === childName,
+      );
+      await createGovtOrganization(page, childName);
+      const response = await responsePromise;
+      expect(response.ok()).toBeTruthy();
+      const payload = response.request().postDataJSON();
+      expect(payload).toMatchObject({ parent: parentId });
+      expect(payload).not.toHaveProperty("parent_id");
+    });
+
+    await test.step("Reload and open the child from its parent's listing", async () => {
+      await page.reload();
+      await expect(govtOrgCard(page, childName)).toBeVisible();
+      await openGovtOrgDetailByName(page, childName, DEFAULT_ORG_TYPE);
+    });
+
+    await test.step("Navigate back through the exact parent breadcrumb", async () => {
+      await page.reload();
+      const breadcrumb = page.locator('[data-slot="breadcrumb"]');
+      await expect(
+        breadcrumb.getByText(childName, { exact: true }),
+      ).toBeVisible();
+      const parentButton = breadcrumb.getByRole("button", {
+        name: createdOrgName,
+        exact: true,
+      });
+      await expect(parentButton).toBeVisible();
+      await Promise.all([page.waitForURL(parentUrl), parentButton.click()]);
+      await expect(page).toHaveURL(parentUrl);
+      await expect(govtOrgCard(page, childName)).toBeVisible();
+    });
+  });
+
+  test("should preserve the parent when editing a child organization", async ({
+    page,
+  }) => {
+    await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
+    const parentUrl = await openGovtOrgDetailByName(
+      page,
+      createdOrgName,
+      DEFAULT_ORG_TYPE,
+    );
+    const childName = `Child ${faker.string.uuid()}`;
+    const updatedName = `Updated ${faker.string.uuid()}`;
+
+    await test.step("Create an independent child fixture", async () => {
+      await createGovtOrganization(page, childName);
+      await page.reload();
+      await expect(govtOrgCard(page, childName)).toBeVisible();
+    });
+
+    await test.step("Edit the child from the parent's listing", async () => {
+      await govtOrgCard(page, childName)
+        .getByRole("button", { name: /^edit$/i })
+        .click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByRole("textbox", { name: /name/i }).fill(updatedName);
+      await dialog
+        .getByRole("button", { name: /update organization/i })
+        .click();
+      await expect(dialog).not.toBeVisible();
+    });
+
+    await test.step("Reload and verify the renamed child still belongs to the parent", async () => {
+      await page.reload();
+      await expect(govtOrgCard(page, updatedName)).toBeVisible();
+      await expect(govtOrgCard(page, childName)).toHaveCount(0);
+      await openGovtOrgDetailByName(page, updatedName, DEFAULT_ORG_TYPE);
+      await page.reload();
+      const parentButton = page
+        .locator('[data-slot="breadcrumb"]')
+        .getByRole("button", { name: createdOrgName, exact: true });
+      await expect(parentButton).toBeVisible();
+      await Promise.all([page.waitForURL(parentUrl), parentButton.click()]);
+      await expect(page).toHaveURL(parentUrl);
+      await expect(govtOrgCard(page, updatedName)).toBeVisible();
+    });
+  });
+
+  test("should create a role organization without a parent", async ({
+    page,
+  }) => {
+    const roleName = `Role ${faker.string.uuid()}`;
+
+    await test.step("Create a responsibility from the role list", async () => {
+      await gotoOrgTypeList(page, "role");
+      await page
+        .getByRole("button", { name: /create responsibility/i })
+        .click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByRole("textbox", { name: /name/i }).fill(roleName);
+      await dialog
+        .getByRole("button", { name: /create responsibility/i })
+        .click();
+      await expect(dialog).not.toBeVisible();
+    });
+
+    await test.step("Reload and open the responsibility from the top-level list", async () => {
+      await page.reload();
+      await searchInput(page, "role").fill(roleName);
+      const roleButton = firstResizablePanel(page).getByRole("button", {
+        name: roleName,
+        exact: true,
+      });
+      await expect(roleButton).toBeVisible();
+      await clickAndWaitForUrl(page, adminOrgDetailUrlRegex("role"), () =>
+        roleButton.click(),
+      );
+      await expect(
+        page.getByRole("heading", { name: roleName, exact: true }),
+      ).toBeVisible();
+    });
   });
 });
