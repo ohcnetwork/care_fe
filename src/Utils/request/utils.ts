@@ -3,9 +3,9 @@ import { LocalStorageKeys } from "@/common/constants";
 import { HttpMethod, QueryParams, Type } from "@/Utils/request/types";
 
 export const API = <TResponse, TBody = undefined>(
-  route: `${HttpMethod} ${string}`,
+  method: HttpMethod,
+  path: string,
 ) => {
-  const [method, path] = route.split(" ") as [HttpMethod, string];
   return {
     path,
     method,

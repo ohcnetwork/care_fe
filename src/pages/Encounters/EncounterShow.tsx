@@ -24,16 +24,13 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { Card } from "@/components/ui/card";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
 import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 import { cn } from "@/lib/utils";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
-import EncounterNavigation, {
-  EncounterTab,
-} from "@/pages/Encounters/EncounterNavigation";
+import { EncounterTab } from "@/pages/Encounters/EncounterNavigation";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
 import { EncounterFilesTab } from "@/pages/Encounters/tabs/files";
@@ -43,12 +40,13 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterWorkspaceContent } from "@/pages/Encounters/workspace/EncounterWorkspaceContent";
+import { EncounterWorkspaceSwitcher } from "@/pages/Encounters/workspace/EncounterWorkspaceSwitcher";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, goBack } from "@/Utils/utils";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
@@ -209,10 +207,6 @@ export const EncounterShow = (props: Props) => {
     ),
   };
 
-  if (!props.tab || !Object.keys(tabs).includes(props.tab)) {
-    return <ErrorPage />;
-  }
-
   return (
     <Page title={t("encounter")} className="block md:px-1" hideTitleOnPage>
       <WorkspaceHeaderContent>
@@ -226,6 +220,9 @@ export const EncounterShow = (props: Props) => {
         ) : (
           <span className="text-sm font-medium">{t("encounter")}</span>
         )}
+        <div className="ml-auto pl-2">
+          <EncounterWorkspaceSwitcher systemTabs={tabs} />
+        </div>
       </WorkspaceHeaderContent>
 
       <div className="flex flex-col gap-2">
@@ -291,23 +288,9 @@ export const EncounterShow = (props: Props) => {
           }
         />
 
-        <EncounterNavigation
-          tabs={tabs}
-          currentTab={props.tab}
-          onTabChange={(tab) => {
-            const query =
-              primaryEncounterId !== selectedEncounterId
-                ? { selectedEncounter: selectedEncounterId }
-                : undefined;
-            const target = new URL(tab, window.location.href);
-            target.search = new URLSearchParams(query).toString();
-            // Radix activation and shortcut clicks can request the same tab.
-            // Check the live URL so a single selection only adds one history entry.
-            if (target.href === window.location.href) {
-              return;
-            }
-            navigate(tab, { query });
-          }}
+        <EncounterWorkspaceContent
+          systemTabs={tabs}
+          currentTab={props.tab ?? "updates"}
         />
       </div>
     </Page>

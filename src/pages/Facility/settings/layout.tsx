@@ -9,6 +9,8 @@ import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/Q
 import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
+import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
+import { WorkspaceList } from "@/components/Workspace/WorkspaceList";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
@@ -23,6 +25,7 @@ import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfi
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
+import { workspaceScopeForFacility } from "@/types/workspace/workspace";
 
 import { FacilityResponses } from "./FacilityResponses";
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
@@ -383,6 +386,15 @@ const getRoutes = (facilityId: string) => ({
   ),
   "/valuesets/:id/edit": ({ id }: { id: string }) => (
     <ValueSetEditor scope={valueSetScopeForFacility(facilityId)} id={id} />
+  ),
+  "/workspaces": () => (
+    <WorkspaceList scope={workspaceScopeForFacility(facilityId)} />
+  ),
+  "/workspaces/create": () => (
+    <WorkspaceEditor scope={workspaceScopeForFacility(facilityId)} />
+  ),
+  "/workspaces/:id/edit": ({ id }: { id: string }) => (
+    <WorkspaceEditor scope={workspaceScopeForFacility(facilityId)} id={id} />
   ),
   "*": () => <ErrorPage />,
 });

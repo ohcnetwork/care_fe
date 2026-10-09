@@ -14,7 +14,11 @@ import { formatName } from "@/Utils/utils";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const ManageCareTeam = () => {
+interface ManageCareTeamProps {
+  title?: string;
+}
+
+export const ManageCareTeam = ({ title }: ManageCareTeamProps = {}) => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
@@ -26,14 +30,25 @@ export const ManageCareTeam = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="w-full rounded-xl border border-gray-200 bg-white">
+    <section
+      aria-label={
+        title ?? (canWrite ? t("manage_care_team") : t("view_care_team"))
+      }
+      className="min-w-0 w-full rounded-xl border border-gray-200 bg-white"
+    >
       <div>
         <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
-          <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
-            {canWrite ? t("manage_care_team") : t("view_care_team")}
+          <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+            {title ?? (canWrite ? t("manage_care_team") : t("view_care_team"))}
           </span>
           {canWrite && (
-            <Button variant="ghost" size="sm" onClick={manageCareTeam}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={manageCareTeam}
+              className="shrink-0"
+              aria-label={t("manage_care_team")}
+            >
               <SquarePen className="cursor-pointer" strokeWidth={1.5} />
             </Button>
           )}
@@ -54,10 +69,10 @@ export const ManageCareTeam = () => {
                   key={member.member.id}
                   name={formatName(member.member, true)}
                   imageUrl={member.member.profile_picture_url}
-                  className="size-9 rounded-full border border-white shadow-sm"
+                  className="size-9 shrink-0 rounded-full border border-white shadow-sm"
                 />{" "}
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-col">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-col [overflow-wrap:anywhere]">
                     <span className="font-medium text-black text-sm">
                       {formatName(member.member)}
                     </span>
@@ -74,28 +89,30 @@ export const ManageCareTeam = () => {
               </div>
             ))}
             {encounter.care_team.length > 3 && !showAllMembers && (
-              <div
+              <button
+                type="button"
                 onClick={() => setShowAllMembers(true)}
-                className="text-sm font-medium text-black underline cursor-pointer p-1"
+                className="text-left text-sm font-medium text-black underline cursor-pointer p-1"
               >
                 <span>
                   +{encounter.care_team.length - 3} {t("members")}
                 </span>
-              </div>
+              </button>
             )}
             {encounter.care_team.length > 3 && showAllMembers && (
-              <div
+              <button
+                type="button"
                 onClick={() => setShowAllMembers(false)}
-                className="text-sm font-medium text-black underline cursor-pointer p-1"
+                className="text-left text-sm font-medium text-black underline cursor-pointer p-1"
               >
                 <span>{t("show_less")}</span>
-              </div>
+              </button>
             )}
           </div>
         ) : (
           <EmptyState message={t("no_care_team")} />
         )}
       </div>
-    </div>
+    </section>
   );
 };
