@@ -12,10 +12,15 @@ import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   createdByFilter,
+  dateFilter,
   invoiceStatusFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -37,9 +42,15 @@ import {
   InvoiceRead,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import facilityApi from "@/types/facility/facilityApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  formatDateTime,
+  parseLocalDate,
+} from "@/Utils/utils";
 
 export default function InvoicesData({
   facilityId,
@@ -58,9 +69,22 @@ export default function InvoicesData({
     disableCache: true,
   });
 
+  const { created_date_after, created_date_before } = qParams;
+
+  const { data: createdByUser } = useQuery({
+    queryKey: ["facilityUser", facilityId, qParams.created_by],
+    queryFn: query(facilityApi.getUser, {
+      pathParams: { facilityId, userId: qParams.created_by },
+    }),
+    enabled: !!qParams.created_by,
+  });
+
+  const selectedCreatedByUsers = createdByUser ? [createdByUser] : undefined;
+
   const filters = [
     invoiceStatusFilter("status"),
     createdByFilter("created_by"),
+    dateFilter("created_date", t("invoice_date"), longDateRangeOptions, false),
   ];
 
   const onFilterUpdate = (filterQuery: Record<string, unknown>) => {
@@ -76,6 +100,19 @@ export default function InvoicesData({
         created_by: user?.id || undefined,
       };
     }
+    if ("created_date" in filterQuery) {
+      const dateRange = filterQuery.created_date as FilterDateRange | undefined;
+      query = {
+        ...query,
+        created_date: undefined,
+        created_date_after: dateRange?.from
+          ? dateQueryString(dateRange.from as Date)
+          : undefined,
+        created_date_before: dateRange?.to
+          ? dateQueryString(dateRange.to as Date)
+          : undefined,
+      };
+    }
     updateQuery(query);
   };
 
@@ -88,7 +125,14 @@ export default function InvoicesData({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     status: qParams.status ? [qParams.status] : undefined,
-    created_by: [],
+    created_by: selectedCreatedByUsers,
+    created_date:
+      created_date_after || created_date_before
+        ? {
+            from: parseLocalDate(created_date_after),
+            to: parseLocalDate(created_date_before),
+          }
+        : undefined,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -103,6 +147,12 @@ export default function InvoicesData({
         status: qParams.status,
         patient: qParams.patient,
         created_by: qParams.created_by,
+        created_date_after: created_date_after
+          ? dateTimeQueryString(created_date_after)
+          : undefined,
+        created_date_before: created_date_before
+          ? dateTimeQueryString(created_date_before, true)
+          : undefined,
       },
     }),
   });
@@ -111,9 +161,9 @@ export default function InvoicesData({
 
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-2 pb-4">
-        <div className="w-full md:w-auto md:flex gap-2 space-y-2 md:space-y-0">
-          {showIdentifierFilter && (
+      <div className="flex flex-wrap items-start gap-2 pb-4">
+        {showIdentifierFilter && (
+          <div className="w-full sm:w-auto sm:shrink-0">
             <PatientIdentifierFilter
               onSelect={(patientId, patientName) =>
                 updateQuery({ patient: patientId, patient_name: patientName })
@@ -121,38 +171,41 @@ export default function InvoicesData({
               patientId={qParams.patient}
               patientName={qParams.patient_name}
               placeholder={t("filter_by_patient")}
-              className="h-9 rounded-md"
+              className="w-full sm:w-auto sm:max-w-xs h-9 rounded-md"
             />
-          )}
+          </div>
+        )}
 
-          <div>
-            <div className="relative flex-1">
-              <CareIcon
-                icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none z-10"
-              />
-              <Input
-                placeholder={t("search_invoices")}
-                value={qParams.search || ""}
-                onChange={(e) =>
-                  updateQuery({ search: e.target.value || undefined })
-                }
-                className="w-full md:w-auto pl-10 h-9"
-              />
-            </div>
+        <div className="w-full sm:w-auto">
+          <div className="relative">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none z-10"
+            />
+            <Input
+              placeholder={t("search_invoices")}
+              value={qParams.search || ""}
+              onChange={(e) =>
+                updateQuery({ search: e.target.value || undefined })
+              }
+              className="w-full sm:w-64 pl-10 h-9"
+            />
           </div>
         </div>
 
-        <MultiFilter
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-          onOperationChange={handleOperationChange}
-          onClearAll={handleClearAll}
-          onClearFilter={handleClearFilter}
-          className="flex flex-row-reverse flex-wrap sm:items-center"
-          facilityId={facilityId}
-          align="end"
-        />
+        <div className="w-full min-w-0 sm:w-auto">
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-center"
+            facilityId={facilityId}
+          />
+        </div>
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />

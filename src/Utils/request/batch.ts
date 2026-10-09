@@ -5,6 +5,7 @@ import {
 } from "@/types/base/batch/batch";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { ApiRoute, HTTPError, HttpMethod, Type } from "@/Utils/request/types";
 import { makeUrl } from "@/Utils/request/utils";
 import {
@@ -18,6 +19,12 @@ export interface BatchRequestObject<T = unknown> {
   api: ApiRoute<unknown, unknown>;
   pathParams?: Record<string, string>;
   body: T;
+  referenceId: string;
+}
+
+export interface BatchQueryObject {
+  api: ApiRoute<unknown, unknown>;
+  pathParams?: Record<string, string>;
   referenceId: string;
 }
 
@@ -96,6 +103,54 @@ function handleBatchSubErrors(results: BatchRequestResult[]) {
       }),
     );
   }
+}
+
+/**
+ * Creates a TanStack Query compatible query function that reads many
+ * resources in one batch request.
+ *
+ * Use this function for reads only. Use {@link useBatchRequest} for writes.
+ *
+ * The batch endpoint always gives a 200 status if the transaction is
+ * successful. Each sub-request keeps its own status code in the `results`
+ * array. So you must check `status_code` of each result before you use its
+ * `data`.
+ *
+ * Set `silent` to `true` if the caller shows the error itself. If you do not,
+ * the global error handler shows a message for the full batch.
+ *
+ * Example:
+ * ```tsx
+ * const { data } = useQuery({
+ *   queryKey: ["medication_dispense_batch", ids],
+ *   queryFn: batchQuery<MedicationDispenseRetrieve>(
+ *     ids.map((id) => ({
+ *       api: medicationDispenseApi.get,
+ *       pathParams: { id },
+ *       referenceId: id,
+ *     })),
+ *     { silent: true },
+ *   ),
+ *   enabled: ids.length > 0,
+ * });
+ * ```
+ */
+export function batchQuery<T = unknown>(
+  requests: BatchQueryObject[],
+  options?: { silent?: boolean },
+) {
+  const body = buildBatchRequestBody(
+    requests.map((request) => ({ ...request, body: {} })),
+  );
+
+  return async ({ signal }: { signal: AbortSignal }) => {
+    const response = await query(batchRequestApi, {
+      body,
+      silent: options?.silent,
+    })({ signal });
+
+    return response as BatchRequestResponse<T>;
+  };
 }
 
 /**

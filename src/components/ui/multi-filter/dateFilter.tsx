@@ -25,6 +25,7 @@ import {
   FilterConfig,
   FilterDateRange,
   FilterValues,
+  isSameDateRange,
   longDateRangeOptions,
 } from "./utils/Utils";
 
@@ -58,11 +59,9 @@ function CustomDateRange({
         <Calendar
           mode="range"
           selected={{ from: dateFrom, to: dateTo }}
-          onSelect={(date) => {
-            if (date) {
-              handleDateChange(date);
-            }
-          }}
+          onSelect={(range, triggerDate) =>
+            handleDateChange(range ?? { from: triggerDate, to: undefined })
+          }
           styles={{
             day: {
               width: "40px",
@@ -169,7 +168,7 @@ function DateRangeOptions({
   isCustomDateRangeSelected: boolean;
   filter: FilterConfig;
   handleDateRangeSelect: (option: DateRangeOption) => void;
-  isSameRange: (option: DateRangeOption) => boolean | undefined;
+  isSameRange: (option: DateRangeOption) => boolean;
 }) {
   const { t } = useTranslation();
   const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
@@ -259,12 +258,8 @@ export default function RenderDateFilter({
     setDateTo(date?.to);
   };
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      dateFrom && isSameDay(dateFrom, from) && dateTo && isSameDay(dateTo, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange({ from: dateFrom, to: dateTo }, option.getDateRange());
 
   const isCustomDateRangeSelected =
     selected.from || selected.to
@@ -335,51 +330,35 @@ export const SelectedDateBadge = ({
     selected.from && selected.to && isSameDay(selected.from, selected.to);
   const presentDate = isSameDate ? selected.from : selected.from || selected.to;
 
-  const isSameRange = (option: DateRangeOption) => {
-    const { from, to } = option.getDateRange();
-    return (
-      selected.from &&
-      isSameDay(selected.from, from) &&
-      selected.to &&
-      isSameDay(selected.to, to)
-    );
-  };
+  const isSameRange = (option: DateRangeOption) =>
+    isSameDateRange(selected, option.getDateRange());
 
   const isRangeSelected = (filter.meta as DateFilterMeta)?.presetOptions?.find(
     (option) => isSameRange(option),
   );
 
+  const selectedDateLabel = isRangeSelected
+    ? t(isRangeSelected.label, { count: isRangeSelected?.count })
+    : selected.from && selected.to && !isSameDate
+      ? (() => {
+          const needsYear =
+            selected.from.getFullYear() !== selected.to.getFullYear();
+          return [selected.from, selected.to]
+            .map((date) => format(date, needsYear ? "d MMM yy" : "d MMM"))
+            .join(" - ");
+        })()
+      : presentDate
+        ? format(presentDate, "d MMM yyyy")
+        : "";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
-        {isRangeSelected ? (
-          <span>
-            {t(isRangeSelected.label, { count: isRangeSelected?.count })}
-          </span>
-        ) : selected.from && selected.to && !isSameDate ? (
-          <span>
-            {(() => {
-              const needsYear =
-                selected.from.getFullYear() !== selected.to.getFullYear();
-              return [selected.from, selected.to].map((date, index) => (
-                <span key={date.toISOString() + index}>
-                  {index > 0 && " - "}
-                  <span>{format(date, needsYear ? "d MMM yy" : "d MMM")}</span>
-                </span>
-              ));
-            })()}
-          </span>
-        ) : presentDate ? (
-          <span>{format(presentDate, "d MMM yyyy")}</span>
-        ) : (
-          <></>
-        )}
+        <span className="block min-w-0 flex-1 truncate whitespace-nowrap">
+          {selectedDateLabel}
+        </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={15}
-        className="w-[320px] p-0"
-      >
+      <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter
           filter={filter}
           selected={selected}

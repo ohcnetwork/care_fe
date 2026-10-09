@@ -31,9 +31,11 @@ import {
 const DiagnosisCard = ({
   diagnosis,
   onViewEncounter,
+  compact = false,
 }: {
   diagnosis: Diagnosis;
   onViewEncounter?: () => void;
+  compact?: boolean;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -96,7 +98,9 @@ const DiagnosisCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div className="mt-4 flex gap-8 flex-wrap">
+      <div
+        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-8")}
+      >
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
           <Badge
@@ -157,10 +161,12 @@ export const DiagnosisTable = ({
   diagnoses,
   patientId,
   showViewEncounter = true,
+  compact = false,
 }: {
   diagnoses: Diagnosis[];
   patientId: string;
   showViewEncounter?: boolean;
+  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -170,11 +176,18 @@ export const DiagnosisTable = ({
   return (
     <>
       {/* Mobile: Card layout */}
-      <div className="space-y-3 block sm:hidden">
+      <div
+        className={
+          compact
+            ? "block space-y-2 @3xl/clinical-widget:hidden"
+            : "block space-y-3 sm:hidden"
+        }
+      >
         {diagnoses.map((diagnosis) => (
           <DiagnosisCard
             key={diagnosis.id}
             diagnosis={diagnosis}
+            compact={compact}
             onViewEncounter={
               showViewEncounter
                 ? () =>
@@ -189,9 +202,19 @@ export const DiagnosisTable = ({
         ))}
       </div>
       {/* Desktop: Table layout */}
-      <div className="overflow-x-auto hidden sm:block">
-        <div className="min-w-xl pb-2">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
+      <div
+        className={cn(
+          "overflow-x-auto hidden",
+          compact ? "@3xl/clinical-widget:block" : "sm:block",
+        )}
+      >
+        <div className={cn("min-w-xl", !compact && "pb-2")}>
+          <div
+            className={cn(
+              "grid grid-cols-[1fr_auto_auto_auto_auto_auto]",
+              compact ? "gap-y-1" : "gap-y-2",
+            )}
+          >
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("diagnosis")}
             </div>
@@ -218,6 +241,7 @@ export const DiagnosisTable = ({
 
             {diagnoses.map((diagnosis) => (
               <ClinicalInformationRow
+                compact={compact}
                 key={diagnosis.id}
                 note={diagnosis.note}
                 createdBy={diagnosis.created_by}

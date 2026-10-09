@@ -15,6 +15,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { registerQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { addOverride } from "@/lib/override";
 import { PlugConfig, PlugConfigMeta } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
@@ -85,7 +86,7 @@ export default function PluginEngine({
 
   const pluginsQuery = useQueries({
     queries: resolvedPlugins.map((config) => ({
-      queryKey: ["plugin-manifest", config.slug],
+      queryKey: ["plugin-manifest", config.slug, config.meta],
       queryFn: () => getPluginManifest(config),
     })),
     combine: (queries) =>
@@ -96,7 +97,17 @@ export default function PluginEngine({
           return { ...config, isLoading: true as const };
         }
 
-        return { ...config, isLoading: false as const, ...data! };
+        // `data` is the remote's OWN manifest — untrusted. `slug` spreads
+        // in AFTER `...data!` so nothing the manifest declares (a stray
+        // `slug` field, or reusing `plugin.plugin`) can shadow the
+        // backend-issued `config.slug` this query was actually fetched
+        // for. That's the identity namespace ownership checks rely on.
+        return {
+          ...config,
+          isLoading: false as const,
+          ...data!,
+          slug: config.slug,
+        };
       }),
   });
 
@@ -116,7 +127,7 @@ export default function PluginEngine({
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
-  // Register plugin overrides
+  // Register plugin overrides and structured question types
   const overrideCleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
@@ -126,17 +137,31 @@ export default function PluginEngine({
 
     // Register new overrides from all loaded plugins
     for (const plugin of pluginsQuery) {
-      if (plugin.isLoading || !plugin.overrides) continue;
+      if (plugin.isLoading) continue;
 
-      for (const override of plugin.overrides) {
+      for (const override of plugin.overrides ?? []) {
         const cleanup = addOverride(override.component, {
           component: override.replacement,
           condition: override.condition,
           priority: override.priority,
           description:
-            override.description ?? `Override from plugin: ${plugin.plugin}`,
+            override.description ?? `Override from plugin: ${plugin.slug}`,
         });
         overrideCleanupRef.current.push(cleanup);
+      }
+
+      // A plugin may register groups only in its own namespace.
+      for (const definition of plugin.registeredQuestionGroups ?? []) {
+        try {
+          overrideCleanupRef.current.push(
+            registerQuestionGroup(definition, plugin.slug),
+          );
+        } catch (error) {
+          console.error(
+            `Invalid registered group from plugin ${plugin.slug}`,
+            error,
+          );
+        }
       }
     }
 
@@ -197,7 +222,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
         } as PluginProps<typeof __name>;
 
         return (
-          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+          <PluginErrorBoundary key={plugin.slug} pluginName={plugin.slug}>
             <React.Suspense
               fallback={
                 <div className="flex items-center justify-center gap-2">

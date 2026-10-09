@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, MoreVerticalIcon, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -38,7 +38,6 @@ import { add } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { getBasePrice } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
@@ -198,6 +197,22 @@ function ServiceRequestForm({
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { data: restoredDefinition } = useQuery({
+    queryKey: [
+      "activity_definition",
+      facilityId,
+      serviceRequest.activity_definition,
+    ],
+    queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
+      pathParams: {
+        facilityId,
+        activityDefinitionSlug: serviceRequest.activity_definition,
+      },
+    }),
+    enabled: !!facilityId && !activityDefinition,
+  });
+  const displayedDefinition = activityDefinition ?? restoredDefinition;
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm relative">
@@ -225,10 +240,10 @@ function ServiceRequestForm({
                 </Badge>
               )}
               <div className="flex items-center gap-1">
-                {activityDefinition && (
+                {displayedDefinition && (
                   <span className="text-sm font-medium text-gray-700">
                     <MonetaryDisplay
-                      amount={activityDefinition.charge_item_definitions.reduce(
+                      amount={displayedDefinition.charge_item_definitions.reduce(
                         (acc: Decimal, curr: ChargeItemDefinitionBase) =>
                           add(acc, getBasePrice(curr.price_components)),
                         new Decimal(0),
@@ -409,19 +424,15 @@ export function ServiceRequestQuestion({
   encounterId,
   errors,
   questionnaireSlug,
-  question,
 }: ServiceRequestQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser() as CurrentUserRead;
   const [selectedActivityDefinition, setSelectedActivityDefinition] = useState<
     string | null
   >(null);
-  const [serviceRequests, setServiceRequests] = useState<
-    ServiceRequestApplyActivityDefinitionSpec[]
-  >(
+  const serviceRequests =
     (questionnaireResponse.values?.[0]
-      ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
-  );
+      ?.value as ServiceRequestApplyActivityDefinitionSpec[]) || [];
   const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
@@ -591,7 +602,6 @@ export function ServiceRequestQuestion({
       },
     }));
 
-    setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
       [{ type: "service_request", value: newServiceRequests }],
       questionnaireResponse.question_id,
@@ -607,7 +617,6 @@ export function ServiceRequestQuestion({
       },
     }));
 
-    setServiceRequests(newServiceRequests);
     updateQuestionnaireResponseCB(
       [{ type: "service_request", value: newServiceRequests }],
       questionnaireResponse.question_id,
@@ -618,7 +627,9 @@ export function ServiceRequestQuestion({
     data: selectedActivityDefinitionData,
     isLoading: isLoadingSelectedAD,
   } = useQuery({
-    queryKey: ["activity_definition", selectedActivityDefinition],
+    // Slugs resolve within a facility. Another facility's cached definition
+    // must never seed the new request while this facility's lookup is pending.
+    queryKey: ["activity_definition", facilityId, selectedActivityDefinition],
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
         facilityId: facilityId,
@@ -628,7 +639,7 @@ export function ServiceRequestQuestion({
     enabled: !!selectedActivityDefinition,
   });
 
-  useEffect(() => {
+  const addSelectedActivityDefinition = useEffectEvent(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -653,7 +664,6 @@ export function ServiceRequestQuestion({
         encounter: encounterId,
       };
 
-      setServiceRequests([...serviceRequests, newServiceRequest]);
       updateQuestionnaireResponseCB(
         [
           {
@@ -669,6 +679,10 @@ export function ServiceRequestQuestion({
       }));
       setSelectedActivityDefinition(null);
     }
+  });
+
+  useEffect(() => {
+    addSelectedActivityDefinition();
   }, [
     selectedActivityDefinition,
     selectedActivityDefinitionData,
@@ -680,7 +694,7 @@ export function ServiceRequestQuestion({
     const newServiceRequests = serviceRequests.filter(
       (_, i: number) => i !== index,
     );
-    setServiceRequests(newServiceRequests);
+
     updateQuestionnaireResponseCB(
       [{ type: "service_request", value: newServiceRequests }],
       questionnaireResponse.question_id,
@@ -707,27 +721,11 @@ export function ServiceRequestQuestion({
       },
     );
 
-    setServiceRequests(newServiceRequests);
-
     updateQuestionnaireResponseCB(
       [{ type: "service_request", value: newServiceRequests }],
       questionnaireResponse.question_id,
     );
   };
-
-  // Effect to sync service requests with questionnaire response
-  useEffect(() => {
-    const initialServiceRequests =
-      (questionnaireResponse.values?.[0]
-        ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) ||
-      [];
-
-    if (
-      JSON.stringify(initialServiceRequests) !== JSON.stringify(serviceRequests)
-    ) {
-      setServiceRequests(initialServiceRequests);
-    }
-  }, [questionnaireResponse.values, serviceRequests]);
 
   const handleActivityDefinitionSelect = (
     value:
@@ -788,7 +786,7 @@ export function ServiceRequestQuestion({
       };
 
       const newServiceRequests = [...serviceRequests, newServiceRequest];
-      setServiceRequests(newServiceRequests);
+
       updateQuestionnaireResponseCB(
         [{ type: "service_request", value: newServiceRequests }],
         questionnaireResponse.question_id,
@@ -885,7 +883,7 @@ export function ServiceRequestQuestion({
       }
 
       const newServiceRequests = [...serviceRequests, ...validServiceRequests];
-      setServiceRequests(newServiceRequests);
+
       updateQuestionnaireResponseCB(
         [{ type: "service_request", value: newServiceRequests }],
         questionnaireResponse.question_id,
@@ -915,7 +913,6 @@ export function ServiceRequestQuestion({
 
   return (
     <div className="space-y-4">
-      <QuestionLabel question={question} />
       <AddToTemplateDialog
         open={!!serviceRequestToAddToTemplate}
         onOpenChange={(open) => {

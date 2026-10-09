@@ -113,7 +113,7 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
     queryKey: ["autocomplete", url, searchQuery, additionalParams],
     queryFn: query.debounced(
       {
-        ...API<unknown>(`${HttpMethod.GET} ${url || "/"}`),
+        ...API<unknown>(HttpMethod.GET, url || "/"),
         noAuth: !sendToken,
       },
       { queryParams },
@@ -157,14 +157,22 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
           <FormControl>
             <Autocomplete
               value={field.value || ""}
-              onChange={(value) => field.onChange(value === "" ? null : value)}
+              onChange={(value) => {
+                if (!metadata.readOnly && !field.disabled) {
+                  field.onChange(value === "" ? null : value);
+                }
+              }}
               onSearch={setSearchQuery}
               options={options}
               isLoading={hasUrlConfig && isLoading}
-              placeholder={`Select ${metadata.label}`}
-              inputPlaceholder={`Search ${metadata.label}...`}
+              placeholder={t("schema_select_placeholder", {
+                label: metadata.label,
+              })}
+              inputPlaceholder={t("schema_search_placeholder", {
+                label: metadata.label,
+              })}
               noOptionsMessage={t("no_results_found")}
-              disabled={metadata.readOnly}
+              disabled={metadata.readOnly || field.disabled}
               aria-invalid={!!fieldState.error}
               closeOnSelect
             />

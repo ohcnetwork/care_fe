@@ -8,7 +8,11 @@ import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const EncounterTags = () => {
+interface EncounterTagsProps {
+  title?: string;
+}
+
+export const EncounterTags = ({ title }: EncounterTagsProps = {}) => {
   const { canWriteSelectedEncounter: canEdit, selectedEncounter: encounter } =
     useEncounter();
   const { t } = useTranslation();
@@ -16,10 +20,13 @@ export const EncounterTags = () => {
   if (!encounter) return <CardListSkeleton count={1} />;
 
   return (
-    <div className="bg-gray-100 rounded-md border border-gray-200 p-1 pt-2 space-y-1">
-      <div className="flex items-center justify-between w-full pl-2">
-        <span className="font-semibold text-gray-950">
-          {t("encounter_tags")}
+    <section
+      aria-label={title ?? t("encounter_tags")}
+      className="min-w-0 w-full rounded-xl border border-gray-200 bg-white"
+    >
+      <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
+        <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+          {title ?? t("encounter_tags")}
         </span>
         {canEdit && (
           <TagAssignmentSheet
@@ -33,7 +40,12 @@ export const EncounterTags = () => {
               });
             }}
             trigger={
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0"
+                aria-label={t("edit")}
+              >
                 <SquarePen className=" text-gray-950" strokeWidth={1.5} />
               </Button>
             }
@@ -41,17 +53,22 @@ export const EncounterTags = () => {
           />
         )}
       </div>
-      <div className="flex flex-wrap bg-white w-full p-2 rounded-md gap-2 shadow">
+      <div className="flex w-full flex-wrap gap-2 p-3">
         {encounter.tags.length > 0 ? (
           <>
             {encounter.tags.map((tag) => (
-              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+              <TagBadge
+                key={tag.id}
+                tag={tag}
+                hierarchyDisplay
+                className="max-w-full whitespace-normal [overflow-wrap:anywhere]"
+              />
             ))}
           </>
         ) : (
           <EmptyState message={t("no_tags")} />
         )}
       </div>
-    </div>
+    </section>
   );
 };

@@ -1,5 +1,7 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
+import type { RegisteredGroupDefinition } from "@/components/QuestionnaireV2/groups/registry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import type { ActionDescriptor, ActionRunResult } from "@/lib/actions";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
@@ -13,18 +15,27 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserRead, UserReadMinimal } from "@/types/user/user";
+import type { JSONSchema2020 } from "@/Utils/schema/types";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;
 }>;
 
+/**
+ * The agent contract. Scribe no longer receives a page's raw state and its
+ * setter: it receives the actions the host is currently offering in this
+ * scope, and one callback to invoke them. The host validates every call
+ * (`lib/actions`), so a plugin can neither write a shape the page does not
+ * expect nor reach a record outside the open session.
+ *
+ * Changing this shape requires a lockstep update in `care_scribe`.
+ */
 export type ScribeComponentType = React.FC<{
-  formState: QuestionnaireFormState[];
-  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
+  actions: ActionDescriptor[];
+  invoke: (actionId: string, input: unknown) => Promise<ActionRunResult>;
 }>;
 
 export type PatientHomeActionsComponentType = React.FC<{
@@ -187,6 +198,26 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+export interface PluginEncounterWidgetProps {
+  patientId: string;
+  encounterId: string;
+  encounter: EncounterRead;
+  facilityId?: string;
+  title?: string;
+  config: Record<string, unknown>;
+  readOnly: boolean;
+}
+
+export type PluginEncounterWidgetComponent =
+  | ComponentType<PluginEncounterWidgetProps>
+  | LazyExoticComponent<ComponentType<PluginEncounterWidgetProps>>;
+
+export interface PluginEncounterWidgetDefinition {
+  component: PluginEncounterWidgetComponent;
+  /** Object schema used by the workspace configuration editor. */
+  configSchema: JSONSchema2020;
+}
+
 /**
  * Plugin override definition for replacing registered components
  */
@@ -221,10 +252,18 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
+  encounterWidgets?: Record<
+    string,
+    | PluginEncounterWidgetDefinition
+    /** @deprecated Supply a definition with configSchema for the configuration editor. */
+    | PluginEncounterWidgetComponent
+  >;
   encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
   /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
+  /** Registered groups contribute ordinary child questions and their rendering. */
+  registeredQuestionGroups?: readonly RegisteredGroupDefinition[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

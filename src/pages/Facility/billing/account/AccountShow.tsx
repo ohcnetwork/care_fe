@@ -1,7 +1,7 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Hash, MoreVertical } from "lucide-react";
+import { Hash, Info, MoreVertical } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,6 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
@@ -57,7 +63,7 @@ import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
-import { isPositive } from "@/Utils/decimal";
+import { isPositive, roundWhole } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { ReportSubTab } from "@/components/Files/ReportSubTab";
@@ -287,6 +293,9 @@ function AccountShow({
 
   const isAccountBillableAndActive =
     !!account && isAccountActiveAndBillable(account);
+
+  const roundedBalance = roundWhole(account.total_balance);
+  const roundedBilledGross = roundWhole(account.total_gross);
 
   const tabs = {
     invoices: {
@@ -529,9 +538,7 @@ function AccountShow({
                   }
                 />
                 {account.tags?.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
-                    {tag.display}
-                  </Badge>
+                  <TagBadge key={tag.id} tag={tag} className="text-xs" />
                 ))}
               </div>
             </div>
@@ -565,23 +572,31 @@ function AccountShow({
         <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("amount_due")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_balance} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p
                   className={cn(
                     "text-3xl font-bold",
-                    isPositive(account.total_balance)
+                    isPositive(roundedBalance)
                       ? "text-red-500"
                       : "text-green-700",
                   )}
                 >
-                  <MonetaryDisplay amount={account.total_balance} />
+                  <MonetaryDisplay amount={roundedBalance} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
-                {isPositive(account.total_balance)
+                {isPositive(roundedBalance)
                   ? t("pending_from_patient")
                   : t("overpaid_amount")}
               </p>
@@ -604,12 +619,20 @@ function AccountShow({
 
           <div className="flex-1 p-6 border-b md:border-r border-gray-200">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
                 {t("billed_gross")}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 text-gray-400 cursor-pointer" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <MonetaryDisplay amount={account.total_gross} />
+                  </TooltipContent>
+                </Tooltip>
               </p>
               <div className="flex items-end">
                 <p className="text-3xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={account.total_gross} />
+                  <MonetaryDisplay amount={roundedBilledGross} />
                 </p>
               </div>
               <p className="text-xs text-gray-500">
@@ -637,7 +660,7 @@ function AccountShow({
           </div>
         </div>
 
-        <div className="flex gap-2 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center justify-between">
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
@@ -679,7 +702,7 @@ function AccountShow({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-gray-500">
               {t("billing_status")}
             </span>
@@ -775,7 +798,7 @@ function AccountShow({
               ))}
             </SelectContent>
           </Select>
-          <ClosedCallout balance={account.total_balance} />
+          <ClosedCallout balance={roundedBalance} />
           {hasBillableItems && (
             <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
               {t("close_account_with_pending_items_caution_message")}

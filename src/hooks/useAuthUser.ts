@@ -14,7 +14,12 @@ export interface AuthContextType {
   verifyMFA: (data: MfaLoginRequest) => Promise<LoginResponse>;
   isAuthenticating: boolean;
   isVerifyingMFA: boolean;
+  /** Deliberate sign-out — also clears local questionnaire fill drafts. */
   signOut: () => Promise<void>;
+  /** Same session teardown for the INVOLUNTARY paths (session expiry, a
+   *  cross-tab token removal), which leave fill drafts in place so work
+   *  interrupted by an expiry can be recovered after re-login. */
+  endSessionKeepingDrafts: () => Promise<void>;
   patientLogin: (tokenData: TokenData, redirectUrl: string) => void;
   patientToken: TokenData | null;
 }

@@ -32,8 +32,8 @@ import {
 } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
-  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
@@ -622,13 +622,13 @@ export function EncounterList({
         <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-visible">
           <div className="flex flex-col overflow-visible">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
                 <div className="relative w-full sm:w-auto sm:min-w-60">
                   <Popover
                     open={searchOptionsOpen && showSearchOptions}
                     onOpenChange={setSearchOptionsOpen}
                   >
-                    <PopoverTrigger asChild>
+                    <PopoverAnchor asChild>
                       <div className="relative">
                         <input
                           ref={searchInputRef}
@@ -646,16 +646,19 @@ export function EncounterList({
                           }}
                           onKeyDown={handleSearchInputKeyDown}
                           placeholder={selectedSearchType.placeholder}
-                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus-visible:outline-none"
+                          className="h-9 w-full rounded-md border bg-white px-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 focus-visible:outline-hidden"
                         />
                       </div>
-                    </PopoverTrigger>
+                    </PopoverAnchor>
                     <PopoverContent
                       className="w-(--radix-popover-trigger-width) p-0"
                       align="start"
                       onOpenAutoFocus={(event) => {
                         event.preventDefault();
                         searchInputRef.current?.focus();
+                      }}
+                      onCloseAutoFocus={(event) => {
+                        event.preventDefault();
                       }}
                     >
                       <Command>
@@ -712,17 +715,19 @@ export function EncounterList({
                   patientId={qParams.patient_filter}
                   patientName={qParams.patient_name}
                 />
-                <MultiFilter
-                  selectedFilters={displaySelectedFilters}
-                  onFilterChange={handleFilterChange}
-                  onOperationChange={handleOperationChange}
-                  onClearAll={handleClearAll}
-                  onClearFilter={handleClearFilter}
-                  className="flex sm:flex-row flex-wrap sm:items-center"
-                  triggerButtonClassName="self-start sm:self-center"
-                  clearAllButtonClassName="self-center"
-                  facilityId={facilityId}
-                />
+                <div className="w-full min-w-0 sm:w-auto">
+                  <MultiFilter
+                    selectedFilters={displaySelectedFilters}
+                    onFilterChange={handleFilterChange}
+                    onOperationChange={handleOperationChange}
+                    onClearAll={handleClearAll}
+                    onClearFilter={handleClearFilter}
+                    className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
+                    triggerButtonClassName="self-start sm:self-center"
+                    clearAllButtonClassName="self-center"
+                    facilityId={facilityId}
+                  />
+                </div>
               </div>
             </div>
 

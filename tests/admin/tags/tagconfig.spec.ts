@@ -5,13 +5,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Tag Configuration Management", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to admin dashboard
-    await page.goto("/");
-    await page.getByRole("link", { name: "Admin Dashboard" }).click();
-
-    // Navigate to Tag Config page
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("link", { name: "Tag Config" }).click();
+    await page.goto("/admin/tag_config");
   });
 
   test("should create a new tag configuration", async ({ page }) => {
@@ -260,28 +254,5 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("button", { name: "View" }).click();
     await page.getByRole("button", { name: parentTagName }).click();
     await expect(page.getByRole("cell", { name: /Child/i })).toBeVisible();
-  });
-
-  test("should display tag hierarchy correctly", async ({ page }) => {
-    // This test verifies that parent-child relationships are displayed correctly
-    // Look for any existing parent tags with children
-    const parentRows = page
-      .getByRole("row")
-      .filter({ has: page.getByRole("button") });
-    const firstParentRow = parentRows.first();
-
-    if (await firstParentRow.isVisible()) {
-      await firstParentRow.getByRole("button").click();
-
-      // Verify the tag details view loads
-      await expect(page.getByRole("button", { name: "View" })).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Add child tag" }),
-      ).toBeVisible();
-
-      // Check if child tags section exists
-      await page.getByRole("button", { name: "View" }).click();
-      await expect(page.getByText("Child tags")).toBeVisible();
-    }
   });
 });

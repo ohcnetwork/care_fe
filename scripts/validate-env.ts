@@ -108,6 +108,7 @@ const envSchema = z
     REACT_APP_COVER_IMAGE: z.url(),
     REACT_APP_COVER_IMAGE_ALT: z.url(),
     REACT_SBOM_BASE_URL: z.url().optional(),
+    REACT_APP_STORE_API_URL: z.url().or(z.literal("")).optional(),
     REACT_GITHUB_URL: z.url().optional(),
     REACT_OHCN_URL: z.url().optional(),
     REACT_SENTRY_DSN: z.url().optional(),
@@ -135,7 +136,7 @@ const envSchema = z
       booleanAsStringSchema.optional(),
     REACT_ENABLE_QUESTIONNAIRE_DRAFT: booleanAsStringSchema.optional(),
     REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
-    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: numberAsString.optional(),
+    REACT_INVENTORY_EXPIRY_MONTH_OFFSET: positiveNumberAsString.optional(),
     REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION:
       booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.url().optional(),

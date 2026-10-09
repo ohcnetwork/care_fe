@@ -51,7 +51,6 @@ export function CombinedDatePicker({
   );
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
     onChange(date);
   };
 
@@ -66,7 +65,7 @@ export function CombinedDatePicker({
           <Button
             variant="outline"
             className={cn(
-              "flex-1 justify-start text-left font-normal",
+              "flex-1 justify-start border-gray-300 text-left font-normal shadow-xs",
               !value && "text-gray-500",
               classes,
               buttonClassName,

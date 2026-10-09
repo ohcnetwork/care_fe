@@ -37,14 +37,14 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await expect(page.getByText("Primary Parameters").first()).toBeVisible();
     });
 
-    test("should navigate to Medicines tab using 'g m' shortcut", async ({
+    test("should navigate to Medications tab using 'g m' shortcut", async ({
       page,
     }) => {
       await page.keyboard.press("g");
       await page.keyboard.press("m");
 
       await expect(
-        page.getByRole("tab", { name: "Medicines" }),
+        page.getByRole("tab", { name: "Medications" }),
       ).toHaveAttribute("data-state", "active");
 
       await expect(page.getByText("All Prescriptions").first()).toBeVisible();

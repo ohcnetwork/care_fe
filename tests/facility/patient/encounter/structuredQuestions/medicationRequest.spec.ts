@@ -220,7 +220,7 @@ test.describe("Medication Request Questionnaire", () => {
       .last()
       .fill(notes);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -236,7 +236,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -279,7 +279,7 @@ test.describe("Medication Request Questionnaire", () => {
 
     await selectDuration(page, duration, durationUnit);
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(
       page.getByText("Questionnaire submitted successfully"),
@@ -295,7 +295,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -317,7 +317,7 @@ test.describe("Medication Request Questionnaire", () => {
       .getByRole("option", { name: medicationName, exact: true })
       .click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
 
     await expect(page.getByText("Dosage*This field is required")).toBeVisible();
 

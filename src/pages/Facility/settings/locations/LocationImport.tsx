@@ -1,5 +1,4 @@
 /* eslint-disable i18next/no-literal-string */
-import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -20,12 +19,8 @@ import {
 } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 
-import mutate from "@/Utils/request/mutate";
-import {
-  BatchRequestBody,
-  BatchRequestResponse,
-} from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { BatchRequestResponse } from "@/types/base/batch/batch";
 import {
   LocationDetail,
   LocationForm,
@@ -493,8 +488,7 @@ interface QueueItem {
 export function useSaveLocations(facilityId: string) {
   const [queue, setQueue] = useState<QueueItem[]>([]);
 
-  const { mutate: submitBatch } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+  const { mutate: submitBatch } = useBatchRequest({
     onSuccess: (data) => {
       const res = data as BatchRequestResponse<LocationDetail>;
       setQueue((prev) => {
@@ -558,19 +552,16 @@ export function useSaveLocations(facilityId: string) {
       return;
     }
 
-    const { path, method } = locationApi.create;
-    const url = path.replace("{facility_id}", facilityId);
-
-    const batchRequest: BatchRequestBody = {
-      requests: toSave.map((location) => ({
-        url,
-        method,
-        reference_id: location.name,
+    const requests: BatchRequestObject<LocationWrite>[] = toSave.map(
+      (location) => ({
+        api: locationApi.create,
+        pathParams: { facility_id: facilityId },
+        referenceId: location.name,
         body: location,
-      })),
-    };
+      }),
+    );
 
-    submitBatch(batchRequest);
+    submitBatch(requests);
   }, [queue, facilityId, submitBatch]);
 
   // Entry point: start the saving process

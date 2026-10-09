@@ -66,7 +66,8 @@
     { "key": "shift+r", "action": "medication-return", "description": "Return Medication" },
     { "key": "b", "action": "billing-action", "description": "Billing related action" },
     { "key": "shift+p", "action": "view-prescriptions", "description": "View Prescription" },
-    { "key": "a", "action": "view-account", "description": "View Account" }
+    { "key": "a", "action": "view-account", "description": "View Account" },
+    { "key": "h", "action": "put-on-hold-action", "description": "Put on Hold" }
   ],
 
   "facility:pharmacy:supply-delivery": [
@@ -85,11 +86,6 @@
     { "key": "p", "action": "print-invoice", "description": "Print Invoice" },
     { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source" },
     { "key": "v", "action": "view-invoice-payment", "description": "View Invoice" }
-  ],
-
-  "facility:billing:payment": [
-    { "key": "shift+enter", "action": "submit-action", "description": "Record Payment/Credit Note" },
-    { "key": "shift+enter", "action": "mark-as-balanced", "description": "Mark as Balanced" }
   ],
 
   "facility:account:show": [

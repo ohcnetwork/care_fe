@@ -13,6 +13,7 @@ import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import TagColorDot from "@/components/Tags/TagColorDot";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -152,7 +153,12 @@ export default function TagConfigView({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
+                <TagColorDot
+                  tag={tagConfig}
+                  fallbackColorClass="bg-gray-200"
+                  className="size-4"
+                />
                 {tagConfig.display}
               </h1>
             </div>

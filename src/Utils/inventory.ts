@@ -1,4 +1,10 @@
-import { addMonths, endOfMonth, formatDate, isAfter } from "date-fns";
+import {
+  addMonths,
+  endOfMonth,
+  formatDate,
+  isAfter,
+  startOfMonth,
+} from "date-fns";
 
 import { Badge } from "@/components/ui/badge";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -31,6 +37,25 @@ export function getExpiryStatus(
   }
 
   return "valid";
+}
+
+/**
+ * Gets the expiration date range of products considered "expired" by
+ * {@link getExpiryStatus}.
+ */
+export function getExpiredDateRange() {
+  return { to: endOfMonth(new Date()) };
+}
+
+/**
+ * Gets the expiration date range of products considered "expiring_soon"
+ */
+export function getExpiringSoonDateRange(expiryMonthOffset: number) {
+  const today = new Date();
+  return {
+    from: startOfMonth(addMonths(today, 1)),
+    to: endOfMonth(addMonths(today, expiryMonthOffset)),
+  };
 }
 
 /**

@@ -1,15 +1,15 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
+  PrescriptionList,
   PrescriptionRead,
-  PrescritionList,
 } from "@/types/emr/prescription/prescription";
 
 export default {
   listPrescriptions: {
     path: "/api/v1/otp/medication_prescription/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<PrescritionList>>(),
+    TRes: Type<PaginatedResponse<PrescriptionList>>(),
   },
   getPrescription: {
     path: "/api/v1/otp/medication_prescription/{id}/",

@@ -55,7 +55,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
-import { isPositive } from "@/Utils/decimal";
+import { isPositive, roundWhole } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
 function formatDate(date?: string) {
@@ -287,12 +287,14 @@ export function AccountList({
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      isPositive(account.total_balance)
+                      isPositive(roundWhole(account.total_balance))
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}
                   >
-                    <MonetaryDisplay amount={account.total_balance} />
+                    <MonetaryDisplay
+                      amount={roundWhole(account.total_balance)}
+                    />
                   </TableCell>
                   <TableCell className="text-base font-medium leading-6 text-gray-950">
                     <MonetaryDisplay
