@@ -39,6 +39,7 @@ function workspace(
       id: faker.string.uuid(),
       name: `Workspace ${faker.word.words(2)} ${faker.string.alphanumeric(6)}`,
       description: faker.lorem.sentence(),
+      status: "active",
       template: { sections: [{ key: "overview", visible: true }] },
       created_by: null,
       updated_by: null,
@@ -229,6 +230,8 @@ async function mockWorkspaceApi(
               record.authContext === url.searchParams.get("auth_context")) &&
             (!url.searchParams.has("facility") ||
               record.facilityId === url.searchParams.get("facility")) &&
+            (!url.searchParams.has("status") ||
+              record.data.status === url.searchParams.get("status")) &&
             record.data.name.toLowerCase().includes(name),
         );
         const offset = Number(url.searchParams.get("offset") ?? 0);
@@ -253,6 +256,7 @@ async function mockWorkspaceApi(
           ...created.data,
           name: payload.name,
           description: payload.description,
+          status: payload.status,
           template: payload.template,
           created_by: user,
         };
@@ -351,9 +355,7 @@ async function mockWorkspaceApi(
           const payload = request.postDataJSON() as WorkspaceUpdate;
           record.data = {
             ...record.data,
-            name: payload.name,
-            description: payload.description,
-            template: payload.template,
+            ...payload,
           };
           await route.fulfill({ json: record.data });
         } else if (method === "DELETE") {
@@ -875,6 +877,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
         body: {
           name,
           description,
+          status: "active",
           template,
           auth_context: "instance",
           inherited: false,
@@ -1305,6 +1308,7 @@ test("department workspaces validate ownership and preserve edits after a backen
         body: {
           name,
           description: "",
+          status: "active",
           template: {},
           auth_context: "facility_organization",
           facility: api.facilityId,
@@ -1398,7 +1402,12 @@ test("department workspaces validate ownership and preserve edits after a backen
     const expectedUpdate = {
       method: "PUT",
       pathname,
-      body: { name: updatedName, description: "", template: updatedTemplate },
+      body: {
+        name: updatedName,
+        description: "",
+        status: "active",
+        template: updatedTemplate,
+      },
     };
     expect(api.writes.slice(1)).toEqual([expectedUpdate, expectedUpdate]);
     await page.reload();
@@ -1513,6 +1522,7 @@ test("the combined facility list uses server pagination and retains personal cre
       body: {
         name,
         description: "",
+        status: "active",
         template: {},
         auth_context: "user",
         facility: facilityId,
@@ -1811,6 +1821,7 @@ test("cached workspace editors refresh untouched fields and preserve unsaved edi
         body: {
           name: draftName,
           description: record.data.description,
+          status: "active",
           template: refreshedTemplate,
         },
       },

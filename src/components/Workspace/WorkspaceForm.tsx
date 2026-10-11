@@ -63,9 +63,11 @@ import mutate from "@/Utils/request/mutate";
 import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
+  WORKSPACE_STATUSES,
   WorkspaceAuthContext,
   WorkspaceRead,
   WorkspaceScope,
+  WorkspaceStatus,
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 
@@ -76,6 +78,7 @@ import { parseWorkspaceJson } from "./workspaceEditorUtils";
 interface WorkspaceFormValues {
   name: string;
   description: string;
+  status: WorkspaceStatus;
   template: string;
   authContext: WorkspaceAuthContext;
   departmentId: string;
@@ -118,6 +121,7 @@ export function WorkspaceForm({
         .min(1, t("workspace_name_required"))
         .max(255, t("workspace_name_too_long")),
       description: z.string(),
+      status: z.enum(WORKSPACE_STATUSES),
       template: z.string().superRefine((value, ctx) => {
         try {
           const template = parseWorkspaceJson(value);
@@ -159,6 +163,7 @@ export function WorkspaceForm({
       ? {
           name: existing.name,
           description: existing.description,
+          status: existing.status,
           template:
             invalidTemplateSnapshot ??
             JSON.stringify(existing.template, null, 2),
@@ -170,6 +175,7 @@ export function WorkspaceForm({
     defaultValues: {
       name: existing?.name ?? "",
       description: existing?.description ?? "",
+      status: existing?.status ?? "active",
       template: JSON.stringify(existing?.template ?? {}, null, 2),
       authContext: scope.authContext,
       departmentId: "",
@@ -211,6 +217,7 @@ export function WorkspaceForm({
       const body = {
         name: values.name,
         description: values.description,
+        status: values.status,
         template: parseWorkspaceJson(values.template),
       };
       return existing
@@ -237,6 +244,7 @@ export function WorkspaceForm({
           {
             name: data.name,
             description: data.description,
+            status: data.status,
             template: JSON.stringify(data.template, null, 2),
             authContext: values.authContext,
             departmentId: values.departmentId,
@@ -375,7 +383,12 @@ export function WorkspaceForm({
                 save.mutate(values);
               },
               (errors) => {
-                if (errors.name || errors.description || errors.departmentId) {
+                if (
+                  errors.name ||
+                  errors.description ||
+                  errors.status ||
+                  errors.departmentId
+                ) {
                   flushSync(() => setSettingsOpen(true));
                 }
               },
@@ -400,6 +413,7 @@ export function WorkspaceForm({
                     {(accessState.dirty ||
                       form.formState.dirtyFields.name ||
                       form.formState.dirtyFields.description ||
+                      form.formState.dirtyFields.status ||
                       form.formState.dirtyFields.authContext ||
                       form.formState.dirtyFields.departmentId) && (
                       <span className="text-xs text-amber-700">
@@ -457,6 +471,39 @@ export function WorkspaceForm({
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-gray-600">
+                        {t("status")}
+                      </FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={busy}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full bg-gray-50/50 shadow-none sm:max-w-xs">
+                            <SelectValue placeholder={t("select_status")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {WORKSPACE_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(status)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        {t("workspace_status_hint")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {!existing && scope.authContext === "facility" && (
                   <div className="grid items-start gap-5 border-t border-gray-100 pt-4 md:grid-cols-2">
                     <FormField

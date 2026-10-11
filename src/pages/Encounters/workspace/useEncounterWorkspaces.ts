@@ -17,19 +17,20 @@ export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
     retry: false,
   });
   const list = useQuery({
-    queryKey: ["workspaces", user.id, "encounter"],
+    queryKey: ["workspaces", user.id, "encounter", { status: "active" }],
     queryFn: async ({ signal }) => {
       const response = await query.paginated(workspaceApi.list, {
         silent: true,
+        queryParams: { status: "active" },
       })({ signal });
-      return response.results;
+      return response.results.filter(({ status }) => status === "active");
     },
     retry: false,
   });
   const accessibleWorkspaces = new Map(
     (list.data ?? []).map((workspace) => [workspace.id, workspace]),
   );
-  // Keep the defaults API's order and skip deleted or revoked workspaces.
+  // Keep the defaults API's order and skip inactive, deleted, or revoked workspaces.
   const firstMatch = defaults.data?.results.find(
     ({ attribute, value, workspace }) =>
       attribute === "encounter_class" &&

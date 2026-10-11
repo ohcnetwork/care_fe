@@ -10,6 +10,10 @@ export const WORKSPACE_AUTH_CONTEXTS = [
 
 export type WorkspaceAuthContext = (typeof WORKSPACE_AUTH_CONTEXTS)[number];
 
+export const WORKSPACE_STATUSES = ["draft", "active", "archived"] as const;
+
+export type WorkspaceStatus = (typeof WORKSPACE_STATUSES)[number];
+
 export type WorkspaceAdminScope = Extract<
   WorkspaceAuthContext,
   "instance" | "facility"
@@ -46,6 +50,7 @@ export type WorkspaceTemplate = Record<string, unknown>;
 export interface WorkspaceBase {
   name: string;
   description: string;
+  status: WorkspaceStatus;
   template: WorkspaceTemplate;
 }
 

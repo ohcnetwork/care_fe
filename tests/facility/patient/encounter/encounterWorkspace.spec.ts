@@ -179,6 +179,7 @@ async function mockEncounterWorkspaceApi(
     id: faker.string.uuid(),
     name: `Rounds ${faker.word.words(2)}`,
     description: "Encounter layout fixture",
+    status: "active",
     created_by: actor,
     updated_by: actor,
     template: roundsTemplate(options.includeOverview),
@@ -562,6 +563,7 @@ async function mockEncounterWorkspaceApi(
                 id: workspace.id,
                 name: workspace.name,
                 description: workspace.description,
+                status: workspace.status,
                 template: workspace.template,
               },
             })),
@@ -571,8 +573,13 @@ async function mockEncounterWorkspaceApi(
       }
       if (path === "/api/v1/workspace/") {
         workspaceReads.push(url);
+        const matching = workspaces.filter(
+          (workspace) =>
+            !url.searchParams.has("status") ||
+            workspace.status === url.searchParams.get("status"),
+        );
         await route.fulfill({
-          json: { count: workspaces.length, results: workspaces },
+          json: { count: matching.length, results: matching },
         });
         return;
       }
@@ -2407,6 +2414,7 @@ test.describe("Encounter workspace rendering", () => {
         {
           name: fixture.workspace.name,
           description: fixture.workspace.description,
+          status: "active",
           template,
         },
       ]);

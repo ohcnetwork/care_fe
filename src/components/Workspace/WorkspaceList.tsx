@@ -4,6 +4,7 @@ import { Link } from "raviger";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,12 @@ import query from "@/Utils/request/query";
 interface WorkspaceListProps {
   scope: WorkspaceScope;
 }
+
+const WORKSPACE_STATUS_VARIANTS = {
+  draft: "yellow",
+  active: "green",
+  archived: "secondary",
+} as const;
 
 export function WorkspaceList({ scope }: WorkspaceListProps) {
   const { t } = useTranslation();
@@ -142,6 +149,7 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
                 <TableHead className="hidden px-4 sm:table-cell">
                   {t("description")}
                 </TableHead>
+                <TableHead className="px-4">{t("status")}</TableHead>
                 <TableHead className="px-4 text-right">
                   {t("actions")}
                 </TableHead>
@@ -166,6 +174,13 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
                     <p className="line-clamp-3 break-words text-sm text-gray-600">
                       {workspace.description || t("no_description")}
                     </p>
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <Badge
+                      variant={WORKSPACE_STATUS_VARIANTS[workspace.status]}
+                    >
+                      {t(workspace.status)}
+                    </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-right">
                     <Button asChild variant="outline" size="sm">

@@ -9,7 +9,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 import { WorkspaceRead } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
-import { callApi } from "@/Utils/request/query";
+import query, { callApi } from "@/Utils/request/query";
 
 import { EncounterWorkspacePicker } from "./EncounterWorkspacePicker";
 import { parseEncounterWorkspace } from "./parseEncounterWorkspace";
@@ -46,12 +46,21 @@ export function EncounterWorkspaceSwitcher({
       encounterClass: EncounterClass;
       encounterId: string;
     }) => {
-      const savedDefaults = await callApi(
-        workspaceApi.getUserDefaultAttributes,
-        {
+      const [savedDefaults, accessibleWorkspaces] = await Promise.all([
+        callApi(workspaceApi.getUserDefaultAttributes, {
           silent: true,
-        },
-      );
+        }),
+        query.paginated(workspaceApi.list, { silent: true })({
+          signal: new AbortController().signal,
+        }),
+      ]);
+      if (
+        !accessibleWorkspaces.results.some(
+          ({ id, status }) => id === choice.id && status === "active",
+        )
+      )
+        throw new Error("Selected workspace is no longer active or accessible");
+
       const classesByWorkspace = new Map<string, Set<string>>();
       for (const rule of savedDefaults.results) {
         if (rule.attribute !== "encounter_class") continue;
@@ -62,7 +71,9 @@ export function EncounterWorkspaceSwitcher({
         classesByWorkspace.set(rule.workspace.id, classes);
       }
 
-      const accessibleIds = new Set((list.data ?? []).map(({ id }) => id));
+      const accessibleIds = new Set(
+        accessibleWorkspaces.results.map(({ id }) => id),
+      );
       const updates: { id: string; value: string }[] = [];
       // The original API cannot delete a preference. Remove only this class;
       // an empty string makes the old rule inactive without changing the backend.

@@ -7621,6 +7621,7 @@
   "workspace_save_access": "Save access",
   "workspace_save_error": "Unable to save the workspace. Your changes are still here. Please try again.",
   "workspace_search_empty_hint": "Try a different name or clear the search.",
+  "workspace_status_hint": "Only active workspaces are available in encounters. Draft and archived workspaces remain editable here.",
   "workspace_template": "Template (JSON)",
   "workspace_template_hint": "Enter the workspace configuration as a JSON object. All template fields are preserved when saving.",
   "workspace_template_invalid": "Enter valid JSON with an object at the top level. Arrays, null, and other values are not supported.",
