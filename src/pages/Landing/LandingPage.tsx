@@ -14,23 +14,14 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-import { Avatar } from "@/components/Common/Avatar";
+import { LoginHeader } from "@/components/Common/LoginHeader";
 
-import { usePatientSignOut } from "@/hooks/usePatientSignOut";
-
-import { LocalStorageKeys } from "@/common/constants";
+import { useAuthContext } from "@/hooks/useAuthUser";
 
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { TokenData } from "@/types/otp/otp";
 
 const { customLogo, stateLogo, mainLogo } = careConfig;
 
@@ -40,15 +31,13 @@ export function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
-  const signOut = usePatientSignOut();
-  const tokenData: TokenData = JSON.parse(
-    localStorage.getItem(LocalStorageKeys.patientTokenKey) || "{}",
-  );
+  const { patientToken } = useAuthContext();
 
   const isLoggedIn =
-    tokenData.token &&
-    Object.keys(tokenData).length > 0 &&
-    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
+    !!patientToken?.token &&
+    dayjs(patientToken.createdAt).isAfter(
+      dayjs().subtract(careConfig.patientTokenFreshnessMinutes, "minutes"),
+    );
   const { data: organizationsResponse } = useQuery({
     queryKey: ["organizations", "level", "1"],
     queryFn: query(organizationApi.getPublicOrganizations, {
@@ -122,38 +111,7 @@ export function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col p-5">
       {/* Main Content  */}
-      {isLoggedIn && (
-        <header className="w-full">
-          <div className="flex justify-end items-center gap-2">
-            <Button
-              variant="ghost"
-              className="text-sm font-medium hover:bg-gray-100 px-6"
-              onClick={() => navigate("/patient/home")}
-            >
-              {t("home")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Avatar name={"User"} className="size-7 rounded-full" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="text-xs text-gray-500">
-                  <span className="font-medium">{tokenData.phoneNumber}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                  onClick={signOut}
-                >
-                  <CareIcon icon="l-signout" className="mr-2 size-4" />
-                  {t("sign_out")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-      )}
+      {isLoggedIn && <LoginHeader />}
       <main className="lg:flex-1 flex flex-col items-center justify-center py-4 md:py-8">
         {/* Logo Section */}
         <div className="w-full flex flex-col items-center mt-2 md:mt-0">
@@ -309,7 +267,7 @@ export function LandingPage() {
                   <Button
                     variant="outline"
                     className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                    onClick={() => navigate(`/login?mode=patient`)}
+                    onClick={() => navigate("/patient/login")}
                   >
                     {t("patient_login")}
                   </Button>

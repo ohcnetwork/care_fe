@@ -130,8 +130,8 @@ export interface TokenSlot {
       name: string;
     };
   };
-  start_datetime: string; // timezone naive datetime
-  end_datetime: string; // timezone naive datetime
+  start_datetime: string; // ISO 8601 datetime with timezone offset
+  end_datetime: string; // ISO 8601 datetime with timezone offset
   allocated: number;
 }
 
@@ -247,6 +247,7 @@ export type Appointment = AppointmentBase & {
 
 export type PublicAppointment = AppointmentBase & {
   patient: PublicPatientRead;
+  associated_encounter?: Partial<EncounterListRead>;
 };
 
 export type AppointmentRead = Appointment & {
@@ -291,10 +292,6 @@ export interface AppointmentRescheduleRequest {
   new_booking_note: string;
   tags: string[];
 }
-
-export const getUserFromLocalStorage = (): UserReadMinimal => {
-  return JSON.parse(localStorage.getItem("user") ?? "{}");
-};
 
 export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));

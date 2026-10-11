@@ -1,207 +1,205 @@
-import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { Activity, CalendarDays, CalendarPlus, FileText } from "lucide-react";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { DiagnosticReportRow } from "@/components/Patient/DiagnosticReportRow";
+import { PatientAppShell } from "@/components/Patient/PatientAppShell";
+import { patientMetaLine } from "@/components/Patient/PatientProfileCard";
+import { PrescriptionRow } from "@/components/Patient/PrescriptionRow";
+import { VisitCard } from "@/components/Patient/VisitCard";
 
+import {
+  READY_REPORT_STATUSES,
+  usePatientAppointments,
+  usePatientDiagnosticReports,
+  usePatientPrescriptions,
+} from "@/hooks/usePatientPortalData";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import query from "@/Utils/request/query";
-import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import {
-  APPOINTMENT_STATUS_COLORS,
-  PublicAppointment,
-  formatScheduleResourceName,
-} from "@/types/scheduling/schedule";
+const QUICK_ACTIONS = [
+  {
+    key: "book_appointment",
+    label: "patient_home__quick_book_op",
+    href: "/nearby_facilities",
+    icon: CalendarPlus,
+  },
+  {
+    key: "prescriptions",
+    label: "patient_home__quick_rx",
+    href: "/patient/records?tab=prescriptions",
+    icon: FileText,
+  },
+  {
+    key: "diagnostic_reports",
+    label: "reports",
+    href: "/patient/records?tab=reports",
+    icon: Activity,
+  },
+  {
+    key: "visits",
+    label: "visits",
+    href: "/patient/visits",
+    icon: CalendarDays,
+  },
+] as const;
 
-import AppointmentDialog from "./components/AppointmentDialog";
+function SectionHeader({ title, href }: { title: string; href: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-baseline justify-between">
+      <span className="text-base font-bold text-gray-900">{title}</span>
+      <Link
+        href={href}
+        className="-my-3 flex min-h-11 items-center text-sm font-semibold text-primary-700"
+      >
+        {t("see_all")}
+      </Link>
+    </div>
+  );
+}
 
 function PatientPortalIndex() {
   const { t } = useTranslation();
+  const { patients, selectedPatient, isLoadingPatients } = usePatientContext();
 
-  const [selectedAppointment, setSelectedAppointment] = useState<
-    PublicAppointment | undefined
-  >();
-  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const { nextAppointment, isLoading: isLoadingAppointments } =
+    usePatientAppointments();
+  const { prescriptions, isLoading: isLoadingPrescriptions } =
+    usePatientPrescriptions();
+  const { reports: readyReports, isLoading: isLoadingReports } =
+    usePatientDiagnosticReports({ status: READY_REPORT_STATUSES });
 
-  const patient = usePatientContext();
-  const selectedPatient = patient?.selectedPatient;
-  const tokenData = patient?.tokenData;
+  const isLoading =
+    isLoadingPatients ||
+    isLoadingAppointments ||
+    isLoadingPrescriptions ||
+    isLoadingReports;
 
-  if (!tokenData) {
-    navigate("/login");
-  }
+  const hasNothingRecorded =
+    !isLoading &&
+    !nextAppointment &&
+    !prescriptions.length &&
+    !readyReports.length;
 
-  const { data: appointmentsData, isLoading } = useQuery({
-    queryKey: ["appointment", tokenData?.phoneNumber],
-    queryFn: query(PublicAppointmentApi.getAppointments, {
-      headers: {
-        Authorization: `Bearer ${tokenData?.token}`,
-      },
-    }),
-    enabled: !!tokenData?.token,
-  });
+  const firstName = selectedPatient?.name.split(" ")[0] ?? "";
 
-  if (isLoading) {
-    return (
-      <div>
-        <div className="flex justify-between w-full mb-8">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-8 w-48" />
-        </div>
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 mt-4">
-          <CardListSkeleton count={6} />
-        </div>
-      </div>
-    );
-  }
-
-  const appointments = appointmentsData?.results
-    .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
-    .sort(
-      (a, b) =>
-        new Date(a.token_slot.start_datetime).getTime() -
-        new Date(b.token_slot.start_datetime).getTime(),
-    );
-
-  const pastAppointments = appointments?.filter((appointment) =>
-    dayjs().isAfter(dayjs(appointment.token_slot.start_datetime)),
-  );
-
-  const scheduledAppointments = appointments?.filter((appointment) =>
-    dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
-  );
-
-  const getAppointmentCard = (appointment: PublicAppointment) => {
-    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
-    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
-    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
-    return (
-      <Card key={appointment.id} className="shadow-sm overflow-hidden">
-        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
-          <CardTitle>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">
-                {t(appointment.resource_type, { count: 1 })}:{" "}
-              </span>
-              <span className="text-sm">
-                {formatScheduleResourceName(appointment)}
-              </span>
-            </div>
-          </CardTitle>
-          <Button
-            variant="secondary"
-            className="border border-secondary-400"
-            onClick={() => {
-              setSelectedAppointment(appointment);
-              setAppointmentDialogOpen(true);
-            }}
-          >
-            <span>{t("view_details")}</span>
-          </Button>
-        </CardHeader>
-
-        <CardContent className="mt-2 pt-2 px-6 pb-3">
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
-            <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
-              <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
-                <span className="text-xs font-medium">{t("location")}: </span>
-                <span className="text-sm">
-                  <Link href={`/facility/${appointment.facility.id}`}>
-                    <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
-                      {appointment.facility?.name}
-                    </span>
-                  </Link>
-                </span>
-              </div>
-              <div className="flex flex-col gap-0 items-start md:flex-none">
-                <span className="text-xs font-medium">{t("status")}: </span>
-                <span>
-                  <Badge
-                    variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-                  >
-                    {t(appointment.status)}
-                  </Badge>
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-row gap-3 justify-between md:flex-none">
-              <div className="flex flex-col gap-0 items-start">
-                <span className="text-xs font-medium">{t("date")}: </span>
-                <span className="text-sm">{appointmentDate}</span>
-              </div>
-              <div className="flex flex-col gap-0 items-start">
-                <span className="text-xs font-medium">{t("time_slot")}: </span>
-                <span className="text-sm">{appointmentTimeSlot}</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const getAppointmentCardContent = (
-    appointments: PublicAppointment[] | undefined,
-  ) => {
-    return (
-      <div className="grid gap-4 mb-2">
-        {appointments && appointments.length > 0 ? (
-          appointments.map((appointment) => getAppointmentCard(appointment))
-        ) : (
-          <div className="col-span-full text-center bg-white shadow-sm rounded p-4 font-medium">
-            {t("no_appointments")}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const isOwnProfile =
+    !patients?.length || selectedPatient?.id === patients[0]?.id;
 
   return (
-    <>
-      <AppointmentDialog
-        setAppointmentDialogOpen={setAppointmentDialogOpen}
-        appointment={selectedAppointment}
-        open={appointmentDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedAppointment(undefined);
-          }
-          setAppointmentDialogOpen(open);
-        }}
-      />
-      <div className="container mx-auto mt-2">
-        <div className="flex justify-between w-full">
-          <span className="text-xl font-bold">{t("appointments")}</span>
-          <Button variant="primary_gradient" className="sticky right-0" asChild>
-            <Link href="/facilities">
-              <span>{t("book_appointment")}</span>
-            </Link>
-          </Button>
+    <PatientAppShell>
+      <div className="flex flex-col gap-3 px-4.5 pb-2 pt-4.5">
+        <div>
+          <h2 className="mb-0.5 text-[22px] font-bold tracking-tight text-gray-900">
+            {isOwnProfile
+              ? t("patient_home__greeting", { name: firstName })
+              : selectedPatient?.name}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {isOwnProfile
+              ? `${dayjs().format("dddd, D MMMM")}${
+                  selectedPatient?.geo_organization?.name
+                    ? ` · ${selectedPatient.geo_organization.name}`
+                    : ""
+                }`
+              : selectedPatient && patientMetaLine(selectedPatient, t)}
+          </p>
         </div>
-        <Tabs defaultValue="scheduled" className="mt-4">
-          <TabsList>
-            <TabsTrigger value="scheduled">{t("scheduled")}</TabsTrigger>
-            <TabsTrigger value="history">{t("history")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="scheduled">
-            {getAppointmentCardContent(scheduledAppointments)}
-          </TabsContent>
-          <TabsContent value="history">
-            {getAppointmentCardContent(pastAppointments)}
-          </TabsContent>
-        </Tabs>
+
+        {isLoading ? (
+          <>
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
+          </>
+        ) : hasNothingRecorded ? (
+          <>
+            <EmptyState
+              className="gap-3 rounded-2xl border-gray-300 px-3 py-7 shadow-none"
+              icon={
+                <CalendarDays
+                  className="size-7 text-gray-500 mx-3"
+                  strokeWidth={1.6}
+                />
+              }
+              title={t("patient_home__empty_heading")}
+              description={t("patient_home__empty_description", {
+                name: firstName,
+              })}
+              action={
+                <Button className="w-full" asChild>
+                  <Link href="/nearby_facilities">
+                    {t("patient_home__book_first_appointment")}
+                  </Link>
+                </Button>
+              }
+            />
+          </>
+        ) : (
+          <>
+            {nextAppointment && (
+              <VisitCard
+                variant="upcoming"
+                appointment={nextAppointment}
+                eyebrow={t("patient_home__upcoming_appointment")}
+              />
+            )}
+
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK_ACTIONS.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    key={action.key}
+                    href={action.href}
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-1 py-4 hover:border-primary-200 hover:bg-primary-50"
+                  >
+                    <Icon
+                      className="size-5 text-primary-700"
+                      strokeWidth={1.8}
+                    />
+                    <span className="text-center text-xs font-semibold leading-tight text-gray-900">
+                      {t(action.label)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {!!prescriptions.length && (
+              <div className="flex flex-col gap-2">
+                <SectionHeader
+                  title={t("patient_home__recent_prescriptions")}
+                  href="/patient/records?tab=prescriptions"
+                />
+                {prescriptions.slice(0, 2).map((prescription) => (
+                  <PrescriptionRow
+                    key={prescription.id}
+                    prescription={prescription}
+                  />
+                ))}
+              </div>
+            )}
+
+            {!!readyReports.length && (
+              <div className="flex flex-col gap-2">
+                <SectionHeader
+                  title={t("patient_home__recent_reports")}
+                  href="/patient/records?tab=reports"
+                />
+                {readyReports.slice(0, 2).map((report) => (
+                  <DiagnosticReportRow key={report.id} report={report} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </>
+    </PatientAppShell>
   );
 }
 

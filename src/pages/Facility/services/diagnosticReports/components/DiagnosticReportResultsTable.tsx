@@ -23,13 +23,22 @@ import {
   ObservationReferenceRange,
 } from "@/types/emr/observation/observation";
 import { BaseObservationDefinition } from "@/types/emr/observationDefinition/observationDefinition";
+import {
+  formatRangeBounds,
+  formatReferenceRanges,
+  isObservationFlagged,
+} from "@/Utils/observationRange";
 
 interface DiagnosticReportResultsTableProps {
   observations: ObservationRead[];
+  highlightAbnormal?: boolean;
+  className?: string;
 }
 
 export function DiagnosticReportResultsTable({
   observations,
+  highlightAbnormal = false,
+  className,
 }: DiagnosticReportResultsTableProps) {
   const hasInterpretation = observations.some(
     (observation) => observation.interpretation?.display,
@@ -61,17 +70,9 @@ export function DiagnosticReportResultsTable({
             ))}
           </div>
           {qr.ranges?.map((r, i) => {
-            let rangeText = "";
-            if (r.min != null && r.max != null) {
-              rangeText = `${r.min} - ${r.max}`;
-            } else if (r.min != null) {
-              rangeText = `> ${r.min}`;
-            } else if (r.max != null) {
-              rangeText = `< ${r.max}`;
-            }
-            if (!rangeText && !r.interpretation?.display) return null;
-
+            const rangeText = formatRangeBounds(r.min, r.max);
             const label = r.interpretation?.display;
+            if (!rangeText && !label) return null;
 
             return (
               <span key={i} className="text-gray-900 self-start ml-2">
@@ -104,28 +105,15 @@ export function DiagnosticReportResultsTable({
   const renderObservationReferenceRange = (
     referenceRange: ObservationReferenceRange[],
   ) => {
-    if (!referenceRange?.length) return "-";
+    const entries = formatReferenceRanges(referenceRange);
+    if (!entries.length) return "-";
 
-    return referenceRange.map((range, index) => {
-      let rangeText = "";
-      if (range.min != null && range.max != null) {
-        rangeText = `${range.min} - ${range.max}`;
-      } else if (range.min != null) {
-        rangeText = `> ${range.min}`;
-      } else if (range.max != null) {
-        rangeText = `< ${range.max}`;
-      }
-
-      const label = range.interpretation?.display;
-      if (!label && !rangeText) return null;
-
-      return (
-        <span key={`observation-reference-range-${index}`} className="block">
-          {label ? `${label}: ` : ""}
-          {rangeText}
-        </span>
-      );
-    });
+    return entries.map((entry, index) => (
+      <span key={`observation-reference-range-${index}`} className="block">
+        {entry.label ? `${entry.label}: ` : ""}
+        {entry.range}
+      </span>
+    ));
   };
 
   const renderObservationComponents = (
@@ -137,6 +125,7 @@ export function DiagnosticReportResultsTable({
         (c) => c.code?.code === component.code?.code,
       )?.qualified_ranges;
       const highlight = component.interpretation?.highlight ?? false;
+      const flagged = highlightAbnormal && isObservationFlagged(component);
       return (
         <TableRow
           key={component.code?.code}
@@ -154,6 +143,7 @@ export function DiagnosticReportResultsTable({
               className={cn(
                 "whitespace-normal",
                 highlight ? "font-bold" : "font-normal",
+                flagged && "text-warning-700 font-bold",
               )}
             >
               <span>{component.value.value}</span>
@@ -185,6 +175,7 @@ export function DiagnosticReportResultsTable({
     const hasComponents =
       observation.component && observation.component.length > 0;
     const highlight = observation.interpretation?.highlight ?? false;
+    const flagged = highlightAbnormal && isObservationFlagged(observation);
 
     return (
       <>
@@ -205,6 +196,7 @@ export function DiagnosticReportResultsTable({
                 className={cn(
                   "whitespace-normal",
                   highlight ? "font-bold" : "font-normal",
+                  flagged && "text-warning-700 font-bold",
                 )}
               >
                 <span>{observation.value.value}</span>
@@ -252,7 +244,7 @@ export function DiagnosticReportResultsTable({
   }
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className={cn("rounded-md border overflow-hidden", className)}>
       <Table className="border-collapse bg-white shadow-sm cursor-default table-fixed w-full">
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x-1 divide-gray-300">
