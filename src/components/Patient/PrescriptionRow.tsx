@@ -5,13 +5,13 @@ import { Link } from "raviger";
 import { cn } from "@/lib/utils";
 
 import { formatName } from "@/Utils/utils";
-import { PrescritionList } from "@/types/emr/prescription/prescription";
+import { PrescriptionList } from "@/types/emr/prescription/prescription";
 
 export function PrescriptionRow({
   prescription,
   className,
 }: {
-  prescription: PrescritionList;
+  prescription: PrescriptionList;
   className?: string;
 }) {
   return (
