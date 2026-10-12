@@ -13,10 +13,12 @@ export function CancelTokenDialog({
   open,
   onOpenChange,
   token,
+  onActionComplete,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   token: TokenRead;
+  onActionComplete?: () => void;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -25,6 +27,7 @@ export function CancelTokenDialog({
     onSuccess: () => {
       toast.success(t("token_has_been_cancelled"));
       onOpenChange(false);
+      onActionComplete?.();
     },
   });
 

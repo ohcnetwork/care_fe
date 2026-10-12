@@ -62,6 +62,7 @@ export const ServicePointSelector = ({
   subQueues,
   facilityId,
   action,
+  onActionComplete,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -69,6 +70,7 @@ export const ServicePointSelector = ({
   subQueues: TokenSubQueueRead[];
   facilityId: string;
   action: ServicePointSelectorAction;
+  onActionComplete?: () => void;
 }) => {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -94,6 +96,7 @@ export const ServicePointSelector = ({
     onSuccess: () => {
       toast.success(t(successMessage));
       onOpenChange(false);
+      onActionComplete?.();
     },
     onError: () => {
       setSelectedSubQueueId(

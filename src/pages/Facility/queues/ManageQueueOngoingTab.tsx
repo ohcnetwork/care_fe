@@ -578,6 +578,7 @@ function AwaitingRecallDialog({
           <OngoingQueueTokenCardsList
             facilityId={facilityId}
             queueId={queueId}
+            onActionComplete={() => onOpenChange(false)}
             qParams={{
               status: TokenStatus.UNFULFILLED,
               sub_queue: subQueueId,

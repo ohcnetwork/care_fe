@@ -68,6 +68,7 @@ interface TokenActionItem {
 function useTokenActions({
   facilityId,
   token,
+  onActionComplete,
   onCancelClick,
   onEnteredInErrorClick,
   onChangeServicePointClick,
@@ -75,6 +76,7 @@ function useTokenActions({
 }: {
   facilityId: string;
   token: TokenRead;
+  onActionComplete?: () => void;
   onCancelClick: () => void;
   onEnteredInErrorClick: () => void;
   assignedServicePointIds: string[];
@@ -87,6 +89,7 @@ function useTokenActions({
       if (data.status === TokenStatus.FULFILLED) {
         toast.success(t("token_has_been_completed"));
       }
+      onActionComplete?.();
     },
   });
 
@@ -101,6 +104,7 @@ function useTokenActions({
       label: t("open_encounter"),
       icon: <ScanEye className="size-4 mr-2" />,
       onSelect: () => {
+        onActionComplete?.();
         navigate(
           `/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`,
         );
@@ -213,9 +217,11 @@ function useTokenActions({
 export function OngoingQueueTokenCard({
   facilityId,
   token,
+  onActionComplete,
 }: {
   facilityId: string;
   token: TokenRead | null;
+  onActionComplete?: () => void;
 }) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showEnteredInErrorDialog, setShowEnteredInErrorDialog] =
@@ -234,6 +240,7 @@ export function OngoingQueueTokenCard({
     <OngoingQueueTokenCardInner
       facilityId={facilityId}
       token={token}
+      onActionComplete={onActionComplete}
       showCancelDialog={showCancelDialog}
       setShowCancelDialog={setShowCancelDialog}
       showEnteredInErrorDialog={showEnteredInErrorDialog}
@@ -245,6 +252,7 @@ export function OngoingQueueTokenCard({
 function OngoingQueueTokenCardInner({
   facilityId,
   token,
+  onActionComplete,
   showCancelDialog,
   setShowCancelDialog,
   showEnteredInErrorDialog,
@@ -252,6 +260,7 @@ function OngoingQueueTokenCardInner({
 }: {
   facilityId: string;
   token: TokenRead;
+  onActionComplete?: () => void;
   showCancelDialog: boolean;
   setShowCancelDialog: (open: boolean) => void;
   showEnteredInErrorDialog: boolean;
@@ -271,6 +280,7 @@ function OngoingQueueTokenCardInner({
               <TokenContent
                 facilityId={facilityId}
                 token={token}
+                onActionComplete={onActionComplete}
                 setShowCancelDialog={setShowCancelDialog}
                 setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
               />
@@ -281,12 +291,14 @@ function OngoingQueueTokenCardInner({
           open={showCancelDialog}
           onOpenChange={setShowCancelDialog}
           token={token}
+          onActionComplete={onActionComplete}
         />
         <EnteredInErrorDialog
           open={showEnteredInErrorDialog}
           onOpenChange={setShowEnteredInErrorDialog}
           facilityId={facilityId}
           token={token}
+          onActionComplete={onActionComplete}
         />
       </>
     );
@@ -302,6 +314,7 @@ function OngoingQueueTokenCardInner({
           <TokenContent
             facilityId={facilityId}
             token={token}
+            onActionComplete={onActionComplete}
             setShowCancelDialog={setShowCancelDialog}
             setShowEnteredInErrorDialog={setShowEnteredInErrorDialog}
           />
@@ -311,12 +324,14 @@ function OngoingQueueTokenCardInner({
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         token={token}
+        onActionComplete={onActionComplete}
       />
       <EnteredInErrorDialog
         open={showEnteredInErrorDialog}
         onOpenChange={setShowEnteredInErrorDialog}
         facilityId={facilityId}
         token={token}
+        onActionComplete={onActionComplete}
       />
     </>
   );
@@ -327,11 +342,13 @@ function EnteredInErrorDialog({
   onOpenChange,
   facilityId,
   token,
+  onActionComplete,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
   token: TokenRead;
+  onActionComplete?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -339,6 +356,7 @@ function EnteredInErrorDialog({
     onSuccess: () => {
       toast.success(t("token_marked_as_entered_in_error"));
       onOpenChange(false);
+      onActionComplete?.();
     },
   });
 
@@ -372,12 +390,14 @@ export function OngoingQueueTokenCardsList({
   emptyState,
   header,
   qParams,
+  onActionComplete,
 }: {
   facilityId: string;
   queueId: string;
   qParams: Record<string, unknown>;
   emptyState?: React.ReactNode;
   header?: React.ReactNode;
+  onActionComplete?: () => void;
 }) {
   const { ref, inView } = useInView();
 
@@ -406,6 +426,7 @@ export function OngoingQueueTokenCardsList({
               key={token.id}
               token={token}
               facilityId={facilityId}
+              onActionComplete={onActionComplete}
             />
           ))}
           <div ref={ref} className="-mt-1" />
@@ -531,11 +552,13 @@ const TokenTrigger = ({
 const TokenContent = ({
   token,
   facilityId,
+  onActionComplete,
   setShowCancelDialog,
   setShowEnteredInErrorDialog,
 }: {
   token: TokenRead;
   facilityId: string;
+  onActionComplete?: () => void;
   setShowCancelDialog: (open: boolean) => void;
   setShowEnteredInErrorDialog: (open: boolean) => void;
 }) => {
@@ -558,6 +581,7 @@ const TokenContent = ({
     facilityId,
     assignedServicePointIds,
     token,
+    onActionComplete,
     onCancelClick: () => setShowCancelDialog(true),
     onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
     onChangeServicePointClick: () => {
@@ -571,7 +595,9 @@ const TokenContent = ({
   const hasNoAssignedServicePoints =
     assignedServicePoints.length === 0 && !isLoadingSubQueues;
 
-  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token);
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
+    onSuccess: onActionComplete,
+  });
 
   return (
     <div className="w-full max-w-md mx-auto space-y-2">
@@ -728,6 +754,7 @@ const TokenContent = ({
               basePath="/"
               href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
               className="flex items-center gap-1"
+              onClick={onActionComplete}
             >
               <Stethoscope className="size-4 mr-2" />
               <span className="text-white font-semibold">
@@ -742,6 +769,7 @@ const TokenContent = ({
                 basePath="/"
                 href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                 className="flex items-center gap-1"
+                onClick={onActionComplete}
               >
                 <Stethoscope className="size-4 mr-2 group-hover:text-white" />
                 <span className="text-primary font-semibold group-hover:text-white">
@@ -798,6 +826,7 @@ const TokenContent = ({
           token={token}
           subQueues={assignedServicePoints}
           action={servicePointAction}
+          onActionComplete={onActionComplete}
         />
       </div>
     </div>

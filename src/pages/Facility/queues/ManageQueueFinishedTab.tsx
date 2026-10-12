@@ -24,7 +24,6 @@ import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  BringToFront,
   DoorOpenIcon,
   ExternalLink,
   MoreHorizontal,
@@ -401,25 +400,6 @@ function FinishedTokenOptions({
               {t("move_back_to_waiting")}
             </DropdownMenuItem>
           )}
-
-          <DropdownMenuItem
-            onClick={() =>
-              updateToken(
-                {
-                  status: TokenStatus.UNFULFILLED,
-                  note: token.note,
-                  sub_queue: token.sub_queue?.id || null,
-                },
-                {
-                  onSuccess: () => toast.success(t("token_recalled_later")),
-                },
-              )
-            }
-            disabled={isUpdating}
-          >
-            <BringToFront className="size-4" />
-            {t("move_to_awaiting_recall")}
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
