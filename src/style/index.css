@@ -67,6 +67,16 @@
   }
 }
 
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .animate-ping-slow {
   animation: ping-slow 8s ease-in-out infinite;
 }
@@ -142,6 +152,8 @@
   --color-danger-700: var(--color-red-700);
   --color-danger-800: var(--color-red-800);
   --color-danger-900: var(--color-red-900);
+
+  --animate-blink: blink 1.5s infinite;
 }
 
 @layer utilities {
@@ -529,18 +541,6 @@
     text-align: center;
   }
 
-  .App-logo {
-    height: 10vmin;
-    pointer-events: none;
-    filter: brightness(80%);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-      animation: App-logo-blink 1s linear infinite;
-    }
-  }
-
   .App-header {
     min-height: 100vh;
     display: flex;
@@ -549,24 +549,6 @@
     justify-content: center;
     font-size: calc(10px + 2vmin);
     color: white;
-  }
-
-  @keyframes App-logo-blink {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 0.5;
-    }
-    50% {
-      opacity: 1;
-    }
-    75% {
-      opacity: 0.5;
-    }
-    100% {
-      opacity: 0;
-    }
   }
 
   .dropdown:hover .dropdown-menu {
