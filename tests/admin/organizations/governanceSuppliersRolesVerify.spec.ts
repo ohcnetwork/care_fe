@@ -70,7 +70,8 @@ async function clickAndWaitForUrl(
   urlPattern: RegExp,
   clickAction: () => Promise<void>,
 ) {
-  await Promise.all([page.waitForURL(urlPattern), clickAction()]);
+  await clickAction();
+  await expect(page).toHaveURL(urlPattern);
   await expect(firstResizablePanel(page)).toBeVisible();
 }
 
@@ -91,7 +92,7 @@ async function openGovtOrgDetailByName(
   const href = await link.getAttribute("href");
   expect(href).toBeTruthy();
   const detailUrl = new URL(href!, page.url()).href;
-  await Promise.all([page.waitForURL(detailUrl), link.click()]);
+  await link.click();
   await expect(page).toHaveURL(detailUrl);
   await expect(
     page.getByRole("heading", { name: orgName, exact: true }),
@@ -100,8 +101,7 @@ async function openGovtOrgDetailByName(
 }
 
 test.describe("Admin organization lists", () => {
-  let parentOrgName: string;
-  let createdOrgName: string;
+  let rootOrgName: string;
 
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext({
@@ -110,9 +110,8 @@ test.describe("Admin organization lists", () => {
     try {
       const page = await context.newPage();
       await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-      createdOrgName = `Root ${faker.string.uuid()}`;
-      parentOrgName = createdOrgName;
-      await createGovtOrganization(page, createdOrgName);
+      rootOrgName = `Root ${faker.string.uuid()}`;
+      await createGovtOrganization(page, rootOrgName);
     } finally {
       await context.close();
     }
@@ -138,8 +137,8 @@ test.describe("Admin organization lists", () => {
       await gotoOrgTypeList(page, type);
 
       if (type === "govt") {
-        await searchInput(page, type).fill(parentOrgName);
-        const parentCard = govtOrgCard(page, parentOrgName);
+        await searchInput(page, type).fill(rootOrgName);
+        const parentCard = govtOrgCard(page, rootOrgName);
         await expect(parentCard).toBeVisible();
         await expect(parentCard.getByRole("heading")).toBeVisible();
         await expect(seeDetailsLinkInCard(parentCard)).toBeVisible();
@@ -161,7 +160,7 @@ test.describe("Admin organization lists", () => {
 
   test("should open govt org detail via see details", async ({ page }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
+    await openGovtOrgDetailByName(page, rootOrgName, DEFAULT_ORG_TYPE);
     await expect(page.locator('[data-slot="breadcrumb"]')).toBeVisible();
   });
 
@@ -173,9 +172,9 @@ test.describe("Admin organization lists", () => {
     const input = searchInput(page, DEFAULT_ORG_TYPE);
     await expect(input).toBeVisible();
 
-    await input.fill(createdOrgName);
+    await input.fill(rootOrgName);
     const matchedCard = govtOrgCards(page).filter({
-      has: page.getByRole("heading", { name: createdOrgName }),
+      has: page.getByRole("heading", { name: rootOrgName }),
     });
     await expect(matchedCard).toBeVisible();
 
@@ -186,7 +185,7 @@ test.describe("Admin organization lists", () => {
       const headingText = (
         await filteredCards.nth(i).getByRole("heading").first().innerText()
       ).trim();
-      expect(headingText.toLowerCase()).toContain(createdOrgName.toLowerCase());
+      expect(headingText.toLowerCase()).toContain(rootOrgName.toLowerCase());
     }
 
     await input.fill(`zz_${faker.string.uuid()}`);
@@ -251,7 +250,7 @@ test.describe("Admin organization lists", () => {
     page,
   }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
+    await openGovtOrgDetailByName(page, rootOrgName, DEFAULT_ORG_TYPE);
 
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
     await expect(breadcrumb).toBeVisible();
@@ -260,7 +259,7 @@ test.describe("Admin organization lists", () => {
       name: /organizations/i,
     });
     await expect(organizationsLink).toBeVisible();
-    await expect(breadcrumb.getByText(parentOrgName)).toBeVisible();
+    await expect(breadcrumb.getByText(rootOrgName)).toBeVisible();
 
     await clickAndWaitForUrl(page, adminOrgListUrlRegex(DEFAULT_ORG_TYPE), () =>
       organizationsLink.click(),
@@ -272,7 +271,7 @@ test.describe("Admin organization lists", () => {
     page,
   }) => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
-    await openGovtOrgDetailByName(page, parentOrgName, DEFAULT_ORG_TYPE);
+    await openGovtOrgDetailByName(page, rootOrgName, DEFAULT_ORG_TYPE);
 
     const addOrgButton = page.getByRole("button", {
       name: /add organization/i,
@@ -321,7 +320,7 @@ test.describe("Admin organization lists", () => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
     const parentUrl = await openGovtOrgDetailByName(
       page,
-      createdOrgName,
+      rootOrgName,
       DEFAULT_ORG_TYPE,
     );
     const parentId = new URL(parentUrl).pathname.split("/").pop();
@@ -355,11 +354,11 @@ test.describe("Admin organization lists", () => {
         breadcrumb.getByText(childName, { exact: true }),
       ).toBeVisible();
       const parentButton = breadcrumb.getByRole("button", {
-        name: createdOrgName,
+        name: rootOrgName,
         exact: true,
       });
       await expect(parentButton).toBeVisible();
-      await Promise.all([page.waitForURL(parentUrl), parentButton.click()]);
+      await parentButton.click();
       await expect(page).toHaveURL(parentUrl);
       await expect(govtOrgCard(page, childName)).toBeVisible();
     });
@@ -371,7 +370,7 @@ test.describe("Admin organization lists", () => {
     await gotoOrgTypeList(page, DEFAULT_ORG_TYPE);
     const parentUrl = await openGovtOrgDetailByName(
       page,
-      createdOrgName,
+      rootOrgName,
       DEFAULT_ORG_TYPE,
     );
     const childName = `Child ${faker.string.uuid()}`;
@@ -403,9 +402,9 @@ test.describe("Admin organization lists", () => {
       await page.reload();
       const parentButton = page
         .locator('[data-slot="breadcrumb"]')
-        .getByRole("button", { name: createdOrgName, exact: true });
+        .getByRole("button", { name: rootOrgName, exact: true });
       await expect(parentButton).toBeVisible();
-      await Promise.all([page.waitForURL(parentUrl), parentButton.click()]);
+      await parentButton.click();
       await expect(page).toHaveURL(parentUrl);
       await expect(govtOrgCard(page, updatedName)).toBeVisible();
     });
