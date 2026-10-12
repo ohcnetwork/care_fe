@@ -57,6 +57,8 @@ function getFileSizeError(file: File | undefined) {
   });
 }
 
+// Validators return the translated message for a missing value, so nothing
+// here depends on the generic `invalid_value` fallback in `validateFields`.
 const FILE_UPLOAD_FIELDS = {
   FILE_DATA: {
     key: "file_data",
@@ -64,7 +66,7 @@ const FILE_UPLOAD_FIELDS = {
     validate: (value: unknown) => {
       const fileData = value as FileUploadQuestion["file_data"];
       if (!fileData) {
-        return false;
+        return t("field_required");
       }
       return getFileSizeError(fileData) ?? true;
     },
@@ -74,7 +76,7 @@ const FILE_UPLOAD_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const name = value as FileUploadQuestion["name"];
-      return !!name;
+      return name ? true : t("field_required");
     },
   },
   ORIGINAL_NAME: {
@@ -82,7 +84,7 @@ const FILE_UPLOAD_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const originalName = value as FileUploadQuestion["original_name"];
-      return !!originalName;
+      return originalName ? true : t("field_required");
     },
   },
 } as const;
@@ -91,8 +93,8 @@ export function validateFileUploadQuestion(
   values: FileUploadQuestion[],
   questionId: string,
 ): QuestionValidationError[] {
-  return values.reduce((errors: QuestionValidationError[], value, index) => {
-    const fieldErrors = validateFields(
+  return values.flatMap((value, index) =>
+    validateFields(
       {
         [FILE_UPLOAD_FIELDS.FILE_DATA.key]: value.file_data,
         [FILE_UPLOAD_FIELDS.NAME.key]: value.name,
@@ -101,19 +103,8 @@ export function validateFileUploadQuestion(
       questionId,
       FILE_UPLOAD_FIELDS,
       index,
-    );
-
-    return [
-      ...errors,
-      // A validator that returns `false` means the value is missing, so show
-      // it as a required-field error; specific messages pass through as is.
-      ...fieldErrors.map((error) =>
-        error.error === t("invalid_value")
-          ? { ...error, error: t("field_required") }
-          : error,
-      ),
-    ];
-  }, []);
+    ),
+  );
 }
 
 export function FilesQuestion(props: FilesQuestionProps) {
@@ -176,11 +167,10 @@ export function FilesQuestion(props: FilesQuestionProps) {
       <QuestionLabel question={props.question} />
       {values.map((value, index) => {
         const sizeError = getFileSizeError(value.file_data);
-        // Once the form has been submitted the same message is shown below the
-        // question, so the inline copy is only needed before that.
-        const showSizeError =
-          sizeError &&
-          !props.errors?.some((error) => error.error === sizeError);
+        // Always rendered inline: the question-level slot shows only the first
+        // error for the question, so a later row's size error could otherwise
+        // go unseen.
+        const sizeErrorId = `${props.question.id}-file-${index}-size-error`;
         return (
           <div key={index} className="flex flex-col gap-1">
             <div className="flex items-stretch gap-2">
@@ -195,6 +185,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
                   "bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]",
                   sizeError && "border-red-500 bg-red-50",
                 )}
+                aria-describedby={sizeError ? sizeErrorId : undefined}
               >
                 <span className="text-sm truncate">{value.original_name}</span>
               </div>
@@ -218,8 +209,14 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 <CareIcon icon="l-trash" className="size-4" />
               </Button>
             </div>
-            {showSizeError && (
-              <p className="text-sm font-medium text-red-500">{sizeError}</p>
+            {sizeError && (
+              <p
+                id={sizeErrorId}
+                role="alert"
+                className="text-sm font-medium text-red-500"
+              >
+                {sizeError}
+              </p>
             )}
           </div>
         );
