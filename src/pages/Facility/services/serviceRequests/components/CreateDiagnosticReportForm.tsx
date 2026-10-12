@@ -47,12 +47,13 @@ export const CreateDiagnosticReportForm = ({
       )}
     >
       <Collapsible open={isExpanded}>
-        <CollapsibleTrigger asChild>
-          <CardHeader
-            className="cursor-pointer p-2"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md">
+        <CardHeader className="p-2">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex w-full flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 rounded-md text-left cursor-pointer"
+            >
               <div className="flex items-center gap-2">
                 <CardTitle className="flex items-center gap-1.5">
                   <span
@@ -76,9 +77,9 @@ export const CreateDiagnosticReportForm = ({
                   <ChevronsUpDown className="size-4 mx-3" />
                 )}
               </div>
-            </div>
-          </CardHeader>
-        </CollapsibleTrigger>
+            </button>
+          </CollapsibleTrigger>
+        </CardHeader>
         <CollapsibleContent>
           <CardContent className="px-2 pb-2 bg-gray-100">
             <PLUGIN_Component

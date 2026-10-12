@@ -81,7 +81,7 @@ export function CollectedSpecimenHeader({
             )}
             {collectedSpecimen.status === SpecimenStatus.available
               ? t("collected")
-              : collectedSpecimen.status || t("unknown")}
+              : t("unknown")}
           </Badge>
 
           {isOpen ? (

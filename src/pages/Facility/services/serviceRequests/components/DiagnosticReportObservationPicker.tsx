@@ -141,11 +141,10 @@ export function DiagnosticReportObservationPicker({
                   {t("no_observation_definitions_found")}
                 </CommandEmpty>
                 <CommandGroup>
-                  {options?.map((definition, index) => (
+                  {options?.map((definition) => (
                     <CommandItem
                       key={definition.id}
                       value={definition.id}
-                      ref={index === options.length - 1 ? ref : undefined}
                       onSelect={() => {
                         onSelect(definition);
                       }}
@@ -158,6 +157,7 @@ export function DiagnosticReportObservationPicker({
                       </div>
                     </CommandItem>
                   ))}
+                  {hasNextPage && <div ref={ref} aria-hidden="true" />}
                   {isFetchingNextPage && (
                     <div className="text-center text-sm py-2 text-gray-500">
                       {t("loading")}

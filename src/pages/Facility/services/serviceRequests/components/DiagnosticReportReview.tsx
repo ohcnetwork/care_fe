@@ -121,6 +121,8 @@ function DiagnosticReportReviewItem({
           updatedBy={currentReport.updated_by}
           icon={FileCheck}
           isExpanded={isExpanded}
+          patientId={patientId}
+          hasObservationHistory
         />
         <CollapsibleContent>
           <CardContent className="px-2 pb-0">
