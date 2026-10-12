@@ -27,7 +27,7 @@ import {
 
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 
-import useFileManager from "@/hooks/useFileManager";
+import useFileManager, { FileManagerResult } from "@/hooks/useFileManager";
 
 import { formatName } from "@/Utils/utils";
 import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
@@ -47,6 +47,91 @@ interface FileListTableProps {
   type: "diagnostic_report" | "patient" | "encounter";
   associatingId: string;
   canEdit?: boolean;
+}
+
+interface FileActionProps {
+  file: FileReadMinimal;
+  fileManager: FileManagerResult;
+  associatingId: string;
+}
+
+function ViewAction({ file, fileManager, associatingId }: FileActionProps) {
+  const { t } = useTranslation();
+
+  if (!fileManager.isPreviewable(file)) {
+    return null;
+  }
+
+  return (
+    <Button
+      variant="link"
+      className="h-auto text-gray-950"
+      onClick={() => fileManager.viewFile(file, associatingId)}
+    >
+      <span className="flex flex-row items-center gap-1 underline">
+        <Eye />
+        {t("view")}
+      </span>
+    </Button>
+  );
+}
+
+function ActionsMenu({
+  file,
+  fileManager,
+  associatingId,
+  canEdit,
+}: FileActionProps & { canEdit: boolean }) {
+  const { t } = useTranslation();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="actions">
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild className="text-primary-900">
+          <Button
+            size="sm"
+            onClick={() => fileManager.downloadFile(file, associatingId)}
+            variant="ghost"
+            className="w-full flex flex-row justify-stretch items-center"
+          >
+            <ArrowDownCircle className="mr-1" />
+            <span>{t("download")}</span>
+          </Button>
+        </DropdownMenuItem>
+        {canEdit && (
+          <>
+            <DropdownMenuItem asChild className="text-primary-900">
+              <Button
+                size="sm"
+                onClick={() => fileManager.archiveFile(file, associatingId)}
+                variant="ghost"
+                className="w-full flex flex-row justify-stretch items-center"
+              >
+                <Archive className="mr-1" />
+                <span>{t("archive")}</span>
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="text-primary-900">
+              <Button
+                size="sm"
+                onClick={() => fileManager.editFile(file, associatingId)}
+                variant="ghost"
+                className="w-full flex flex-row justify-stretch items-center"
+              >
+                <Pencil className="mr-1" />
+                <span>{t("rename")}</span>
+              </Button>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export function FileListTable({
@@ -96,76 +181,6 @@ export function FileListTable({
     );
   };
 
-  const ViewAction = ({ file }: { file: FileReadMinimal }) => {
-    if (!fileManager.isPreviewable(file)) {
-      return null;
-    }
-
-    return (
-      <Button
-        variant="link"
-        className="h-auto text-gray-950"
-        onClick={() => fileManager.viewFile(file, associatingId)}
-      >
-        <span className="flex flex-row items-center gap-1 underline">
-          <Eye />
-          {t("view")}
-        </span>
-      </Button>
-    );
-  };
-
-  const ActionsMenu = ({ file }: { file: FileReadMinimal }) => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="actions">
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild className="text-primary-900">
-            <Button
-              size="sm"
-              onClick={() => fileManager.downloadFile(file, associatingId)}
-              variant="ghost"
-              className="w-full flex flex-row justify-stretch items-center"
-            >
-              <ArrowDownCircle className="mr-1" />
-              <span>{t("download")}</span>
-            </Button>
-          </DropdownMenuItem>
-          {canEdit && (
-            <>
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => fileManager.archiveFile(file, associatingId)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <Archive className="mr-1" />
-                  <span>{t("archive")}</span>
-                </Button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => fileManager.editFile(file, associatingId)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <Pencil className="mr-1" />
-                  <span>{t("rename")}</span>
-                </Button>
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
   return (
     <div className="space-y-1">
       {files.length > 0 ? (
@@ -208,13 +223,22 @@ export function FileListTable({
                   {file.is_archived ? (
                     getArchivedMessage(file)
                   ) : (
-                    <ViewAction file={file} />
+                    <ViewAction
+                      file={file}
+                      fileManager={fileManager}
+                      associatingId={associatingId}
+                    />
                   )}
                 </div>
               </div>
               {!file.is_archived && (
                 <div className="flex shrink-0 items-center justify-center px-2">
-                  <ActionsMenu file={file} />
+                  <ActionsMenu
+                    file={file}
+                    fileManager={fileManager}
+                    associatingId={associatingId}
+                    canEdit={canEdit}
+                  />
                 </div>
               )}
             </div>
