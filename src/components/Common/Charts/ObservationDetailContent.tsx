@@ -89,12 +89,19 @@ const RenderValueLabel = ({
   if (index === lastIndex) {
     return (
       <g>
-        <text x={xNum + 14} y={yNum - 4} fontSize={11} fill="#6b7280">
+        <text
+          x={xNum - 12}
+          y={yNum - 4}
+          textAnchor="end"
+          fontSize={11}
+          fill="#6b7280"
+        >
           {t("latest")}
         </text>
         <text
-          x={xNum + 14}
+          x={xNum - 12}
           y={yNum + 13}
+          textAnchor="end"
           fontSize={15}
           fontWeight={600}
           fill="#111827"
@@ -192,24 +199,26 @@ export function ObservationDetailContent({
   return (
     <div className="flex flex-col gap-8">
       {chartData.length > 0 ? (
-        <div className="relative mt-2" style={{ height: 420 }}>
-          <Button
-            variant="link"
-            onClick={() => {
-              const el = scrollContainerRef.current;
-              if (el) {
-                el.scrollTo({
-                  left: el.scrollWidth,
-                  behavior: "smooth",
-                });
-              }
-            }}
-            className="absolute right-4 top-1 z-10 text-xs text-gray-500 hover:text-gray-700"
-          >
-            {t("newest")} →
-          </Button>
+        <div className="mt-2">
+          <div className="flex justify-end">
+            <Button
+              variant="link"
+              onClick={() => {
+                const el = scrollContainerRef.current;
+                if (el) {
+                  el.scrollTo({
+                    left: el.scrollWidth,
+                    behavior: "smooth",
+                  });
+                }
+              }}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              {t("newest")} →
+            </Button>
+          </div>
 
-          <div className="h-full overflow-x-auto" ref={scrollContainerRef}>
+          <div className="h-105 overflow-x-auto" ref={scrollContainerRef}>
             <div
               className="relative h-full"
               style={{ minWidth: chartMinWidth }}
@@ -273,7 +282,7 @@ export function ObservationDetailContent({
                     tick={{ fontSize: 12 }}
                     tickLine={true}
                     axisLine={{ stroke: "#6b7280" }}
-                    width={36}
+                    width="auto"
                     label={{
                       value: unit,
                       angle: -90,
