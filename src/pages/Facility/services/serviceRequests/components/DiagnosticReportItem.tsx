@@ -128,6 +128,23 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     </CardContent>
                   </Card>
                 )}
+                <div className="flex sm:flex-row flex-col-reverse justify-between gap-3">
+                  <div className="flex justify-start items-end">
+                    <DiagnosticReportTimestamps report={fullReport ?? report} />
+                  </div>
+                  {isPreliminary && (
+                    <div className="flex justify-end items-center">
+                      <Button
+                        variant="primary"
+                        onClick={handleSubmit}
+                        disabled={isReadOnly}
+                      >
+                        <Check className="size-4" />
+                        {t("save_results")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-4 pb-2">
                   <DottedDivider className="text-gray-400" />
                   <DiagnosticReportAttachments
@@ -137,23 +154,6 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                     isReadOnly={isReadOnly}
                   />
                 </div>
-              </div>
-              <div className="flex sm:flex-row flex-col-reverse justify-between bg-white/50 -mx-2 p-2 pt-3 border-t border-gray-300 rounded-b-lg gap-3">
-                <div className="flex justify-start items-end">
-                  <DiagnosticReportTimestamps report={fullReport ?? report} />
-                </div>
-                {isPreliminary && (
-                  <div className="flex justify-end items-center">
-                    <Button
-                      variant="primary"
-                      onClick={handleSubmit}
-                      disabled={isReadOnly}
-                    >
-                      <Check className="size-4" />
-                      {t("save_results")}
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
