@@ -90,7 +90,9 @@ function PinPageDialog({ url }: PinPageDialogProps) {
         onClick={() => onOpenChange(true)}
         className="sr-only"
         tabIndex={-1}
-        aria-label={isAlreadyPinned ? t("unpin_page") : t("pin_page")}
+        aria-label={
+          isAlreadyPinned ? t("unpin_page_shortcut") : t("pin_page_shortcut")
+        }
       >
         <ShortcutBadge actionId="pin-page" />
       </Button>

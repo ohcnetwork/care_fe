@@ -6,7 +6,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 async function unpinCurrentPage(page: Page) {
   await expect(
-    page.getByRole("button", { name: "Unpin/Remove from Overview" }),
+    page.getByRole("button", { name: "Unpin page", exact: true }),
   ).toBeAttached();
   await page.keyboard.press("Shift+B");
 
@@ -34,10 +34,12 @@ test.describe("Pin Page Shortcut (Shift+B)", () => {
     await page.goto(pageUrl);
 
     const pinTrigger = page.getByRole("button", {
-      name: "Pin/Add to Overview",
+      name: "Pin page",
+      exact: true,
     });
     const unpinTrigger = page.getByRole("button", {
-      name: "Unpin/Remove from Overview",
+      name: "Unpin page",
+      exact: true,
     });
     await expect(pinTrigger.or(unpinTrigger)).toBeAttached();
 
