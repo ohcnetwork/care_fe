@@ -30,6 +30,15 @@ const logo = (value?: string, fallback?: ILogo) => {
 };
 
 /**
+ * Parse a positive number (fractions allowed) from an environment variable,
+ * falling back when the value is missing, not a number, or not positive.
+ */
+const positiveNumber = (value: string | undefined, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+/**
  * Parse API URL map from environment variable.
  * Maps frontend origins (including port) to backend URLs.
  * Example: '{"http://localhost:3000": "http://careapi.localhost"}'
@@ -251,9 +260,10 @@ const careConfig = {
 
   // Keep in sync with the backend's MAX_FILE_UPLOAD_SIZE, which limits files
   // sent through /api/v1/files/upload-file/ (questionnaire file questions).
-  maxFileUploadSizeInMB: env.REACT_APP_MAX_FILE_UPLOAD_SIZE_MB
-    ? parseInt(env.REACT_APP_MAX_FILE_UPLOAD_SIZE_MB, 10)
-    : 5,
+  maxFileUploadSizeInMB: positiveNumber(
+    env.REACT_APP_MAX_FILE_UPLOAD_SIZE_MB,
+    5,
+  ),
 
   pagination: {
     limitOffset: {
