@@ -20,6 +20,7 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
@@ -73,7 +74,10 @@ export default function NoActiveAccountWarningDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("proceed")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            <ShortcutBadge actionId="cancel-action" />
+            {t("proceed")}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>
               navigate(
@@ -81,6 +85,7 @@ export default function NoActiveAccountWarningDialog({
               )
             }
           >
+            <ShortcutBadge actionId="submit-action" />
             {t("go_to_accounts")}
           </AlertDialogAction>
         </AlertDialogFooter>
