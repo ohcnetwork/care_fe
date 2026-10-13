@@ -143,10 +143,7 @@ export const ObservationVisualizer = ({
     );
   }
 
-  if (
-    !data?.results?.length ||
-    data.results.every((item) => item.results.length === 0)
-  ) {
+  if (!data?.results?.length) {
     return (
       <div
         className="grid gap-4"

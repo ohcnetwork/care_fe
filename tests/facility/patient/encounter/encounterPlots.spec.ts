@@ -54,9 +54,11 @@ test.describe("Encounter Plots Tab", () => {
   test("shows no data message when observations have no results", async ({
     page,
   }) => {
+    let analyseHits = 0;
     await test.step("Stub observations with empty results per code", async () => {
-      await page.route("**/observation/analyse/**", (route) =>
-        route.fulfill({
+      await page.route(/\/observation\/analyse\//, (route) => {
+        analyseHits++;
+        return route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify({
@@ -64,8 +66,8 @@ test.describe("Encounter Plots Tab", () => {
               { code: { code: "8867-4", display: "Pulse" }, results: [] },
             ],
           }),
-        }),
-      );
+        });
+      });
     });
 
     await test.step("Navigate to the Plots tab", async () => {
@@ -73,16 +75,22 @@ test.describe("Encounter Plots Tab", () => {
     });
 
     await test.step("Verify the no data message is shown", async () => {
+      await expect.poll(() => analyseHits).toBeGreaterThan(0);
       await expect(page.getByText("No data available").first()).toBeVisible();
+      await expect(
+        page.getByRole("tab", { name: "Full History" }).first(),
+      ).toBeVisible();
     });
   });
 
   test("shows no data message only for charts without observations", async ({
     page,
   }) => {
+    let analyseHits = 0;
     await test.step("Stub observations with one empty and one filled code", async () => {
-      await page.route("**/observation/analyse/**", (route) =>
-        route.fulfill({
+      await page.route(/\/observation\/analyse\//, (route) => {
+        analyseHits++;
+        return route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify({
@@ -106,8 +114,8 @@ test.describe("Encounter Plots Tab", () => {
               },
             ],
           }),
-        }),
-      );
+        });
+      });
     });
 
     await test.step("Navigate to the Plots tab", async () => {
@@ -115,6 +123,7 @@ test.describe("Encounter Plots Tab", () => {
     });
 
     await test.step("Verify empty charts show the message and filled charts render", async () => {
+      await expect.poll(() => analyseHits).toBeGreaterThan(0);
       await expect(page.getByText("No data available").first()).toBeVisible();
       await expect(page.locator("svg.recharts-surface").first()).toBeVisible();
     });
