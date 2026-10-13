@@ -56,7 +56,7 @@ export default function RichTextEditorContent({
   }
 
   return (
-    <div className="rounded-lg border border-gray-300 bg-white focus-within:border-gray-500">
+    <div className="rounded-lg border border-gray-300 bg-white">
       <MDXEditor
         ref={editor}
         markdown={initialValue}
