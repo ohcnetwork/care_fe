@@ -1195,6 +1195,8 @@
   "charge_items_add_failed": "Failed to add charge items. Please try again.",
   "charge_items_added_successfully": "Charge Items added ssucccessfully",
   "charge_items_can_only_be_added_to_leaf_categories": "Charge items can only be added to leaf categories",
+  "charge_items_one": "{{count}} Charge Item",
+  "charge_items_other": "{{count}} Charge Items",
   "charges": "Charges",
   "chat_on_whatsapp": "Chat on Whatsapp",
   "check": "Check",

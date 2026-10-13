@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import query from "@/Utils/request/query";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { Classification } from "@/types/emr/activityDefinition/activityDefinition";
 import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefinitionApi";
@@ -44,6 +45,7 @@ export default function ServiceRequestShow({
   locationId,
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
   // Set only by a tab click; scrolling never highlights, and it fades after a moment
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
@@ -99,22 +101,22 @@ export default function ServiceRequestShow({
       show: !!request?.diagnostic_reports.length,
     },
   ].filter((section) => section.show);
-  const sectionKey = mobileSections.map(({ id }) => id).join(",");
 
   useEffect(() => {
-    const ids = sectionKey.split(",");
+    if (!isMobile || mobileSections.length <= 1) return;
+
     const onScroll = () => {
       // Don't fight the smooth scroll started by a tab click
       if (Date.now() < ignoreScrollUntil.current) return;
-      const focused = ids
+      const focused = mobileSections
         .filter(
-          (id) =>
+          ({ id }) =>
             (document.getElementById(id)?.getBoundingClientRect().top ??
               Infinity) <=
             window.innerHeight * 0.4,
         )
         .at(-1);
-      setFocusedSectionId(focused ?? ids[0]);
+      setFocusedSectionId(focused?.id ?? mobileSections[0].id);
     };
     // Capture so scrolling inside any layout container is caught
     document.addEventListener("scroll", onScroll, {
@@ -123,7 +125,7 @@ export default function ServiceRequestShow({
     });
     return () =>
       document.removeEventListener("scroll", onScroll, { capture: true });
-  }, [sectionKey]);
+  }, [isMobile, mobileSections]);
 
   useEffect(() => {
     if (!activeSectionId) return;

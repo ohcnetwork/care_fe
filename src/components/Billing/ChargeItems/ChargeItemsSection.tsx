@@ -107,7 +107,7 @@ export function ChargeItemsSection({
         <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0 p-0">
           <CardTitle>
             {chargeItems?.count
-              ? `${chargeItems.count} ${t("charge_items")}`
+              ? t("charge_items", { count: chargeItems.count })
               : t("add_charge_item")}
           </CardTitle>
           <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">

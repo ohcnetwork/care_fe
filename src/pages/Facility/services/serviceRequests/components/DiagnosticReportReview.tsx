@@ -69,6 +69,7 @@ function DiagnosticReportReviewItem({
   patientId,
   serviceRequestId,
   disableEdit,
+  observationDefinitions,
   expandedReport,
 }: DiagnosticReportReviewItemProps) {
   const { t } = useTranslation();
@@ -122,7 +123,10 @@ function DiagnosticReportReviewItem({
           icon={FileCheck}
           isExpanded={isExpanded}
           patientId={patientId}
-          hasObservationHistory
+          hasObservationHistory={
+            observationDefinitions.length > 0 ||
+            !!currentReport.observations?.length
+          }
         />
         <CollapsibleContent>
           <CardContent className="px-2 pb-0">
