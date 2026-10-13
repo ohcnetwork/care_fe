@@ -81,8 +81,6 @@ function ListContent({
       return options.map((o) => o.value);
     });
   };
-  const valueSet = new Set(value);
-  const selectedSet = new Set(selectedValues);
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Command className="flex-1 overflow-hidden min-h-0">
@@ -120,7 +118,7 @@ function ListContent({
             <>
               <CommandGroup heading={t("selected")}>
                 {options
-                  .filter((option) => valueSet.has(option.value))
+                  .filter((option) => value.includes(option.value))
                   .map((option) => (
                     <CommandItem
                       key={option.value}
@@ -129,7 +127,7 @@ function ListContent({
                       className="cursor-pointer h-10 flex gap-3"
                     >
                       <Checkbox
-                        checked={selectedSet.has(option.value)}
+                        checked={selectedValues.includes(option.value)}
                         className="data-[state=checked]:text-white"
                       />
 
@@ -150,7 +148,7 @@ function ListContent({
           {value.length < options.length && (
             <CommandGroup>
               {options
-                .filter((option) => !valueSet.has(option.value))
+                .filter((option) => !value.includes(option.value))
                 .map((option) => (
                   <CommandItem
                     key={option.value}
@@ -159,7 +157,7 @@ function ListContent({
                     className="cursor-pointer h-10 flex gap-3"
                   >
                     <Checkbox
-                      checked={selectedSet.has(option.value)}
+                      checked={selectedValues.includes(option.value)}
                       className="data-[state=checked]:text-white"
                     />
 
