@@ -50,4 +50,30 @@ test.describe("Encounter Plots Tab", () => {
       expect(pageErrors).toHaveLength(0);
     });
   });
+
+  test("shows no data message when observations have no results", async ({
+    page,
+  }) => {
+    await test.step("Stub observations with empty results per code", async () => {
+      await page.route("**/observation/analyse/**", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { code: { code: "8867-4", display: "Pulse" }, results: [] },
+            ],
+          }),
+        }),
+      );
+    });
+
+    await test.step("Navigate to the Plots tab", async () => {
+      await page.goto(plotsUrl);
+    });
+
+    await test.step("Verify the no data message is shown", async () => {
+      await expect(page.getByText("No data available").first()).toBeVisible();
+    });
+  });
 });
