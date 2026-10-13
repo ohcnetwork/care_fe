@@ -68,6 +68,7 @@ interface TokenActionItem {
 function useTokenActions({
   facilityId,
   token,
+  updateToken,
   onActionComplete,
   onCancelClick,
   onEnteredInErrorClick,
@@ -76,22 +77,14 @@ function useTokenActions({
 }: {
   facilityId: string;
   token: TokenRead;
+  updateToken: ReturnType<typeof useUpdateToken>["mutate"];
   onActionComplete?: () => void;
   onCancelClick: () => void;
   onEnteredInErrorClick: () => void;
   assignedServicePointIds: string[];
   onChangeServicePointClick: () => void;
-}): { actions: TokenActionItem[]; isPending: boolean } {
+}): TokenActionItem[] {
   const { t } = useTranslation();
-
-  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
-    onSuccess: (data) => {
-      if (data.status === TokenStatus.FULFILLED) {
-        toast.success(t("token_has_been_completed"));
-      }
-      onActionComplete?.();
-    },
-  });
 
   const items: TokenActionItem[] = [];
 
@@ -211,7 +204,7 @@ function useTokenActions({
     });
   }
 
-  return { actions: items, isPending };
+  return items;
 }
 
 export function OngoingQueueTokenCard({
@@ -577,10 +570,25 @@ const TokenContent = ({
   const [openServicePointSelector, setOpenServicePointSelector] =
     useState(false);
 
-  const { actions, isPending: isTokenActionPending } = useTokenActions({
+  const queueStatus = getQueueTokenStatus(token);
+
+  const hasNoAssignedServicePoints =
+    assignedServicePoints.length === 0 && !isLoadingSubQueues;
+
+  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
+    onSuccess: (data) => {
+      if (data.status === TokenStatus.FULFILLED) {
+        toast.success(t("token_has_been_completed"));
+      }
+      onActionComplete?.();
+    },
+  });
+
+  const actions = useTokenActions({
     facilityId,
     assignedServicePointIds,
     token,
+    updateToken,
     onActionComplete,
     onCancelClick: () => setShowCancelDialog(true),
     onEnteredInErrorClick: () => setShowEnteredInErrorDialog(true),
@@ -588,15 +596,6 @@ const TokenContent = ({
       setServicePointAction("change_service_point");
       setOpenServicePointSelector(true);
     },
-  });
-
-  const queueStatus = getQueueTokenStatus(token);
-
-  const hasNoAssignedServicePoints =
-    assignedServicePoints.length === 0 && !isLoadingSubQueues;
-
-  const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
-    onSuccess: onActionComplete,
   });
 
   return (
@@ -810,7 +809,7 @@ const TokenContent = ({
                     action.danger && "text-danger-600",
                   )}
                   onClick={action.onSelect}
-                  disabled={isTokenActionPending}
+                  disabled={isPending}
                 >
                   <span>{action.icon}</span>
                   {action.label}

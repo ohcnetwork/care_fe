@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueueTokenCard";
@@ -45,7 +46,7 @@ interface Props {
 
 export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
-  const { assignedServicePoints } = useQueueServicePoints();
+  const { assignedServicePoints, isLoadingSubQueues } = useQueueServicePoints();
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
@@ -96,7 +97,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               queueId={queueId}
               qParams={{
                 status: TokenStatus.IN_PROGRESS,
-                patient: patient,
               }}
               variant="green"
             />
@@ -108,7 +108,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
               queueId={queueId}
               qParams={{
                 status: TokenStatus.UNFULFILLED,
-                patient: patient,
               }}
               variant="secondary"
             />
@@ -209,50 +208,71 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             }
           >
             <div className="flex flex-col gap-4">
-              {assignedServicePoints.map((subQueue) => (
-                <div key={subQueue.id} className="flex flex-col gap-4">
-                  <div className="flex flex-col p-1 rounded-lg bg-gray-300/30 border border-gray-300">
-                    <div className="flex items-start justify-between gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
-                      <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
-                          <span className="text-base font-semibold text-gray-950 truncate">
-                            {subQueue.name}
+              {isLoadingSubQueues ? (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-3 p-3 rounded-lg bg-gray-200 border border-gray-300"
+                    >
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : assignedServicePoints.length === 0 ? (
+                <div className="flex flex-col gap-2 mb-1 items-center justify-center bg-gray-200 rounded-lg py-10 border border-gray-300">
+                  <DoorOpenIcon className="size-6 text-gray-700" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {t("no_service_points_assigned")}
+                  </span>
+                </div>
+              ) : (
+                assignedServicePoints.map((subQueue) => (
+                  <div key={subQueue.id} className="flex flex-col gap-4">
+                    <div className="flex flex-col p-1 rounded-lg bg-gray-300/30 border border-gray-300">
+                      <div className="flex items-start justify-between gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
+                            <span className="text-base font-semibold text-gray-950 truncate">
+                              {subQueue.name}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-700 font-medium pl-1">
+                            {t("category")}:{" "}
+                            {preferredServicePointCategories?.[subQueue.id]
+                              ?.name ?? t("all")}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700 font-medium pl-1">
-                          {t("category")}:{" "}
-                          {preferredServicePointCategories?.[subQueue.id]
-                            ?.name ?? t("all")}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <AwaitingRecallTrigger
+                            subQueueId={subQueue.id}
+                            queueId={queueId}
+                            facilityId={facilityId}
+                          />
+                          <InServiceColumnOptions
+                            facilityId={facilityId}
+                            subQueueId={subQueue.id}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <AwaitingRecallTrigger
-                          subQueueId={subQueue.id}
+                      <div className="flex flex-col gap-3">
+                        <NowServingSection
+                          facilityId={facilityId}
                           queueId={queueId}
-                          facilityId={facilityId}
+                          subQueueId={subQueue.id}
                         />
-                        <InServiceColumnOptions
+                        <UpNextSection
                           facilityId={facilityId}
+                          queueId={queueId}
                           subQueueId={subQueue.id}
                         />
                       </div>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <NowServingSection
-                        facilityId={facilityId}
-                        queueId={queueId}
-                        subQueueId={subQueue.id}
-                      />
-                      <UpNextSection
-                        facilityId={facilityId}
-                        queueId={queueId}
-                        subQueueId={subQueue.id}
-                      />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </QueueColumn>
         </div>
@@ -269,48 +289,69 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             className="bg-transparent border-0 lg:bg-gray-100 lg:border lg:border-gray-200 px-0 pt-0"
           >
             <div className="flex flex-col gap-4">
-              {assignedServicePoints.map((subQueue) => (
-                <div key={subQueue.id} className="flex flex-col gap-4">
-                  <div className="flex flex-col px-1 pt-1 rounded-lg bg-gray-300/30 border border-gray-300">
-                    <div className="flex items-start gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
-                      <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
-                          <span className="text-base font-semibold text-gray-950 truncate">
-                            {subQueue.name}
-                          </span>
-                        </div>
-                      </div>
-                      <SubQueueCountBadge
-                        facilityId={facilityId}
-                        queueId={queueId}
-                        qParams={{
-                          status: TokenStatus.UNFULFILLED,
-                          sub_queue: subQueue.id,
-                        }}
-                      />
+              {isLoadingSubQueues ? (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-3 p-3 rounded-lg bg-gray-200 border border-gray-300"
+                    >
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-16 w-full" />
                     </div>
-                    <div className="flex flex-col gap-3 pt-2">
-                      <OngoingQueueTokenCardsList
-                        facilityId={facilityId}
-                        queueId={queueId}
-                        qParams={{
-                          status: TokenStatus.UNFULFILLED,
-                          sub_queue: subQueue.id,
-                        }}
-                        emptyState={
-                          <div className="flex flex-col mb-1 gap-2 items-center justify-center bg-gray-200 rounded-md py-3 border border-gray-300">
-                            <DoorOpenIcon className="size-6 text-gray-700" />
-                            <span className="text-sm font-semibold text-gray-700 text-center">
-                              {t("no_tokens_awaiting_recall")}
+                  ))}
+                </div>
+              ) : assignedServicePoints.length === 0 ? (
+                <div className="flex flex-col gap-2 mb-1 items-center justify-center bg-gray-200 rounded-lg py-10 border border-gray-300">
+                  <DoorOpenIcon className="size-6 text-gray-700" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {t("no_service_points_assigned")}
+                  </span>
+                </div>
+              ) : (
+                assignedServicePoints.map((subQueue) => (
+                  <div key={subQueue.id} className="flex flex-col gap-4">
+                    <div className="flex flex-col px-1 pt-1 rounded-lg bg-gray-300/30 border border-gray-300">
+                      <div className="flex items-start gap-2 p-1 pb-2 flex-wrap border-b border-gray-300">
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-1.5 -ml-2.25 lg:-ml-2.5 h-4 rounded-r-[2.5px] bg-gray-600" />
+                            <span className="text-base font-semibold text-gray-950 truncate">
+                              {subQueue.name}
                             </span>
                           </div>
-                        }
-                      />
+                        </div>
+                        <SubQueueCountBadge
+                          facilityId={facilityId}
+                          queueId={queueId}
+                          qParams={{
+                            status: TokenStatus.UNFULFILLED,
+                            sub_queue: subQueue.id,
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3 pt-2">
+                        <OngoingQueueTokenCardsList
+                          facilityId={facilityId}
+                          queueId={queueId}
+                          qParams={{
+                            status: TokenStatus.UNFULFILLED,
+                            sub_queue: subQueue.id,
+                          }}
+                          emptyState={
+                            <div className="flex flex-col mb-1 gap-2 items-center justify-center bg-gray-200 rounded-md py-3 border border-gray-300">
+                              <DoorOpenIcon className="size-6 text-gray-700" />
+                              <span className="text-sm font-semibold text-gray-700 text-center">
+                                {t("no_tokens_awaiting_recall")}
+                              </span>
+                            </div>
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </QueueColumn>
         </div>

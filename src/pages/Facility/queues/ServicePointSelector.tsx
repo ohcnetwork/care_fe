@@ -17,7 +17,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { useUpdateToken } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -82,6 +82,10 @@ export const ServicePointSelector = ({
 
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
 
+  // `isPending` only flips on re-render, and RadioInput can fire onValueChange
+  // twice for a single tap, so block the duplicate synchronously.
+  const isSubmittingRef = useRef(false);
+
   useEffect(() => {
     if (!open) {
       setSelectedSubQueueId("");
@@ -94,11 +98,13 @@ export const ServicePointSelector = ({
 
   const { mutate: updateToken, isPending } = useUpdateToken(facilityId, token, {
     onSuccess: () => {
+      isSubmittingRef.current = false;
       toast.success(t(successMessage));
       onOpenChange(false);
       onActionComplete?.();
     },
     onError: () => {
+      isSubmittingRef.current = false;
       setSelectedSubQueueId(
         token.status === targetStatus ? (token.sub_queue?.id ?? "") : "",
       );
@@ -107,11 +113,13 @@ export const ServicePointSelector = ({
 
   const handleSelect = (subQueueId: string) => {
     if (
+      isSubmittingRef.current ||
       isPending ||
       (subQueueId === token.sub_queue?.id && token.status === targetStatus)
     ) {
       return;
     }
+    isSubmittingRef.current = true;
     setSelectedSubQueueId(subQueueId);
     updateToken({
       sub_queue: subQueueId,
