@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 const TAG_COLORS = [
@@ -43,6 +45,8 @@ const TAG_COLORS = [
   "#0E7490", // Cyan
   "#4D7C0F", // Lime
 ] as const;
+
+const EXPIRY_OFFSET_UNITS = ["days", "hours", "minutes", "seconds"] as const;
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
@@ -76,6 +80,12 @@ export default function TagConfigForm({
   const isCreatingChild = Boolean(parentId);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
+  // Cleared number inputs produce NaN; validate units only when expiry is enabled.
+  const expiryOffsetValueSchema = z.custom<number>(
+    (value) => typeof value === "number",
+    { error: t("tag_expiry_duration_non_negative_integer") },
+  );
+
   const tagConfigSchema = z.object({
     display: z.string().trim().min(1, t("field_required")),
     category: z.enum(TagCategory, {
@@ -92,6 +102,44 @@ export default function TagConfigForm({
     facility_organization: z.string().optional(),
     organization: z.string().optional(),
     color: z.string().optional(),
+    expiry_metadata: z
+      .object({
+        autoset_expiry: z.boolean(),
+        modification_allowed: z.boolean(),
+        expiry_offset: z.object({
+          days: expiryOffsetValueSchema,
+          hours: expiryOffsetValueSchema,
+          minutes: expiryOffsetValueSchema,
+          seconds: expiryOffsetValueSchema,
+        }),
+      })
+      .superRefine((metadata, context) => {
+        if (!metadata.autoset_expiry) return;
+
+        let hasInvalidUnit = false;
+        for (const unit of EXPIRY_OFFSET_UNITS) {
+          const value = metadata.expiry_offset[unit];
+          if (!Number.isSafeInteger(value) || value < 0) {
+            hasInvalidUnit = true;
+            context.addIssue({
+              code: "custom",
+              message: t("tag_expiry_duration_non_negative_integer"),
+              path: ["expiry_offset", unit],
+            });
+          }
+        }
+
+        if (
+          !hasInvalidUnit &&
+          !EXPIRY_OFFSET_UNITS.some((unit) => metadata.expiry_offset[unit] > 0)
+        ) {
+          context.addIssue({
+            code: "custom",
+            message: t("tag_expiry_duration_positive"),
+            path: ["expiry_offset", "days"],
+          });
+        }
+      }),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
@@ -118,7 +166,17 @@ export default function TagConfigForm({
       facility_organization: undefined,
       organization: undefined,
       color: "",
+      expiry_metadata: {
+        autoset_expiry: false,
+        modification_allowed: false,
+        expiry_offset: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+      },
     },
+  });
+  const display = useWatch({ control: form.control, name: "display" });
+  const autosetExpiry = useWatch({
+    control: form.control,
+    name: "expiry_metadata.autoset_expiry",
   });
 
   // Fetch existing config data when editing
@@ -147,6 +205,20 @@ export default function TagConfigForm({
           typeof existingConfig.metadata?.color === "string"
             ? existingConfig.metadata.color
             : "",
+        expiry_metadata: {
+          autoset_expiry:
+            existingConfig.expiry_metadata?.autoset_expiry ?? false,
+          modification_allowed:
+            existingConfig.expiry_metadata?.modification_allowed ?? false,
+          expiry_offset: {
+            days: existingConfig.expiry_metadata?.expiry_offset?.days ?? 0,
+            hours: existingConfig.expiry_metadata?.expiry_offset?.hours ?? 0,
+            minutes:
+              existingConfig.expiry_metadata?.expiry_offset?.minutes ?? 0,
+            seconds:
+              existingConfig.expiry_metadata?.expiry_offset?.seconds ?? 0,
+          },
+        },
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -164,6 +236,11 @@ export default function TagConfigForm({
         facility_organization: undefined,
         organization: undefined,
         color: "",
+        expiry_metadata: {
+          autoset_expiry: false,
+          modification_allowed: false,
+          expiry_offset: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        },
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -205,6 +282,13 @@ export default function TagConfigForm({
       status: data.status,
       resource: data.resource,
       metadata: data.color ? { color: data.color } : {},
+      expiry_metadata: {
+        autoset_expiry: data.expiry_metadata.autoset_expiry,
+        modification_allowed: data.expiry_metadata.modification_allowed,
+        ...(data.expiry_metadata.autoset_expiry && {
+          expiry_offset: data.expiry_metadata.expiry_offset,
+        }),
+      },
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {
@@ -227,7 +311,11 @@ export default function TagConfigForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="display"
@@ -417,7 +505,7 @@ export default function TagConfigForm({
                       }}
                       className="capitalize min-w-0 whitespace-normal break-words"
                     >
-                      {form.watch("display") || t("preview")}
+                      {display || t("preview")}
                     </Badge>
                     <Button
                       type="button"
@@ -436,6 +524,89 @@ export default function TagConfigForm({
             </FormItem>
           )}
         />
+
+        <fieldset className="space-y-4 rounded-lg border p-4">
+          <legend className="px-1 text-sm font-medium">
+            {t("tag_expiry_configuration")}
+          </legend>
+          <FormField
+            control={form.control}
+            name="expiry_metadata.autoset_expiry"
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <div className="space-y-1">
+                  <FormLabel>{t("tag_autoset_expiry")}</FormLabel>
+                  <FormDescription>
+                    {t("tag_autoset_expiry_hint")}
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+          {autosetExpiry && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{t("tag_expiry_duration")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {EXPIRY_OFFSET_UNITS.map((unit) => (
+                  <FormField
+                    key={unit}
+                    control={form.control}
+                    name={`expiry_metadata.expiry_offset.${unit}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t(unit)}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min={0}
+                            step={1}
+                            value={Number.isNaN(field.value) ? "" : field.value}
+                            onChange={(event) =>
+                              field.onChange(event.target.valueAsNumber)
+                            }
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <FormField
+            control={form.control}
+            name="expiry_metadata.modification_allowed"
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                    ref={field.ref}
+                  />
+                </FormControl>
+                <div className="space-y-1">
+                  <FormLabel>{t("tag_expiry_modification_allowed")}</FormLabel>
+                  <FormDescription>
+                    {t("tag_expiry_modification_allowed_hint")}
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+        </fieldset>
 
         {facilityId ? (
           <FormField

@@ -69,12 +69,14 @@ export default function TagConfigView({
       // First fetch the child to get its current data
       const queryFn = query(tagConfigApi.retrieve, {
         pathParams: { external_id: child.id! },
+        queryParams: facilityId ? { facility: facilityId } : undefined,
       });
       const childData = await queryFn({ signal: new AbortController().signal });
 
       // Then update with archived status
       return mutate(tagConfigApi.update, {
         pathParams: { external_id: child.id! },
+        queryParams: facilityId ? { facility: facilityId } : undefined,
       })({
         display: childData.display,
         category: childData.category,
@@ -82,6 +84,10 @@ export default function TagConfigView({
         priority: childData.priority,
         status: TagStatus.ARCHIVED,
         resource: childData.resource,
+        metadata: childData.metadata,
+        expiry_metadata: childData.expiry_metadata,
+        facility_organization: childData.facility_organization?.id,
+        organization: childData.organization?.id,
         parent:
           childData.parent &&
           typeof childData.parent === "object" &&
@@ -141,6 +147,16 @@ export default function TagConfigView({
       </Page>
     );
   }
+
+  const expiryDuration = (["days", "hours", "minutes", "seconds"] as const)
+    .filter(
+      (unit) => (tagConfig.expiry_metadata?.expiry_offset?.[unit] ?? 0) > 0,
+    )
+    .map(
+      (unit) =>
+        `${tagConfig.expiry_metadata?.expiry_offset?.[unit]} ${t(unit)}`,
+    )
+    .join(", ");
 
   return (
     <Page title={tagConfig.display} hideTitleOnPage>
@@ -247,6 +263,36 @@ export default function TagConfigView({
                     : tagConfig.organization
                       ? tagConfig.organization.name
                       : t("none")}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("tag_autoset_expiry")}
+                </label>
+                <div className="mt-1 text-sm">
+                  {tagConfig.expiry_metadata?.autoset_expiry
+                    ? t("yes")
+                    : t("no")}
+                </div>
+              </div>
+              {tagConfig.expiry_metadata?.autoset_expiry && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    {t("tag_expiry_duration")}
+                  </label>
+                  <div className="mt-1 text-sm">
+                    {expiryDuration || t("none")}
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("tag_expiry_modification_allowed")}
+                </label>
+                <div className="mt-1 text-sm">
+                  {tagConfig.expiry_metadata?.modification_allowed
+                    ? t("yes")
+                    : t("no")}
                 </div>
               </div>
             </div>

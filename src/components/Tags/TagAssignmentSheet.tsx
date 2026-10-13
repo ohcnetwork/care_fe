@@ -1,16 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
+import { TagExpiryDialog } from "@/components/Tags/TagExpiryDialog";
 import accountApi from "@/types/billing/account/accountApi";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+  TagSetRequest,
+} from "@/types/emr/tagConfig/tagConfig";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import locationApi from "@/types/location/locationApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -141,7 +147,13 @@ export default function TagAssignmentSheet({
   trigger: trigger,
 }: TagAssignmentSheetProps) {
   const { t } = useTranslation();
-  const [selectedTags, setSelectedTags] = useState<TagConfig[]>([]);
+  const [selectedTags, setSelectedTags] = useState<TagConfig[]>(currentTags);
+  const [pendingSelection, setPendingSelection] = useState<{
+    tag: TagConfig;
+    tags: TagConfig[];
+  } | null>(null);
+  const [isUpdatingTags, setIsUpdatingTags] = useState(false);
+  const mutationInProgress = useRef(false);
 
   const entityConfig = ENTITY_CONFIG[entityType];
 
@@ -164,7 +176,7 @@ export default function TagAssignmentSheet({
         ? entityConfig.setTagsApi
         : entityConfig.removeTagsApi;
 
-    const createBodyPayload = (tags: string[]) =>
+    const createBodyPayload = (tags: TagSetRequest[]) =>
       isFacilityPatientTag ? { tags, facility: facilityId || null } : { tags };
 
     return { apiEndpoint, createBodyPayload };
@@ -172,7 +184,7 @@ export default function TagAssignmentSheet({
 
   // Set tags mutation
   const { mutateAsync: setTags, isPending: isSettingTags } = useMutation({
-    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+    mutationFn: async (payload: { tags: TagSetRequest[]; tag: TagConfig }) => {
       const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
         payload.tag,
         "set",
@@ -195,7 +207,7 @@ export default function TagAssignmentSheet({
 
   // Remove tags mutation
   const { mutateAsync: removeTags, isPending: isRemovingTags } = useMutation({
-    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+    mutationFn: async (payload: { tags: TagSetRequest[]; tag: TagConfig }) => {
       const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
         payload.tag,
         "remove",
@@ -226,44 +238,117 @@ export default function TagAssignmentSheet({
     return null;
   }
 
-  // Handle tag changes with sequential API calls
-  const handleTagChange = async (newTags: TagConfig[]) => {
-    const prevTagIds = new Set(selectedTags.map((tag: TagConfig) => tag.id));
-    const newTagIds = new Set(newTags.map((tag: TagConfig) => tag.id));
+  const getUpdatedTags = (
+    result: unknown,
+    tag: TagConfig,
+    fallback: TagConfig[],
+  ): TagConfig[] => {
+    if (!result || typeof result !== "object") return fallback;
 
-    // Find tags to add and remove
-    const tagsToAdd = newTags.filter(
-      (tag: TagConfig) => !prevTagIds.has(tag.id),
-    );
-    const tagsToRemove = selectedTags.filter(
-      (tag: TagConfig) => !newTagIds.has(tag.id),
-    );
+    if (entityType === "patient") {
+      const facilityTag = isFacilityTag(tag);
+      const assignedTags = facilityTag
+        ? "facility_tags" in result && result.facility_tags
+        : "instance_tags" in result && result.instance_tags;
+      if (Array.isArray(assignedTags)) {
+        // Instance responses may omit facility context; retain the other scope.
+        return [
+          ...fallback.filter(
+            (current) => isFacilityTag(current) !== facilityTag,
+          ),
+          ...(assignedTags as TagConfig[]),
+        ];
+      }
+    } else if ("tags" in result && Array.isArray(result.tags)) {
+      return result.tags as TagConfig[];
+    }
+    return fallback;
+  };
 
-    // Update local state immediately for responsive UX
-    setSelectedTags(newTags);
+  const applyTagChanges = async (
+    newTags: TagConfig[],
+    offsets: Record<string, TagExpiryOffset | undefined> = {},
+  ) => {
+    if (mutationInProgress.current) return;
+    mutationInProgress.current = true;
+    setIsUpdatingTags(true);
+
+    const prevTagIds = new Set(selectedTags.map((tag) => tag.id));
+    const newTagIds = new Set(newTags.map((tag) => tag.id));
+    const tagsToAdd = newTags.filter((tag) => !prevTagIds.has(tag.id));
+    const tagsToRemove = selectedTags.filter((tag) => !newTagIds.has(tag.id));
+    let confirmedTags = selectedTags;
+    let changed = false;
 
     try {
       for (const tag of tagsToRemove) {
-        await removeTags({ tags: [tag.id!], tag });
+        const result = await removeTags({
+          tags: [{ tag: tag.id }],
+          tag,
+        });
+        confirmedTags = getUpdatedTags(
+          result,
+          tag,
+          confirmedTags.filter((current) => current.id !== tag.id),
+        );
+        changed = true;
+        setSelectedTags(confirmedTags);
       }
 
       for (const tag of tagsToAdd) {
-        await setTags({ tags: [tag.id!], tag });
+        const tagRequest: TagSetRequest = { tag: tag.id };
+        if (offsets[tag.id]) tagRequest.expiry_offset = offsets[tag.id];
+        const result = await setTags({
+          tags: [tagRequest],
+          tag,
+        });
+        confirmedTags = getUpdatedTags(result, tag, [...confirmedTags, tag]);
+        changed = true;
+        setSelectedTags(confirmedTags);
       }
 
-      onUpdate();
       toast.success(t("tags_updated_successfully"));
     } catch (error) {
       console.error("Tag operation failed:", error);
-      // Revert local state on error
-      setSelectedTags(currentTags);
+    } finally {
+      // Refetch successful changes even if a later operation failed.
+      mutationInProgress.current = false;
+      setIsUpdatingTags(false);
+      if (changed) onUpdate();
     }
   };
 
-  const isTagMutationInProgress = isSettingTags || isRemovingTags;
+  const handleTagChange = (newTags: TagConfig[]) => {
+    if (mutationInProgress.current || pendingSelection) return;
+    const tagWithCustomExpiry = newTags.find(
+      (tag) =>
+        tag.expiry_metadata?.modification_allowed &&
+        !selectedTags.some((current) => current.id === tag.id),
+    );
+    if (tagWithCustomExpiry) {
+      setPendingSelection({ tag: tagWithCustomExpiry, tags: newTags });
+      return;
+    }
+    void applyTagChanges(newTags);
+  };
+
+  const isTagMutationInProgress =
+    isUpdatingTags || isSettingTags || isRemovingTags || !!pendingSelection;
 
   return (
     <>
+      {pendingSelection && (
+        <TagExpiryDialog
+          key={pendingSelection.tag.id}
+          tag={pendingSelection.tag}
+          onCancel={() => setPendingSelection(null)}
+          onApply={(offset) => {
+            const { tag, tags } = pendingSelection;
+            setPendingSelection(null);
+            void applyTagChanges(tags, { [tag.id]: offset });
+          }}
+        />
+      )}
       {canWrite && (
         <MultiFilterStyleTagSelector
           selected={selectedTags}

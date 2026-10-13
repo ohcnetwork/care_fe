@@ -1,9 +1,10 @@
-import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 import {
   PrescriptionList,
   PrescriptionRead,
   PrescriptionSummary,
 } from "@/types/emr/prescription/prescription";
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 export default {
   list: {
@@ -30,13 +31,13 @@ export default {
     path: "/api/v1/patient/{patientId}/medication/prescription/{external_id}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   removeTags: {
     path: "/api/v1/patient/{patientId}/medication/prescription/{external_id}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   summary: {
     path: "/api/v1/facility/{facilityId}/medication_prescription/summary/",

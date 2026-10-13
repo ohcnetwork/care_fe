@@ -1,5 +1,6 @@
-import * as React from "react";
+import type { ComponentProps } from "react";
 
+import { TagExpiry } from "@/components/Tags/TagExpiry";
 import { getTagColorStyles } from "@/components/Tags/tagColor";
 
 import {
@@ -10,10 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface TagBadgeProps extends Omit<
-  React.ComponentProps<typeof Badge>,
-  "children"
-> {
+interface TagBadgeProps extends Omit<ComponentProps<typeof Badge>, "children"> {
   tag: TagConfig;
   className?: string;
   hierarchyDisplay?: boolean;
@@ -37,6 +35,13 @@ export default function TagBadge({
       {...props}
     >
       {hierarchyDisplay ? getTagHierarchyDisplay(tag) : tag.display}
+      {(tag.expiry || tag.expired === true) && (
+        <TagExpiry
+          key={`${tag.expiry ?? ""}:${tag.expired === true}`}
+          expiry={tag.expiry}
+          expired={tag.expired === true}
+        />
+      )}
     </Badge>
   );
 }

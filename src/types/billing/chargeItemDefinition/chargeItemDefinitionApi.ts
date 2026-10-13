@@ -1,3 +1,4 @@
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import { Metrics } from "@/types/base/condition/condition";
@@ -40,12 +41,12 @@ export default {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   removeTags: {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
 } as const;

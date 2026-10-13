@@ -1,4 +1,4 @@
-import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
   AppointmentCancelRequest,
@@ -21,6 +21,7 @@ import {
 } from "@/types/scheduling/schedule";
 import { TokenGenerate, TokenRetrieve } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 export default {
   /**
@@ -209,13 +210,13 @@ export default {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/set_tags/",
       method: HttpMethod.POST,
       TRes: Type<unknown>(),
-      TBody: Type<{ tags: string[] }>(),
+      TBody: Type<TagUpdateRequest>(),
     },
     removeTags: {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/remove_tags/",
       method: HttpMethod.POST,
       TRes: Type<unknown>(),
-      TBody: Type<{ tags: string[] }>(),
+      TBody: Type<TagUpdateRequest>(),
     },
   },
 } as const;

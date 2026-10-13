@@ -1,9 +1,10 @@
-import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
 import {
   DeliveryOrderCreate,
   DeliveryOrderRetrieve,
   DeliveryOrderUpdate,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 export default {
   listDeliveryOrder: {
@@ -32,12 +33,12 @@ export default {
     path: "/api/v1/facility/{facilityId}/order/delivery/{external_id}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<DeliveryOrderRetrieve>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   removeTags: {
     path: "/api/v1/facility/{facilityId}/order/delivery/{external_id}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<DeliveryOrderRetrieve>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
 } as const;

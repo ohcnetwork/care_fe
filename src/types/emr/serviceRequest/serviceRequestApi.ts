@@ -1,3 +1,4 @@
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
@@ -50,12 +51,12 @@ export default {
     path: "/api/v1/facility/{facilityId}/service_request/{external_id}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   removeTags: {
     path: "/api/v1/facility/{facilityId}/service_request/{external_id}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<unknown>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
 } as const;

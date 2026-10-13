@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { TagExpiry } from "@/components/Tags/TagExpiry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -116,6 +117,7 @@ export function MultiFilterStyleTagSelector({
 
   // Select/deselect tag
   const handleSelect = (tag: TagConfig) => {
+    if (disabled || isTagMutationInProgress) return;
     // If tag has a parent, enforce single selection per group
     const parentId =
       tag.parent && typeof tag.parent === "object" && "id" in tag.parent
@@ -159,9 +161,22 @@ export function MultiFilterStyleTagSelector({
     : [];
 
   const renderTagNameWithParent = (tag: TagConfig) => {
+    const hasExpiry = tag.expired === true || !!tag.expiry;
+
     return (
-      <div className="flex items-center gap-2 max-w-xs truncate">
-        <span className="text-sm flex flex-row items-center gap-1 min-w-0">
+      <div
+        className={cn(
+          "flex items-center gap-2 max-w-xs truncate",
+          hasExpiry &&
+            "min-w-0 flex-col items-start gap-1 overflow-visible whitespace-normal",
+        )}
+      >
+        <span
+          className={cn(
+            "text-sm flex flex-row items-center gap-1 min-w-0",
+            hasExpiry && "max-w-full",
+          )}
+        >
           {tag.parent && <Component className="size-3 text-black/80" />}
           {tag.parent && (
             <span className="flex gap-1 items-center flex-shrink-0">
@@ -177,6 +192,15 @@ export function MultiFilterStyleTagSelector({
           />
           <span className="truncate">{tag.display}</span>
         </span>
+        {hasExpiry && (
+          <span className="text-xs">
+            <TagExpiry
+              key={`${tag.expiry ?? ""}:${tag.expired === true}`}
+              expiry={tag.expiry}
+              expired={tag.expired}
+            />
+          </span>
+        )}
       </div>
     );
   };

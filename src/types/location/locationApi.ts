@@ -1,5 +1,6 @@
-import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { TagUpdateRequest } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
+import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
 import {
   LocationAssociation,
@@ -61,13 +62,13 @@ export default {
     path: "/api/v1/facility/{facilityId}/location/{external_id}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<LocationRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   removeTags: {
     path: "/api/v1/facility/{facilityId}/location/{external_id}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<LocationRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<TagUpdateRequest>(),
   },
   listAssociations: {
     path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/association/",

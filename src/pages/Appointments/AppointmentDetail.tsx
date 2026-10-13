@@ -914,7 +914,7 @@ const AppointmentActions = ({
         new_slot: selectedSlotId || "",
         previous_booking_note: oldNote,
         new_booking_note: newNote,
-        tags: appointment.tags.map((tag) => tag.id),
+        tags: appointment.tags.map((tag) => ({ tag: tag.id })),
       },
     });
     if (

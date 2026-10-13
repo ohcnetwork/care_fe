@@ -281,6 +281,7 @@ export default function DeliveryOrderForm({
         ...restData,
         status: DeliveryOrderStatus.draft,
         extensions: cleanedExtensions,
+        tags: restData.tags.map((tag) => ({ tag })),
       });
     }
   }

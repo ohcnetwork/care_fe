@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
 
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
@@ -298,9 +299,14 @@ export const Demography = (props: PatientProps) => {
         />
       ),
       details: [...patientData.instance_tags, ...patientData.facility_tags].map(
-        (t) => ({
-          label: t.parent ? t.parent.display : t.display,
-          value: t.display,
+        (tag) => ({
+          label: tag.parent ? tag.parent.display : tag.display,
+          value: (
+            <TagBadge
+              tag={tag}
+              className="max-w-full flex-wrap whitespace-normal [overflow-wrap:anywhere]"
+            />
+          ),
         }),
       ),
     },

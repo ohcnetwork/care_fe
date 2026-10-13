@@ -5,6 +5,28 @@ export interface TagConfigMeta {
   [key: string]: unknown;
 }
 
+export interface TagExpiryOffset {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}
+
+export interface TagConfigExpiryMetadata {
+  modification_allowed?: boolean;
+  expiry_offset?: TagExpiryOffset;
+  autoset_expiry?: boolean;
+}
+
+export interface TagSetRequest {
+  tag: string;
+  expiry_offset?: TagExpiryOffset | null;
+}
+
+export interface TagUpdateRequest {
+  tags: TagSetRequest[];
+}
+
 export enum TagCategory {
   DIET = "diet",
   DRUG = "drug",
@@ -55,6 +77,9 @@ export interface TagConfigBase {
 
 export interface TagConfig extends TagConfigBase {
   metadata: TagConfigMeta;
+  expiry_metadata?: TagConfigExpiryMetadata;
+  expiry?: string | null;
+  expired?: boolean;
   priority: number;
   status: TagStatus;
   system_generated: boolean;
@@ -80,6 +105,7 @@ export interface TagConfigRequest {
   facility?: string;
   facility_organization?: string;
   metadata?: TagConfigMeta;
+  expiry_metadata?: TagConfigExpiryMetadata;
 }
 
 export function getTagHierarchyDisplay(
