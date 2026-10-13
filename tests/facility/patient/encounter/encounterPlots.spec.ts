@@ -76,4 +76,47 @@ test.describe("Encounter Plots Tab", () => {
       await expect(page.getByText("No data available").first()).toBeVisible();
     });
   });
+
+  test("shows no data message only for charts without observations", async ({
+    page,
+  }) => {
+    await test.step("Stub observations with one empty and one filled code", async () => {
+      await page.route("**/observation/analyse/**", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { code: { code: "8867-4", display: "Pulse" }, results: [] },
+              {
+                code: { code: "8310-5", display: "Temperature" },
+                results: [
+                  {
+                    effective_datetime: "2026-10-13T06:56:32Z",
+                    status: "final",
+                    value: { value: "37.2" },
+                    note: "",
+                    data_entered_by: {
+                      first_name: "Test",
+                      last_name: "Doctor",
+                      username: "test",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        }),
+      );
+    });
+
+    await test.step("Navigate to the Plots tab", async () => {
+      await page.goto(plotsUrl);
+    });
+
+    await test.step("Verify empty charts show the message and filled charts render", async () => {
+      await expect(page.getByText("No data available").first()).toBeVisible();
+      await expect(page.locator("svg.recharts-surface").first()).toBeVisible();
+    });
+  });
 });
