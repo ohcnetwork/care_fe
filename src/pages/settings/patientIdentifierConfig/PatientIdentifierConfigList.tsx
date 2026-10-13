@@ -35,6 +35,11 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import { getPermissions } from "@/common/Permissions";
+
+import { usePermissions } from "@/context/PermissionContext";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+
 import query from "@/Utils/request/query";
 import {
   PATIENT_IDENTIFIER_CONFIG_STATUS_COLORS,
@@ -49,9 +54,11 @@ import PatientIdentifierConfigForm from "./PatientIdentifierConfigForm";
 
 function PatientIdentifierConfigCard({
   config,
+  canEdit,
   onEdit,
 }: {
   config: PatientIdentifierConfig;
+  canEdit: boolean;
   onEdit: (config: PatientIdentifierConfig) => void;
 }) {
   const { t } = useTranslation();
@@ -76,10 +83,12 @@ function PatientIdentifierConfigCard({
               </p>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("edit")}
-          </Button>
+          {canEdit && (
+            <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
+              <CareIcon icon="l-edit" className="size-4" />
+              {t("edit")}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -92,6 +101,15 @@ export default function PatientIdentifierConfigList({
   facilityId?: string;
 }) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacilitySilently();
+  const { canWritePatientIdentifierConfig } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
+  // Instance-level configs are managed from the admin panel, which is only
+  // reachable by superusers; facility-level configs follow facility permissions.
+  const canWrite = !facilityId || canWritePatientIdentifierConfig;
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
@@ -149,66 +167,68 @@ export default function PatientIdentifierConfigList({
                   : t("manage_instance_patient_identifier_config")}
               </p>
             </div>
-            <Sheet
-              open={!!selectedConfig}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setSelectedConfig(null);
-                } else {
-                  setSelectedConfig({
-                    config: {
-                      use: PatientIdentifierUse.usual,
-                      description: "",
-                      system: "",
-                      required: false,
-                      unique: false,
-                      regex: "",
-                      display: "",
-                      auto_maintained: false,
-                      retrieve_config: {
-                        retrieve_with_dob: false,
-                        retrieve_with_year_of_birth: false,
-                        retrieve_with_otp: false,
+            {canWrite && (
+              <Sheet
+                open={!!selectedConfig}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setSelectedConfig(null);
+                  } else {
+                    setSelectedConfig({
+                      config: {
+                        use: PatientIdentifierUse.usual,
+                        description: "",
+                        system: "",
+                        required: false,
+                        unique: false,
+                        regex: "",
+                        display: "",
+                        auto_maintained: false,
+                        retrieve_config: {
+                          retrieve_with_dob: false,
+                          retrieve_with_year_of_birth: false,
+                          retrieve_with_otp: false,
+                        },
                       },
-                    },
-                    status: PatientIdentifierConfigStatus.draft,
-                    facility: facilityId || undefined,
-                  });
-                }
-              }}
-            >
-              <SheetTrigger asChild>
-                <Button onClick={handleAdd} className="w-full md:w-auto">
-                  <CareIcon icon="l-plus" className="mr-2" />
-                  {t("add_patient_identifier_config")}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    {selectedConfig && "id" in selectedConfig
-                      ? t("edit_patient_identifier_config")
-                      : t("add_patient_identifier_config")}
-                  </SheetTitle>
-                  <SheetDescription>
-                    {selectedConfig && "id" in selectedConfig
-                      ? t("manage_patient_identifier_config")
-                      : t("manage_instance_patient_identifier_config")}
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 pb-6">
-                  <PatientIdentifierConfigForm
-                    facilityId={facilityId}
-                    configId={
-                      selectedConfig && "id" in selectedConfig
-                        ? selectedConfig.id
-                        : undefined
-                    }
-                    onSuccess={handleSheetClose}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
+                      status: PatientIdentifierConfigStatus.draft,
+                      facility: facilityId || undefined,
+                    });
+                  }
+                }}
+              >
+                <SheetTrigger asChild>
+                  <Button onClick={handleAdd} className="w-full md:w-auto">
+                    <CareIcon icon="l-plus" className="mr-2" />
+                    {t("add_patient_identifier_config")}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>
+                      {selectedConfig && "id" in selectedConfig
+                        ? t("edit_patient_identifier_config")
+                        : t("add_patient_identifier_config")}
+                    </SheetTitle>
+                    <SheetDescription>
+                      {selectedConfig && "id" in selectedConfig
+                        ? t("manage_patient_identifier_config")
+                        : t("manage_instance_patient_identifier_config")}
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 pb-6">
+                    <PatientIdentifierConfigForm
+                      facilityId={facilityId}
+                      configId={
+                        selectedConfig && "id" in selectedConfig
+                          ? selectedConfig.id
+                          : undefined
+                      }
+                      onSuccess={handleSheetClose}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
@@ -266,6 +286,7 @@ export default function PatientIdentifierConfigList({
                 <PatientIdentifierConfigCard
                   key={config.id}
                   config={config}
+                  canEdit={canWrite}
                   onEdit={handleEdit}
                 />
               ))}
@@ -303,14 +324,16 @@ export default function PatientIdentifierConfigList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(config)}
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("edit")}
-                          </Button>
+                          {canWrite && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(config)}
+                            >
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("edit")}
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

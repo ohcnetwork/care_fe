@@ -30,6 +30,7 @@ interface MultiFilterProps {
   triggerButtonClassName?: string;
   clearAllButtonClassName?: string;
   selectedBarClassName?: string;
+  selectedValueClassName?: string;
   facilityId?: string;
   disabled?: boolean;
   align?: "start" | "end";
@@ -45,6 +46,7 @@ export default function MultiFilter({
   triggerButtonClassName,
   clearAllButtonClassName,
   selectedBarClassName,
+  selectedValueClassName,
   facilityId,
   disabled = false,
   align = "start",
@@ -184,6 +186,7 @@ export default function MultiFilter({
             onFilterChange={onFilterChange}
             onOperationChange={onOperationChange}
             selectedBarClassName={selectedBarClassName}
+            selectedValueClassName={selectedValueClassName}
             facilityId={facilityId}
           />
         );

@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { Document, Page } from "react-pdf";
 
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { DiagnosticReportResultsTable } from "./components/DiagnosticReportResultsTable";
 
 // TODO: Replace with PDFViewer or extract this to a component
@@ -226,27 +227,20 @@ export default function DiagnosticReportPrint({
                 {report.encounter?.patient?.name}
               </span>
             </div>
-            {report.encounter?.patient &&
-              "instance_identifiers" in report.encounter.patient &&
-              report.encounter.patient.instance_identifiers
-                .filter(
-                  ({ config }) =>
-                    config.config.use === PatientIdentifierUse.official,
-                )
-                .map((identifier) => (
-                  <div
-                    key={identifier.config.id}
-                    className="grid grid-cols-[6rem_auto_1fr] items-center"
-                  >
-                    <span className="text-gray-600">
-                      {identifier.config.config.display}
-                    </span>
-                    <span className="text-gray-600">:</span>
-                    <span className="font-semibold ml-2">
-                      {identifier.value}
-                    </span>
-                  </div>
-                ))}
+            {getPatientIdentifiers(report.encounter?.patient, {
+              use: PatientIdentifierUse.official,
+            }).map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="grid grid-cols-[6rem_auto_1fr] items-center"
+              >
+                <span className="text-gray-600">
+                  {identifier.config.config.display}
+                </span>
+                <span className="text-gray-600">:</span>
+                <span className="font-semibold ml-2">{identifier.value}</span>
+              </div>
+            ))}
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
               <span className="text-gray-600">
                 {t("age")} / {t("sex")}

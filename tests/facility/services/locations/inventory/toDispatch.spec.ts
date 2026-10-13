@@ -158,8 +158,18 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page
       .getByRole("row", { name: "Requested Qty." })
       .getByRole("checkbox")
-      .click();
-    await page.getByRole("button", { name: "Mark as Completed" }).click();
+      .check();
+    const receiveButton = page.getByRole("button", {
+      name: "Receive & Update Stock",
+    });
+    await expect(receiveButton).toBeEnabled();
+    await receiveButton.click();
+    await page.getByRole("button", { name: "Confirm" }).click();
+    const markAsCompletedButton = page.getByRole("button", {
+      name: "Mark as Completed",
+    });
+    await expect(markAsCompletedButton).toBeEnabled();
+    await markAsCompletedButton.click();
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Incoming Deliveries" }).click();

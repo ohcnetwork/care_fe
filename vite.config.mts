@@ -15,7 +15,6 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
@@ -50,26 +49,23 @@ function toImportName(slug: string) {
 }
 
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const slug = entry.name;
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
       return {
         slug,
         importName: toImportName(slug),
-        manifestPath: path.join(appsDir, slug, "src", "manifest.tsx"),
-        publicDir: path.join(appsDir, slug, "public"),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
       };
     })
-    .filter((plugin) => fs.existsSync(plugin.manifestPath))
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -124,7 +120,9 @@ function isPluginManifestPath(rootDir: string, filePath: string) {
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    normalizedFilePath.endsWith("/src/manifest.tsx")
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
   );
 }
 
@@ -452,17 +450,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ],
       }),
       react(),
-      checker({
-        typescript: true,
-        eslint: {
-          useFlatConfig: true,
-          lintCommand: "eslint ./src",
-          dev: {
-            logLevel: ["error"],
-          },
-        },
-        enableBuild: false,
-      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
@@ -544,7 +531,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       target: "es2022",
     },
     server: {
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
       host: "0.0.0.0",
       allowedHosts: true,
       watch: {
@@ -566,7 +554,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
     },
   };
 });

@@ -26,6 +26,7 @@ const badgeVariants = cva(
         pink: "border-pink-300 bg-pink-100 text-pink-900",
       },
       size: {
+        xs: "text-xs",
         sm: "text-sm",
         md: "px-3 text-base",
       },
