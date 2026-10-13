@@ -182,6 +182,7 @@ async function mockEncounterWorkspaceApi(
     created_by: actor,
     updated_by: actor,
     template: roundsTemplate(options.includeOverview),
+    status: "active",
   };
   // The original read API does not expose workspace scope metadata. Its list
   // already contains every workspace this user can access, including instance
@@ -563,6 +564,7 @@ async function mockEncounterWorkspaceApi(
                 name: workspace.name,
                 description: workspace.description,
                 template: workspace.template,
+                status: workspace.status,
               },
             })),
           },
@@ -571,8 +573,13 @@ async function mockEncounterWorkspaceApi(
       }
       if (path === "/api/v1/workspace/") {
         workspaceReads.push(url);
+        // As in the backend, status filters the list but not detail reads.
+        const status = url.searchParams.get("status");
+        const results = status
+          ? workspaces.filter((item) => item.status === status)
+          : workspaces;
         await route.fulfill({
-          json: { count: workspaces.length, results: workspaces },
+          json: { count: results.length, results },
         });
         return;
       }
@@ -1417,6 +1424,52 @@ test.describe("Encounter workspace rendering", () => {
         ),
       ).toBe(true);
     });
+  });
+
+  test("offers only active workspaces and ignores saved choices for archived ones", async ({
+    page,
+  }) => {
+    const fixture = await mockEncounterWorkspaceApi(page);
+    // The saved ambulatory choice points at a workspace that is now archived.
+    fixture.workspace.status = "archived";
+    const draftWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Draft ${faker.word.words(2)}`,
+      status: "draft",
+    };
+    const activeWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Active ${faker.word.words(2)}`,
+      status: "active",
+    };
+    fixture.workspaces.push(draftWorkspace, activeWorkspace);
+
+    await page.goto(`${fixture.basePath}/updates`);
+    await expect(
+      page.getByRole("tab", { name: "Overview", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("tab", { name: "Ward rounds", exact: true }),
+    ).toHaveCount(0);
+    await page.getByRole("button", { name: "Workspace", exact: true }).click();
+    const picker = page.getByRole("dialog", { name: "Workspace", exact: true });
+    await expect(
+      picker.getByText("Workspace: Standard encounter", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      picker.getByRole("option").filter({ hasText: activeWorkspace.name }),
+    ).toHaveCount(1);
+    for (const unavailable of [fixture.workspace, draftWorkspace]) {
+      await expect(
+        picker.getByRole("option").filter({ hasText: unavailable.name }),
+      ).toHaveCount(0);
+    }
+    expect(fixture.workspaceReads.length).toBeGreaterThan(0);
+    for (const request of fixture.workspaceReads) {
+      expect(request.searchParams.get("status")).toBe("active");
+    }
   });
 
   test("reuses encounter sections on configured pages with historical context and responsive columns", async ({
@@ -2408,6 +2461,7 @@ test.describe("Encounter workspace rendering", () => {
           name: fixture.workspace.name,
           description: fixture.workspace.description,
           template,
+          status: "active",
         },
       ]);
       await page.reload();

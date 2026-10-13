@@ -13,7 +13,7 @@ import {
 } from "./workspace";
 
 export default {
-  /** Filter configuration lists by auth_context and, for a facility, facility. */
+  /** Filter configuration lists by auth_context, status and, for a facility, facility. */
   list: {
     path: "/api/v1/workspace/",
     method: HttpMethod.GET,

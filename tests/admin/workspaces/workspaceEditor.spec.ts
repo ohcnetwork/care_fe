@@ -6,6 +6,7 @@ import type {
   WorkspaceAuthContext,
   WorkspaceCreate,
   WorkspaceRead,
+  WorkspaceStatus,
   WorkspaceUpdate,
 } from "../../../src/types/workspace/workspace";
 
@@ -30,6 +31,7 @@ interface WorkspaceWrite {
 function workspace(
   authContext: WorkspaceAuthContext,
   facilityId?: string,
+  status: WorkspaceStatus = "active",
 ): StoredWorkspace {
   return {
     authContext,
@@ -40,6 +42,7 @@ function workspace(
       name: `Workspace ${faker.word.words(2)} ${faker.string.alphanumeric(6)}`,
       description: faker.lorem.sentence(),
       template: { sections: [{ key: "overview", visible: true }] },
+      status,
       created_by: null,
       updated_by: null,
     },
@@ -229,6 +232,8 @@ async function mockWorkspaceApi(
               record.authContext === url.searchParams.get("auth_context")) &&
             (!url.searchParams.has("facility") ||
               record.facilityId === url.searchParams.get("facility")) &&
+            (!url.searchParams.has("status") ||
+              record.data.status === url.searchParams.get("status")) &&
             record.data.name.toLowerCase().includes(name),
         );
         const offset = Number(url.searchParams.get("offset") ?? 0);
@@ -254,6 +259,7 @@ async function mockWorkspaceApi(
           name: payload.name,
           description: payload.description,
           template: payload.template,
+          status: payload.status,
           created_by: user,
         };
         created.departmentId = payload.facility_organization ?? null;
@@ -354,6 +360,7 @@ async function mockWorkspaceApi(
             name: payload.name,
             description: payload.description,
             template: payload.template,
+            status: payload.status,
           };
           await route.fulfill({ json: record.data });
         } else if (method === "DELETE") {
@@ -482,6 +489,7 @@ test("instance admins can validate, create, reopen, update, and delete a workspa
         name,
         description,
         template,
+        status: "active",
         auth_context: "instance",
         inherited: false,
       },
@@ -519,7 +527,12 @@ test("instance admins can validate, create, reopen, update, and delete a workspa
     expect(api.writes).toHaveLength(2);
     expect(api.writes[1]).toMatchObject({
       method: "PUT",
-      body: { name: updatedName, description, template: updatedTemplate },
+      body: {
+        name: updatedName,
+        description,
+        template: updatedTemplate,
+        status: "active",
+      },
     });
     expect(api.writes[1].body).not.toHaveProperty("auth_context");
     expect(api.writes[1].body).not.toHaveProperty("facility");
@@ -876,6 +889,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
           name,
           description,
           template,
+          status: "active",
           auth_context: "instance",
           inherited: false,
         },
@@ -1217,6 +1231,7 @@ test("facility configuration stays scoped and saves department access separately
         facility: facilityId,
         inherited: false,
         template: {},
+        status: "active",
       },
     });
     await page.reload();
@@ -1306,6 +1321,7 @@ test("department workspaces validate ownership and preserve edits after a backen
           name,
           description: "",
           template: {},
+          status: "active",
           auth_context: "facility_organization",
           facility: api.facilityId,
           facility_organization: api.organizations[0].id,
@@ -1398,7 +1414,12 @@ test("department workspaces validate ownership and preserve edits after a backen
     const expectedUpdate = {
       method: "PUT",
       pathname,
-      body: { name: updatedName, description: "", template: updatedTemplate },
+      body: {
+        name: updatedName,
+        description: "",
+        template: updatedTemplate,
+        status: "active",
+      },
     };
     expect(api.writes.slice(1)).toEqual([expectedUpdate, expectedUpdate]);
     await page.reload();
@@ -1455,7 +1476,13 @@ test("the combined facility list uses server pagination and retains personal cre
         page.getByRole("link", { name: excluded.data.name, exact: true }),
       ).toHaveCount(0);
     }
-    await expect(page.getByRole("tab")).toHaveCount(0);
+    // Ownership contexts share one list; status is the only tabbed filter.
+    await expect(page.getByRole("tablist")).toHaveCount(1);
+    await expect(page.getByRole("tab")).toHaveText([
+      "Active",
+      "Draft",
+      "Archived",
+    ]);
     const firstList = api.reads.find(
       (url) => url.pathname === "/api/v1/workspace/",
     );
@@ -1514,6 +1541,7 @@ test("the combined facility list uses server pagination and retains personal cre
         name,
         description: "",
         template: {},
+        status: "active",
         auth_context: "user",
         facility: facilityId,
         inherited: false,
@@ -1812,6 +1840,7 @@ test("cached workspace editors refresh untouched fields and preserve unsaved edi
           name: draftName,
           description: record.data.description,
           template: refreshedTemplate,
+          status: "active",
         },
       },
       {
@@ -1842,5 +1871,119 @@ test("cached workspace editors refresh untouched fields and preserve unsaved edi
     await expect(nameField).toHaveValue(record.data.name);
     await expect(save).toBeDisabled();
     expect(api.writes).toHaveLength(2);
+  });
+});
+
+test("workspace status filters the list and saves with the configuration", async ({
+  page,
+}) => {
+  const active = workspace("instance");
+  const draft = workspace("instance", undefined, "draft");
+  const archived = workspace("instance", undefined, "archived");
+  const api = await mockWorkspaceApi(page, {
+    records: [active, draft, archived],
+  });
+  const statusTabs = page.getByRole("tablist", { name: "Status", exact: true });
+  const statusField = page.getByRole("combobox", {
+    name: "Status",
+    exact: true,
+  });
+  const lastListRead = () =>
+    api.reads.filter((url) => url.pathname === "/api/v1/workspace/").at(-1);
+
+  await test.step("The list opens on active workspaces and switches by status", async () => {
+    await page.goto("/admin/workspaces");
+    await expect(
+      statusTabs.getByRole("tab", { name: "Active", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("link", { name: active.data.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: draft.data.name, exact: true }),
+    ).toHaveCount(0);
+    expect(lastListRead()?.searchParams.get("status")).toBe("active");
+
+    await statusTabs.getByRole("tab", { name: "Draft", exact: true }).click();
+    await expect(
+      page.getByRole("link", { name: draft.data.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: active.data.name, exact: true }),
+    ).toHaveCount(0);
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("status") === "draft",
+    );
+    expect(lastListRead()?.searchParams.get("status")).toBe("draft");
+
+    await statusTabs
+      .getByRole("tab", { name: "Archived", exact: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: archived.data.name, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: draft.data.name, exact: true }),
+    ).toHaveCount(0);
+  });
+
+  await test.step("Activating a draft saves its status with the configuration", async () => {
+    await page.goto(`/admin/workspaces/${draft.data.id}/edit`);
+    const header = page.locator("header").filter({
+      has: page.getByRole("heading", { name: /^Edit workspace/ }),
+    });
+    await expect(header.getByText("Draft", { exact: true })).toBeVisible();
+    await openGeneralSettings(page);
+    await expect(statusField).toHaveText("Draft");
+    await expect(
+      page.getByText(
+        "Not offered on encounters yet. Keep it here while you set it up.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await statusField.click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    await expect(
+      page.getByText("Workspace updated", { exact: true }),
+    ).toBeVisible();
+    expect(api.writes).toHaveLength(1);
+    expect(api.writes[0]).toMatchObject({
+      method: "PUT",
+      pathname: `/api/v1/workspace/${draft.data.id}/`,
+      body: { name: draft.data.name, status: "active" },
+    });
+    await expect(header.getByText("Active", { exact: true })).toBeVisible();
+    await page.goto("/admin/workspaces");
+    await expect(
+      page.getByRole("link", { name: draft.data.name, exact: true }),
+    ).toBeVisible();
+  });
+
+  await test.step("New workspaces start active and can be created as drafts", async () => {
+    const name = `Draft workspace ${faker.string.alphanumeric(8)}`;
+    await page.goto("/admin/workspaces/create");
+    await expect(statusField).toHaveText("Active");
+    await expect(
+      page.getByText("Available on encounters to everyone with access.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await statusField.click();
+    await page.getByRole("option", { name: "Draft", exact: true }).click();
+    await page.getByRole("textbox", { name: "Name", exact: true }).fill(name);
+    await page
+      .getByRole("button", { name: "Create workspace", exact: true })
+      .click();
+    await page.waitForURL(/\/admin\/workspaces\/[\da-f-]+\/edit$/);
+    expect(api.writes.at(-1)).toMatchObject({
+      method: "POST",
+      pathname: "/api/v1/workspace/",
+      body: { name, status: "draft", auth_context: "instance" },
+    });
+    await page.goto("/admin/workspaces?status=draft");
+    await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   });
 });

@@ -10,6 +10,21 @@ export const WORKSPACE_AUTH_CONTEXTS = [
 
 export type WorkspaceAuthContext = (typeof WORKSPACE_AUTH_CONTEXTS)[number];
 
+export const WORKSPACE_STATUSES = ["active", "draft", "archived"] as const;
+
+/** Only active workspaces are offered on encounters. */
+export type WorkspaceStatus = (typeof WORKSPACE_STATUSES)[number];
+
+export const WORKSPACE_STATUS_COLORS = {
+  active: "primary",
+  draft: "yellow",
+  archived: "secondary",
+} as const;
+
+export function isWorkspaceStatus(value: unknown): value is WorkspaceStatus {
+  return WORKSPACE_STATUSES.some((status) => status === value);
+}
+
 export type WorkspaceAdminScope = Extract<
   WorkspaceAuthContext,
   "instance" | "facility"
@@ -47,6 +62,7 @@ export interface WorkspaceBase {
   name: string;
   description: string;
   template: WorkspaceTemplate;
+  status: WorkspaceStatus;
 }
 
 export interface WorkspaceMinimalRead extends WorkspaceBase {

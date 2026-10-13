@@ -8,7 +8,11 @@ import query from "@/Utils/request/query";
 
 import { parseEncounterClasses } from "./workspacePreferences";
 
-/** The backend owns access; saved choices apply across facilities by class. */
+/**
+ * The backend owns access; saved choices apply across facilities by class.
+ * Only active workspaces are offered, so saved choices for draft or archived
+ * workspaces fall back to the standard encounter.
+ */
 export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
   const user = useAuthUser();
   const defaults = useQuery({
@@ -17,9 +21,10 @@ export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
     retry: false,
   });
   const list = useQuery({
-    queryKey: ["workspaces", user.id, "encounter"],
+    queryKey: ["workspaces", user.id, "encounter", "active"],
     queryFn: async ({ signal }) => {
       const response = await query.paginated(workspaceApi.list, {
+        queryParams: { status: "active" },
         silent: true,
       })({ signal });
       return response.results;

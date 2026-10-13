@@ -63,9 +63,12 @@ import mutate from "@/Utils/request/mutate";
 import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
+  WORKSPACE_STATUS_COLORS,
+  WORKSPACE_STATUSES,
   WorkspaceAuthContext,
   WorkspaceRead,
   WorkspaceScope,
+  WorkspaceStatus,
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 
@@ -77,6 +80,7 @@ interface WorkspaceFormValues {
   name: string;
   description: string;
   template: string;
+  status: WorkspaceStatus;
   authContext: WorkspaceAuthContext;
   departmentId: string;
 }
@@ -137,6 +141,7 @@ export function WorkspaceForm({
           });
         }
       }),
+      status: z.enum(WORKSPACE_STATUSES),
       authContext: z.enum(WORKSPACE_AUTH_CONTEXTS),
       departmentId: z.string(),
     })
@@ -162,6 +167,7 @@ export function WorkspaceForm({
           template:
             invalidTemplateSnapshot ??
             JSON.stringify(existing.template, null, 2),
+          status: existing.status,
           authContext: scope.authContext,
           departmentId: "",
         }
@@ -171,6 +177,7 @@ export function WorkspaceForm({
       name: existing?.name ?? "",
       description: existing?.description ?? "",
       template: JSON.stringify(existing?.template ?? {}, null, 2),
+      status: existing?.status ?? "active",
       authContext: scope.authContext,
       departmentId: "",
     },
@@ -188,6 +195,7 @@ export function WorkspaceForm({
     [getValues, setIsEditorValid, setInvalidTemplateSnapshot],
   );
   const authContext = useWatch({ control: form.control, name: "authContext" });
+  const status = useWatch({ control: form.control, name: "status" });
   const returnPath = scope.basePath;
   const contextLabel = {
     instance: t("workspace_instance_scope"),
@@ -201,6 +209,11 @@ export function WorkspaceForm({
     facility_organization: t("workspace_department_description"),
     user: t("workspace_personal_description"),
   };
+  const statusHint = {
+    active: t("workspace_status_active_hint"),
+    draft: t("workspace_status_draft_hint"),
+    archived: t("workspace_status_archived_hint"),
+  };
 
   const title = t(existing ? "edit_workspace" : "create_workspace");
   const dirty = form.formState.isDirty || accessState.dirty || !isEditorValid;
@@ -212,6 +225,7 @@ export function WorkspaceForm({
         name: values.name,
         description: values.description,
         template: parseWorkspaceJson(values.template),
+        status: values.status,
       };
       return existing
         ? mutate(workspaceApi.update, { pathParams: { id: existing.id } })(body)
@@ -238,6 +252,7 @@ export function WorkspaceForm({
             name: data.name,
             description: data.description,
             template: JSON.stringify(data.template, null, 2),
+            status: data.status,
             authContext: values.authContext,
             departmentId: values.departmentId,
           },
@@ -320,6 +335,14 @@ export function WorkspaceForm({
                   {contextLabel[authContext]}
                 </Badge>
               )}
+              {existing?.status && (
+                <Badge
+                  variant={WORKSPACE_STATUS_COLORS[existing.status]}
+                  className="shrink-0"
+                >
+                  {t(existing.status)}
+                </Badge>
+              )}
             </div>
             <p className="mt-1 hidden text-sm leading-5 text-gray-500 sm:block">
               {t("workspace_editor_description")}
@@ -375,7 +398,12 @@ export function WorkspaceForm({
                 save.mutate(values);
               },
               (errors) => {
-                if (errors.name || errors.description || errors.departmentId) {
+                if (
+                  errors.name ||
+                  errors.description ||
+                  errors.status ||
+                  errors.departmentId
+                ) {
                   flushSync(() => setSettingsOpen(true));
                 }
               },
@@ -400,6 +428,7 @@ export function WorkspaceForm({
                     {(accessState.dirty ||
                       form.formState.dirtyFields.name ||
                       form.formState.dirtyFields.description ||
+                      form.formState.dirtyFields.status ||
                       form.formState.dirtyFields.authContext ||
                       form.formState.dirtyFields.departmentId) && (
                       <span className="text-xs text-amber-700">
@@ -452,6 +481,42 @@ export function WorkspaceForm({
                             placeholder={t("workspace_description_hint")}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid items-start gap-4 border-t border-gray-100 pt-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-gray-600">
+                          {t("status")}
+                        </FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={busy}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              ref={field.ref}
+                              className="h-10 w-full bg-gray-50/50 shadow-none"
+                            >
+                              <SelectValue placeholder={t("select_status")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {WORKSPACE_STATUSES.map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {t(value)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>{statusHint[status]}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -1,5 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { LayoutDashboard, Plus, Search } from "lucide-react";
+import {
+  ArchiveIcon,
+  CircleCheckIcon,
+  LayoutDashboard,
+  NotepadTextDashedIcon,
+  Plus,
+  Search,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,15 +22,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
-import { WorkspaceScope } from "@/types/workspace/workspace";
+import {
+  isWorkspaceStatus,
+  WORKSPACE_STATUSES,
+  WorkspaceScope,
+} from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 import query from "@/Utils/request/query";
+
+const WORKSPACE_STATUS_ICONS = {
+  active: CircleCheckIcon,
+  draft: NotepadTextDashedIcon,
+  archived: ArchiveIcon,
+} as const;
 
 interface WorkspaceListProps {
   scope: WorkspaceScope;
@@ -42,11 +60,13 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
     facility: "workspace_facility_description",
   }[scope.authContext];
   const name = qParams.name || "";
+  const status = isWorkspaceStatus(qParams.status) ? qParams.status : "active";
   const page = Math.max(1, Number(qParams.page) || 1);
   const listFilters = {
     ...(scope.authContext === "facility"
       ? { facility: scope.facilityId }
       : { auth_context: "instance" }),
+    status,
     name: name || undefined,
   };
   const {
@@ -84,6 +104,30 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
           </Link>
         </Button>
       </div>
+
+      <Tabs
+        value={status}
+        onValueChange={(value) => updateQuery({ status: value, page: 1 })}
+      >
+        <TabsList
+          aria-label={t("status")}
+          className="flex w-full sm:w-auto sm:self-start"
+        >
+          {WORKSPACE_STATUSES.map((value) => {
+            const Icon = WORKSPACE_STATUS_ICONS[value];
+            return (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex-1 sm:flex-none sm:px-4"
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {t(value)}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
 
       <div className="w-full space-y-1.5 sm:max-w-md">
         <Label htmlFor={searchId}>{t("search")}</Label>
@@ -130,7 +174,11 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
             {t("no_workspaces_found")}
           </h2>
           <p className="mt-1 text-sm text-gray-600">
-            {t(name ? "workspace_search_empty_hint" : "workspace_empty_hint")}
+            {t(
+              name
+                ? "workspace_search_empty_hint"
+                : "workspace_status_empty_hint",
+            )}
           </p>
         </div>
       ) : (
