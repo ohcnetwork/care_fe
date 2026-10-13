@@ -99,7 +99,7 @@ export default function QuestionnaireResponseView({
       <div key={question.id} className="grid grid-cols-2 gap-4">
         <div className="text-sm text-gray-500">{question.text}</div>
         <div className="font-medium">
-          {questionResponse.values.map((entry, index) => (
+          {(questionResponse.values ?? []).map((entry, index) => (
             <div key={index}>
               {formatValue(entry.value, question.type)}
               {entry.unit && <span className="ml-1">{entry.unit.code}</span>}

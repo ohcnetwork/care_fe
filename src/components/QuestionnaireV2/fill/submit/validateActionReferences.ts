@@ -24,7 +24,7 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
  * batch roll back, and the clinician see a generic failure with no field
  * to fix. Caught here, on the question, before anything is sent.
  *
- * Runs alongside `collectRequiredErrors` and follows the same visibility
+ * Runs alongside `collectQuestionErrors` and follows the same visibility
  * rule: a question hidden by enable_when (or inside a hidden group) is
  * not on the canvas and gets no error — the studio refuses to save an
  * action that references one, so that case never reaches a form.
