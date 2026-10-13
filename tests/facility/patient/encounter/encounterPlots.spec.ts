@@ -112,6 +112,22 @@ test.describe("Encounter Plots Tab", () => {
                   },
                 ],
               },
+              {
+                code: { code: "2339-0", display: "GRBS" },
+                results: [
+                  {
+                    effective_datetime: "2026-10-13T06:56:32Z",
+                    status: "final",
+                    value: { value: "not a number" },
+                    note: "",
+                    data_entered_by: {
+                      first_name: "Test",
+                      last_name: "Doctor",
+                      username: "test",
+                    },
+                  },
+                ],
+              },
             ],
           }),
         });
@@ -122,10 +138,25 @@ test.describe("Encounter Plots Tab", () => {
       await page.goto(plotsUrl);
     });
 
+    const chartCard = (title: string) =>
+      page.locator('[data-slot="card"]').filter({
+        has: page.getByRole("heading", { name: title, exact: true }),
+      });
+
     await test.step("Verify empty charts show the message and filled charts render", async () => {
       await expect.poll(() => analyseHits).toBeGreaterThan(0);
-      await expect(page.getByText("No data available").first()).toBeVisible();
-      await expect(page.locator("svg.recharts-surface").first()).toBeVisible();
+      await expect(
+        chartCard("Pulse").getByText("No data available"),
+      ).toBeVisible();
+      await expect(
+        chartCard("GRBS").getByText("No data available"),
+      ).toBeVisible();
+      await expect(
+        chartCard("Temperature").locator("svg.recharts-surface").first(),
+      ).toBeVisible();
+      await expect(
+        chartCard("Temperature").getByText("No data available"),
+      ).toHaveCount(0);
     });
   });
 });

@@ -174,7 +174,12 @@ export const ObservationVisualizer = ({
       if (!resultGroup) return;
 
       resultGroup.results.forEach((observation) => {
-        if (observation.effective_datetime) {
+        // Only timestamps with a plottable value, so a group of non-numeric
+        // results stays empty and shows the no-data state.
+        if (
+          observation.effective_datetime &&
+          !isNaN(Number(observation.value.value))
+        ) {
           allTimestamps.add(observation.effective_datetime);
         }
       });
