@@ -57,7 +57,7 @@ const RenderXAxisTick = ({
       x={x}
       y={Number(y) + 14}
       textAnchor="middle"
-      fontSize={12}
+      fontSize={11}
       fill="#6b7280"
     >
       <tspan x={x}>{dateLabel}</tspan>
@@ -90,18 +90,18 @@ const RenderValueLabel = ({
     return (
       <g>
         <text
-          x={xNum - 12}
+          x={xNum + 14}
           y={yNum - 4}
-          textAnchor="end"
+          textAnchor="start"
           fontSize={11}
           fill="#6b7280"
         >
           {t("latest")}
         </text>
         <text
-          x={xNum - 12}
+          x={xNum + 14}
           y={yNum + 13}
-          textAnchor="end"
+          textAnchor="start"
           fontSize={15}
           fontWeight={600}
           fill="#111827"
@@ -165,9 +165,15 @@ export function ObservationDetailContent({
         enteredBy: string;
         note: string | null | undefined;
       } => entry !== null,
-    );
+    )
+    .sort((firstEntry, secondEntry) => firstEntry.time - secondEntry.time);
 
   const lastIndex = chartData.length - 1;
+  const latestLabelWidth = Math.max(
+    String(chartData[lastIndex]?.value ?? "").length * 10,
+    t("latest").length * 11,
+  );
+  const chartRightMargin = Math.max(72, latestLabelWidth + 30);
 
   const timeByKey = new Map(chartData.map((entry) => [entry.key, entry.time]));
 
@@ -233,7 +239,12 @@ export function ObservationDetailContent({
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
-                  margin={{ top: 32, right: 72, left: 20, bottom: 8 }}
+                  margin={{
+                    top: 32,
+                    right: chartRightMargin,
+                    left: 20,
+                    bottom: 8,
+                  }}
                 >
                   <Tooltip
                     cursor={{ stroke: "#9ca3af", strokeDasharray: "3 3" }}

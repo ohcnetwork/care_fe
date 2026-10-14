@@ -99,12 +99,14 @@ interface DiagnosticReportDetailCardProps {
   reportId: string;
   patientId: string;
   facilityId?: string;
+  showObservationHistory?: boolean;
 }
 
 function DiagnosticReportDetailCard({
   reportId,
   patientId,
   facilityId,
+  showObservationHistory = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -277,7 +279,7 @@ function DiagnosticReportDetailCard({
               observations={filteredObservations}
               patientId={report.encounter.patient.id}
               encounterId={report.encounter.id}
-              showObservationHistory={true}
+              showObservationHistory={showObservationHistory}
             />
           </div>
         )}
@@ -397,12 +399,14 @@ interface DiagnosticReportsTabProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  showObservationHistory?: boolean;
 }
 
 export const DiagnosticReportsTab = ({
   patientId,
   encounterId,
   facilityId,
+  showObservationHistory = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -561,6 +565,7 @@ export const DiagnosticReportsTab = ({
                   reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
+                  showObservationHistory={showObservationHistory}
                 />
               )
             )}
@@ -583,6 +588,7 @@ export const EncounterDiagnosticReportsTab = () => {
       patientId={patientId}
       encounterId={encounterId}
       facilityId={facilityId}
+      showObservationHistory={true}
     />
   );
 };

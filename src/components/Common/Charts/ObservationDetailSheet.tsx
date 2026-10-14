@@ -31,7 +31,7 @@ interface ObservationDetailSheetProps {
   title: string;
   patientId: string;
   encounterId?: string;
-  trigger?: React.ReactNode;
+  trigger: React.ReactNode;
 }
 
 export function ObservationDetailSheet({
