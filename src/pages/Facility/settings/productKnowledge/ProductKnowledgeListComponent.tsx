@@ -49,7 +49,7 @@ function ProductKnowledgeCard({
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 flex-1">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
                 <CareIcon icon="l-folder" className="h-5 w-5" />
@@ -70,7 +70,7 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate text-lg">
+              <h3 className="font-medium text-gray-900 break-words text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
@@ -215,7 +215,7 @@ export function ProductKnowledgeListContent({
       {/* Header with filters and view toggle */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         {/* Search */}
-        <div className="relative w-full sm:w-auto">
+        <div className="relative w-full">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <CareIcon icon="l-search" className="size-5" />
           </span>
@@ -225,7 +225,7 @@ export function ProductKnowledgeListContent({
             onChange={(e) =>
               updateQuery({ search: e.target.value || undefined })
             }
-            className="w-full sm:w-[300px] pl-10"
+            className="w-full lg:w-[300px] pl-10"
           />
         </div>
 
