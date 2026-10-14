@@ -98,12 +98,12 @@ test.describe("Payment Reconciliation", () => {
     await expect(successMessage).toBeVisible();
   });
 
-  test("should open record payment dialog using keyboard shortcut R", async ({
+  test("should open record payment dialog using keyboard shortcut C", async ({
     page,
   }) => {
+    // "R" is bound only to the lg:hidden mobile button; desktop uses "C"
     await expect(page.getByRole("button", { name: /advance/i })).toBeVisible();
-    // Press 'R' to open Record Payment
-    await page.keyboard.press("r");
+    await page.keyboard.press("c");
 
     // Verify Record Payment sheet is open by checking for the sheet heading
     const sheet = page.locator("[role='dialog']").filter({
