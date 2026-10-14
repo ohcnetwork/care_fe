@@ -79,21 +79,21 @@ type DeliveryDirection = "incoming" | "outgoing";
 interface ProductDeliveriesDrawerContentProps {
   facilityId: string;
   locationId: string;
-  selectedProductKnowledge?: ProductKnowledgeBase;
+  productId?: string;
 }
 
 interface PaginatedDeliveriesProps {
   facilityId: string;
   locationId: string;
   direction: DeliveryDirection;
-  productKnowledgeId: string;
+  productId: string;
 }
 
 const PaginatedDeliveries = ({
   facilityId,
   locationId,
   direction,
-  productKnowledgeId,
+  productId,
 }: PaginatedDeliveriesProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
@@ -103,7 +103,7 @@ const PaginatedDeliveries = ({
       "supplyDeliveries",
       facilityId,
       locationId,
-      productKnowledgeId,
+      productId,
       direction,
       page,
     ],
@@ -113,13 +113,13 @@ const PaginatedDeliveries = ({
         ...(direction === "incoming"
           ? { destination: locationId }
           : { origin: locationId }),
-        supplied_inventory_item_product_knowledge: productKnowledgeId,
+        supplied_item: productId,
         status: ACTIVE_DELIVERY_STATUS_FILTER,
         limit: DELIVERIES_PER_PAGE,
         offset: (page - 1) * DELIVERIES_PER_PAGE,
       },
     }),
-    enabled: !!productKnowledgeId,
+    enabled: !!productId,
   });
 
   if (isLoading) {
@@ -160,7 +160,7 @@ const PaginatedDeliveries = ({
 function ProductDeliveriesDrawerContent({
   facilityId,
   locationId,
-  selectedProductKnowledge,
+  productId,
 }: ProductDeliveriesDrawerContentProps) {
   const { t } = useTranslation();
   const [direction, setDirection] = useState<DeliveryDirection>("incoming");
@@ -181,7 +181,7 @@ function ProductDeliveriesDrawerContent({
             facilityId={facilityId}
             locationId={locationId}
             direction="incoming"
-            productKnowledgeId={selectedProductKnowledge?.id || ""}
+            productId={productId || ""}
           />
         </TabsContent>
         <TabsContent value="outgoing">
@@ -189,7 +189,7 @@ function ProductDeliveriesDrawerContent({
             facilityId={facilityId}
             locationId={locationId}
             direction="outgoing"
-            productKnowledgeId={selectedProductKnowledge?.id || ""}
+            productId={productId || ""}
           />
         </TabsContent>
       </Tabs>
@@ -215,8 +215,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
 
   // State for the "all deliveries" drawer
   const [showAllDeliveries, setShowAllDeliveries] = useState(false);
-  const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
-    useState<ProductKnowledgeBase | undefined>(undefined);
+  const [selectedProductId, setSelectedProductId] = useState<string>();
 
   // Clear selected product knowledge when query parameter is cleared
   useEffect(() => {
@@ -369,9 +368,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                       variant="link"
                       className="font-semibold hover:text-gray-700 underline underline-offset-2"
                       onClick={() => {
-                        setSelectedProductKnowledgeDrawer(
-                          inventory.product.product_knowledge,
-                        );
+                        setSelectedProductId(inventory.product.id);
                         setShowAllDeliveries(true);
                       }}
                     >
@@ -457,7 +454,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         open={showAllDeliveries}
         onOpenChange={(open) => {
           setShowAllDeliveries(open);
-          if (!open) setSelectedProductKnowledgeDrawer(undefined);
+          if (!open) setSelectedProductId(undefined);
         }}
       >
         <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10">
@@ -467,7 +464,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
           <ProductDeliveriesDrawerContent
             facilityId={facilityId}
             locationId={locationId}
-            selectedProductKnowledge={selectedProductKnowledgeDrawer}
+            productId={selectedProductId}
           />
         </DrawerContent>
       </Drawer>

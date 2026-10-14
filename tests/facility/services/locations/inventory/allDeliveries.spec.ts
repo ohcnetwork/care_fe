@@ -46,16 +46,29 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
     });
 
     await test.step("Open the All Deliveries drawer and assert its API call", async () => {
+      const productRow = page.getByRole("row").filter({
+        has: page.getByRole("button", { name: PRODUCT_NAME }),
+      });
+      const productHref = await productRow
+        .locator('a[href*="/settings/product/"]')
+        .getAttribute("href");
+      expect(productHref).toBeTruthy();
+      const productId = productHref!.split("/").pop();
       const deliveriesResponse = page.waitForResponse(
         (resp) =>
           resp.url().includes("/api/v1/supply_delivery/") &&
           resp.request().method() === "GET" &&
-          resp.url().includes("supplied_inventory_item_product_knowledge=") &&
+          new URL(resp.url()).searchParams.has("supplied_item") &&
           resp.url().includes("destination=") &&
           resp.ok(),
       );
       await page.getByRole("button", { name: PRODUCT_NAME }).click();
-      await deliveriesResponse;
+      const response = await deliveriesResponse;
+      const params = new URL(response.url()).searchParams;
+      expect(params.get("supplied_item")).toBe(productId);
+      expect(params.has("supplied_inventory_item_product_knowledge")).toBe(
+        false,
+      );
     });
 
     await test.step("Verify the deliveries table is shown in the drawer", async () => {
@@ -119,7 +132,7 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       await page.route(
         (url) =>
           url.pathname === "/api/v1/supply_delivery/" &&
-          url.searchParams.has("supplied_inventory_item_product_knowledge"),
+          url.searchParams.has("supplied_item"),
         (route) =>
           route.fulfill({
             status: 200,
@@ -157,7 +170,7 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       await page.route(
         (url) =>
           url.pathname === "/api/v1/supply_delivery/" &&
-          url.searchParams.has("supplied_inventory_item_product_knowledge"),
+          url.searchParams.has("supplied_item"),
         async (route) => {
           const response = await route.fetch();
           const json = await response.json();
