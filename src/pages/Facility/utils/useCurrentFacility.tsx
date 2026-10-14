@@ -22,7 +22,8 @@ const extractFacilityId = (path: string) => {
 /**
  * Avoids fetching the facility data on all places the current facility is needed.
  *
- * Use this hook outside a facility route. It returns `undefined` values there.
+ * If this hook is used outside a facility route, it returns `undefined` values there
+ * instead of throwing an error.
  *
  * @returns The current facility in context, if there is one.
  */
