@@ -113,7 +113,7 @@ const PaginatedDeliveries = ({
         ...(direction === "incoming"
           ? { destination: locationId }
           : { origin: locationId }),
-        supplied_item: productId,
+        supplied_inventory_item_product: productId,
         status: ACTIVE_DELIVERY_STATUS_FILTER,
         limit: DELIVERIES_PER_PAGE,
         offset: (page - 1) * DELIVERIES_PER_PAGE,

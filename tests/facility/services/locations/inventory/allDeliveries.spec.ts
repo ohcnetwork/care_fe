@@ -58,17 +58,16 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
         (resp) =>
           resp.url().includes("/api/v1/supply_delivery/") &&
           resp.request().method() === "GET" &&
-          new URL(resp.url()).searchParams.has("supplied_item") &&
+          new URL(resp.url()).searchParams.has(
+            "supplied_inventory_item_product",
+          ) &&
           resp.url().includes("destination=") &&
           resp.ok(),
       );
       await page.getByRole("button", { name: PRODUCT_NAME }).click();
       const response = await deliveriesResponse;
       const params = new URL(response.url()).searchParams;
-      expect(params.get("supplied_item")).toBe(productId);
-      expect(params.has("supplied_inventory_item_product_knowledge")).toBe(
-        false,
-      );
+      expect(params.get("supplied_inventory_item_product")).toBe(productId);
     });
 
     await test.step("Verify the deliveries table is shown in the drawer", async () => {
@@ -132,7 +131,7 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       await page.route(
         (url) =>
           url.pathname === "/api/v1/supply_delivery/" &&
-          url.searchParams.has("supplied_item"),
+          url.searchParams.has("supplied_inventory_item_product"),
         (route) =>
           route.fulfill({
             status: 200,
@@ -170,7 +169,7 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       await page.route(
         (url) =>
           url.pathname === "/api/v1/supply_delivery/" &&
-          url.searchParams.has("supplied_item"),
+          url.searchParams.has("supplied_inventory_item_product"),
         async (route) => {
           const response = await route.fetch();
           const json = await response.json();
