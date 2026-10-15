@@ -43,7 +43,7 @@ function PinPageDialog({ url }: PinPageDialogProps) {
     : window.location.pathname;
   const currentUrl = url ? url : pathUrl;
   const isAlreadyPinned = isCustomLink(currentUrl);
-  const isLimitReached = !canAddMoreLinks && !isAlreadyPinned;
+  const isLimitReached = !canAddMoreLinks(facilityId) && !isAlreadyPinned;
   useShortcutSubContext("facility");
 
   const [title, setTitle] = useState("");
