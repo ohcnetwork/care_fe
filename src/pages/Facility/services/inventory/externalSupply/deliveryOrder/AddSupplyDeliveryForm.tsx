@@ -44,7 +44,9 @@ import {
 } from "@/components/ui/table";
 
 import {
-  getExtensionFieldsWithName,
+  ExtensionFormField,
+  getExtensionFormFields,
+  groupFieldsByAnchor,
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
@@ -84,7 +86,7 @@ import { round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { ExtensionContexts } from "@/Utils/schema/types";
+import { ExtensionContexts, SupplyDeliveryAnchor } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
@@ -124,6 +126,22 @@ export const createFormSchema = z.object({
 export type SupplyDeliveryFormValues = z.infer<typeof createFormSchema>;
 export type SupplyDeliveryItemValues = z.infer<typeof supplyDeliveryItemSchema>;
 
+/** Extension anchors (x-ui.placement.after) this table renders, in column order */
+const EXTENSION_ANCHORS = [
+  "product",
+  "batch",
+  "expiry",
+  "category",
+  "pack_size",
+  "pack_quantity",
+  "quantity",
+  "sale",
+  "purchase",
+  "tax",
+] as const satisfies readonly SupplyDeliveryAnchor[];
+
+export type SupplyDeliveryFormAnchor = (typeof EXTENSION_ANCHORS)[number];
+
 interface Props {
   deliveryOrderId: string;
   facilityId: string;
@@ -160,9 +178,9 @@ export function AddSupplyDeliveryForm({
   const informationalCodes = facility?.instance_informational_codes || [];
 
   // Get extensions from API
-  const allExtensions = getExtensions(
-    ExtensionEntityType.supply_delivery,
-    "write",
+  const allExtensions = useMemo(
+    () => getExtensions(ExtensionEntityType.supply_delivery, "write"),
+    [getExtensions],
   );
 
   // Process extensions for form rendering (includes owner, defaults, fieldMetadata)
@@ -172,15 +190,32 @@ export function AddSupplyDeliveryForm({
     [allExtensions],
   );
 
-  // Get extension field metadata with extension name for table headers
-  const extensionFields = useMemo(
+  // Extension columns grouped by the core column they follow (x-ui.placement).
+  // The header and every row read this one grouping, so columns always line up.
+  const extensionColumns = useMemo(
     () =>
-      getExtensionFieldsWithName(
-        allExtensions,
-        ExtensionContexts.supply_delivery_table,
+      groupFieldsByAnchor(
+        getExtensionFormFields(processedExtensions),
+        EXTENSION_ANCHORS,
+        // The tax cell also holds the discount selector
+        { discount: "tax" },
       ),
-    [allExtensions],
+    [processedExtensions],
   );
+
+  const renderExtensionHeads = (fields: ExtensionFormField[]) =>
+    fields.map((field) => (
+      <TableHead
+        rowSpan={2}
+        key={`${field.extensionName}-${field.name}`}
+        className="min-w-[100px] text-xs font-semibold"
+      >
+        {field.label}
+        {field.required && <span className="text-red-500 ml-0.5">*</span>}
+      </TableHead>
+    ));
+  const extensionHeadsAfter = (anchor: SupplyDeliveryFormAnchor) =>
+    renderExtensionHeads(extensionColumns.at(anchor));
 
   // Default values for a new empty item row
   const createEmptyItem = useCallback(
@@ -679,74 +714,73 @@ export function AddSupplyDeliveryForm({
                                 >
                                   {t("product")}
                                 </TableHead>
+                                {extensionHeadsAfter("product")}
                                 <TableHead
                                   rowSpan={2}
                                   className="min-w-[140px] text-xs font-semibold"
                                 >
                                   {t("batch")}
                                 </TableHead>
+                                {extensionHeadsAfter("batch")}
                                 <TableHead
                                   rowSpan={2}
                                   className="min-w-[130px] text-xs font-semibold"
                                 >
                                   {t("expiry")}
                                 </TableHead>
+                                {extensionHeadsAfter("expiry")}
                                 <TableHead
                                   rowSpan={2}
                                   className="min-w-[140px] text-xs font-semibold text-center"
                                 >
                                   {t("category")}
                                 </TableHead>
+                                {extensionHeadsAfter("category")}
                                 <TableHead
                                   rowSpan={2}
                                   className="w-20 text-xs font-semibold"
                                 >
                                   {t("pack_size")}
                                 </TableHead>
+                                {extensionHeadsAfter("pack_size")}
                                 <TableHead
                                   rowSpan={2}
                                   className="w-28 text-xs font-semibold"
                                 >
                                   {t("pack_qty")}
                                 </TableHead>
+                                {extensionHeadsAfter("pack_quantity")}
                                 <TableHead
                                   rowSpan={2}
                                   className="w-32 text-xs font-semibold"
                                 >
                                   {t("qty")}
                                 </TableHead>
+                                {extensionHeadsAfter("quantity")}
                                 <TableHead
                                   colSpan={1 + informationalCodes.length}
                                   className="text-xs font-semibold text-center border-b"
                                 >
                                   {t("sale")}
                                 </TableHead>
+                                {extensionHeadsAfter("sale")}
                                 <TableHead
                                   colSpan={2}
                                   className="text-xs font-semibold text-center border-b"
                                 >
                                   {t("purchase")}
                                 </TableHead>
+                                {extensionHeadsAfter("purchase")}
                                 <TableHead
                                   rowSpan={2}
                                   className="min-w-[120px] text-xs font-semibold"
                                 >
                                   {t("tax")}
                                 </TableHead>
-                                {extensionFields.map((field) => (
-                                  <TableHead
-                                    rowSpan={2}
-                                    key={`${field.extensionName}-${field.name}`}
-                                    className="min-w-[100px] text-xs font-semibold"
-                                  >
-                                    {field.label}
-                                    {field.required && (
-                                      <span className="text-red-500 ml-0.5">
-                                        *
-                                      </span>
-                                    )}
-                                  </TableHead>
-                                ))}
+                                {extensionHeadsAfter("tax")}
+                                {renderExtensionHeads(
+                                  extensionColumns.trailing,
+                                )}
                                 <TableHead
                                   rowSpan={2}
                                   className="text-xs font-semibold"
@@ -898,7 +932,7 @@ export function AddSupplyDeliveryForm({
                                 onProductSelectOpened={() =>
                                   setNewlyAddedRowIndex(null)
                                 }
-                                processedExtensions={processedExtensions}
+                                extensionColumns={extensionColumns}
                                 locationId={destination}
                                 onRemove={() => remove(index)}
                               />

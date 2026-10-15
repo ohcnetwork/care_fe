@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -37,7 +37,10 @@ import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponen
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { SchemaField } from "@/components/Extensions/SchemaField";
 import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
-import { ProcessedExtension } from "@/hooks/useExtensions";
+import {
+  AnchoredExtensionFields,
+  ExtensionFormField,
+} from "@/hooks/useExtensions";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
@@ -48,7 +51,10 @@ import {
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductRead } from "@/types/inventory/product/product";
 
-import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
+import {
+  SupplyDeliveryFormAnchor,
+  SupplyDeliveryFormValues,
+} from "./AddSupplyDeliveryForm";
 import { useDeliveryRowItem } from "./useDeliveryRowItem";
 
 interface Props {
@@ -57,8 +63,11 @@ interface Props {
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
-  /** All processed extensions with owner and schema info */
-  processedExtensions: ProcessedExtension[];
+  /** Extension fields grouped by the column they follow (same grouping as the header) */
+  extensionColumns: AnchoredExtensionFields<
+    ExtensionFormField,
+    SupplyDeliveryFormAnchor
+  >;
   /** Location ID for fetching inventory (origin location for internal transfers) */
   locationId?: string;
   onRemove?: () => void;
@@ -70,7 +79,7 @@ export function SmartExternalDeliveryRow({
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
-  processedExtensions,
+  extensionColumns,
   locationId,
   onRemove,
 }: Props) {
@@ -78,14 +87,34 @@ export function SmartExternalDeliveryRow({
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
 
-  // Filter extensions that have fields to render
-  const extensionsWithFields = useMemo(
-    () =>
-      processedExtensions.filter(
-        ({ fieldMetadata }) => fieldMetadata.length > 0,
-      ),
-    [processedExtensions],
-  );
+  // Extension fields - each field in its own column, name-namespaced
+  const renderExtensionCells = (fields: ExtensionFormField[]) =>
+    fields.map((field) => (
+      <TableCell
+        key={`${field.extensionName}-${field.name}`}
+        className="align-top"
+      >
+        <SchemaField
+          metadata={{
+            ...field,
+            label: "",
+            description: undefined,
+            required: false, // Hide asterisk - shown in table header
+          }}
+          control={form.control}
+          basePath={`items.${index}.extensions.${field.extensionName}`}
+          className="min-w-[100px] [&_input]:h-9 gap-0"
+          conditionalRules={field.conditionalRules}
+        />
+        {field.description && (
+          <p className="text-[10px] text-muted-foreground mt-1">
+            {field.description}
+          </p>
+        )}
+      </TableCell>
+    ));
+  const extensionCellsAfter = (anchor: SupplyDeliveryFormAnchor) =>
+    renderExtensionCells(extensionColumns.at(anchor));
 
   const {
     productKnowledge,
@@ -155,6 +184,8 @@ export function SmartExternalDeliveryRow({
           )}
         />
       </TableCell>
+
+      {extensionCellsAfter("product")}
 
       {/* Batch Number */}
       <TableCell className="align-top p-2 pb-4!">
@@ -331,6 +362,8 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
+      {extensionCellsAfter("batch")}
+
       {/* Expiry Date */}
       <TableCell className="align-top p-2">
         <FormField
@@ -355,6 +388,8 @@ export function SmartExternalDeliveryRow({
           )}
         />
       </TableCell>
+
+      {extensionCellsAfter("expiry")}
 
       {/* Category */}
       <TableCell className="align-top p-2 text-center">
@@ -389,6 +424,8 @@ export function SmartExternalDeliveryRow({
         )}
       </TableCell>
 
+      {extensionCellsAfter("category")}
+
       {/* Pack Size */}
       <TableCell className="align-top p-2">
         <Input
@@ -406,6 +443,8 @@ export function SmartExternalDeliveryRow({
         />
       </TableCell>
 
+      {extensionCellsAfter("pack_size")}
+
       {/* Pack Quantity */}
       <TableCell className="align-top p-2">
         <Input
@@ -421,6 +460,8 @@ export function SmartExternalDeliveryRow({
           className="w-[7rem]"
         />
       </TableCell>
+
+      {extensionCellsAfter("pack_quantity")}
 
       {/* Quantity */}
       <TableCell className="align-top p-2">
@@ -444,6 +485,8 @@ export function SmartExternalDeliveryRow({
           )}
         />
       </TableCell>
+
+      {extensionCellsAfter("quantity")}
 
       {/* Item Price */}
       <TableCell className="align-top p-2!">
@@ -517,6 +560,8 @@ export function SmartExternalDeliveryRow({
         );
       })}
 
+      {extensionCellsAfter("sale")}
+
       {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
@@ -553,6 +598,8 @@ export function SmartExternalDeliveryRow({
         </div>
       </TableCell>
 
+      {extensionCellsAfter("purchase")}
+
       {/* Taxes */}
       <TableCell className="align-top p-2">
         <MonetaryComponentSelector
@@ -581,36 +628,21 @@ export function SmartExternalDeliveryRow({
         </span>
       </TableCell>
 
-      {/* Extension Fields - each field in its own column, name-namespaced */}
-      {extensionsWithFields.flatMap(
-        ({ config, fieldMetadata, conditionalRules }) =>
-          fieldMetadata.map((fieldMeta) => (
-            <TableCell
-              key={`${config.name}-${fieldMeta.name}`}
-              className="align-top"
-            >
-              <SchemaField
-                metadata={{
-                  ...fieldMeta,
-                  label: "",
-                  description: undefined,
-                  required: false, // Hide asterisk - shown in table header
-                }}
-                control={form.control}
-                basePath={`items.${index}.extensions.${config.name}`}
-                className="min-w-[100px] [&_input]:h-9 gap-0"
-                conditionalRules={conditionalRules}
-              />
-              {fieldMeta.description && (
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {fieldMeta.description}
-                </p>
-              )}
-            </TableCell>
-          )),
-      )}
+      {extensionCellsAfter("tax")}
+
+      {/* Extension fields without a placement */}
+      {renderExtensionCells(extensionColumns.trailing)}
 
       <TableCell>
+        {/* Hidden/const extension fields get no column */}
+        {extensionColumns.hidden.map((field) => (
+          <SchemaField
+            key={`${field.extensionName}-${field.name}`}
+            metadata={field}
+            control={form.control}
+            basePath={`items.${index}.extensions.${field.extensionName}`}
+          />
+        ))}
         <Button
           type="button"
           variant="ghost"

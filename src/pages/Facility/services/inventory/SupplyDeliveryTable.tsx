@@ -27,8 +27,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ExtensionFieldWithName,
   getExtensionFieldsWithName,
   getExtensionValue,
+  groupFieldsByAnchor,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
@@ -48,7 +50,35 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { ExtensionContexts } from "@/Utils/schema/types";
+import { ExtensionContexts, SupplyDeliveryAnchor } from "@/Utils/schema/types";
+
+/** Extension anchors (x-ui.placement.after) this table renders, in column order */
+const EXTENSION_ANCHORS = [
+  "product",
+  "batch",
+  "expiry",
+  "requested_quantity",
+  "pack_size",
+  "pack_quantity",
+  "quantity",
+  "date",
+  "sale",
+  "purchase",
+  "tax",
+  "discount",
+  "status",
+  "condition",
+] as const satisfies readonly SupplyDeliveryAnchor[];
+
+type SupplyDeliveryTableAnchor = (typeof EXTENSION_ANCHORS)[number];
+
+/** Internal transfers hide the pack and purchase columns */
+const INTERNAL_EXTENSION_ANCHORS = EXTENSION_ANCHORS.filter(
+  (anchor) =>
+    anchor !== "pack_size" &&
+    anchor !== "pack_quantity" &&
+    anchor !== "purchase",
+);
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -122,20 +152,53 @@ export function SupplyDeliveryTable({
   const informationalCodes = facility?.instance_informational_codes || [];
 
   // Get extensions and extract field metadata with owner info for table headers
-  const allExtensions = getExtensions(
-    ExtensionEntityType.supply_delivery,
-    "read",
+  const allExtensions = useMemo(
+    () => getExtensions(ExtensionEntityType.supply_delivery, "read"),
+    [getExtensions],
   );
 
-  // Get field metadata with extension name for reading namespaced values
-  const extensionFields = useMemo(
+  // Extension columns grouped by the core column they follow (x-ui.placement)
+  const extensionColumns = useMemo(
     () =>
-      getExtensionFieldsWithName(
-        allExtensions,
-        ExtensionContexts.supply_delivery_table,
+      groupFieldsByAnchor(
+        getExtensionFieldsWithName(
+          allExtensions,
+          ExtensionContexts.supply_delivery_table,
+        ),
+        internal ? INTERNAL_EXTENSION_ANCHORS : EXTENSION_ANCHORS,
       ),
-    [allExtensions],
+    [allExtensions, internal],
   );
+
+  const renderExtensionHeads = (fields: ExtensionFieldWithName[]) =>
+    fields.map((field) => (
+      <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
+        {field.label}
+      </TableHead>
+    ));
+  const extensionHeadsAfter = (anchor: SupplyDeliveryTableAnchor) =>
+    renderExtensionHeads(extensionColumns.at(anchor));
+
+  // Read namespaced extension values for a delivery row
+  const renderExtensionValues = (
+    delivery: SupplyDeliveryRead,
+    fields: ExtensionFieldWithName[],
+  ) =>
+    fields.map((field) => {
+      const value = getExtensionValue(
+        delivery.extensions as NamespacedExtensionData,
+        field,
+      );
+      return (
+        <TableCell key={`${field.extensionName}-${field.name}`}>
+          {value !== undefined && value !== null ? String(value) : "-"}
+        </TableCell>
+      );
+    });
+  const extensionValuesAfter = (
+    delivery: SupplyDeliveryRead,
+    anchor: SupplyDeliveryTableAnchor,
+  ) => renderExtensionValues(delivery, extensionColumns.at(anchor));
 
   const { mutate: updateDeliveryStatus } = useMutation({
     mutationFn: ({
@@ -224,37 +287,47 @@ export function SupplyDeliveryTable({
           )}
           <TableHead rowSpan={2}>{t("hash_tag")}</TableHead>
           <TableHead rowSpan={2}>{t("item")}</TableHead>
+          {extensionHeadsAfter("product")}
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
+          {extensionHeadsAfter("batch")}
           <TableHead rowSpan={2}>{t("expiry")}</TableHead>
+          {extensionHeadsAfter("expiry")}
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
+          {extensionHeadsAfter("requested_quantity")}
           {!internal && <TableHead rowSpan={2}>{t("pack_size")}</TableHead>}
+          {extensionHeadsAfter("pack_size")}
           {!internal && <TableHead rowSpan={2}>{t("pack_qty")}</TableHead>}
+          {extensionHeadsAfter("pack_quantity")}
           <TableHead rowSpan={2}>
             {isRequester ? t("received_qty") : t("dispatched_qty")}
           </TableHead>
+          {extensionHeadsAfter("quantity")}
           <TableHead rowSpan={2}>
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
+          {extensionHeadsAfter("date")}
           <TableHead
             colSpan={1 + informationalCodes.length}
             className="text-center border-b"
           >
             {t("sale")}
           </TableHead>
+          {extensionHeadsAfter("sale")}
           {!internal && (
             <TableHead colSpan={2} className="text-center border-b">
               {t("purchase")}
             </TableHead>
           )}
+          {extensionHeadsAfter("purchase")}
           <TableHead rowSpan={2}>{t("tax")}</TableHead>
+          {extensionHeadsAfter("tax")}
           <TableHead rowSpan={2}>{t("disc")}</TableHead>
+          {extensionHeadsAfter("discount")}
           <TableHead rowSpan={2}>{t("status")}</TableHead>
+          {extensionHeadsAfter("status")}
           <TableHead rowSpan={2}>{t("condition")}</TableHead>
-          {extensionFields.map((field) => (
-            <TableHead rowSpan={2} key={`${field.extensionName}-${field.name}`}>
-              {field.label}
-            </TableHead>
-          ))}
+          {extensionHeadsAfter("condition")}
+          {renderExtensionHeads(extensionColumns.trailing)}
           {showActionsColumn && (
             <TableHead rowSpan={2}>{t("actions")}</TableHead>
           )}
@@ -301,31 +374,39 @@ export function SupplyDeliveryTable({
                   facilityId={facilityId}
                 />
               </TableCell>
+              {extensionValuesAfter(delivery, "product")}
               <TableCell>
                 {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
                   "-"}
               </TableCell>
+              {extensionValuesAfter(delivery, "batch")}
               <TableCell>
                 {expiry ? formatDate(parseISO(expiry), "dd/MM/yyyy") : "-"}
               </TableCell>
+              {extensionValuesAfter(delivery, "expiry")}
               <TableCell>
                 {delivery.supply_request
                   ? round(delivery.supply_request.quantity)
                   : "-"}
               </TableCell>
+              {extensionValuesAfter(delivery, "requested_quantity")}
               {!internal && (
                 <TableCell>{delivery.supplied_item_pack_size || "-"}</TableCell>
               )}
+              {extensionValuesAfter(delivery, "pack_size")}
               {!internal && (
                 <TableCell>
                   {delivery.supplied_item_pack_quantity || "-"}
                 </TableCell>
               )}
+              {extensionValuesAfter(delivery, "pack_quantity")}
               <TableCell>{round(delivery.supplied_item_quantity)}</TableCell>
+              {extensionValuesAfter(delivery, "quantity")}
               <TableCell>
                 {delivery.created_date &&
                   formatDate(new Date(delivery.created_date), "dd/MM/yyyy")}
               </TableCell>
+              {extensionValuesAfter(delivery, "date")}
               <TableCell>
                 <MonetaryDisplay
                   amount={
@@ -353,6 +434,7 @@ export function SupplyDeliveryTable({
                   </TableCell>
                 );
               })}
+              {extensionValuesAfter(delivery, "sale")}
               {!internal && (
                 <TableCell>
                   <MonetaryDisplay
@@ -365,6 +447,7 @@ export function SupplyDeliveryTable({
                   <MonetaryDisplay amount={delivery.total_purchase_price} />
                 </TableCell>
               )}
+              {extensionValuesAfter(delivery, "purchase")}
               <TableCell>
                 <MonetaryDisplay
                   factor={add(
@@ -381,6 +464,7 @@ export function SupplyDeliveryTable({
                   )}
                 />
               </TableCell>
+              {extensionValuesAfter(delivery, "tax")}
               <TableCell>
                 {(() => {
                   const discountComponents =
@@ -397,11 +481,13 @@ export function SupplyDeliveryTable({
                   ));
                 })()}
               </TableCell>
+              {extensionValuesAfter(delivery, "discount")}
               <TableCell>
                 <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>
                   {t(delivery.status)}
                 </Badge>
               </TableCell>
+              {extensionValuesAfter(delivery, "status")}
               <TableCell>
                 {delivery.supplied_item_condition && (
                   <Badge
@@ -415,19 +501,8 @@ export function SupplyDeliveryTable({
                   </Badge>
                 )}
               </TableCell>
-              {extensionFields.map((field) => {
-                const value = getExtensionValue(
-                  delivery.extensions as NamespacedExtensionData,
-                  field,
-                );
-                return (
-                  <TableCell key={`${field.extensionName}-${field.name}`}>
-                    {value !== undefined && value !== null
-                      ? String(value)
-                      : "-"}
-                  </TableCell>
-                );
-              })}
+              {extensionValuesAfter(delivery, "condition")}
+              {renderExtensionValues(delivery, extensionColumns.trailing)}
               {showActionsColumn && (
                 <TableCell>
                   {delivery.status === SupplyDeliveryStatus.in_progress && (
