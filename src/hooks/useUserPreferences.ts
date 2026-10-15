@@ -263,10 +263,10 @@ function useUserPreferences() {
   // Resets the custom links for the given facility. Other facilities' links remain unchanged.
   const resetCustomLinks = useCallback(
     (facilityId?: string) => {
-      const facilityLinks = customLinks(facilityId);
+      const facilityLinks = new Set(customLinks(facilityId));
       const newQuickLinks = { ...facilityQuickLinks };
       newQuickLinks.custom_links = facilityQuickLinks.custom_links?.filter(
-        (link) => !facilityLinks.includes(link),
+        (link) => !facilityLinks.has(link),
       );
       updatePreferences({
         type: ActionType.SET_CUSTOM_LINKS,
