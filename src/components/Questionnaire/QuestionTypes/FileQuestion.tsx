@@ -57,35 +57,21 @@ function getFileSizeError(file: File | undefined) {
   });
 }
 
-// Validators return the translated message for a missing value, so nothing
-// here depends on the generic `invalid_value` fallback in `validateFields`.
 const FILE_UPLOAD_FIELDS = {
   FILE_DATA: {
     key: "file_data",
     required: true,
-    validate: (value: unknown) => {
-      const fileData = value as FileUploadQuestion["file_data"];
-      if (!fileData) {
-        return t("field_required");
-      }
-      return getFileSizeError(fileData) ?? true;
-    },
+    // `validateFields` reports a missing value itself, so this only sees a file.
+    validate: (value: unknown) =>
+      getFileSizeError(value as FileUploadQuestion["file_data"]) ?? true,
   },
   NAME: {
     key: "name",
     required: true,
-    validate: (value: unknown) => {
-      const name = value as FileUploadQuestion["name"];
-      return name ? true : t("field_required");
-    },
   },
   ORIGINAL_NAME: {
     key: "original_name",
     required: true,
-    validate: (value: unknown) => {
-      const originalName = value as FileUploadQuestion["original_name"];
-      return originalName ? true : t("field_required");
-    },
   },
 } as const;
 
@@ -169,7 +155,8 @@ export function FilesQuestion(props: FilesQuestionProps) {
         const sizeError = getFileSizeError(value.file_data);
         // Always rendered inline: the question-level slot shows only the first
         // error for the question, so a later row's size error could otherwise
-        // go unseen.
+        // go unseen. The name input is the row's focusable control, so it
+        // carries the aria association with the message.
         const sizeErrorId = `${props.question.id}-file-${index}-size-error`;
         return (
           <div key={index} className="flex flex-col gap-1">
@@ -179,13 +166,14 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 className="flex-1"
                 value={value.name}
                 onChange={(e) => handleUpdate({ name: e.target.value }, index)}
+                aria-invalid={!!sizeError}
+                aria-describedby={sizeError ? sizeErrorId : undefined}
               />
               <div
                 className={cn(
                   "bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]",
                   sizeError && "border-red-500 bg-red-50",
                 )}
-                aria-describedby={sizeError ? sizeErrorId : undefined}
               >
                 <span className="text-sm truncate">{value.original_name}</span>
               </div>
