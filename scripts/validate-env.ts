@@ -39,15 +39,6 @@ const positiveNumberAsString = z.string().refine(
   { message: "Must be a positive number greater than 0" },
 );
 
-// Like positiveNumberAsString, but fractions such as 0.5 are allowed.
-const positiveDecimalAsString = z.string().refine(
-  (val) => {
-    const n = Number(val);
-    return Number.isFinite(n) && n > 0;
-  },
-  { message: "Must be a positive number greater than 0" },
-);
-
 const jsonAsStringSchema = z.string().refine(
   (val) => {
     try {
@@ -131,7 +122,7 @@ const envSchema = z
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
-    REACT_APP_MAX_FILE_UPLOAD_SIZE_MB: positiveDecimalAsString.optional(),
+    REACT_APP_MAX_FILE_UPLOAD_SIZE_MB: positiveNumberAsString.optional(),
     REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT: positiveNumberAsString.optional(),
     REACT_JWT_TOKEN_REFRESH_INTERVAL: positiveNumberAsString.optional(),
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),

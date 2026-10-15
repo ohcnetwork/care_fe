@@ -201,7 +201,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
               <p
                 id={sizeErrorId}
                 role="alert"
-                className="text-sm font-medium text-red-500"
+                className="text-sm font-medium text-red-500 break-words"
               >
                 {sizeError}
               </p>
