@@ -10,6 +10,7 @@ permissions: {}
 jobs:
   save-review-info:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ github.event.review.state == 'changes_requested' }}
     steps:
       - name: Save review info
