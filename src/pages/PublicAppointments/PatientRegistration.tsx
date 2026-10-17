@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
+import { Link, navigate, useNavigationPrompt, useQueryParams } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -182,17 +182,12 @@ export default function PublicPatientRegistration(
   return (
     <>
       <div className="container mx-auto p-4 max-w-4xl flex justify-start">
-        <Button
-          variant="outline"
-          className="border border-secondary-400"
-          type="button"
-          onClick={() =>
-            navigate(
-              `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-            )
-          }
-        >
-          <span className="text-sm underline">{t("back")}</span>
+        <Button variant="outline" className="border border-secondary-400" asChild>
+          <Link
+            href={`/facility/${props.facilityId}/appointments/${staffId}/patient-select`}
+          >
+            <span className="text-sm underline">{t("back")}</span>
+          </Link>
         </Button>
       </div>
       <Form {...form}>
@@ -405,18 +400,13 @@ export default function PublicPatientRegistration(
 
           <div className="bg-secondary-200 pt-3 pb-8">
             <div className="flex flex-row gap-2 justify-center sm:ml-64 mt-4">
-              <Button
-                variant="white"
-                className="sm:w-1/5"
-                type="button"
-                onClick={() =>
-                  navigate(
-                    `/facility/${props.facilityId}/appointments/${staffId}/patient-select`,
-                  )
-                }
-              >
-                <span className="bg-linear-to-b from-white/15 to-transparent" />
-                {t("cancel")}
+              <Button variant="white" className="sm:w-1/5" asChild>
+                <Link
+                  href={`/facility/${props.facilityId}/appointments/${staffId}/patient-select`}
+                >
+                  <span className="bg-linear-to-b from-white/15 to-transparent" />
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button
                 variant="primary_gradient"

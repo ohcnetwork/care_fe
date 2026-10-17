@@ -7,7 +7,7 @@ import {
   PlayCircle,
   PrinterIcon,
 } from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -438,16 +438,13 @@ export function DispenseOrderView({
 
         {isOrderCancelled ? (
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
-                )
-              }
-            >
-              <PrinterIcon className="size-4" />
-              {t("print")}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`}
+              >
+                <PrinterIcon className="size-4" />
+                {t("print")}
+              </Link>
             </Button>
             <Button variant="primary" asChild>
               <Link

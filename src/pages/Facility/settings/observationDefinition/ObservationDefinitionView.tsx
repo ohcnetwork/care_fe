@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -254,17 +254,13 @@ export default function ObservationDefinitionView({
               {t("observation_definition_not_found")}
             </AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/observation_definitions`,
-              )
-            }
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-            {t("back_to_list")}
+          <Button variant="outline" className="mt-4" asChild>
+            <Link
+              href={`/facility/${facilityId}/settings/observation_definitions`}
+            >
+              <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+              {t("back_to_list")}
+            </Link>
           </Button>
         </div>
       </Page>
@@ -274,16 +270,13 @@ export default function ObservationDefinitionView({
   return (
     <Page title={definition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/observation_definitions`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
-          {t("back")}
+        <Button variant="outline" size="xs" className="mb-2" asChild>
+          <Link
+            href={`/facility/${facilityId}/settings/observation_definitions`}
+          >
+            <CareIcon icon="l-arrow-left" className="size-4" />
+            {t("back")}
+          </Link>
         </Button>
 
         <div className="flex md:items-center justify-between flex-col md:flex-row ">
@@ -313,16 +306,13 @@ export default function ObservationDefinitionView({
                 {t("delete")}
               </Button>
             )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/observation_definitions/${definition.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-pen" className="mr-2 size-4" />
-              {t("edit")}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/observation_definitions/${definition.slug}/edit`}
+              >
+                <CareIcon icon="l-pen" className="mr-2 size-4" />
+                {t("edit")}
+              </Link>
             </Button>
           </div>
         </div>

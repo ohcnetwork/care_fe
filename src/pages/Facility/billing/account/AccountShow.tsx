@@ -389,15 +389,15 @@ function AccountShow({
               <Button
                 variant="outline"
                 className="border-gray-400 text-gray-950"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
-                }
+                asChild
               >
-                <CareIcon icon="l-plus" className="mr-2 size-4" />
-                {t("create_invoice")}
-                <ShortcutBadge actionId="create-invoice" />
+                <Link
+                  href={`/facility/${facilityId}/billing/account/${accountId}/invoices/create`}
+                >
+                  <CareIcon icon="l-plus" className="mr-2 size-4" />
+                  {t("create_invoice")}
+                  <ShortcutBadge actionId="create-invoice" />
+                </Link>
               </Button>
               <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />
@@ -411,15 +411,15 @@ function AccountShow({
               <Button
                 variant="outline"
                 className="border-gray-400 text-gray-950"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                  )
-                }
+                asChild
               >
-                <CareIcon icon="l-plus" className="size-4" />
-                {t("invoice")}
-                <ShortcutBadge actionId="create-invoice" />
+                <Link
+                  href={`/facility/${facilityId}/billing/account/${accountId}/invoices/create`}
+                >
+                  <CareIcon icon="l-plus" className="size-4" />
+                  {t("invoice")}
+                  <ShortcutBadge actionId="create-invoice" />
+                </Link>
               </Button>
               <Button variant="primary" onClick={() => openPaymentSheet("pay")}>
                 <CareIcon icon="l-plus" className="size-4" />

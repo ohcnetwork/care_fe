@@ -42,7 +42,7 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
 
   test("raise new stock request and mark as approved", async ({ page }) => {
     orderName = faker.lorem.words(5);
-    await page.getByRole("button", { name: "Raise Stock Request" }).click();
+    await page.getByRole("link", { name: "Raise Stock Request" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(orderName);
     await page
       .getByRole("combobox")
@@ -73,7 +73,7 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
 
   test("mark stock request as completed", async ({ page }) => {
     orderName = faker.lorem.words(5);
-    await page.getByRole("button", { name: "Raise Stock Request" }).click();
+    await page.getByRole("link", { name: "Raise Stock Request" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(orderName);
     await page
       .getByRole("combobox")

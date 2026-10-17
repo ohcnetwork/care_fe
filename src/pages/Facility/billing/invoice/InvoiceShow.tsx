@@ -622,27 +622,19 @@ function InvoiceShow({
                 <Button
                   variant="outline"
                   className="border-gray-400 gap-1 flex-1 sm:flex-initial"
-                  onClick={() => {
-                    if (relatedInvoices) {
-                      // Navigate to multi-invoice print with all invoices
-                      const allInvoiceIds = [
-                        ...relatedInvoices.split(","),
-                        invoiceId,
-                      ].join(",");
-                      navigate(
-                        `/facility/${facilityId}/billing/invoices/${allInvoiceIds}/print`,
-                      );
-                    } else {
-                      // Navigate to single invoice print
-                      navigate(
-                        `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
-                      );
-                    }
-                  }}
+                  asChild
                 >
-                  <CareIcon icon="l-print" className="size-4" />
-                  {t("print")}
-                  <ShortcutBadge actionId="print-invoice" />
+                  <Link
+                    href={
+                      relatedInvoices
+                        ? `/facility/${facilityId}/billing/invoices/${[...relatedInvoices.split(","), invoiceId].join(",")}/print`
+                        : `/facility/${facilityId}/billing/invoice/${invoiceId}/print`
+                    }
+                  >
+                    <CareIcon icon="l-print" className="size-4" />
+                    {t("print")}
+                    <ShortcutBadge actionId="print-invoice" />
+                  </Link>
                 </Button>
                 {canEdit && (
                   <DropdownMenu>
@@ -1236,31 +1228,27 @@ function InvoiceShow({
                                         variant="outline"
                                         size="sm"
                                         className="text-gray-800 font-semibold text-xs p-2"
-                                        onClick={() => {
-                                          navigate(
-                                            `/facility/${facilityId}/billing/payments/${payment.id}`,
-                                          );
-                                        }}
+                                        asChild
                                       >
-                                        <>
+                                        <Link
+                                          href={`/facility/${facilityId}/billing/payments/${payment.id}`}
+                                        >
                                           <EyeIcon className="size-3" />
                                           {t("view")}
-                                        </>
+                                        </Link>
                                       </Button>
                                       <Button
                                         variant="outline"
                                         size="sm"
                                         className="text-gray-800 font-semibold text-xs p-2"
-                                        onClick={() => {
-                                          navigate(
-                                            `/facility/${facilityId}/billing/payments/${payment.id}/print`,
-                                          );
-                                        }}
+                                        asChild
                                       >
-                                        <>
+                                        <Link
+                                          href={`/facility/${facilityId}/billing/payments/${payment.id}/print`}
+                                        >
                                           <PrinterIcon className="size-3" />
                                           {t("print")}
-                                        </>
+                                        </Link>
                                       </Button>
                                     </div>
                                   </div>
@@ -1384,31 +1372,27 @@ function InvoiceShow({
                                       variant="outline"
                                       size="sm"
                                       className="text-gray-800 font-semibold text-xs p-2"
-                                      onClick={() => {
-                                        navigate(
-                                          `/facility/${facilityId}/billing/payments/${creditNote.id}`,
-                                        );
-                                      }}
+                                      asChild
                                     >
-                                      <>
+                                      <Link
+                                        href={`/facility/${facilityId}/billing/payments/${creditNote.id}`}
+                                      >
                                         <EyeIcon className="size-3" />
                                         {t("view")}
-                                      </>
+                                      </Link>
                                     </Button>
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       className="text-gray-800 font-semibold text-xs p-2"
-                                      onClick={() => {
-                                        navigate(
-                                          `/facility/${facilityId}/billing/payments/${creditNote.id}/print`,
-                                        );
-                                      }}
+                                      asChild
                                     >
-                                      <>
+                                      <Link
+                                        href={`/facility/${facilityId}/billing/payments/${creditNote.id}/print`}
+                                      >
                                         <PrinterIcon className="size-3" />
                                         {t("print")}
-                                      </>
+                                      </Link>
                                     </Button>
                                   </div>
                                 </div>
@@ -1587,14 +1571,12 @@ function InvoiceShow({
                 </span>
               </div>
               <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
-                <Button
-                  variant="primary"
-                  onClick={() => navigate(sourceUrl)}
-                  className="shadow ml-2"
-                >
-                  <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-                  {alertButtonText}
-                  <ShortcutBadge actionId="navigate-to-source" />
+                <Button variant="primary" asChild className="shadow ml-2">
+                  <Link href={sourceUrl}>
+                    <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+                    {alertButtonText}
+                    <ShortcutBadge actionId="navigate-to-source" />
+                  </Link>
                 </Button>
               </div>
             </AlertTitle>

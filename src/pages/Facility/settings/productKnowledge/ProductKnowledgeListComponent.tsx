@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -109,16 +109,12 @@ function ProductKnowledgeTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50 cursor-pointer">
-      <TableCell
-        className="font-medium cursor-pointer"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-          )
-        }
-      >
-        <div className="flex items-center space-x-3">
+    <TableRow className="hover:bg-gray-50">
+      <TableCell className="font-medium">
+        <Link
+          href={`/facility/${facilityId}/settings/product_knowledge/${product.slug}`}
+          className="flex items-center space-x-3"
+        >
           <div className="p-1 rounded bg-gray-100 text-gray-600">
             <CareIcon icon="l-folder" className="h-4 w-4" />
           </div>
@@ -131,7 +127,7 @@ function ProductKnowledgeTableRow({
               </div>
             )}
           </div>
-        </div>
+        </Link>
       </TableCell>
       <TableCell>
         <Badge

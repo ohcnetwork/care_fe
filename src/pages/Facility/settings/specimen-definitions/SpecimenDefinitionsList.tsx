@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -120,15 +120,13 @@ export function SpecimenDefinitionsList({
                 {t("manage_specimen_definitions")}
               </p>
             </div>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/specimen_definitions/new`,
-                )
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_definition")}
+            <Button asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/specimen_definitions/new`}
+              >
+                <CareIcon icon="l-plus" className="mr-2" />
+                {t("add_definition")}
+              </Link>
             </Button>
           </div>
 

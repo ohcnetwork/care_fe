@@ -28,12 +28,6 @@ export function ChargeItemDefinitionsList({
     );
   };
 
-  const onCreateItem = () => {
-    navigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}/new`,
-    );
-  };
-
   return (
     <Page title={t("charge_item_definitions")} hideTitleOnPage>
       <ResourceCategoryList
@@ -44,7 +38,7 @@ export function ChargeItemDefinitionsList({
         basePath={`/facility/${facilityId}/settings/charge_item_definitions`}
         baseTitle={t("charge_item_definitions")}
         onNavigate={onNavigate}
-        onCreateItem={onCreateItem}
+        createItemHref={`/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}/new`}
         createItemLabel={t("add_definition")}
         createItemIcon="l-plus"
         showMonetaryComponentsOption

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, MapPinIcon, X } from "lucide-react";
-import { navigate, usePath } from "raviger";
+import { Link, navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -66,17 +66,21 @@ export function LocationSwitcher() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(fallbackUrl)}
+            asChild
             className="w-8 h-8"
             aria-label={t("home")}
             title={t("home")}
           >
-            <CareIcon icon="l-home-alt" />
+            <Link href={fallbackUrl}>
+              <CareIcon icon="l-home-alt" />
+            </Link>
           </Button>
         ) : (
-          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-            <CareIcon icon="l-arrow-left" />
-            <span className="underline underline-offset-2">{t("home")}</span>
+          <Button variant="ghost" asChild>
+            <Link href={fallbackUrl}>
+              <CareIcon icon="l-arrow-left" />
+              <span className="underline underline-offset-2">{t("home")}</span>
+            </Link>
           </Button>
         )}
 

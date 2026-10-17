@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -115,15 +115,11 @@ export default function TokenCategoryView({
             <AlertTitle>{t("error_loading_token_category")}</AlertTitle>
             <AlertDescription>{t("token_category_not_found")}</AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/token_category`)
-            }
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-            {t("back_to_list")}
+          <Button variant="outline" className="mt-4" asChild>
+            <Link href={`/facility/${facilityId}/settings/token_category`}>
+              <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+              {t("back_to_list")}
+            </Link>
           </Button>
         </div>
       </Page>
@@ -136,16 +132,11 @@ export default function TokenCategoryView({
       hideTitleOnPage={true}
     >
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/token_category`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
-          {t("back")}
+        <Button variant="outline" size="xs" className="mb-2" asChild>
+          <Link href={`/facility/${facilityId}/settings/token_category`}>
+            <CareIcon icon="l-arrow-left" className="size-4" />
+            {t("back")}
+          </Link>
         </Button>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">

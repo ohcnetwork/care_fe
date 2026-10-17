@@ -34,7 +34,7 @@ test.describe("Specimen Definitions Delete", () => {
   });
 
   test("should be able to delete specimen definition", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);

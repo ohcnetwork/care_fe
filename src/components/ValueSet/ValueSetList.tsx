@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Eye, Pencil, PlusIcon, Search } from "lucide-react";
-import { Link, useNavigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -70,7 +70,6 @@ const RenderCard = ({
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   return (
     <div className="md:hidden space-y-4 px-4">
@@ -158,22 +157,22 @@ const RenderCard = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                    }
+                    asChild
                     className="hover:bg-primary/5"
                   >
-                    {valueset.is_system_defined ? (
-                      <>
-                        <Eye className="size-4 mr-0" />
-                        {t("view")}
-                      </>
-                    ) : (
-                      <>
-                        <Pencil className="size-4 mr-0" />
-                        {t("edit")}
-                      </>
-                    )}
+                    <Link href={`/admin/valuesets/${valueset.slug}/edit`}>
+                      {valueset.is_system_defined ? (
+                        <>
+                          <Eye className="size-4 mr-0" />
+                          {t("view")}
+                        </>
+                      ) : (
+                        <>
+                          <Pencil className="size-4 mr-0" />
+                          {t("edit")}
+                        </>
+                      )}
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -193,7 +192,6 @@ const RenderTable = ({
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   return (
     <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm">
       {isLoading ? (
@@ -266,24 +264,20 @@ const RenderTable = ({
                   </ExpandableText>
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-sm">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(`/admin/valuesets/${valueset.slug}/edit`)
-                    }
-                  >
-                    {valueset.is_system_defined ? (
-                      <>
-                        <Eye className="size-4 mr-0" />
-                        {t("view")}
-                      </>
-                    ) : (
-                      <>
-                        <Pencil className="size-4 mr-0" />
-                        {t("edit")}
-                      </>
-                    )}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/admin/valuesets/${valueset.slug}/edit`}>
+                      {valueset.is_system_defined ? (
+                        <>
+                          <Eye className="size-4 mr-0" />
+                          {t("view")}
+                        </>
+                      ) : (
+                        <>
+                          <Pencil className="size-4 mr-0" />
+                          {t("edit")}
+                        </>
+                      )}
+                    </Link>
                   </Button>
                 </TableCell>
               </TableRow>
@@ -362,7 +356,7 @@ export function ValueSetList() {
             />
           </div>
 
-          <Button className="w-full sm:w-auto">
+          <Button asChild className="w-full sm:w-auto">
             <Link
               href="/admin/valuesets/create"
               className="flex items-center gap-2"

@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -128,9 +128,9 @@ export function LandingPage() {
             <Button
               variant="ghost"
               className="text-sm font-medium hover:bg-gray-100 px-6"
-              onClick={() => navigate("/patient/home")}
+              asChild
             >
-              {t("home")}
+              <Link href="/patient/home">{t("home")}</Link>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -289,9 +289,9 @@ export function LandingPage() {
                   <Button
                     variant="outline"
                     className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                    onClick={() => navigate(`/login?mode=staff`)}
+                    asChild
                   >
-                    {t("staff_login")}
+                    <Link href="/login?mode=staff">{t("staff_login")}</Link>
                   </Button>
                   <p className="text-xs mt-2 w-full text-center">
                     {t("staff_login_description")}
@@ -309,9 +309,9 @@ export function LandingPage() {
                   <Button
                     variant="outline"
                     className="w-full text-xs md:text-sm border border-primary-600 text-primary-700 hover:text-primary-800 font-semibold"
-                    onClick={() => navigate(`/login?mode=patient`)}
+                    asChild
                   >
-                    {t("patient_login")}
+                    <Link href="/login?mode=patient">{t("patient_login")}</Link>
                   </Button>
                   <p className="text-xs mt-2 w-full text-center">
                     {t("patient_login_description")}
