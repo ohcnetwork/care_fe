@@ -7,6 +7,7 @@ import MedicationDispenseRedirect from "@/pages/Facility/billing/account/compone
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import ReportViewer from "@/pages/Encounters/ReportViewer";
 import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
 import TemplatePage from "@/pages/Encounters/TemplateBuilder/TemplatePage";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
@@ -28,6 +29,7 @@ import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/D
 import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
 import { SettingsLayout } from "@/pages/Facility/settings/layout";
+import { ReportType } from "@/types/emr/report/report";
 
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
@@ -104,6 +106,24 @@ const FacilityRoutes: AppRoutes = {
     facilityId,
     accountId,
   }) => <PrintChargeItems facilityId={facilityId} accountId={accountId} />,
+  "/facility/:facilityId/billing/account/:accountId/report/template/:templateSlug":
+    ({ accountId, templateSlug }) => (
+      <ReportViewer
+        associatingId={accountId}
+        templateSlug={templateSlug}
+        reportType={ReportType.ACCOUNT_REPORT}
+      />
+    ),
+  "/facility/:facilityId/billing/account/:accountId/report/:reportId": ({
+    accountId,
+    reportId,
+  }) => (
+    <ReportViewer
+      associatingId={accountId}
+      reportId={reportId}
+      reportType={ReportType.ACCOUNT_REPORT}
+    />
+  ),
   "/facility/:facilityId/billing/account/:accountId/:tab": ({
     facilityId,
     accountId,
