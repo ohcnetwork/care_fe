@@ -249,6 +249,13 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
+  // Whole megabytes, kept in sync with the backend's MAX_FILE_UPLOAD_SIZE (an
+  // integer), which limits files sent through /api/v1/files/upload-file/
+  // (questionnaire file questions). The value is checked by validate-env.ts.
+  maxFileUploadSizeInMB: env.REACT_APP_MAX_FILE_UPLOAD_SIZE_MB
+    ? parseInt(env.REACT_APP_MAX_FILE_UPLOAD_SIZE_MB, 10)
+    : 5,
+
   pagination: {
     limitOffset: {
       /**
