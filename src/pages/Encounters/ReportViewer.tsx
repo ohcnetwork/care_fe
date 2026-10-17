@@ -700,7 +700,7 @@ function ReportList({
                 </span>
               </div>
               <span className="flex gap-1 items-center text-xs text-gray-500">
-                {formatDateTime(report.created_date, "DD MMM YYYY, hh:mm a")}
+                {formatDateTime(report.created_date, "dd MMM yyyy, hh:mm aaa")}
                 <Dot className="size-2.5 shrink-0 text-gray-700" />
                 {relativeTime(report.created_date)}
               </span>

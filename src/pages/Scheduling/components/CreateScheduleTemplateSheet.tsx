@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isBefore, startOfDay } from "date-fns";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -44,6 +45,7 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { isScheduleTimeBefore } from "@/pages/Scheduling/dateValidation";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
@@ -79,6 +81,7 @@ export default function CreateScheduleTemplateSheet({
   // Voluntarily masking the setQParams function to merge with other query params if any (since path is not unique within the user availability tab)
   const [qParams, _setQParams] = useQueryParams<QueryParams>();
   const setQParams = (p: QueryParams) => _setQParams(p, { overwrite: false });
+  const clinicToday = getClinicTodayDate();
 
   const weekdayFormat = useBreakpoints({
     default: "alphabet",
@@ -90,7 +93,7 @@ export default function CreateScheduleTemplateSheet({
       name: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ error: t("field_required") })
-        .min(dayjs().startOf("day").toDate(), {
+        .min(startOfDay(clinicToday), {
           message: t("schedule_creation_for_past_validation_error"),
         }),
       valid_to: z.date({ error: t("field_required") }),
@@ -168,12 +171,7 @@ export default function CreateScheduleTemplateSheet({
               }),
             ])
             .refine(
-              (data) => {
-                // Validate each availability's time range
-                const startTime = dayjs(data.start_time, "HH:mm");
-                const endTime = dayjs(data.end_time, "HH:mm");
-                return startTime.isBefore(endTime);
-              },
+              (data) => isScheduleTimeBefore(data.start_time, data.end_time),
               {
                 message: t("start_time_must_be_before_end_time"),
                 path: ["start_time"], // This will show error at the start_time field
@@ -183,7 +181,8 @@ export default function CreateScheduleTemplateSheet({
         .min(1, t("schedule_sessions_min_error")),
     })
     .refine(
-      (data) => !dayjs(data.valid_to).isBefore(dayjs(data.valid_from), "day"),
+      (data) =>
+        !isBefore(startOfDay(data.valid_to), startOfDay(data.valid_from)),
       {
         path: ["valid_to"],
         message: t("to_date_equal_or_after_from_date"),
@@ -362,8 +361,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        today={clinicToday}
                         disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
+                          isBefore(startOfDay(date), startOfDay(clinicToday))
                         }
                       />
                       <FormMessage />
@@ -380,8 +380,9 @@ export default function CreateScheduleTemplateSheet({
                       <DatePicker
                         date={field.value}
                         onChange={(date) => field.onChange(date)}
+                        today={clinicToday}
                         disabled={(date) =>
-                          dayjs(date).isBefore(dayjs(), "day")
+                          isBefore(startOfDay(date), startOfDay(clinicToday))
                         }
                       />
                       <FormMessage />

@@ -12,6 +12,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQueryParams } from "raviger";
 
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
+
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
 
@@ -51,6 +53,7 @@ export default function BookAppointmentSheet({
         </SheetHeader>
         <SheetDescription />
         <div className="flex flex-col gap-4 mt-6">
+          <SchedulingTimeZoneCallout />
           <Tabs defaultValue="appointment">
             <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
               <TabsTrigger

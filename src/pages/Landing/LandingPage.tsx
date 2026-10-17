@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { isAfter, parseISO, subMinutes } from "date-fns";
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -48,7 +48,7 @@ export function LandingPage() {
   const isLoggedIn =
     tokenData.token &&
     Object.keys(tokenData).length > 0 &&
-    dayjs(tokenData.createdAt).isAfter(dayjs().subtract(14, "minutes"));
+    isAfter(parseISO(tokenData.createdAt ?? ""), subMinutes(new Date(), 14));
   const { data: organizationsResponse } = useQuery({
     queryKey: ["organizations", "level", "1"],
     queryFn: query(organizationApi.getPublicOrganizations, {

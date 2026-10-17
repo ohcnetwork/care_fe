@@ -485,7 +485,7 @@ export const PrintChargeItems = (props: {
                           />
                           <DetailRow
                             label={`${t("date")}`}
-                            value={formatDateTime(new Date(), "DD-MM-YYYY")}
+                            value={formatDateTime(new Date(), "dd-MM-yyyy")}
                             width="w-24"
                           />
                           {getPatientIdentifiers(account?.patient, {
@@ -751,7 +751,7 @@ export const PrintChargeItems = (props: {
                                                         )}
                                                         {formatDateTime(
                                                           chargeItem.created_date,
-                                                          "DD/MM/YY",
+                                                          "dd/MM/yy",
                                                         )}
                                                       </div>
                                                     </TableCell>
@@ -1041,7 +1041,7 @@ export const PrintChargeItems = (props: {
                                                             )}
                                                             {formatDateTime(
                                                               chargeItem.created_date,
-                                                              "DD/MM/YY",
+                                                              "dd/MM/yy",
                                                             )}
                                                           </div>
                                                         </TableCell>
@@ -1291,7 +1291,7 @@ export const PrintChargeItems = (props: {
                                                     {payment.payment_datetime &&
                                                       formatDateTime(
                                                         payment.payment_datetime,
-                                                        "DD-MM-YY",
+                                                        "dd-MM-yy",
                                                       )}
                                                   </span>
                                                   <span className="font-mono text-xs text-gray-500">
@@ -1529,7 +1529,7 @@ export const PrintChargeItems = (props: {
                                                     {payment.payment_datetime &&
                                                       formatDateTime(
                                                         payment.payment_datetime,
-                                                        "DD-MM-YY",
+                                                        "dd-MM-yy",
                                                       )}
                                                   </span>
                                                   <span className="font-mono text-xs text-gray-500">

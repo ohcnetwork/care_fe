@@ -1,16 +1,14 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import {
-  compareAsc,
-  eachDayOfInterval,
-  format,
-  isPast,
-  max,
-  startOfToday,
-} from "date-fns";
+import { compareAsc, eachDayOfInterval, isPast } from "date-fns";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
+import {
+  formatSchedulingDateTime,
+  formatSchedulingTimeRange,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
 import {
   AvailabilityHeatmapResponse,
   PublicAppointment,
@@ -90,11 +88,15 @@ export const useAvailabilityHeatmap = ({
 }) => {
   const { start, end } = getMonthStartAndEnd(month);
 
-  // start from today if the month is current or past
-  const fromDate = dateQueryString(max([start, startOfToday()]));
+  // Clinic "today" — not the viewer's locale day (Sensors / travel TZ).
+  const clinicTodayYmd = getClinicTodayYmd();
+  const monthStartYmd = dateQueryString(start);
+  const fromDate =
+    monthStartYmd < clinicTodayYmd ? clinicTodayYmd : monthStartYmd;
 
   // ensure toDate is not before fromDate
-  const toDate = dateQueryString(max([fromDate, end]));
+  const monthEndYmd = dateQueryString(end);
+  const toDate = monthEndYmd < fromDate ? fromDate : monthEndYmd;
 
   let queryFn = query(scheduleApis.slots.availabilityStats, {
     pathParams: { facilityId },
@@ -142,15 +144,14 @@ export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
     return "";
   }
-  return format(appointment.token_slot.start_datetime, "dd MMM, yyyy, hh:mm a");
+  return formatSchedulingDateTime(
+    appointment.token_slot.start_datetime,
+    "dd MMM, yyyy, hh:mm a",
+  );
 };
 
 export const formatSlotTimeRange = (slot: {
   start_datetime: string;
   end_datetime: string;
-}) => {
-  return `${format(slot.start_datetime, "h:mm a")} - ${format(
-    slot.end_datetime,
-    "h:mm a",
-  )}`;
-};
+}) =>
+  formatSchedulingTimeRange(slot.start_datetime, slot.end_datetime, "h:mm a");

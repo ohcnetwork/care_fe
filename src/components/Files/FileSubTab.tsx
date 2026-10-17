@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { t } from "i18next";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -42,7 +41,7 @@ import useFilters from "@/hooks/useFilters";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -317,8 +316,9 @@ export const FilesPage = ({
                     <div>
                       <div className="text-gray-500">{t("date")}</div>
                       <div className="font-medium">
-                        {dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        {formatDateTime(
+                          file.created_date,
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       </div>
                     </div>
@@ -421,12 +421,13 @@ export const FilesPage = ({
                       )}
                     >
                       <TooltipComponent
-                        content={dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
+                        content={formatDateTime(
+                          file.created_date,
+                          "dd MMM yyyy, hh:mm a",
                         )}
                       >
                         <span>
-                          {dayjs(file.created_date).format("DD MMM YYYY ")}
+                          {formatDateTime(file.created_date, "dd MMM yyyy ")}
                         </span>
                       </TooltipComponent>
                     </TableCell>

@@ -1,10 +1,13 @@
-import { format } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { Badge } from "@/components/ui/badge";
+import {
+  formatSchedulingDateTime,
+  getAppointmentsSchedulingTimeZone,
+} from "@/pages/Appointments/schedulingTimeZone";
 import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
@@ -13,7 +16,7 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { facilityLocalDateQueryString } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 
 interface UpcomingAppointmentCardProps {
@@ -28,7 +31,11 @@ export const UpcomingAppointmentCard = ({
   onViewAllAppointments,
 }: UpcomingAppointmentCardProps) => {
   const { t } = useTranslation();
-  const today = new Date();
+  const schedulingTimeZone = getAppointmentsSchedulingTimeZone();
+  const clinicToday = facilityLocalDateQueryString(
+    new Date(),
+    schedulingTimeZone,
+  );
 
   const { data: appointmentsData, isLoading } = useQuery({
     queryKey: [
@@ -36,13 +43,14 @@ export const UpcomingAppointmentCard = ({
       patientId,
       facilityId,
       UpcomingAppointmentStatuses,
+      clinicToday,
     ],
     queryFn: query(scheduleApi.appointments.getAppointments, {
       pathParams: { patientId },
       queryParams: {
         facility: facilityId,
-        date_after: dateQueryString(today),
-        date_before: dateQueryString(today),
+        date_after: clinicToday,
+        date_before: clinicToday,
         status: UpcomingAppointmentStatuses.join(","),
       },
     }),
@@ -61,7 +69,11 @@ export const UpcomingAppointmentCard = ({
       <h5 className="font-semibold text-gray-900">
         {t("upcoming_appointment")}
       </h5>
-      <AppointmentRow appointment={appointment} patientId={patientId} />
+      <AppointmentRow
+        appointment={appointment}
+        patientId={patientId}
+        schedulingTimeZone={schedulingTimeZone}
+      />
       {totalCount > 1 && onViewAllAppointments && (
         <button
           type="button"
@@ -78,9 +90,11 @@ export const UpcomingAppointmentCard = ({
 const AppointmentRow = ({
   appointment,
   patientId,
+  schedulingTimeZone,
 }: {
   appointment: Appointment;
   patientId: string;
+  schedulingTimeZone: string;
 }) => {
   const { t } = useTranslation();
 
@@ -98,9 +112,11 @@ const AppointmentRow = ({
         </div>
         <div className="hidden sm:block h-5 w-px bg-gray-300" />
         <span className="text-sm text-gray-700 whitespace-nowrap">
-          {format(appointment.token_slot.start_datetime, "hh:mm a")}
-          {"; "}
-          {format(appointment.token_slot.start_datetime, "dd/MM/yyyy")}
+          {formatSchedulingDateTime(
+            appointment.token_slot.start_datetime,
+            "hh:mm a; dd/MM/yyyy",
+            schedulingTimeZone,
+          )}
         </span>
         <div className="hidden sm:block h-5 w-px bg-gray-300" />
         <span className="hidden sm:block text-sm text-gray-600 truncate">

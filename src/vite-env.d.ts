@@ -24,6 +24,7 @@ interface ImportMetaEnv {
   readonly REACT_DEFAULT_DISCHARGE_DISPOSITION?: string;
   readonly REACT_ENCOUNTER_DEFAULT_DATE_FILTER?: string;
   readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
+  readonly REACT_APPOINTMENTS_SCHEDULING_TIMEZONE?: string;
   readonly REACT_PAYMENT_LOCATION_REQUIRED?: string;
   readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;

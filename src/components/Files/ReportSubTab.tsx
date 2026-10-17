@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,6 +33,7 @@ import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
+import { formatDateTime } from "@/Utils/utils";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -215,8 +215,9 @@ export function ReportSubTab({
                   <div>
                     <div className="text-gray-500">{t("date")}</div>
                     <div className="font-medium">
-                      {dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                      {formatDateTime(
+                        report.created_date,
+                        "dd MMM yyyy, hh:mm a",
                       )}
                     </div>
                   </div>
@@ -303,12 +304,13 @@ export function ReportSubTab({
                     )}
                   >
                     <TooltipComponent
-                      content={dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                      content={formatDateTime(
+                        report.created_date,
+                        "dd MMM yyyy, hh:mm a",
                       )}
                     >
                       <span>
-                        {dayjs(report.created_date).format("DD MMM YYYY")}
+                        {formatDateTime(report.created_date, "dd MMM yyyy")}
                       </span>
                     </TooltipComponent>
                   </TableCell>

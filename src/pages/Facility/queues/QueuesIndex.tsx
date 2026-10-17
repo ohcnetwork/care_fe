@@ -55,8 +55,11 @@ import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { startOfDay } from "date-fns";
-import dayjs from "dayjs";
+import {
+  getClinicTodayDate,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
 import QueueFormSheet from "./QueueFormSheet";
@@ -259,8 +262,7 @@ export default function QueuesIndex({
   // Set default date to today if no date is specified
   useEffect(() => {
     if (!qParams.date) {
-      const today = new Date();
-      updateQuery({ date: dateQueryString(today) });
+      updateQuery({ date: getClinicTodayYmd() });
     }
   }, [qParams.date, updateQuery]);
 
@@ -311,7 +313,11 @@ export default function QueuesIndex({
 
   const queues = queuesResponse?.results || [];
   const subQueues = subQueuesResponse?.results || [];
-  const isPast = dayjs(qParams.date).isBefore(dayjs(), "day");
+  const clinicToday = getClinicTodayDate();
+  const selectedDate = qParams.date ? parseISO(qParams.date) : undefined;
+  const isPast =
+    !!selectedDate &&
+    isBefore(startOfDay(selectedDate), startOfDay(clinicToday));
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
@@ -324,8 +330,9 @@ export default function QueuesIndex({
               {t("date")}
             </label>
             <DatePicker
-              date={qParams.date ? new Date(qParams.date) : undefined}
+              date={selectedDate}
               onChange={handleDateChange}
+              today={clinicToday}
             />
           </div>
 
@@ -350,7 +357,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={startOfDay(qParams.date)}
+              initialDate={selectedDate}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="size-4 mr-2" />
@@ -384,7 +391,7 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={startOfDay(qParams.date)}
+                    initialDate={selectedDate}
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="size-4 mr-2" />

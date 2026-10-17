@@ -41,10 +41,10 @@ import {
 } from "@/types/scheduling/schedule";
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
+import { formatDateTime } from "@/Utils/date";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -150,7 +150,7 @@ export function ManageQueuePage({
                   </div>
                   <span className="text-xs font-medium text-gray-500 break-all">
                     {!queue.system_generated && `${queue.name} - `}
-                    {formatDate(queue.date, "dd MMM yyyy")}
+                    {formatDateTime(queue.date, "dd MMM yyyy")}
                   </span>
                 </div>
               </div>

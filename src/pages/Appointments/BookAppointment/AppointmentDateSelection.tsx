@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { isBefore, isPast, isSameDay, isToday, startOfToday } from "date-fns";
+import { isBefore, isPast, isSameDay } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -8,6 +8,10 @@ import Calendar from "@/CAREUI/interactive/Calendar";
 
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import {
+  getClinicTodayDate,
+  getClinicTodayYmd,
+} from "@/pages/Appointments/schedulingTimeZone";
 import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
 import {
   Appointment,
@@ -15,7 +19,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AppointmentDateSelectionProps {
   facilityId: string;
@@ -35,7 +39,12 @@ export const AppointmentDateSelection = ({
   selectedDate,
 }: AppointmentDateSelectionProps) => {
   const { t } = useTranslation();
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const clinicToday = getClinicTodayDate();
+  const [selectedMonth, setSelectedMonth] = useState(selectedDate);
+
+  useEffect(() => {
+    setSelectedMonth(selectedDate);
+  }, [selectedDate]);
 
   return (
     <div className="flex flex-col gap-3 md:min-w-121 lg:w-full">
@@ -50,6 +59,7 @@ export const AppointmentDateSelection = ({
         month={selectedMonth}
         onMonthChange={setSelectedMonth}
         setSelectedDate={setSelectedDate}
+        referenceToday={clinicToday}
         renderDay={(date) => {
           return (
             <DateColumn
@@ -92,8 +102,11 @@ const DateColumn = ({
   selectedMonth,
   resourceType,
 }: DateColumnProps) => {
-  const isSelected = isSameDay(date, selectedDate ?? new Date());
-  const isBeforeToday = isBefore(date, startOfToday());
+  const clinicTodayYmd = getClinicTodayYmd();
+  const clinicToday = getClinicTodayDate();
+  const isSelected = isSameDay(date, selectedDate ?? clinicToday);
+  const isBeforeToday = isBefore(date, clinicToday);
+  const isClinicToday = isSameDay(date, clinicToday);
   const { t } = useTranslation();
 
   const heatmapQuery = useAvailabilityHeatmap({
@@ -104,13 +117,13 @@ const DateColumn = ({
   });
 
   const slotsTodayQuery = useQuery({
-    queryKey: ["slots", facilityId, resourceId, dateQueryString(new Date())],
+    queryKey: ["slots", facilityId, resourceId, clinicTodayYmd],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
         resource_type: resourceType,
         resource_id: resourceId || "",
-        day: dateQueryString(new Date()),
+        day: clinicTodayYmd,
       },
     }),
     enabled: !!resourceId,
@@ -125,11 +138,9 @@ const DateColumn = ({
   });
 
   const availability = (() => {
-    // If the date is today and there are slots for today, ignore the heatmap
-    // as the heatmap does not account for past slots and instead compute
-    // the availability for the day based on the slots that are currently
-    // available
-    if (isToday(date) && slotsTodayQuery.data) {
+    // If the date is clinic-today and there are slots for that day, ignore the
+    // heatmap as it does not account for past slots — compute from live slots.
+    if (isClinicToday && slotsTodayQuery.data) {
       const slots = slotsTodayQuery.data.filter(
         (slot) => !isPast(slot.end_datetime),
       );

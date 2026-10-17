@@ -770,6 +770,7 @@
   "appointment_rescheduled_successfully": "Appointment rescheduled successfully",
   "appointment_slot": "Appointment Slot",
   "appointment_time": "Appointment Time",
+  "appointment_times_in_timezone": "Clinic timezone: {{abbreviation}}. Schedules, appointment slots, and date filters follow {{timezone}} — not the date and time on your device.",
   "appointment_type": "Appointment Type",
   "appointments": "Appointments",
   "appointments_list": "Appointments List",

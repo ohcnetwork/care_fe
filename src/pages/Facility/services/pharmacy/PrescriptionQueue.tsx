@@ -70,6 +70,7 @@ import {
   dateTimeQueryString,
   formatDateTime,
   formatName,
+  parseLocalDate,
 } from "@/Utils/utils";
 
 export default function PrescriptionQueue({
@@ -146,12 +147,8 @@ export default function PrescriptionQueue({
     created_date:
       qParams.created_date_after || qParams.created_date_before
         ? {
-            from: qParams.created_date_after
-              ? new Date(qParams.created_date_after)
-              : undefined,
-            to: qParams.created_date_before
-              ? new Date(qParams.created_date_before)
-              : undefined,
+            from: parseLocalDate(qParams.created_date_after),
+            to: parseLocalDate(qParams.created_date_before),
           }
         : undefined,
   });
@@ -169,10 +166,10 @@ export default function PrescriptionQueue({
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
         created_date_after: qParams.created_date_after
-          ? dateTimeQueryString(new Date(qParams.created_date_after))
+          ? dateTimeQueryString(qParams.created_date_after)
           : undefined,
         created_date_before: qParams.created_date_before
-          ? dateTimeQueryString(new Date(qParams.created_date_before), true)
+          ? dateTimeQueryString(qParams.created_date_before, true)
           : undefined,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,

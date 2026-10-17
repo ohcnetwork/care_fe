@@ -86,9 +86,9 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <Clock className="size-3 text-gray-500 shrink-0" />
           <span className="text-xs text-gray-700">
             {encounter.period.start &&
-              formatDateTime(encounter.period.start, "DD/MM/YYYY, hh:mm A")}
+              formatDateTime(encounter.period.start, "dd/MM/yyyy, hh:mm a")}
             {encounter.period.end &&
-              ` - ${formatDateTime(encounter.period.end, "DD/MM/YYYY, hh:mm A")}`}
+              ` - ${formatDateTime(encounter.period.end, "dd/MM/yyyy, hh:mm a")}`}
           </span>
         </div>
 

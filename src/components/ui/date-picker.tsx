@@ -21,6 +21,8 @@ interface DatePickerProps {
   className?: string;
   disablePicker?: boolean;
   dateFormat?: string;
+  /** Day the calendar marks as today. Defaults to the viewer's local day. */
+  today?: Date;
 }
 
 export function DatePicker({
@@ -30,6 +32,7 @@ export function DatePicker({
   className,
   disablePicker,
   dateFormat = "PPP",
+  today,
 }: DatePickerProps) {
   const { t } = useTranslation();
 
@@ -77,6 +80,7 @@ export function DatePicker({
           endMonth={new Date(2100, 11, 31)}
           autoFocus
           disabled={disabled}
+          today={today}
         />
       </PopoverContent>
     </Popover>

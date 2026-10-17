@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, isSameDay, parseISO } from "date-fns";
+import { isSameDay, parseISO } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -16,7 +16,8 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
-import { formatTimeShort } from "@/Utils/utils";
+import { formatDateTime, formatTimeShort } from "@/Utils/utils";
+import { getSchedulingTimeZoneSuffix } from "@/pages/Appointments/schedulingTimeZone";
 import {
   SchedulableResourceType,
   ScheduleException,
@@ -116,23 +117,24 @@ const ScheduleExceptionItem = (
               <span className="font-medium">
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
+                {getSchedulingTimeZoneSuffix()}
               </span>
               {isSameDay(fromDate, toDate) ? (
                 <>
                   <span> {t("on")} </span>
                   <span className="font-medium">
-                    {format(fromDate, "EEE, dd MMM yyyy")}
+                    {formatDateTime(props.valid_from, "EEE, dd MMM yyyy")}
                   </span>
                 </>
               ) : (
                 <>
                   <span> {t("from")} </span>
                   <span className="font-medium">
-                    {format(fromDate, "EEE, dd MMM yyyy")}
+                    {formatDateTime(props.valid_from, "EEE, dd MMM yyyy")}
                   </span>
                   <span> {t("to")} </span>
                   <span className="font-medium">
-                    {format(toDate, "EEE, dd MMM yyyy")}
+                    {formatDateTime(props.valid_to, "EEE, dd MMM yyyy")}
                   </span>
                 </>
               )}

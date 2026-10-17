@@ -25,6 +25,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName, goBack } from "@/Utils/utils";
 import { TokenSlotButton } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { SchedulingTimeZoneCallout } from "@/pages/Appointments/components/SchedulingTimeZoneCallout";
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
@@ -44,8 +46,11 @@ interface AppointmentsProps {
 export function ScheduleAppointment(props: AppointmentsProps) {
   const { t } = useTranslation();
   const { facilityId, staffId, appointmentId } = props;
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedMonth, setSelectedMonth] = useState(() =>
+    getClinicTodayDate(),
+  );
+  const [selectedDate, setSelectedDate] = useState(() => getClinicTodayDate());
+  const clinicToday = getClinicTodayDate();
   const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
   const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
@@ -272,6 +277,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           </div>
           <div className="flex-1 mx-2">
             <div className="flex flex-col gap-6">
+              <SchedulingTimeZoneCallout />
               <span className="text-base font-semibold">
                 {appointmentId
                   ? t("reschedule_appointment_with")
@@ -291,6 +297,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 onMonthChange={setSelectedMonth}
                 renderDay={renderDay}
                 setSelectedDate={setSelectedDate}
+                referenceToday={clinicToday}
                 highlightToday={false}
               />
               <div className="space-y-6">

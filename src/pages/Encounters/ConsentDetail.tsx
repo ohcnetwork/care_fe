@@ -288,7 +288,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                       {t("consent_given_on")}
                     </h3>
                     <p className="text-base font-semibold text-gray-700">
-                      {formatDateTime(consent.date, "MMMM D, YYYY")}
+                      {formatDateTime(consent.date, "MMMM d, yyyy")}
                       {" , "}
                       {format(consent.date, "h:mm a")}
                     </p>

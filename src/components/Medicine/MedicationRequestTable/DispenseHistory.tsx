@@ -204,7 +204,7 @@ export function DispenseHistory({
                   <TableCell className="text-gray-950">
                     {formatDateTime(
                       medication.when_prepared.toString(),
-                      "hh:mm A, DD/MM/YYYY",
+                      "hh:mm a, dd/MM/yyyy",
                     )}
                   </TableCell>
                   <TableCell>

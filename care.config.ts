@@ -10,7 +10,19 @@ import { NonEmptyArray } from "@/Utils/types";
 import Decimal from "decimal.js";
 import { CountryCode } from "libphonenumber-js";
 
-const env = import.meta.env;
+const env = import.meta.env ?? {};
+
+const DEFAULT_SCHEDULING_TIME_ZONE = "Asia/Kolkata";
+
+function schedulingTimeZoneFromEnv(value: string | undefined): string {
+  if (!value) return DEFAULT_SCHEDULING_TIME_ZONE;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: value });
+    return value;
+  } catch {
+    return DEFAULT_SCHEDULING_TIME_ZONE;
+  }
+}
 
 interface ILogo {
   light: string;
@@ -122,6 +134,11 @@ const careConfig = {
     useAvailabilityStatsAPI: booleanFromString(
       env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
+    ),
+
+    /** IANA timezone for appointment filters and slot display until facility TZ exists on API. */
+    schedulingTimeZone: schedulingTimeZoneFromEnv(
+      env.REACT_APPOINTMENTS_SCHEDULING_TIMEZONE,
     ),
   },
 

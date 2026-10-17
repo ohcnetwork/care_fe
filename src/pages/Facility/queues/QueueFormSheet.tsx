@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isBefore, parseISO, startOfDay } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -27,12 +28,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { getClinicTodayDate } from "@/pages/Appointments/schedulingTimeZone";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
   name: z.string().trim().min(1, "Queue name is required"),
@@ -73,6 +74,7 @@ export default function QueueFormSheet({
   const queryClient = useQueryClient();
 
   const isEditMode = Boolean(queueId);
+  const clinicToday = getClinicTodayDate();
 
   const form = useForm<QueueFormData>({
     resolver: zodResolver(
@@ -98,7 +100,7 @@ export default function QueueFormSheet({
     if (queue && isEditMode) {
       form.reset({
         name: queue.name,
-        date: new Date(queue.date),
+        date: parseISO(queue.date),
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -227,8 +229,9 @@ export default function QueueFormSheet({
                         <DatePicker
                           date={field.value}
                           onChange={field.onChange}
+                          today={clinicToday}
                           disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
+                            isBefore(startOfDay(date), startOfDay(clinicToday))
                           }
                         />
                       </FormControl>
