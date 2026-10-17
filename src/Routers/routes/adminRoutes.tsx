@@ -11,6 +11,7 @@ import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
+import ResponsibilitiesIndex from "@/pages/Admin/organizations/ResponsibilitiesIndex";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
@@ -41,13 +42,17 @@ const AdminRoutes: AppRoutes = {
   "/admin/rbac/roles": () => <RolesIndex />,
   "/admin/apps": () => <PlugConfigList />,
   "/admin/apps/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
-  ...["govt", "product_supplier", "role"].reduce((acc: AppRoutes, type) => {
+  "/admin/organizations/role": () => <ResponsibilitiesIndex />,
+  "/admin/organizations/role/:id": ({ id }) => (
+    <ResponsibilitiesIndex organizationId={id} />
+  ),
+  ...["govt", "product_supplier"].reduce((acc: AppRoutes, type) => {
     acc[`/admin/organizations/${type}/:id`] = ({ id }) => (
       <AdminOrganizationList organizationType={type} organizationId={id} />
     );
     return acc;
   }, {}),
-  ...["govt", "product_supplier", "role"].reduce((acc: AppRoutes, type) => {
+  ...["govt", "product_supplier"].reduce((acc: AppRoutes, type) => {
     acc[`/admin/organizations/${type}`] = () => (
       <AdminOrganizationList organizationType={type} />
     );
