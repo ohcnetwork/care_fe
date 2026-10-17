@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -54,6 +54,7 @@ import { useDeliveryRowItem } from "./useDeliveryRowItem";
 interface Props {
   form: UseFormReturn<SupplyDeliveryFormValues>;
   index: number;
+  replacesDeliveryId?: string;
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
@@ -67,6 +68,7 @@ interface Props {
 export function SmartExternalDeliveryRow({
   form,
   index,
+  replacesDeliveryId,
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
@@ -94,7 +96,6 @@ export function SmartExternalDeliveryRow({
     unitPrice,
     purchasePrice,
     totalPurchasePrice,
-    packQuantity,
     packSize,
     taxComponents,
     discountComponents,
@@ -127,33 +128,48 @@ export function SmartExternalDeliveryRow({
   };
 
   return (
-    <TableRow className="divide-x divide-gray-200 hover:bg-gray-50/50">
+    <TableRow
+      className="divide-x divide-gray-200 hover:bg-gray-50/50"
+      data-pending-delivery-id={replacesDeliveryId}
+    >
       {/* Product Knowledge */}
-      <TableCell className="align-top p-2">
-        <FormField
-          control={form.control}
-          name={`items.${index}.product_knowledge`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <ProductKnowledgeSelect
-                  value={field.value}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    onProductSelectOpened?.();
-                    resetFields();
-                  }}
-                  placeholder={t("select_product")}
-                  className="w-full min-w-[180px]"
-                  disableFavorites
-                  hideClearButton
-                  defaultOpen={autoOpenProductSelect}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+      <TableCell
+        className={cn(
+          "sticky left-0 z-10 border-r border-gray-200 bg-white align-top p-2 shadow-[1px_0_0_0_var(--color-gray-300)]",
+          replacesDeliveryId && "bg-primary-50",
+        )}
+      >
+        <div className="w-40 sm:w-56">
+          {replacesDeliveryId && (
+            <Badge variant="blue" size="xs" className="mb-2">
+              {t("editing_existing_item")}
+            </Badge>
           )}
-        />
+          <FormField
+            control={form.control}
+            name={`items.${index}.product_knowledge`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <ProductKnowledgeSelect
+                    value={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      onProductSelectOpened?.();
+                      resetFields();
+                    }}
+                    placeholder={t("select_product")}
+                    className="w-full"
+                    disableFavorites
+                    hideClearButton
+                    defaultOpen={autoOpenProductSelect}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </TableCell>
 
       {/* Batch Number */}
@@ -395,6 +411,7 @@ export function SmartExternalDeliveryRow({
           type="number"
           min={1}
           value={packSize || ""}
+          aria-label={t("pack_size")}
           placeholder="0"
           onChange={(e) => {
             const value = parseInt(e.target.value) || undefined;
@@ -408,17 +425,36 @@ export function SmartExternalDeliveryRow({
 
       {/* Pack Quantity */}
       <TableCell className="align-top p-2">
-        <Input
-          type="number"
-          min={1}
-          value={packQuantity || ""}
-          placeholder="0"
-          onChange={(e) => {
-            const value = parseInt(e.target.value) || undefined;
-            setField("supplied_item_pack_quantity", value);
-          }}
-          disabled={!productKnowledge}
-          className="w-[7rem]"
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_pack_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="number"
+                  min={1}
+                  step={1}
+                  required
+                  value={field.value ?? ""}
+                  aria-label={t("pack_qty")}
+                  data-pending-item-quantity
+                  placeholder={t("pack_qty")}
+                  onChange={(event) =>
+                    field.onChange(
+                      event.target.value === ""
+                        ? undefined
+                        : Number(event.target.value),
+                    )
+                  }
+                  disabled={!productKnowledge?.slug}
+                  className="w-[7rem] scroll-ml-44 scroll-mr-16 sm:scroll-ml-60"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </TableCell>
 
@@ -433,6 +469,7 @@ export function SmartExternalDeliveryRow({
                 <Input
                   type="number"
                   min={1}
+                  aria-label={t("qty")}
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
                   className="w-32"
@@ -542,6 +579,7 @@ export function SmartExternalDeliveryRow({
             min={0}
             step="0.01"
             value={totalPurchasePrice || ""}
+            aria-label={t("tpr")}
             placeholder="0"
             onChange={(e) => {
               setField("total_purchase_price", e.target.value || undefined);
@@ -610,15 +648,25 @@ export function SmartExternalDeliveryRow({
           )),
       )}
 
-      <TableCell>
+      <TableCell
+        className={cn(
+          "sticky right-0 z-10 border-l bg-white align-top p-2",
+          replacesDeliveryId && "bg-primary-50",
+        )}
+      >
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={onRemove}
-          aria-label={t("remove")}
+          aria-label={replacesDeliveryId ? t("discard_edit") : t("remove")}
+          title={replacesDeliveryId ? t("discard_edit") : t("remove")}
         >
-          <Trash2 className="size-4" />
+          {replacesDeliveryId ? (
+            <Undo2 className="size-4" />
+          ) : (
+            <Trash2 className="size-4" />
+          )}
         </Button>
       </TableCell>
     </TableRow>
