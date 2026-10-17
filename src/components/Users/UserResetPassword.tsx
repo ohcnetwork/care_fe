@@ -101,10 +101,7 @@ export default function UserResetPassword({
             id="change-edit-password-button"
             variant="primary"
           >
-            <CareIcon
-              icon={isEditing ? "l-times" : "l-pen"}
-              className="size-4"
-            />
+            <CareIcon icon="l-pen" className="size-4" />
             {t("update_password")}
           </Button>
         </div>

@@ -165,7 +165,7 @@ export default function AppointmentDetail(props: Props) {
     }
 
     // If facility is loaded but user doesn't have permission to view appointments
-    if (facility && !canViewAppointments) {
+    if (!canViewAppointments) {
       toast.error(t("no_permission_to_view_page"));
       goBack(`/facility/${facility.id}/overview`);
       return;
@@ -240,10 +240,7 @@ export default function AppointmentDetail(props: Props) {
                       strong: <strong className="font-semibold" />,
                     }}
                     values={{
-                      name:
-                        (appointment &&
-                          formatScheduleResourceName(appointment)) ||
-                        "",
+                      name: formatScheduleResourceName(appointment) || "",
                       date: format(
                         appointment.token_slot.start_datetime,
                         "do MMMM",
