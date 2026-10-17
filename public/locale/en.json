@@ -4470,7 +4470,7 @@
   "pin_page_already_pinned_description": "This page is already pinned to your dashboard. You can unpin it from the dashboard if you wish to pin a different page.",
   "pin_page_current_url": "Pin current page",
   "pin_page_description": "Pin this page to your dashboard for quick access.",
-  "pin_page_limit_reached": "You have reached the maximum of {{max}} pinned links. Please unpin an existing link before adding a new one.",
+  "pin_page_limit_reached": "You have reached the maximum of {{max}} pinned links for this facility. Please unpin an existing link before adding a new one.",
   "pin_page_shortcut": "Pin page",
   "pin_page_success": "Page pinned to dashboard successfully",
   "pin_page_title_placeholder": "Enter a custom title for the pinned link (optional)",
