@@ -375,7 +375,7 @@ export function AddSupplyDeliveryForm({
         delivery.supplied_item || delivery.supplied_inventory_item?.product;
       if (!product) return;
 
-      const chargeItem = product.charge_item_definition;
+      const chargeItem = product.charge_item_definition ?? undefined;
       const getComponents = (type: MonetaryComponentType) =>
         chargeItem ? getComponentsFromChargeItem(chargeItem, type) : [];
       const quantity = Number(delivery.supplied_item_quantity);
@@ -408,7 +408,7 @@ export function AddSupplyDeliveryForm({
           charge_item_category: chargeItem?.category?.slug,
           unit_price:
             getComponents(MonetaryComponentType.base)[0]?.amount ?? "0",
-          purchase_price: product.purchase_price,
+          purchase_price: product.purchase_price ?? undefined,
           total_purchase_price:
             delivery.total_purchase_price != null
               ? String(delivery.total_purchase_price)
@@ -872,7 +872,11 @@ export function AddSupplyDeliveryForm({
               <Form {...form}>
                 <form
                   ref={formElementRef}
-                  onSubmit={form.handleSubmit(onSubmit)}
+                  onSubmit={form.handleSubmit(onSubmit, () => {
+                    const message = t("please_fix_errors");
+                    setSaveError(message);
+                    toast.error(message);
+                  })}
                   className="space-y-6"
                   aria-label={t("pending_changes")}
                 >

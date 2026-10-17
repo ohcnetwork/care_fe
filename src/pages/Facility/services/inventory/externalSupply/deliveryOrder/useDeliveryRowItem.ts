@@ -175,7 +175,7 @@ export function useDeliveryRowItem({
 
       setField("supplied_item", product);
       setField("supplied_item_pack_quantity", currentPackQuantity);
-      setField("purchase_price", product.purchase_price);
+      setField("purchase_price", product.purchase_price ?? undefined);
       if (isReplacement) {
         setField("total_purchase_price", currentTotalPurchasePrice);
       }
@@ -338,22 +338,18 @@ export function useDeliveryRowItem({
       !isManuallyEdited &&
       !createdChargeItemDefinition
     ) {
+      const knownPurchasePrice = suppliedItem.purchase_price ?? undefined;
       const calculatedTotal =
-        suppliedItem.purchase_price != null &&
-        hasValidPackQuantity &&
-        hasValidPackSize
+        knownPurchasePrice != null && hasValidPackQuantity && hasValidPackSize
           ? round(
-              multiply(
-                suppliedItem.purchase_price,
-                multiply(packSize!, packQuantity!),
-              ),
+              multiply(knownPurchasePrice, multiply(packSize!, packQuantity!)),
             )
           : undefined;
       if (calculatedTotal !== totalPurchasePrice) {
         setField("total_purchase_price", calculatedTotal);
       }
-      if (purchasePrice !== suppliedItem.purchase_price) {
-        setField("purchase_price", suppliedItem.purchase_price);
+      if (purchasePrice !== knownPurchasePrice) {
+        setField("purchase_price", knownPurchasePrice);
       }
       return;
     }

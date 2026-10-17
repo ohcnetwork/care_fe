@@ -551,5 +551,89 @@ test.describe("External delivery draft items", () => {
         .click();
       await expect(editForm).not.toBeVisible();
     });
+
+    await test.step("Save an expiry-only edit when the original item has no purchase prices", async () => {
+      const unpricedBatch = `no-price-${faker.string.alphanumeric(10)}`;
+      const unpricedProduct = await responseData<
+        ProductFixture & { purchase_price: string | null }
+      >(
+        await page.request.post(
+          `${apiUrl}/api/v1/facility/${facilityId}/product/`,
+          {
+            headers,
+            data: {
+              status: "active",
+              product_knowledge: product.product_knowledge.slug,
+              charge_item_definition: product.charge_item_definition!.slug,
+              batch: { lot_number: unpricedBatch },
+              expiration_date: "2030-12-31",
+              standard_pack_size: 5,
+              extensions: {},
+            },
+          },
+        ),
+      );
+      expect(unpricedProduct.purchase_price).toBeNull();
+      const unpricedDelivery = await responseData<{ id: string }>(
+        await page.request.post(`${apiUrl}/api/v1/supply_delivery/`, {
+          headers,
+          data: {
+            status: "in_progress",
+            supplied_item_type: "product",
+            supplied_item_condition: "normal",
+            supplied_item: unpricedProduct.id,
+            supplied_item_pack_quantity: 2,
+            supplied_item_pack_size: 5,
+            supplied_item_quantity: "10",
+            order: order.id,
+            extensions: {},
+          },
+        }),
+      );
+      const originalUnpriced = await responseData<
+        DeliveryItem & {
+          total_purchase_price: number | null;
+          supplied_item: { id: string; purchase_price: string | null };
+        }
+      >(
+        await page.request.get(
+          `${apiUrl}/api/v1/supply_delivery/${unpricedDelivery.id}/`,
+          { headers },
+        ),
+      );
+      expect(originalUnpriced.supplied_item.purchase_price).toBeNull();
+      expect(originalUnpriced.total_purchase_price).toBeNull();
+      await page.reload();
+      const unpricedRow = page.locator("table tbody tr").filter({
+        hasText: unpricedBatch,
+      });
+      await unpricedRow
+        .getByRole("button", { name: "Actions", exact: true })
+        .click();
+      await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+      await expect(
+        editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
+      ).toHaveValue("2");
+      await editForm.locator('input[type="date"]').fill("2031-01-31");
+      const beforeSave = await responseData<DeliveryItem>(
+        await page.request.get(
+          `${apiUrl}/api/v1/supply_delivery/${unpricedDelivery.id}/`,
+          { headers },
+        ),
+      );
+      expect(beforeSave.status).toBe("in_progress");
+      await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
+      await expect(editForm).not.toBeVisible();
+      await page.reload();
+      await expect(unpricedRow).toHaveCount(1);
+      await expect(unpricedRow).toContainText("31/01/2031");
+      const replacedOriginal = await responseData<DeliveryItem>(
+        await page.request.get(
+          `${apiUrl}/api/v1/supply_delivery/${unpricedDelivery.id}/`,
+          { headers },
+        ),
+      );
+      expect(replacedOriginal.status).toBe("abandoned");
+    });
   });
 });
