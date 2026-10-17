@@ -927,6 +927,8 @@ export function DeliveryOrderShow({
                         }
                       }}
                       internal={internal}
+                      facilityId={facilityId}
+                      linkToProduct
                       onDeliveryClick={(delivery) => {
                         setShowAllDeliveries(true);
                         setSelectedProductKnowledgeDrawer(

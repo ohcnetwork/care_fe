@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate, parseISO } from "date-fns";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, History } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,12 +27,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   getExtensionFieldsWithName,
   getExtensionValue,
   NamespacedExtensionData,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
-import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ExtensionEntityType } from "@/types/extensions/extensions";
@@ -87,7 +91,7 @@ function ProductLink({
     return (
       <Link
         href={`/facility/${facilityId}/settings/product/${productId}`}
-        className="font-medium text-primary-600 hover:underline"
+        className="font-medium text-wrap wrap-break-word text-gray-950 underline underline-offset-2"
         onClick={(e) => e.stopPropagation()}
         basePath="/"
       >
@@ -290,16 +294,32 @@ export function SupplyDeliveryTable({
                 </TableCell>
               )}
               <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
-              <TableCell
-                className={cn(onDeliveryClick && "cursor-pointer underline")}
-                onClick={() => onDeliveryClick?.(delivery)}
-              >
-                <ProductLink
-                  delivery={delivery}
-                  internal={internal}
-                  linkToProduct={linkToProduct}
-                  facilityId={facilityId}
-                />
+              <TableCell className="min-w-40">
+                <div className="flex items-center gap-2">
+                  <ProductLink
+                    delivery={delivery}
+                    internal={internal}
+                    linkToProduct={linkToProduct}
+                    facilityId={facilityId}
+                  />
+                  {onDeliveryClick && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 shrink-0 text-gray-500"
+                          aria-label={t("view_history")}
+                          onClick={() => onDeliveryClick(delivery)}
+                        >
+                          <History className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("view_history")}</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 {delivery.supplied_inventory_item?.product?.batch?.lot_number ||
