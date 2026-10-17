@@ -1,5 +1,5 @@
 import { isTouchDevice, sleep } from "@/Utils/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface AutoPrintOptions {
   enabled?: boolean;
@@ -21,11 +21,13 @@ export default function useAutoPrint({
   window: printWindow = window,
 }: AutoPrintOptions) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const hasPrinted = useRef(false);
 
   useEffect(() => {
-    if (enabled) {
+    if (enabled && !hasPrinted.current) {
       setIsProcessing(true);
       const timer = setTimeout(async () => {
+        hasPrinted.current = true;
         printWindow.print();
         // Give some time for the print dialog to appear before navigating back
         await sleep(300);
@@ -38,7 +40,7 @@ export default function useAutoPrint({
 
       return () => clearTimeout(timer);
     }
-  }, [enabled, printWindow]);
+  }, [enabled, printWindow, delay]);
 
   return { isPrinting: isProcessing };
 }

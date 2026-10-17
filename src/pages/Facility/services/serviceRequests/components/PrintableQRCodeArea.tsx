@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +21,7 @@ export function PrintableQRCodeArea({
   const { t } = useTranslation();
 
   return (
-    <div id="multi-print" className="w-full">
+    <div className="w-full">
       {/* Header */}
       <div className="flex justify-between items-start pb-2 border-b border-gray-200 print:border-gray-300">
         <div className="space-y-4 flex-1">
@@ -32,17 +31,12 @@ export function PrintableQRCodeArea({
             </h2>
           </div>
         </div>
-        <img
-          src={careConfig.mainLogo?.dark}
-          alt="Care Logo"
-          className="h-10 w-auto object-contain ml-6 print:block"
-        />
       </div>
 
       {/* QR Codes Grid */}
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 mt-8">
         {specimens.map((specimen) => (
-          <div key={specimen.id} className="page-break-inside-avoid">
+          <div key={specimen.id} className="break-inside-avoid">
             <div className="flex gap-6 p-4 rounded-lg border border-gray-200 print:border-gray-300">
               <div className={cn("shrink-0", !showDetails && "mx-auto")}>
                 <QRCodeSVG
