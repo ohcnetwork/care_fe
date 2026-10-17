@@ -43,7 +43,7 @@ import {
   Tags,
   Users,
 } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -225,8 +225,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     [filters.dateTo],
   );
 
-  // Read directly from sessionStorage on mount to avoid Jotai hydration delay
-  const initialQueryParamsRef = useRef(() => {
+  // Read directly from sessionStorage on mount to avoid Jotai hydration delay.
+  // Computed once via a lazy state initializer.
+  const [initialQueryParams] = useState<Record<string, unknown>>(() => {
     try {
       const stored = sessionStorage.getItem("encounter_history_filters");
       if (stored) {
@@ -251,15 +252,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
     return {};
   });
-
-  // Compute initial params once
-  const initialQueryParams = useMemo(
-    () =>
-      typeof initialQueryParamsRef.current === "function"
-        ? initialQueryParamsRef.current()
-        : initialQueryParamsRef.current,
-    [],
-  );
 
   const {
     primaryEncounter,
