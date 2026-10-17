@@ -444,7 +444,11 @@ function ScheduleTemplateAvailabilityItem({
   ).length;
 
   const exceptions = [
-    ...new Set(computedSlots.flatMap((slot) => slot.exceptions)),
+    ...new Map(
+      computedSlots
+        .flatMap((slot) => slot.exceptions)
+        .map((exception) => [exception.id, exception]),
+    ).values(),
   ];
   const hasExceptions = exceptions.length > 0;
 
@@ -488,7 +492,11 @@ function ScheduleTemplateAvailabilityItem({
                 <TooltipContent className="max-w-xs" side="bottom">
                   <p className="font-medium mb-1">
                     {t("exceptions")}:{" "}
-                    {humanizeStrings(exceptions.map((e) => e.reason))}
+                    {humanizeStrings(
+                      exceptions.map(
+                        (e) => e.reason?.trim() || t("no_reason_provided"),
+                      ),
+                    )}
                   </p>
                 </TooltipContent>
               )}
