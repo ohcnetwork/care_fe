@@ -1,20 +1,59 @@
 import { navigate } from "raviger";
+import { lazy } from "react";
 
-import QuestionnaireEditor from "@/components/Questionnaire/QuestionnaireEditor";
-import { QuestionnaireList } from "@/components/Questionnaire/QuestionnaireList";
-import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
-import { ValueSetList } from "@/components/ValueSet/ValueSetList";
+import type { AppRoutes } from "@/Routers/AppRouter";
 
-import { AppRoutes } from "@/Routers/AppRouter";
-import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
-import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
-import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
-import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
-import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
-import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
-import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
-import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
-import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+const QuestionnaireEditor = lazy(
+  () => import("@/components/Questionnaire/QuestionnaireEditor"),
+);
+const QuestionnaireList = lazy(() =>
+  import("@/components/Questionnaire/QuestionnaireList").then((module) => ({
+    default: module.QuestionnaireList,
+  })),
+);
+const ValueSetEditor = lazy(() =>
+  import("@/components/ValueSet/ValueSetEditor").then((module) => ({
+    default: module.ValueSetEditor,
+  })),
+);
+const ValueSetList = lazy(() =>
+  import("@/components/ValueSet/ValueSetList").then((module) => ({
+    default: module.ValueSetList,
+  })),
+);
+const PermissionsIndex = lazy(() =>
+  import("@/pages/Admin/Permissions/PermissionsIndex").then((module) => ({
+    default: module.PermissionsIndex,
+  })),
+);
+const RolesIndex = lazy(() => import("@/pages/Admin/Roles/RolesIndex"));
+const TagConfigList = lazy(
+  () => import("@/pages/Admin/TagConfig/TagConfigList"),
+);
+const TagConfigView = lazy(
+  () => import("@/pages/Admin/TagConfig/TagConfigView"),
+);
+const AdminOrganizationList = lazy(
+  () => import("@/pages/Admin/organizations/AdminOrganizationList"),
+);
+const PlugConfigEdit = lazy(() =>
+  import("@/pages/Apps/PlugConfigEdit").then((module) => ({
+    default: module.PlugConfigEdit,
+  })),
+);
+const PlugConfigList = lazy(() =>
+  import("@/pages/Apps/PlugConfigList").then((module) => ({
+    default: module.PlugConfigList,
+  })),
+);
+const PatientIdentifierConfigForm = lazy(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm"),
+);
+const PatientIdentifierConfigList = lazy(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList"),
+);
 
 const AdminRoutes: AppRoutes = {
   "/admin/questionnaire": () => <QuestionnaireList />,
