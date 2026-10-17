@@ -91,7 +91,7 @@ function ProductLink({
     return (
       <Link
         href={`/facility/${facilityId}/settings/product/${productId}`}
-        className="font-medium text-wrap wrap-break-word text-primary-600 hover:underline"
+        className="font-medium text-wrap wrap-break-word text-gray-950 underline underline-offset-2"
         onClick={(e) => e.stopPropagation()}
         basePath="/"
       >
@@ -294,7 +294,7 @@ export function SupplyDeliveryTable({
                 </TableCell>
               )}
               <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
-              <TableCell>
+              <TableCell className="min-w-40">
                 <div className="flex items-center gap-2">
                   <ProductLink
                     delivery={delivery}
@@ -309,7 +309,7 @@ export function SupplyDeliveryTable({
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="size-7 shrink-0"
+                          className="size-7 shrink-0 text-gray-500"
                           aria-label={t("view_history")}
                           onClick={() => onDeliveryClick(delivery)}
                         >
