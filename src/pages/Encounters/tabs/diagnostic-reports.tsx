@@ -99,12 +99,14 @@ interface DiagnosticReportDetailCardProps {
   reportId: string;
   patientId: string;
   facilityId?: string;
+  showObservationHistory?: boolean;
 }
 
 function DiagnosticReportDetailCard({
   reportId,
   patientId,
   facilityId,
+  showObservationHistory = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -121,16 +123,16 @@ function DiagnosticReportDetailCard({
 
   // Query to fetch files for the diagnostic report
   const { data: filesData } = useQuery<PaginatedResponse<FileReadMinimal>>({
-    queryKey: ["files", "diagnostic_report", report?.id],
+    queryKey: ["files", "diagnostic_report", reportId],
     queryFn: query(fileApi.list, {
       queryParams: {
         file_type: "diagnostic_report",
-        associating_id: report?.id,
+        associating_id: reportId,
         limit: 100,
         offset: 0,
       },
     }),
-    enabled: !!report?.id,
+    enabled: !!reportId,
   });
 
   const files = filesData?.results || [];
@@ -151,9 +153,11 @@ function DiagnosticReportDetailCard({
     <Card className="shadow-sm border rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
         <CardTitle className="text-base font-medium">
-          {report.service_request?.title ||
-            report.code?.display ||
-            t("diagnostic_report", { count: 1 })}
+          <span>
+            {report.service_request?.title ||
+              t("diagnostic_report", { count: 1 })}
+          </span>
+          {report.code?.display && <span> - {report.code.display}</span>}
         </CardTitle>
         <div className="flex items-center gap-2">
           <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
@@ -271,7 +275,12 @@ function DiagnosticReportDetailCard({
             <h4 className="text-sm font-semibold text-gray-700">
               {t("test_results")}
             </h4>
-            <DiagnosticReportResultsTable observations={filteredObservations} />
+            <DiagnosticReportResultsTable
+              observations={filteredObservations}
+              patientId={report.encounter.patient.id}
+              encounterId={report.encounter.id}
+              showObservationHistory={showObservationHistory}
+            />
           </div>
         )}
 
@@ -390,12 +399,14 @@ interface DiagnosticReportsTabProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  showObservationHistory?: boolean;
 }
 
 export const DiagnosticReportsTab = ({
   patientId,
   encounterId,
   facilityId,
+  showObservationHistory = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -554,6 +565,7 @@ export const DiagnosticReportsTab = ({
                   reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
+                  showObservationHistory={showObservationHistory}
                 />
               )
             )}
@@ -576,6 +588,7 @@ export const EncounterDiagnosticReportsTab = () => {
       patientId={patientId}
       encounterId={encounterId}
       facilityId={facilityId}
+      showObservationHistory={true}
     />
   );
 };
