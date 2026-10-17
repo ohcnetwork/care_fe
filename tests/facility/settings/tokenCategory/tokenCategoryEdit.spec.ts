@@ -10,7 +10,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
   let resourceType: string;
   let updatedName: string;
   let updatedShorthand: string;
-  let updatedResourceType: string;
   let facilityId: string;
 
   // Resource types available for token categories
@@ -25,7 +24,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
     // Generate data for updates
     updatedName = faker.company.name();
     updatedShorthand = faker.string.alphanumeric(4).toUpperCase();
-    updatedResourceType = faker.helpers.arrayElement(resourceTypes);
     facilityId = getFacilityId();
   });
 
@@ -50,26 +48,21 @@ test.describe("Token Category Edit - Permission Tests", () => {
       );
 
       // Step 2: Create a token category first (so we have something to edit)
-      const addButton = page.getByRole("button", {
-        name: "Add Token Category",
+      await page
+        .getByRole("button", { name: `Add ${resourceType} Token Category` })
+        .click();
+
+      // Fill and submit the inline creation form
+      const popover = page.getByRole("dialog", {
+        name: `Add ${resourceType} Token Category`,
       });
-      await expect(addButton).toBeVisible();
-      await addButton.click();
-
-      // Fill and submit creation form
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
-      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: resourceType }).click();
-      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
-      await page.getByRole("button", { name: "Create" }).click();
-
-      // Wait for navigation back to list page
-      await page.waitForURL(
-        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
-      );
+      await expect(popover).toBeVisible();
+      await popover
+        .getByRole("textbox", { name: "Name" })
+        .fill(tokenCategoryName);
+      await popover.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await popover.getByRole("button", { name: "Create" }).click();
+      await expect(popover).not.toBeVisible();
 
       // Step 3: Search for the created token category
       await page
@@ -91,10 +84,14 @@ test.describe("Token Category Edit - Permission Tests", () => {
         page.getByRole("heading", { name: "Edit Token Category" }),
       ).toBeVisible();
 
-      // Step 6: Update the token category
+      // Step 6: Update the token category (resource type is read-only)
+      await expect(
+        page.getByRole("combobox", { name: "Resource Type" }),
+      ).toHaveCount(0);
+      await expect(
+        page.locator('[data-cy="token-category-resource-type"]'),
+      ).toContainText(resourceType);
       await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: updatedResourceType }).click();
       await page
         .getByRole("textbox", { name: "Shorthand" })
         .fill(updatedShorthand);
@@ -112,10 +109,12 @@ test.describe("Token Category Edit - Permission Tests", () => {
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(updatedName);
 
-      const tableBody = page.locator("tbody");
-      await expect(tableBody).toContainText(updatedName);
-      await expect(tableBody).toContainText(updatedShorthand);
-      await expect(tableBody).toContainText(updatedResourceType);
+      // Category stays within its original resource type group
+      const groupBody = page
+        .getByRole("region", { name: resourceType, exact: true })
+        .locator("tbody");
+      await expect(groupBody).toContainText(updatedName);
+      await expect(groupBody).toContainText(updatedShorthand);
     });
 
     test("Admin can access Set as default and Edit buttons after clicking View button", async ({
@@ -135,21 +134,21 @@ test.describe("Token Category Edit - Permission Tests", () => {
       );
 
       // Step 2: Create a token category first (so we have something to view)
-      const addButton = page.getByRole("button", {
-        name: "Add Token Category",
-      });
-      await expect(addButton).toBeVisible();
-      await addButton.click();
+      await page
+        .getByRole("button", { name: `Add ${resourceType} Token Category` })
+        .click();
 
-      // Fill and submit creation form
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
-      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: resourceType }).click();
-      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
-      await page.getByRole("button", { name: "Create" }).click();
+      // Fill and submit the inline creation form
+      const popover = page.getByRole("dialog", {
+        name: `Add ${resourceType} Token Category`,
+      });
+      await expect(popover).toBeVisible();
+      await popover
+        .getByRole("textbox", { name: "Name" })
+        .fill(tokenCategoryName);
+      await popover.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await popover.getByRole("button", { name: "Create" }).click();
+      await expect(popover).not.toBeVisible();
 
       // Step 3: Click the View button of the first token category from the table
       const viewButton = page.getByRole("link", { name: "View" }).nth(1);
