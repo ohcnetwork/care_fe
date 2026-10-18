@@ -16,7 +16,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 interface ProductFixture {
   id: string;
-  product_knowledge: { slug: string; name: string };
+  product_knowledge: { id: string; slug: string; name: string };
   charge_item_definition?: {
     slug: string;
     category?: { slug: string };
@@ -36,6 +36,7 @@ interface DeliveryItem {
   supplied_item_pack_quantity: number;
   supplied_item_pack_size: number;
   supplied_item: { id: string; product_knowledge?: { slug: string } };
+  supply_request?: { id: string };
 }
 
 async function responseData<T>(response: APIResponse): Promise<T> {
@@ -306,7 +307,291 @@ async function createExternalDeliveryDraft(
   };
 }
 
+test.describe("External delivery cancellation", () => {
+  const scenarios = [
+    {
+      name: "refreshes pending delivery items immediately when their order is cancelled",
+      receipt: "none",
+      status: "abandoned",
+      action: "Mark as Abandoned",
+    },
+    {
+      name: "cancels a partially received order and reverses unconsumed stock",
+      receipt: "first",
+      status: "abandoned",
+      action: "Mark as Abandoned",
+    },
+    {
+      name: "cancels a completed order and reverses unconsumed stock",
+      receipt: "all",
+      status: "entered_in_error",
+      action: "Mark as entered in error",
+    },
+  ] as const;
+
+  for (const scenario of scenarios) {
+    test(scenario.name, async ({ page }) => {
+      const fixture = await createExternalDeliveryDraft(page);
+      const orderApiUrl = `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/order/delivery/${fixture.order.id}/`;
+      const secondItem = await responseData<{ id: string }>(
+        await page.request.post(`${fixture.apiUrl}/api/v1/supply_delivery/`, {
+          headers: fixture.headers,
+          data: {
+            status: "in_progress",
+            supplied_item_type: "product",
+            supplied_item_condition: "normal",
+            supplied_item: fixture.product.id,
+            supplied_item_pack_quantity: 3,
+            supplied_item_pack_size: 5,
+            supplied_item_quantity: "15",
+            total_purchase_price: "37.5",
+            order: fixture.order.id,
+            extensions: {},
+          },
+        }),
+      );
+      const destinationStock = async () => {
+        const inventory = await responseData<{
+          results: { product: { id: string }; net_content: string }[];
+        }>(
+          await page.request.get(
+            `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/location/${fixture.locationId}/product/?product_knowledge=${fixture.product.product_knowledge.id}&limit=100`,
+            { headers: fixture.headers },
+          ),
+        );
+        return Number(
+          inventory.results.find(
+            ({ product }) => product.id === fixture.product.id,
+          )?.net_content ?? 0,
+        );
+      };
+      const waitForOrderStatus = (status: string) =>
+        page.waitForResponse(
+          (response) =>
+            response.url() === orderApiUrl &&
+            response.request().method() === "PUT" &&
+            response.request().postDataJSON().status === status,
+        );
+      expect(await destinationStock()).toBe(0);
+      await page.goto(fixture.deliveryUrl);
+      const table = page.getByRole("table");
+      await expect(table.locator("tbody tr")).toHaveCount(2);
+      const approval = waitForOrderStatus("pending");
+      await page.getByRole("button", { name: /^Mark as Approved\b/ }).click();
+      expect(
+        (await responseData<{ status: string }>(await approval)).status,
+      ).toBe("pending");
+
+      if (scenario.receipt !== "none") {
+        const receive = page.getByRole("button", {
+          name: /^Receive & Update Stock\b/,
+        });
+        await expect(receive).toBeEnabled();
+        if (scenario.receipt === "first") {
+          await table.getByRole("checkbox").first().uncheck();
+          await table.locator("tbody tr").first().getByRole("checkbox").check();
+        }
+        await receive.click();
+        const receipt = page.waitForResponse(
+          (response) =>
+            response.url() ===
+              `${fixture.apiUrl}/api/v1/supply_delivery/upsert/` &&
+            response.request().method() === "POST",
+        );
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: /^Confirm\b/ })
+          .click();
+        await responseData(await receipt);
+        await expect(table.getByText("Completed", { exact: true })).toHaveCount(
+          scenario.receipt === "first" ? 1 : 2,
+        );
+        expect(await destinationStock()).toBe(
+          scenario.receipt === "first" ? 10 : 25,
+        );
+
+        if (scenario.receipt === "all") {
+          const complete = page.getByRole("button", {
+            name: /^Mark as Completed\b/,
+          });
+          await expect(complete).toBeEnabled();
+          const completion = waitForOrderStatus("completed");
+          await complete.click();
+          expect(
+            (await responseData<{ status: string }>(await completion)).status,
+          ).toBe("completed");
+          await expect(complete).not.toBeVisible();
+        }
+      }
+
+      await page
+        .getByRole("main")
+        .getByRole("button")
+        .filter({
+          has: page.locator("svg.lucide-ellipsis-vertical"),
+        })
+        .first()
+        .click();
+      const cancel = page.getByRole("menuitem", {
+        name: scenario.action,
+        exact: true,
+      });
+      await expect(cancel).toBeVisible();
+      await cancel.click();
+      const cancellation = waitForOrderStatus(scenario.status);
+      await page
+        .getByRole("alertdialog")
+        .getByRole("button", { name: /^Confirm\b/ })
+        .click();
+      expect(
+        (await responseData<{ status: string }>(await cancellation)).status,
+      ).toBe(scenario.status);
+
+      await expect(table.getByText("In Progress", { exact: true })).toHaveCount(
+        0,
+      );
+      await expect(table.getByText("Completed", { exact: true })).toHaveCount(
+        0,
+      );
+      await expect(
+        page.getByText(/There are no active delivery items/),
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Show cancelled items (4)", exact: true })
+        .click();
+      await expect(table.locator("tbody tr")).toHaveCount(4);
+      await expect(table.getByText("Abandoned", { exact: true })).toHaveCount(
+        scenario.status === "abandoned" ? 3 : 1,
+      );
+      await expect(
+        table.getByText("Entered in Error", { exact: true }),
+      ).toHaveCount(scenario.status === "entered_in_error" ? 3 : 1);
+      const saved = await responseData<{ results: DeliveryItem[] }>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+          { headers: fixture.headers },
+        ),
+      );
+      for (const id of [fixture.original.id, secondItem.id]) {
+        expect(
+          saved.results.find((delivery) => delivery.id === id)?.status,
+        ).toBe(scenario.status);
+      }
+      expect(await destinationStock()).toBe(0);
+    });
+  }
+});
+
 test.describe("External delivery draft items", () => {
+  test("loads and saves one purchase request item at a time", async ({
+    page,
+  }) => {
+    const fixture = await createExternalDeliveryDraft(page);
+    const requestPayload = {
+      name: `Delivery request ${faker.string.alphanumeric(10)}`,
+      status: "draft",
+      supplier: fixture.supplier.id,
+      destination: fixture.locationId,
+      intent: "order",
+      category: "nonstock",
+      priority: "routine",
+      reason: "ward_stock",
+    };
+    const requestOrder = await responseData<{ id: string }>(
+      await page.request.post(
+        `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/order/request/`,
+        { headers: fixture.headers, data: requestPayload },
+      ),
+    );
+    const requests: { id: string; quantity: number }[] = [];
+    for (const quantity of [15, 20]) {
+      const request = await responseData<{ id: string }>(
+        await page.request.post(`${fixture.apiUrl}/api/v1/supply_request/`, {
+          headers: fixture.headers,
+          data: {
+            status: "active",
+            quantity: String(quantity),
+            item: fixture.product.product_knowledge.id,
+            order: requestOrder.id,
+          },
+        }),
+      );
+      requests.push({ id: request.id, quantity });
+    }
+    await responseData(
+      await page.request.put(
+        `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/order/request/${requestOrder.id}/`,
+        {
+          headers: fixture.headers,
+          data: { ...requestPayload, status: "pending" },
+        },
+      ),
+    );
+    await page.goto(`${fixture.deliveryUrl}?supplyOrder=${requestOrder.id}`);
+    const form = page.getByRole("form", {
+      name: "Pending changes",
+      exact: true,
+    });
+    const requestPicker = page.getByRole("dialog", {
+      name: "Select Item",
+      exact: true,
+    });
+
+    for (const [index, request] of requests.entries()) {
+      await page.getByRole("button", { name: /^Load from order\b/ }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page.getByRole("dialog").getByRole("checkbox")).toHaveCount(
+        0,
+      );
+      await expect(requestPicker).toBeVisible();
+      await requestPicker
+        .getByText(new RegExp(`^${request.quantity}(?:\\.0+)?\\s`))
+        .locator("..")
+        .getByRole("radio")
+        .check();
+      await expect(
+        requestPicker.getByRole("radio", { checked: true }),
+      ).toHaveCount(1);
+      await requestPicker.getByRole("button", { name: /^Done\b/ }).click();
+
+      await expect(requestPicker).not.toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(form).toBeVisible();
+      await expect(form.locator("tbody tr")).toHaveCount(1);
+      await expect(form.getByRole("combobox")).toHaveCount(1);
+      await expect(form.getByRole("combobox")).toContainText(
+        fixture.product.product_knowledge.name,
+      );
+      await expect(
+        form.getByRole("button", { name: "Add Another", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        form.getByRole("button", { name: /^Load from order\b/ }),
+      ).toHaveCount(0);
+      const packQuantity = request.quantity / 5;
+      await form
+        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
+        .fill(String(packQuantity));
+      await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+      await expect(form).not.toBeVisible();
+
+      const persisted = await responseData<{ results: DeliveryItem[] }>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+          { headers: fixture.headers },
+        ),
+      );
+      const linked = persisted.results.filter(
+        (delivery) => delivery.supply_request,
+      );
+      expect(linked).toHaveLength(index + 1);
+      expect(
+        linked.find((delivery) => delivery.supply_request?.id === request.id)
+          ?.supplied_item_quantity,
+      ).toMatch(new RegExp(`^${packQuantity * 5}(?:\\.0+)?$`));
+    }
+  });
+
   test("preserves cancelled history and replaces an item only when an edit is saved", async ({
     page,
   }, testInfo) => {
@@ -809,9 +1094,15 @@ test.describe("External delivery draft items", () => {
       await expect(page.getByText("Abandoned", { exact: true })).toHaveCount(2);
     });
 
-    await test.step("Refresh the visible order summary when only some new items save", async () => {
+    await test.step("Add items one at a time and preserve a failed item for retry", async () => {
       await page.getByRole("button", { name: /^Add Item\b/ }).click();
       await selectProductKnowledge();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(editForm.locator("tbody tr")).toHaveCount(1);
+      await expect(editForm.getByRole("combobox")).toHaveCount(1);
+      await expect(
+        editForm.getByRole("button", { name: "Add Another", exact: true }),
+      ).toHaveCount(0);
       await expect(editForm.getByPlaceholder("Batch #")).toHaveValue(batch);
       await expect(
         editForm.getByRole("spinbutton", { name: "Pack Size", exact: true }),
@@ -819,42 +1110,12 @@ test.describe("External delivery draft items", () => {
       await editForm
         .getByRole("spinbutton", { name: "Pack Qty", exact: true })
         .fill("3");
-      await editForm
-        .getByRole("button", { name: "Add Another", exact: true })
-        .click();
-      await selectProductKnowledge();
-      await expect(editForm.getByPlaceholder("Batch #").nth(1)).toHaveValue(
-        batch,
-      );
-      await expect(
-        editForm
-          .getByRole("spinbutton", { name: "Pack Size", exact: true })
-          .nth(1),
-      ).toHaveValue("5");
-      await editForm
-        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
-        .nth(1)
-        .fill("4");
-      const updatedNote = `Summary after partial save ${faker.string.alphanumeric(10)}`;
+      const updatedNote = `Summary after item save ${faker.string.alphanumeric(10)}`;
       await updateOrderNote(updatedNote);
       await expect(
         page.getByText(updatedNote, { exact: true }),
       ).not.toBeVisible();
 
-      await page.route(
-        `${apiUrl}/api/v1/supply_delivery/`,
-        async (route) => {
-          const payload = route.request().postDataJSON() as Record<
-            string,
-            unknown
-          >;
-          if (Number(payload.supplied_item_pack_quantity) === 4) {
-            payload.supplied_item = faker.string.uuid();
-          }
-          await route.continue({ postData: JSON.stringify(payload) });
-        },
-        { times: 2 },
-      );
       const waitForCreatedItem = (packQuantity: number) =>
         page.waitForResponse(
           (response) =>
@@ -865,12 +1126,48 @@ test.describe("External delivery draft items", () => {
             ) === packQuantity,
         );
       const successfulItem = waitForCreatedItem(3);
-      const failedItem = waitForCreatedItem(4);
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect((await successfulItem).ok()).toBe(true);
-      expect((await failedItem).status()).toBe(404);
+      await expect(editForm).not.toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(page.getByText(updatedNote, { exact: true })).toBeVisible();
+
+      await page.getByRole("button", { name: /^Add Item\b/ }).click();
+      await selectProductKnowledge();
+      await expect(editForm.getByRole("combobox")).toHaveCount(1);
+      await expect(
+        editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
+      ).toHaveValue("");
+      await editForm
+        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
+        .fill("4");
+      await savedRows
+        .getByRole("button", { name: "Actions", exact: true })
+        .first()
+        .click();
+      await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
+      await expect(editForm.getByRole("combobox")).toBeEnabled();
+      await expect(
+        editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
+      ).toHaveValue("4");
+      await page.route(
+        `${apiUrl}/api/v1/supply_delivery/`,
+        async (route) => {
+          const payload = route.request().postDataJSON() as Record<
+            string,
+            unknown
+          >;
+          payload.supplied_item = faker.string.uuid();
+          await route.continue({ postData: JSON.stringify(payload) });
+        },
+        { times: 1 },
+      );
+      const failedItem = waitForCreatedItem(4);
+      await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
+      expect((await failedItem).status()).toBe(404);
+      await expect(editForm).toBeVisible();
+      await expect(editForm.getByRole("combobox")).toHaveCount(1);
       await expect(
         editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
       ).toHaveValue("4");
@@ -884,10 +1181,25 @@ test.describe("External delivery draft items", () => {
       expect(
         persisted.results.filter(({ status }) => status === "in_progress"),
       ).toHaveLength(2);
-      await editForm
-        .getByRole("button", { name: "Discard Changes", exact: true })
-        .click();
+
+      const retriedItem = waitForCreatedItem(4);
+      await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
+      expect((await retriedItem).ok()).toBe(true);
       await expect(editForm).not.toBeVisible();
+      const saved = await responseData<{ results: DeliveryItem[] }>(
+        await page.request.get(
+          `${apiUrl}/api/v1/supply_delivery/?order=${order.id}&facility=${facilityId}`,
+          { headers },
+        ),
+      );
+      expect(saved.results).toHaveLength(6);
+      const active = saved.results.filter(
+        ({ status }) => status === "in_progress",
+      );
+      expect(active).toHaveLength(3);
+      expect(
+        active.filter((item) => Number(item.supplied_item_quantity) === 20),
+      ).toHaveLength(1);
     });
 
     await test.step("Save an expiry-only edit when the original item has no purchase prices", async () => {
