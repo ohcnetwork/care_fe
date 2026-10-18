@@ -668,22 +668,21 @@ export function AddSupplyDeliveryForm({
       !origin &&
       (!productId || item.is_manually_edited || hasPurchasePriceChange)
     ) {
-      // If is_manually_edited is true, we're creating NEW entities
-      // Any existing IDs are from a reference product selection, not our creation
-      // Clear them so we create fresh ones (but only on first attempt)
-      if (item.is_manually_edited) {
+      // Each new product owns its pricing definition. Reuse only a definition
+      // prepared for this draft when retrying a failed product creation.
+      if (item.is_manually_edited || hasPurchasePriceChange) {
         productId = undefined;
-        chargeItemSlug =
-          item._created_charge_item_definition ??
-          (item.is_charge_item_edited ? undefined : chargeItemSlug);
-      } else if (hasPurchasePriceChange) {
-        productId = undefined;
+        chargeItemSlug = item._created_charge_item_definition;
       }
 
       // Only create ChargeItemDefinition if we don't already have one from our creation
-      if (!chargeItemSlug && (!sourceProduct || item.is_charge_item_edited)) {
-        const category = item.charge_item_category;
-        if (!category) {
+      if (
+        !chargeItemSlug &&
+        (sourceChargeItem || !sourceProduct || item.is_charge_item_edited)
+      ) {
+        const category =
+          item.charge_item_category ?? sourceChargeItem?.category?.slug;
+        if (!category && (!sourceChargeItem || item.is_charge_item_edited)) {
           throw new Error(
             t("charge_item_category_required_for_item", {
               item: item.product_knowledge.name,
@@ -691,10 +690,13 @@ export function AddSupplyDeliveryForm({
           );
         }
 
-        const priceComponents = buildPriceComponents(item);
+        const priceComponents =
+          sourceChargeItem && !item.is_charge_item_edited
+            ? structuredClone(sourceChargeItem.price_components)
+            : buildPriceComponents(item);
         const chargeItemCreate: ChargeItemDefinitionCreate = {
           slug_value: crypto.randomUUID(),
-          category,
+          category: category ?? null,
           title:
             sourceChargeItem?.title ??
             `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
@@ -703,17 +705,10 @@ export function AddSupplyDeliveryForm({
           description: sourceChargeItem?.description,
           purpose: sourceChargeItem?.purpose,
           can_edit_charge_item: sourceChargeItem?.can_edit_charge_item ?? false,
-          price_components:
-            priceComponents.length > 0
-              ? priceComponents
-              : [
-                  {
-                    monetary_component_type: MonetaryComponentType.base,
-                    amount: "0",
-                  },
-                ],
+          price_components: priceComponents,
           discount_configuration:
             sourceChargeItem?.discount_configuration ?? null,
+          tags: sourceChargeItem?.tags?.map((tag) => tag.id),
         };
 
         const newChargeItem =
@@ -729,16 +724,6 @@ export function AddSupplyDeliveryForm({
           `items.${index}._created_charge_item_definition`,
           chargeItemSlug,
         );
-      }
-
-      if (
-        chargeItemSlug &&
-        sourceChargeItem?.tags?.length &&
-        chargeItemSlug !== sourceChargeItem.slug
-      ) {
-        await mutate(chargeItemDefinitionApi.setTags, {
-          pathParams: { facilityId, slug: chargeItemSlug },
-        })({ tags: sourceChargeItem.tags.map((tag) => tag.id) });
       }
 
       // Only create Product if we don't already have one from our creation

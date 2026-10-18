@@ -9,6 +9,8 @@ import {
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
+import type { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 interface ProductFixture {
@@ -153,6 +155,25 @@ async function createExternalDeliveryDraft(
       ),
     );
     chargeItemSlug = definition.slug;
+    const tag = await responseData<{ id: string }>(
+      await page.request.post(`${apiUrl}/api/v1/tag_config/`, {
+        headers,
+        data: {
+          display: `Metadata tag ${faker.string.alphanumeric(10)}`,
+          description: "Preserve the source pricing tag when cloning",
+          category: "admin",
+          status: "active",
+          resource: "charge_item_definition",
+          facility: facilityId,
+        },
+      }),
+    );
+    await responseData(
+      await page.request.post(
+        `${apiUrl}/api/v1/facility/${facilityId}/charge_item_definition/${chargeItemSlug}/set_tags/`,
+        { headers, data: { tags: [tag.id] } },
+      ),
+    );
   }
 
   const product = await responseData<ProductFixture>(
@@ -892,11 +913,21 @@ test.describe("External delivery draft items", () => {
         expect(active[0].supplied_item.charge_item_definition).toBeNull();
         expect(active[0].supplied_item.batch).toEqual({});
         expect(active[0].supplied_item.expiration_date).toBeNull();
+      } else {
+        expect(
+          active[0].supplied_item.charge_item_definition?.slug,
+        ).toBeTruthy();
+        expect(active[0].supplied_item.charge_item_definition?.slug).not.toBe(
+          fixture.product.charge_item_definition?.slug,
+        );
+        expect(
+          active[0].supplied_item.charge_item_definition?.price_components,
+        ).toEqual(fixture.product.charge_item_definition?.price_components);
       }
     });
   }
 
-  test("preserves metadata when correcting expiry and cloning sale pricing", async ({
+  test("preserves metadata and isolates pricing when correcting expiry and sale pricing", async ({
     page,
   }) => {
     const fixture = await createExternalDeliveryDraft(page, { metadata: true });
@@ -930,7 +961,8 @@ test.describe("External delivery draft items", () => {
       ),
     );
     expect(replacement.extensions).toEqual(fixture.product.extensions);
-    expect(replacement.charge_item_definition?.slug).toBe(
+    expect(replacement.charge_item_definition?.slug).toBeTruthy();
+    expect(replacement.charge_item_definition?.slug).not.toBe(
       fixture.product.charge_item_definition?.slug,
     );
     for (const key of [
@@ -940,14 +972,67 @@ test.describe("External delivery draft items", () => {
       "description",
       "purpose",
       "price_components",
+      "tags",
     ]) {
       expect(replacement.charge_item_definition?.[key], key).toEqual(
         fixture.product.charge_item_definition?.[key],
       );
     }
 
+    const definitionsUrl = `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/charge_item_definition`;
+    const clonedDefinition = await responseData<ChargeItemDefinitionRead>(
+      await page.request.get(
+        `${definitionsUrl}/${replacement.charge_item_definition!.slug}/`,
+        { headers: fixture.headers },
+      ),
+    );
+    const changedClone = await responseData<ChargeItemDefinitionRead>(
+      await page.request.put(`${definitionsUrl}/${clonedDefinition.slug}/`, {
+        headers: fixture.headers,
+        data: {
+          slug_value: clonedDefinition.slug_config.slug_value,
+          category: clonedDefinition.category.slug,
+          title: clonedDefinition.title,
+          status: clonedDefinition.status,
+          can_edit_charge_item: clonedDefinition.can_edit_charge_item,
+          discount_configuration: clonedDefinition.discount_configuration,
+          derived_from_uri: clonedDefinition.derived_from_uri,
+          description: clonedDefinition.description,
+          purpose: clonedDefinition.purpose,
+          version: clonedDefinition.version,
+          price_components: clonedDefinition.price_components.map(
+            (component) =>
+              component.monetary_component_type === "base"
+                ? { ...component, amount: "12" }
+                : component,
+          ),
+        },
+      }),
+    );
+    expect(
+      Number(
+        changedClone.price_components.find(
+          ({ monetary_component_type }) => monetary_component_type === "base",
+        )?.amount,
+      ),
+    ).toBe(12);
+    const unchangedOriginal = await responseData<ChargeItemDefinitionRead>(
+      await page.request.get(
+        `${definitionsUrl}/${fixture.product.charge_item_definition!.slug}/`,
+        { headers: fixture.headers },
+      ),
+    );
+    expect(unchangedOriginal.price_components).toEqual(
+      fixture.product.charge_item_definition?.price_components,
+    );
+
+    await page.reload();
+
     await row.getByRole("button", { name: "Actions", exact: true }).click();
     await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+    await expect(
+      form.getByRole("spinbutton", { name: "Item Price", exact: true }),
+    ).toHaveValue(/^12(?:\.0+)?$/);
     await form
       .getByRole("spinbutton", { name: "Item Price", exact: true })
       .fill("11");
@@ -971,6 +1056,9 @@ test.describe("External delivery draft items", () => {
     );
     expect(pricedReplacement.extensions).toEqual(fixture.product.extensions);
     expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
+      replacement.charge_item_definition?.slug,
+    );
+    expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
       fixture.product.charge_item_definition?.slug,
     );
     for (const key of [
@@ -979,6 +1067,7 @@ test.describe("External delivery draft items", () => {
       "derived_from_uri",
       "description",
       "purpose",
+      "tags",
     ]) {
       expect(pricedReplacement.charge_item_definition?.[key], key).toEqual(
         fixture.product.charge_item_definition?.[key],
