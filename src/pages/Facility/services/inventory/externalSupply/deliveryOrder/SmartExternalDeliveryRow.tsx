@@ -155,9 +155,10 @@ export function SmartExternalDeliveryRow({
                     }}
                     placeholder={t("select_product")}
                     className="w-full"
+                    disabled={Boolean(replacesDeliveryId)}
                     disableFavorites
                     hideClearButton
-                    defaultOpen={autoOpenProductSelect}
+                    defaultOpen={autoOpenProductSelect && !replacesDeliveryId}
                   />
                 </FormControl>
                 <FormMessage />

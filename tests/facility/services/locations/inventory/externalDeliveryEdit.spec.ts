@@ -34,7 +34,7 @@ interface DeliveryItem {
   supplied_item_quantity: string;
   supplied_item_pack_quantity: number;
   supplied_item_pack_size: number;
-  supplied_item: { id: string };
+  supplied_item: { id: string; product_knowledge?: { slug: string } };
 }
 
 async function responseData<T>(response: APIResponse): Promise<T> {
@@ -369,6 +369,7 @@ test.describe("External delivery draft items", () => {
       await page.getByRole("button", { name: /^Add Item\b/ }).click();
       await selectProductKnowledge();
       await expect(editForm.getByPlaceholder("Batch #")).toHaveValue(batch);
+      await expect(editForm.getByRole("combobox")).toBeEnabled();
       const packQuantity = editForm.getByRole("spinbutton", {
         name: "Pack Qty",
         exact: true,
@@ -467,6 +468,10 @@ test.describe("External delivery draft items", () => {
         await savedRows.getByRole("cell").nth(3).innerText()
       ).split("/");
       await openEdit();
+      await expect(editForm.getByRole("combobox")).toBeDisabled();
+      await expect(editForm.getByRole("combobox")).toContainText(
+        product.product_knowledge.name,
+      );
       await expect(editForm.getByPlaceholder("Batch #")).toHaveValue(batch);
       await expect(editForm.locator('input[type="date"]')).toHaveValue(
         `${expiryYear}-${expiryMonth}-${expiryDay}`,
@@ -495,6 +500,10 @@ test.describe("External delivery draft items", () => {
         .getByRole("menuitem", { name: "Continue editing", exact: true })
         .click();
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
+      await expect(editForm.getByRole("combobox")).toBeDisabled();
+      await expect(editForm.getByRole("combobox")).toContainText(
+        product.product_knowledge.name,
+      );
       await expect(
         editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
       ).toBeFocused();
@@ -610,6 +619,9 @@ test.describe("External delivery draft items", () => {
       expect(active[0].supplied_item_pack_quantity).toBe(3);
       expect(active[0].supplied_item_pack_size).toBe(5);
       expect(Number(active[0].supplied_item_quantity)).toBe(15);
+      expect(active[0].supplied_item.product_knowledge?.slug).toBe(
+        product.product_knowledge.slug,
+      );
 
       await page
         .getByRole("button", { name: "Show cancelled items (3)" })
