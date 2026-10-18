@@ -1130,6 +1130,22 @@ test.describe("External delivery draft items", () => {
       const fixture = await createExternalDeliveryDraft(page, {
         metadata: true,
       });
+      const sourceProduct = await responseData<ProductFixture>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${fixture.product.id}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      const expectedLocalExpiry = await page.evaluate((expiration) => {
+        const parts = new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date(expiration!));
+        const part = (type: string) =>
+          parts.find((entry) => entry.type === type)!.value;
+        return `${part("year")}-${part("month")}-${part("day")}`;
+      }, sourceProduct.expiration_date);
       await page.goto(fixture.deliveryUrl);
       const row = page
         .locator("table tbody tr")
@@ -1142,7 +1158,7 @@ test.describe("External delivery draft items", () => {
       });
       await expect
         .soft(form.locator('input[type="date"]'))
-        .toHaveValue("2031-01-31");
+        .toHaveValue(expectedLocalExpiry);
       const itemPrice = form.getByRole("spinbutton", {
         name: "Item Price",
         exact: true,

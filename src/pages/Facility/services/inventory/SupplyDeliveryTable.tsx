@@ -51,10 +51,10 @@ import {
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { add, round } from "@/Utils/decimal";
-import { getProductExpiryDate } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { ExtensionContexts } from "@/Utils/schema/types";
+import { dateQueryString } from "@/Utils/utils";
 
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
@@ -303,7 +303,7 @@ export function SupplyDeliveryTable({
           const isInactive =
             delivery.status === SupplyDeliveryStatus.abandoned ||
             delivery.status === SupplyDeliveryStatus.entered_in_error;
-          const expiry = getProductExpiryDate(
+          const expiry = dateQueryString(
             delivery.supplied_inventory_item?.product?.expiration_date ||
               delivery.supplied_item?.expiration_date,
           );

@@ -20,7 +20,7 @@ import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
 import { add, divide, multiply, round } from "@/Utils/decimal";
-import { getProductExpiryDate } from "@/Utils/inventory";
+import { dateQueryString } from "@/Utils/utils";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -192,7 +192,7 @@ export function useDeliveryRowItem({
       }
       setField("batch_number", product.batch?.lot_number || "");
       if (product.expiration_date) {
-        setField("expiry_date", getProductExpiryDate(product.expiration_date));
+        setField("expiry_date", dateQueryString(product.expiration_date));
       }
       if (product.standard_pack_size) {
         setField("supplied_item_pack_size", product.standard_pack_size);

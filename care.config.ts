@@ -359,11 +359,6 @@ const careConfig = {
       false,
     ),
     /**
-     * Must match backend TIME_ZONE, which defaults to Asia/Kolkata.
-     * Date-only product expiries are stored as midnight in this timezone.
-     */
-    expiryTimeZone: env.REACT_INVENTORY_EXPIRY_TIME_ZONE || "Asia/Kolkata",
-    /**
      * Number of months offset for expiry restriction.
      * 0 = current month, 1 = next month, etc.
      * Products expiring before the end of (current month + offset) will be restricted.

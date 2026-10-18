@@ -95,12 +95,12 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { isEqual, round, zodDecimal } from "@/Utils/decimal";
-import { getProductExpiryDate } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
@@ -413,7 +413,7 @@ export function AddSupplyDeliveryForm({
           supply_request: delivery.supply_request,
           _is_inward_stock: true,
           batch_number: product.batch?.lot_number || "",
-          expiry_date: getProductExpiryDate(product.expiration_date),
+          expiry_date: dateQueryString(product.expiration_date),
           charge_item_definition: chargeItem,
           charge_item_category: chargeItem?.category?.slug,
           unit_price:
@@ -760,10 +760,9 @@ export function AddSupplyDeliveryForm({
             : undefined,
           expiration_date:
             sourceProduct?.expiration_date &&
-            item.expiry_date ===
-              getProductExpiryDate(sourceProduct.expiration_date)
+            item.expiry_date === dateQueryString(sourceProduct.expiration_date)
               ? sourceProduct.expiration_date
-              : item.expiry_date || undefined,
+              : dateTimeQueryString(item.expiry_date) || undefined,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,

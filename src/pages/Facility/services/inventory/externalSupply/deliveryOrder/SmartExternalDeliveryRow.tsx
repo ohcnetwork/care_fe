@@ -33,7 +33,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { add, isPositive, round } from "@/Utils/decimal";
-import { getProductExpiryDate } from "@/Utils/inventory";
+import { dateQueryString } from "@/Utils/utils";
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { SchemaField } from "@/components/Extensions/SchemaField";
@@ -124,7 +124,7 @@ export function SmartExternalDeliveryRow({
   };
 
   const getExpirationDisplay = (product: ProductRead) => {
-    const expiry = getProductExpiryDate(product.expiration_date);
+    const expiry = dateQueryString(product.expiration_date);
     return expiry ? format(parseISO(expiry), "MMM yyyy") : "N/A";
   };
 
