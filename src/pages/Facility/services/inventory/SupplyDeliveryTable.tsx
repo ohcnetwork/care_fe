@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate, parseISO } from "date-fns";
-import { EllipsisVertical } from "lucide-react";
+import { Edit, EllipsisVertical, History } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,6 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   ExtensionFieldWithName,
   getExtensionFieldsWithName,
   getExtensionValue,
@@ -51,6 +56,7 @@ import { add, round } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { ExtensionContexts, SupplyDeliveryAnchor } from "@/Utils/schema/types";
+import { dateQueryString } from "@/Utils/utils";
 
 /** Extension anchors (x-ui.placement.after) this table renders, in column order */
 const EXTENSION_ANCHORS = [
@@ -88,6 +94,8 @@ interface SupplyDeliveryTableProps {
   onSelectAll?: (checked: boolean) => void;
   internal?: boolean;
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
+  onEditDelivery?: (delivery: SupplyDeliveryRead) => void;
+  editingDeliveryIds?: string[];
   deliveryOrderStatus?: DeliveryOrderStatus;
   autoSelectOnMount?: boolean;
   isRequester?: boolean;
@@ -117,7 +125,7 @@ function ProductLink({
     return (
       <Link
         href={`/facility/${facilityId}/settings/product/${productId}`}
-        className="font-medium text-primary-600 hover:underline"
+        className="min-w-0 flex-1 font-medium text-wrap wrap-anywhere text-gray-950 underline underline-offset-2"
         onClick={(e) => e.stopPropagation()}
         basePath="/"
       >
@@ -126,7 +134,9 @@ function ProductLink({
     );
   }
   return (
-    <div className="font-medium text-wrap wrap-break-word">{productName}</div>
+    <div className="min-w-0 flex-1 font-medium text-wrap wrap-anywhere">
+      {productName}
+    </div>
   );
 }
 
@@ -138,6 +148,8 @@ export function SupplyDeliveryTable({
   onSelectAll,
   internal = false,
   onDeliveryClick,
+  onEditDelivery,
+  editingDeliveryIds = [],
   deliveryOrderStatus,
   autoSelectOnMount = false,
   isRequester = false,
@@ -216,6 +228,7 @@ export function SupplyDeliveryTable({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("status_updated_successfully"));
     },
   });
@@ -237,6 +250,7 @@ export function SupplyDeliveryTable({
     inProgressDeliveries.length > 0;
 
   const didAutoSelectRef = useRef(false);
+  const isEditingFromMenuRef = useRef(false);
   useEffect(() => {
     if (!autoSelectOnMount) return;
     if (!showAllCheckbox) return;
@@ -286,7 +300,12 @@ export function SupplyDeliveryTable({
             </TableHead>
           )}
           <TableHead rowSpan={2}>{t("hash_tag")}</TableHead>
-          <TableHead rowSpan={2}>{t("item")}</TableHead>
+          <TableHead
+            rowSpan={2}
+            className="sticky left-0 z-20 border-r border-gray-200 bg-gray-100 shadow-[1px_0_0_0_var(--color-gray-300)]"
+          >
+            {t("item")}
+          </TableHead>
           {extensionHeadsAfter("product")}
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
           {extensionHeadsAfter("batch")}
@@ -329,7 +348,15 @@ export function SupplyDeliveryTable({
           {extensionHeadsAfter("condition")}
           {renderExtensionHeads(extensionColumns.trailing)}
           {showActionsColumn && (
-            <TableHead rowSpan={2}>{t("actions")}</TableHead>
+            <TableHead
+              rowSpan={2}
+              className={cn(
+                onEditDelivery &&
+                  "sm:sticky sm:right-0 z-10 bg-gray-100 border-l",
+              )}
+            >
+              {t("actions")}
+            </TableHead>
           )}
         </TableRow>
         <TableRow>
@@ -345,11 +372,22 @@ export function SupplyDeliveryTable({
       </TableHeader>
       <TableBody className="text-sm">
         {deliveries.map((delivery) => {
-          const expiry =
+          const isEditing = editingDeliveryIds.includes(delivery.id);
+          const isInactive =
+            delivery.status === SupplyDeliveryStatus.abandoned ||
+            delivery.status === SupplyDeliveryStatus.entered_in_error;
+          const expiry = dateQueryString(
             delivery.supplied_inventory_item?.product?.expiration_date ||
-            delivery.supplied_item?.expiration_date;
+              delivery.supplied_item?.expiration_date,
+          );
           return (
-            <TableRow key={delivery.id}>
+            <TableRow
+              key={delivery.id}
+              className={cn(
+                isEditing && "bg-primary-50/60 hover:bg-primary-50",
+                isInactive && "bg-gray-50 hover:bg-gray-100/50",
+              )}
+            >
               {showAllCheckbox && (
                 <TableCell>
                   {delivery.status === SupplyDeliveryStatus.in_progress && (
@@ -364,15 +402,45 @@ export function SupplyDeliveryTable({
               )}
               <TableCell>{serialNumberMap.get(delivery.id)}</TableCell>
               <TableCell
-                className={cn(onDeliveryClick && "cursor-pointer underline")}
-                onClick={() => onDeliveryClick?.(delivery)}
+                className={cn(
+                  "sticky left-0 z-10 border-r border-gray-200 bg-white shadow-[1px_0_0_0_var(--color-gray-300)]",
+                  isEditing && "bg-primary-50",
+                  isInactive && "bg-gray-50",
+                )}
               >
-                <ProductLink
-                  delivery={delivery}
-                  internal={internal}
-                  linkToProduct={linkToProduct}
-                  facilityId={facilityId}
-                />
+                <div className="flex w-24 items-center gap-2 sm:w-56">
+                  <ProductLink
+                    delivery={delivery}
+                    internal={internal}
+                    linkToProduct={linkToProduct}
+                    facilityId={facilityId}
+                  />
+                  {onDeliveryClick && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 shrink-0 text-gray-500"
+                          aria-label={t("view_history")}
+                          onClick={() => onDeliveryClick(delivery)}
+                        >
+                          <History className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("view_history")}</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                {isEditing && (
+                  <Badge
+                    variant="outline"
+                    className="mt-1 border-primary-200 bg-primary-50 text-primary-800"
+                  >
+                    {t("editing")}
+                  </Badge>
+                )}
               </TableCell>
               {extensionValuesAfter(delivery, "product")}
               <TableCell>
@@ -504,7 +572,13 @@ export function SupplyDeliveryTable({
               {extensionValuesAfter(delivery, "condition")}
               {renderExtensionValues(delivery, extensionColumns.trailing)}
               {showActionsColumn && (
-                <TableCell>
+                <TableCell
+                  className={cn(
+                    onEditDelivery &&
+                      "sm:sticky sm:right-0 z-10 border-l bg-white",
+                    onEditDelivery && isEditing && "bg-primary-50",
+                  )}
+                >
                   {delivery.status === SupplyDeliveryStatus.in_progress && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -516,10 +590,30 @@ export function SupplyDeliveryTable({
                           <EllipsisVertical className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
+                      <DropdownMenuContent
+                        align="end"
+                        onCloseAutoFocus={(event) => {
+                          if (isEditingFromMenuRef.current) {
+                            event.preventDefault();
+                            isEditingFromMenuRef.current = false;
+                          }
+                        }}
+                      >
+                        {onEditDelivery && (
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              isEditingFromMenuRef.current = true;
+                              onEditDelivery(delivery);
+                            }}
+                          >
+                            <Edit className="size-4" />
+                            {isEditing ? t("continue_editing") : t("edit")}
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem asChild disabled={isEditing}>
                           <Button
                             variant="ghost"
+                            disabled={isEditing}
                             onClick={() =>
                               updateDeliveryStatus({
                                 deliveryId: delivery.id,
@@ -533,9 +627,10 @@ export function SupplyDeliveryTable({
                             <span>{t("mark_as_entered_in_error")}</span>
                           </Button>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
+                        <DropdownMenuItem asChild disabled={isEditing}>
                           <Button
                             variant="ghost"
+                            disabled={isEditing}
                             onClick={() =>
                               updateDeliveryStatus({
                                 deliveryId: delivery.id,
