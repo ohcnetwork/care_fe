@@ -180,7 +180,6 @@ function AllSupplyDeliveriesComponent({
 function getDeliveryOrderStatusActions(
   status: DeliveryOrderStatus,
   internal: boolean,
-  anyCompletedSupplyDeliveries: boolean,
 ) {
   const isPendingOrCompleted = [
     DeliveryOrderStatus.draft,
@@ -199,24 +198,19 @@ function getDeliveryOrderStatusActions(
       status: DeliveryOrderStatus.draft,
       icon: <Edit className="size-4" />,
       label: "mark_as_draft",
-      visibility: true,
     },
     {
       status: DeliveryOrderStatus.entered_in_error,
       icon: <CareIcon icon="l-exclamation-circle" />,
       label: "mark_as_entered_in_error",
-      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
     {
       status: DeliveryOrderStatus.abandoned,
       icon: <CareIcon icon="l-ban" />,
       label: "mark_as_abandoned",
-      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
   ];
-  return actions.filter(
-    (action) => action.status !== status && action.visibility,
-  );
+  return actions.filter((action) => action.status !== status);
 }
 
 export function DeliveryOrderShow({
@@ -322,10 +316,20 @@ export function DeliveryOrderShow({
         deliveryOrderId: deliveryOrderId,
       },
     }),
-    onSuccess: (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
-      queryClient.invalidateQueries({
-        queryKey: ["deliveryOrders", deliveryOrderId],
-      });
+    onSuccess: async (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
+      setSelectedDeliveries([]);
+      await Promise.all(
+        [
+          ["deliveryOrders"],
+          ["supplyDeliveries", deliveryOrderId],
+          ["allSupplyDeliveries"],
+          ["supplyRequests"],
+          ["inventory", facilityId],
+          ["inventoryItems", facilityId],
+          ["dispensableItems", facilityId],
+          ["expiredItems", facilityId],
+        ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      );
 
       toast.success(
         updatedDeliveryOrder.status === DeliveryOrderStatus.pending
@@ -476,11 +480,6 @@ export function DeliveryOrderShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
-  const anyCompletedSupplyDeliveries =
-    supplyDeliveries?.results?.some(
-      (delivery) => delivery.status === SupplyDeliveryStatus.completed,
-    ) ?? false;
-
   const canMarkAsCompleted =
     !!supplyDeliveries?.results?.length &&
     supplyDeliveries.results.every(
@@ -493,7 +492,6 @@ export function DeliveryOrderShow({
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
     internal,
-    anyCompletedSupplyDeliveries,
   );
 
   const inprogressSupplyDeliveries =
@@ -650,7 +648,12 @@ export function DeliveryOrderShow({
                   <Button
                     variant="outline"
                     size="icon"
-                    disabled={hasPendingItemChanges}
+                    aria-label={t("actions")}
+                    disabled={
+                      hasPendingItemChanges ||
+                      isUpdating ||
+                      isUpsertingDeliveries
+                    }
                   >
                     <EllipsisVertical className="size-4" />
                   </Button>
@@ -667,7 +670,7 @@ export function DeliveryOrderShow({
                               status: action.status,
                             })
                           }
-                          disabled={isUpdating}
+                          disabled={isUpdating || isUpsertingDeliveries}
                           className="w-full flex justify-stretch"
                         >
                           {action.icon}
@@ -1219,8 +1222,8 @@ export function DeliveryOrderShow({
               ? t("mark_order_as_draft_confirmation_description")
               : deliveryOrderStatusDialog.status ===
                   DeliveryOrderStatus.entered_in_error
-                ? t("mark_order_as_entered_in_error_confirmation_description")
-                : t("mark_order_as_abandoned_confirmation_description")
+                ? t("delivery_order_entered_in_error_confirmation_description")
+                : t("delivery_order_abandoned_confirmation_description")
           }
           confirmText={t("confirm")}
           variant={
@@ -1234,7 +1237,7 @@ export function DeliveryOrderShow({
             }
             setDeliveryOrderStatusDialog({ open: false, status: null });
           }}
-          disabled={isUpdating}
+          disabled={isUpdating || isUpsertingDeliveries}
         />
       </div>
     </Page>
