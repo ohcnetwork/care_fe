@@ -1147,6 +1147,13 @@ test.describe("External delivery draft items", () => {
         name: "Item Price",
         exact: true,
       });
+      await expect.soft(itemPrice).toHaveValue("10.12");
+      await expect.soft(itemPrice).toHaveAttribute("step", "0.01");
+      await itemPrice.focus();
+      await expect(itemPrice).toHaveValue("10.12");
+      await form
+        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
+        .focus();
       expect
         .soft(
           await itemPrice.evaluate(
@@ -1263,7 +1270,13 @@ test.describe("External delivery draft items", () => {
       ).toHaveValue(/^12(?:\.0+)?$/);
       await form
         .getByRole("spinbutton", { name: "Item Price", exact: true })
-        .fill("11");
+        .fill("11.123");
+      await expect(
+        form.getByRole("spinbutton", { name: "Item Price", exact: true }),
+      ).toHaveValue("12.00");
+      await form
+        .getByRole("spinbutton", { name: "Item Price", exact: true })
+        .fill("11.12");
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
       await expect(form).not.toBeVisible();
       const pricedLines = await responseData<{ results: DeliveryItem[] }>(
@@ -1314,7 +1327,7 @@ test.describe("External delivery draft items", () => {
       const pricedBase = pricedComponents.find(
         ({ monetary_component_type }) => monetary_component_type === "base",
       );
-      expect(Number(pricedBase?.amount)).toBe(11);
+      expect(Number(pricedBase?.amount)).toBe(11.12);
       expect(pricedBase?.code).toEqual(sourceBase?.code);
       expect(
         pricedComponents.filter(

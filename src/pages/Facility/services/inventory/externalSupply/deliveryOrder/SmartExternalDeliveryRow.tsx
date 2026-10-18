@@ -50,6 +50,7 @@ import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/reso
 import { ProductRead } from "@/types/inventory/product/product";
 
 import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
+import { DeliveryMonetaryInput } from "./DeliveryMonetaryInput";
 import { useDeliveryRowItem } from "./useDeliveryRowItem";
 
 interface Props {
@@ -484,15 +485,12 @@ export function SmartExternalDeliveryRow({
             <span className="text-xs text-gray-500 mr-1">
               {CURRENCY_SYMBOL}
             </span>
-            <Input
-              type="number"
-              min={0}
-              step="0.000001"
-              value={unitPrice || ""}
+            <DeliveryMonetaryInput
+              value={unitPrice}
               aria-label={t("item_price")}
               placeholder="0"
-              onChange={(e) => {
-                setField("unit_price", e.target.value);
+              onValueChange={(value) => {
+                setField("unit_price", value);
                 markAsEdited(true);
               }}
               disabled={!productKnowledge || isTaxInclusive}
@@ -530,17 +528,11 @@ export function SmartExternalDeliveryRow({
               <span className="text-xs text-gray-500 mr-1">
                 {CURRENCY_SYMBOL}
               </span>
-              <Input
-                type="number"
-                min={0}
-                step="0.000001"
-                value={currentValue?.amount || ""}
+              <DeliveryMonetaryInput
+                value={currentValue?.amount}
                 placeholder="0"
-                onChange={(e) => {
-                  updateInformationalComponent(
-                    code,
-                    parseFloat(e.target.value) || 0,
-                  );
+                onValueChange={(value) => {
+                  updateInformationalComponent(code, parseFloat(value) || 0);
                 }}
                 disabled={!productKnowledge}
                 className="w-[90px]"
@@ -554,11 +546,8 @@ export function SmartExternalDeliveryRow({
       <TableCell className="align-top p-2">
         <div className="flex items-center">
           <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
-          <Input
-            type="number"
-            min={0}
-            step="0.000001"
-            value={purchasePrice || ""}
+          <DeliveryMonetaryInput
+            value={purchasePrice}
             placeholder="0"
             disabled
             className="w-[90px] bg-gray-100 text-gray-600"
@@ -570,15 +559,12 @@ export function SmartExternalDeliveryRow({
       <TableCell className="align-top p-2">
         <div className="flex items-center">
           <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
-          <Input
-            type="number"
-            min={0}
-            step="0.000001"
-            value={totalPurchasePrice || ""}
+          <DeliveryMonetaryInput
+            value={totalPurchasePrice}
             aria-label={t("tpr")}
             placeholder="0"
-            onChange={(e) => {
-              setField("total_purchase_price", e.target.value || undefined);
+            onValueChange={(value) => {
+              setField("total_purchase_price", value || undefined);
               setField("is_total_purchase_price_edited", true);
               markAsEdited();
             }}
