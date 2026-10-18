@@ -31,6 +31,7 @@ export interface ChargeItemDefinitionBase {
   slug_config: SlugConfig;
   tags: TagConfig[];
   can_edit_charge_item: boolean;
+  discount_configuration?: DiscountConfiguration | null;
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {

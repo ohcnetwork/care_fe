@@ -69,7 +69,9 @@ export function useDeliveryRowItem({
     charge_item_category: chargeItemCategory,
     is_tax_inclusive: isTaxInclusive,
     is_manually_edited: isManuallyEdited,
+    is_charge_item_edited: isChargeItemEdited,
     _created_charge_item_definition: createdChargeItemDefinition,
+    _created_product: createdProduct,
     replaces_delivery: replacesDelivery,
   } = item || {};
   const isReplacement = Boolean(replacesDelivery);
@@ -93,6 +95,7 @@ export function useDeliveryRowItem({
       expiry_date: "",
       charge_item_definition: undefined,
       _created_charge_item_definition: undefined,
+      _created_product: undefined,
       unit_price: "0",
       purchase_price: undefined,
       total_purchase_price: undefined,
@@ -101,6 +104,7 @@ export function useDeliveryRowItem({
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
+      is_charge_item_edited: false,
       supplied_item_pack_quantity: undefined,
       supplied_item_pack_size: 1,
       supplied_item_quantity: "",
@@ -112,13 +116,19 @@ export function useDeliveryRowItem({
     setIsCreatingNew(false);
   }, [setField]);
 
-  // Mark item as manually edited (creating new product)
-  const markAsEdited = useCallback(() => {
-    setField("is_manually_edited", true);
-    setField("supplied_item", undefined);
-    setField("_created_charge_item_definition", undefined);
-    setIsCreatingNew(true);
-  }, [setField]);
+  // Keep the reference product until preparation succeeds so retries retain its metadata.
+  const markAsEdited = useCallback(
+    (chargeItemChanged = false) => {
+      setField("is_manually_edited", true);
+      if (chargeItemChanged) {
+        setField("is_charge_item_edited", true);
+      }
+      setField("_created_charge_item_definition", undefined);
+      setField("_created_product", undefined);
+      setIsCreatingNew(true);
+    },
+    [setField],
+  );
 
   // Fetch products for selected product knowledge
   const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
@@ -247,8 +257,9 @@ export function useDeliveryRowItem({
   // Whether category selection is needed for charge item definition
   const needsCategorySelection = useMemo(() => {
     if (!productKnowledge) return false;
+    if (isCreatingNew) return true;
     if (suppliedItem?.charge_item_definition?.category) return false;
-    return isCreatingNew || products.length === 0;
+    return products.length === 0;
   }, [productKnowledge, suppliedItem, products.length, isCreatingNew]);
 
   // Available tax components from facility
@@ -285,12 +296,12 @@ export function useDeliveryRowItem({
 
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
-    if (isTaxInclusive && mrpValue > 0) {
+    if (isTaxInclusive && isChargeItemEdited && mrpValue > 0) {
       let calculatedBasePrice = divide(
         mrpValue,
         add(1, divide(totalTaxFactor, 100)),
       );
-      if (packSize && packQuantity && packSize > 0)
+      if (packSize && packSize > 0)
         calculatedBasePrice = divide(calculatedBasePrice, packSize);
       const newUnitPrice = round(calculatedBasePrice);
       // Only update if value actually changed to prevent infinite loops
@@ -300,10 +311,10 @@ export function useDeliveryRowItem({
     }
   }, [
     isTaxInclusive,
+    isChargeItemEdited,
     mrpValue,
     totalTaxFactor,
     packSize,
-    packQuantity,
     unitPrice,
     setField,
   ]);
@@ -336,7 +347,8 @@ export function useDeliveryRowItem({
       !isReplacement &&
       suppliedItem &&
       !isManuallyEdited &&
-      !createdChargeItemDefinition
+      !createdChargeItemDefinition &&
+      !createdProduct
     ) {
       const knownPurchasePrice = suppliedItem.purchase_price ?? undefined;
       const calculatedTotal =
@@ -377,6 +389,7 @@ export function useDeliveryRowItem({
     suppliedItem,
     isManuallyEdited,
     createdChargeItemDefinition,
+    createdProduct,
     setField,
   ]);
 
@@ -395,7 +408,7 @@ export function useDeliveryRowItem({
         ...(value > 0 ? [newComponent] : []),
       ];
       setField("informational_components", updated);
-      markAsEdited();
+      markAsEdited(true);
     },
     [informationalComponents, setField, markAsEdited],
   );

@@ -388,7 +388,7 @@ export function SmartExternalDeliveryRow({
                 // Clear components when category is cleared
                 setField("tax_components", []);
               }
-              markAsEdited();
+              markAsEdited(true);
             }}
             placeholder={t("select_category")}
             className="w-full min-w-[140px]"
@@ -411,7 +411,7 @@ export function SmartExternalDeliveryRow({
           onChange={(e) => {
             const value = parseInt(e.target.value) || undefined;
             setField("supplied_item_pack_size", value);
-            markAsEdited();
+            markAsEdited(Boolean(isTaxInclusive));
           }}
           disabled={!productKnowledge}
           className="w-20"
@@ -439,7 +439,7 @@ export function SmartExternalDeliveryRow({
                   onChange={(event) =>
                     field.onChange(
                       event.target.value === ""
-                        ? undefined
+                        ? null
                         : Number(event.target.value),
                     )
                   }
@@ -489,10 +489,11 @@ export function SmartExternalDeliveryRow({
               min={0}
               step="0.01"
               value={unitPrice || ""}
+              aria-label={t("item_price")}
               placeholder="0"
               onChange={(e) => {
                 setField("unit_price", e.target.value);
-                markAsEdited();
+                markAsEdited(true);
               }}
               disabled={!productKnowledge || isTaxInclusive}
               className={cn(
@@ -506,7 +507,7 @@ export function SmartExternalDeliveryRow({
               checked={isTaxInclusive || false}
               onCheckedChange={(checked) => {
                 setField("is_tax_inclusive", !!checked);
-                markAsEdited();
+                markAsEdited(true);
               }}
               disabled={!productKnowledge}
               className="h-3.5 w-3.5"
@@ -594,7 +595,7 @@ export function SmartExternalDeliveryRow({
           selectedComponents={taxComponents || []}
           onSelectionChange={(components) => {
             setField("tax_components", components);
-            markAsEdited();
+            markAsEdited(true);
           }}
           disabled={!productKnowledge}
           displayMode="inline"
@@ -606,7 +607,7 @@ export function SmartExternalDeliveryRow({
             selectedComponents={discountComponents || []}
             onSelectionChange={(components) => {
               setField("discount_components", components);
-              markAsEdited();
+              markAsEdited(true);
             }}
             disabled={!productKnowledge}
             displayMode="short"

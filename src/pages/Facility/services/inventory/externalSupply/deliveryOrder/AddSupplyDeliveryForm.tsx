@@ -95,7 +95,7 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { round, zodDecimal } from "@/Utils/decimal";
+import { isEqual, round, zodDecimal } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
@@ -105,7 +105,7 @@ import { ExtensionContexts } from "@/Utils/schema/types";
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
   supplied_item_quantity: zodDecimal({ min: 1 }),
-  supplied_item_pack_quantity: z.number().optional(),
+  supplied_item_pack_quantity: z.number().nullable().optional(),
   supplied_item_pack_size: z.number().optional(),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
@@ -119,10 +119,12 @@ const supplyDeliveryItemSchema = z.object({
   expiry_date: z.string().optional(),
   charge_item_definition: z.object({ slug: z.string() }).optional(),
   _created_charge_item_definition: z.string().optional(),
+  _created_product: z.string().optional(),
   unit_price: zodDecimal({ min: 0 }).optional(),
   purchase_price: zodDecimal({ min: 0 }).optional(),
   total_purchase_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
+  is_charge_item_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
@@ -548,11 +550,20 @@ export function AddSupplyDeliveryForm({
   const buildPriceComponents = (
     item: SupplyDeliveryFormValues["items"][number],
   ): MonetaryComponent[] => {
-    const components: MonetaryComponent[] = [];
+    const sourceComponents =
+      item.supplied_item?.charge_item_definition?.price_components ?? [];
+    const components: MonetaryComponent[] = sourceComponents.filter(
+      (component) =>
+        component.monetary_component_type === MonetaryComponentType.surcharge,
+    );
 
     // Base price component
     if (item.unit_price != null) {
       components.push({
+        ...sourceComponents.find(
+          (component) =>
+            component.monetary_component_type === MonetaryComponentType.base,
+        ),
         monetary_component_type: MonetaryComponentType.base,
         amount: item.unit_price,
       });
@@ -617,7 +628,10 @@ export function AddSupplyDeliveryForm({
               hasErrors = true;
               break;
             }
-            if (!item.charge_item_category) {
+            if (
+              (!item.supplied_item || item.is_charge_item_edited) &&
+              !item.charge_item_category
+            ) {
               toast.error(t("category_required_at_row", { row: index + 1 }));
               hasErrors = true;
               break;
@@ -641,25 +655,33 @@ export function AddSupplyDeliveryForm({
     index: number,
     suppliedItemType: SupplyDeliveryType,
   ) {
+    const sourceProduct = item.supplied_item;
+    const sourceChargeItem = sourceProduct?.charge_item_definition;
     let productId = item.supplied_item?.id;
     let chargeItemSlug = item.charge_item_definition?.slug;
+    const hasPurchasePriceChange =
+      sourceProduct &&
+      !isEqual(item.purchase_price, sourceProduct.purchase_price ?? undefined);
 
     // Create ChargeItemDefinition and Product for external supply (no origin)
-    if (!origin && (!productId || item.is_manually_edited)) {
+    if (
+      !origin &&
+      (!productId || item.is_manually_edited || hasPurchasePriceChange)
+    ) {
       // If is_manually_edited is true, we're creating NEW entities
       // Any existing IDs are from a reference product selection, not our creation
       // Clear them so we create fresh ones (but only on first attempt)
       if (item.is_manually_edited) {
         productId = undefined;
-        chargeItemSlug = item._created_charge_item_definition;
-        form.setValue(`items.${index}.supplied_item`, undefined);
-        if (!chargeItemSlug) {
-          form.setValue(`items.${index}.charge_item_definition`, undefined);
-        }
+        chargeItemSlug =
+          item._created_charge_item_definition ??
+          (item.is_charge_item_edited ? undefined : chargeItemSlug);
+      } else if (hasPurchasePriceChange) {
+        productId = undefined;
       }
 
       // Only create ChargeItemDefinition if we don't already have one from our creation
-      if (!chargeItemSlug) {
+      if (!chargeItemSlug && (!sourceProduct || item.is_charge_item_edited)) {
         const category = item.charge_item_category;
         if (!category) {
           throw new Error(
@@ -673,9 +695,14 @@ export function AddSupplyDeliveryForm({
         const chargeItemCreate: ChargeItemDefinitionCreate = {
           slug_value: crypto.randomUUID(),
           category,
-          title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
+          title:
+            sourceChargeItem?.title ??
+            `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,
-          can_edit_charge_item: false,
+          derived_from_uri: sourceChargeItem?.derived_from_uri,
+          description: sourceChargeItem?.description,
+          purpose: sourceChargeItem?.purpose,
+          can_edit_charge_item: sourceChargeItem?.can_edit_charge_item ?? false,
           price_components:
             priceComponents.length > 0
               ? priceComponents
@@ -685,7 +712,8 @@ export function AddSupplyDeliveryForm({
                     amount: "0",
                   },
                 ],
-          discount_configuration: null,
+          discount_configuration:
+            sourceChargeItem?.discount_configuration ?? null,
         };
 
         const newChargeItem =
@@ -703,19 +731,29 @@ export function AddSupplyDeliveryForm({
         );
       }
 
+      if (
+        chargeItemSlug &&
+        sourceChargeItem?.tags?.length &&
+        chargeItemSlug !== sourceChargeItem.slug
+      ) {
+        await mutate(chargeItemDefinitionApi.setTags, {
+          pathParams: { facilityId, slug: chargeItemSlug },
+        })({ tags: sourceChargeItem.tags.map((tag) => tag.id) });
+      }
+
       // Only create Product if we don't already have one from our creation
       if (!productId) {
         const productCreate: ProductCreate = {
           status: ProductStatusOptions.active,
-          batch: {
-            lot_number: item.batch_number!,
-          },
-          expiration_date: item.expiry_date!,
+          batch: item.batch_number
+            ? { lot_number: item.batch_number }
+            : undefined,
+          expiration_date: item.expiry_date || undefined,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,
           purchase_price: item.purchase_price,
-          extensions: {},
+          extensions: structuredClone(sourceProduct?.extensions ?? {}),
         };
 
         const newProduct = await createProduct(productCreate);
@@ -724,7 +762,9 @@ export function AddSupplyDeliveryForm({
         // Immediately persist Product to form state
         // So if Delivery fails, we won't recreate it on retry
         form.setValue(`items.${index}.supplied_item`, newProduct);
+        form.setValue(`items.${index}._created_product`, newProduct.id);
         form.setValue(`items.${index}.is_manually_edited`, false);
+        form.setValue(`items.${index}.is_charge_item_edited`, false);
       }
     }
 
@@ -741,7 +781,8 @@ export function AddSupplyDeliveryForm({
         ? { supplied_inventory_item: item.supplied_inventory_item }
         : {
             supplied_item: productId,
-            supplied_item_pack_quantity: item.supplied_item_pack_quantity,
+            supplied_item_pack_quantity:
+              item.supplied_item_pack_quantity ?? undefined,
             supplied_item_pack_size: item.supplied_item_pack_size,
             total_purchase_price: item.total_purchase_price
               ? parseFloat(item.total_purchase_price)
