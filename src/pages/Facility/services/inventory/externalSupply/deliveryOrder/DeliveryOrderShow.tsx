@@ -5,12 +5,13 @@ import {
   EllipsisVertical,
   Eye,
   Hash,
+  History,
   MoreVertical,
   Printer,
   Truck,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -34,6 +35,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -55,7 +57,10 @@ import {
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
 import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
-import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
+import {
+  AddSupplyDeliveryForm,
+  AddSupplyDeliveryFormHandle,
+} from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
@@ -69,6 +74,7 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
+  ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -244,6 +250,10 @@ export function DeliveryOrderShow({
     condition: SupplyDeliveryCondition.normal,
   });
   const [showAllDeliveries, setShowAllDeliveries] = useState(false);
+  const [showCancelledDeliveries, setShowCancelledDeliveries] = useState(false);
+  const deliveryFormRef = useRef<AddSupplyDeliveryFormHandle>(null);
+  const [editingDeliveryIds, setEditingDeliveryIds] = useState<string[]>([]);
+  const [hasPendingItemChanges, setHasPendingItemChanges] = useState(false);
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
   const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
@@ -293,6 +303,7 @@ export function DeliveryOrderShow({
         queryClient.invalidateQueries({
           queryKey: ["supplyDeliveries", deliveryOrderId],
         });
+        queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
         toast.success(t("supply_deliveries_updated_successfully"));
       },
       onError: (_error) => {
@@ -496,6 +507,18 @@ export function DeliveryOrderShow({
   const isWithinUpsertLimit =
     selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
 
+  const activeSupplyDeliveries =
+    supplyDeliveries?.results.filter((delivery) =>
+      ACTIVE_SUPPLY_DELIVERY_STATUSES.some(
+        (status) => status === delivery.status,
+      ),
+    ) ?? [];
+  const cancelledDeliveriesCount =
+    (supplyDeliveries?.results.length ?? 0) - activeSupplyDeliveries.length;
+  const visibleSupplyDeliveries = showCancelledDeliveries
+    ? (supplyDeliveries?.results ?? [])
+    : activeSupplyDeliveries;
+
   return (
     <Page
       title={t("delivery_order_details")}
@@ -511,7 +534,7 @@ export function DeliveryOrderShow({
             : "md:max-w-[calc(100vw-9rem)]",
         )}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button
               size="icon"
@@ -551,7 +574,7 @@ export function DeliveryOrderShow({
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {supplyOrderId && (
               <Button variant="outline" asChild>
                 <Link
@@ -572,21 +595,30 @@ export function DeliveryOrderShow({
             </Button>
 
             {(!isRequester || !internal) &&
-              deliveryOrder.status === DeliveryOrderStatus.draft && (
+              deliveryOrder.status === DeliveryOrderStatus.draft &&
+              (hasPendingItemChanges ? (
+                <Button variant="outline" disabled>
+                  <Edit /> {t("edit_order")}
+                </Button>
+              ) : (
                 <Button variant="outline" asChild>
                   <Link href={`${deliveryOrderId}/edit`}>
-                    <Edit /> {t("edit")}
+                    <Edit /> {t("edit_order")}
                     <ShortcutBadge actionId="edit-order" />
                   </Link>
                 </Button>
-              )}
+              ))}
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
                 onClick={() =>
                   handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.pending)
                 }
-                disabled={isUpdating || supplyDeliveries?.results.length === 0}
+                disabled={
+                  isUpdating ||
+                  hasPendingItemChanges ||
+                  activeSupplyDeliveries.length === 0
+                }
               >
                 {isUpdating ? t("updating") : t("mark_as_approved")}
                 <ShortcutBadge actionId="mark-as" />
@@ -615,7 +647,11 @@ export function DeliveryOrderShow({
             {deliveryOrderStatusActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={hasPendingItemChanges}
+                  >
                     <EllipsisVertical className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -645,6 +681,12 @@ export function DeliveryOrderShow({
             )}
           </div>
         </div>
+
+        {hasPendingItemChanges && (
+          <p className="text-sm text-gray-600" role="status">
+            {t("save_or_discard_delivery_changes")}
+          </p>
+        )}
 
         {/* Delivery Order Details */}
         <Card>
@@ -791,7 +833,7 @@ export function DeliveryOrderShow({
 
         {/* Supply Deliveries Section */}
         <Card>
-          <CardHeader className="text-lg flex flex-row justify-between">
+          <CardHeader className="text-lg flex flex-row flex-wrap items-center justify-between gap-2">
             <CardTitle>
               {isRequester
                 ? deliveryOrder.status === DeliveryOrderStatus.completed
@@ -799,7 +841,22 @@ export function DeliveryOrderShow({
                   : t("items_to_receive")
                 : t("supply_deliveries")}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {cancelledDeliveriesCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={showCancelledDeliveries}
+                  onClick={() => setShowCancelledDeliveries((show) => !show)}
+                >
+                  <History className="size-4" />
+                  {showCancelledDeliveries
+                    ? t("hide_cancelled_items")
+                    : t("show_cancelled_items", {
+                        count: cancelledDeliveriesCount,
+                      })}
+                </Button>
+              )}
               {deliveryOrder.status === DeliveryOrderStatus.pending && (
                 <Button
                   variant="outline"
@@ -885,11 +942,10 @@ export function DeliveryOrderShow({
             ) : (
               <div className="space-y-6">
                 {/* Existing Supply Deliveries Table */}
-                {supplyDeliveries?.results &&
-                supplyDeliveries.results.length > 0 ? (
+                {visibleSupplyDeliveries.length > 0 ? (
                   <div className="space-y-4">
                     <SupplyDeliveryTable
-                      deliveries={supplyDeliveries.results}
+                      deliveries={visibleSupplyDeliveries}
                       showCheckbox={
                         deliveryOrder.status === DeliveryOrderStatus.pending &&
                         isRequester
@@ -915,12 +971,7 @@ export function DeliveryOrderShow({
                       onSelectAll={(checked) => {
                         if (checked) {
                           setSelectedDeliveries(
-                            supplyDeliveries.results
-                              .filter(
-                                (d) =>
-                                  d.status === SupplyDeliveryStatus.in_progress,
-                              )
-                              .map((d) => d.id),
+                            inprogressSupplyDeliveries.map((d) => d.id),
                           );
                         } else {
                           setSelectedDeliveries([]);
@@ -929,6 +980,14 @@ export function DeliveryOrderShow({
                       internal={internal}
                       facilityId={facilityId}
                       linkToProduct
+                      editingDeliveryIds={editingDeliveryIds}
+                      onEditDelivery={
+                        canAddSupplyDeliveries && !internal
+                          ? (delivery) => {
+                              deliveryFormRef.current?.editDelivery(delivery);
+                            }
+                          : undefined
+                      }
                       onDeliveryClick={(delivery) => {
                         setShowAllDeliveries(true);
                         setSelectedProductKnowledgeDrawer(
@@ -941,9 +1000,11 @@ export function DeliveryOrderShow({
                       deliveryOrderStatus={deliveryOrder.status}
                     />
                   </div>
-                ) : (
-                  <></>
-                )}
+                ) : cancelledDeliveriesCount > 0 ? (
+                  <p className="py-6 text-center text-sm text-gray-500">
+                    {t("no_active_deliveries")}
+                  </p>
+                ) : null}
 
                 {hasReachedUpsertLimit && canAddSupplyDeliveries && (
                   <UpsertLimitCallout>
@@ -954,16 +1015,22 @@ export function DeliveryOrderShow({
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
-                {canAddSupplyDeliveries && !hasReachedUpsertLimit && (
-                  <AddSupplyDeliveryForm
-                    deliveryOrderId={deliveryOrderId}
-                    facilityId={facilityId}
-                    origin={deliveryOrder.origin?.id}
-                    destination={deliveryOrder.destination.id}
-                    onSuccess={handleSupplyDeliverySuccess}
-                    supplyDeliveriesCount={inprogressSupplyDeliveries.length}
-                    isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
-                  />
+                {canAddSupplyDeliveries && (
+                  <div>
+                    <AddSupplyDeliveryForm
+                      ref={deliveryFormRef}
+                      deliveryOrderId={deliveryOrderId}
+                      facilityId={facilityId}
+                      origin={deliveryOrder.origin?.id}
+                      destination={deliveryOrder.destination.id}
+                      onSuccess={handleSupplyDeliverySuccess}
+                      supplyDeliveriesCount={inprogressSupplyDeliveries.length}
+                      isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
+                      currentSupplyDeliveries={supplyDeliveries?.results ?? []}
+                      onEditingDeliveryIdsChange={setEditingDeliveryIds}
+                      onPendingChangesChange={setHasPendingItemChanges}
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -983,7 +1050,10 @@ export function DeliveryOrderShow({
         >
           <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10 ">
             <DrawerHeader>
-              <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
+              <DrawerTitle>{t("delivery_history")}</DrawerTitle>
+              <DrawerDescription>
+                {t("delivery_history_description")}
+              </DrawerDescription>
             </DrawerHeader>
             <div>
               <div className="flex items-center justify-end px-4">
