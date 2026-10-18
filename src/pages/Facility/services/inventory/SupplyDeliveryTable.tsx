@@ -51,6 +51,7 @@ import {
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { add, round } from "@/Utils/decimal";
+import { getProductExpiryDate } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { ExtensionContexts } from "@/Utils/schema/types";
@@ -277,7 +278,8 @@ export function SupplyDeliveryTable({
             <TableHead
               rowSpan={2}
               className={cn(
-                onEditDelivery && "sticky right-0 z-10 bg-gray-100 border-l",
+                onEditDelivery &&
+                  "sm:sticky sm:right-0 z-10 bg-gray-100 border-l",
               )}
             >
               {t("actions")}
@@ -301,9 +303,10 @@ export function SupplyDeliveryTable({
           const isInactive =
             delivery.status === SupplyDeliveryStatus.abandoned ||
             delivery.status === SupplyDeliveryStatus.entered_in_error;
-          const expiry =
+          const expiry = getProductExpiryDate(
             delivery.supplied_inventory_item?.product?.expiration_date ||
-            delivery.supplied_item?.expiration_date;
+              delivery.supplied_item?.expiration_date,
+          );
           return (
             <TableRow
               key={delivery.id}
@@ -332,7 +335,7 @@ export function SupplyDeliveryTable({
                   isInactive && "bg-gray-50",
                 )}
               >
-                <div className="flex w-40 items-center gap-2 sm:w-56">
+                <div className="flex w-24 items-center gap-2 sm:w-56">
                   <ProductLink
                     delivery={delivery}
                     internal={internal}
@@ -496,7 +499,8 @@ export function SupplyDeliveryTable({
               {showActionsColumn && (
                 <TableCell
                   className={cn(
-                    onEditDelivery && "sticky right-0 z-10 border-l bg-white",
+                    onEditDelivery &&
+                      "sm:sticky sm:right-0 z-10 border-l bg-white",
                     onEditDelivery && isEditing && "bg-primary-50",
                   )}
                 >

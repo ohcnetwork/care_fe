@@ -3,6 +3,8 @@ import {
   endOfMonth,
   formatDate,
   isAfter,
+  isValid,
+  parseISO,
   startOfMonth,
 } from "date-fns";
 
@@ -11,6 +13,37 @@ import { InventoryRead } from "@/types/inventory/product/inventory";
 import careConfig from "@careConfig";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid";
+
+/**
+ * Recover the product expiry's calendar date in the backend timezone.
+ * Date-only and timezone-less ISO values already use that calendar.
+ */
+export function getProductExpiryDate(value?: string | null): string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(value)) return "";
+
+  const date = parseISO(value);
+  if (!isValid(date)) return "";
+
+  if (!/[Z+-]/i.test(value.slice(10))) return value.slice(0, 10);
+
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: careConfig.inventory.expiryTimeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+    const year = parts.find((part) => part.type === "year")?.value;
+    const month = parts.find((part) => part.type === "month")?.value;
+    const day = parts.find((part) => part.type === "day")?.value;
+
+    return year && month && day
+      ? `${year.padStart(4, "0")}-${month}-${day}`
+      : "";
+  } catch {
+    return "";
+  }
+}
 
 /**
  * Gets the expiry status of a product based on its expiration date

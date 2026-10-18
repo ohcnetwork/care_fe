@@ -10,6 +10,7 @@ import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 import type { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import type { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -85,15 +86,43 @@ async function createExternalDeliveryDraft(
     ),
   );
   const referenceProduct = products.results.find(
-    ({ charge_item_definition }) => charge_item_definition,
+    ({ charge_item_definition }) => charge_item_definition?.category?.slug,
   );
   expect(
     referenceProduct,
     "The test facility must include a priced product fixture",
   ).toBeDefined();
 
-  let chargeItemSlug = referenceProduct!.charge_item_definition!.slug;
-  if (options.metadata) {
+  const referenceKnowledge = await responseData<ProductKnowledgeBase>(
+    await page.request.get(
+      `${apiUrl}/api/v1/product_knowledge/${referenceProduct!.product_knowledge.slug}/`,
+      { headers },
+    ),
+  );
+  const productKnowledge = await responseData<ProductKnowledgeBase>(
+    await page.request.post(`${apiUrl}/api/v1/product_knowledge/`, {
+      headers,
+      data: {
+        status: "active",
+        product_type: "consumable",
+        name: `Delivery product ${faker.string.alphanumeric(10)}`,
+        slug_value: faker.string.uuid(),
+        facility: facilityId,
+        base_unit: referenceKnowledge.base_unit,
+        names: [],
+        storage_guidelines: [],
+        definitional: null,
+      },
+    }),
+  );
+  const referenceDefinition = await responseData<ChargeItemDefinitionRead>(
+    await page.request.get(
+      `${apiUrl}/api/v1/facility/${facilityId}/charge_item_definition/${referenceProduct!.charge_item_definition!.slug}/`,
+      { headers },
+    ),
+  );
+  let chargeItemSlug: string | undefined;
+  if (!options.withoutPricingMetadata) {
     const definition = await responseData<{ slug: string }>(
       await page.request.post(
         `${apiUrl}/api/v1/facility/${facilityId}/charge_item_definition/`,
@@ -101,60 +130,71 @@ async function createExternalDeliveryDraft(
           headers,
           data: {
             slug_value: faker.string.uuid(),
-            category: referenceProduct!.charge_item_definition!.category!.slug,
+            category: referenceDefinition.category?.slug ?? null,
             title: `Metadata pricing ${faker.string.alphanumeric(10)}`,
             status: "active",
-            can_edit_charge_item: true,
-            discount_configuration: {
-              max_applicable: 1,
-              applicability_order: "total_desc",
-            },
-            derived_from_uri: "urn:care:delivery-edit:source",
-            description: "Retain the existing pricing description",
-            purpose: "Retain the existing pricing purpose",
-            price_components: [
-              {
-                monetary_component_type: "base",
-                amount: "10",
-                code: {
-                  system: "urn:care:delivery-edit",
-                  code: "base-reference",
-                  display: "Base reference",
-                },
-              },
-              {
-                monetary_component_type: "surcharge",
-                amount: "2.5",
-                code: {
-                  system: "urn:care:delivery-edit",
-                  code: "handling-fee",
-                  display: "Handling fee",
-                },
-              },
-              {
-                monetary_component_type: "tax",
-                factor: "18",
-                code: {
-                  system: "urn:care:delivery-edit",
-                  code: "tax-reference",
-                  display: "Tax reference",
-                },
-              },
-              {
-                monetary_component_type: "discount",
-                factor: "5",
-                code: {
-                  system: "urn:care:delivery-edit",
-                  code: "discount-reference",
-                  display: "Discount reference",
-                },
-              },
-            ],
+            can_edit_charge_item: options.metadata
+              ? true
+              : referenceDefinition.can_edit_charge_item,
+            discount_configuration: options.metadata
+              ? { max_applicable: 1, applicability_order: "total_desc" }
+              : referenceDefinition.discount_configuration,
+            derived_from_uri: options.metadata
+              ? "urn:care:delivery-edit:source"
+              : referenceDefinition.derived_from_uri,
+            description: options.metadata
+              ? "Retain the existing pricing description"
+              : referenceDefinition.description,
+            purpose: options.metadata
+              ? "Retain the existing pricing purpose"
+              : referenceDefinition.purpose,
+            price_components: options.metadata
+              ? [
+                  {
+                    monetary_component_type: "base",
+                    amount: "10.123456",
+                    code: {
+                      system: "urn:care:delivery-edit",
+                      code: "base-reference",
+                      display: "Base reference",
+                    },
+                  },
+                  {
+                    monetary_component_type: "surcharge",
+                    amount: "2.5",
+                    code: {
+                      system: "urn:care:delivery-edit",
+                      code: "handling-fee",
+                      display: "Handling fee",
+                    },
+                  },
+                  {
+                    monetary_component_type: "tax",
+                    factor: "18",
+                    code: {
+                      system: "urn:care:delivery-edit",
+                      code: "tax-reference",
+                      display: "Tax reference",
+                    },
+                  },
+                  {
+                    monetary_component_type: "discount",
+                    factor: "5",
+                    code: {
+                      system: "urn:care:delivery-edit",
+                      code: "discount-reference",
+                      display: "Discount reference",
+                    },
+                  },
+                ]
+              : [{ monetary_component_type: "base", amount: "10" }],
           },
         },
       ),
     );
     chargeItemSlug = definition.slug;
+  }
+  if (options.metadata) {
     const tag = await responseData<{ id: string }>(
       await page.request.post(`${apiUrl}/api/v1/tag_config/`, {
         headers,
@@ -183,16 +223,13 @@ async function createExternalDeliveryDraft(
         headers,
         data: {
           status: "active",
-          product_knowledge: referenceProduct!.product_knowledge.slug,
+          product_knowledge: productKnowledge.slug,
           charge_item_definition: options.withoutPricingMetadata
             ? null
             : chargeItemSlug,
           ...(!options.withoutPricingMetadata && {
             batch: { lot_number: batch },
-            expiration_date: faker.date
-              .future({ years: 2 })
-              .toISOString()
-              .slice(0, 10),
+            expiration_date: "2031-01-31",
           }),
           standard_pack_size: 5,
           purchase_price: options.withoutPricingMetadata ? null : "2.5",
@@ -272,7 +309,7 @@ async function createExternalDeliveryDraft(
 test.describe("External delivery draft items", () => {
   test("preserves cancelled history and replaces an item only when an edit is saved", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const {
       facilityId,
       apiUrl,
@@ -302,15 +339,6 @@ test.describe("External delivery draft items", () => {
         }),
       );
     };
-    const waitForOrderSummary = () =>
-      page
-        .waitForResponse(
-          (response) =>
-            response.url() === orderApiUrl &&
-            response.request().method() === "GET",
-          { timeout: 10000 },
-        )
-        .catch(() => null);
     await page.goto(deliveryUrl);
     const savedRows = page.locator("table tbody tr").filter({ hasText: batch });
     const savedTable = page.getByRole("table").filter({
@@ -380,6 +408,13 @@ test.describe("External delivery draft items", () => {
       });
       await expect(packQuantity).toHaveValue("");
       await expect(quantity).toHaveValue("");
+      await editForm.locator('input[type="date"]').fill("2032-01-31");
+      await expect
+        .soft(editForm.locator('input[type="number"]:disabled').last())
+        .toHaveValue(/^2\.5(?:0+)?$/);
+      await expect(
+        editForm.getByRole("spinbutton", { name: "TPR", exact: true }),
+      ).toHaveValue("");
 
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect(
@@ -398,6 +433,9 @@ test.describe("External delivery draft items", () => {
 
       await packQuantity.fill("3");
       await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
+      await expect
+        .soft(editForm.getByRole("spinbutton", { name: "TPR", exact: true }))
+        .toHaveValue(/^37\.5(?:0+)?$/);
       await editForm.getByPlaceholder("Batch #").click();
       await page
         .getByRole("option")
@@ -440,7 +478,9 @@ test.describe("External delivery draft items", () => {
           response.request().method() === "POST",
       );
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
-      expect((await preparedProduct).ok()).toBe(true);
+      const preparedResponse = await preparedProduct;
+      expect(preparedResponse.ok()).toBe(true);
+      const firstPrepared = (await preparedResponse.json()) as ProductFixture;
       expect((await failedDelivery).status()).toBe(404);
       await expect(editForm).toBeVisible();
       await expect(
@@ -456,6 +496,82 @@ test.describe("External delivery draft items", () => {
         ),
       );
       expect(afterPreparationFailure.results).toHaveLength(3);
+
+      await packQuantity.fill("4");
+      await expect(quantity).toHaveValue(/^20(?:\.0+)?$/);
+      await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      await page.route(
+        `${apiUrl}/api/v1/facility/${facilityId}/product/`,
+        async (route) => {
+          const payload = route.request().postDataJSON() as Record<
+            string,
+            unknown
+          >;
+          payload.product_knowledge = `missing-${faker.string.uuid()}`;
+          await route.continue({ postData: JSON.stringify(payload) });
+        },
+        { times: 1 },
+      );
+      const failedProduct = page.waitForResponse(
+        (response) =>
+          response.url() ===
+            `${apiUrl}/api/v1/facility/${facilityId}/product/` &&
+          response.request().method() === "POST",
+      );
+      await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
+      const productFailure = await failedProduct;
+      expect(productFailure.status()).toBe(404);
+      const preparedDefinition = productFailure.request().postDataJSON()
+        .charge_item_definition as string;
+      expect
+        .soft(preparedDefinition)
+        .not.toBe(firstPrepared.charge_item_definition?.slug);
+      await expect(
+        editForm.getByRole("button", { name: /^Save Changes\b/ }),
+      ).toBeEnabled();
+
+      await page.route(
+        `${apiUrl}/api/v1/supply_delivery/`,
+        async (route) => {
+          const payload = route.request().postDataJSON() as Record<
+            string,
+            unknown
+          >;
+          payload.supplied_item = faker.string.uuid();
+          await route.continue({ postData: JSON.stringify(payload) });
+        },
+        { times: 1 },
+      );
+      const retriedProduct = page.waitForResponse(
+        (response) =>
+          response.url() ===
+            `${apiUrl}/api/v1/facility/${facilityId}/product/` &&
+          response.request().method() === "POST",
+      );
+      const retriedDelivery = page.waitForResponse(
+        (response) =>
+          response.url() === `${apiUrl}/api/v1/supply_delivery/` &&
+          response.request().method() === "POST",
+      );
+      await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
+      const retriedResponse = await retriedProduct;
+      expect(retriedResponse.ok()).toBe(true);
+      const secondPrepared = (await retriedResponse.json()) as ProductFixture;
+      expect(secondPrepared.id).not.toBe(firstPrepared.id);
+      expect(secondPrepared.charge_item_definition?.slug).toBe(
+        preparedDefinition,
+      );
+      expect((await retriedDelivery).status()).toBe(404);
+      await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      const unchangedPrepared = await responseData<ProductFixture>(
+        await page.request.get(
+          `${apiUrl}/api/v1/facility/${facilityId}/product/${firstPrepared.id}/`,
+          { headers },
+        ),
+      );
+      expect(unchangedPrepared.charge_item_definition).toEqual(
+        firstPrepared.charge_item_definition,
+      );
 
       await editForm
         .getByRole("button", { name: "Discard Changes", exact: true })
@@ -485,6 +601,71 @@ test.describe("External delivery draft items", () => {
       await expect(editForm.getByRole("radiogroup")).not.toBeVisible();
       await expect(page.getByText("Editing", { exact: true })).toBeVisible();
       await expect(approveButton).toBeDisabled();
+
+      const desktopViewport = page.viewportSize()!;
+      await page.setViewportSize({ width: 320, height: 900 });
+      for (const [name, input] of [
+        [
+          "pack-quantity",
+          editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
+        ],
+        ["expiry", editForm.locator('input[type="date"]')],
+      ] as const) {
+        await input.evaluate((element) =>
+          element.scrollIntoView({
+            block: "center",
+            inline: "center",
+            behavior: "instant",
+          }),
+        );
+        const bounds = await input.evaluate((element) => {
+          const row = element.closest("tr")!;
+          const medicine = row
+            .querySelector('[role="combobox"]')!
+            .closest("td")!;
+          const actions = row.lastElementChild!;
+          const target = element.getBoundingClientRect();
+          const clip = row
+            .closest("table")!
+            .parentElement!.getBoundingClientRect();
+          return {
+            left: target.left,
+            right: target.right,
+            top: target.top,
+            bottom: target.bottom,
+            viewportHeight: window.innerHeight,
+            visibleLeft: Math.max(
+              0,
+              clip.left,
+              medicine.getBoundingClientRect().right,
+            ),
+            visibleRight: Math.min(
+              window.innerWidth,
+              clip.right,
+              actions.getBoundingClientRect().left,
+            ),
+          };
+        });
+        expect
+          .soft(bounds.left, `${name} must clear the sticky medicine column`)
+          .toBeGreaterThanOrEqual(bounds.visibleLeft - 1);
+        expect
+          .soft(bounds.right, `${name} must clear the actions column`)
+          .toBeLessThanOrEqual(bounds.visibleRight + 1);
+        expect
+          .soft(bounds.top, `${name} must be vertically visible`)
+          .toBeGreaterThanOrEqual(0);
+        expect
+          .soft(bounds.bottom, `${name} must be vertically visible`)
+          .toBeLessThanOrEqual(bounds.viewportHeight);
+        await expect(editForm.getByRole("combobox")).toBeInViewport({
+          ratio: 1,
+        });
+        await page.screenshot({
+          path: testInfo.outputPath(`saved-edit-320px-${name}.png`),
+        });
+      }
+      await page.setViewportSize(desktopViewport);
 
       await scrollTableRight(editForm.getByRole("table"));
       await expect(
@@ -590,11 +771,9 @@ test.describe("External delivery draft items", () => {
       await expect(
         page.getByText(updatedNote, { exact: true }),
       ).not.toBeVisible();
-      const refreshedSummary = waitForOrderSummary();
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       await expect(editForm).not.toBeVisible();
       await expect(page.getByText(updatedNote, { exact: true })).toBeVisible();
-      expect((await refreshedSummary)?.ok()).toBe(true);
       await page.reload();
       await expect(page.locator("table tbody tr")).toHaveCount(1);
       await expect(
@@ -687,12 +866,10 @@ test.describe("External delivery draft items", () => {
         );
       const successfulItem = waitForCreatedItem(3);
       const failedItem = waitForCreatedItem(4);
-      const refreshedSummary = waitForOrderSummary();
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect((await successfulItem).ok()).toBe(true);
       expect((await failedItem).status()).toBe(404);
       await expect(page.getByText(updatedNote, { exact: true })).toBeVisible();
-      expect((await refreshedSummary)?.ok()).toBe(true);
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
       await expect(
         editForm.getByRole("spinbutton", { name: "Pack Qty", exact: true }),
@@ -858,7 +1035,7 @@ test.describe("External delivery draft items", () => {
   });
 
   for (const withoutPricingMetadata of [false, true]) {
-    test(`persists the purchase prices displayed after a quantity-only edit for ${withoutPricingMetadata ? "a product without pricing or batch metadata" : "a priced product"}`, async ({
+    test(`${withoutPricingMetadata ? "persists a legacy total correction without inventing batch or pricing metadata" : "persists the purchase prices displayed after a quantity-only edit for a priced product"}`, async ({
       page,
     }) => {
       const fixture = await createExternalDeliveryDraft(page, {
@@ -882,6 +1059,11 @@ test.describe("External delivery draft items", () => {
         name: "Pending changes",
         exact: true,
       });
+      if (withoutPricingMetadata) {
+        await form
+          .getByRole("spinbutton", { name: "TPR", exact: true })
+          .fill("30");
+      }
       await form
         .getByRole("spinbutton", { name: "Pack Qty", exact: true })
         .fill("3");
@@ -897,7 +1079,7 @@ test.describe("External delivery draft items", () => {
         .getByRole("spinbutton", { name: "TPR", exact: true })
         .inputValue();
       expect(Number(displayedPurchasePrice)).toBeGreaterThan(0);
-      expect(Number(displayedTotal)).toBe(25);
+      expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 25);
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
       await expect(form).not.toBeVisible();
       const saved = await responseData<{
@@ -939,172 +1121,210 @@ test.describe("External delivery draft items", () => {
     });
   }
 
-  test("preserves metadata and isolates pricing when correcting expiry and sale pricing", async ({
-    page,
-  }) => {
-    const fixture = await createExternalDeliveryDraft(page, { metadata: true });
-    await page.goto(fixture.deliveryUrl);
-    const row = page
-      .locator("table tbody tr")
-      .filter({ hasText: fixture.batch });
-    await row.getByRole("button", { name: "Actions", exact: true }).click();
-    await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
-    const form = page.getByRole("form", {
-      name: "Pending changes",
-      exact: true,
-    });
-    await form.locator('input[type="date"]').fill("2031-02-28");
-    await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-    await expect(form).not.toBeVisible();
-    const saved = await responseData<{ results: DeliveryItem[] }>(
-      await page.request.get(
-        `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
-        { headers: fixture.headers },
-      ),
-    );
-    const active = saved.results.filter(
-      ({ status }) => status === "in_progress",
-    );
-    expect(active).toHaveLength(1);
-    const replacement = await responseData<ProductFixture>(
-      await page.request.get(
-        `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${active[0].supplied_item.id}/`,
-        { headers: fixture.headers },
-      ),
-    );
-    expect(replacement.extensions).toEqual(fixture.product.extensions);
-    expect(replacement.charge_item_definition?.slug).toBeTruthy();
-    expect(replacement.charge_item_definition?.slug).not.toBe(
-      fixture.product.charge_item_definition?.slug,
-    );
-    for (const key of [
-      "can_edit_charge_item",
-      "discount_configuration",
-      "derived_from_uri",
-      "description",
-      "purpose",
-      "price_components",
-      "tags",
-    ]) {
-      expect(replacement.charge_item_definition?.[key], key).toEqual(
-        fixture.product.charge_item_definition?.[key],
-      );
-    }
+  test.describe("Metadata corrections in a western timezone", () => {
+    test.use({ timezoneId: "America/Los_Angeles" });
 
-    const definitionsUrl = `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/charge_item_definition`;
-    const clonedDefinition = await responseData<ChargeItemDefinitionRead>(
-      await page.request.get(
-        `${definitionsUrl}/${replacement.charge_item_definition!.slug}/`,
-        { headers: fixture.headers },
-      ),
-    );
-    const changedClone = await responseData<ChargeItemDefinitionRead>(
-      await page.request.put(`${definitionsUrl}/${clonedDefinition.slug}/`, {
-        headers: fixture.headers,
-        data: {
-          slug_value: clonedDefinition.slug_config.slug_value,
-          category: clonedDefinition.category.slug,
-          title: clonedDefinition.title,
-          status: clonedDefinition.status,
-          can_edit_charge_item: clonedDefinition.can_edit_charge_item,
-          discount_configuration: clonedDefinition.discount_configuration,
-          derived_from_uri: clonedDefinition.derived_from_uri,
-          description: clonedDefinition.description,
-          purpose: clonedDefinition.purpose,
-          version: clonedDefinition.version,
-          price_components: clonedDefinition.price_components.map(
-            (component) =>
-              component.monetary_component_type === "base"
-                ? { ...component, amount: "12" }
-                : component,
+    test("preserves metadata and isolates pricing when correcting expiry and sale pricing", async ({
+      page,
+    }) => {
+      const fixture = await createExternalDeliveryDraft(page, {
+        metadata: true,
+      });
+      await page.goto(fixture.deliveryUrl);
+      const row = page
+        .locator("table tbody tr")
+        .filter({ hasText: fixture.batch });
+      await row.getByRole("button", { name: "Actions", exact: true }).click();
+      await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+      const form = page.getByRole("form", {
+        name: "Pending changes",
+        exact: true,
+      });
+      await expect
+        .soft(form.locator('input[type="date"]'))
+        .toHaveValue("2031-01-31");
+      const itemPrice = form.getByRole("spinbutton", {
+        name: "Item Price",
+        exact: true,
+      });
+      expect
+        .soft(
+          await itemPrice.evaluate(
+            (element) => (element as HTMLInputElement).validity.stepMismatch,
           ),
-        },
-      }),
-    );
-    expect(
-      Number(
-        changedClone.price_components.find(
-          ({ monetary_component_type }) => monetary_component_type === "base",
-        )?.amount,
-      ),
-    ).toBe(12);
-    const unchangedOriginal = await responseData<ChargeItemDefinitionRead>(
-      await page.request.get(
-        `${definitionsUrl}/${fixture.product.charge_item_definition!.slug}/`,
-        { headers: fixture.headers },
-      ),
-    );
-    expect(unchangedOriginal.price_components).toEqual(
-      fixture.product.charge_item_definition?.price_components,
-    );
-
-    await page.reload();
-
-    await row.getByRole("button", { name: "Actions", exact: true }).click();
-    await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
-    await expect(
-      form.getByRole("spinbutton", { name: "Item Price", exact: true }),
-    ).toHaveValue(/^12(?:\.0+)?$/);
-    await form
-      .getByRole("spinbutton", { name: "Item Price", exact: true })
-      .fill("11");
-    await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-    await expect(form).not.toBeVisible();
-    const pricedLines = await responseData<{ results: DeliveryItem[] }>(
-      await page.request.get(
-        `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
-        { headers: fixture.headers },
-      ),
-    );
-    const pricedActive = pricedLines.results.filter(
-      ({ status }) => status === "in_progress",
-    );
-    expect(pricedActive).toHaveLength(1);
-    const pricedReplacement = await responseData<ProductFixture>(
-      await page.request.get(
-        `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${pricedActive[0].supplied_item.id}/`,
-        { headers: fixture.headers },
-      ),
-    );
-    expect(pricedReplacement.extensions).toEqual(fixture.product.extensions);
-    expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
-      replacement.charge_item_definition?.slug,
-    );
-    expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
-      fixture.product.charge_item_definition?.slug,
-    );
-    for (const key of [
-      "can_edit_charge_item",
-      "discount_configuration",
-      "derived_from_uri",
-      "description",
-      "purpose",
-      "tags",
-    ]) {
-      expect(pricedReplacement.charge_item_definition?.[key], key).toEqual(
-        fixture.product.charge_item_definition?.[key],
+        )
+        .toBe(false);
+      // A tax-inclusive toggle with no MRP leaves the entered base price unchanged.
+      // It also lets this scenario reach pricing persistence when native step validation regresses.
+      await form
+        .getByRole("checkbox", { name: "Tax Inclusive", exact: true })
+        .check();
+      await form.locator('input[type="date"]').fill("2031-02-28");
+      await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+      await expect(form).not.toBeVisible();
+      const saved = await responseData<{ results: DeliveryItem[] }>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+          { headers: fixture.headers },
+        ),
       );
-    }
-    const sourceComponents =
-      fixture.product.charge_item_definition?.price_components ?? [];
-    const pricedComponents =
-      pricedReplacement.charge_item_definition?.price_components ?? [];
-    const sourceBase = sourceComponents.find(
-      ({ monetary_component_type }) => monetary_component_type === "base",
-    );
-    const pricedBase = pricedComponents.find(
-      ({ monetary_component_type }) => monetary_component_type === "base",
-    );
-    expect(Number(pricedBase?.amount)).toBe(11);
-    expect(pricedBase?.code).toEqual(sourceBase?.code);
-    expect(
-      pricedComponents.filter(
-        ({ monetary_component_type }) => monetary_component_type !== "base",
-      ),
-    ).toEqual(
-      sourceComponents.filter(
-        ({ monetary_component_type }) => monetary_component_type !== "base",
-      ),
-    );
+      const active = saved.results.filter(
+        ({ status }) => status === "in_progress",
+      );
+      expect(active).toHaveLength(1);
+      const replacement = await responseData<ProductFixture>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${active[0].supplied_item.id}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      expect(replacement.extensions).toEqual(fixture.product.extensions);
+      expect(replacement.charge_item_definition?.slug).toBeTruthy();
+      expect(replacement.charge_item_definition?.slug).not.toBe(
+        fixture.product.charge_item_definition?.slug,
+      );
+      for (const key of [
+        "can_edit_charge_item",
+        "discount_configuration",
+        "derived_from_uri",
+        "description",
+        "purpose",
+        "tags",
+      ]) {
+        expect
+          .soft(replacement.charge_item_definition?.[key], key)
+          .toEqual(fixture.product.charge_item_definition?.[key]);
+      }
+      const unchangedComponents =
+        fixture.product.charge_item_definition?.price_components ?? [];
+      expect
+        .soft(replacement.charge_item_definition?.price_components)
+        .toHaveLength(unchangedComponents.length);
+      expect
+        .soft(replacement.charge_item_definition?.price_components)
+        .toEqual(expect.arrayContaining(unchangedComponents));
+
+      const definitionsUrl = `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/charge_item_definition`;
+      const clonedDefinition = await responseData<ChargeItemDefinitionRead>(
+        await page.request.get(
+          `${definitionsUrl}/${replacement.charge_item_definition!.slug}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      const changedClone = await responseData<ChargeItemDefinitionRead>(
+        await page.request.put(`${definitionsUrl}/${clonedDefinition.slug}/`, {
+          headers: fixture.headers,
+          data: {
+            slug_value: clonedDefinition.slug_config.slug_value,
+            category: clonedDefinition.category.slug,
+            title: clonedDefinition.title,
+            status: clonedDefinition.status,
+            can_edit_charge_item: clonedDefinition.can_edit_charge_item,
+            discount_configuration: clonedDefinition.discount_configuration,
+            derived_from_uri: clonedDefinition.derived_from_uri,
+            description: clonedDefinition.description,
+            purpose: clonedDefinition.purpose,
+            version: clonedDefinition.version,
+            price_components: clonedDefinition.price_components.map(
+              (component) =>
+                component.monetary_component_type === "base"
+                  ? { ...component, amount: "12" }
+                  : component,
+            ),
+          },
+        }),
+      );
+      expect(
+        Number(
+          changedClone.price_components.find(
+            ({ monetary_component_type }) => monetary_component_type === "base",
+          )?.amount,
+        ),
+      ).toBe(12);
+      const unchangedOriginal = await responseData<ChargeItemDefinitionRead>(
+        await page.request.get(
+          `${definitionsUrl}/${fixture.product.charge_item_definition!.slug}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      expect(unchangedOriginal.price_components).toEqual(
+        fixture.product.charge_item_definition?.price_components,
+      );
+
+      await page.reload();
+
+      await row.getByRole("button", { name: "Actions", exact: true }).click();
+      await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+      await expect
+        .soft(form.locator('input[type="date"]'))
+        .toHaveValue("2031-02-28");
+      await expect(
+        form.getByRole("spinbutton", { name: "Item Price", exact: true }),
+      ).toHaveValue(/^12(?:\.0+)?$/);
+      await form
+        .getByRole("spinbutton", { name: "Item Price", exact: true })
+        .fill("11");
+      await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+      await expect(form).not.toBeVisible();
+      const pricedLines = await responseData<{ results: DeliveryItem[] }>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+          { headers: fixture.headers },
+        ),
+      );
+      const pricedActive = pricedLines.results.filter(
+        ({ status }) => status === "in_progress",
+      );
+      expect(pricedActive).toHaveLength(1);
+      const pricedReplacement = await responseData<ProductFixture>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${pricedActive[0].supplied_item.id}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      expect(pricedReplacement.extensions).toEqual(fixture.product.extensions);
+      expect
+        .soft(pricedReplacement.expiration_date)
+        .toBe(replacement.expiration_date);
+      expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
+        replacement.charge_item_definition?.slug,
+      );
+      expect(pricedReplacement.charge_item_definition?.slug).not.toBe(
+        fixture.product.charge_item_definition?.slug,
+      );
+      for (const key of [
+        "can_edit_charge_item",
+        "discount_configuration",
+        "derived_from_uri",
+        "description",
+        "purpose",
+        "tags",
+      ]) {
+        expect(pricedReplacement.charge_item_definition?.[key], key).toEqual(
+          fixture.product.charge_item_definition?.[key],
+        );
+      }
+      const sourceComponents =
+        fixture.product.charge_item_definition?.price_components ?? [];
+      const pricedComponents =
+        pricedReplacement.charge_item_definition?.price_components ?? [];
+      const sourceBase = sourceComponents.find(
+        ({ monetary_component_type }) => monetary_component_type === "base",
+      );
+      const pricedBase = pricedComponents.find(
+        ({ monetary_component_type }) => monetary_component_type === "base",
+      );
+      expect(Number(pricedBase?.amount)).toBe(11);
+      expect(pricedBase?.code).toEqual(sourceBase?.code);
+      expect(
+        pricedComponents.filter(
+          ({ monetary_component_type }) => monetary_component_type !== "base",
+        ),
+      ).toEqual(
+        sourceComponents.filter(
+          ({ monetary_component_type }) => monetary_component_type !== "base",
+        ),
+      );
+    });
   });
 });

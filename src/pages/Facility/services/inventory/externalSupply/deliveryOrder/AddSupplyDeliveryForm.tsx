@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { t as translate } from "i18next";
 import { AlertCircle, PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
@@ -96,6 +95,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { isEqual, round, zodDecimal } from "@/Utils/decimal";
+import { getProductExpiryDate } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
@@ -120,11 +120,21 @@ const supplyDeliveryItemSchema = z.object({
   charge_item_definition: z.object({ slug: z.string() }).optional(),
   _created_charge_item_definition: z.string().optional(),
   _created_product: z.string().optional(),
-  unit_price: zodDecimal({ min: 0 }).optional(),
+  unit_price: z
+    .string()
+    .refine(
+      (value) =>
+        value.trim() !== "" &&
+        Number.isFinite(Number(value)) &&
+        Number(value) >= 0,
+      { message: translate("invalid_value") },
+    )
+    .optional(),
   purchase_price: zodDecimal({ min: 0 }).optional(),
   total_purchase_price: zodDecimal({ min: 0 }).optional(),
   is_manually_edited: z.boolean().optional(),
   is_charge_item_edited: z.boolean().optional(),
+  is_total_purchase_price_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
@@ -403,9 +413,7 @@ export function AddSupplyDeliveryForm({
           supply_request: delivery.supply_request,
           _is_inward_stock: true,
           batch_number: product.batch?.lot_number || "",
-          expiry_date: product.expiration_date
-            ? format(new Date(product.expiration_date), "yyyy-MM-dd")
-            : "",
+          expiry_date: getProductExpiryDate(product.expiration_date),
           charge_item_definition: chargeItem,
           charge_item_category: chargeItem?.category?.slug,
           unit_price:
@@ -614,16 +622,16 @@ export function AddSupplyDeliveryForm({
 
         // Only validate supplied_item for external if it's NOT a new creation
         if (!origin) {
-          // If we are creating/editing, we need batch and expiry
+          // Existing delivery corrections may retain missing legacy metadata.
           if (!item.supplied_item || item.is_manually_edited) {
-            if (!item.batch_number) {
+            if (!item.replaces_delivery && !item.batch_number) {
               toast.error(
                 t("batch_number_required_at_row", { row: index + 1 }),
               );
               hasErrors = true;
               break;
             }
-            if (!item.expiry_date) {
+            if (!item.replaces_delivery && !item.expiry_date) {
               toast.error(t("expiry_date_required_at_row", { row: index + 1 }));
               hasErrors = true;
               break;
@@ -661,18 +669,35 @@ export function AddSupplyDeliveryForm({
     let chargeItemSlug = item.charge_item_definition?.slug;
     const hasPurchasePriceChange =
       sourceProduct &&
-      !isEqual(item.purchase_price, sourceProduct.purchase_price ?? undefined);
+      !isEqual(
+        item.purchase_price,
+        sourceProduct.purchase_price != null
+          ? round(sourceProduct.purchase_price)
+          : undefined,
+      );
 
     // Create ChargeItemDefinition and Product for external supply (no origin)
     if (
       !origin &&
       (!productId || item.is_manually_edited || hasPurchasePriceChange)
     ) {
+      if (!item.replaces_delivery && item.total_purchase_price != null) {
+        form.setValue(`items.${index}.is_total_purchase_price_edited`, true);
+      }
       // Each new product owns its pricing definition. Reuse only a definition
       // prepared for this draft when retrying a failed product creation.
       if (item.is_manually_edited || hasPurchasePriceChange) {
         productId = undefined;
-        chargeItemSlug = item._created_charge_item_definition;
+        if (item._created_product) {
+          chargeItemSlug = undefined;
+          form.setValue(`items.${index}._created_product`, undefined);
+          form.setValue(
+            `items.${index}._created_charge_item_definition`,
+            undefined,
+          );
+        } else {
+          chargeItemSlug = item._created_charge_item_definition;
+        }
       }
 
       // Only create ChargeItemDefinition if we don't already have one from our creation
@@ -733,7 +758,12 @@ export function AddSupplyDeliveryForm({
           batch: item.batch_number
             ? { lot_number: item.batch_number }
             : undefined,
-          expiration_date: item.expiry_date || undefined,
+          expiration_date:
+            sourceProduct?.expiration_date &&
+            item.expiry_date ===
+              getProductExpiryDate(sourceProduct.expiration_date)
+              ? sourceProduct.expiration_date
+              : item.expiry_date || undefined,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
           standard_pack_size: item.supplied_item_pack_size,
@@ -893,7 +923,7 @@ export function AddSupplyDeliveryForm({
     <>
       <DisablingCover disabled={isProcessing} message={t("saving")}>
         <Card className="bg-gray-50 py-4 rounded-md">
-          <CardContent className="space-y-4 ">
+          <CardContent className="space-y-4 px-2 sm:px-6">
             {fields.length > 0 ? (
               <Form {...form}>
                 <form
@@ -1071,7 +1101,7 @@ export function AddSupplyDeliveryForm({
                                 ))}
                                 <TableHead
                                   rowSpan={2}
-                                  className="sticky right-0 z-20 border-l bg-gray-100 text-xs font-semibold"
+                                  className="sm:sticky sm:right-0 z-20 border-l bg-gray-100 text-xs font-semibold"
                                 >
                                   {t("actions")}
                                 </TableHead>

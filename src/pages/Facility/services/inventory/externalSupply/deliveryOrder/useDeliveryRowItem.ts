@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 
@@ -21,6 +20,7 @@ import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
 import { add, divide, multiply, round } from "@/Utils/decimal";
+import { getProductExpiryDate } from "@/Utils/inventory";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -68,7 +68,7 @@ export function useDeliveryRowItem({
     informational_components: informationalComponents,
     charge_item_category: chargeItemCategory,
     is_tax_inclusive: isTaxInclusive,
-    is_manually_edited: isManuallyEdited,
+    is_total_purchase_price_edited: isTotalPurchasePriceEdited,
     is_charge_item_edited: isChargeItemEdited,
     _created_charge_item_definition: createdChargeItemDefinition,
     _created_product: createdProduct,
@@ -104,6 +104,7 @@ export function useDeliveryRowItem({
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
+      is_total_purchase_price_edited: false,
       is_charge_item_edited: false,
       supplied_item_pack_quantity: undefined,
       supplied_item_pack_size: 1,
@@ -191,10 +192,7 @@ export function useDeliveryRowItem({
       }
       setField("batch_number", product.batch?.lot_number || "");
       if (product.expiration_date) {
-        setField(
-          "expiry_date",
-          format(new Date(product.expiration_date), "yyyy-MM-dd"),
-        );
+        setField("expiry_date", getProductExpiryDate(product.expiration_date));
       }
       if (product.standard_pack_size) {
         setField("supplied_item_pack_size", product.standard_pack_size);
@@ -346,7 +344,7 @@ export function useDeliveryRowItem({
     if (
       !isReplacement &&
       suppliedItem &&
-      !isManuallyEdited &&
+      !isTotalPurchasePriceEdited &&
       !createdChargeItemDefinition &&
       !createdProduct
     ) {
@@ -387,7 +385,7 @@ export function useDeliveryRowItem({
     purchasePrice,
     isReplacement,
     suppliedItem,
-    isManuallyEdited,
+    isTotalPurchasePriceEdited,
     createdChargeItemDefinition,
     createdProduct,
     setField,

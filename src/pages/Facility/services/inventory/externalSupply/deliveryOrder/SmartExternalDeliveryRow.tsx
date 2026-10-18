@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ChevronDown, Plus, Trash2, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -33,6 +33,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { add, isPositive, round } from "@/Utils/decimal";
+import { getProductExpiryDate } from "@/Utils/inventory";
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import { SchemaField } from "@/components/Extensions/SchemaField";
@@ -122,9 +123,8 @@ export function SmartExternalDeliveryRow({
   };
 
   const getExpirationDisplay = (product: ProductRead) => {
-    return product.expiration_date
-      ? format(new Date(product.expiration_date), "MMM yyyy")
-      : "N/A";
+    const expiry = getProductExpiryDate(product.expiration_date);
+    return expiry ? format(parseISO(expiry), "MMM yyyy") : "N/A";
   };
 
   return (
@@ -139,7 +139,7 @@ export function SmartExternalDeliveryRow({
           replacesDeliveryId && "bg-primary-50",
         )}
       >
-        <div className="w-40 sm:w-56">
+        <div className="w-24 sm:w-56">
           <FormField
             control={form.control}
             name={`items.${index}.product_knowledge`}
@@ -359,7 +359,7 @@ export function SmartExternalDeliveryRow({
                     markAsEdited();
                   }}
                   disabled={!productKnowledge}
-                  className="w-full min-w-[10rem]"
+                  className="w-full min-w-[8rem] scroll-ml-28 scroll-mr-2 sm:min-w-[10rem] sm:scroll-ml-60 sm:scroll-mr-16"
                 />
               </FormControl>
               <FormMessage />
@@ -445,7 +445,7 @@ export function SmartExternalDeliveryRow({
                     )
                   }
                   disabled={!productKnowledge?.slug}
-                  className="w-[7rem] scroll-ml-44 scroll-mr-16 sm:scroll-ml-60"
+                  className="w-[7rem] scroll-ml-28 scroll-mr-2 sm:scroll-ml-60 sm:scroll-mr-16"
                 />
               </FormControl>
               <FormMessage />
@@ -472,7 +472,6 @@ export function SmartExternalDeliveryRow({
                   disabled
                 />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
@@ -488,7 +487,7 @@ export function SmartExternalDeliveryRow({
             <Input
               type="number"
               min={0}
-              step="0.01"
+              step="0.000001"
               value={unitPrice || ""}
               aria-label={t("item_price")}
               placeholder="0"
@@ -534,7 +533,7 @@ export function SmartExternalDeliveryRow({
               <Input
                 type="number"
                 min={0}
-                step="0.01"
+                step="0.000001"
                 value={currentValue?.amount || ""}
                 placeholder="0"
                 onChange={(e) => {
@@ -558,7 +557,7 @@ export function SmartExternalDeliveryRow({
           <Input
             type="number"
             min={0}
-            step="0.01"
+            step="0.000001"
             value={purchasePrice || ""}
             placeholder="0"
             disabled
@@ -574,12 +573,13 @@ export function SmartExternalDeliveryRow({
           <Input
             type="number"
             min={0}
-            step="0.01"
+            step="0.000001"
             value={totalPurchasePrice || ""}
             aria-label={t("tpr")}
             placeholder="0"
             onChange={(e) => {
               setField("total_purchase_price", e.target.value || undefined);
+              setField("is_total_purchase_price_edited", true);
               markAsEdited();
             }}
             disabled={!productKnowledge}
@@ -647,7 +647,7 @@ export function SmartExternalDeliveryRow({
 
       <TableCell
         className={cn(
-          "sticky right-0 z-10 border-l bg-white align-top p-2",
+          "sm:sticky sm:right-0 z-10 border-l bg-white align-top p-2",
           replacesDeliveryId && "bg-primary-50",
         )}
       >
