@@ -140,11 +140,6 @@ export function SmartExternalDeliveryRow({
         )}
       >
         <div className="w-40 sm:w-56">
-          {replacesDeliveryId && (
-            <Badge variant="blue" size="xs" className="mb-2">
-              {t("editing_existing_item")}
-            </Badge>
-          )}
           <FormField
             control={form.control}
             name={`items.${index}.product_knowledge`}
