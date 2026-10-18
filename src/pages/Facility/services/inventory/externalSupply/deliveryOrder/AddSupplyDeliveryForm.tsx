@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import Autocomplete from "@/components/ui/autocomplete";
@@ -610,6 +611,14 @@ export function AddSupplyDeliveryForm({
       <DisablingCover disabled={isProcessing} message={t("saving")}>
         <Card className="bg-gray-50 py-4 rounded-md">
           <CardContent className="space-y-4 ">
+            {!origin && (
+              <PLUGIN_Component
+                __name="SupplyDeliveryFormActions"
+                facilityId={facilityId}
+                deliveryOrderId={deliveryOrderId}
+                form={form}
+              />
+            )}
             {fields.length > 0 ? (
               <Form {...form}>
                 <form
