@@ -587,7 +587,7 @@ export function SmartExternalDeliveryRow({
 
       {extensionCellsAfter("sale")}
 
-      {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
+      {/* Purchase Price (auto-calculated: tpr / pack_size) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
           <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
@@ -600,7 +600,7 @@ export function SmartExternalDeliveryRow({
         </div>
       </TableCell>
 
-      {/* Total Purchase Price (user-entered) */}
+      {/* Total Purchase Price per pack (user-entered) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
           <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>

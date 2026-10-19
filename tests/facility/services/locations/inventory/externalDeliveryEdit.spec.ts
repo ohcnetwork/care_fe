@@ -272,7 +272,7 @@ async function createExternalDeliveryDraft(
     supplied_item_pack_quantity: 2,
     supplied_item_pack_size: 5,
     supplied_item_quantity: "10",
-    total_purchase_price: "25",
+    total_purchase_price: "12.5",
     order: order.id,
     extensions: {},
   };
@@ -344,7 +344,7 @@ test.describe("External delivery cancellation", () => {
             supplied_item_pack_quantity: 3,
             supplied_item_pack_size: 5,
             supplied_item_quantity: "15",
-            total_purchase_price: "37.5",
+            total_purchase_price: "12.5",
             order: fixture.order.id,
             extensions: {},
           },
@@ -716,11 +716,17 @@ test.describe("External delivery draft items", () => {
       );
       expect(persisted.results).toHaveLength(3);
 
+      // TPR is the price of one pack, so it does not follow the pack quantity.
+      await packQuantity.fill("2");
+      await expect(quantity).toHaveValue(/^10(?:\.0+)?$/);
+      await expect
+        .soft(editForm.getByRole("spinbutton", { name: "TPR", exact: true }))
+        .toHaveValue(/^12\.5(?:0+)?$/);
       await packQuantity.fill("3");
       await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
       await expect
         .soft(editForm.getByRole("spinbutton", { name: "TPR", exact: true }))
-        .toHaveValue(/^37\.5(?:0+)?$/);
+        .toHaveValue(/^12\.5(?:0+)?$/);
       await editForm.getByPlaceholder("Batch #").click();
       await page
         .getByRole("option")
@@ -785,6 +791,9 @@ test.describe("External delivery draft items", () => {
       await packQuantity.fill("4");
       await expect(quantity).toHaveValue(/^20(?:\.0+)?$/);
       await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      // A pack quantity change keeps the per-item price, so change the pack
+      // price to make the prepared product stale.
+      await totalPurchasePrice.fill("120");
       await page.route(
         `${apiUrl}/api/v1/facility/${facilityId}/product/`,
         async (route) => {
@@ -847,7 +856,7 @@ test.describe("External delivery draft items", () => {
         preparedDefinition,
       );
       expect((await retriedDelivery).status()).toBe(404);
-      await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      await expect(totalPurchasePrice).toHaveValue(/^120(?:\.0+)?$/);
       const unchangedPrepared = await responseData<ProductFixture>(
         await page.request.get(
           `${apiUrl}/api/v1/facility/${facilityId}/product/${firstPrepared.id}/`,
@@ -1347,7 +1356,7 @@ test.describe("External delivery draft items", () => {
   });
 
   for (const withoutPricingMetadata of [false, true]) {
-    test(`${withoutPricingMetadata ? "persists a legacy total correction without inventing batch or pricing metadata" : "persists the purchase prices displayed after a quantity-only edit for a priced product"}`, async ({
+    test(`${withoutPricingMetadata ? "persists a legacy total correction without inventing batch or pricing metadata" : "keeps the product and purchase price after a quantity-only edit for a priced product"}`, async ({
       page,
     }) => {
       const fixture = await createExternalDeliveryDraft(page, {
@@ -1385,13 +1394,15 @@ test.describe("External delivery draft items", () => {
       const displayedPriceInput = form
         .locator('input[type="number"]:disabled')
         .last();
-      await expect(displayedPriceInput).not.toHaveValue(/^2\.5(?:0+)?$/);
+      // Purchase price is TPR / pack size, so a pack quantity change keeps it.
+      await expect(displayedPriceInput).toHaveValue(
+        withoutPricingMetadata ? /^6(?:\.0+)?$/ : /^2\.5(?:0+)?$/,
+      );
       const displayedPurchasePrice = await displayedPriceInput.inputValue();
       const displayedTotal = await form
         .getByRole("spinbutton", { name: "TPR", exact: true })
         .inputValue();
-      expect(Number(displayedPurchasePrice)).toBeGreaterThan(0);
-      expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 25);
+      expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 12.5);
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
       await expect(form).not.toBeVisible();
       const saved = await responseData<{
@@ -1420,15 +1431,10 @@ test.describe("External delivery draft items", () => {
         expect(active[0].supplied_item.batch).toEqual({});
         expect(active[0].supplied_item.expiration_date).toBeNull();
       } else {
-        expect(
-          active[0].supplied_item.charge_item_definition?.slug,
-        ).toBeTruthy();
-        expect(active[0].supplied_item.charge_item_definition?.slug).not.toBe(
+        expect(active[0].supplied_item.id).toBe(fixture.product.id);
+        expect(active[0].supplied_item.charge_item_definition?.slug).toBe(
           fixture.product.charge_item_definition?.slug,
         );
-        expect(
-          active[0].supplied_item.charge_item_definition?.price_components,
-        ).toEqual(fixture.product.charge_item_definition?.price_components);
       }
     });
   }
