@@ -111,7 +111,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   // Combine default and custom dashboard links
   const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
-  // Filter pinned links for this facility (or show all if no facilityId specified)
   const pinnedLinks = customLinks(facilityId);
 
   return (
