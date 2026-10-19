@@ -96,7 +96,7 @@ const typeTestedSchema = z.object({
 interface SpecimenDefinitionFormProps {
   facilityId: string;
   specimenSlug?: string;
-  onSuccess?: () => void;
+  onSuccess?: (specimenDefinition?: SpecimenDefinitionRead) => void;
   onCancel?: () => void;
 }
 
@@ -148,7 +148,7 @@ interface SpecimenDefinitionFormContentProps {
   facilityId: string;
   specimenSlug?: string;
   initialData?: SpecimenDefinitionRead;
-  onSuccess?: () => void;
+  onSuccess?: (specimenDefinition?: SpecimenDefinitionRead) => void;
   onCancel?: () => void;
 }
 
@@ -156,11 +156,10 @@ function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
-  onSuccess = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
+  onSuccess = (specimenDefinition) => {
+    const slug = specimenDefinition?.slug ?? specimenSlug;
+    if (slug) {
+      navigate(`/facility/${facilityId}/settings/specimen_definitions/${slug}`);
     } else {
       navigate(`/facility/${facilityId}/settings/specimen_definitions`);
     }
@@ -297,12 +296,12 @@ function SpecimenDefinitionFormContent({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
         pathParams: { facilityId, specimenSlug },
       }),
-      onSuccess: () => {
+      onSuccess: (updated: SpecimenDefinitionRead) => {
         toast.success(t("specimen_definition_updated"));
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        onSuccess?.(updated);
       },
     });
 
