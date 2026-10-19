@@ -67,7 +67,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   });
 
   const handleSelect = (org: Organization) => {
-    const isAlreadySelected = !!currentOrganizations?.find(
+    const isAlreadySelected = selectedOrganizations?.find(
       (o) => o.id === org.id,
     );
     if (isAlreadySelected) {
@@ -98,6 +98,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   const handleRemoveOrganization = (index: number) => {
     const newSelection = selectedOrganizations.filter((_, i) => i !== index);
     setSelectedOrganizations(newSelection);
+    setCurrentSelection(null);
     onChange(
       newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
     );
