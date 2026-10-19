@@ -1,11 +1,29 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import { getApiHeaders, getApiUrl } from "tests/helper/utils";
+import fs from "fs";
+import { getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
+// pinPageShortcut.spec.ts pins pages as the admin user. Seeding here replaces
+// the user's whole pinned links list, so use a different user to avoid a
+// cross-file race when specs run in parallel.
+const STORAGE_STATE = "tests/.auth/facilityAdmin.json";
 const MAX_PINNED_LINKS = 10;
 
-test.use({ storageState: "tests/.auth/user.json" });
+test.use({ storageState: STORAGE_STATE });
+
+function getApiHeaders() {
+  const storageState = JSON.parse(fs.readFileSync(STORAGE_STATE, "utf-8"));
+  const token = storageState.origins?.[0]?.localStorage?.find(
+    (item: { name: string; value: string }) =>
+      item.name === "care_access_token",
+  )?.value;
+  if (!token) throw new Error(`No access token in ${STORAGE_STATE}`);
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+}
 
 interface PinnedLink {
   link: string;

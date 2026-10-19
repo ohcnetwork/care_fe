@@ -149,7 +149,6 @@ function useUserPreferences() {
     user.preferences ?? {},
   );
   const facilityQuickLinks = getFacilityQuickLinks(preferences);
-  const customLinksCount = facilityQuickLinks.custom_links?.length ?? 0;
   const blacklist = facilityQuickLinks.blacklist ?? [];
   const customLinks = useCallback(
     (facilityId?: string) =>
@@ -311,7 +310,6 @@ function useUserPreferences() {
     updateCustomLink,
     isCustomLink,
     customLinks,
-    customLinksCount,
     canAddMoreLinks,
     maxCustomLinks: MAX_QUICK_LINKS,
     // Blacklist methods
