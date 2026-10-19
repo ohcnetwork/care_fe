@@ -34,6 +34,20 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
     await expect(
       page.getByRole("heading", { name: "Inventory" }),
     ).toBeVisible();
+
+    // Other specs add products to this location, which can push the seeded
+    // product off the first page — filter the list down to it.
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Search Product Knowledge" })
+      .click();
+    await page.getByPlaceholder("Search Product Knowledge").fill(PRODUCT_NAME);
+    await page
+      .getByRole("option")
+      .filter({ has: page.getByText(PRODUCT_NAME, { exact: true }) })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/product_knowledge_id=/);
   });
 
   test("opens the drawer and lists deliveries for a stocked product", async ({
@@ -151,6 +165,40 @@ test.describe("Inventory Summary — All Deliveries drawer", () => {
       const drawer = page.locator('[data-slot="drawer-content"]');
       await expect(drawer.getByText("All Deliveries")).toBeVisible();
       await expect(drawer.getByText("No delivery found")).toBeVisible();
+    });
+  });
+
+  test("shows the error state in the drawer when deliveries fail to load", async ({
+    page,
+  }) => {
+    await test.step("Wait for the inventory row to render", async () => {
+      await expect(
+        page.getByRole("button", { name: PRODUCT_NAME }),
+      ).toBeVisible();
+    });
+
+    await test.step("Stub the deliveries response as a server error", async () => {
+      await page.route(
+        (url) =>
+          url.pathname === "/api/v1/supply_delivery/" &&
+          url.searchParams.has("supplied_inventory_item_product"),
+        (route) =>
+          route.fulfill({
+            status: 500,
+            contentType: "application/json",
+            body: JSON.stringify({ detail: "Internal Server Error" }),
+          }),
+      );
+    });
+
+    await test.step("Open the drawer and verify the error state", async () => {
+      await page.getByRole("button", { name: PRODUCT_NAME }).click();
+      const drawer = page.locator('[data-slot="drawer-content"]');
+      await expect(drawer.getByText("All Deliveries")).toBeVisible();
+      await expect(
+        drawer.getByText("Failed to load deliveries", { exact: true }),
+      ).toBeVisible();
+      await expect(drawer.getByText("No delivery found")).toBeHidden();
     });
   });
 
