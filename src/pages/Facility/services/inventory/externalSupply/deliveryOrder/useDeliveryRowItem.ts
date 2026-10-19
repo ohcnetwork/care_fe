@@ -338,7 +338,8 @@ export function useDeliveryRowItem({
     setField,
   ]);
 
-  // New rows use the selected product's unit price once a pack quantity is entered.
+  // TPR is the price of one pack (purchase_price × pack_size), not a line total.
+  // New rows derive it from the selected product once a pack quantity is entered.
   // Manual totals and saved delivery totals remain under the user's control.
   useEffect(() => {
     if (
@@ -351,9 +352,7 @@ export function useDeliveryRowItem({
       const knownPurchasePrice = suppliedItem.purchase_price ?? undefined;
       const calculatedTotal =
         knownPurchasePrice != null && hasValidPackQuantity && hasValidPackSize
-          ? round(
-              multiply(knownPurchasePrice, multiply(packSize!, packQuantity!)),
-            )
+          ? round(multiply(knownPurchasePrice, packSize!))
           : undefined;
       if (calculatedTotal !== totalPurchasePrice) {
         setField("total_purchase_price", calculatedTotal);
