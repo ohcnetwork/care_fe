@@ -365,7 +365,7 @@ export function useDeliveryRowItem({
     }
 
     if (totalPurchasePrice && hasValidPackSize && hasValidPackQuantity) {
-      const newPurchasePrice = round(divide(totalPurchasePrice, packQuantity!));
+      const newPurchasePrice = round(divide(totalPurchasePrice, packSize!));
       if (newPurchasePrice !== purchasePrice) {
         setField("purchase_price", newPurchasePrice);
       }
