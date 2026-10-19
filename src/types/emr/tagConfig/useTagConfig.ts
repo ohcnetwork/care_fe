@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 
 import query from "@/Utils/request/query";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -27,10 +27,6 @@ function getQueryOptions(
       persist: true,
     },
   };
-}
-
-export function useTagConfig(id: TagConfig["id"], facilityId?: string) {
-  return useQuery(getQueryOptions(id, facilityId));
 }
 
 export default function useTagConfigs({ ids, facilityId, disabled }: Options) {

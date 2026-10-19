@@ -29,7 +29,10 @@ interface UseAppVersionReturn {
  *
  * On initial mount:
  * - If no stored version (first visit): stores current version without reload
- * - If stored version differs from server: auto-updates (clears caches + reloads)
+ * - If stored version differs from server and user is on the root route (`/`):
+ *   auto-updates (clears caches + reloads)
+ * - If stored version differs but user is on a non-root route:
+ *   sets pendingUpdate state (user must confirm via toast)
  *
  * On subsequent polling checks:
  * - If version differs: sets pendingUpdate state (user must confirm)
@@ -75,11 +78,11 @@ export function useAppVersion(): UseAppVersionReturn {
     }
 
     // Version differs
-    if (isInitial) {
-      // Initial check: auto-update
+    if (isInitial && window.location.pathname === "/") {
+      // Initial check on root route: auto-update
       performAppUpdate(data.version);
     } else {
-      // Polling check: notify user, wait for confirmation
+      // Non-root initial check or polling check: notify user, wait for confirmation
       setPendingUpdate(data.version);
     }
   }, [data?.version]);

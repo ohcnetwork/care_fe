@@ -30,10 +30,10 @@ jobs:
           # Fetch full history for potential rollback operations
           fetch-depth: 0
 
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "npm"
 
       - name: Install Dependencies

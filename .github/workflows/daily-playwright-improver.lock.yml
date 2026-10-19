@@ -21,7 +21,7 @@
 #
 # Daily agent that incrementally improves Playwright E2E test coverage for ohcnetwork/care_fe. Identifies under-tested pages and components, writes new tests or strengthens existing ones, and opens a draft PR each weekday.
 #
-# frontmatter-hash: 124cc19b5cdf8156e9ebcc4d3bce68a31ddc9a9e84389f91491cf9489568b684
+# frontmatter-hash: aa34401e0f51a6d6977cb9ee40e6ef99a4d0e61abbbab8b623d92b1a00271b7c
 
 name: "Daily Playwright Test Improver"
 "on":
@@ -38,6 +38,7 @@ run-name: "Daily Playwright Test Improver"
 
 jobs:
   activation:
+    if: ${{ github.repository == 'ohcnetwork/care_fe' }}
     runs-on: ubuntu-slim
     permissions:
       contents: read

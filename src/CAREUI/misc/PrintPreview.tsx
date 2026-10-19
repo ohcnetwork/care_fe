@@ -5,11 +5,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import {
-  FitToWidthScrollContainer,
-  ZoomProvider,
-  ZoomTransform,
-} from "@/CAREUI/interactive/Zoom";
+import { FitToWidthScrollContainer } from "@/CAREUI/interactive/FitToWidthScrollContainer";
 
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +39,7 @@ type Props = {
   facility?: FacilityRead;
   templateSlug: string;
   hideFacilityHeader?: boolean;
+  footer?: ReactNode;
 };
 
 export default function PrintPreview(props: Props) {
@@ -107,6 +104,7 @@ export default function PrintPreview(props: Props) {
         facility={props.facility}
         templateSlug={props.templateSlug}
         hideFacilityHeader={props.hideFacilityHeader}
+        footer={props.footer}
       >
         {props.children}
       </FacilityPrintLayout>
@@ -147,12 +145,8 @@ export default function PrintPreview(props: Props) {
             </FitToWidthScrollContainer>
           </div>
         ) : (
-          <div className="mx-auto my-4 max-w-[95vw] print:max-w-none sm:my-8">
-            <ZoomProvider>
-              <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
-                {printContent}
-              </ZoomTransform>
-            </ZoomProvider>
+          <div className="mx-auto my-4 print:max-w-none sm:my-8 origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:transform-none max-w-[calc(100vw-1rem)]">
+            {printContent}
           </div>
         )}
       </Page>
@@ -320,14 +314,21 @@ function FacilityPrintLayout({
   facility,
   children,
   hideFacilityHeader,
+  footer,
 }: {
   templateSlug?: string;
   facility?: FacilityRead;
   children: ReactNode;
   hideFacilityHeader?: boolean;
+  footer?: ReactNode;
 }) {
   if (!facility) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        {footer && <div>{footer}</div>}
+      </>
+    );
   }
 
   const printTemplate = resolvePrintTemplate(facility, templateSlug);
@@ -391,6 +392,7 @@ function FacilityPrintLayout({
           />
         </div>
       )}
+      {footer && <div>{footer}</div>}
     </div>
   );
 }

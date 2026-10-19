@@ -61,7 +61,7 @@ export function PlugConfigEdit({ slug }: Props) {
     onSuccess: () => navigate("/admin/apps"),
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     let meta;
     try {

@@ -53,7 +53,7 @@ export default function ScheduleChargeItemDefinitionSelector({
       .custom<ChargeItemDefinitionBase>()
       .refine((val) => val?.slug, { message: t("field_required") }),
     re_visit_allowed_days: z
-      .number({ required_error: t("field_required") })
+      .number({ error: t("field_required") })
       .min(0, t("revisit_days_non_negative")),
     re_visit_charge_item_definition: z
       .custom<ChargeItemDefinitionBase>()

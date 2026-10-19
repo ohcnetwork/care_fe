@@ -89,8 +89,6 @@ export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
 export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
   "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
-export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
-  "can_create_charge_item_definition";
 export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
   "can_set_charge_item_definition";
 
@@ -99,6 +97,12 @@ export const PERMISSION_WRITE_TOKEN_CATEGORY = "can_write_token_category";
 export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
 export const PERMISSION_WRITE_TOKEN = "can_write_token";
 export const PERMISSION_LIST_TOKENS = "can_list_token";
+
+// Patient Identifier Config Permissions
+export const PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG =
+  "can_write_patient_identifier_config";
+export const PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG =
+  "can_read_patient_identifier_config";
 
 // Healthcare Permissions
 export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
@@ -259,6 +263,12 @@ export interface Permissions {
   canWriteToken: boolean;
   /** Permission slug: "can_list_token" */
   canListTokens: boolean;
+
+  // Patient Identifier Config Permissions
+  /** Permission slug: "can_write_patient_identifier_config" */
+  canWritePatientIdentifierConfig: boolean;
+  /** Permission slug: "can_read_patient_identifier_config" */
+  canReadPatientIdentifierConfig: boolean;
 
   /** Permission slug: "can_write_healthcare_service" */
   canWriteHealthcareService: boolean;
@@ -477,6 +487,16 @@ export function getPermissions(
     ),
     canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
     canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+
+    // Patient Identifier Config
+    canWritePatientIdentifierConfig: hasPermission(
+      PERMISSION_WRITE_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
+    canReadPatientIdentifierConfig: hasPermission(
+      PERMISSION_READ_PATIENT_IDENTIFIER_CONFIG,
+      permissions,
+    ),
 
     //Healthcare Services
     canWriteHealthcareService: hasPermission(

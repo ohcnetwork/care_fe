@@ -51,22 +51,25 @@ class OverrideErrorBoundary extends Component<
 /**
  * register() - Makes a component overrideable
  *
- * This is the main API for making components overrideable. Simply wrap your
- * component export with register() and it becomes context-aware and overrideable.
+ * This is the runtime primitive that wraps a component so it becomes
+ * context-aware and overrideable. You normally do NOT call it by hand:
+ * every exported PascalCase component under `src/` is registered
+ * automatically at build time by `plugins/autoRegisterComponents.ts`, which
+ * rewrites the export to call register() for you. Just export the component
+ * normally and its call sites stay unchanged.
  *
- * @example
  * ```tsx
- * function PatientCard(props: PatientCardProps) {
+ * // You write this:
+ * export function PatientCard(props: PatientCardProps) {
  *   return <div>Base Card</div>;
  * }
  *
- * export default register("PatientCard", PatientCard);
- * ```
- *
- * Usage remains unchanged:
- * ```tsx
+ * // The build transform emits the registration; usage is unchanged:
  * <PatientCard patient={patient} />
  * ```
+ *
+ * See `docs/care-apps-plugin-overrides.md` ("Supported Export Forms") for the
+ * export shapes the transform handles and the ones it deliberately skips.
  */
 export function register<P extends AnyProps>(
   key: string,

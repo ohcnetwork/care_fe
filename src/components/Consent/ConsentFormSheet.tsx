@@ -97,7 +97,7 @@ const consentFormSchema = (isEdit: boolean) =>
         data.period.start > data.period.end
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("valid_from_after_valid_untill"),
           path: ["period.end"],
         });
@@ -108,7 +108,7 @@ const consentFormSchema = (isEdit: boolean) =>
         new Date(data.period.start) < new Date(data.date)
       ) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: t("consent_period_start_before_consent_date_validation"),
           path: ["period.start"],
         });
@@ -332,11 +332,13 @@ export default function ConsentFormSheet({
                       <FormLabel aria-required>
                         {t("consent_given_on")}
                       </FormLabel>
-                      <DateTimeInput
-                        {...field}
-                        value={field.value}
-                        onDateChange={(val) => field.onChange(val ?? null)}
-                      />
+                      <FormControl>
+                        <DateTimeInput
+                          {...field}
+                          value={field.value}
+                          onDateChange={(val) => field.onChange(val ?? null)}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -349,13 +351,15 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_from")}</FormLabel>
-                        <DateTimeInput
-                          {...field}
-                          value={field.value ?? ""}
-                          onDateChange={(val) => {
-                            field.onChange(val ?? null);
-                          }}
-                        />
+                        <FormControl>
+                          <DateTimeInput
+                            {...field}
+                            value={field.value ?? ""}
+                            onDateChange={(val) => {
+                              field.onChange(val ?? null);
+                            }}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -367,13 +371,15 @@ export default function ConsentFormSheet({
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("consent_valid_until")}</FormLabel>
-                        <DateTimeInput
-                          {...field}
-                          value={field.value ?? ""}
-                          onDateChange={(val) => {
-                            field.onChange(val ?? null);
-                          }}
-                        />
+                        <FormControl>
+                          <DateTimeInput
+                            {...field}
+                            value={field.value ?? ""}
+                            onDateChange={(val) => {
+                              field.onChange(val ?? null);
+                            }}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

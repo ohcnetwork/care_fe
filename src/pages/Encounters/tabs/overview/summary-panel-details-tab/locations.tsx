@@ -8,7 +8,7 @@ import { LocationTree } from "@/components/Location/LocationTree";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const Locations = () => {
   const { t } = useTranslation();

@@ -55,7 +55,7 @@ const formSchema = z.object({
     careIcon: z.string().optional(),
   }),
   extra_details: z.string(),
-  internal_type: z.nativeEnum(InternalType).optional(),
+  internal_type: z.enum(InternalType).optional(),
   locations: z
     .array(
       z.object({

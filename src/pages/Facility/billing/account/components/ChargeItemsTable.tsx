@@ -111,7 +111,7 @@ export interface ChargeItemsTableProps {
   patientId: string;
   canAddChargeItems?: boolean;
 }
-export function ChargeItemsTable({
+function ChargeItemsTable({
   facilityId,
   accountId,
   patientId,
@@ -154,9 +154,7 @@ export function ChargeItemsTable({
           break;
         case "created_by": {
           const createdByValue = value as
-            | UserReadMinimal
-            | UserReadMinimal[]
-            | undefined;
+            UserReadMinimal | UserReadMinimal[] | undefined;
           const user = Array.isArray(createdByValue)
             ? createdByValue[0]
             : createdByValue;
@@ -197,8 +195,7 @@ export function ChargeItemsTable({
   // Convert date filter values to API query params
   const getDateQueryParams = () => {
     const dateRange = selectedFilters.created_date?.selected as
-      | FilterDateRange
-      | undefined;
+      FilterDateRange | undefined;
     if (!dateRange) return {};
     return {
       created_date_after: dateRange.from?.toISOString(),
@@ -331,18 +328,24 @@ export function ChargeItemsTable({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <MultiFilter
-          selectedFilters={selectedFilters}
-          onFilterChange={handleFilterChange}
-          onOperationChange={handleOperationChange}
-          onClearAll={handleClearAll}
-          onClearFilter={handleClearFilter}
-          className="flex flex-row-reverse flex-wrap sm:items-center"
-          facilityId={facilityId}
-        />
-        <div className="flex sm:flex-row flex-col sm:items-center gap-2 w-full sm:w-auto">
-          <div className="gap-2 flex items-center whitespace-nowrap">
+      <div className="mb-4 space-y-2">
+        <div className="w-full min-w-0">
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            className="w-full min-w-0 items-start sm:flex-row sm:flex-wrap sm:items-center"
+            triggerButtonClassName="self-start sm:self-center"
+            clearAllButtonClassName="self-start sm:self-center"
+            selectedBarClassName="md:w-full lg:w-fit"
+            selectedValueClassName="w-0 flex-1 md:w-0 md:flex-1 md:max-w-none lg:w-auto lg:flex-none lg:max-w-80 xl:max-w-96"
+            facilityId={facilityId}
+          />
+        </div>
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             <Label htmlFor="sort-by-title">{t("sort_by_title")}</Label>
             <Switch
               id="sort-by-title"
@@ -355,7 +358,7 @@ export function ChargeItemsTable({
           <Button
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto sm:max-w-full"
           >
             <PrinterIcon className="size-4 mr-2" />
             {t("print_charge_items")}
@@ -366,7 +369,7 @@ export function ChargeItemsTable({
               <Button
                 variant="outline"
                 onClick={() => setIsQuickAddOpen(true)}
-                className="w-full sm:w-auto bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100"
+                className="w-full bg-linear-to-r from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 hover:from-amber-100 hover:to-orange-100 sm:w-auto sm:max-w-full"
               >
                 <Zap className="size-4 mr-2 text-amber-500" />
                 {t("quick_add")}
@@ -374,7 +377,7 @@ export function ChargeItemsTable({
               <Button
                 variant="outline"
                 onClick={() => setIsAddChargeItemsOpen(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto sm:max-w-full"
               >
                 <PlusIcon className="size-4 mr-2" />
                 {t("add_charge_items")}
@@ -468,10 +471,10 @@ export function ChargeItemsTable({
                 <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
                   {t("performer")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[120px]">
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-30">
                   {t("status")}
                 </TableHead>
-                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-[60px]">
+                <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5 w-15">
                   {t("actions")}
                 </TableHead>
               </TableRow>
@@ -672,7 +675,7 @@ export function ChargeItemsTable({
                     <TableCell></TableCell>
                     <TableCell>{t("note")}</TableCell>
                     <TableCell></TableCell>
-                    <TableCell className="p-3 break-words whitespace-pre-wrap">
+                    <TableCell className="p-3 wrap-break-word whitespace-pre-wrap">
                       {noteText}
                     </TableCell>
                     <TableCell></TableCell>

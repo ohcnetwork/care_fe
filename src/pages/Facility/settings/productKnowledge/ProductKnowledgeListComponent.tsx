@@ -167,7 +167,7 @@ interface ProductKnowledgeListProps {
   setAllowCategoryCreate: (allow: boolean) => void;
 }
 
-export function ProductKnowledgeList({
+export function ProductKnowledgeListContent({
   facilityId,
   categorySlug,
   setAllowCategoryCreate,

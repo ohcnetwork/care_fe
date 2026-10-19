@@ -1,0 +1,182 @@
+# Re-runs an agentic workflow when it failed for a reason that will pass on its own.
+#
+# Why this exists: the agentic reviewers authenticate inference with a single Copilot PAT
+# (COPILOT_GITHUB_TOKEN). When several PRs are pushed at once, that PAT hits its request rate
+# limit and the Copilot CLI returns 429. The harness already retries in-job, but it exhausts its
+# attempts in ~8 minutes, and an exhausted rate-limit window can stay shut for far longer — on
+# 2026-08-20 it took out every agentic run in the repo for 45 minutes. Those runs are not broken;
+# a plain re-run succeeds, which is exactly what a human ends up doing by hand.
+#
+# Nothing here decides whether the review was any *good* — it only distinguishes "the model never
+# answered" from "the agent ran and something is actually wrong", and retries the former.
+name: Retry Agentic Runs
+
+on:
+  workflow_run:
+    # NOTE: `workflow_run` only fires for the copy of this file on the DEFAULT branch, so edits
+    # here have no effect until they land on `develop`. Matched by workflow `name:`, not filename.
+    workflows:
+      - "CARE PR Reviewer"
+      - "Daily Playwright Test Improver"
+      - "Thank You Note Generator"
+    types: [completed]
+
+# No workflow-level permissions; the single job opts into exactly what it needs.
+permissions: {}
+
+concurrency:
+  # One retry watcher per run. A re-run reuses the SAME run id, so every attempt's watcher lands in
+  # this group. `cancel-in-progress: true` because the newest watcher always has the freshest view:
+  # if a later completion event arrives for this run while an earlier watcher is still sleeping,
+  # that earlier watcher has not acted yet, so cancelling it loses nothing and the newer one
+  # performs the retry. Queueing them instead would let a watcher wake up and act on a payload that
+  # is already several attempts stale, which can push past the `run_attempt` cap below.
+  group: retry-agentic-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  retry:
+    # `run_attempt < 3` is the loop breaker. A re-run emits another `workflow_run: completed` event
+    # with an incremented attempt, so without this a permanently failing workflow would retry
+    # forever. This allows two automatic retries (attempts 2 and 3) and then gives up for good.
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.workflow_run.conclusion == 'failure' &&
+          github.event.workflow_run.run_attempt < 3 }}
+    runs-on: ubuntu-latest
+    permissions:
+      # Read the failed run's logs, and re-run its failed jobs. Nothing else — this job never
+      # touches repository contents, and deliberately holds no `contents` or `pull-requests` scope.
+      actions: write
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
+      RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+      WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
+      WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      - name: Classify the failure
+        id: classify
+        run: |
+          set -uo pipefail
+
+          echo "Run:      $WORKFLOW_NAME #$RUN_ID (attempt $RUN_ATTEMPT)"
+          echo "Branch:   $HEAD_BRANCH"
+
+          # --log-failed returns only the failed steps, which keeps this to a few thousand lines.
+          # A missing or expired log is not fatal: it just means we cannot prove the failure was
+          # transient, and the default below is to NOT retry.
+          if ! gh run view "$RUN_ID" --log-failed > failed.log 2>/dev/null; then
+            echo "::warning::Could not download logs for run $RUN_ID — not retrying."
+            echo "retry=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Permanent failures are checked FIRST and always win. Retrying any of these burns
+          # credits and runner time to arrive at the same answer:
+          #   - quota / invocation caps and daily credit ceilings are exhausted budgets, not
+          #     momentary congestion, and reset on a schedule this job cannot wait out;
+          #   - auth and model-not-supported errors are configuration, and need a human.
+          #
+          # Match only the harness's `is<Thing>=true` flags and explicit `: true` env values. The
+          # bare output *names* are useless as markers: gh-aw prints `Set output
+          # 'invocation_cap_exceeded'` on every run regardless of value, so matching the bare name
+          # classifies every failure — including plain 429s — as permanent.
+          PERMANENT='is(CAPIQuotaExceededError|InvocationCapExceeded|ModelNotSupportedError|AuthError|AuthenticationFailedError)=true|GH_AW_DAILY_AI_CREDITS_EXCEEDED: *true|GH_AW_INFERENCE_ACCESS_ERROR: *true'
+
+          if grep -qE "$PERMANENT" failed.log; then
+            echo "Permanent failure — a re-run would fail the same way. Not retrying."
+            grep -oE "$PERMANENT" failed.log | sort -u | sed 's/^/  /'
+            echo "retry=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Transient markers: the model or the gateway never answered, so the agent produced no
+          # review at all and re-running duplicates nothing.
+          #
+          # Deliberately narrow. Generic network strings (`socket hang up`, `ECONNRESET`) are NOT
+          # here: they show up as benign startup warnings — the MCP gateway health check logs
+          # `socket hang up` on its first probe in runs that go on to succeed — so matching them
+          # would retry genuine failures that merely contain a recovered blip. `Last error:` is
+          # the Copilot CLI's own terminal line after it exhausts its internal retries.
+          TRANSIENT='Failed to get response from the AI model|Last error: (429|5[0-9]{2})|429 Too Many Requests|is(MCPGatewayShutdownError|SDKSessionIdleTimeoutError)=true'
+
+          if grep -qE "$TRANSIENT" failed.log; then
+            echo "Transient failure — worth retrying:"
+            grep -oE "$TRANSIENT" failed.log | sort | uniq -c | sed 's/^/  /'
+            echo "retry=true" >> "$GITHUB_OUTPUT"
+          else
+            # The agent ran and failed for some other reason. That is a real failure and should
+            # stay visible rather than be papered over by a retry.
+            echo "No transient error found — this looks like a genuine failure. Not retrying."
+            echo "retry=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait out the rate-limit window
+        if: steps.classify.outputs.retry == 'true'
+        run: |
+          set -euo pipefail
+
+          # Back off further on each attempt: ~10 min before the first retry, ~20 before the second.
+          # Combined with the ~8 minutes each failing run already spends exhausting its own harness
+          # retries, two attempts cover roughly an hour — enough for the outages seen so far.
+          #
+          # Sleeping holds a runner, which is free on this public repository but not free of
+          # concurrency. Keep these numbers modest.
+          DELAY=$(( RUN_ATTEMPT * 600 ))
+          echo "Waiting ${DELAY}s before re-running $WORKFLOW_NAME #$RUN_ID."
+          sleep "$DELAY"
+
+      - name: Re-run failed jobs unless a newer run has superseded this one
+        if: steps.classify.outputs.retry == 'true'
+        run: |
+          set -euo pipefail
+
+          # The freshness check lives HERE, after the sleep and in the same step as the re-run.
+          # Checking before the wait would answer the question at the one moment it cannot matter:
+          # the whole point of the wait is that it is long enough for a push to land during it, and
+          # a stale answer from 20 minutes ago would happily re-run against a superseded SHA.
+          #
+          # A push that lands while this job sleeps starts a fresh run against the new head. Re-running
+          # the old one would spend credits reviewing a diff that no longer exists and could post a
+          # review against lines that have already been replaced.
+          #
+          # Compare run IDs numerically rather than trusting list position. Run IDs are monotonic, so
+          # "a newer run exists" is exactly "some run on this branch has a higher ID than ours" —
+          # which holds no matter how the API happens to order its response. Position-based
+          # (`workflow_runs[0]`) would be betting on undocumented ordering.
+          #
+          # Note a re-run does NOT mint a new ID: it increments `run_attempt` on this same run and
+          # leaves `created_at` frozen at the original time. So on later attempts we legitimately
+          # compare against ourselves and find no higher ID, which is the correct "not superseded"
+          # answer — a genuinely newer run would still carry a higher ID.
+          #
+          # `-X GET -f` puts the branch in the query string with proper encoding, which matters for
+          # branch names like `renovate/all-dependencies-(patch)`.
+          HIGHEST=$(gh api -X GET "repos/$GH_REPO/actions/workflows/$WORKFLOW_ID/runs" \
+            -f branch="$HEAD_BRANCH" -f per_page=30 \
+            --jq '[.workflow_runs[].id] | max // empty' 2>/dev/null || true)
+
+          if [ -n "$HIGHEST" ] && [ "$HIGHEST" -gt "$RUN_ID" ]; then
+            echo "Run $HIGHEST supersedes $RUN_ID on $HEAD_BRANCH — not retrying."
+            {
+              echo "### Skipped retry of \`$WORKFLOW_NAME\`"
+              echo
+              echo "Run \`$RUN_ID\` failed transiently but was superseded by run \`$HIGHEST\` while waiting."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # --failed re-runs only the jobs that failed, reusing the original event payload, so the
+          # reviewer sees the same PR and head SHA it was originally triggered for.
+          gh run rerun "$RUN_ID" --failed
+          echo "Re-ran $WORKFLOW_NAME #$RUN_ID (was attempt $RUN_ATTEMPT)."
+          {
+            echo "### Retried \`$WORKFLOW_NAME\`"
+            echo
+            echo "Run [\`$RUN_ID\`]($GITHUB_SERVER_URL/$GH_REPO/actions/runs/$RUN_ID) failed with a"
+            echo "transient inference error on attempt \`$RUN_ATTEMPT\` and was re-run automatically."
+          } >> "$GITHUB_STEP_SUMMARY"

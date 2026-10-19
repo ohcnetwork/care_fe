@@ -34,7 +34,7 @@ interface PrintFooterProps {
   className?: string;
 }
 
-export function PrintFooter({
+function PrintFooter({
   leftContent,
   rightContent,
   showPreparedBy = false,

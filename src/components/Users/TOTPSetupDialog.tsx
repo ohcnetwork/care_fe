@@ -57,7 +57,7 @@ export function TOTPSetupDialog({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!isVerifying && verificationCode) {
       onVerify(verificationCode);

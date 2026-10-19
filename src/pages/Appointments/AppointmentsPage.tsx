@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,14 +78,10 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
-import {
-  dateQueryString,
-  formatDateTime,
-  formatPatientAge,
-  goBack,
-} from "@/Utils/utils";
+import { dateQueryString, formatDateTime, goBack } from "@/Utils/utils";
 
 import { booleanFromString } from "@/common/utils";
+import { PatientAge } from "@/components/Patient/PatientAge";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -227,6 +224,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
+  const resourceIds =
+    resourceId ?? practitioners?.map((p) => p.id).join(",") ?? "";
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -236,15 +235,20 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     (qParams.date_from === qParams.date_to || !qParams.date_to);
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", facilityId, qParams.practitioners, qParams.date_from],
+    queryKey: [
+      "slots",
+      facilityId,
+      resourceType,
+      resourceIds,
+      qParams.date_from,
+    ],
     queryFn: query(scheduleApis.slots.getSlotsForDay, {
       pathParams: { facilityId },
       body: {
         // voluntarily coalesce to empty string since we know query would be
         // enabled only if practitioner and date_from are present
         resource_type: resourceType,
-        resource_id:
-          resourceId ?? practitioners?.map((p) => p.id).join(",") ?? "",
+        resource_id: resourceIds,
         day: qParams.date_from ?? "",
       },
     }),
@@ -353,9 +357,9 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
-        <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
+        <div className="flex w-full min-w-0 flex-wrap items-start gap-4 lg:w-auto">
           {practitionerFilterEnabled && (
-            <div className="mt-1 w-full">
+            <div className="mt-1 w-full sm:w-auto sm:min-w-60">
               <Label className="mb-2 text-black">
                 {t("practitioner", { count: 2 })}
               </Label>
@@ -373,7 +377,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           )}
 
           {/* Tags Filter */}
-          <div>
+          <div className="w-full min-w-0 sm:w-auto">
             <Label className="mt-1 text-black">{t("filter_by_tags")}</Label>
             <MultiFilter
               selectedFilters={selectedFilters}
@@ -381,7 +385,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               onOperationChange={handleOperationChange}
               onClearAll={handleClearAll}
               onClearFilter={handleClearFilter}
-              className="flex sm:flex-row mt-2 sm:items-center"
+              className="mt-2 w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
               triggerButtonClassName="self-start sm:self-center h-9"
               clearAllButtonClassName="self-center"
               selectedBarClassName="h-9"
@@ -593,7 +597,7 @@ function AppointmentColumn(props: {
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="bg-gray-100 py-4 rounded-lg w-[20rem] overflow-y-hidden">
+    <div className="bg-gray-100 py-4 rounded-lg w-80 overflow-y-hidden">
       <div className="flex flex-row justify-between px-3 gap-2 mb-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold capitalize text-base px-1">
@@ -731,7 +735,7 @@ function AppointmentCard({
             {patient.name}
           </h3>
           <p className="text-sm text-gray-700">
-            {formatPatientAge(patient, true)}, {t(`GENDER__${patient.gender}`)}
+            <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             {formatDateTime(
@@ -760,9 +764,12 @@ function AppointmentCard({
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
-          <Badge variant="primary" className="text-xs" key={tag.id}>
-            {tag.display}
-          </Badge>
+          <TagBadge
+            key={tag.id}
+            tag={tag}
+            variant="primary"
+            className="text-xs"
+          />
         ))}
         {showStatus && (
           <Badge
@@ -958,8 +965,7 @@ function AppointmentRowItem({ appointment }: { appointment: Appointment }) {
           <span className="flex flex-col">
             <span className="text-sm font-semibold">{patient.name}</span>
             <span className="text-xs text-gray-500">
-              {formatPatientAge(patient, true)},{" "}
-              {t(`GENDER__${patient.gender}`)}
+              <PatientAge patient={patient} />, {t(`GENDER__${patient.gender}`)}
             </span>
           </span>
         </span>

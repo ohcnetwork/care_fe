@@ -1,8 +1,7 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 type ContactLinkProps =
-  | { mailto: string; tel?: undefined }
-  | { mailto?: undefined; tel: string };
+  { mailto: string; tel?: undefined } | { mailto?: undefined; tel: string };
 
 export default function ContactLink(props: ContactLinkProps) {
   return (

@@ -96,10 +96,6 @@ function Calendar({
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
-  const _captionClassName = cn(
-    "relative flex items-center justify-center pt-1",
-    props.captionClassName,
-  );
   const _captionLabelClassName = cn(
     "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-gray-400",
     props.captionLabelClassName,
@@ -131,8 +127,11 @@ function Calendar({
     "size-8 rounded-md p-0 font-normal transition-none aria-selected:opacity-100",
     props.dayButtonClassName,
   );
+  // Band color for range days. Uses bg-primary-100 (a defined token) rather than
+  // bg-accent — this theme never defines an `accent` color, so bg-accent renders
+  // nothing and the in-range days would be invisible.
   const buttonRangeClassName =
-    "bg-accent [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
+    "bg-primary-100 [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
   const _rangeStartClassName = cn(
     buttonRangeClassName,
     "day-range-start rounded-s-md",
@@ -144,7 +143,7 @@ function Calendar({
     props.rangeEndClassName,
   );
   const _rangeMiddleClassName = cn(
-    "bg-accent text-foreground! [&>button]:bg-transparent [&>button]:text-foreground! hover:[&>button]:bg-transparent hover:[&>button]:text-foreground!",
+    "bg-primary-100 [&>button]:bg-transparent [&>button]:text-primary-900 hover:[&>button]:bg-primary-200",
     props.rangeMiddleClassName,
   );
   const _selectedClassName = cn(
@@ -179,7 +178,6 @@ function Calendar({
         weekdays: _weekdaysClassName,
         weekday: _weekdayClassName,
         month: _monthClassName,
-        caption: _captionClassName,
         caption_label: _captionLabelClassName,
         button_next: _buttonNextClassName,
         button_previous: _buttonPreviousClassName,

@@ -24,7 +24,7 @@ import {
 
 import AppointmentDialog from "./components/AppointmentDialog";
 
-function PatientIndex() {
+function PatientPortalIndex() {
   const { t } = useTranslation();
 
   const [selectedAppointment, setSelectedAppointment] = useState<
@@ -205,4 +205,4 @@ function PatientIndex() {
   );
 }
 
-export default PatientIndex;
+export default PatientPortalIndex;

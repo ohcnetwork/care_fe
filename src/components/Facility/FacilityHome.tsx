@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Hospital, Printer } from "lucide-react";
+import { ChevronDown, Printer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -45,16 +45,6 @@ import { FacilityMapsLink } from "./FacilityMapLink";
 
 type Props = {
   facilityId: string;
-};
-
-export const getFacilityFeatureIcon = (featureId: number) => {
-  const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
-  if (!feature?.icon) return null;
-  return typeof feature.icon === "string" ? (
-    <Hospital className="size-4" />
-  ) : (
-    feature.icon
-  );
 };
 
 export const FacilityHome = ({ facilityId }: Props) => {

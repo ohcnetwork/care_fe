@@ -395,7 +395,7 @@ export default function QuestionnaireEditor({
     },
   });
 
-  const urlSchema = z.string().url(t("please enter a valid url"));
+  const urlSchema = z.url(t("please enter a valid url"));
 
   const QuestionnaireFormPartialSchema = z.object({
     title: z.string().trim().min(1, t("field_required")),
@@ -760,7 +760,7 @@ export default function QuestionnaireEditor({
       importQuestionnaire(importUrl);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error(error.issues[0].message);
       }
     }
   };
@@ -1988,10 +1988,7 @@ function QuestionEditor({
                 newCondition = {
                   question: condition.question,
                   operator: condition.operator as
-                    | "greater"
-                    | "less"
-                    | "greater_or_equals"
-                    | "less_or_equals",
+                    "greater" | "less" | "greater_or_equals" | "less_or_equals",
                   answer: Number(value),
                 };
               } else {

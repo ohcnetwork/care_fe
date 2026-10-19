@@ -17,7 +17,7 @@ import accountApi from "@/types/billing/account/accountApi";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EmptyState } from "./empty-state";
+import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const Account = () => {
   const { t } = useTranslation();

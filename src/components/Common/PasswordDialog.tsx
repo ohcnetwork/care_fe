@@ -44,7 +44,7 @@ export function PasswordDialog({
   const { t } = useTranslation();
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     onSubmit(password);
   };

@@ -32,7 +32,7 @@ interface Props {
   trigger?: React.ReactNode;
 }
 
-export default function EditUserRoleSheet({
+export default function EditFacilityUserRoleSheet({
   facilityId,
   organizationId,
   userRole,

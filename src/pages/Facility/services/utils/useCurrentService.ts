@@ -35,15 +35,3 @@ export default function useCurrentService() {
 
   return { facilityId, serviceId, service };
 }
-
-export function useCurrentServiceSilently() {
-  try {
-    return useCurrentService();
-  } catch {
-    return {
-      facilityId: undefined,
-      serviceId: undefined,
-      service: undefined,
-    };
-  }
-}

@@ -170,7 +170,7 @@ export default function PatientHome() {
                     onSuccess={(encounter) => {
                       if (isDispenseFlow && pharmacyDispenseService) {
                         navigate(
-                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill?encounterId=${encounter.id}`,
+                          `/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill/dispense/${encounter.id}`,
                         );
                       }
                     }}
@@ -243,7 +243,7 @@ export default function PatientHome() {
                     {flow === "dispense" && pharmacyDispenseService && (
                       <Button variant="outline">
                         <Link
-                          href={`/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill?encounterId=${encounter.id}`}
+                          href={`/facility/${facilityId}/locations/${pharmacyDispenseService.locationId}/medication_requests/patient/${patientData.id}/bill/dispense/${encounter.id}`}
                           className="flex items-center gap-2"
                         >
                           <span>{t("dispense_medicine")}</span>

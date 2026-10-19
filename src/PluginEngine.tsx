@@ -36,10 +36,7 @@ const getPluginManifest = async (config: PlugConfig) => {
     } as PluginManifestWithMeta;
   }
 
-  if (
-    !config.meta.url ||
-    !z.string().url().safeParse(config.meta.url).success
-  ) {
+  if (!config.meta.url || !z.url().safeParse(config.meta.url).success) {
     console.error(
       `Plugin ${config.slug} has an invalid URL (${config.meta.url}) in meta`,
     );

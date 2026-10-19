@@ -1,6 +1,3 @@
-import { Suspense, lazy } from "react";
-
-import Loading from "@/components/Common/Loading";
 import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
@@ -13,9 +10,7 @@ import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
-const ExcalidrawEditor = lazy(
-  () => import("@/components/Common/Drawings/ExcalidrawEditor"),
-);
+import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
@@ -81,12 +76,13 @@ const consultationRoutes: AppRoutes = {
     };
     return acc;
   }, {}),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/medicines/administrations/print":
-    ({ facilityId, encounterId, patientId }) => (
+  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/type/:productType/administrations/print":
+    ({ facilityId, encounterId, patientId, productType }) => (
       <PrintMedicationAdministration
         facilityId={facilityId}
         encounterId={encounterId}
         patientId={patientId}
+        productType={productType as AdministrableProductType}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/report/template/:templateSlug":
@@ -105,26 +101,6 @@ const consultationRoutes: AppRoutes = {
         patientId={patientId}
         subjectType="encounter"
       />
-    ),
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/new":
-    ({ encounterId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-        />
-      </Suspense>
-    ),
-
-  "/facility/:facilityId/patient/:patientId/encounter/:encounterId/drawings/:drawingId":
-    ({ encounterId, drawingId }) => (
-      <Suspense fallback={<Loading />}>
-        <ExcalidrawEditor
-          associatingId={encounterId}
-          associating_type="encounter"
-          drawingId={drawingId}
-        />
-      </Suspense>
     ),
 
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire/:slug":

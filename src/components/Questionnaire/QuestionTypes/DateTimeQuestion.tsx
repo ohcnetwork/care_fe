@@ -87,11 +87,11 @@ export function DateTimeQuestion({
         date={currentValue}
         onChange={handleSelect}
         disablePicker={disabled}
-        className="flex-1"
+        className="flex-1 border-gray-300 shadow-none"
       />
       <Input
         type="time"
-        className="sm:w-[150px] border-gray-200 sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
+        className="sm:w-[150px] sm:border-r-0 sm:ring-r-0 sm:focus-visible:ring-0 h-9 text-sm sm:text-base"
         value={formatTime(currentValue)}
         onChange={handleTimeChange}
         disabled={disabled || !currentValue}

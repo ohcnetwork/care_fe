@@ -5,6 +5,8 @@ import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import careConfig from "@careConfig";
+
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -16,10 +18,10 @@ import { DebugPreview } from "@/components/Common/DebugPreview";
 import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/file";
@@ -62,13 +64,6 @@ export interface QuestionnaireFormState {
   questionnaire: QuestionnaireRead;
   responses: QuestionnaireResponse[];
   errors: QuestionValidationError[];
-}
-
-interface FormBatchRequest {
-  url: string;
-  method: string;
-  body: Record<string, any>;
-  reference_id: string;
 }
 
 interface ServerValidationError {
@@ -413,8 +408,8 @@ export function QuestionnaireForm({
     enabled: !!continueDraftId,
   });
 
-  const { mutate: submitBatch, isPending: isSubmitPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
+  const { mutate: submitBatch, isPending: isSubmitPending } = useBatchRequest({
+    silent: true,
     onSuccess: () => {
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
@@ -549,7 +544,7 @@ export function QuestionnaireForm({
 
   // Check if questionnaire is saveable as draft (no structured questions)
   const isDraftSaveable = useMemo(() => {
-    if (import.meta.env.REACT_ENABLE_QUESTIONNAIRE_DRAFT !== "true") {
+    if (!careConfig.enableQuestionnaireDraft) {
       return false;
     }
 
@@ -822,10 +817,10 @@ export function QuestionnaireForm({
     }
 
     // Continue with existing submission logic...
-    const requests: FormBatchRequest[] = [];
+    const requests: BatchRequestObject[] = [];
     if (patientId) {
       const context = { facilityId, patientId, encounterId };
-      const structuredPromises: Promise<FormBatchRequest[]>[] = [];
+      const structuredPromises: Promise<BatchRequestObject[]>[] = [];
 
       formsWithValidation.forEach((form) => {
         form.responses.forEach((response) => {
@@ -861,9 +856,9 @@ export function QuestionnaireForm({
       );
       if (validResponses.length > 0) {
         requests.push({
-          url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
-          method: "POST",
-          reference_id: form.questionnaire.id,
+          api: questionnaireApi.submit,
+          pathParams: { slug: form.questionnaire.slug },
+          referenceId: form.questionnaire.id,
           body: {
             resource_id: encounterId ? encounterId : patientId,
             encounter: encounterId,
@@ -922,9 +917,9 @@ export function QuestionnaireForm({
     if (continueDraftId) {
       const draftQuestionnaire = formsWithValidation[0];
       requests.push({
-        url: `/api/v1/form_submission/${continueDraftId}/`,
-        method: "PUT",
-        reference_id: `form_submission_${continueDraftId}`,
+        api: formSubmissionApi.update,
+        pathParams: { external_id: continueDraftId },
+        referenceId: `form_submission_${continueDraftId}`,
         body: {
           patient: patientId,
           encounter: encounterId,
@@ -937,7 +932,7 @@ export function QuestionnaireForm({
     }
 
     setIsDirty(false);
-    submitBatch({ requests });
+    submitBatch(requests);
   };
 
   const scrollToQuestion = (questionnaireId: string, groupId?: string) => {

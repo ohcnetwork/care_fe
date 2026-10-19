@@ -59,7 +59,7 @@ export default function PatientIdentifierConfigForm({
   const getFormSchema = (isAutoMaintained: boolean) =>
     z.object({
       config: z.object({
-        use: z.nativeEnum(PatientIdentifierUse),
+        use: z.enum(PatientIdentifierUse),
         description: isAutoMaintained
           ? z.string().trim().optional().nullable()
           : z.string().trim().min(1, t("field_required")),
@@ -86,7 +86,7 @@ export default function PatientIdentifierConfigForm({
           retrieve_with_otp: z.boolean().optional(),
         }),
       }),
-      status: z.nativeEnum(PatientIdentifierConfigStatus),
+      status: z.enum(PatientIdentifierConfigStatus),
       facility: z.string().optional().nullable(),
     });
 

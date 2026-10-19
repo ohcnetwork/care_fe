@@ -10,7 +10,11 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    // "bundler" resolution (recommended for Vite) reads package `exports` maps,
+    // which Vite 8 and other modern deps require. `baseUrl` remains deprecated in
+    // TS 6 but still functions; silence that one warning via ignoreDeprecations.
+    "moduleResolution": "bundler",
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,

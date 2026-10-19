@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 import { ResourceCategoryList } from "@/components/Common/ResourceCategoryList";
-import { ProductKnowledgeList as ProductKnowledgeListComponent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
+import { ProductKnowledgeListContent } from "@/pages/Facility/settings/productKnowledge/ProductKnowledgeListComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ProductKnowledgeStatus } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
@@ -60,7 +60,7 @@ export default function ProductKnowledgeList({
         }}
       >
         {categorySlug && (
-          <ProductKnowledgeListComponent
+          <ProductKnowledgeListContent
             facilityId={facilityId}
             categorySlug={categorySlug}
             setAllowCategoryCreate={setAllowCategoryCreate}

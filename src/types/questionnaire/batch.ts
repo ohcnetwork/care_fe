@@ -60,9 +60,7 @@ export interface ValidationErrorResponse {
 
 // Type unions
 export type BatchResponse<T = unknown> =
-  | BatchErrorResponse
-  | BatchSuccessResponse<T>;
+  BatchErrorResponse | BatchSuccessResponse<T>;
 
 export type BatchResponseResult<T = unknown> =
-  | ValidationErrorResponse
-  | BatchResponse<T>;
+  ValidationErrorResponse | BatchResponse<T>;

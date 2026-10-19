@@ -22,7 +22,7 @@ interface Props {
   facilityId: string;
 }
 
-export function UserCard({ user, className, facilityId }: Props) {
+export function FacilityUserCard({ user, className, facilityId }: Props) {
   const { t } = useTranslation();
   const { patientToken: tokenData } = useAuthContext();
 

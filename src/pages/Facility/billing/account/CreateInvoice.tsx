@@ -98,7 +98,7 @@ import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 const ITEMS_PER_PAGE = 200;
 
 const formSchema = z.object({
-  status: z.nativeEnum(InvoiceStatus),
+  status: z.enum(InvoiceStatus),
   payment_terms: z.string().optional(),
   note: z.string().optional(),
   issue_date: z

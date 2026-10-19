@@ -11,9 +11,11 @@ test("navigate to an encounter and save patient and encounter id", async ({
   const facilityId = getFacilityId();
   const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
   const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-  // Navigate to encounters overview page with a wide date range to show all encounters
+  // Pin to writable encounters (planned or in_progress); without a status
+  // filter the list is -modified_date ordered and can hand back a discharged
+  // or completed encounter where questionnaires are locked.
   await page.goto(
-    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=planned,in_progress`,
   );
 
   try {

@@ -139,7 +139,7 @@ function getFacilityQuickLinks(
   );
 }
 
-export function useUserPreferences() {
+function useUserPreferences() {
   const user = useAuthUser();
   const queryClient = useQueryClient();
 

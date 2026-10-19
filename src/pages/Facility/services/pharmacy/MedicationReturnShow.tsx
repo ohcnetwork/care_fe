@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import {
   ChevronLeft,
-  Edit,
   EllipsisVertical,
   ExternalLink,
   MoreVertical,
@@ -45,6 +44,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { AddMedicationReturnItemForm } from "@/pages/Facility/services/pharmacy/components/AddMedicationReturnItemForm";
 import { MedicationReturnItemsTable } from "@/pages/Facility/services/pharmacy/components/MedicationReturnItemsTable";
+import { MEDICATION_DISPENSE_CANCELLED_STATUSES } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -162,6 +162,7 @@ export default function MedicationReturnShow({
           location: locationId,
           limit: 100,
           order: orderId,
+          exclude_status: MEDICATION_DISPENSE_CANCELLED_STATUSES.join(","),
         },
       }),
       enabled: !!orderId && !!locationId,
@@ -355,18 +356,6 @@ export default function MedicationReturnShow({
                   basePath="/"
                 >
                   <Printer className="size-4" /> {t("print")}
-                </Link>
-              </Button>
-            )}
-
-            {deliveryOrder.status === DeliveryOrderStatus.draft && (
-              <Button variant="outline" asChild>
-                <Link
-                  basePath="/"
-                  href={`${basePath}/order/${deliveryOrderId}/edit`}
-                >
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
                 </Link>
               </Button>
             )}

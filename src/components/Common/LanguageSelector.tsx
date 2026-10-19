@@ -13,7 +13,7 @@ import {
 import { keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
 
-export const LanguageSelector = () => {
+const LanguageSelector = () => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {

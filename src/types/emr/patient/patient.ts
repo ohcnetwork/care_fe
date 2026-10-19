@@ -1,7 +1,10 @@
 import { Permissions } from "@/types/emr/permission/permission";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
-import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import {
+  PatientIdentifier,
+  PatientIdentifierUse,
+} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum BloodGroupChoices {
@@ -98,6 +101,48 @@ export function getPartialId(patient: PartialPatientModel | PatientListRead) {
     return patient.partial_id;
   }
   return patient.id.slice(0, 5);
+}
+
+/**
+ * Identifiers to display for a patient: instance-level ones followed by
+ * facility-level ones. Auto-maintained identifiers are never included.
+ *
+ * `facility_identifiers` is only populated by the backend when the patient was
+ * fetched with a facility in context (e.g. `?facility=<id>`), so callers that
+ * need facility identifiers must fetch the patient that way.
+ *
+ * The backend can list the same config in both arrays (its instance cache is
+ * not filtered by facility), so entries are de-duplicated by config id.
+ */
+export function getPatientIdentifiers(
+  patient:
+    | Partial<
+        Pick<PatientRead, "instance_identifiers" | "facility_identifiers">
+      >
+    | PatientListRead
+    | PublicPatientRead
+    | null
+    | undefined,
+  options: { use?: PatientIdentifierUse } = {},
+): PatientIdentifier[] {
+  if (!patient) return [];
+  const instanceIdentifiers =
+    "instance_identifiers" in patient
+      ? (patient.instance_identifiers ?? [])
+      : [];
+  const facilityIdentifiers =
+    "facility_identifiers" in patient
+      ? (patient.facility_identifiers ?? [])
+      : [];
+  const byConfigId = new Map<string, PatientIdentifier>();
+  for (const identifier of [...instanceIdentifiers, ...facilityIdentifiers]) {
+    byConfigId.set(identifier.config.id, identifier);
+  }
+  return [...byConfigId.values()].filter(
+    ({ config }) =>
+      !config.config.auto_maintained &&
+      (!options.use || config.config.use === options.use),
+  );
 }
 
 export interface PublicPatientRead {

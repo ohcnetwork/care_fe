@@ -21,7 +21,7 @@ import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import { goBack } from "@/Utils/utils";
 import { Button } from "@/components/ui/button";
 import { FeatureBadge } from "./Utils";
-import { UserCard } from "./components/UserCard";
+import { FacilityUserCard as UserCard } from "./components/UserCard";
 
 interface Props {
   id: string;

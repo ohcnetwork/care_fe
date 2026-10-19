@@ -41,11 +41,9 @@ export default function ServiceHistoryForm({
 
   const formSchema = z.object({
     note: z.string().min(1, { message: t("field_required") }),
-    serviced_on: z
-      .date({ required_error: t("field_required") })
-      .max(dayjs().toDate(), {
-        message: t("service_date_min_date"),
-      }),
+    serviced_on: z.date({ error: t("field_required") }).max(dayjs().toDate(), {
+      message: t("service_date_min_date"),
+    }),
   });
 
   type FormValues = z.infer<typeof formSchema>;

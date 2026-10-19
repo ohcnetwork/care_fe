@@ -9,6 +9,9 @@ export enum ProductKnowledgeType {
   consumable = "consumable",
 }
 
+export type AdministrableProductType =
+  ProductKnowledgeType.medication | ProductKnowledgeType.nutritional_product;
+
 export const PRODUCT_KNOWLEDGE_TYPE_COLORS = {
   medication: "blue",
   nutritional_product: "green",

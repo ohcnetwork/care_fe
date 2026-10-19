@@ -140,7 +140,7 @@ export function ChargeItemDefinitionForm({
         }),
       category: z.string().min(1, { message: t("field_required") }),
       _categoryName: z.string().optional(),
-      status: z.nativeEnum(ChargeItemDefinitionStatus),
+      status: z.enum(ChargeItemDefinitionStatus),
       description: z.string().optional(),
       purpose: z.string().optional(),
       derived_from_uri: z
@@ -158,7 +158,7 @@ export function ChargeItemDefinitionForm({
       can_edit_charge_item: z.boolean(),
       price_components: z.array(
         z.object({
-          monetary_component_type: z.nativeEnum(MonetaryComponentType),
+          monetary_component_type: z.enum(MonetaryComponentType),
           code: CodeSchema.optional(),
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),

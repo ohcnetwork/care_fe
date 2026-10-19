@@ -40,8 +40,7 @@ export interface DiscountMonetaryComponent extends SharedMonetaryFields {
 }
 
 export type MonetaryComponent =
-  | StandardMonetaryComponent
-  | DiscountMonetaryComponent;
+  StandardMonetaryComponent | DiscountMonetaryComponent;
 
 export enum DiscountApplicabilityOrder {
   total_desc = "total_desc",
@@ -268,39 +267,4 @@ export function calculateTotalPriceWithQuantity(
 ): Decimal {
   const unitPrice = calculateTotalPrice(priceComponents);
   return multiply(unitPrice, quantity);
-}
-
-/**
- * Get a breakdown of all price components
- */
-export interface PriceBreakdown {
-  basePrice: string;
-  surcharges: string;
-  discounts: string;
-  subtotal: string;
-  tax: string;
-  total: string;
-}
-
-export function getPriceBreakdown(
-  priceComponents: MonetaryComponent[],
-  quantity: string | number = 1,
-): PriceBreakdown {
-  const base = getBasePrice(priceComponents);
-  const surcharges = getSurchargeAmount(priceComponents, base);
-  const discounts = getDiscountAmount(priceComponents, base);
-  const subtotal = add(base, surcharges).minus(discounts);
-  const tax = getTaxAmount(priceComponents, subtotal);
-  const total = add(subtotal, tax);
-
-  const qty = decimal(quantity);
-
-  return {
-    basePrice: round(multiply(base, qty)),
-    surcharges: round(multiply(surcharges, qty)),
-    discounts: round(multiply(discounts, qty)),
-    subtotal: round(multiply(subtotal, qty)),
-    tax: round(multiply(tax, qty)),
-    total: round(multiply(total, qty)),
-  };
 }

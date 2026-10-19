@@ -10,7 +10,6 @@ import { scheduleServiceTypeAtom } from "@/atoms/scheduleServiceTypeAtom";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
-import { register } from "@/lib/override";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -27,7 +26,7 @@ export interface BookAppointmentDetailsProps {
   onSuccess?: () => void;
 }
 
-const BookAppointmentDetailsBase = ({
+export const BookAppointmentDetails = ({
   patientId,
   onSuccess,
 }: BookAppointmentDetailsProps) => {
@@ -242,8 +241,3 @@ const BookAppointmentDetailsBase = ({
     </div>
   );
 };
-
-export const BookAppointmentDetails = register(
-  "BookAppointmentDetails",
-  BookAppointmentDetailsBase,
-);

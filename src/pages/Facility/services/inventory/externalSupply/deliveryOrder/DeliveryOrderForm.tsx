@@ -177,8 +177,7 @@ export default function DeliveryOrderForm({
     schemaType: "write",
     form,
     existingData: existingData?.extensions as
-      | Record<string, Record<string, unknown>>
-      | undefined,
+      Record<string, Record<string, unknown>> | undefined,
   });
 
   useEffect(() => {
@@ -204,6 +203,14 @@ export default function DeliveryOrderForm({
       });
     }
   }, [isEditMode, existingData, supplyOrderData, form, extensions.defaults]);
+
+  useEffect(() => {
+    if (isEditMode || supplyOrderId) return;
+    if (internal && form.getValues("destination") === locationId) {
+      form.setValue("destination", "");
+    }
+    form.setValue(internal ? "origin" : "destination", locationId);
+  }, [locationId, internal, isEditMode, supplyOrderId, form]);
 
   const tagIds = form.watch("tags");
   const selectedTags = useTagConfigs({ ids: tagIds, facilityId })

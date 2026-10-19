@@ -4,7 +4,7 @@ export interface IPageTitleProps {
   title: string;
 }
 
-export default function PageTitle({ title }: IPageTitleProps) {
+export default function PageHeadTitle({ title }: IPageTitleProps) {
   useEffect(() => {
     const prevTitle = document.title;
     if (title) {

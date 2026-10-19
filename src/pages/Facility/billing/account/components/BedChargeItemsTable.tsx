@@ -195,7 +195,7 @@ export interface BedChargeItemsTableProps {
   canAddChargeItems?: boolean;
 }
 
-export function BedChargeItemsTable({
+function BedChargeItemsTable({
   facilityId,
   account,
   canAddChargeItems = true,

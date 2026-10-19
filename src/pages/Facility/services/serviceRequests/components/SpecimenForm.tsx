@@ -171,7 +171,7 @@ export function SpecimenForm({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
 
     // Ensure collector ID is available before submitting

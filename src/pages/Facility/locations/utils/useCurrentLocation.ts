@@ -35,15 +35,3 @@ export default function useCurrentLocation() {
 
   return { facilityId, locationId, location };
 }
-
-export function useCurrentLocationSilently() {
-  try {
-    return useCurrentLocation();
-  } catch {
-    return {
-      facilityId: undefined,
-      locationId: undefined,
-      location: undefined,
-    };
-  }
-}

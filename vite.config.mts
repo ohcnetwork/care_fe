@@ -9,16 +9,14 @@ import {
 } from "vite";
 
 import federation from "@originjs/vite-plugin-federation";
-import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
-import { viteStaticCopy } from "vite-plugin-static-copy";
+import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -51,26 +49,23 @@ function toImportName(slug: string) {
 }
 
 function getLocalPluginDefinitions(rootDir: string): LocalPluginDefinition[] {
-  const appsDir = path.join(rootDir, "apps");
-
-  if (!fs.existsSync(appsDir)) {
-    return [];
-  }
-
+  // ponytail: an app shipping two manifests (manifest.ts AND manifest.tsx) yields
+  // duplicate imports in the generated module; make this throw if it ever happens.
   return fs
-    .readdirSync(appsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const slug = entry.name;
+    .globSync(
+      `apps/*/src/manifest{${LOCAL_PLUGIN_SOURCE_EXTENSIONS.join(",")}}`,
+      { cwd: rootDir },
+    )
+    .map((manifestFile) => {
+      const slug = manifestFile.split(/[\\/]/)[1];
       return {
         slug,
         importName: toImportName(slug),
-        manifestPath: path.join(appsDir, slug, "src", "manifest.tsx"),
-        publicDir: path.join(appsDir, slug, "public"),
+        manifestPath: path.join(rootDir, manifestFile),
+        publicDir: path.join(rootDir, "apps", slug, "public"),
       };
     })
-    .filter((plugin) => fs.existsSync(plugin.manifestPath))
-    .sort((left, right) => left.slug.localeCompare(right.slug));
+    .sort((left, right) => left.manifestPath.localeCompare(right.manifestPath));
 }
 
 function getMimeType(filePath: string) {
@@ -103,12 +98,31 @@ function getMimeType(filePath: string) {
   }
 }
 
+function parseRegisteredComponentNames(value: string | undefined) {
+  if (!value || value.trim() === "") {
+    return new Set<string>();
+  }
+
+  if (value.trim() === "*") {
+    return null;
+  }
+
+  return new Set(
+    value
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
+}
+
 function isPluginManifestPath(rootDir: string, filePath: string) {
   const normalizedFilePath = normalizePath(filePath);
   const appsPrefix = `${normalizePath(path.join(rootDir, "apps"))}/`;
   return (
     normalizedFilePath.startsWith(appsPrefix) &&
-    normalizedFilePath.endsWith("/src/manifest.tsx")
+    LOCAL_PLUGIN_SOURCE_EXTENSIONS.some((extension) =>
+      normalizedFilePath.endsWith(`/src/manifest${extension}`),
+    )
   );
 }
 
@@ -406,7 +420,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
   return {
     envPrefix: "REACT_",
     define: {
-      "process.env.IS_PREACT": JSON.stringify("true"),
       __CUSTOM_DESCRIPTION_HTML__: getDescriptionHtml(
         env.REACT_CUSTOM_DESCRIPTION || "",
       ),
@@ -415,6 +428,11 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       localPluginDevSupport(),
+      autoRegisterComponents({
+        include: parseRegisteredComponentNames(
+          env.REACT_MFE_REGISTERED_COMPONENTS,
+        ),
+      }),
       tailwindcss(),
       federation({
         name: "core",
@@ -431,30 +449,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "decimal.js",
         ],
       }),
-      viteStaticCopy({
-        targets: [
-          {
-            src: "node_modules/pdfjs-dist/build/pdf.worker.min.mjs",
-            dest: "",
-          },
-        ],
-      }),
       react(),
-      reactScan({
-        enable:
-          env.NODE_ENV === "development" && env.ENABLE_REACT_SCAN === "true",
-      }),
-      checker({
-        typescript: true,
-        eslint: {
-          useFlatConfig: true,
-          lintCommand: "eslint ./src",
-          dev: {
-            logLevel: ["error"],
-          },
-        },
-        enableBuild: false,
-      }),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
       }),
@@ -536,7 +531,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       target: "es2022",
     },
     server: {
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
       host: "0.0.0.0",
       allowedHosts: true,
       watch: {
@@ -558,7 +554,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           img-src 'self' https://cdn.ohc.network ${cdnUrls};\
           object-src 'self' ${cdnUrls};`,
       },
-      port: 4000,
+      port: Number(process.env.PORT) || 4000,
+      strictPort: !!process.env.PORT,
     },
   };
 });

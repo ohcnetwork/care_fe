@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/service-worker.ts",
+    "src/pluginMap.ts",
+    "src/PluginRegistry.ts",
+    "src/Locale/update_locale.js",
+    "src/lib/override/index.ts",
+    "tests/globalSetup.ts",
+    "tests/setup/*.setup.ts"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "exclude": ["types", "nsExports", "nsTypes", "enumMembers", "duplicates"],
+  "tags": ["-public"],
+  "ignoreIssues": {
+    "src/components/ui/**": ["exports"],
+    "src/components/Common/Table.tsx": ["exports"],
+    "src/Utils/decimal.ts": ["exports"]
+  },
+  "ignore": [".opencode/**"],
+  "ignoreUnresolved": ["__federation__", "@/supportedBrowsers"],
+  "ignoreDependencies": ["workbox-core", "workbox-precaching", "pdfjs-dist"]
+}

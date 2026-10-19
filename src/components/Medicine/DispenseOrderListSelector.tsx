@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import * as React from "react";
+import { useEffect, useMemo } from "react";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +20,7 @@ import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { ChevronDown, PackageIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useOnInView } from "react-intersection-observer";
 
 interface DispenseOrderListSelectorProps {
   patientId: string;
@@ -34,15 +37,46 @@ export default function DispenseOrderListSelector({
 }: DispenseOrderListSelectorProps) {
   const { t } = useTranslation();
   const [openDrawer, setOpenDrawer] = React.useState(false);
-  const { data: dispenseOrders, isLoading } = useQuery({
-    queryKey: ["dispenseOrders", patientId, facilityId],
-    queryFn: query(dispenseOrderApi.list, {
-      pathParams: { facilityId: facilityId ?? "" },
-      queryParams: {
-        patient: patientId,
+
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["infinite-dispenseOrders", patientId, facilityId],
+      queryFn: async ({ pageParam = 0, signal }) => {
+        const response = await query(dispenseOrderApi.list, {
+          pathParams: { facilityId: facilityId ?? "" },
+          queryParams: {
+            patient: patientId,
+            limit: String(RESULTS_PER_PAGE_LIMIT),
+            offset: String(pageParam),
+          },
+        })({
+          signal,
+        });
+        return response;
       },
-    }),
-    enabled: !!patientId && !!facilityId,
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
+        return currentOffset < lastPage.count ? currentOffset : null;
+      },
+      enabled: !!facilityId,
+    });
+
+  const dispenseOrders = useMemo(
+    () => data?.pages.flatMap((page) => page.results) ?? [],
+    [data],
+  );
+
+  const loadMoreRefMobile = useOnInView<HTMLDivElement>((inView) => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+
+  const loadMoreRefDesktop = useOnInView<HTMLDivElement>((inView) => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
   });
 
   function handleSelectDispenseOrder(
@@ -53,10 +87,10 @@ export default function DispenseOrderListSelector({
   }
 
   // Select first dispense order by default
-  React.useEffect(() => {
-    if (dispenseOrders?.results?.length) {
+  useEffect(() => {
+    if (dispenseOrders.length) {
       if (!selectedDispenseOrderId) {
-        onSelectDispenseOrder(dispenseOrders.results[0] as DispenseOrderRead);
+        onSelectDispenseOrder(dispenseOrders[0]);
       }
     } else {
       onSelectDispenseOrder(undefined);
@@ -71,23 +105,23 @@ export default function DispenseOrderListSelector({
     );
   }
 
-  if (!dispenseOrders?.results?.length) {
+  if (!dispenseOrders.length) {
     return null;
   }
 
   const selectedDispenseOrder = selectedDispenseOrderId
-    ? dispenseOrders?.results.find(
-        (order) => order.id === selectedDispenseOrderId,
-      )
+    ? dispenseOrders.find((order) => order.id === selectedDispenseOrderId)
     : undefined;
 
   return (
     <>
       <div className="hidden lg:block h-full overflow-y-auto pr-1">
         <DispenseOrderList
-          dispenseOrders={dispenseOrders.results as DispenseOrderRead[]}
+          dispenseOrders={dispenseOrders}
           selectedDispenseOrderId={selectedDispenseOrderId}
           onSelectDispenseOrder={onSelectDispenseOrder}
+          loadMoreRef={loadMoreRefDesktop}
+          isFetchingNextPage={isFetchingNextPage}
         />
       </div>
       <div className="lg:hidden">
@@ -128,9 +162,11 @@ export default function DispenseOrderListSelector({
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
               <DispenseOrderList
-                dispenseOrders={dispenseOrders.results as DispenseOrderRead[]}
+                dispenseOrders={dispenseOrders}
                 selectedDispenseOrderId={selectedDispenseOrderId}
                 onSelectDispenseOrder={handleSelectDispenseOrder}
+                loadMoreRef={loadMoreRefMobile}
+                isFetchingNextPage={isFetchingNextPage}
               />
             </div>
           </DrawerContent>
@@ -144,15 +180,19 @@ function DispenseOrderList({
   dispenseOrders,
   selectedDispenseOrderId,
   onSelectDispenseOrder,
+  isFetchingNextPage,
+  loadMoreRef,
 }: {
   dispenseOrders: DispenseOrderRead[];
   selectedDispenseOrderId: string | undefined;
   onSelectDispenseOrder: (dispenseOrder: DispenseOrderRead | undefined) => void;
+  isFetchingNextPage: boolean;
+  loadMoreRef: React.Ref<HTMLDivElement>;
 }) {
   const { t } = useTranslation();
   return (
     <div className="space-y-2 p-2">
-      {dispenseOrders.map((dispenseOrder) => {
+      {dispenseOrders.map((dispenseOrder, i) => {
         const isSelected = selectedDispenseOrderId === dispenseOrder.id;
         return (
           <Card
@@ -164,6 +204,7 @@ function DispenseOrderList({
                 : "bg-gray-100 hover:bg-gray-100 shadow-none",
             )}
             onClick={() => onSelectDispenseOrder(dispenseOrder)}
+            ref={i === dispenseOrders.length - 1 ? loadMoreRef : undefined}
           >
             {isSelected && (
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
@@ -193,6 +234,7 @@ function DispenseOrderList({
           </Card>
         );
       })}
+      {isFetchingNextPage && <CardListSkeleton count={5} />}
     </div>
   );
 }

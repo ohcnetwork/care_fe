@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 
 import { expect, test } from "@playwright/test";
+import { expectToast, selectFromValueSet } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 const UNITS = [
@@ -578,14 +579,17 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addGenderCondition(page, 1, "Male");
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
+
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
     });
 
     // Edit interpretation
     await test.step("Edit interpretation", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-square-pen)")
+        .getByRole("button", { name: "Edit interpretation" })
+        .first()
         .click();
 
       // Wait for sheet to open
@@ -642,6 +646,10 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
 
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+
       // Verify interpretation appears
       await expect(
         page.getByText("Observation Interpretation (1)"),
@@ -651,9 +659,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Delete interpretation
     await test.step("Delete interpretation", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-trash-2)")
+        .getByRole("button", { name: "Delete interpretation" })
+        .first()
         .click();
 
       // Verify interpretation is removed
@@ -770,14 +777,17 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await addGenderCondition(page, 1, "Male");
       await addNumericRange(page, 1, false, "Normal", 0, 100);
       await page.getByRole("button", { name: "Save" }).click();
+
+      // Explicitly wait for the sheet's exit animation to complete and the
+      // dialog to unmount, so the overlay no longer intercepts clicks
+      await page.getByRole("dialog").waitFor({ state: "detached" });
     });
 
     // Edit and cancel
     await test.step("Edit and cancel", async () => {
       await page
-        .locator(".flex.flex-col.sm\\:flex-row")
-        .nth(0)
-        .locator("button:has(svg.lucide-square-pen)")
+        .getByRole("button", { name: "Edit interpretation" })
+        .first()
         .click();
 
       await expect(
@@ -811,5 +821,56 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await expect(
       page.getByText("observation definition created successfully"),
     ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("should create observation definition with a component that has no unit", async ({
+    page,
+  }) => {
+    const data = generateObservationData();
+
+    await fillBasicObservationForm(page, data);
+
+    await test.step("Add component without unit", async () => {
+      await page
+        .getByRole("button", {
+          name: "Add your first component",
+        })
+        .click();
+
+      // Fill component code
+      await selectFromValueSet(
+        page,
+        page.getByRole("combobox", { name: "Code *", exact: true }),
+        { search: "Hemoglobin" },
+      );
+
+      // Select component data type but intentionally skip the unit
+      await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
+      await page.getByRole("option", { name: "Quantity" }).first().click();
+    });
+
+    await page.getByRole("button", { name: "Create" }).click();
+    await expectToast(page, "observation definition created successfully");
+  });
+
+  test("should show validation error when component code is left blank", async ({
+    page,
+  }) => {
+    const data = generateObservationData();
+
+    await fillBasicObservationForm(page, data);
+
+    // Add a component but leave the code empty
+    await page
+      .getByRole("button", {
+        name: "Add your first component",
+      })
+      .click();
+
+    await page.getByRole("button", { name: "Create" }).click();
+
+    await expect(page.getByText("Required")).toBeVisible();
+
+    await expect(page).toHaveURL(/observation_definitions\/new/);
   });
 });

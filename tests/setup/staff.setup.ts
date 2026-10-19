@@ -1,0 +1,24 @@
+import { expect, test as setup } from "@playwright/test";
+
+const authFile = "tests/.auth/staff.json";
+
+setup("authenticate as staff", async ({ page }) => {
+  // Navigate to login page
+  await page.goto("/login");
+
+  // Fill in credentials for care-staff
+  await page.getByRole("textbox", { name: /username/i }).fill("care-staff");
+  await page.getByLabel(/password/i).fill("Ohcn@123");
+
+  // Click login button
+  await page.getByRole("button", { name: /login/i }).click();
+
+  // Wait for successful login
+  await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+
+  // Verify we're logged in by checking for user-specific elements
+  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+
+  // Save signed-in state to 'authFile'
+  await page.context().storageState({ path: authFile });
+});

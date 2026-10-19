@@ -96,9 +96,9 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Environment Setup
 
-- Node.js 22+ is required (check `.node-version` file)
-- Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
-- Or use nvm: `nvm install 22 && nvm use 22`
+- Node.js 24+ is required (check `.node-version` file)
+- Install Node.js 24: `curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs`
+- Or use nvm: `nvm install 24 && nvm use 24`
 
 ### Bootstrap, Build, and Test the Repository
 
@@ -144,7 +144,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Required Validation Steps
 
 - Always run `npm run format` and `npm run lint` before committing changes
-- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run unimported`
+- The CI pipeline (.github/workflows/linter.yml) runs `npm run lint -- --quiet` and `npm run knip`
 - Application loads successfully showing CARE healthcare facility search and login interface
 - Build produces a functional PWA with service worker
 
