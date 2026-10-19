@@ -144,7 +144,9 @@ export function UserCard(props: UserCardProps) {
                   <Button
                     variant="outline"
                     className="h-4 w-fit px-2 text-xs"
-                    aria-label={t("see_details")}
+                    aria-label={t("see_count_more_responsibilities", {
+                      count: additionalResponsibilities,
+                    })}
                     onClick={() => navigate(userDetailsPath)}
                   >
                     +{t("count_more", { count: additionalResponsibilities })}
