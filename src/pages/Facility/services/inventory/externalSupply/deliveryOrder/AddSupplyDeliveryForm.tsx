@@ -102,6 +102,16 @@ import query from "@/Utils/request/query";
 import { ExtensionContexts, SupplyDeliveryAnchor } from "@/Utils/schema/types";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
+const monetaryAmountSchema = z
+  .string()
+  .refine(
+    (value) =>
+      value.trim() !== "" &&
+      Number.isFinite(Number(value)) &&
+      Number(value) >= 0,
+    { message: translate("invalid_value") },
+  );
+
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
   supplied_item_quantity: zodDecimal({ min: 1 }),
@@ -120,18 +130,9 @@ const supplyDeliveryItemSchema = z.object({
   charge_item_definition: z.object({ slug: z.string() }).optional(),
   _created_charge_item_definition: z.string().optional(),
   _created_product: z.string().optional(),
-  unit_price: z
-    .string()
-    .refine(
-      (value) =>
-        value.trim() !== "" &&
-        Number.isFinite(Number(value)) &&
-        Number(value) >= 0,
-      { message: translate("invalid_value") },
-    )
-    .optional(),
-  purchase_price: zodDecimal({ min: 0 }).optional(),
-  total_purchase_price: zodDecimal({ min: 0 }).optional(),
+  unit_price: monetaryAmountSchema.optional(),
+  purchase_price: monetaryAmountSchema.optional(),
+  total_purchase_price: monetaryAmountSchema.optional(),
   is_manually_edited: z.boolean().optional(),
   is_charge_item_edited: z.boolean().optional(),
   is_total_purchase_price_edited: z.boolean().optional(),
@@ -689,21 +690,13 @@ export function AddSupplyDeliveryForm({
     let chargeItemSlug = item.charge_item_definition?.slug;
     const hasPurchasePriceChange =
       sourceProduct &&
-      !isEqual(
-        item.purchase_price,
-        sourceProduct.purchase_price != null
-          ? round(sourceProduct.purchase_price)
-          : undefined,
-      );
+      !isEqual(item.purchase_price, sourceProduct.purchase_price ?? undefined);
 
     // Create ChargeItemDefinition and Product for external supply (no origin)
     if (
       !origin &&
       (!productId || item.is_manually_edited || hasPurchasePriceChange)
     ) {
-      if (!item.replaces_delivery && item.total_purchase_price != null) {
-        form.setValue(`items.${index}.is_total_purchase_price_edited`, true);
-      }
       // Each new product owns its pricing definition. Reuse only a definition
       // prepared for this draft when retrying a failed product creation.
       if (item.is_manually_edited || hasPurchasePriceChange) {
@@ -818,9 +811,7 @@ export function AddSupplyDeliveryForm({
             supplied_item_pack_quantity:
               item.supplied_item_pack_quantity ?? undefined,
             supplied_item_pack_size: item.supplied_item_pack_size,
-            total_purchase_price: item.total_purchase_price
-              ? parseFloat(item.total_purchase_price)
-              : undefined,
+            total_purchase_price: item.total_purchase_price,
           }),
       supply_request: item.supply_request?.id,
       origin: origin,

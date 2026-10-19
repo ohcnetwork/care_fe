@@ -141,6 +141,8 @@ export function SmartExternalDeliveryRow({
     availableTaxes,
     availableDiscounts,
     setField,
+    updatePackSize,
+    updateTotalPurchasePrice,
     resetFields,
     markAsEdited,
     fillFromProduct,
@@ -449,8 +451,7 @@ export function SmartExternalDeliveryRow({
           placeholder="0"
           onChange={(e) => {
             const value = parseInt(e.target.value) || undefined;
-            setField("supplied_item_pack_size", value);
-            markAsEdited(Boolean(isTaxInclusive));
+            updatePackSize(value);
           }}
           disabled={!productKnowledge}
           className="w-20"
@@ -587,7 +588,7 @@ export function SmartExternalDeliveryRow({
 
       {extensionCellsAfter("sale")}
 
-      {/* Purchase Price (auto-calculated: tpr / pack_quantity) */}
+      {/* Purchase Price per unit (TPR / pack size) */}
       <TableCell className="align-top p-2">
         <div className="flex items-center">
           <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
@@ -609,9 +610,7 @@ export function SmartExternalDeliveryRow({
             aria-label={t("tpr")}
             placeholder="0"
             onValueChange={(value) => {
-              setField("total_purchase_price", value || undefined);
-              setField("is_total_purchase_price_edited", true);
-              markAsEdited();
+              updateTotalPurchasePrice(value || undefined);
             }}
             disabled={!productKnowledge}
             className="w-[100px]"

@@ -41,7 +41,7 @@ export interface SupplyDeliveryBase {
   status: SupplyDeliveryStatus;
   supplied_item_condition?: SupplyDeliveryCondition;
   supplied_item_type: SupplyDeliveryType;
-  total_purchase_price?: number;
+  total_purchase_price?: string | null;
 }
 
 export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {

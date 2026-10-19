@@ -35,7 +35,8 @@ interface DeliveryItem {
   supplied_item_quantity: string;
   supplied_item_pack_quantity: number;
   supplied_item_pack_size: number;
-  supplied_item: { id: string; product_knowledge?: { slug: string } };
+  supplied_item: ProductFixture;
+  total_purchase_price?: string | null;
   supply_request?: { id: string };
 }
 
@@ -233,7 +234,11 @@ async function createExternalDeliveryDraft(
             expiration_date: "2031-01-31",
           }),
           standard_pack_size: 5,
-          purchase_price: options.withoutPricingMetadata ? null : "2.5",
+          purchase_price: options.withoutPricingMetadata
+            ? null
+            : options.metadata
+              ? "2.123456"
+              : "2.5",
           extensions: options.metadata
             ? { core: { audit_marker: "preserve-product-metadata" } }
             : {},
@@ -272,7 +277,7 @@ async function createExternalDeliveryDraft(
     supplied_item_pack_quantity: 2,
     supplied_item_pack_size: 5,
     supplied_item_quantity: "10",
-    total_purchase_price: "25",
+    total_purchase_price: options.metadata ? "10.61728" : "12.5",
     order: order.id,
     extensions: {},
   };
@@ -344,7 +349,7 @@ test.describe("External delivery cancellation", () => {
             supplied_item_pack_quantity: 3,
             supplied_item_pack_size: 5,
             supplied_item_quantity: "15",
-            total_purchase_price: "37.5",
+            total_purchase_price: "12.5",
             order: fixture.order.id,
             extensions: {},
           },
@@ -697,9 +702,9 @@ test.describe("External delivery draft items", () => {
       await expect
         .soft(editForm.locator('input[type="number"]:disabled').last())
         .toHaveValue(/^2\.5(?:0+)?$/);
-      await expect(
-        editForm.getByRole("spinbutton", { name: "TPR", exact: true }),
-      ).toHaveValue("");
+      await expect
+        .soft(editForm.getByRole("spinbutton", { name: "TPR", exact: true }))
+        .toHaveValue(/^12\.5(?:0+)?$/);
 
       await editForm.getByRole("button", { name: /^Save Changes\b/ }).click();
       expect(
@@ -720,7 +725,7 @@ test.describe("External delivery draft items", () => {
       await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
       await expect
         .soft(editForm.getByRole("spinbutton", { name: "TPR", exact: true }))
-        .toHaveValue(/^37\.5(?:0+)?$/);
+        .toHaveValue(/^12\.5(?:0+)?$/);
       await editForm.getByPlaceholder("Batch #").click();
       await page
         .getByRole("option")
@@ -739,6 +744,40 @@ test.describe("External delivery draft items", () => {
         exact: true,
       });
       await totalPurchasePrice.fill("100");
+      const purchasePrice = editForm
+        .locator('input[type="number"]:disabled')
+        .last();
+      await test.step("Keep a manually entered pack rate when reselecting its batch or changing pack size and quantity", async () => {
+        await expect.soft(purchasePrice).toHaveValue(/^20(?:\.0+)?$/);
+        await editForm.getByPlaceholder("Batch #").click();
+        await page
+          .getByRole("option")
+          .filter({ hasText: `#${batch}` })
+          .click();
+        await expect.soft(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+        await expect.soft(purchasePrice).toHaveValue(/^20(?:\.0+)?$/);
+        await expect(packQuantity).toHaveValue("3");
+        await totalPurchasePrice.fill("100");
+        await packQuantity.fill("4");
+        await expect(quantity).toHaveValue(/^20(?:\.0+)?$/);
+        await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+        await expect.soft(purchasePrice).toHaveValue(/^20(?:\.0+)?$/);
+        await packQuantity.fill("3");
+        await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
+        await expect.soft(purchasePrice).toHaveValue(/^20(?:\.0+)?$/);
+        const packSize = editForm.getByRole("spinbutton", {
+          name: "Pack Size",
+          exact: true,
+        });
+        await packSize.fill("10");
+        await expect(quantity).toHaveValue(/^30(?:\.0+)?$/);
+        await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+        await expect(purchasePrice).toHaveValue(/^10(?:\.0+)?$/);
+        await packSize.fill("5");
+        await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
+        await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+        await expect(purchasePrice).toHaveValue(/^20(?:\.0+)?$/);
+      });
       await page.route(
         `${apiUrl}/api/v1/supply_delivery/`,
         async (route) => {
@@ -766,6 +805,7 @@ test.describe("External delivery draft items", () => {
       const preparedResponse = await preparedProduct;
       expect(preparedResponse.ok()).toBe(true);
       const firstPrepared = (await preparedResponse.json()) as ProductFixture;
+      expect.soft(Number(firstPrepared.purchase_price)).toBe(20);
       expect((await failedDelivery).status()).toBe(404);
       await expect(editForm).toBeVisible();
       await expect(
@@ -782,9 +822,9 @@ test.describe("External delivery draft items", () => {
       );
       expect(afterPreparationFailure.results).toHaveLength(3);
 
-      await packQuantity.fill("4");
-      await expect(quantity).toHaveValue(/^20(?:\.0+)?$/);
-      await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      await totalPurchasePrice.fill("120");
+      await expect(quantity).toHaveValue(/^15(?:\.0+)?$/);
+      await expect.soft(purchasePrice).toHaveValue(/^24(?:\.0+)?$/);
       await page.route(
         `${apiUrl}/api/v1/facility/${facilityId}/product/`,
         async (route) => {
@@ -842,12 +882,13 @@ test.describe("External delivery draft items", () => {
       const retriedResponse = await retriedProduct;
       expect(retriedResponse.ok()).toBe(true);
       const secondPrepared = (await retriedResponse.json()) as ProductFixture;
+      expect.soft(Number(secondPrepared.purchase_price)).toBe(24);
       expect(secondPrepared.id).not.toBe(firstPrepared.id);
       expect(secondPrepared.charge_item_definition?.slug).toBe(
         preparedDefinition,
       );
       expect((await retriedDelivery).status()).toBe(404);
-      await expect(totalPurchasePrice).toHaveValue(/^100(?:\.0+)?$/);
+      await expect(totalPurchasePrice).toHaveValue(/^120(?:\.0+)?$/);
       const unchangedPrepared = await responseData<ProductFixture>(
         await page.request.get(
           `${apiUrl}/api/v1/facility/${facilityId}/product/${firstPrepared.id}/`,
@@ -1347,7 +1388,7 @@ test.describe("External delivery draft items", () => {
   });
 
   for (const withoutPricingMetadata of [false, true]) {
-    test(`${withoutPricingMetadata ? "persists a legacy total correction without inventing batch or pricing metadata" : "persists the purchase prices displayed after a quantity-only edit for a priced product"}`, async ({
+    test(`${withoutPricingMetadata ? "persists a per-pack purchase-rate correction without requiring batch or pricing metadata" : "preserves per-pack purchase rates and product identity when only quantity changes"}`, async ({
       page,
     }) => {
       const fixture = await createExternalDeliveryDraft(page, {
@@ -1385,58 +1426,56 @@ test.describe("External delivery draft items", () => {
       const displayedPriceInput = form
         .locator('input[type="number"]:disabled')
         .last();
-      await expect(displayedPriceInput).not.toHaveValue(/^2\.5(?:0+)?$/);
       const displayedPurchasePrice = await displayedPriceInput.inputValue();
       const displayedTotal = await form
         .getByRole("spinbutton", { name: "TPR", exact: true })
         .inputValue();
-      expect(Number(displayedPurchasePrice)).toBeGreaterThan(0);
-      expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 25);
-      await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(form).not.toBeVisible();
-      const saved = await responseData<{
-        results: (DeliveryItem & {
-          total_purchase_price: number;
-          supplied_item: ProductFixture;
-        })[];
-      }>(
-        await page.request.get(
-          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
-          { headers: fixture.headers },
-        ),
-      );
-      const active = saved.results.filter(
-        ({ status }) => status === "in_progress",
-      );
-      expect(active).toHaveLength(1);
-      expect(Number(active[0].supplied_item.purchase_price)).toBe(
-        Number(displayedPurchasePrice),
-      );
-      expect(Number(active[0].total_purchase_price)).toBe(
-        Number(displayedTotal),
-      );
-      if (withoutPricingMetadata) {
-        expect(active[0].supplied_item.charge_item_definition).toBeNull();
-        expect(active[0].supplied_item.batch).toEqual({});
-        expect(active[0].supplied_item.expiration_date).toBeNull();
-      } else {
-        expect(
-          active[0].supplied_item.charge_item_definition?.slug,
-        ).toBeTruthy();
-        expect(active[0].supplied_item.charge_item_definition?.slug).not.toBe(
-          fixture.product.charge_item_definition?.slug,
+      expect
+        .soft(Number(displayedPurchasePrice))
+        .toBe(withoutPricingMetadata ? 6 : 2.5);
+      expect(Number(displayedTotal)).toBe(withoutPricingMetadata ? 30 : 12.5);
+      await test.step("Save and verify the independent purchase-rate contract", async () => {
+        await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+        await expect(form).not.toBeVisible();
+        const saved = await responseData<{
+          results: (DeliveryItem & {
+            total_purchase_price: string;
+            supplied_item: ProductFixture;
+          })[];
+        }>(
+          await page.request.get(
+            `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+            { headers: fixture.headers },
+          ),
         );
-        expect(
-          active[0].supplied_item.charge_item_definition?.price_components,
-        ).toEqual(fixture.product.charge_item_definition?.price_components);
-      }
+        const active = saved.results.filter(
+          ({ status }) => status === "in_progress",
+        );
+        expect(active).toHaveLength(1);
+        expect(Number(active[0].supplied_item.purchase_price)).toBe(
+          withoutPricingMetadata ? 6 : 2.5,
+        );
+        expect(Number(active[0].total_purchase_price)).toBe(
+          withoutPricingMetadata ? 30 : 12.5,
+        );
+        if (withoutPricingMetadata) {
+          expect(active[0].supplied_item.charge_item_definition).toBeNull();
+          expect(active[0].supplied_item.batch).toEqual({});
+          expect(active[0].supplied_item.expiration_date).toBeNull();
+        } else {
+          expect(active[0].supplied_item.id).toBe(fixture.product.id);
+          expect(active[0].supplied_item.charge_item_definition?.slug).toBe(
+            fixture.product.charge_item_definition?.slug,
+          );
+        }
+      });
     });
   }
 
   test.describe("Metadata corrections in a western timezone", () => {
     test.use({ timezoneId: "America/Los_Angeles" });
 
-    test("preserves metadata and isolates pricing when correcting expiry and sale pricing", async ({
+    test("preserves precise purchase rates and isolates sale pricing when correcting metadata", async ({
       page,
     }) => {
       const fixture = await createExternalDeliveryDraft(page, {
@@ -1448,6 +1487,14 @@ test.describe("External delivery draft items", () => {
           { headers: fixture.headers },
         ),
       );
+      const sourceDelivery = await responseData<DeliveryItem>(
+        await page.request.get(
+          `${fixture.apiUrl}/api/v1/supply_delivery/${fixture.original.id}/`,
+          { headers: fixture.headers },
+        ),
+      );
+      expect(Number(sourceProduct.purchase_price)).toBe(2.123456);
+      expect(Number(sourceDelivery.total_purchase_price)).toBe(10.61728);
       const expectedLocalExpiry = await page.evaluate((expiration) => {
         const parts = new Intl.DateTimeFormat(undefined, {
           year: "numeric",
@@ -1495,7 +1542,27 @@ test.describe("External delivery draft items", () => {
         .getByRole("checkbox", { name: "Tax Inclusive", exact: true })
         .check();
       await form.locator('input[type="date"]').fill("2031-02-28");
+      const outboundReplacement = page.waitForRequest(
+        (request) =>
+          request.url() === `${fixture.apiUrl}/api/v1/batch_requests/` &&
+          request.method() === "POST",
+      );
       await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+      const outbound = (await outboundReplacement).postDataJSON() as {
+        requests: {
+          method: string;
+          url: string;
+          body: Record<string, unknown>;
+        }[];
+      };
+      const creation = outbound.requests.find(
+        ({ method, url }) =>
+          method === "POST" &&
+          new URL(url, fixture.apiUrl).pathname === "/api/v1/supply_delivery/",
+      );
+      expect
+        .soft(creation?.body.total_purchase_price)
+        .toBe(sourceDelivery.total_purchase_price);
       await expect(form).not.toBeVisible();
       const saved = await responseData<{ results: DeliveryItem[] }>(
         await page.request.get(
@@ -1513,6 +1580,14 @@ test.describe("External delivery draft items", () => {
           { headers: fixture.headers },
         ),
       );
+      await test.step("Preserve the exact raw purchase unit rate and pack rate during metadata edits", async () => {
+        expect
+          .soft(replacement.purchase_price)
+          .toBe(sourceProduct.purchase_price);
+        expect
+          .soft(active[0].total_purchase_price)
+          .toBe(sourceDelivery.total_purchase_price);
+      });
       expect(replacement.extensions).toEqual(fixture.product.extensions);
       expect(replacement.charge_item_definition?.slug).toBeTruthy();
       expect(replacement.charge_item_definition?.slug).not.toBe(
@@ -1617,6 +1692,9 @@ test.describe("External delivery draft items", () => {
         ({ status }) => status === "in_progress",
       );
       expect(pricedActive).toHaveLength(1);
+      expect
+        .soft(pricedActive[0].total_purchase_price)
+        .toBe(sourceDelivery.total_purchase_price);
       const pricedReplacement = await responseData<ProductFixture>(
         await page.request.get(
           `${fixture.apiUrl}/api/v1/facility/${fixture.facilityId}/product/${pricedActive[0].supplied_item.id}/`,
@@ -1624,6 +1702,9 @@ test.describe("External delivery draft items", () => {
         ),
       );
       expect(pricedReplacement.extensions).toEqual(fixture.product.extensions);
+      expect
+        .soft(pricedReplacement.purchase_price)
+        .toBe(sourceProduct.purchase_price);
       expect
         .soft(pricedReplacement.expiration_date)
         .toBe(replacement.expiration_date);
