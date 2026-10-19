@@ -98,7 +98,11 @@ const PaginatedDeliveries = ({
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
 
-  const { data: deliveries, isLoading } = useQuery({
+  const {
+    data: deliveries,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: [
       "supplyDeliveries",
       facilityId,
@@ -130,8 +134,14 @@ const PaginatedDeliveries = ({
     return (
       <EmptyState
         icon={<Truck className="size-5 text-primary-600" />}
-        title={t("no_deliveries_found")}
-        description={t("no_deliveries_found_description")}
+        title={
+          isError ? t("failed_to_load_deliveries") : t("no_deliveries_found")
+        }
+        description={
+          isError
+            ? t("failed_to_load_deliveries_description")
+            : t("no_deliveries_found_description")
+        }
       />
     );
   }

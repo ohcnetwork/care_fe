@@ -2623,6 +2623,8 @@
   "failed_to_load_activity_definition": "Failed to load activity definition: {{slug}}",
   "failed_to_load_categories": "Failed to load categories",
   "failed_to_load_definitions": "Failed to load definitions",
+  "failed_to_load_deliveries": "Failed to load deliveries",
+  "failed_to_load_deliveries_description": "Something went wrong while fetching deliveries. Please try again.",
   "failed_to_load_locations": "Failed to load locations",
   "failed_to_load_medication_details": "Failed to load medication details",
   "failed_to_lock_invoice": "Failed to lock invoice",
