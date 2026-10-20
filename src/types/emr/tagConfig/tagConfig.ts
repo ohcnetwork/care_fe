@@ -78,7 +78,7 @@ export interface TagConfigRequest {
   resource: TagResource;
   organization: string | null;
   facility?: string;
-  facility_organization?: string | null;
+  facility_organization: string | null;
   metadata?: TagConfigMeta;
 }
 

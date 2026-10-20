@@ -83,7 +83,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
 
   const handleConfirmSelection = useCallback(
     (org: Organization) => {
-      if (!selectedOrganizations.includes(org)) {
+      if (!selectedOrganizations.some((o) => o.id === org.id)) {
         const newSelection = [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
         onChange(newSelection.map((org) => org.id));
@@ -245,13 +245,10 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
     );
   };
 
-  const isDisabled = useMemo(() => {
-    return (
-      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === currentSelection?.id))
-    );
-  }, [currentSelection, currentOrganizations, selectedOrganizations]);
+  const isDisabled = useMemo(
+    () => selectedOrganizations.some((org) => org.id === currentSelection?.id),
+    [currentSelection, selectedOrganizations],
+  );
 
   return (
     <div className="space-y-4">
@@ -282,6 +279,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                   variant="ghost"
                   size="sm"
                   className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  type="button"
                   onClick={() => handleRemoveOrganization(index)}
                 >
                   <X className="size-4" />
