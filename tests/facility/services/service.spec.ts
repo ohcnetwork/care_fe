@@ -133,44 +133,72 @@ test.describe("Services list search", () => {
 
   test("should show only services matching the search", async ({ page }) => {
     const target = serviceNames[3];
-    await searchInput(page).fill(target);
 
-    await expect(page).toHaveURL(/[?&]search=/);
-    await expect(serviceCards(page)).toHaveCount(1);
-    await expect(serviceCards(page)).toContainText(target);
+    await test.step("Search for a service by name", async () => {
+      await searchInput(page).fill(target);
+    });
+
+    await test.step("Verify the URL and results reflect the search", async () => {
+      await expect(page).toHaveURL(
+        (url) => url.searchParams.get("search") === target,
+      );
+      await expect(serviceCards(page)).toHaveCount(1);
+      await expect(serviceCards(page)).toContainText(target);
+    });
   });
 
   test("should show empty state when no service matches", async ({ page }) => {
-    await searchInput(page).fill(`nomatch-${faker.string.alphanumeric(12)}`);
+    await test.step("Search for a non-existent service", async () => {
+      await searchInput(page).fill(`nomatch-${faker.string.alphanumeric(12)}`);
+    });
 
-    await expect(page.getByText("No services found")).toBeVisible();
-    await expect(serviceCards(page)).toHaveCount(0);
+    await test.step("Verify the empty state is shown", async () => {
+      await expect(page.getByText("No services found")).toBeVisible();
+      await expect(serviceCards(page)).toHaveCount(0);
+    });
   });
 
   test("should restore the full list when the search is cleared", async ({
     page,
   }) => {
-    await searchInput(page).fill(serviceNames[0]);
-    await expect(serviceCards(page)).toHaveCount(1);
+    await test.step("Filter the list to a single service", async () => {
+      await searchInput(page).fill(serviceNames[0]);
+      await expect(serviceCards(page)).toHaveCount(1);
+    });
 
-    await searchInput(page).fill("");
+    await test.step("Clear the search input", async () => {
+      await searchInput(page).fill("");
+    });
 
-    await expect(page).not.toHaveURL(/[?&]search=/);
-    await expect(serviceCards(page)).toHaveCount(PAGE_SIZE);
-    await expect(page.locator("#page-2")).toBeVisible();
+    await test.step("Verify the full paginated list is restored", async () => {
+      await expect(page).not.toHaveURL(/[?&]search=/);
+      await expect(serviceCards(page)).toHaveCount(PAGE_SIZE);
+      await expect(page.locator("#page-2")).toBeVisible();
+    });
   });
 
   test("should reset to the first page when searching from a later page", async ({
     page,
   }) => {
-    await page.locator("#page-2").click();
-    await expect(page).toHaveURL(/[?&]page=2(&|$)/);
-
     const target = serviceNames[5];
-    await searchInput(page).fill(target);
 
-    await expect(page).toHaveURL(/[?&]page=1(&|$)/);
-    await expect(serviceCards(page)).toHaveCount(1);
-    await expect(serviceCards(page)).toContainText(target);
+    await test.step("Navigate to page 2 of the list", async () => {
+      await page.locator("#page-2").click();
+      await expect(page).toHaveURL(/[?&]page=2(&|$)/);
+    });
+
+    await test.step("Search for a service", async () => {
+      await searchInput(page).fill(target);
+    });
+
+    await test.step("Verify pagination resets to page 1 with the match", async () => {
+      await expect(page).toHaveURL(
+        (url) =>
+          url.searchParams.get("page") === "1" &&
+          url.searchParams.get("search") === target,
+      );
+      await expect(serviceCards(page)).toHaveCount(1);
+      await expect(serviceCards(page)).toContainText(target);
+    });
   });
 });
