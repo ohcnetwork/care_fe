@@ -5203,6 +5203,7 @@
   "retrieve_with_otp_help": "Allow searching for a patient using this identifier and a one-time password (OTP).",
   "retrieve_with_year_of_birth": "Retrieve with year of birth",
   "retrieve_with_year_of_birth_help": "Allow searching for a patient using this identifier and their year of birth.",
+  "return_date": "Return Date",
   "return_excess_stock": "Return Excess Stock",
   "return_medicines": "Return Medicines",
   "return_to": "Return To",

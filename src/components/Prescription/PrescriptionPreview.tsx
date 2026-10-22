@@ -154,12 +154,12 @@ const PrescriptionContent = ({
                 className: "whitespace-nowrap text-center text-gray-600 w-8",
               },
               medicine: {
-                className: "whitespace-pre-wrap font-medium",
+                className: "print-wrap whitespace-pre-wrap font-medium",
               },
               dosage: { className: "whitespace-pre-wrap" },
               frequency: { className: "whitespace-pre-wrap" },
               duration: { className: "whitespace-pre-wrap border-r" },
-              instructions: { className: "whitespace-pre-wrap" },
+              instructions: { className: "print-wrap whitespace-pre-wrap" },
             }}
             headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-y border-gray-300"
             tableClassName="border-0 rounded-none"

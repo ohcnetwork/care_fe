@@ -505,12 +505,9 @@
       overflow-wrap: break-word;
     }
 
-    /* Lets a long item name wrap. The id selector beats the break-word rule above. */
+    /* The id selector beats the break-word rule above. */
     #section-to-print .print-wrap,
     #section-to-print .print-wrap * {
-      width: auto;
-      max-width: none;
-      white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
 

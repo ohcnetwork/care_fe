@@ -431,7 +431,7 @@ export const PrintChargeItems = (props: {
               {hideHeader && preserveHeaderSpace && (
                 <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
               )}
-              <table className="w-full border-collapse">
+              <table className="w-full table-fixed border-collapse">
                 <tbody>
                   <tr>
                     <td className="p-0 align-top">
@@ -560,32 +560,32 @@ export const PrintChargeItems = (props: {
                                         </>
                                       ) : (
                                         <>
-                                          <TableHead className="font-bold w-10">
+                                          <TableHead className="font-bold">
                                             {t("date")}
                                           </TableHead>
-                                          <TableHead className="font-bold w-10">
+                                          <TableHead className="font-bold">
                                             {t("invoice")}
                                           </TableHead>
-                                          <TableHead className="font-bold w-24">
+                                          <TableHead className="font-bold">
                                             {t("title")}
                                           </TableHead>
                                           {showStatus && (
-                                            <TableHead className="font-bold text-center w-8">
+                                            <TableHead className="font-bold text-center">
                                               {t("status")}
                                             </TableHead>
                                           )}
                                           {showCreatedBy && (
-                                            <TableHead className="font-bold w-16">
+                                            <TableHead className="font-bold">
                                               {t("created_by")}
                                             </TableHead>
                                           )}
-                                          <TableHead className="font-bold w-10">
+                                          <TableHead className="font-bold">
                                             {t("rate")}
                                           </TableHead>
-                                          <TableHead className="font-bold text-right w-10">
+                                          <TableHead className="font-bold text-right">
                                             {t("qty")}
                                           </TableHead>
-                                          <TableHead className="font-bold text-right w-10">
+                                          <TableHead className="font-bold text-right">
                                             {t("amount")}
                                           </TableHead>
                                         </>
@@ -744,7 +744,7 @@ export const PrintChargeItems = (props: {
                                                         : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
                                                     }
                                                   >
-                                                    <TableCell className="w-10 text-left">
+                                                    <TableCell className="text-left">
                                                       <div className="flex items-center gap-1">
                                                         {!hasIssuedOrBalancedInvoice && (
                                                           <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
@@ -755,13 +755,13 @@ export const PrintChargeItems = (props: {
                                                         )}
                                                       </div>
                                                     </TableCell>
-                                                    <TableCell className="w-10 text-left">
+                                                    <TableCell className="print-wrap whitespace-pre-wrap text-left">
                                                       {
                                                         chargeItem.paid_invoice
                                                           ?.number
                                                       }
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="print-wrap whitespace-pre-wrap">
                                                       <div className="flex flex-col">
                                                         <span className="font-medium">
                                                           {chargeItem.title}
@@ -769,31 +769,31 @@ export const PrintChargeItems = (props: {
                                                       </div>
                                                     </TableCell>
                                                     {showStatus && (
-                                                      <TableCell className="text-center w-8">
+                                                      <TableCell className="text-center">
                                                         <span className="text-xs">
                                                           {t(chargeItem.status)}
                                                         </span>
                                                       </TableCell>
                                                     )}
                                                     {showCreatedBy && (
-                                                      <TableCell className="w-16">
+                                                      <TableCell>
                                                         {
                                                           chargeItem.created_by
                                                             ?.first_name
                                                         }
                                                       </TableCell>
                                                     )}
-                                                    <TableCell className="text-right w-10">
+                                                    <TableCell className="text-right">
                                                       <MonetaryDisplay
                                                         amount={unitPrice}
                                                       />
                                                     </TableCell>
-                                                    <TableCell className="text-right w-10">
+                                                    <TableCell className="text-right">
                                                       {round(
                                                         chargeItem.quantity,
                                                       )}
                                                     </TableCell>
-                                                    <TableCell className="text-right w-10">
+                                                    <TableCell className="text-right">
                                                       <MonetaryDisplay
                                                         amount={
                                                           chargeItem.total_price
@@ -913,32 +913,32 @@ export const PrintChargeItems = (props: {
                                             </>
                                           ) : (
                                             <>
-                                              <TableHead className="font-bold w-10">
+                                              <TableHead className="font-bold">
                                                 {t("date")}
                                               </TableHead>
-                                              <TableHead className="font-bold w-10">
+                                              <TableHead className="font-bold">
                                                 {t("invoice")}
                                               </TableHead>
-                                              <TableHead className="font-bold w-24">
+                                              <TableHead className="font-bold">
                                                 {t("title")}
                                               </TableHead>
                                               {showStatus && (
-                                                <TableHead className="font-bold text-center w-8">
+                                                <TableHead className="font-bold text-center">
                                                   {t("status")}
                                                 </TableHead>
                                               )}
                                               {showCreatedBy && (
-                                                <TableHead className="font-bold w-16">
+                                                <TableHead className="font-bold">
                                                   {t("created_by")}
                                                 </TableHead>
                                               )}
-                                              <TableHead className="font-bold w-10">
+                                              <TableHead className="font-bold">
                                                 {t("rate")}
                                               </TableHead>
-                                              <TableHead className="font-bold text-right w-10">
+                                              <TableHead className="font-bold text-right">
                                                 {t("qty")}
                                               </TableHead>
-                                              <TableHead className="font-bold text-right w-10">
+                                              <TableHead className="font-bold text-right">
                                                 {t("amount")}
                                               </TableHead>
                                             </>
@@ -1034,7 +1034,7 @@ export const PrintChargeItems = (props: {
                                                             : "bg-red-50 hover:bg-red-50 text-red-700 print:bg-red-50"
                                                         }
                                                       >
-                                                        <TableCell className="w-10 text-left">
+                                                        <TableCell className="text-left">
                                                           <div className="flex items-center gap-1">
                                                             {!hasIssuedOrBalancedInvoice && (
                                                               <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />
@@ -1045,14 +1045,14 @@ export const PrintChargeItems = (props: {
                                                             )}
                                                           </div>
                                                         </TableCell>
-                                                        <TableCell className="w-10 text-left">
+                                                        <TableCell className="print-wrap whitespace-pre-wrap text-left">
                                                           {
                                                             chargeItem
                                                               .paid_invoice
                                                               ?.number
                                                           }
                                                         </TableCell>
-                                                        <TableCell>
+                                                        <TableCell className="print-wrap whitespace-pre-wrap">
                                                           <div className="flex flex-col">
                                                             <span className="font-medium">
                                                               {chargeItem.title}
@@ -1060,7 +1060,7 @@ export const PrintChargeItems = (props: {
                                                           </div>
                                                         </TableCell>
                                                         {showStatus && (
-                                                          <TableCell className="text-center w-8">
+                                                          <TableCell className="text-center">
                                                             <span className="text-xs">
                                                               {t(
                                                                 chargeItem.status,
@@ -1069,7 +1069,7 @@ export const PrintChargeItems = (props: {
                                                           </TableCell>
                                                         )}
                                                         {showCreatedBy && (
-                                                          <TableCell className="w-16">
+                                                          <TableCell>
                                                             {
                                                               chargeItem
                                                                 .created_by
@@ -1077,17 +1077,17 @@ export const PrintChargeItems = (props: {
                                                             }
                                                           </TableCell>
                                                         )}
-                                                        <TableCell className="text-right w-10">
+                                                        <TableCell className="text-right">
                                                           <MonetaryDisplay
                                                             amount={unitPrice}
                                                           />
                                                         </TableCell>
-                                                        <TableCell className="text-right w-10">
+                                                        <TableCell className="text-right">
                                                           {round(
                                                             chargeItem.quantity,
                                                           )}
                                                         </TableCell>
-                                                        <TableCell className="text-right w-10">
+                                                        <TableCell className="text-right">
                                                           <MonetaryDisplay
                                                             amount={
                                                               chargeItem.total_price
@@ -1164,21 +1164,21 @@ export const PrintChargeItems = (props: {
                                     </>
                                   ) : (
                                     <>
-                                      <TableHead className="font-bold w-10">
+                                      <TableHead className="font-bold">
                                         {t("date")}
                                       </TableHead>
-                                      <TableHead className="font-bold w-20">
+                                      <TableHead className="font-bold">
                                         {t("invoice")}
                                       </TableHead>
                                       {hidePaymentTypeGrouping && (
-                                        <TableHead className="font-bold w-10">
+                                        <TableHead className="font-bold">
                                           {t("type")}
                                         </TableHead>
                                       )}
-                                      <TableHead className="font-bold w-32">
+                                      <TableHead className="font-bold">
                                         {t("method")}
                                       </TableHead>
-                                      <TableHead className="font-bold text-right w-32">
+                                      <TableHead className="font-bold text-right">
                                         {t("amount")}
                                       </TableHead>
                                     </>
@@ -1285,7 +1285,7 @@ export const PrintChargeItems = (props: {
                                               key={payment.id}
                                               className="bg-transparent hover:bg-transparent"
                                             >
-                                              <TableCell>
+                                              <TableCell className="print-wrap whitespace-pre-wrap">
                                                 <div className="flex flex-col mr-1">
                                                   <span>
                                                     {payment.payment_datetime &&
@@ -1299,7 +1299,7 @@ export const PrintChargeItems = (props: {
                                                   </span>
                                                 </div>
                                               </TableCell>
-                                              <TableCell>
+                                              <TableCell className="print-wrap whitespace-pre-wrap">
                                                 {payment.target_invoice?.number}
                                               </TableCell>
                                               {hidePaymentTypeGrouping && (
@@ -1397,21 +1397,21 @@ export const PrintChargeItems = (props: {
                                     </>
                                   ) : (
                                     <>
-                                      <TableHead className="font-bold w-10">
+                                      <TableHead className="font-bold">
                                         {t("date")}
                                       </TableHead>
-                                      <TableHead className="font-bold w-20">
+                                      <TableHead className="font-bold">
                                         {t("invoice")}
                                       </TableHead>
                                       {hidePaymentTypeGrouping && (
-                                        <TableHead className="font-bold w-10">
+                                        <TableHead className="font-bold">
                                           {t("type")}
                                         </TableHead>
                                       )}
-                                      <TableHead className="font-bold w-32">
+                                      <TableHead className="font-bold">
                                         {t("method")}
                                       </TableHead>
-                                      <TableHead className="font-bold text-right w-32">
+                                      <TableHead className="font-bold text-right">
                                         {t("amount")}
                                       </TableHead>
                                     </>
@@ -1523,7 +1523,7 @@ export const PrintChargeItems = (props: {
                                               key={payment.id}
                                               className="bg-transparent hover:bg-transparent"
                                             >
-                                              <TableCell>
+                                              <TableCell className="print-wrap whitespace-pre-wrap">
                                                 <div className="flex flex-col">
                                                   <span>
                                                     {payment.payment_datetime &&
@@ -1537,7 +1537,7 @@ export const PrintChargeItems = (props: {
                                                   </span>
                                                 </div>
                                               </TableCell>
-                                              <TableCell>
+                                              <TableCell className="print-wrap whitespace-pre-wrap">
                                                 {payment.target_invoice?.number}
                                               </TableCell>
                                               {hidePaymentTypeGrouping && (
