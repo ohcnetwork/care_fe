@@ -22,7 +22,7 @@ function Input({
         inputMode === "numeric" && {
           onBeforeInput: (e) => {
             const inputEvent = e.nativeEvent as InputEvent;
-            if (inputEvent.data === ".") {
+            if (inputEvent.data && /[.eE+]/.test(inputEvent.data)) {
               e.preventDefault();
             }
           },
