@@ -101,6 +101,8 @@ interface SupplyDeliveryTableProps {
   isRequester?: boolean;
   facilityId?: string;
   linkToProduct?: boolean;
+  showLocations?: boolean;
+  serialNumberOffset?: number;
 }
 
 function ProductLink({
@@ -114,10 +116,13 @@ function ProductLink({
   linkToProduct: boolean;
   facilityId?: string;
 }) {
-  const productId = internal
+  const internalDelivery =
+    internal || !!delivery.supplied_inventory_item?.product?.id;
+
+  const productId = internalDelivery
     ? delivery.supplied_inventory_item?.product?.id
     : delivery.supplied_item?.id;
-  const productName = internal
+  const productName = internalDelivery
     ? delivery.supplied_inventory_item?.product?.product_knowledge?.name
     : delivery.supplied_item?.product_knowledge?.name;
 
@@ -155,6 +160,8 @@ export function SupplyDeliveryTable({
   isRequester = false,
   facilityId,
   linkToProduct = false,
+  showLocations = false,
+  serialNumberOffset = 0,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -269,7 +276,7 @@ export function SupplyDeliveryTable({
   // Build a map of delivery id -> serial number for non-cancelled deliveries
   const serialNumberMap = useMemo(() => {
     const map = new Map<string, number>();
-    let serial = 1;
+    let serial = serialNumberOffset + 1;
     for (const delivery of deliveries) {
       if (
         ACTIVE_SUPPLY_DELIVERY_STATUSES.includes(
@@ -280,7 +287,7 @@ export function SupplyDeliveryTable({
       }
     }
     return map;
-  }, [deliveries]);
+  }, [deliveries, serialNumberOffset]);
 
   return (
     <Table>
@@ -309,6 +316,12 @@ export function SupplyDeliveryTable({
           {extensionHeadsAfter("product")}
           <TableHead rowSpan={2}>{t("batch")}</TableHead>
           {extensionHeadsAfter("batch")}
+          {showLocations && (
+            <>
+              <TableHead rowSpan={2}>{t("origin")}</TableHead>
+              <TableHead rowSpan={2}>{t("destination")}</TableHead>
+            </>
+          )}
           <TableHead rowSpan={2}>{t("expiry")}</TableHead>
           {extensionHeadsAfter("expiry")}
           <TableHead rowSpan={2}>{t("requested_qty")}</TableHead>
@@ -448,6 +461,18 @@ export function SupplyDeliveryTable({
                   "-"}
               </TableCell>
               {extensionValuesAfter(delivery, "batch")}
+              {showLocations && (
+                <>
+                  <TableCell>
+                    {delivery?.order?.origin?.name ||
+                      delivery?.order?.supplier?.name ||
+                      (delivery?.order?.patient ? t("patient_return") : "-")}
+                  </TableCell>
+                  <TableCell>
+                    {delivery?.order?.destination?.name || "-"}
+                  </TableCell>
+                </>
+              )}
               <TableCell>
                 {expiry ? formatDate(parseISO(expiry), "dd/MM/yyyy") : "-"}
               </TableCell>

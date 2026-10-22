@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { PatientListRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
@@ -90,4 +91,5 @@ export interface RequestOrderRetrieve extends RequestOrder {
   destination: LocationDetail;
   supplier?: Organization;
   tags: TagConfig[];
+  patient?: PatientListRead;
 }
