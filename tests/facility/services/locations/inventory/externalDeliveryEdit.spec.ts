@@ -508,8 +508,9 @@ test.describe("External delivery draft items", () => {
     for (const [index, product] of [
       fixture.product,
       secondFixture.product,
+      fixture.product,
     ].entries()) {
-      const quantity = index === 0 ? 15 : 20;
+      const quantity = 15 + index * 5;
       const request = await responseData<{ id: string }>(
         await page.request.post(`${fixture.apiUrl}/api/v1/supply_request/`, {
           headers: fixture.headers,
@@ -588,15 +589,17 @@ test.describe("External delivery draft items", () => {
     await expect(form.locator("tbody tr")).toHaveCount(requests.length);
     await expect(form.getByRole("combobox")).toHaveCount(requests.length);
     for (const product of [fixture.product, secondFixture.product]) {
-      const row = form.locator("tbody tr").filter({
+      const rows = form.locator("tbody tr").filter({
         has: page.getByRole("combobox").filter({
           hasText: product.product_knowledge.name,
         }),
       });
-      await expect(row).toHaveCount(1);
-      await row
-        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
-        .fill("3");
+      await expect(rows).toHaveCount(product === fixture.product ? 2 : 1);
+      for (const row of await rows.all()) {
+        await row
+          .getByRole("spinbutton", { name: "Pack Qty", exact: true })
+          .fill("3");
+      }
     }
     const saves = requests.map((request) =>
       page.waitForResponse(
@@ -607,8 +610,19 @@ test.describe("External delivery draft items", () => {
       ),
     );
     await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-    for (const response of await Promise.all(saves)) {
+    const responses = await Promise.all(saves);
+    for (const response of responses) {
       await responseData(response);
+    }
+    const timings = responses
+      .map((response) => response.request().timing())
+      .sort((a, b) => a.startTime - b.startTime);
+    for (let index = 1; index < timings.length; index++) {
+      const previous = timings[index - 1];
+      expect(previous.responseStart).toBeGreaterThanOrEqual(0);
+      expect(timings[index].startTime).toBeGreaterThanOrEqual(
+        previous.startTime + previous.responseStart,
+      );
     }
     await expect(form).not.toBeVisible();
 

@@ -903,20 +903,18 @@ export function AddSupplyDeliveryForm({
 
     setIsProcessing(true);
     try {
-      const results = await Promise.allSettled(
-        data.items.map((item, index) =>
-          processRowItem(item, index, data.supplied_item_type).then(
-            () => index,
-          ),
-        ),
-      );
+      const successfulIndices: number[] = [];
+      let failedCount = 0;
 
-      const successfulIndices = results
-        .map((result) =>
-          result.status === "fulfilled" ? result.value : undefined,
-        )
-        .filter((index): index is number => index !== undefined);
-      const failedCount = results.length - successfulIndices.length;
+      // Delivery creation locks the order, so rows must not save concurrently.
+      for (const [index, item] of data.items.entries()) {
+        try {
+          await processRowItem(item, index, data.supplied_item_type);
+          successfulIndices.push(index);
+        } catch {
+          failedCount++;
+        }
+      }
 
       if (successfulIndices.length > 0) {
         queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
