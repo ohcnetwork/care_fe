@@ -431,7 +431,7 @@ export const PrintChargeItems = (props: {
               {hideHeader && preserveHeaderSpace && (
                 <div className="mb-4 pb-2 border-b border-gray-200 h-20" />
               )}
-              <table className="w-full table-fixed border-collapse">
+              <table className="w-full border-collapse">
                 <tbody>
                   <tr>
                     <td className="p-0 align-top">
