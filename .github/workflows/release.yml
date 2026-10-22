@@ -5,6 +5,10 @@ on:
     branches:
       - production
 
+concurrency:
+  group: release-production
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -12,6 +16,7 @@ jobs:
   release:
     name: Release on Push
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
