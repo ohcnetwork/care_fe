@@ -24,7 +24,6 @@ import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  BringToFront,
   DoorOpenIcon,
   ExternalLink,
   MoreHorizontal,
@@ -34,6 +33,7 @@ import { Link } from "raviger";
 import { forwardRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
+import { toast } from "sonner";
 import { useTokenListInfiniteQuery } from "./utils";
 
 const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
@@ -348,19 +348,29 @@ function FinishedTokenOptions({
   });
 
   const handleMoveBackToInService = () => {
-    updateToken({
-      status: TokenStatus.IN_PROGRESS,
-      note: token.note,
-      sub_queue: token.sub_queue?.id || null,
-    });
+    updateToken(
+      {
+        status: TokenStatus.IN_PROGRESS,
+        note: token.note,
+        sub_queue: token.sub_queue?.id || null,
+      },
+      {
+        onSuccess: () => toast.success(t("move_back_to_in_service")),
+      },
+    );
   };
 
   const handleMoveBackToWaiting = () => {
-    updateToken({
-      status: TokenStatus.CREATED,
-      note: token.note,
-      sub_queue: null,
-    });
+    updateToken(
+      {
+        status: TokenStatus.CREATED,
+        note: token.note,
+        sub_queue: null,
+      },
+      {
+        onSuccess: () => toast.success(t("token_returned_to_waiting")),
+      },
+    );
   };
 
   return (
@@ -390,20 +400,6 @@ function FinishedTokenOptions({
               {t("move_back_to_waiting")}
             </DropdownMenuItem>
           )}
-
-          <DropdownMenuItem
-            onClick={() =>
-              updateToken({
-                status: TokenStatus.UNFULFILLED,
-                note: token.note,
-                sub_queue: null,
-              })
-            }
-            disabled={isUpdating}
-          >
-            <BringToFront className="size-4" />
-            {t("move_to_awaiting_recall")}
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
