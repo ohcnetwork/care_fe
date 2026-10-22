@@ -80,6 +80,9 @@ const DeliveryOrderContent = ({
                 ? [{ key: "lot_batch_number" }, { key: "expiry_date" }]
                 : []),
             ]}
+            cellConfig={{
+              product: { className: "print-wrap" },
+            }}
             rows={supplyDeliveries.map((delivery) => {
               const productName = internal
                 ? delivery.supplied_inventory_item?.product?.product_knowledge

@@ -79,6 +79,9 @@ const RequestOrderContent = ({
               { key: "remaining_quantity" },
               { key: "status" },
             ]}
+            cellConfig={{
+              product: { className: "print-wrap" },
+            }}
             rows={supplyRequests.map((request) => {
               const dispatched =
                 dispatchedQuantities[request.item.id] || new Decimal(0);
