@@ -427,7 +427,12 @@
       break-inside: avoid;
     }
 
-    /* Ensure tables and large elements scale properly */
+    /* Scrollports clip print tables. Let the table use the page width. */
+    #section-to-print [data-slot="table-container"],
+    #section-to-print .overflow-x-auto {
+      overflow: visible;
+    }
+
     #section-to-print table {
       max-width: 100%;
       width: 100%;
@@ -498,6 +503,15 @@
       max-width: 100%;
       word-wrap: break-word;
       overflow-wrap: break-word;
+    }
+
+    /* Lets a long item name wrap. The id selector beats the break-word rule above. */
+    #section-to-print .print-wrap,
+    #section-to-print .print-wrap * {
+      width: auto;
+      max-width: none;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     /* Hide elements that shouldn't be printed */
