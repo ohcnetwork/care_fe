@@ -50,4 +50,113 @@ test.describe("Encounter Plots Tab", () => {
       expect(pageErrors).toHaveLength(0);
     });
   });
+
+  test("shows no data message when observations have no results", async ({
+    page,
+  }) => {
+    let analyseHits = 0;
+    await test.step("Stub observations with empty results per code", async () => {
+      await page.route(/\/observation\/analyse\//, (route) => {
+        analyseHits++;
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { code: { code: "8867-4", display: "Pulse" }, results: [] },
+            ],
+          }),
+        });
+      });
+    });
+
+    await test.step("Navigate to the Plots tab", async () => {
+      await page.goto(plotsUrl);
+    });
+
+    await test.step("Verify the no data message is shown", async () => {
+      await expect.poll(() => analyseHits).toBeGreaterThan(0);
+      await expect(page.getByText("No data available").first()).toBeVisible();
+      await expect(
+        page.getByRole("tab", { name: "Full History" }).first(),
+      ).toBeVisible();
+    });
+  });
+
+  test("shows no data message only for charts without observations", async ({
+    page,
+  }) => {
+    let analyseHits = 0;
+    await test.step("Stub observations with one empty and one filled code", async () => {
+      await page.route(/\/observation\/analyse\//, (route) => {
+        analyseHits++;
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { code: { code: "8867-4", display: "Pulse" }, results: [] },
+              {
+                code: { code: "8310-5", display: "Temperature" },
+                results: [
+                  {
+                    effective_datetime: "2026-10-13T06:56:32Z",
+                    status: "final",
+                    value: { value: "37.2" },
+                    note: "",
+                    data_entered_by: {
+                      first_name: "Test",
+                      last_name: "Doctor",
+                      username: "test",
+                    },
+                  },
+                ],
+              },
+              {
+                code: { code: "2339-0", display: "GRBS" },
+                results: [
+                  {
+                    effective_datetime: "2026-10-13T06:56:32Z",
+                    status: "final",
+                    value: { value: "not a number" },
+                    note: "",
+                    data_entered_by: {
+                      first_name: "Test",
+                      last_name: "Doctor",
+                      username: "test",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        });
+      });
+    });
+
+    await test.step("Navigate to the Plots tab", async () => {
+      await page.goto(plotsUrl);
+    });
+
+    const chartCard = (title: string) =>
+      page.locator('[data-slot="card"]').filter({
+        has: page.getByRole("heading", { name: title, exact: true }),
+      });
+
+    await test.step("Verify empty charts show the message and filled charts render", async () => {
+      await expect.poll(() => analyseHits).toBeGreaterThan(0);
+      await expect(
+        chartCard("Pulse").getByText("No data available"),
+      ).toBeVisible();
+      await expect(
+        chartCard("GRBS").getByText("No data available"),
+      ).toBeVisible();
+      await expect(
+        chartCard("Temperature").locator("svg.recharts-surface").first(),
+      ).toBeVisible();
+      await expect(
+        chartCard("Temperature").getByText("No data available"),
+      ).toHaveCount(0);
+    });
+  });
 });

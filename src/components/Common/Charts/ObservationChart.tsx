@@ -174,7 +174,12 @@ export const ObservationVisualizer = ({
       if (!resultGroup) return;
 
       resultGroup.results.forEach((observation) => {
-        if (observation.effective_datetime) {
+        // Only timestamps with a plottable value, so a group of non-numeric
+        // results stays empty and shows the no-data state.
+        if (
+          observation.effective_datetime &&
+          !isNaN(Number(observation.value.value))
+        ) {
           allTimestamps.add(observation.effective_datetime);
         }
       });
@@ -276,58 +281,64 @@ export const ObservationVisualizer = ({
 
             <TabsContent value="graph">
               <div style={{ height: `${height}px` }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={group.data}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="time"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      scale="time"
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-                      }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      domain={group.yAxisDomain || ["auto", "auto"]}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      labelFormatter={(value) => {
-                        if (typeof value === "number") {
+                {group.data.length === 0 ? (
+                  <div className="flex h-full items-center justify-center text-gray-500">
+                    {t("no_data_available")}
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={group.data}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="time"
+                        type="number"
+                        domain={["dataMin", "dataMax"]}
+                        scale="time"
+                        tickFormatter={(value) => {
                           const date = new Date(value);
-                          return formatChartDate(date.toISOString()).display;
-                        }
-                        return value;
-                      }}
-                    />
-                    <Legend />
-                    {group.codes.map((code, codeIndex) => {
-                      if (!code.display) return null;
-                      return (
-                        <Line
-                          key={code.code}
-                          type="monotone"
-                          dataKey={code.display}
-                          stroke={
-                            group.color ||
-                            DEFAULT_COLORS[codeIndex % DEFAULT_COLORS.length]
+                          return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+                        }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis
+                        domain={group.yAxisDomain || ["auto", "auto"]}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <Tooltip
+                        labelFormatter={(value) => {
+                          if (typeof value === "number") {
+                            const date = new Date(value);
+                            return formatChartDate(date.toISOString()).display;
                           }
-                          dot={true}
-                          connectNulls
-                        />
-                      );
-                    })}
-                  </LineChart>
-                </ResponsiveContainer>
+                          return value;
+                        }}
+                      />
+                      <Legend />
+                      {group.codes.map((code, codeIndex) => {
+                        if (!code.display) return null;
+                        return (
+                          <Line
+                            key={code.code}
+                            type="monotone"
+                            dataKey={code.display}
+                            stroke={
+                              group.color ||
+                              DEFAULT_COLORS[codeIndex % DEFAULT_COLORS.length]
+                            }
+                            dot={true}
+                            connectNulls
+                          />
+                        );
+                      })}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </TabsContent>
 
