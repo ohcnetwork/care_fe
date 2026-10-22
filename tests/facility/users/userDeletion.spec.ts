@@ -19,7 +19,7 @@ test.describe("User Deletion Access Control", () => {
       await page.goto("http://localhost:4000/");
 
       // Login as admin user
-      await page.getByRole("button", { name: "Log in as Staff" }).click();
+      await page.getByRole("link", { name: "Log in as Staff" }).click();
       await page.getByRole("textbox", { name: "Username" }).fill("admin");
       await page.getByRole("textbox", { name: "Password" }).fill("admin");
       await page.getByRole("button", { name: "Login" }).click();
@@ -39,7 +39,7 @@ test.describe("User Deletion Access Control", () => {
 
       // Wait for users page to load by checking for See Details button
       const seeDetailsButton = page
-        .getByRole("button", { name: "See Details" })
+        .getByRole("link", { name: "See Details" })
         .first();
       await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
 
@@ -63,7 +63,7 @@ test.describe("User Deletion Access Control", () => {
       await page.goto("http://localhost:4000/");
 
       // Login as staff user
-      await page.getByRole("button", { name: "Log in as Staff" }).click();
+      await page.getByRole("link", { name: "Log in as Staff" }).click();
       await page.getByRole("textbox", { name: "Username" }).fill("care-staff");
       await page.getByRole("textbox", { name: "Password" }).fill("Ohcn@123");
       await page.getByRole("button", { name: "Login" }).click();
@@ -79,7 +79,7 @@ test.describe("User Deletion Access Control", () => {
 
       // Check if staff can see the users list at all
       const seeDetailsButton = page
-        .getByRole("button", { name: "See Details" })
+        .getByRole("link", { name: "See Details" })
         .first();
       const canSeeUsers = await seeDetailsButton
         .isVisible({ timeout: 10000 })

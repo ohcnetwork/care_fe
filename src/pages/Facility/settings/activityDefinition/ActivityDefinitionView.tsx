@@ -173,16 +173,13 @@ export default function ActivityDefinitionView({
                 {t("delete")}
               </Button>
             )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-pen" className=" size-4" />
-              {t("edit")}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`}
+              >
+                <CareIcon icon="l-pen" className=" size-4" />
+                {t("edit")}
+              </Link>
             </Button>
           </div>
         </div>

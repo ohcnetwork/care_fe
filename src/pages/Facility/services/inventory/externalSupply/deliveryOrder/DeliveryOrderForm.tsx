@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -452,13 +452,11 @@ export default function DeliveryOrderForm({
             </Card>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(returnPath)}
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
+              <Button variant="outline" asChild>
+                <Link href={returnPath}>
+                  {t("cancel")}
+                  <ShortcutBadge actionId="cancel-action" />
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending

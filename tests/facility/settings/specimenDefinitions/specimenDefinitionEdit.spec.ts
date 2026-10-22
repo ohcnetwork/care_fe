@@ -42,7 +42,7 @@ test.describe("Specimen Definitions Edit", () => {
 
   test("edit specimen definition and verify changes", async ({ page }) => {
     // Create a specimen definition with only required fields to edit it
-    await page.getByRole("button", { name: "Add Definition" }).click();
+    await page.getByRole("link", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);

@@ -1,6 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { BadgeCheck, LogOut, RefreshCw } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -104,28 +104,26 @@ export function FacilityNavUser({
             )}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => {
-                  const profileUrl = selectedFacilityId
-                    ? `/facility/${selectedFacilityId}/users/${user.username}`
-                    : `/users/${user.username}`;
-                  navigate(profileUrl);
-                }}
-              >
-                <BadgeCheck />
-                {t("profile")}
+              <DropdownMenuItem asChild>
+                <Link
+                  href={
+                    selectedFacilityId
+                      ? `/facility/${selectedFacilityId}/users/${user.username}`
+                      : `/users/${user.username}`
+                  }
+                >
+                  <BadgeCheck />
+                  {t("profile")}
+                </Link>
               </DropdownMenuItem>
               {pluginNavItems.map((item) => (
-                <DropdownMenuItem
-                  key={item.name}
-                  onClick={() => {
-                    navigate(
-                      `/facility/${selectedFacilityId}/users/${user.username}/${item.url}`,
-                    );
-                  }}
-                >
-                  {item.icon}
-                  {t(item.name)}
+                <DropdownMenuItem key={item.name} asChild>
+                  <Link
+                    href={`/facility/${selectedFacilityId}/users/${user.username}/${item.url}`}
+                  >
+                    {item.icon}
+                    {t(item.name)}
+                  </Link>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>

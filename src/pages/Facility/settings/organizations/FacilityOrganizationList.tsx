@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -124,15 +124,6 @@ export default function FacilityOrganizationList({
     [facilityId, organizationId],
   );
 
-  const handleParentClick = useCallback(
-    (parentId: string) => {
-      navigate(
-        `/facility/${facilityId}/settings/departments/${parentId}/${currentTab}`,
-      );
-    },
-    [facilityId, currentTab],
-  );
-
   const orgParents: FacilityOrganizationParent[] = [];
   let currentParent = org?.parent;
   while (currentParent) {
@@ -166,13 +157,12 @@ export default function FacilityOrganizationList({
                         <BreadcrumbLink
                           asChild
                           className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/settings/departments`,
-                            )
-                          }
                         >
-                          <button type="button">{t("departments")}</button>
+                          <Link
+                            href={`/facility/${facilityId}/settings/departments`}
+                          >
+                            {t("departments")}
+                          </Link>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
@@ -182,9 +172,12 @@ export default function FacilityOrganizationList({
                             <BreadcrumbLink
                               asChild
                               className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                              onClick={() => handleParentClick(parent.id)}
                             >
-                              <button type="button">{parent.name}</button>
+                              <Link
+                                href={`/facility/${facilityId}/settings/departments/${parent.id}/${currentTab}`}
+                              >
+                                {parent.name}
+                              </Link>
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           <BreadcrumbSeparator />

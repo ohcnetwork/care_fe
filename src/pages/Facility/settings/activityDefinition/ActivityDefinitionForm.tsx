@@ -2,7 +2,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -416,16 +416,6 @@ function ActivityDefinitionFormContent({
       );
     }
   }
-
-  const handleCancel = () => {
-    if (categorySlug) {
-      navigate(
-        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/activity_definitions`);
-    }
-  };
 
   return (
     <Page
@@ -1081,8 +1071,16 @@ function ActivityDefinitionFormContent({
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button type="button" variant="outline" onClick={handleCancel}>
-                {t("cancel")}
+              <Button variant="outline" asChild>
+                <Link
+                  href={
+                    categorySlug
+                      ? `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`
+                      : `/facility/${facilityId}/settings/activity_definitions`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending

@@ -966,14 +966,21 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline_primary"
                   disabled={!locationId}
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`,
-                    )
-                  }
+                  asChild={!!locationId}
                 >
-                  {t("dispense_now")}
-                  <ShortcutBadge actionId="view-prescriptions" />
+                  {locationId ? (
+                    <Link
+                      href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}`}
+                    >
+                      {t("dispense_now")}
+                      <ShortcutBadge actionId="view-prescriptions" />
+                    </Link>
+                  ) : (
+                    <>
+                      {t("dispense_now")}
+                      <ShortcutBadge actionId="view-prescriptions" />
+                    </>
+                  )}
                 </Button>
               )}
               <Button

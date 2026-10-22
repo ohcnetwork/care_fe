@@ -7,7 +7,7 @@ export async function createHealthcareService(
   servicesUrl: string,
 ) {
   await page.goto(`/facility/${facilityId}/settings/healthcare_services`);
-  await page.getByRole("button", { name: "Add Healthcare Service" }).click();
+  await page.getByRole("link", { name: "Add Healthcare Service" }).click();
   await page.getByRole("textbox", { name: "Name" }).fill(serviceName);
   await page
     .getByRole("combobox")
@@ -31,7 +31,7 @@ export async function createHealthcareService(
 
 export async function toggleSidebar(page: Page, expand: boolean) {
   const homeButtonVisible = await page
-    .getByRole("button", { name: "Home" })
+    .getByRole("link", { name: "Home" })
     .isVisible();
   if ((expand && !homeButtonVisible) || (!expand && homeButtonVisible)) {
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
