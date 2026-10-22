@@ -148,7 +148,7 @@ const PrescriptionContent = ({
                 ];
               },
             )}
-            cellClassName="text-sm print:text-xs text-gray-950 font-normal text-left border-t border-gray-300"
+            cellClassName="wrap-anywhere text-sm print:text-xs text-gray-950 font-normal text-left border-t border-gray-300"
             cellConfig={{
               hash_tag: {
                 className: "whitespace-nowrap text-center text-gray-600 w-8",
