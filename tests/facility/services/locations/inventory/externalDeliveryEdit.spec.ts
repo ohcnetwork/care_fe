@@ -483,10 +483,11 @@ test.describe("External delivery cancellation", () => {
 });
 
 test.describe("External delivery draft items", () => {
-  test("loads and saves one purchase request item at a time", async ({
+  test("selects and saves multiple purchase request items together", async ({
     page,
   }) => {
     const fixture = await createExternalDeliveryDraft(page);
+    const secondFixture = await createExternalDeliveryDraft(page);
     const requestPayload = {
       name: `Delivery request ${faker.string.alphanumeric(10)}`,
       status: "draft",
@@ -504,14 +505,19 @@ test.describe("External delivery draft items", () => {
       ),
     );
     const requests: { id: string; quantity: number }[] = [];
-    for (const quantity of [15, 20]) {
+    for (const [index, product] of [
+      fixture.product,
+      secondFixture.product,
+      fixture.product,
+    ].entries()) {
+      const quantity = 15 + index * 5;
       const request = await responseData<{ id: string }>(
         await page.request.post(`${fixture.apiUrl}/api/v1/supply_request/`, {
           headers: fixture.headers,
           data: {
             status: "active",
             quantity: String(quantity),
-            item: fixture.product.product_knowledge.id,
+            item: product.product_knowledge.id,
             order: requestOrder.id,
           },
         }),
@@ -533,62 +539,110 @@ test.describe("External delivery draft items", () => {
       exact: true,
     });
     const requestPicker = page.getByRole("dialog", {
-      name: "Select Item",
+      name: "Select Items to Add",
       exact: true,
     });
 
+    await page.getByRole("button", { name: /^Load from order\b/ }).click();
+    await expect(requestPicker).toBeVisible();
+    await expect(requestPicker.getByRole("radio")).toHaveCount(0);
+    const selectAll = requestPicker.getByRole("checkbox", {
+      name: "Select All",
+      exact: true,
+    });
+    const done = requestPicker.getByRole("button", { name: /^Done\b/ });
+    await expect(selectAll).toBeChecked();
+    await expect(
+      requestPicker.getByRole("checkbox", { checked: true }),
+    ).toHaveCount(requests.length + 1);
+    await selectAll.uncheck();
+    await expect(
+      requestPicker.getByRole("checkbox", { checked: true }),
+    ).toHaveCount(0);
+    await expect(done).toBeDisabled();
+
     for (const [index, request] of requests.entries()) {
-      await page.getByRole("button", { name: /^Load from order\b/ }).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await expect(page.getByRole("dialog").getByRole("checkbox")).toHaveCount(
-        0,
-      );
-      await expect(requestPicker).toBeVisible();
       await requestPicker
         .getByText(new RegExp(`^${request.quantity}(?:\\.0+)?\\s`))
         .locator("..")
-        .getByRole("radio")
+        .getByRole("checkbox")
         .check();
-      await expect(
-        requestPicker.getByRole("radio", { checked: true }),
-      ).toHaveCount(1);
-      await requestPicker.getByRole("button", { name: /^Done\b/ }).click();
+      for (const selected of requests.slice(0, index + 1)) {
+        await expect(
+          requestPicker
+            .getByText(new RegExp(`^${selected.quantity}(?:\\.0+)?\\s`))
+            .locator("..")
+            .getByRole("checkbox"),
+        ).toBeChecked();
+      }
+      await expect(done).toBeEnabled();
+    }
+    await expect(selectAll).toBeChecked();
+    await selectAll.uncheck();
+    await expect(done).toBeDisabled();
+    await selectAll.check();
+    await done.click();
 
-      await expect(requestPicker).not.toBeVisible();
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-      await expect(form).toBeVisible();
-      await expect(form.locator("tbody tr")).toHaveCount(1);
-      await expect(form.getByRole("combobox")).toHaveCount(1);
-      await expect(form.getByRole("combobox")).toContainText(
-        fixture.product.product_knowledge.name,
+    await expect(requestPicker).not.toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(form).toBeVisible();
+    await expect(form.locator("tbody tr")).toHaveCount(requests.length);
+    await expect(form.getByRole("combobox")).toHaveCount(requests.length);
+    for (const product of [fixture.product, secondFixture.product]) {
+      const rows = form.locator("tbody tr").filter({
+        has: page.getByRole("combobox").filter({
+          hasText: product.product_knowledge.name,
+        }),
+      });
+      await expect(rows).toHaveCount(product === fixture.product ? 2 : 1);
+      for (const row of await rows.all()) {
+        await row
+          .getByRole("spinbutton", { name: "Pack Qty", exact: true })
+          .fill("3");
+      }
+    }
+    const saves = requests.map((request) =>
+      page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/api/v1/supply_delivery/") &&
+          response.request().method() === "POST" &&
+          response.request().postDataJSON()?.supply_request === request.id,
+      ),
+    );
+    await form.getByRole("button", { name: /^Save Changes\b/ }).click();
+    const responses = await Promise.all(saves);
+    for (const response of responses) {
+      await responseData(response);
+    }
+    const timings = responses
+      .map((response) => response.request().timing())
+      .sort((a, b) => a.startTime - b.startTime);
+    for (let index = 1; index < timings.length; index++) {
+      const previous = timings[index - 1];
+      expect(previous.responseStart).toBeGreaterThanOrEqual(0);
+      expect(timings[index].startTime).toBeGreaterThanOrEqual(
+        previous.startTime + previous.responseStart,
       );
-      await expect(
-        form.getByRole("button", { name: "Add Another", exact: true }),
-      ).toHaveCount(0);
-      await expect(
-        form.getByRole("button", { name: /^Load from order\b/ }),
-      ).toHaveCount(0);
-      const packQuantity = request.quantity / 5;
-      await form
-        .getByRole("spinbutton", { name: "Pack Qty", exact: true })
-        .fill(String(packQuantity));
-      await form.getByRole("button", { name: /^Save Changes\b/ }).click();
-      await expect(form).not.toBeVisible();
+    }
+    await expect(form).not.toBeVisible();
 
-      const persisted = await responseData<{ results: DeliveryItem[] }>(
-        await page.request.get(
-          `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
-          { headers: fixture.headers },
-        ),
+    const persisted = await responseData<{ results: DeliveryItem[] }>(
+      await page.request.get(
+        `${fixture.apiUrl}/api/v1/supply_delivery/?order=${fixture.order.id}&facility=${fixture.facilityId}`,
+        { headers: fixture.headers },
+      ),
+    );
+    const linked = persisted.results.filter(
+      (delivery) => delivery.supply_request,
+    );
+    expect(linked).toHaveLength(requests.length);
+    for (const request of requests) {
+      const delivery = linked.find(
+        (item) => item.supply_request?.id === request.id,
       );
-      const linked = persisted.results.filter(
-        (delivery) => delivery.supply_request,
-      );
-      expect(linked).toHaveLength(index + 1);
-      expect(
-        linked.find((delivery) => delivery.supply_request?.id === request.id)
-          ?.supplied_item_quantity,
-      ).toMatch(new RegExp(`^${packQuantity * 5}(?:\\.0+)?$`));
+      expect(delivery?.supplied_item_quantity).toMatch(/^15(?:\.0+)?$/);
+      expect(delivery?.supplied_item_pack_quantity).toBe(3);
+      expect(delivery?.supplied_item_pack_size).toBe(5);
     }
   });
 
