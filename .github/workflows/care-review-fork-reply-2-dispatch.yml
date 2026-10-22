@@ -1,0 +1,302 @@
+# Fork-reply bridge, Stage 2 of 3 — DISPATCH.
+#
+# Stage 1 ran powerless on a fork PR comment and left a `fork-reply-context` artifact. This stage is
+# a `workflow_run` job, which GitHub ALWAYS runs on the default branch in base-repo trust WITH
+# secrets and a write-capable token — regardless of the fork origin of the event that started Stage
+# 1. That is the whole trick: the trust the fork side was denied is recovered here.
+#
+# `workflow_run` only fires for the copy of this file on the DEFAULT branch, so edits here have no
+# effect until they land on `develop`. Matched by workflow `name:`, not filename.
+name: CARE Reply Bridge — Dispatch
+
+on:
+  workflow_run:
+    workflows: ["CARE Reply Bridge — Capture"]
+    types: [completed]
+
+permissions:
+  actions: write        # download Stage 1 artifact by run-id, and workflow_dispatch Stage 3
+  pull-requests: read   # resolve fork-ness and fetch review comments for the addressed gate
+
+concurrency:
+  # One dispatcher per Stage 1 run. A re-run reuses the same id, so retries coalesce here.
+  group: care-reply-bridge-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.workflow_run.conclusion == 'success' }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      # A skipped Stage 1 job (bot comment) still makes the Capture workflow conclude `success`,
+      # and it uploads nothing. A missing artifact is that expected skip — do not fail the download.
+      - name: Check for Stage 1 artifact
+        id: artifact
+        run: |
+          set -euo pipefail
+          NAME=$(gh api "repos/${GH_REPO}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "fork-reply-context") | .name')
+          if [ -n "$NAME" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No fork-reply-context artifact — Stage 1 skipped this event."
+          fi
+
+      - name: Download Stage 1 context
+        if: steps.artifact.outputs.exists == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: fork-reply-context
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The artifact came from an untrusted event, so treat every field as hostile: the ids must be
+      # numeric before they touch a shell or an API path. The reply agent re-fetches the comment
+      # via the API by id — we do not forward the body into the dispatch.
+      - name: Recover and validate context
+        id: ctx
+        if: steps.artifact.outputs.exists == 'true'
+        run: |
+          set -euo pipefail
+          PR=$(cat pr_number.txt); CID=$(cat comment_id.txt)
+          EVENT=$(cat event_name.txt)
+          [[ "$PR"  =~ ^[0-9]+$ ]] || { echo "::error::non-numeric PR number"; exit 1; }
+          [[ "$CID" =~ ^[0-9]+$ ]] || { echo "::error::non-numeric comment id"; exit 1; }
+          if [ "$EVENT" != "pull_request_review_comment" ]; then
+            echo "::error::unexpected event_name '$EVENT'"
+            exit 1
+          fi
+          echo "event=$EVENT pr=$PR comment=$CID"
+          {
+            echo "pr=$PR"
+            echo "cid=$CID"
+          } >> "$GITHUB_OUTPUT"
+
+      # Stage 1 YAML comes from the PR merge commit, so a fork can change the uploaded ids.
+      # workflow_run is from this default-branch job — bind the API comment to that run before
+      # any later gate trusts the ids (same pattern as cloudflare-preview-deploy.yml resolving
+      # the PR from head_sha instead of from the artifact).
+      - name: Bind artifact to this run
+        id: bind
+        if: steps.artifact.outputs.exists == 'true'
+        env:
+          PR: ${{ steps.ctx.outputs.pr }}
+          CID: ${{ steps.ctx.outputs.cid }}
+          RUN_ACTOR: ${{ github.event.workflow_run.actor.login }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_CREATED: ${{ github.event.workflow_run.created_at }}
+          RUN_HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          # One hour: Stage 1 is created when the comment webhook lands. Yesterday is a replay;
+          # a long Actions queue should still fit.
+          MAX_AGE_SECS=3600
+
+          if [ -z "$RUN_ACTOR" ] || [ -z "$RUN_SHA" ] || [ -z "$RUN_CREATED" ]; then
+            echo "workflow_run is missing actor/sha/created_at; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! COMMENT=$(gh api "repos/${GH_REPO}/pulls/comments/${CID}" 2>/dev/null); then
+            echo "Comment $CID not found; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMENT_LOGIN=$(echo "$COMMENT" | jq -r '.user.login // empty')
+          if [ "$COMMENT_LOGIN" != "$RUN_ACTOR" ]; then
+            echo "Comment author '$COMMENT_LOGIN' is not run actor '$RUN_ACTOR'; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMENT_PR=$(echo "$COMMENT" | jq -r '.pull_request_url // empty' | awk -F/ '{print $NF}')
+          if [ "$COMMENT_PR" != "$PR" ]; then
+            echo "Comment $CID is on #$COMMENT_PR, not claimed #$PR; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Identity of the PR that triggered Stage 1 — same inputs cloudflare-preview-deploy uses.
+          # Do not use commits/{sha}/pulls: that list is often empty for a fork head SHA.
+          if ! PR_JSON=$(gh api "repos/${GH_REPO}/pulls/${PR}" 2>/dev/null); then
+            echo "PR #$PR not found; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PR_OWNER=$(echo "$PR_JSON" | jq -r '.head.repo.owner.login // empty')
+          PR_REF=$(echo "$PR_JSON" | jq -r '.head.ref // empty')
+          PR_HEAD=$(echo "$PR_JSON" | jq -r '.head.sha // empty')
+          if [ "$PR_OWNER" = "$RUN_HEAD_OWNER" ] && [ "$PR_REF" = "$RUN_HEAD_BRANCH" ]; then
+            :
+          elif [ -n "$PR_HEAD" ] && [ "$PR_HEAD" = "$RUN_SHA" ]; then
+            :
+          else
+            echo "PR #$PR head ${PR_OWNER}:${PR_REF}@${PR_HEAD:0:10} is not run ${RUN_HEAD_OWNER}:${RUN_HEAD_BRANCH}@${RUN_SHA:0:10}; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMENT_CREATED=$(echo "$COMMENT" | jq -r '.created_at // empty')
+          if [ -z "$COMMENT_CREATED" ]; then
+            echo "Comment $CID has no created_at; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! COMMENT_EPOCH=$(date -d "$COMMENT_CREATED" +%s) \
+            || ! RUN_EPOCH=$(date -d "$RUN_CREATED" +%s); then
+            echo "Could not parse comment/run timestamps; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          DELTA=$(( COMMENT_EPOCH - RUN_EPOCH ))
+          ABS_DELTA=${DELTA#-}
+          if [ "$ABS_DELTA" -gt "$MAX_AGE_SECS" ]; then
+            echo "Comment $CID at $COMMENT_CREATED is ${ABS_DELTA}s from run $RUN_CREATED; skipping."
+            echo "bound=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Bound comment $CID on #$PR to this run (actor=$RUN_ACTOR sha=${RUN_SHA:0:10})."
+          echo "bound=true" >> "$GITHUB_OUTPUT"
+
+      # Fork gate — the load-bearing decision. Same-repo replies are answered by care-review
+      # DIRECTLY (they keep their secret), so bridging them would post a SECOND, duplicate reply.
+      # Capture already skips same-repo heads on the event payload; this API check remains because a
+      # planted Capture.yml can omit that skip. Always resolve head.repo through the API — do not
+      # trust the artifact. If it is not a fork, stop here.
+      - name: Fork gate
+        id: fork
+        if: steps.bind.outputs.bound == 'true'
+        env:
+          PR: ${{ steps.ctx.outputs.pr }}
+        run: |
+          set -euo pipefail
+          # Always resolve through the API. Artifact fields are attacker-controlled.
+          HEAD_REPO=$(gh api "repos/$GH_REPO/pulls/$PR" --jq '.head.repo.full_name' 2>/dev/null || true)
+          if [ -z "$HEAD_REPO" ] || [ "$HEAD_REPO" = "$GH_REPO" ]; then
+            echo "Not a fork PR (head=$HEAD_REPO) — care-review answers same-repo replies directly. Skipping."
+            echo "is_fork=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Fork PR (head=$HEAD_REPO) — bridging the reply."
+            echo "is_fork=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Addressed-to-reviewer gate. Without this, every human inline comment on a fork PR starts
+      # Stage 3 (Copilot CLI) and the prompt-level noop still bills. Re-fetch the comment by id —
+      # do not trust the Stage 1 body / in_reply_to — then dispatch only if it @mentions
+      # github-actions, OR is in_reply_to a care-review thread. Conversation comments stay with
+      # care-review. Inline findings carry no marker. gh-aw puts `workflow_id: care-review` on the
+      # submitted review body. Resolve the parent's pull_request_review_id and accept it only when
+      # that review is from github-actions[bot] and the body contains that marker — not the visible
+      # "CARE PR Reviewer" footer, which any Actions workflow can copy. A reply the bridge already
+      # posted carries "Generated by CARE reply agent" on that comment.
+      - name: Addressed-to-reviewer gate
+        id: addressed
+        if: steps.fork.outputs.is_fork == 'true'
+        env:
+          PR: ${{ steps.ctx.outputs.pr }}
+          CID: ${{ steps.ctx.outputs.cid }}
+        run: |
+          set -euo pipefail
+          addressed=false
+          API_PATH="repos/${GH_REPO}/pulls/comments/${CID}"
+
+          if ! COMMENT=$(gh api "$API_PATH" 2>/dev/null); then
+            echo "Comment $CID not found via $API_PATH; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "$COMMENT" | jq -r '.body // empty' > "${RUNNER_TEMP}/comment_body.txt"
+          USER_TYPE=$(echo "$COMMENT" | jq -r '.user.type // empty')
+          if [ "$USER_TYPE" = "Bot" ]; then
+            echo "Comment author is a Bot; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMENT_PR=$(echo "$COMMENT" | jq -r '.pull_request_url // empty' | grep -oE '[0-9]+$' || true)
+          if [ "$COMMENT_PR" != "$PR" ]; then
+            echo "Comment $CID is on #$COMMENT_PR, not claimed #$PR; skipping."
+            echo "addressed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if grep -qiF '@github-actions' "${RUNNER_TEMP}/comment_body.txt"; then
+            echo "Comment mentions @github-actions."
+            addressed=true
+          fi
+
+          if [ "$addressed" = false ]; then
+            PARENT_ID=$(echo "$COMMENT" | jq -r '.in_reply_to_id // empty')
+            if [[ "$PARENT_ID" =~ ^[0-9]+$ ]]; then
+              if PARENT=$(gh api "repos/${GH_REPO}/pulls/comments/${PARENT_ID}" 2>/dev/null); then
+                echo "$PARENT" | jq -r '.body // empty' > "${RUNNER_TEMP}/parent_body.txt"
+                if grep -qF 'Generated by CARE PR Reviewer' "${RUNNER_TEMP}/parent_body.txt" \
+                  || grep -qF 'Generated by CARE reply agent' "${RUNNER_TEMP}/parent_body.txt" \
+                  || grep -qF 'workflow_id: care-review' "${RUNNER_TEMP}/parent_body.txt" \
+                  || grep -qF 'gh-aw-workflow-call-id: ohcnetwork/care_fe/care-review' "${RUNNER_TEMP}/parent_body.txt"; then
+                  echo "Parent comment $PARENT_ID is a care-review thread."
+                  addressed=true
+                else
+                  REVIEW_ID=$(echo "$PARENT" | jq -r '.pull_request_review_id // empty')
+                  if [[ "$REVIEW_ID" =~ ^[0-9]+$ ]] \
+                    && REVIEW=$(gh api "repos/${GH_REPO}/pulls/${PR}/reviews/${REVIEW_ID}" 2>/dev/null); then
+                    REVIEW_LOGIN=$(echo "$REVIEW" | jq -r '.user.login // empty')
+                    echo "$REVIEW" | jq -r '.body // empty' > "${RUNNER_TEMP}/review_body.txt"
+                    if [ "$REVIEW_LOGIN" = "github-actions[bot]" ] \
+                      && grep -qF 'workflow_id: care-review' "${RUNNER_TEMP}/review_body.txt"; then
+                      echo "Parent comment $PARENT_ID belongs to care-review review $REVIEW_ID."
+                      addressed=true
+                    else
+                      echo "Parent comment $PARENT_ID is not a care-review thread; skipping."
+                    fi
+                  else
+                    echo "Parent comment $PARENT_ID is not a care-review thread; skipping."
+                  fi
+                fi
+              else
+                echo "Parent comment $PARENT_ID not found; skipping."
+              fi
+            else
+              echo "Top-level review comment with no @mention; skipping."
+            fi
+          fi
+
+          echo "addressed=${addressed}" >> "$GITHUB_OUTPUT"
+
+      # workflow_dispatch is the recursion-guard exception, so this GITHUB_TOKEN-fired step CAN spawn
+      # Stage 3. Hand it the full aw_context envelope built from the digit-validated ids (so
+      # --argjson cannot inject). Stage 3 pins its reply target to item_number and needs no inputs
+      # beyond this envelope.
+      - name: Dispatch Stage 3 (reply agent)
+        if: steps.fork.outputs.is_fork == 'true' && steps.addressed.outputs.addressed == 'true'
+        env:
+          PR: ${{ steps.ctx.outputs.pr }}
+          CID: ${{ steps.ctx.outputs.cid }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          [[ "$PR" =~ ^[0-9]+$ && "$CID" =~ ^[0-9]+$ ]] || { echo "::error::invalid ids"; exit 1; }
+          AW_CONTEXT=$(jq -nc \
+            --argjson run_id "$RUN_ID" \
+            --arg repo "$GH_REPO" \
+            --arg workflow_id "care-review-fork-reply" \
+            --arg item_type "pull_request" \
+            --argjson item_number "$PR" \
+            --argjson comment_id "$CID" \
+            '{run_id:$run_id,repo:$repo,workflow_id:$workflow_id,item_type:$item_type,item_number:$item_number,comment_id:$comment_id}')
+          gh workflow run care-review-fork-reply.lock.yml \
+            --repo "$GH_REPO" \
+            --ref "${{ github.event.repository.default_branch }}" \
+            -f aw_context="$AW_CONTEXT"
+          echo "Dispatched reply agent for fork PR #$PR comment $CID"
