@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightIcon, CheckCircle, MoreVertical } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckCircle,
+  MoreVertical,
+  PrinterIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -367,6 +372,20 @@ export default function PrescriptionQueue({
                   href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
                   {t("preview_selected_rx")}
+                </Link>
+              </Button>
+              <Button variant="link" asChild>
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}/print`}
+                  className={cn(
+                    "underline",
+                    selectedPrescriptionIds.length === 0
+                      ? "pointer-events-none opacity-50"
+                      : "",
+                  )}
+                >
+                  <PrinterIcon />
+                  {t("print_selected_rx")}
                 </Link>
               </Button>
               <Button variant="outline_primary" asChild>
