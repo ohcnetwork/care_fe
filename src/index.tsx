@@ -1,5 +1,4 @@
 import "@/style/index.css";
-import "reactflow/dist/style.css";
 
 import * as Sentry from "@sentry/browser";
 
@@ -33,6 +32,18 @@ if ("serviceWorker" in navigator) {
 }
 
 if (import.meta.env.PROD) {
+  window.addEventListener("vite:preloadError", () => {
+    const retryKey = `care:chunk-reload:${window.location.href}`;
+    try {
+      if (sessionStorage.getItem(retryKey)) return;
+      sessionStorage.setItem(retryKey, "true");
+    } catch {
+      // Without persistent storage, let the error boundary handle the failure.
+      return;
+    }
+    window.location.reload();
+  });
+
   Sentry.init({
     environment: import.meta.env.MODE,
     dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
