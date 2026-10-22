@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -107,6 +107,19 @@ const Login = (props: LoginProps) => {
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
   const [resendOtpCountdown, setResendOtpCountdown] = useState(0);
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const input =
+        !disablePatientLogin && mode === "patient"
+          ? phoneRef.current
+          : usernameRef.current;
+      input?.focus();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [disablePatientLogin, mode]);
 
   // Timer Function for resend OTP
   useEffect(() => {
@@ -378,6 +391,7 @@ const Login = (props: LoginProps) => {
                           <Label htmlFor="username">{t("username")}</Label>
                           <Input
                             id="username"
+                            ref={usernameRef}
                             name="username"
                             type="text"
                             autoComplete="username"
@@ -487,8 +501,10 @@ const Login = (props: LoginProps) => {
                             <Label htmlFor="username">{t("username")}</Label>
                             <Input
                               id="username"
+                              ref={usernameRef}
                               name="username"
                               type="text"
+                              autoFocus
                               autoComplete="username"
                               value={form.username}
                               onChange={handleChange}
@@ -573,7 +589,9 @@ const Login = (props: LoginProps) => {
                           <Label htmlFor="phone">{t("phone_number")}</Label>
                           <PhoneInput
                             id="phone"
+                            ref={phoneRef}
                             name="phone"
+                            autoFocus
                             value={phone}
                             onChange={(value) => {
                               setPhone(value ?? "");
