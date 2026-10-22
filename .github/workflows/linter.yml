@@ -9,6 +9,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
     permissions:
       contents: read
       packages: read

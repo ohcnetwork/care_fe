@@ -29,6 +29,7 @@ jobs:
   changes:
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tests: ${{ steps.filter.outputs.tests }}
     steps:
@@ -235,6 +236,7 @@ jobs:
     if: "!cancelled() && github.repository == 'ohcnetwork/care_fe'"
     needs: [changes, test]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check if tests were skipped
         id: skipped
