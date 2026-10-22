@@ -111,10 +111,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   // Combine default and custom dashboard links
   const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
-  // Filter pinned links for this facility (or show all if no facilityId specified)
-  const pinnedLinks = customLinks.filter(
-    (link) => !link.facilityId || link.facilityId === facilityId,
-  );
+  const pinnedLinks = customLinks(facilityId);
 
   return (
     <Page title="">
@@ -185,7 +182,9 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={resetCustomLinks}>
+                  <DropdownMenuItem
+                    onClick={() => resetCustomLinks(facilityId)}
+                  >
                     <RotateCcw className="size-4" />
                     {t("reset_pinned_links")}
                   </DropdownMenuItem>
