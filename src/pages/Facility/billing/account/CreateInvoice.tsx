@@ -146,7 +146,7 @@ export function CreateInvoicePage({
   const hasInitializedSelections = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const pickerRef = useRef<HTMLButtonElement>(null);
-  const hasAutoOpenedPicker = useRef(false);
+  const [hasAutoOpenedPicker, setHasAutoOpenedPicker] = useState(false);
   const [optionalFieldsOpen, setOptionalFieldsOpen] = useState(false);
 
   useShortcutSubContext("facility:billing");
@@ -181,7 +181,7 @@ export function CreateInvoicePage({
       onSuccess: () => {
         handleChargeItemsAdded();
         setPendingItem(null);
-        hasAutoOpenedPicker.current = true;
+        setHasAutoOpenedPicker(true);
         toast.success(t("charge_items_added_successfully"));
         setTimeout(() => pickerRef.current?.focus(), 100);
       },
@@ -346,7 +346,7 @@ export function CreateInvoicePage({
       knownItemIds.current = new Set(chargeItems.map((item) => item.id));
       hasInitializedSelections.current = true;
       if (chargeItems.length > 0) {
-        hasAutoOpenedPicker.current = true;
+        setHasAutoOpenedPicker(true);
       }
       return;
     }
@@ -407,14 +407,18 @@ export function CreateInvoicePage({
   // Auto-focus the picker when the page loads (only if it won't auto-open)
   useEffect(() => {
     if (!disableCreateChargeItems && !isLoading) {
-      const willAutoOpen =
-        !hasAutoOpenedPicker.current && chargeItems.length === 0;
+      const willAutoOpen = !hasAutoOpenedPicker && chargeItems.length === 0;
       if (!willAutoOpen) {
         const timer = setTimeout(() => pickerRef.current?.focus(), 200);
         return () => clearTimeout(timer);
       }
     }
-  }, [disableCreateChargeItems, isLoading, chargeItems.length]);
+  }, [
+    disableCreateChargeItems,
+    isLoading,
+    chargeItems.length,
+    hasAutoOpenedPicker,
+  ]);
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -793,7 +797,7 @@ export function CreateInvoicePage({
                         disabled={isApplyingInline}
                         className="w-full"
                         defaultOpen={
-                          !hasAutoOpenedPicker.current &&
+                          !hasAutoOpenedPicker &&
                           chargeItems.length === 0 &&
                           !isLoading
                         }
