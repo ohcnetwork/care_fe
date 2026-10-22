@@ -357,17 +357,13 @@ export default function PrescriptionQueue({
                 </label>
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="link"
-                className={cn(
-                  "underline",
-                  selectedPrescriptionIds.length === 0
-                    ? "pointer-events-none opacity-50"
-                    : "",
-                )}
-                asChild
-              >
+            <div
+              className={cn(
+                "ml-auto flex items-center gap-2",
+                selectedPrescriptionIds.length === 0 && "hidden",
+              )}
+            >
+              <Button variant="link" className="underline" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
@@ -377,12 +373,7 @@ export default function PrescriptionQueue({
               <Button variant="link" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}/print`}
-                  className={cn(
-                    "underline",
-                    selectedPrescriptionIds.length === 0
-                      ? "pointer-events-none opacity-50"
-                      : "",
-                  )}
+                  className="underline"
                 >
                   <PrinterIcon />
                   {t("print_selected_rx")}
@@ -391,11 +382,6 @@ export default function PrescriptionQueue({
               <Button variant="outline_primary" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
-                  className={
-                    selectedPrescriptionIds.length === 0
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }
                 >
                   {t("bill_selected_prescriptions")}
                   <ArrowRightIcon />
