@@ -37,7 +37,7 @@ Detailed guidance is split into focused files so agents only load what's relevan
 - [`docs/local-development.md`](docs/local-development.md) — Backend + frontend setup, local credentials, dev/build/lint commands.
 - [`docs/testing.md`](docs/testing.md) — Playwright E2E setup, commands, DB snapshot workflow, and writing tests.
 - [`docs/architecture.md`](docs/architecture.md) — Routing, API layer, state management, UI components, plugins, auth, key directories, and config.
-- [`docs/care-apps-architecture-note.md`](docs/care-apps-architecture-note.md), [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md), [`docs/care-apps-override-architecture.md`](docs/care-apps-override-architecture.md) — Plugin system deep dives.
+- [`docs/care-apps-architecture-note.md`](docs/care-apps-architecture-note.md), [`docs/care-apps-local-dev.md`](docs/care-apps-local-dev.md), [`docs/care-apps-override-architecture.md`](docs/care-apps-override-architecture.md), [`docs/care-apps-plugin-overrides.md`](docs/care-apps-plugin-overrides.md) — Plugin system deep dives.
 - [`tests/PLAYWRIGHT_GUIDE.md`](tests/PLAYWRIGHT_GUIDE.md) — Complete Playwright patterns for form interactions, selectors, assertions, and helpers.
 
 ## Quick Commands
@@ -45,6 +45,7 @@ Detailed guidance is split into focused files so agents only load what's relevan
 - `portless` — **Preferred** way to start the dev server (see [Dev Servers](#dev-servers-portless))
 - `npm run dev` — Start dev server directly at http://localhost:4000 (only if portless is unavailable)
 - `npm run build` — Production build (takes 2+ minutes, set timeout to 180s+)
+- `npm run typecheck` — Type check with TypeScript (`tsc --noEmit`)
 - `npm run lint` — Run ESLint (takes 85s+, set timeout to 120s+)
 - `npm run lint-fix` — ESLint with auto-fix
 - `npm run format` — Prettier formatting
