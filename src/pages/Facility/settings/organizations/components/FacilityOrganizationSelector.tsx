@@ -187,7 +187,7 @@ export default function FacilityOrganizationSelector(
 
   const handleConfirmSelection = useCallback(
     (org: FacilityOrganizationRead) => {
-      if (!selectedOrganizations.includes(org)) {
+      if (!selectedOrganizations.find((o) => o.id === org.id)) {
         const newSelection = singleSelection
           ? [org]
           : [...selectedOrganizations, org];
@@ -302,7 +302,7 @@ export default function FacilityOrganizationSelector(
       // Reset the auto-select flag when value is cleared (e.g., form reset)
       // setHasAutoSelectedPreferred(false);
     }
-  }, [value, currentOrganizations, showAllOrgs]);
+  }, [value, currentOrganizations]);
 
   // Auto-select preferred departments
   useEffect(() => {
