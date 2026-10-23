@@ -23,10 +23,9 @@ export const PrintEncounterPrescriptions = ({
   const { data, isLoading } = useQuery({
     queryKey: ["prescriptions-list", patientId, encounterId, facilityId],
     queryFn: query.paginated(prescriptionApi.list, {
-      pathParams: { patientId: patientId! },
+      pathParams: { patientId },
       queryParams: { encounter: encounterId, facility: facilityId },
     }),
-    enabled: !!encounterId && !!patientId && !!facilityId,
   });
 
   if (isLoading) {
