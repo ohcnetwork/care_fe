@@ -12,6 +12,7 @@ import {
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
+import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
 import { UserRead, UserReadMinimal } from "@/types/user/user";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -127,6 +128,13 @@ export type DeliveryOrderActionsComponentType = React.FC<{
   locationId: string;
 }>;
 
+// Extra actions contributed by plugins to a service point (sub queue) card,
+// rendered in the card's edit state alongside the built-in actions.
+export type SubQueueActionsComponentType = React.FC<{
+  facilityId: string;
+  subQueue: TokenSubQueueRead;
+}>;
+
 // Sections rendered on the user profile (summary) page
 export type UserProfileSectionsComponentType = React.FC<{
   user: UserRead;
@@ -154,6 +162,7 @@ export type SupportedPluginComponents = {
   DiagnosticReportOverride: DiagnosticReportOverrideComponentType;
   PatientHomeQuickActions: PatientHomeActionsComponentType;
   DeliveryOrderActions: DeliveryOrderActionsComponentType;
+  SubQueueActions: SubQueueActionsComponentType;
   UserProfileSections: UserProfileSectionsComponentType;
 };
 
