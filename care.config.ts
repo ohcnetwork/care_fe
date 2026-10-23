@@ -421,6 +421,14 @@ const careConfig = {
   maxFormDialogFavorites: env.REACT_MAX_FORM_DIALOG_FAVORITES
     ? parseInt(env.REACT_MAX_FORM_DIALOG_FAVORITES, 10)
     : 5,
+
+  /**
+   * Maximum number of datapoints allowed in a single upsert request.
+   * This should be set with whatever backend sets.
+   */
+  maxDatapointsPerUpsert: env.REACT_MAX_DATAPOINTS_PER_UPSERT
+    ? parseInt(env.REACT_MAX_DATAPOINTS_PER_UPSERT, 10)
+    : 100,
 } as const;
 
 export default careConfig;

@@ -9,6 +9,12 @@ export const InventoryStatusOptions = [
 
 export type InventoryStatus = (typeof InventoryStatusOptions)[number];
 
+export const INVENTORY_STATUS_COLORS = {
+  active: "primary",
+  inactive: "secondary",
+  entered_in_error: "destructive",
+} as const satisfies Record<InventoryStatus, string>;
+
 interface InventoryBase {
   status: InventoryStatus;
 }

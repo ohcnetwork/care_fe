@@ -26,6 +26,10 @@
   ],
   "author": "Open Healthcare Network Contributors",
   "license": "MIT",
+  "portless": {
+    "name": "care",
+    "script": "dev"
+  },
   "scripts": {
     "dev": "npm run build:meta && npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",

@@ -196,15 +196,20 @@ export const GenericSelectedBadge = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-1 min-w-0 shrink-0">
+    <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
       <Badge
         variant={variant || "outline"}
-        className={cn("whitespace-nowrap rounded-sm", className)}
+        className={cn(
+          "min-w-0 max-w-full overflow-hidden rounded-sm",
+          className,
+        )}
       >
-        {t(selectedValue)}
+        <span className="block min-w-0 truncate whitespace-nowrap">
+          {t(selectedValue)}
+        </span>
       </Badge>
       {selectedLength > 1 && (
-        <span className="text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
+        <span className="shrink-0 text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
           +{selectedLength - 1}
         </span>
       )}

@@ -28,7 +28,7 @@ export default {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/",
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<ChargeItemDefinitionCreate>(),
+    TBody: Type<Omit<ChargeItemDefinitionCreate, "tags">>(),
   },
   listMetrics: {
     // TODO: To be changed to /api/v1/charge_item_definition/metrics/ when BE is ready

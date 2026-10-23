@@ -13,7 +13,7 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import { UserReadMinimal } from "@/types/user/user";
+import { UserRead, UserReadMinimal } from "@/types/user/user";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
@@ -135,6 +135,13 @@ export type SubQueueActionsComponentType = React.FC<{
   subQueue: TokenSubQueueRead;
 }>;
 
+// Sections rendered on the user profile (summary) page
+export type UserProfileSectionsComponentType = React.FC<{
+  user: UserRead;
+  isOwnProfile: boolean;
+  className?: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -156,6 +163,7 @@ export type SupportedPluginComponents = {
   PatientHomeQuickActions: PatientHomeActionsComponentType;
   DeliveryOrderActions: DeliveryOrderActionsComponentType;
   SubQueueActions: SubQueueActionsComponentType;
+  UserProfileSections: UserProfileSectionsComponentType;
 };
 
 // Create a type for lazy-loaded components

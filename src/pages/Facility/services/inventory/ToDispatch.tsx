@@ -214,7 +214,7 @@ function IncomingOrdersTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row items-start gap-2">
+      <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
         <Tabs value={qParams.status}>
           <TabsList>
             {EFFECTIVE_STATUSES.map((status) => (
@@ -235,7 +235,7 @@ function IncomingOrdersTab({
           onClearAll={handleClearAll}
           onClearFilter={handleClearFilter}
           placeholder={t("filters")}
-          className="flex sm:flex-row flex-wrap sm:items-center"
+          className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
           triggerButtonClassName="self-start sm:self-center"
           clearAllButtonClassName="self-start"
           facilityId={facilityId}
@@ -358,8 +358,8 @@ function OutgoingDeliveriesTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row items-start gap-4 justify-between">
-        <div className="flex flex-col md:flex-row items-start gap-2">
+      <div className="flex flex-col items-start gap-4 justify-between sm:flex-row">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
           <Tabs value={qParams.status}>
             <TabsList>
               {EFFECTIVE_STATUSES.map((status) => (
@@ -380,7 +380,7 @@ function OutgoingDeliveriesTab({
             onClearAll={handleClearAll}
             onClearFilter={handleClearFilter}
             placeholder={t("filters")}
-            className="flex sm:flex-row flex-wrap sm:items-center"
+            className="w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
             triggerButtonClassName="self-start sm:self-center"
             facilityId={facilityId}
           />

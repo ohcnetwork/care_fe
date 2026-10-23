@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Building, ChevronDown, Loader2, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -244,13 +244,10 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
     );
   };
 
-  const isDisabled = useMemo(() => {
-    return (
-      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === currentSelection?.id))
-    );
-  }, [currentSelection, currentOrganizations, selectedOrganizations]);
+  const isDisabled =
+    selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
+    (!!currentOrganizations &&
+      currentOrganizations.some((org) => org.id === currentSelection?.id));
 
   return (
     <div className="space-y-4">
