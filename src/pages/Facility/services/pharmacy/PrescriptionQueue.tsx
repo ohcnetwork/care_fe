@@ -359,7 +359,7 @@ export default function PrescriptionQueue({
             </div>
             <div
               className={cn(
-                "ml-auto flex items-center gap-2",
+                "mx-auto md:mr-0 flex flex-col md:flex-row items-center gap-2",
                 selectedPrescriptionIds.length === 0 && "hidden",
               )}
             >
