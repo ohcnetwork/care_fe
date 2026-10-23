@@ -54,6 +54,7 @@ export function ObservationDetailSheet({
     isLoading: isHistoryLoading,
     hasNextPage,
     fetchNextPage,
+    isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: [
       "observation-history",
@@ -167,6 +168,7 @@ export function ObservationDetailSheet({
                     <ObservationDetailContent
                       entries={entriesByCode[code.code] ?? []}
                       hasNextPage={hasNextPage}
+                      isFetchingNextPage={isFetchingNextPage}
                       fetchNextPage={fetchNextPage}
                     />
                   </TabsContent>
@@ -176,6 +178,7 @@ export function ObservationDetailSheet({
               <ObservationDetailContent
                 entries={entriesByCode[codeList[0].code] ?? []}
                 hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
                 fetchNextPage={fetchNextPage}
               />
             )}
@@ -184,6 +187,7 @@ export function ObservationDetailSheet({
               entriesByCode={entriesByCode}
               totalCount={totalCount}
               hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
               fetchNextPage={fetchNextPage}
             />
           </div>

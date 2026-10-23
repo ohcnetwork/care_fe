@@ -216,7 +216,7 @@ export function DiagnosticReportResultsTable({
             showObservationHistory ? (
               <ObservationDetailSheet
                 codes={[observation.main_code]}
-                title={observationTitle || t("observation")}
+                title={observationTitle}
                 patientId={patientId}
                 encounterId={encounterId}
                 trigger={

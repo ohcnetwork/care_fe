@@ -1,6 +1,6 @@
 import { format, isToday } from "date-fns";
 import { Pin } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
@@ -24,12 +24,14 @@ export const ObservationHistoryMatrix = ({
   entriesByCode,
   totalCount,
   hasNextPage,
+  isFetchingNextPage,
   fetchNextPage,
 }: {
   codes: Code[];
   entriesByCode: Record<string, ResolvedObservationEntry[]>;
   totalCount: number;
   hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
 }) => {
   const { t } = useTranslation();
@@ -39,9 +41,13 @@ export const ObservationHistoryMatrix = ({
 
   const { ref: loadMoreRef, inView } = useInView();
 
+  const loadMore = useEffectEvent(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage?.();
+  });
+
   useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage?.();
-  }, [inView, hasNextPage, fetchNextPage]);
+    if (inView) loadMore();
+  }, [inView, isFetchingNextPage]);
 
   const { columns, rows } = useMemo(() => {
     // One column per reading. Readings can share an effective time (several
@@ -67,15 +73,9 @@ export const ObservationHistoryMatrix = ({
     const rows = codes.map((code) => {
       const codeEntries = entriesByCode[code.code] ?? [];
 
-      const valuesByKey: Record<
-        string,
-        { time: number; value?: string | null }
-      > = {};
+      const valuesByKey: Record<string, string | null | undefined> = {};
       for (const entry of codeEntries) {
-        valuesByKey[entry.key] = {
-          time: entry.time,
-          value: entry.value,
-        };
+        valuesByKey[entry.key] = entry.value;
       }
 
       return {
@@ -126,7 +126,7 @@ export const ObservationHistoryMatrix = ({
     [&_tbody_tr:last-child_td]:border-b-0"
         >
           <TableHeader>
-            <TableRow className="bg-gray-100 hover:bg-gray-50">
+            <TableRow className="bg-gray-100">
               <TableHead
                 ref={firstColRef}
                 className="sticky left-0 z-20 w-32 min-w-32 max-w-32 sm:w-64 sm:min-w-64 sm:max-w-64 border-r border-gray-200 bg-gray-50 text-gray-600"
@@ -148,11 +148,9 @@ export const ObservationHistoryMatrix = ({
                     <div className="flex flex-col items-center leading-tight">
                       <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                         {isLatest && (
-                          <div className="size-2 bg-indigo-100 rounded-full border border-indigo-700" />
+                          <span className="size-2 bg-indigo-100 rounded-full border border-indigo-700" />
                         )}
-                        {isTodayCol
-                          ? t("today")
-                          : format(new Date(col.time), "d MMM")}
+                        {isTodayCol ? t("today") : format(col.time, "d MMM")}
                         {isLatest && <Pin className="size-3" />}
                       </span>
                       <span className="font-semibold text-gray-700">
@@ -185,7 +183,7 @@ export const ObservationHistoryMatrix = ({
                   </div>
                 </TableCell>
                 {columns.map((col, index) => {
-                  const entry = row.valuesByKey[col.key];
+                  const value = row.valuesByKey[col.key];
                   const isLatest = index === 0;
                   return (
                     <TableCell
@@ -197,7 +195,7 @@ export const ObservationHistoryMatrix = ({
                       )}
                     >
                       <span className="inline-flex items-center gap-1">
-                        {entry?.value ?? "-"}
+                        {value ?? "-"}
                       </span>
                     </TableCell>
                   );

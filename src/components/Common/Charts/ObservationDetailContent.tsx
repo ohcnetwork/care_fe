@@ -1,5 +1,5 @@
 import { format, isToday } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import {
@@ -27,6 +27,7 @@ const POINT_WIDTH = 56;
 interface ObservationDetailContentProps {
   entries: ResolvedObservationEntry[];
   hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
 }
 
@@ -128,6 +129,7 @@ const RenderValueLabel = ({
 export function ObservationDetailContent({
   entries,
   hasNextPage,
+  isFetchingNextPage,
   fetchNextPage,
 }: ObservationDetailContentProps) {
   const { t } = useTranslation();
@@ -135,11 +137,15 @@ export function ObservationDetailContent({
   const { ref: loadMoreRef, inView } = useInView();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const didInitialScroll = useRef(false);
+  const distanceFromRight = useRef(0);
+
+  const loadMore = useEffectEvent(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage?.();
+  });
 
   useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage?.();
-  }, [inView, hasNextPage, fetchNextPage]);
+    if (inView) loadMore();
+  }, [inView, isFetchingNextPage]);
 
   const unit = entries[0]?.unit?.display || entries[0]?.unit?.code || "";
 
@@ -195,11 +201,11 @@ export function ObservationDetailContent({
   const isDense = chartData.length > 12;
   const chartMinWidth = chartData.length * POINT_WIDTH;
 
-  useEffect(() => {
+  // Older pages prepend points on the left; keep the view anchored to the right edge.
+  useLayoutEffect(() => {
     const el = scrollContainerRef.current;
-    if (!el || didInitialScroll.current || chartData.length === 0) return;
-    el.scrollLeft = el.scrollWidth;
-    didInitialScroll.current = true;
+    if (!el || chartData.length === 0) return;
+    el.scrollLeft = el.scrollWidth - el.clientWidth - distanceFromRight.current;
   }, [chartData.length]);
 
   return (
@@ -224,7 +230,15 @@ export function ObservationDetailContent({
             </Button>
           </div>
 
-          <div className="h-105 overflow-x-auto" ref={scrollContainerRef}>
+          <div
+            className="h-105 overflow-x-auto"
+            ref={scrollContainerRef}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              distanceFromRight.current =
+                el.scrollWidth - el.clientWidth - el.scrollLeft;
+            }}
+          >
             <div
               className="relative h-full"
               style={{ minWidth: chartMinWidth }}
