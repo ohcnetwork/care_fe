@@ -55,7 +55,7 @@ export function useFormRenderer(): FormContextValue {
 
 /** `id → signature` per question; a changed signature re-seeds the answer
  *  on a live tree update. */
-export function questionSignatures(questions: Question[]): Map<string, string> {
+function questionSignatures(questions: Question[]): Map<string, string> {
   const signatures = new Map<string, string>();
   const walk = (list: Question[]) => {
     for (const question of list) {
@@ -78,7 +78,7 @@ export function questionSignatures(questions: Question[]): Map<string, string> {
 
 /** Merge existing answers over a fresh seed: entries survive when the
  *  question still exists with the same signature, otherwise they re-seed. */
-export function syncResponses(
+function syncResponses(
   previous: Record<string, QuestionnaireResponse>,
   previousSignatures: Map<string, string>,
   questions: Question[],

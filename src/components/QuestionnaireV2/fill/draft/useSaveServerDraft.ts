@@ -11,14 +11,36 @@ import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import { resolveStructuredType } from "@/components/QuestionnaireV2/structured/registry";
 
-import { unsupportedDraftStructuredTypes } from "@/components/QuestionnaireV2/fill/draft/unsupportedDraftStructuredTypes";
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
 import type { FillSubject } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
+import type { Question } from "@/types/questionnaire/question";
 import mutate from "@/Utils/request/mutate";
+
+/** Structured types that a server draft cannot faithfully carry. */
+function unsupportedDraftStructuredTypes(questions: Question[]): string[] {
+  const blocking: string[] = [];
+  const walk = (list: Question[]) => {
+    for (const question of list) {
+      if (question.type === "group") {
+        walk(question.questions ?? []);
+        continue;
+      }
+      if (question.type !== "structured") continue;
+      const resolved = question.structured_type
+        ? resolveStructuredType(question.structured_type)
+        : undefined;
+      if (!resolved || resolved.draftPolicy === "exclude") {
+        blocking.push(question.structured_type ?? "<untyped>");
+      }
+    }
+  };
+  walk(questions);
+  return blocking;
+}
 
 interface UseSaveServerDraftArgs {
   /** Every questionnaire in the session, primary first. */
@@ -70,10 +92,8 @@ export function useSaveServerDraft({
     // completed.
     if (primary.questionnaire.subject_type !== "encounter") return false;
     return (
-      unsupportedDraftStructuredTypes(
-        primary.questionnaire.questions,
-        resolveStructuredType,
-      ).length === 0
+      unsupportedDraftStructuredTypes(primary.questionnaire.questions)
+        .length === 0
     );
   }, [encounterBound, primary, forms.length]);
 

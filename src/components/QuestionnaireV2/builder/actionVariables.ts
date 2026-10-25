@@ -142,9 +142,7 @@ export function reachableContextValues(
 
 const NUMBER_TYPES: QuestionType[] = ["integer", "decimal", "quantity"];
 
-/** Types that never produce a `q_` value: the layout types
- *  (`saveValidation`'s NON_RESPONSE_TYPES — not imported, that module drags
- *  the component tree into these node-tested helpers) plus structured
+/** Types that never produce a `q_` value: layout types and structured
  *  questions, whose data goes to the domain APIs, not the response. */
 const NON_ANSWER_TYPES: QuestionType[] = ["group", "display", "structured"];
 

@@ -26,8 +26,8 @@ export function codingsLabel(codes?: ImmunizationPolicyCoding[] | null) {
  */
 export function forecastDisplayStatus(
   recommendation: ImmunizationRecommendationRead,
-  today = todayDateString(),
 ): ImmunizationForecastDisplayStatus {
+  const today = todayDateString();
   if (recommendation.forecast_status !== "due") {
     return recommendation.forecast_status;
   }

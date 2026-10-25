@@ -107,7 +107,7 @@ const setResponseSchema = z.object({
   note: z.string().max(MAX_NOTE_LENGTH).optional(),
 });
 
-export type SetResponseInput = z.infer<typeof setResponseSchema>;
+type SetResponseInput = z.infer<typeof setResponseSchema>;
 
 // `.default({})` so an agent that calls a no-argument action with no
 // argument at all still parses — the alternative is a confusing
@@ -365,19 +365,15 @@ function resolveRows(
 }
 
 /**
- * Apply one `questionnaire.response.set` call. Exported for node-side
- * assertions; the registry is the only production caller, and it has
- * already validated the input's SHAPE — everything checked here is about
- * the input's meaning against the live session.
+ * Apply one `questionnaire.response.set` call. The action registry has already
+ * validated the input's shape; these checks validate its meaning against the
+ * live session.
  */
-export async function applySetResponse(
+async function applySetResponse(
   input: SetResponseInput,
   forms: FillFormEntry[],
   getStore: GetStore,
-  {
-    subject,
-    isFrozen,
-  }: { subject?: FillSubject; isFrozen?: () => boolean } = {},
+  { subject, isFrozen }: { subject: FillSubject; isFrozen: () => boolean },
 ): Promise<ActionRunResult> {
   const form = input.questionnaire_id
     ? forms.find((entry) => entry.key === input.questionnaire_id)
@@ -421,7 +417,7 @@ export async function applySetResponse(
 
   let structuredSlot: StructuredSlotState | undefined;
   if (question.type === "structured") {
-    if (!question.structured_type || !subject || !isPatientBound(subject)) {
+    if (!question.structured_type || !isPatientBound(subject)) {
       return {
         ok: false,
         error:
@@ -445,7 +441,7 @@ export async function applySetResponse(
       };
     }
   }
-  if (isFrozen?.()) {
+  if (isFrozen()) {
     return { ok: false, error: "The questionnaire is currently being saved" };
   }
 
@@ -498,7 +494,7 @@ export async function applySetResponse(
   }
 
   const values: ResponseValue[] = [];
-  if (structuredSlot?.kind === "ready" && subject) {
+  if (structuredSlot?.kind === "ready") {
     const coerced = coerceStructuredFillValue(
       question,
       input.values,
@@ -569,9 +565,8 @@ interface FormQuestionSummary {
   description?: string;
 }
 
-/** Apply one `questionnaire.forms.list` call — the agent's map of the
- *  session. Exported for node-side assertions. */
-export function listFormsSummary(
+/** Apply one `questionnaire.forms.list` call — the agent's map of the session. */
+function listFormsSummary(
   forms: FillFormEntry[],
   getStore: GetStore,
 ): ActionRunResult {

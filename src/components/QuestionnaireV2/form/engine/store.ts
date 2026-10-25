@@ -152,7 +152,7 @@ function foldBoolean(value: unknown): unknown {
 /** Evaluates one enable_when condition against its controller's response
  *  the way the backend does: only answered entries count, and every entry
  *  is considered. */
-export function evaluateEnableWhen(
+function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {

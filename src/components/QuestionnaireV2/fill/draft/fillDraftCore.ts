@@ -17,10 +17,6 @@ export function fillDraftScopeKey(scope: FillDraftScope): string {
     : base;
 }
 
-// This module must stay free of `structured/registry` (directly or
-// transitively): `serverDraft.test.ts` runs under plain `node --test`, and
-// the registry pulls every core definition's component tree.
-
 /** JSON round-trips Dates to ISO strings; date/dateTime entries revive to
  *  Date objects so the inputs' discriminant checks keep working. Shared by
  *  the local-draft store and the server-draft (`?continue_draft=`) restore
