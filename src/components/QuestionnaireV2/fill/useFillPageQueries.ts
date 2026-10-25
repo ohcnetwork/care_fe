@@ -69,9 +69,10 @@ export function useFillPageQueries({
     enabled: !!continueDraftId,
   });
 
-  // The draft record carries no patient or encounter, but the list endpoint
-  // filters by them server-side: a `?continue_draft=` id that is not among
-  // this subject's own drafts belongs to another patient or encounter.
+  // The record carries no patient or encounter, but the list endpoint filters
+  // by them server-side. A record whose loaded status is still draft must be
+  // among this subject's drafts before it can resume here; other statuses are
+  // absent from this list regardless of their subject and cannot be recovered.
   const subjectDraftsQuery = useQuery({
     queryKey: formSubmissionKeys.subjectDrafts(subjectKeyOf(subject)),
     queryFn: query(formSubmissionApi.list, {

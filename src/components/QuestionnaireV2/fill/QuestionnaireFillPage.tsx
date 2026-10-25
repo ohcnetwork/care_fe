@@ -211,8 +211,9 @@ export function QuestionnaireFillPage({
 
   // The URL is shareable: a draft the user may read but that belongs to
   // another patient or encounter must not render beside this route's
-  // clinical context, nor be completed by this route's submit.
-  if (serverDraftForeign) {
+  // clinical context, nor be completed by this route's submit. The subject
+  // list contains only drafts, so completed records use the recovery guard below.
+  if (serverDraft?.status === "draft" && serverDraftForeign) {
     return (
       <FillErrorPage
         message={t("draft_subject_mismatch")}
