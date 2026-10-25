@@ -9,6 +9,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
 
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
+import { encounterPageKeySchema } from "@/types/workspace/encounterWorkspace";
 
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
@@ -52,6 +53,7 @@ export function QuestionnaireFillPage({
       resume_local_draft: resumeLocalDraftParam,
       prescription,
       toDischarge,
+      return_page: requestedReturnPage,
     },
   ] = useQueryParams();
   const patientBound = isPatientBound(subject) ? subject : undefined;
@@ -89,7 +91,13 @@ export function QuestionnaireFillPage({
     },
   );
 
-  const exitTarget = exitTargetOf(subject);
+  const defaultExitTarget = exitTargetOf(subject);
+  const returnPage =
+    encounterPageKeySchema.safeParse(requestedReturnPage).data ?? "updates";
+  const exitTarget =
+    subject.type === "encounter"
+      ? `${defaultExitTarget.slice(0, defaultExitTarget.lastIndexOf("/") + 1)}${returnPage}`
+      : defaultExitTarget;
 
   if (!questionnaireId) {
     return (

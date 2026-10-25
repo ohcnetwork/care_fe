@@ -168,7 +168,7 @@ export function StructuredSlot({
       // the subject-mismatch and missing-context notices above. A REQUIRED
       // question still hard-blocks the submit by name for this reason
       // (`collectStructuredErrors`); marking it here only tells that
-      // validator (and `collectRequiredErrors`, staying out of the way)
+      // validator (and `collectQuestionErrors`, staying out of the way)
       // which slots are in this state.
       onError={markRenderFailed}
       // `resolveStructuredType` hands back a stable reference per

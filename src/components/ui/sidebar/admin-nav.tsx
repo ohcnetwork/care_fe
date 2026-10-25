@@ -4,9 +4,11 @@ import {
   Building2,
   ClipboardList,
   IdCard,
+  LayoutDashboard,
   ListOrdered,
   Settings2,
   ShieldCheck,
+  Syringe,
   Tags,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +33,11 @@ function generateAdminLinks(
       name: t("action_configurations"),
       url: `${baseUrl}/actions`,
       icon: <Settings2 />,
+    },
+    {
+      name: t("immunization_policies"),
+      url: `${baseUrl}/immunization-policies`,
+      icon: <Syringe />,
     },
     {
       name: t("admin_nav_valuesets"),
@@ -81,6 +88,11 @@ function generateAdminLinks(
           url: `${baseUrl}/organizations/role`,
         },
       ],
+    },
+    {
+      name: t("workspaces"),
+      url: `${baseUrl}/workspaces`,
+      icon: <LayoutDashboard />,
     },
     {
       name: t("admin_nav_apps"),
