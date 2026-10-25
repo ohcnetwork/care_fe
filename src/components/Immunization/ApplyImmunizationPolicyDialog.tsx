@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isValid, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useId, useState } from "react";
@@ -25,21 +25,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import mutate from "@/Utils/request/mutate";
+import { useBatchRequest } from "@/Utils/request/batch";
 import { formatDateTime } from "@/Utils/utils";
+import type { ImmunizationRecommendationCreate } from "@/types/emr/immunizationRecommendation/immunizationRecommendation";
 import immunizationRecommendationApi from "@/types/emr/immunizationRecommendation/immunizationRecommendationApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 
 import { fetchImmunizationPolicyCatalogue } from "@/pages/ImmunizationPolicies/useImmunizationPolicyOwnership";
 
 import {
-  MaterializedRecommendation,
   codingsLabel,
   doseLabel,
   flattenRecommendations,
   materializePolicyTemplate,
   todayDateString,
 } from "./immunizationUtils";
+
+// Keep the entire schedule within the backend's single-batch request limit.
+const MAX_POLICY_RECOMMENDATIONS = 20;
 
 interface ApplyImmunizationPolicyDialogProps {
   open: boolean;
@@ -112,12 +115,10 @@ function ApplyPolicyForm({
       ? materializePolicyTemplate(policy.policy_template, reference)
       : undefined;
   const preview = schedule ? flattenRecommendations(schedule) : [];
+  const tooManyRecommendations = preview.length > MAX_POLICY_RECOMMENDATIONS;
 
-  const apply = useMutation({
-    mutationFn: (root: MaterializedRecommendation) =>
-      mutate(immunizationRecommendationApi.createTree, {
-        pathParams: { patientId: patient.id },
-      })({ patient: patient.id, encounter: encounterId, root }),
+  const apply = useBatchRequest({
+    silent: true,
     onSuccess: () => {
       toast.success(t("immunization_policy_applied"));
       onDone();
@@ -138,9 +139,32 @@ function ApplyPolicyForm({
       className="space-y-5"
       onSubmit={(event) => {
         event.preventDefault();
-        if (schedule && preview.length && !isError && !apply.isPending) {
-          apply.mutate(schedule);
-        }
+        if (
+          !schedule ||
+          !preview.length ||
+          tooManyRecommendations ||
+          isError ||
+          apply.isPending
+        )
+          return;
+
+        apply.mutate(
+          preview.map(({ path, node }) => {
+            const { children: _children, ...fields } = node;
+            return {
+              api: immunizationRecommendationApi.create,
+              pathParams: { patientId: patient.id },
+              referenceId: `recommendation-${path}`,
+              body: {
+                ...fields,
+                patient: patient.id,
+                encounter: encounterId,
+                is_group: false,
+                forecast_status: "due",
+              } satisfies ImmunizationRecommendationCreate,
+            };
+          }),
+        );
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
@@ -261,6 +285,16 @@ function ApplyPolicyForm({
         </section>
       )}
 
+      {tooManyRecommendations && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {t("immunization_policy_recommendation_limit", {
+              max: MAX_POLICY_RECOMMENDATIONS,
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <DialogFooter className="gap-2">
         <Button
           type="button"
@@ -272,7 +306,12 @@ function ApplyPolicyForm({
         </Button>
         <Button
           type="submit"
-          disabled={!preview.length || isError || apply.isPending}
+          disabled={
+            !preview.length ||
+            tooManyRecommendations ||
+            isError ||
+            apply.isPending
+          }
         >
           {apply.isPending && (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />

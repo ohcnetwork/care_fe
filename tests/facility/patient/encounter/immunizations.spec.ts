@@ -1,14 +1,25 @@
 import { faker } from "@faker-js/faker";
-import { expect, Page, Request, test } from "@playwright/test";
+import {
+  APIRequestContext,
+  expect,
+  Page,
+  Request,
+  test,
+} from "@playwright/test";
+import { adminApiHeaders, apiBaseUrl } from "tests/helper/questionnaireV2";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
+import { BatchRequestBody } from "../../../../src/types/base/batch/batch";
 import { ImmunizationRead } from "../../../../src/types/emr/immunization/immunization";
-import { ImmunizationPolicyRead } from "../../../../src/types/emr/immunizationPolicy/immunizationPolicy";
 import {
+  ImmunizationPolicyRead,
+  ImmunizationPolicyTemplate,
+} from "../../../../src/types/emr/immunizationPolicy/immunizationPolicy";
+import {
+  ImmunizationRecommendationCreate,
   ImmunizationRecommendationRead,
-  ImmunizationRecommendationTree,
 } from "../../../../src/types/emr/immunizationRecommendation/immunizationRecommendation";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -44,9 +55,8 @@ function recommendation(
   };
 }
 
-/** Exercise the browser/API boundary while the immunization endpoints roll
- * out. The handler echoes writes into the next list response so the page can
- * refresh; assertions concern outgoing requests and rendered controls.
+/** Isolate record-entry and error-state controls from backend persistence.
+ * Policy application tests below use the real batch and recommendation APIs.
  */
 async function routeImmunizations(
   page: Page,
@@ -80,27 +90,6 @@ async function routeImmunizations(
       }
       writes.push(request);
       const body = request.postDataJSON();
-      if (
-        request.method() === "POST" &&
-        path === `${base}recommendation/create_tree/`
-      ) {
-        // The endpoint returns the root and later list reads contain each node.
-        // Atomic persistence is covered by the backend, not this browser mock.
-        const addNode = ({
-          children,
-          ...fields
-        }: ImmunizationRecommendationTree): ImmunizationRecommendationRead => {
-          const created = {
-            ...fields,
-            id: faker.string.uuid(),
-            forecast_status: "due" as const,
-          };
-          recommendations.push(created);
-          children.forEach(addNode);
-          return created;
-        };
-        return route.fulfill({ json: addNode(body.root) });
-      }
       if (request.method() === "POST") {
         const created = { ...body, id: faker.string.uuid() };
         store.push(created);
@@ -145,6 +134,81 @@ function isWrite(request: Request, method: string, resource: string) {
   );
 }
 
+// A real system-medication coding accepted by the existing recommendation API.
+const policyVaccine = {
+  system: "http://snomed.info/sct",
+  code: "871822003",
+  display: "Hepatitis B virus antigen only vaccine product",
+};
+
+function dosePolicy(series: string, count: number): ImmunizationPolicyRead {
+  const doses: ImmunizationPolicyTemplate[] = Array.from(
+    { length: count },
+    (_, index) => ({
+      codes: [policyVaccine],
+      is_group: false,
+      children: [],
+      series,
+      dose_number: String(index + 1),
+      series_number: String(count),
+      due_date: index * 28,
+      ...(index === 0 ? { earliest_date: -1, overdue_date: 14 } : {}),
+    }),
+  );
+  return {
+    id: faker.string.uuid(),
+    name: `${series} (${count} doses)`,
+    policy_template: {
+      is_group: true,
+      codes: [],
+      children: [
+        { is_group: true, codes: [], children: doses.slice(0, 2) },
+        ...doses.slice(2),
+      ],
+    },
+  };
+}
+
+async function routePolicies(page: Page, policies: ImmunizationPolicyRead[]) {
+  await page.route(
+    (url) => url.pathname === "/api/v1/immunization/policy/",
+    (route) =>
+      route.fulfill({ json: { count: policies.length, results: policies } }),
+  );
+}
+
+async function savedPolicyRecommendations(
+  request: APIRequestContext,
+  patientId: string,
+  series: string,
+): Promise<ImmunizationRecommendationRead[]> {
+  const saved: ImmunizationRecommendationRead[] = [];
+  const limit = 100;
+  // The existing endpoint does not filter by series; read every page so other
+  // tests' recommendations cannot hide rows or create a false empty result.
+  for (let offset = 0; ; offset += limit) {
+    const response = await request.get(
+      `${apiBaseUrl()}/api/v1/patient/${patientId}/immunization/recommendation/?limit=${limit}&offset=${offset}`,
+      { headers: adminApiHeaders() },
+    );
+    expect(response.ok()).toBeTruthy();
+    const data = (await response.json()) as {
+      count: number;
+      results: ImmunizationRecommendationRead[];
+    };
+    saved.push(...data.results.filter((item) => item.series === series));
+    if (offset + data.results.length >= data.count) return saved;
+    expect(data.results.length).toBeGreaterThan(0);
+  }
+}
+
+function isBatch(request: Request) {
+  return (
+    request.method() === "POST" &&
+    new URL(request.url()).pathname === "/api/v1/batch_requests/"
+  );
+}
+
 test.describe("Encounter immunizations", () => {
   let facilityId: string;
   let patientId: string;
@@ -158,102 +222,180 @@ test.describe("Encounter immunizations", () => {
     tabUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/immunizations`;
   });
 
-  test("applies a policy as nested recommendations dated from the start date", async ({
+  test("applies 20 policy doses atomically and blocks policies above the batch limit", async ({
     page,
+    request,
   }) => {
-    const policy: ImmunizationPolicyRead = {
-      id: faker.string.uuid(),
-      name: `Hepatitis B schedule ${faker.string.alphanumeric(6)}`,
-      policy_template: {
-        is_group: true,
-        codes: [],
-        children: [
-          {
-            codes: [{ ...vaccine, version: "2024" }],
-            diseases: [disease],
-            is_group: false,
-            children: [],
-            series: "Hepatitis B primary series",
-            dose_number: "1",
-            series_number: "2",
-            earliest_date: -1,
-            due_date: 0,
-            overdue_date: 14,
-          },
-          {
-            codes: [vaccine],
-            is_group: false,
-            children: [],
-            dose_number: "2",
-            series_number: "2",
-            due_date: 28,
-          },
-        ],
-      },
-    };
-    await page.route(
-      (url) => url.pathname === "/api/v1/immunization/policy/",
-      (route) => route.fulfill({ json: { count: 1, results: [policy] } }),
-    );
-    const writes = await routeImmunizations(page, patientId);
+    const series = `Policy ${faker.string.uuid()}`;
+    const policy = dosePolicy(series, 20);
+    const oversizedPolicy = dosePolicy(series, 21);
+    await routePolicies(page, [policy, oversizedPolicy]);
+    const writes: Request[] = [];
+    page.on("request", (request) => {
+      if (isBatch(request) || isWrite(request, "POST", "recommendation")) {
+        writes.push(request);
+      }
+    });
     await page.goto(tabUrl);
-    await expect(page.getByText("No recommendations scheduled")).toBeVisible();
+    await page.getByRole("button", { name: "Apply policy" }).click();
+    const dialog = page.getByRole("dialog", { name: "Apply policy" });
+    await dialog.getByRole("combobox", { name: "Policy" }).click();
+    await page.getByRole("option", { name: oversizedPolicy.name }).click();
+    await dialog.getByLabel("Start date").fill("2026-01-01");
 
+    const preview = dialog.getByRole("region", { name: "Schedule preview" });
+    const limitError = dialog.getByText(
+      "This policy has more than 20 recommendations. Choose a policy with at most 20 recommendations.",
+    );
+    await expect(preview.getByRole("listitem")).toHaveCount(21);
+    await expect(limitError).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Add 21 recommendations" }),
+    ).toBeDisabled();
+    await dialog.getByLabel("Start date").press("Enter");
+    await expect(dialog).toBeVisible();
+    expect(writes).toHaveLength(0);
+
+    await dialog.getByRole("combobox", { name: "Policy" }).click();
+    await page.getByRole("option", { name: policy.name }).click();
+    await expect(limitError).toBeHidden();
+    await expect(preview.getByRole("listitem")).toHaveCount(20);
+    await expect(preview).toContainText("Due 01 Jan 2026");
+    await expect(preview).toContainText("Due 29 Jan 2026");
+
+    const [response] = await Promise.all([
+      page.waitForResponse((response) => isBatch(response.request())),
+      dialog.getByRole("button", { name: "Add 20 recommendations" }).click(),
+    ]);
+    expect(response.ok()).toBeTruthy();
+    await expect(dialog).toBeHidden();
+    expect(writes).toHaveLength(1);
+    const body =
+      writes[0].postDataJSON() as BatchRequestBody<ImmunizationRecommendationCreate>;
+    expect(body.requests).toHaveLength(20);
+    for (const entry of body.requests) {
+      expect(entry).toMatchObject({
+        url: `/api/v1/patient/${patientId}/immunization/recommendation/`,
+        method: "POST",
+        body: {
+          patient: patientId,
+          encounter: encounterId,
+          is_group: false,
+          forecast_status: "due",
+        },
+      });
+      expect(entry.body).not.toHaveProperty("children");
+      expect(entry.body.parent ?? null).toBeNull();
+    }
+
+    const saved = await savedPolicyRecommendations(request, patientId, series);
+    expect(saved).toHaveLength(20);
+    expect(new Set(saved.map((item) => item.id)).size).toBe(20);
+    expect(
+      saved.every((item) => !item.is_group && item.forecast_status === "due"),
+    ).toBe(true);
+    expect(saved.find((item) => item.dose_number === "1")).toMatchObject({
+      codes: [policyVaccine],
+      earliest_date: "2025-12-31",
+      due_date: "2026-01-01",
+      overdue_date: "2026-01-15",
+      series_number: "20",
+    });
+    expect(saved.find((item) => item.dose_number === "2")).toMatchObject({
+      due_date: "2026-01-29",
+    });
+    await expect(
+      page
+        .getByRole("list", { name: "Schedule" })
+        .getByRole("listitem")
+        .filter({ hasText: series }),
+    ).toHaveCount(20);
+  });
+
+  test("rolls back every policy dose when a later dose fails and retries without duplicates", async ({
+    page,
+    request,
+  }) => {
+    const series = `Policy retry ${faker.string.uuid()}`;
+    const policy = dosePolicy(series, 2);
+    await routePolicies(page, [policy]);
+    let attempts = 0;
+    await page.route(
+      (url) => url.pathname === "/api/v1/batch_requests/",
+      async (route) => {
+        const body = route
+          .request()
+          .postDataJSON() as BatchRequestBody<ImmunizationRecommendationCreate>;
+        if (!body.requests.some((item) => item.body.series === series)) {
+          return route.continue();
+        }
+        attempts++;
+        if (attempts === 1) {
+          // Let the real backend accept the first dose and reject the second;
+          // the subsequent GET proves rollback, not a simulated mock store.
+          return route.continue({
+            postData: JSON.stringify({
+              ...body,
+              requests: body.requests.map((item, index) =>
+                index === 1
+                  ? {
+                      ...item,
+                      body: { ...item.body, forecast_status: "invalid-status" },
+                    }
+                  : item,
+              ),
+            }),
+          });
+        }
+        return route.continue();
+      },
+    );
+    await page.goto(tabUrl);
     await page.getByRole("button", { name: "Apply policy" }).click();
     const dialog = page.getByRole("dialog", { name: "Apply policy" });
     await dialog.getByRole("combobox", { name: "Policy" }).click();
     await page.getByRole("option", { name: policy.name }).click();
     await dialog.getByLabel("Start date").fill("2026-01-01");
+    const apply = dialog.getByRole("button", { name: "Add 2 recommendations" });
+    const [failed] = await Promise.all([
+      page.waitForResponse((response) => isBatch(response.request())),
+      apply.click(),
+    ]);
+    expect(failed.status()).toBe(400);
+    const failure = await failed.json();
+    expect(failure.results).toHaveLength(2);
+    expect(failure.results[0].status_code).toBeGreaterThanOrEqual(200);
+    expect(failure.results[0].status_code).toBeLessThan(300);
+    expect(failure.results[1].status_code).toBe(400);
+    expect(
+      await savedPolicyRecommendations(request, patientId, series),
+    ).toEqual([]);
+    await expect(dialog).toBeVisible();
+    await expect(apply).toBeEnabled();
+    await expect(
+      dialog
+        .getByRole("region", { name: "Schedule preview" })
+        .getByRole("listitem"),
+    ).toHaveCount(2);
 
-    const preview = dialog.getByRole("region", { name: "Schedule preview" });
-    await expect(preview.getByRole("listitem")).toHaveCount(2);
-    await expect(preview).toContainText("Due 01 Jan 2026");
-    await expect(preview).toContainText("Due 29 Jan 2026");
-
-    await dialog.getByRole("button", { name: "Add 2 recommendations" }).click();
+    const [retried] = await Promise.all([
+      page.waitForResponse((response) => isBatch(response.request())),
+      apply.click(),
+    ]);
+    expect(retried.ok()).toBeTruthy();
     await expect(dialog).toBeHidden();
-    const creates = writes.filter((request) =>
-      isWrite(request, "POST", "recommendation"),
-    );
-    expect(creates).toHaveLength(1);
-    expect(new URL(creates[0].url()).pathname).toBe(
-      `/api/v1/patient/${patientId}/immunization/recommendation/create_tree/`,
-    );
-    const body = creates[0].postDataJSON();
-    expect(body).toMatchObject({
-      patient: patientId,
-      encounter: encounterId,
-    });
-    const root = body.root;
-    expect(root.is_group).toBe(true);
-    expect(root).not.toHaveProperty("codes");
-    expect(root.children).toHaveLength(2);
-    const [first, second] = root.children;
-    expect(first).toMatchObject({
-      is_group: false,
-      codes: [{ ...vaccine, version: "2024" }],
-      diseases: [disease],
-      earliest_date: "2025-12-31",
-      due_date: "2026-01-01",
-      overdue_date: "2026-01-15",
-      dose_number: "1",
-      series_number: "2",
-      children: [],
-    });
-    expect(second).toMatchObject({
-      is_group: false,
-      codes: [vaccine],
-      due_date: "2026-01-29",
-      children: [],
-    });
-    expect(second).not.toHaveProperty("earliest_date");
-    for (const node of [root, first, second]) {
-      expect(node).not.toHaveProperty("parent");
-      expect(node).not.toHaveProperty("forecast_status");
-    }
-
-    const schedule = page.getByRole("list", { name: "Schedule" });
-    await expect(schedule.getByRole("listitem")).toHaveCount(2);
+    expect(attempts).toBe(2);
+    const saved = await savedPolicyRecommendations(request, patientId, series);
+    expect(saved).toHaveLength(2);
+    expect(new Set(saved.map((item) => item.id)).size).toBe(2);
+    expect(saved.map((item) => item.dose_number).sort()).toEqual(["1", "2"]);
+    expect(saved.every((item) => item.forecast_status === "due")).toBe(true);
+    await expect(
+      page
+        .getByRole("list", { name: "Schedule" })
+        .getByRole("listitem")
+        .filter({ hasText: series }),
+    ).toHaveCount(2);
   });
 
   test("switches the linked recommendation, records its vaccine and completes it", async ({

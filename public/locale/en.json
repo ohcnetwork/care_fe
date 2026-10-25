@@ -3238,6 +3238,7 @@
   "immunization_policy_read_only": "You can view this policy. Editing requires permission for the facility or instance that owns it.",
   "immunization_policy_recommendation_count_one": "{{count}} recommendation",
   "immunization_policy_recommendation_count_other": "{{count}} recommendations",
+  "immunization_policy_recommendation_limit": "This policy has more than {{max}} recommendations. Choose a policy with at most {{max}} recommendations.",
   "immunization_policy_recommendations": "Recommendations",
   "immunization_policy_save": "Save policy",
   "immunization_policy_save_error": "The policy could not be saved. Your changes are still here. Please try again.",

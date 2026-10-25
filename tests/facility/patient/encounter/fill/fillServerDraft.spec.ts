@@ -478,7 +478,6 @@ test.describe("Fill page server draft", () => {
         url: string;
         body: {
           form_submission?: string;
-          expected_status?: string;
           status?: string;
         };
       }[];
@@ -494,13 +493,11 @@ test.describe("Fill page server draft", () => {
       "submit sub-request must link the resumed draft via form_submission",
     ).toBe(draftId);
 
-    // The completion write rejects a second submit, rolling back its whole
-    // batch even when the questionnaire contains only structured resources.
+    // Complete the resumed draft in the same batch as its responses.
     const completion = body.requests.find((request) =>
       request.url.includes(`/form_submission/${draftId}/`),
     );
     expect(completion?.body).toMatchObject({
-      expected_status: "draft",
       status: "submitted",
     });
 
@@ -509,5 +506,11 @@ test.describe("Fill page server draft", () => {
     await expectToast(page, "Questionnaire submitted successfully");
     await page.waitForURL(/\/updates$/);
     await expect(serverDraftRow(page, draftId)).toHaveCount(0);
+    const completedDraft = await fetch(
+      `${apiBaseUrl()}/api/v1/form_submission/${draftId}/`,
+      { headers: adminApiHeaders() },
+    );
+    expect(completedDraft.ok).toBe(true);
+    expect((await completedDraft.json()).status).toBe("submitted");
   });
 });

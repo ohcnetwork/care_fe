@@ -33,7 +33,6 @@ import { planPlainSubmit } from "./submitTarget";
 interface FormSubmissionCompletionBody {
   patient: string;
   encounter?: string;
-  expected_status: "draft";
   status: "submitted";
   response_dump: {
     questionnaireResponses: {
@@ -208,10 +207,9 @@ export async function composeBatch({
   if (results.length > 0) {
     // Endpoint and body come from the questionnaire's subject_type, not the
     // mount — see `planPlainSubmit`. `continueDraftId` links the submission
-    // to the resumed server draft so the backend's duplicate-submission
-    // guard (keyed off `form_submission`) also protects plain responses.
-    // The conditional completion below guards every resumed draft,
-    // including ones that contain only structured answers.
+    // to the resumed server draft for the backend's existing duplicate-response
+    // check (keyed off `form_submission`). The completion PUT below writes
+    // the draft's status in the same batch as its questionnaire and resources.
     const plan = planPlainSubmit({
       questionnaireId: questionnaire.id,
       subjectType: questionnaire.subject_type,
@@ -237,7 +235,6 @@ export async function composeBatch({
     const body: FormSubmissionCompletionBody = {
       patient: patientBound.patientId,
       encounter: renderCtx.encounterId,
-      expected_status: "draft",
       status: "submitted",
       response_dump: {
         questionnaireResponses: {
