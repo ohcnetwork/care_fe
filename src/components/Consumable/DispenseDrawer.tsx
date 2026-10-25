@@ -88,9 +88,7 @@ import {
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
-interface SelectedLocation {
-  id: string;
-  name: string;
+interface SelectedLocation extends LocationRead {
   path: string;
 }
 
@@ -146,21 +144,8 @@ export default function DispenseDrawer({
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
-  const [currentLocation, setCurrentLocation] = useState<LocationRead>(
-    () =>
-      ({
-        id: selectedLocation.id,
-        name: selectedLocation.name,
-        status: "active",
-        operational_status: "O",
-        has_children: false,
-        sort_index: 0,
-        description: "",
-        form: "ward",
-        mode: "instance",
-        parent: null,
-      }) as unknown as LocationRead,
-  );
+  const [currentLocation, setCurrentLocation] =
+    useState<LocationRead>(selectedLocation);
 
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState(false);
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);

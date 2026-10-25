@@ -2,6 +2,7 @@ import { Braces, ChevronDown, Eye, Puzzle } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AuthorRoleFilter } from "@/components/Facility/ConsultationDetails/AuthorRoleFilter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -175,7 +176,11 @@ export function WorkspaceWidgetInspector({
           {preparedSchema.fieldMetadata.length ? (
             <WorkspaceSchemaFields
               config={editedConfig ?? config}
-              fields={preparedSchema.fieldMetadata}
+              fields={preparedSchema.fieldMetadata.filter(
+                (field) =>
+                  widget.type !== "questionnaire_responses" ||
+                  field.name !== "role",
+              )}
               issues={issues}
               disabled={disabled || jsonError}
               onChange={updateConfig}
@@ -186,6 +191,27 @@ export function WorkspaceWidgetInspector({
                 ? widgetSchemaText(schema.description, t)
                 : t("workspace_widget_no_config_options")}
             </p>
+          )}
+          {widget.type === "questionnaire_responses" && (
+            <div className="space-y-1.5">
+              <AuthorRoleFilter
+                value={
+                  typeof (editedConfig ?? config).role === "string"
+                    ? ((editedConfig ?? config).role as string)
+                    : undefined
+                }
+                disabled={disabled || jsonError}
+                onChange={(roleId) => {
+                  const nextConfig = { ...(editedConfig ?? config) };
+                  if (roleId) nextConfig.role = roleId;
+                  else delete nextConfig.role;
+                  updateConfig(nextConfig);
+                }}
+              />
+              <p className="text-xs text-gray-500">
+                {t("author_role_filter_hint")}
+              </p>
+            </div>
           )}
           {!!issues.length && (
             <Alert variant="destructive" className="p-3">

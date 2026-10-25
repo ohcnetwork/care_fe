@@ -91,8 +91,7 @@ export const DispenseButton = ({
           patientId={selectedEncounter.patient.id}
           encounterId={selectedEncounter.id}
           selectedLocation={{
-            id: location.id,
-            name: location.name,
+            ...location,
             path: getLocationPath(location),
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {

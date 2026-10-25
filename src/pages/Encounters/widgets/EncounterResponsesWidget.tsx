@@ -48,6 +48,7 @@ export function EncounterResponsesWidget({
       title={title}
       showEmpty={showEmpty}
       questionnaireSlug={parsedConfig.data.questionnaire_slug}
+      authorRoleId={parsedConfig.data.role}
       onlyUnstructured={parsedConfig.data.only_unstructured}
       limit={parsedConfig.data.limit}
       presentation="panel"

@@ -118,7 +118,7 @@ export function LocationPicker({
   }, [open]);
 
   const handleLocationSelect = (location: LocationRead) => {
-    if (location.has_children) {
+    if (location.has_sub_locations) {
       // Navigate to sublocation
       setBreadcrumbs((prev) => [
         ...prev,
@@ -355,7 +355,7 @@ export function LocationPicker({
                         {value?.id === location.id && (
                           <Check className="h-4 w-4 text-gray-700" />
                         )}
-                        {location.has_children && (
+                        {location.has_sub_locations && (
                           <ChevronRight className="h-4 w-4 text-gray-500" />
                         )}
                       </div>

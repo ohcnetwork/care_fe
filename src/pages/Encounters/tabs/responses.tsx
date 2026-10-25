@@ -1,3 +1,4 @@
+import { AuthorRoleFilter } from "@/components/Facility/ConsultationDetails/AuthorRoleFilter";
 import QuestionnaireResponsesList, {
   ResponseCard,
 } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
@@ -66,6 +67,8 @@ interface LeftPanelProps {
   responseId?: string;
   questionnaireTitle: string;
   questionnaireSlug?: string;
+  authorRoleId?: string;
+  onAuthorRoleChange: (roleId?: string) => void;
   handleQuestionnaireChange: (
     questionnaireSlug?: string,
     questionnaireTitle?: string,
@@ -80,6 +83,8 @@ function LeftPanel({
   responseId,
   questionnaireTitle,
   questionnaireSlug,
+  authorRoleId,
+  onAuthorRoleChange,
   handleQuestionnaireChange,
   onResponseClick,
 }: LeftPanelProps) {
@@ -129,12 +134,18 @@ function LeftPanel({
           }
         />
       </div>
+      <AuthorRoleFilter
+        value={authorRoleId}
+        onChange={onAuthorRoleChange}
+        disabled={!canAccess}
+      />
       <div className="flex-1 overflow-y-auto">
         <QuestionnaireResponsesList
           encounterId={encounterId}
           patientId={patientId}
           canAccess={canAccess}
           questionnaireSlug={questionnaireSlug}
+          authorRoleId={authorRoleId}
           renderItem={(response: QuestionnaireResponse) => (
             <LeftCard
               response={response}
@@ -165,9 +176,10 @@ export const EncounterResponsesTab = ({
     questionnaireSlug?: string;
     questionnaireTitle?: string;
     responseId?: string;
+    role?: string;
   }>();
 
-  const { questionnaireSlug, questionnaireTitle, responseId } = qParams;
+  const { questionnaireSlug, questionnaireTitle, responseId, role } = qParams;
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
@@ -194,6 +206,16 @@ export const EncounterResponsesTab = ({
     }
   };
 
+  const handleAuthorRoleChange = (roleId?: string) => {
+    const { responseId: _responseId, role: _role, ...rest } = qParams;
+    setQueryParams(roleId ? { ...rest, role: roleId } : rest);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.href.split("#")[0],
+    );
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-full">
       <div className="hidden md:flex md:w-1/5 flex flex-col gap-3 pt-1 md:h-full md:overflow-y-auto">
@@ -203,6 +225,8 @@ export const EncounterResponsesTab = ({
           canAccess={canAccess}
           responseId={responseId}
           questionnaireSlug={questionnaireSlug}
+          authorRoleId={role}
+          onAuthorRoleChange={handleAuthorRoleChange}
           questionnaireTitle={questionnaireTitle || ""}
           handleQuestionnaireChange={handleQuestionnaireChange}
           onResponseClick={handleResponseClick}
@@ -229,6 +253,8 @@ export const EncounterResponsesTab = ({
                     canAccess={canAccess}
                     responseId={responseId}
                     questionnaireSlug={questionnaireSlug}
+                    authorRoleId={role}
+                    onAuthorRoleChange={handleAuthorRoleChange}
                     questionnaireTitle={questionnaireTitle || ""}
                     handleQuestionnaireChange={handleQuestionnaireChange}
                     onResponseClick={handleResponseClick}
@@ -240,13 +266,17 @@ export const EncounterResponsesTab = ({
         </div>
       )}
       <div className="flex-1 h-full overflow-y-auto">
-        <ScrollArea key={questionnaireSlug} className="h-full">
+        <ScrollArea
+          key={`${questionnaireSlug ?? ""}:${role ?? ""}`}
+          className="h-full"
+        >
           <div className="space-y-4 p-3 overflow-anchor-auto">
             <QuestionnaireResponsesList
               encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
               questionnaireSlug={questionnaireSlug}
+              authorRoleId={role}
               renderItem={(response: QuestionnaireResponse) => {
                 return (
                   <div

@@ -59,6 +59,7 @@ interface Props {
   onlyUnstructured?: boolean;
   canAccess?: boolean;
   questionnaireSlug?: string;
+  authorRoleId?: string;
   /** Maximum total responses to show, newest first. Omit for infinite scrolling. */
   limit?: number;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
@@ -741,6 +742,7 @@ export default function QuestionnaireResponsesList({
   onlyUnstructured,
   canAccess = true,
   questionnaireSlug,
+  authorRoleId,
   limit,
   renderItem,
   subjectType = "encounter",
@@ -764,6 +766,7 @@ export default function QuestionnaireResponsesList({
       patientId,
       questionnaireSlug,
       encounterId,
+      authorRoleId,
       { onlyUnstructured, subjectType, isPrintPreview, limit },
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
@@ -778,6 +781,7 @@ export default function QuestionnaireResponsesList({
             offset: String(pageParam),
           }),
           encounter: encounterId,
+          role: authorRoleId,
           // The backend treats presence of this parameter as true.
           only_unstructured: onlyUnstructured ? true : undefined,
           subject_type: subjectType,
