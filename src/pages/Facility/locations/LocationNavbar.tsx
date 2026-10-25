@@ -32,6 +32,7 @@ export function LocationTreeNode({
   level = 0,
   facilityId,
 }: LocationTreeNodeProps) {
+  const { t } = useTranslation();
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = location.id === selectedLocationId;
   const Icon =
@@ -48,10 +49,10 @@ export function LocationTreeNode({
         limit: 100,
       },
     }),
-    enabled: true,
+    enabled: isExpanded && location.has_sub_locations,
   });
 
-  const hasChildren = children?.results && children.results.length > 0;
+  const hasChildren = location.has_sub_locations;
 
   return (
     <div className="space-y-1">
@@ -71,6 +72,7 @@ export function LocationTreeNode({
             variant="ghost"
             size="icon"
             className="size-6"
+            aria-label={`${t(isExpanded ? "collapse" : "expand")} ${location.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
@@ -90,29 +92,32 @@ export function LocationTreeNode({
           onClick={(e) => {
             e.stopPropagation();
             onSelect(location);
-            onToggleExpand(location.id);
+            if (hasChildren) onToggleExpand(location.id);
           }}
         >
           <Icon className="size-4 shrink-0" />
           <span className="truncate">{location.name}</span>
         </div>
       </div>
-      {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
-          {children.results.map((child) => (
-            <LocationTreeNode
-              key={child.id}
-              location={child}
-              selectedLocationId={selectedLocationId}
-              onSelect={onSelect}
-              expandedLocations={expandedLocations}
-              onToggleExpand={onToggleExpand}
-              level={level + 1}
-              facilityId={facilityId}
-            />
-          ))}
-        </div>
-      )}
+      {hasChildren &&
+        isExpanded &&
+        children?.results &&
+        children.results.length > 0 && (
+          <div className="pl-2">
+            {children.results.map((child) => (
+              <LocationTreeNode
+                key={child.id}
+                location={child}
+                selectedLocationId={selectedLocationId}
+                onSelect={onSelect}
+                expandedLocations={expandedLocations}
+                onToggleExpand={onToggleExpand}
+                level={level + 1}
+                facilityId={facilityId}
+              />
+            ))}
+          </div>
+        )}
     </div>
   );
 }

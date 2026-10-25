@@ -196,6 +196,16 @@ async function mockWorkspaceApi(
         });
         return;
       }
+      if (method === "GET" && pathname.startsWith("/api/v1/organization/")) {
+        const organization = roleOrganizations.find(
+          (item) => pathname === `/api/v1/organization/${item.id}/`,
+        );
+        await route.fulfill({
+          status: organization ? 200 : 404,
+          json: organization ?? { detail: "Organization not found" },
+        });
+        return;
+      }
       if (!pathname.startsWith("/api/v1/workspace/")) {
         await route.abort();
         return;
@@ -627,6 +637,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
                   questionnaire_slug: "daily-progress-note",
                   limit: 1,
                   only_unstructured: true,
+                  role: api.roleOrganizations[0].id,
                 },
               },
               {
@@ -741,6 +752,12 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await inspector
       .getByRole("checkbox", { name: "Form responses only", exact: true })
       .check();
+    await inspector
+      .getByRole("combobox", { name: "Author role", exact: true })
+      .click();
+    await page
+      .getByRole("option", { name: api.roleOrganizations[0].name, exact: true })
+      .click();
     const responseLimit = inspector.getByRole("spinbutton", {
       name: "Latest results",
       exact: true,
@@ -968,6 +985,9 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
         exact: true,
       }),
     ).toBeChecked();
+    await expect(
+      inspector.getByRole("combobox", { name: "Author role", exact: true }),
+    ).toHaveText(api.roleOrganizations[0].name);
     await page.screenshot({
       path: testInfo.outputPath("workspace-visual-desktop.png"),
       fullPage: true,

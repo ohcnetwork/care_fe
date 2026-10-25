@@ -15,6 +15,7 @@ export const responsesConfigSchema = z.strictObject({
     .meta({ pattern: "\\S" })
     .optional(),
   only_unstructured: z.boolean().optional(),
+  role: z.uuid().optional(),
   limit: widgetLimitSchema,
 });
 
@@ -63,6 +64,11 @@ function responsesSchema(t: TFunction): JSONSchema2020 {
         ...properties.only_unstructured,
         title: t("workspace_widget_unstructured"),
         description: t("workspace_widget_unstructured_hint"),
+      },
+      role: {
+        ...properties.role,
+        title: t("author_role"),
+        description: t("author_role_filter_hint"),
       },
       limit: limitProperty(properties.limit, t),
     },

@@ -205,7 +205,7 @@ export function LocationSelectorDialog({
   });
 
   const handleSelect = (location: LocationRead) => {
-    if (location.has_children) {
+    if (location.has_sub_locations) {
       setLocationLevel(buildLocationPath(location));
     } else {
       handleConfirmSelection(location);
@@ -261,7 +261,7 @@ export function LocationSelectorDialog({
               className="flex flex-row gap-1 items-center truncate max-w-xs"
               key={loc.id}
             >
-              {loc.has_children ? (
+              {loc.has_sub_locations ? (
                 <Button
                   variant="link"
                   className="p-0 text-nowrap h-5 justify-start overflow-hidden"
@@ -305,7 +305,7 @@ export function LocationSelectorDialog({
                   key={level.id}
                   className="flex flex-row gap-1 items-center"
                 >
-                  {level.has_children ? (
+                  {level.has_sub_locations ? (
                     <Button
                       variant="link"
                       className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
@@ -426,7 +426,7 @@ function LocationCommandItem({
       key={location.id}
       value={location.id}
       onSelect={() =>
-        location.has_children
+        location.has_sub_locations
           ? handleSelect(location)
           : handleConfirmSelection(location)
       }
@@ -441,7 +441,7 @@ function LocationCommandItem({
       <div>
         <Button variant="white" size="xs" className="p-2 mr-4 w-full shadow">
           <CareIcon icon="l-corner-down-left" />
-          {location.has_children ? t("view_sub_locations") : t("select")}
+          {location.has_sub_locations ? t("view_sub_locations") : t("select")}
         </Button>
       </div>
     </CommandItem>

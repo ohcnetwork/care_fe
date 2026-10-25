@@ -43,6 +43,7 @@ function BaseLocationTreeNode({
   getPaddingLeft,
   className,
 }: BaseLocationTreeNodeProps) {
+  const { t } = useTranslation();
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocations.some((loc) => loc.id === location.id);
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -58,7 +59,7 @@ function BaseLocationTreeNode({
         limit: 100,
       },
     }),
-    enabled: isExpanded,
+    enabled: isExpanded && location.has_sub_locations,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -69,7 +70,7 @@ function BaseLocationTreeNode({
     }
   }, [children?.results, addLocationsToMap]);
 
-  const hasChildren = location.has_children;
+  const hasChildren = location.has_sub_locations;
   const hasChildrenResults = children?.results && children.results.length > 0;
   const shouldShowExpand =
     hasChildren && (isExpanded ? hasChildrenResults : true);
@@ -102,6 +103,7 @@ function BaseLocationTreeNode({
             variant="ghost"
             size="icon"
             className="size-6 hover:bg-gray-100"
+            aria-label={`${t(isExpanded ? "collapse" : "expand")} ${location.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onToggleExpand(location.id);
@@ -124,6 +126,7 @@ function BaseLocationTreeNode({
             variant="ghost"
             size="icon"
             className="ml-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-white hover:border-gray-300"
+            aria-label={`${t("select")} ${location.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(location.id);
@@ -134,39 +137,42 @@ function BaseLocationTreeNode({
         )}
       </div>
 
-      {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2">
-          {children.results.map((child) => (
-            <BaseLocationTreeNode
-              key={child.id}
-              location={child}
-              selectedLocations={selectedLocations}
-              onSelect={onSelect}
-              expandedLocations={expandedLocations}
-              onToggleExpand={onToggleExpand}
-              level={level + 1}
-              facilityId={facilityId}
-              addLocationsToMap={addLocationsToMap}
-              renderLocationInfo={(childLocation) => {
-                const ChildIcon =
-                  LocationTypeIcons[
-                    childLocation.form as keyof typeof LocationTypeIcons
-                  ];
-                return (
-                  <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
-                    <ChildIcon className="size-4 shrink-0 text-gray-600" />
-                    <span className="truncate font-medium text-gray-900">
-                      {childLocation.name}
-                    </span>
-                  </div>
-                );
-              }}
-              getPaddingLeft={getPaddingLeft}
-              className={className}
-            />
-          ))}
-        </div>
-      )}
+      {hasChildren &&
+        isExpanded &&
+        children?.results &&
+        children.results.length > 0 && (
+          <div className="pl-2">
+            {children.results.map((child) => (
+              <BaseLocationTreeNode
+                key={child.id}
+                location={child}
+                selectedLocations={selectedLocations}
+                onSelect={onSelect}
+                expandedLocations={expandedLocations}
+                onToggleExpand={onToggleExpand}
+                level={level + 1}
+                facilityId={facilityId}
+                addLocationsToMap={addLocationsToMap}
+                renderLocationInfo={(childLocation) => {
+                  const ChildIcon =
+                    LocationTypeIcons[
+                      childLocation.form as keyof typeof LocationTypeIcons
+                    ];
+                  return (
+                    <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
+                      <ChildIcon className="size-4 shrink-0 text-gray-600" />
+                      <span className="truncate font-medium text-gray-900">
+                        {childLocation.name}
+                      </span>
+                    </div>
+                  );
+                }}
+                getPaddingLeft={getPaddingLeft}
+                className={className}
+              />
+            ))}
+          </div>
+        )}
     </div>
   );
 }
@@ -285,10 +291,10 @@ interface LocationValue {
   name: string;
 }
 
-interface LocationMultiSelectProps {
+interface LocationMultiSelectProps<T extends LocationValue> {
   facilityId: string;
-  value: LocationValue[];
-  onChange: (value: LocationValue[]) => void;
+  value: T[];
+  onChange: (value: (T | LocationRead)[]) => void;
 }
 
 function SelectedLocationPill({
@@ -333,11 +339,11 @@ function LoadingSkeleton() {
   );
 }
 
-export default function LocationMultiSelect({
+export default function LocationMultiSelect<T extends LocationValue>({
   facilityId,
   value,
   onChange,
-}: LocationMultiSelectProps) {
+}: LocationMultiSelectProps<T>) {
   const { t } = useTranslation();
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
     new Set(),
@@ -456,7 +462,7 @@ export default function LocationMultiSelect({
 
     const newValue = value.some((v) => v.id === locationId)
       ? value.filter((v) => v.id !== locationId)
-      : [...value, { id: location.id, name: location.name }];
+      : [...value, location];
     onChange(newValue);
   };
 
