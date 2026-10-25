@@ -36,8 +36,6 @@ test("selecting the same activity slug in another facility waits for that facili
   const require = createRequire(import.meta.url);
   const previousModules = new Map<string, NodeJS.Module | undefined>();
   const user = { id: "clinician", username: "clinician" };
-  // Keep the real widget, query cache, API client and selection effect. The
-  // picker and unrelated dialogs are UI boundaries outside this regression.
   const modules: [string, unknown][] = [
     [
       "@careConfig",
@@ -150,8 +148,7 @@ test("selecting the same activity slug in another facility waits for that facili
   };
   const settleUntil = async (ready: () => boolean) => {
     for (let attempt = 0; attempt < 100 && !ready(); attempt++) {
-      // TanStack delivers observer notifications on its scheduler, after the
-      // deferred fetch resolves. Flush those updates through React's act.
+      // Flush TanStack observer notifications through act.
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 1));
       });

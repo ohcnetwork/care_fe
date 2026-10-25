@@ -424,7 +424,7 @@ test.describe("Shared workspace navigation", () => {
       name: "location",
       endpoint: "location",
       route: "locations",
-      page: "beds",
+      page: "overview",
       query: "mode=kind&mine=true&limit=1&ordering=sort_index",
     },
   ]) {
@@ -549,6 +549,7 @@ test.describe("Shared workspace navigation", () => {
       ).toHaveText(["Configuration", "Administration"]);
       for (const [name, path] of [
         ["Questionnaires", "questionnaires"],
+        ["Actions", "actions"],
         ["Valuesets", "valuesets"],
         ["Patient Identifier Config", "patient_identifier_config"],
         ["Tag Config", "tag_config"],

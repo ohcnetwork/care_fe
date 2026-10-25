@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
+import Module, { createRequire } from "node:module";
 import { test } from "node:test";
 
+import { createInstance } from "i18next";
 import { JSDOM } from "jsdom";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
+import { I18nextProvider } from "react-i18next";
 
+import { QuestionnaireFormProvider } from "@/components/QuestionnaireV2/form/FormContext";
 import type { Question } from "@/types/questionnaire/question";
 
 import { RegisteredGroupAnswerView } from "./RegisteredGroupAnswerView";
@@ -15,7 +19,7 @@ import {
   type RegisteredGroupDefinition,
 } from "./registry";
 
-test("registered groups preserve fallback, nullable fields, and recovery after a renderer fails", async (context) => {
+test("registered groups preserve fallback, renderer recovery and surviving row buffers", async (context) => {
   const dom = new JSDOM("<!doctype html><div id='root'></div>");
   const globals = {
     window: dom.window,
@@ -63,6 +67,8 @@ test("registered groups preserve fallback, nullable fields, and recovery after a
     });
   };
   const logged = context.mock.method(console, "error", () => {});
+  const require = createRequire(import.meta.url);
+  const previousModules = new Map<string, NodeJS.Module | undefined>();
   try {
     await act(async () => {
       root.render(
@@ -142,10 +148,133 @@ test("registered groups preserve fallback, nullable fields, and recovery after a
       ["First", "Second"],
     );
     assert.equal(received.at(-1)?.disabled, true);
+
+    // Only replace fallback UI. The registered slot, provider, bindings, row
+    // operations and plugin component remain real throughout this regression.
+    for (const [path, name] of [
+      ["@/components/QuestionnaireV2/form/QuestionBlock", "QuestionBlock"],
+      ["@/components/QuestionnaireV2/form/RepeatingGroup", "RepeatingGroup"],
+      ["@/components/QuestionnaireV2/form/SectionCard", "SectionCard"],
+    ]) {
+      const modulePath = require.resolve(path);
+      previousModules.set(modulePath, require.cache[modulePath]);
+      const module = new Module(modulePath);
+      module.exports = { [name]: () => null };
+      module.loaded = true;
+      require.cache[modulePath] = module;
+    }
+    const { RegisteredGroupSlot } = await import("./RegisteredGroupSlot");
+    function BufferedRows(props: GroupInputProps) {
+      received.push(props);
+      return createElement(
+        "div",
+        null,
+        props.rows.map((row) =>
+          createElement(
+            "div",
+            { key: row.key },
+            createElement("input", {
+              defaultValue: String(
+                row.fields.child?.response.values[0]?.value ?? "",
+              ),
+            }),
+            createElement("button", { onClick: row.remove }, "Remove row"),
+            createElement(
+              "button",
+              {
+                onClick: () => row.onChange({ child: { note: "Saved note" } }),
+              },
+              "Update row",
+            ),
+          ),
+        ),
+        createElement("button", { onClick: () => props.addRow() }, "Add row"),
+      );
+    }
+    await register({ ...definition, repeats: true, component: BufferedRows });
+    const i18n = createInstance();
+    await i18n.init({ lng: "en", resources: {}, initAsync: false });
+    await act(async () => {
+      root.render(
+        createElement(
+          I18nextProvider,
+          { i18n },
+          createElement(QuestionnaireFormProvider, {
+            questionnaire: {
+              id: "form",
+              slug: "form",
+              title: "Form",
+              status: "active",
+              subject_type: "encounter",
+              questions: [saved],
+            },
+            mode: "fill",
+            initialResponses: {
+              group: {
+                question_id: "group",
+                link_id: "group",
+                structured_type: "view_test.group",
+                values: [],
+                sub_results: ["First", "Second", "Third"].map((value) => [
+                  {
+                    question_id: "child-id",
+                    link_id: "group__child",
+                    structured_type: null,
+                    values: [{ type: "string" as const, value }],
+                  },
+                ]),
+              },
+            },
+            children: createElement(RegisteredGroupSlot, {
+              question: saved,
+              depth: 0,
+              disabled: false,
+            }),
+          }),
+        ),
+      );
+    });
+    const click = async (label: string, index = 0) => {
+      const button = [...container.querySelectorAll("button")].filter(
+        (button) => button.textContent === label,
+      )[index];
+      assert.ok(button, `Missing button: ${label}`);
+      await act(async () => button.click());
+    };
+    const [first, second, third] = container.querySelectorAll("input");
+    const initialKeys = received.at(-1)!.rows.map((row) => row.key);
+    assert.equal(new Set(initialKeys).size, 3);
+    third.value = "Pending third edit";
+    await click("Update row", 2);
+    assert.deepEqual(
+      received.at(-1)!.rows.map((row) => row.key),
+      initialKeys,
+    );
+    assert.equal(container.querySelectorAll("input")[2], third);
+    await click("Remove row", 1);
+    assert.equal(second.isConnected, false);
+    assert.equal(container.querySelectorAll("input")[0], first);
+    assert.equal(container.querySelectorAll("input")[1], third);
+    assert.equal(third.value, "Pending third edit");
+    await click("Add row");
+    const appended = container.querySelectorAll("input")[2];
+    const newKey = received.at(-1)!.rows[2].key;
+    assert.equal(initialKeys.includes(newKey), false);
+    const [firstRow, thirdRow] = received.at(-1)!.rows;
+    await act(async () => {
+      firstRow.remove();
+      thirdRow.remove();
+    });
+    assert.equal(container.querySelectorAll("input").length, 1);
+    assert.equal(container.querySelector("input"), appended);
   } finally {
     await act(async () => root.unmount());
     registrations.forEach((unregister) => unregister());
     dom.window.close();
+    for (const [path, module] of previousModules) {
+      if (module) require.cache[path] = module;
+      else delete require.cache[path];
+    }
     for (const [key, descriptor] of previous) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);
       else Reflect.deleteProperty(globalThis, key);

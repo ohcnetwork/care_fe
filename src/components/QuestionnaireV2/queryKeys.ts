@@ -70,6 +70,10 @@ export const formSubmissionKeys = {
   lists: () => [...formSubmissionKeys.all, "list"] as const,
   list: (encounterId: string) =>
     [...formSubmissionKeys.lists(), encounterId] as const,
+  /** Every open draft of one fill subject — what a `?continue_draft=` id
+   *  must be a member of before it resumes under that subject. */
+  subjectDrafts: (subjectKey: string) =>
+    [...formSubmissionKeys.lists(), "subject", subjectKey] as const,
   detail: (id: string | undefined) =>
     [...formSubmissionKeys.all, "detail", id] as const,
 };

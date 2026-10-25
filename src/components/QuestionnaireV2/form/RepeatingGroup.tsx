@@ -15,7 +15,6 @@ import {
 import { useFormRenderer } from "./FormContext";
 import { SectionCard } from "./SectionCard";
 
-/** Ordinary repeating groups own their rows in the same store as all inputs. */
 export function RepeatingGroup(props: {
   question: Question;
   depth: number;

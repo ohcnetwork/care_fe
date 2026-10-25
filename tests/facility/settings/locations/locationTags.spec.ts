@@ -11,7 +11,7 @@ test.describe("Facility Location Tags", () => {
     facilityId = getFacilityId();
   });
 
-  test("Create a location tag and assign it to a location", async ({
+  test("A tagged location keeps tag controls in settings and fills forms from its workspace", async ({
     page,
   }) => {
     const tagName = `Loc Tag ${Date.now()}`;
@@ -61,6 +61,50 @@ test.describe("Facility Location Tags", () => {
       await expect(
         page.getByRole("cell", { name: tagName }).first(),
       ).toBeVisible();
+    });
+
+    await test.step("Location settings retains tag controls without a questionnaire action", async () => {
+      await page.getByRole("cell", { name: locationName, exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: locationName, exact: true }),
+      ).toBeVisible();
+      await expect(page.getByText(tagName, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Manage Tags", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Fill questionnaire", exact: true }),
+      ).toHaveCount(0);
+    });
+
+    await test.step("Open a form from the location workspace and return to its settings", async () => {
+      const settingsUrl = page.url();
+      const locationId = new URL(settingsUrl).pathname.split("/").at(-1);
+      const locationPath = `/facility/${facilityId}/locations/${locationId}`;
+      await page.goto(`${locationPath}/overview`);
+      await page
+        .locator('[data-cy="location-overview-page"]')
+        .getByRole("button", { name: /Submit forms/ })
+        .click();
+      const picker = page.getByRole("dialog", { name: "Forms", exact: true });
+      await picker.getByPlaceholder("Search Forms").fill("E2E Location");
+      await picker
+        .getByRole("option", {
+          name: "E2E Location Questionnaire",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByRole("region", { name: "Form canvas" }),
+      ).toBeVisible();
+      await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
+      await expect(
+        page.getByRole("tab", { name: "Patient Clinical History" }),
+      ).toHaveCount(0);
+      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(page).toHaveURL(`${locationPath}/responses`);
+      await page.goto(settingsUrl);
+      await expect(page.getByText(tagName, { exact: true })).toBeVisible();
     });
   });
 });

@@ -5,18 +5,26 @@ import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/Q
 import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 import { ValueSetList } from "@/components/ValueSet/ValueSetList";
+import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
+import { WorkspaceList } from "@/components/Workspace/WorkspaceList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
 import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
+import { ActionConfigurationForm } from "@/pages/Admin/actions/ActionConfigurationForm";
+import { ActionConfigurationList } from "@/pages/Admin/actions/ActionConfigurationList";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
+import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
+import ImmunizationPolicyList from "@/pages/ImmunizationPolicies/ImmunizationPolicyList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
+import { INSTANCE_WORKSPACE_SCOPE } from "@/types/workspace/workspace";
 
 const INSTANCE_SCOPE = {
   authContext: "instance",
@@ -24,6 +32,15 @@ const INSTANCE_SCOPE = {
 } as const;
 
 const AdminRoutes: AppRoutes = {
+  "/admin/immunization-policies": () => (
+    <ImmunizationPolicyList scope={immunizationPolicyScope()} />
+  ),
+  "/admin/immunization-policies/new": () => (
+    <ImmunizationPolicyForm scope={immunizationPolicyScope()} />
+  ),
+  "/admin/immunization-policies/:id": ({ id }) => (
+    <ImmunizationPolicyForm scope={immunizationPolicyScope()} id={id} />
+  ),
   "/admin/questionnaires": () => (
     <QuestionnaireListPage scope={INSTANCE_SCOPE} />
   ),
@@ -48,12 +65,23 @@ const AdminRoutes: AppRoutes = {
   "/admin/questionnaires/:id": ({ id }) => (
     <QuestionnaireDetailPage scope={INSTANCE_SCOPE} id={id} />
   ),
+  "/admin/actions": () => <ActionConfigurationList />,
+  // Before "/admin/actions/:id" — raviger matches in object order.
+  "/admin/actions/new": () => <ActionConfigurationForm />,
+  "/admin/actions/:id": ({ id }) => <ActionConfigurationForm id={id} />,
   "/admin/valuesets": () => <ValueSetList scope={INSTANCE_VALUESET_SCOPE} />,
   "/admin/valuesets/create": () => (
     <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} />
   ),
   "/admin/valuesets/:id/edit": ({ id }) => (
     <ValueSetEditor scope={INSTANCE_VALUESET_SCOPE} id={id} />
+  ),
+  "/admin/workspaces": () => <WorkspaceList scope={INSTANCE_WORKSPACE_SCOPE} />,
+  "/admin/workspaces/create": () => (
+    <WorkspaceEditor scope={INSTANCE_WORKSPACE_SCOPE} />
+  ),
+  "/admin/workspaces/:id/edit": ({ id }) => (
+    <WorkspaceEditor scope={INSTANCE_WORKSPACE_SCOPE} id={id} />
   ),
   "/admin/patient_identifier_config": () => <PatientIdentifierConfigList />,
   "/admin/patient_identifier_config/new": () => <PatientIdentifierConfigForm />,

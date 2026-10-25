@@ -7,6 +7,7 @@ import {
   FileText,
   HeartPulse,
   IdCard,
+  LayoutDashboard,
   ListChecks,
   LucideIcon,
   MapPin,
@@ -15,6 +16,7 @@ import {
   Package,
   Receipt,
   Stethoscope,
+  Syringe,
   Tags,
   TestTubeDiagonal,
   Ticket,
@@ -35,6 +37,7 @@ interface SettingsPermissions {
   canListTokenCategories: boolean;
   canReadPatientIdentifierConfig: boolean;
   canListTemplate: boolean;
+  canReadImmunizationPolicy: boolean;
 }
 
 interface SettingsPage {
@@ -78,6 +81,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     label: "clinical",
     pages: [
       {
+        path: "settings/immunization-policies",
+        title: "immunization_policies",
+        icon: Syringe,
+        permission: "canReadImmunizationPolicy",
+      },
+      {
         path: "settings/healthcare_services",
         title: "healthcare_services",
         icon: Stethoscope,
@@ -114,6 +123,11 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         icon: FileText,
         permission: "canListTemplate",
       },
+      {
+        path: "settings/responses",
+        title: "responses",
+        icon: ClipboardList,
+      },
     ],
   },
   {
@@ -135,6 +149,16 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
         path: "settings/charge_item_definitions",
         title: "charge_item_definitions",
         icon: Receipt,
+      },
+    ],
+  },
+  {
+    label: "Advanced",
+    pages: [
+      {
+        path: "settings/workspaces",
+        title: "workspaces",
+        icon: LayoutDashboard,
       },
     ],
   },

@@ -164,6 +164,7 @@ describe("questionnaire definition import", () => {
       ["score"],
       [{}],
       [{ question: 123 }],
+      [{ question: "score", answer: 5 }],
     ]) {
       assert.equal(
         parseQuestionnaireImport({
@@ -186,6 +187,82 @@ describe("questionnaire definition import", () => {
         }),
       );
     }
+  });
+
+  it("rejects malformed answer options and descriptions", () => {
+    for (const answer_option of [
+      "Yes,No",
+      [{}],
+      [null],
+      [{ value: null }],
+      [{ value: Number.NaN }],
+      [{ value: Number.POSITIVE_INFINITY }],
+      [{ value: "yes", initial_selected: "false" }],
+      [{ value: "yes", initial_selected: 1 }],
+      [{ value: "yes", initial_selected: null }],
+    ]) {
+      assert.equal(
+        parseQuestionnaireImport({
+          ...exported,
+          questions: [{ ...exported.questions[0], answer_option }],
+        }),
+        null,
+      );
+    }
+    for (const answer_option of [
+      undefined,
+      null,
+      [],
+      [{ value: "yes", display: "Yes", initial_selected: false }, { value: 1 }],
+    ]) {
+      assert.ok(
+        parseQuestionnaireImport({
+          ...exported,
+          questions: [{ ...exported.questions[0], answer_option }],
+        }),
+      );
+    }
+    assert.equal(
+      parseQuestionnaireImport({
+        ...exported,
+        questions: [{ ...exported.questions[0], description: ["Help"] }],
+      }),
+      null,
+    );
+  });
+
+  it("normalizes numeric choice values at every depth before they reach the renderer or save payload", () => {
+    const options = [
+      { value: 0, initial_selected: true },
+      { value: 1.5, initial_selected: false },
+      { value: "2" },
+    ];
+    const imported = {
+      ...exported,
+      questions: [
+        {
+          text: "Group",
+          type: "group",
+          questions: [
+            { text: "Score", type: "choice", answer_option: options },
+          ],
+        },
+        { text: "Score", type: "choice", answer_option: options },
+      ],
+    };
+    const parsed = parseQuestionnaireImport(imported);
+    assert.ok(parsed);
+    const normalized = [
+      { value: "0", initial_selected: true },
+      { value: "1.5", initial_selected: false },
+      { value: "2" },
+    ];
+    assert.deepEqual(
+      parsed.questions[0].questions?.[0].answer_option,
+      normalized,
+    );
+    assert.deepEqual(parsed.questions[1].answer_option, normalized);
+    assert.equal(options[0].value, 0);
   });
 
   it("retains support for question-only files without treating them as full definitions", () => {

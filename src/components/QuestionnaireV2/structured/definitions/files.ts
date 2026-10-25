@@ -12,11 +12,10 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
   component: FilesInput,
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
-  // Raw `File` objects cannot round-trip through JSON — hard exclude.
   draftPolicy: "exclude",
   validate: (files, questionId) =>
     validateFileUploadQuestion(files, questionId),
-  buildRequests: async (files, { encounterId, questionId }) =>
+  buildRequests: async (files, { encounterId, questionId, path }) =>
     await Promise.all(
       files.map(async (file) => {
         const base64 = (await readFileAsDataURL(file.file_data)).split(",")[1];
@@ -28,7 +27,7 @@ export const filesDefinition: StructuredTypeDefinition<"files"> = {
             file_data: base64,
             encounter: encounterId,
           },
-          reference_id: structuredReferenceId("files", questionId),
+          reference_id: structuredReferenceId("files", questionId, path),
         };
       }),
     ),

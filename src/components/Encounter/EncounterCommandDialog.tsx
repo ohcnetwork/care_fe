@@ -24,7 +24,7 @@ import {
   RotateCcw,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
@@ -85,11 +85,15 @@ export function EncounterCommandDialog({
     }),
   });
 
-  useEffect(() => {
-    if (!open) {
-      setSearch("");
-    }
-  }, [open]);
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) {
+        setSearch("");
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange],
+  );
 
   const getShortcutDisplay = useShortcutDisplay();
 
@@ -159,6 +163,7 @@ export function EncounterCommandDialog({
         plots: () => navigate(buildEncounterUrl("/plots")),
         observations: () => navigate(buildEncounterUrl("/observations")),
         medicines: () => navigate(buildEncounterUrl("/medicines")),
+        immunizations: () => navigate(buildEncounterUrl("/immunizations")),
         responses: () => navigate(buildEncounterUrl("/responses")),
         files: () => navigate(buildEncounterUrl("/files")),
         notes: () => navigate(buildEncounterUrl("/notes")),
@@ -182,8 +187,8 @@ export function EncounterCommandDialog({
 
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
-        const slug = actionId.replace("questionnaire-", "");
-        navigate(buildEncounterUrl(`/questionnaire/${slug}`));
+        const questionnaireId = actionId.replace("questionnaire-", "");
+        navigate(buildEncounterUrl(`/questionnaire/${questionnaireId}`));
       }
     },
     [navigate, buildEncounterUrl, actions, encounter],
@@ -357,6 +362,12 @@ export function EncounterCommandDialog({
           icon: <ArrowBigRight />,
         },
         {
+          id: "immunizations",
+          label: t("immunizations"),
+          shortcut: getShortcutDisplay("immunizations"),
+          icon: <ArrowBigRight />,
+        },
+        {
           id: "responses",
           label: t("responses"),
           shortcut: getShortcutDisplay("responses"),
@@ -420,12 +431,10 @@ export function EncounterCommandDialog({
   }, [
     t,
     questionnaires,
-    search,
     getShortcutDisplay,
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
-    encounter.encounter_class,
-    encounter.status,
+    encounter,
   ]);
 
   const findRecentActions = useCallback(
@@ -459,9 +468,9 @@ export function EncounterCommandDialog({
     (actionId: string) => {
       addRecentAction(actionId);
       handleAction(actionId);
-      onOpenChange(false);
+      handleOpenChange(false);
     },
-    [handleAction, onOpenChange, addRecentAction],
+    [handleAction, handleOpenChange, addRecentAction],
   );
 
   const careApps = useCareApps();
@@ -471,7 +480,7 @@ export function EncounterCommandDialog({
       {trigger}
       <CommandDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={handleOpenChange}
         className="md:max-w-2xl"
       >
         <div className="border-b border-gray-100 shadow-xs">

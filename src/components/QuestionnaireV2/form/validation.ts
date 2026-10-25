@@ -5,7 +5,9 @@ import { responseMap } from "@/components/QuestionnaireV2/form/engine/responseSc
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
+  renderFailedKey,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { getQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { groupsNeedingSchemaUpdate } from "@/components/QuestionnaireV2/groups/schema";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 
@@ -21,25 +23,23 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 /** Where the questionnaire is being filled — what decides whether a
  *  structured question's slot can show an input at all. */
-export interface RequiredCheckContext {
+export interface QuestionValidationContext {
   questionnaire: QuestionnaireRead;
   subject: RendererSubject;
-  /** Question ids whose structured slot threw and is now showing the error
-   *  boundary's notice (`structuredRenderFailedAtom`). */
+  /** `structuredRenderFailedAtom`: slots showing the error boundary's notice. */
   renderFailed: ReadonlySet<string>;
 }
 
-/**
- * Whether this structured question can accept an answer on this mount.
- * Broken slots are handled by structured-specific validation so the generic
- * required check does not stack a second, vaguer required error.
- */
+/** A slot showing a notice instead of an input cannot be answered; the
+ *  structured validator reports those by name, so the generic required
+ *  check stays out of the way. */
 function structuredQuestionIsAnswerable(
   structuredType: string,
   questionId: string,
-  context: RequiredCheckContext,
+  path: ResponsePath,
+  context: QuestionValidationContext,
 ): boolean {
-  if (context.renderFailed.has(questionId)) return false;
+  if (context.renderFailed.has(renderFailedKey(questionId, path))) return false;
   const state = resolveStructuredSlotState(
     structuredType,
     context.questionnaire.subject_type,
@@ -58,11 +58,11 @@ function structuredQuestionIsAnswerable(
  * required-invalid; a response counts as answered when any of its entries
  * does, by the same `entryIsAnswered` rule the submit serializer filters on.
  */
-export function collectRequiredErrors(
+export function collectQuestionErrors(
   questions: Question[],
   responses: Record<string, QuestionnaireResponse>,
   t: TFunction,
-  context: RequiredCheckContext,
+  context: QuestionValidationContext,
 ): QuestionValidationError[] {
   const linkIndex = buildLinkIndex(questions);
 
@@ -73,7 +73,7 @@ export function collectRequiredErrors(
     path: ResponsePath,
   ) => {
     for (const question of list) {
-      if (!isQuestionEnabledInState(question, scope, linkIndex)) continue;
+      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
       if (question.type === "group") {
         if (
           groupsNeedingSchemaUpdate(
@@ -88,6 +88,23 @@ export function collectRequiredErrors(
           });
           continue;
         }
+        const definition = question.structured_type
+          ? getQuestionGroup(question.structured_type)
+          : undefined;
+        if (
+          definition?.validate &&
+          definition.subjects.includes(context.questionnaire.subject_type)
+        ) {
+          try {
+            errors.push(...definition.validate(question, scope, path));
+          } catch {
+            errors.push({
+              question_id: question.id,
+              response_path: path,
+              error: t("registered_group_validation_failed"),
+            });
+          }
+        }
         if (question.repeats) {
           const rows = scope[question.id]?.sub_results ?? [];
           if (question.required && !rows.length)
@@ -97,7 +114,7 @@ export function collectRequiredErrors(
               error: t("field_required"),
             });
           rows.forEach((row, rowIndex) =>
-            walk(question.questions ?? [], { ...scope, ...responseMap(row) }, [
+            walk(question.questions ?? [], responseMap(row), [
               ...path,
               { questionId: question.id, rowIndex },
             ]),
@@ -108,18 +125,12 @@ export function collectRequiredErrors(
         continue;
       }
       if (question.type === "display" || !question.required) continue;
-      // A structured question whose slot is showing a notice instead of an
-      // input is NOT waived here — it still blocks the submit — but the
-      // specific, named error for it is `collectStructuredErrors`' job
-      // (same resolver, every non-ready state, see its docstring). Staying
-      // out of the way here is what keeps a broken required question from
-      // ALSO surfacing a generic "this field is required" alongside the
-      // real message.
       if (
         question.structured_type &&
         !structuredQuestionIsAnswerable(
           question.structured_type,
           question.id,
+          path,
           context,
         )
       ) {
