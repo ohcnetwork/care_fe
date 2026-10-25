@@ -94,6 +94,32 @@ test.describe("Fill page server draft", () => {
       const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}${operation === "update" ? `?continue_draft=${draftId}` : ""}`;
       const saveMethod = operation === "create" ? "POST" : "PUT";
       const saveUrl = `**/api/v1/form_submission/${operation === "update" ? `${draftId}/` : ""}`;
+      const draft = {
+        id: draftId,
+        status: "draft",
+        response_dump: {
+          questionnaireResponses: {
+            questionnaire: { id: questionnaireId },
+            responses: [],
+          },
+        },
+      };
+
+      if (operation === "update") {
+        await page.route(/\/api\/v1\/form_submission\/\?/, (route) => {
+          const request = route.request();
+          const params = new URL(request.url()).searchParams;
+          if (
+            request.method() !== "GET" ||
+            params.get("encounter") !== getEncounterId() ||
+            params.get("status") !== "draft"
+          ) {
+            return route.fallback();
+          }
+          // Resuming also verifies membership in this encounter's drafts.
+          return route.fulfill({ json: { count: 1, results: [draft] } });
+        });
+      }
 
       let releaseRequest: (() => void) | undefined;
       const pendingResponse = new Promise<void>((resolve) => {
@@ -109,18 +135,7 @@ test.describe("Fill page server draft", () => {
       }[] = [];
       await page.route(saveUrl, async (route) => {
         if (operation === "update" && route.request().method() === "GET") {
-          return route.fulfill({
-            json: {
-              id: draftId,
-              status: "draft",
-              response_dump: {
-                questionnaireResponses: {
-                  questionnaire: { id: questionnaireId },
-                  responses: [],
-                },
-              },
-            },
-          });
+          return route.fulfill({ json: draft });
         }
         if (route.request().method() !== saveMethod) return route.fallback();
         savedBodies.push(route.request().postDataJSON());
