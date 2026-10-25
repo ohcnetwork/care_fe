@@ -30,7 +30,7 @@ env:
   TEST_SHARDS: 3
   # CARE 3.1 requires the companion APIs from care#3809 on ccn_final.
   # Pin the validated revision; restore develop when 3.1 lands there.
-  CARE_BACKEND_REF: bef204c3e827f0aff0d2d4c101456cb1f4058f01
+  CARE_BACKEND_REF: 091f562494e9c3fec682510c95b7bc8a49f26f17
 
 jobs:
   # Detect if test-related files changed
