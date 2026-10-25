@@ -4,6 +4,7 @@ import {
   Building2,
   ClipboardList,
   IdCard,
+  LayoutDashboard,
   ListOrdered,
   Settings2,
   ShieldCheck,
@@ -87,6 +88,11 @@ function generateAdminLinks(
           url: `${baseUrl}/organizations/role`,
         },
       ],
+    },
+    {
+      name: t("workspaces"),
+      url: `${baseUrl}/workspaces`,
+      icon: <LayoutDashboard />,
     },
     {
       name: t("admin_nav_apps"),

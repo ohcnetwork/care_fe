@@ -177,7 +177,11 @@ export const DiagnosisTable = ({
     <>
       {/* Mobile: Card layout */}
       <div
-        className={cn("block sm:hidden", compact ? "space-y-2" : "space-y-3")}
+        className={
+          compact
+            ? "block space-y-2 @3xl/clinical-widget:hidden"
+            : "block space-y-3 sm:hidden"
+        }
       >
         {diagnoses.map((diagnosis) => (
           <DiagnosisCard
@@ -198,7 +202,12 @@ export const DiagnosisTable = ({
         ))}
       </div>
       {/* Desktop: Table layout */}
-      <div className="overflow-x-auto hidden sm:block">
+      <div
+        className={cn(
+          "overflow-x-auto hidden",
+          compact ? "@3xl/clinical-widget:block" : "sm:block",
+        )}
+      >
         <div className={cn("min-w-xl", !compact && "pb-2")}>
           <div
             className={cn(

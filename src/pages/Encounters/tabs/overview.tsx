@@ -1,5 +1,3 @@
-import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
 import { ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -7,21 +5,11 @@ import { PLUGIN_Component } from "@/PluginEngine";
 
 import { EmptyState } from "@/components/ui/empty-state";
 
-import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { AllergyList } from "@/components/Patient/allergy/list";
-import { DiagnosisList } from "@/components/Patient/diagnosis/list";
-import { SymptomsList } from "@/components/Patient/symptoms/list";
-import { VitalsList } from "@/components/Patient/vitals/list";
-import { ObservationPlotConfig } from "@/types/emr/observation/observation";
-
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
-import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
-import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
-import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterWidget } from "@/pages/Encounters/widgets/EncounterWidget";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
@@ -29,19 +17,8 @@ export const EncounterOverviewTab = () => {
     selectedEncounter: encounter,
     patientId,
     selectedEncounterId: encounterId,
-    canReadSelectedEncounter: canAccess,
-    canWriteSelectedEncounter: canWrite,
     canReadClinicalData,
   } = useEncounter();
-
-  const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
-    queryKey: ["plots-config"],
-    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
-    enabled: canReadClinicalData,
-  });
-
-  const vitalGroups =
-    plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
 
   return (
     <div className="flex items-start gap-3 @max-md:w-full">
@@ -54,8 +31,8 @@ export const EncounterOverviewTab = () => {
         </div>
         {canReadClinicalData ? (
           <div className="flex flex-col gap-3">
-            {canWrite && <QuickActions />}
-            {canWrite && <FavoriteFormsQuickActions />}
+            <EncounterWidget type="quick_actions" />
+            <EncounterWidget type="favorite_forms" />
             {encounter && (
               <PLUGIN_Component
                 __name="EncounterOverviewTop"
@@ -75,49 +52,13 @@ export const EncounterOverviewTab = () => {
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />
                 )}
-                {encounter &&
-                  !inactiveEncounterStatus.includes(encounter.status) && (
-                    <FormSubmissionDrafts
-                      facilityId={encounter.facility.id}
-                      patientId={patientId}
-                      encounterId={encounterId}
-                    />
-                  )}
+                <EncounterWidget type="draft_forms" />
                 {/* Clinical informations */}
-                <AllergyList
-                  presentation="panel"
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  encounterStatus={encounter?.status}
-                  showViewEncounter={false}
-                />
-                <SymptomsList
-                  presentation="panel"
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  showViewEncounter={false}
-                />
-                <DiagnosisList
-                  presentation="panel"
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  showViewEncounter={false}
-                />
-                <VitalsList
-                  presentation="panel"
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  codeGroups={vitalGroups}
-                />
-                <QuestionnaireResponsesList
-                  presentation="panel"
-                  encounterId={encounterId}
-                  patientId={patientId}
-                  canAccess={canAccess}
-                />
+                <EncounterWidget type="allergies" />
+                <EncounterWidget type="symptoms" />
+                <EncounterWidget type="diagnosis" />
+                <EncounterWidget type="vitals" />
+                <EncounterWidget type="questionnaire_responses" showEmpty />
               </div>
             }
           </div>

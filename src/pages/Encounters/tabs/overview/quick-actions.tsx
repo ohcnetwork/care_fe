@@ -21,14 +21,41 @@ import { AllergyIcon, MedicineIcon } from "@/CAREUI/icons/CustomIcons";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+
 import { FormDialog } from "./FormsDialog";
 
-export const QuickActions = (props: React.ComponentProps<"div">) => {
+interface QuickActionsProps extends React.ComponentProps<"div"> {
+  showEmpty?: boolean;
+  returnPage?: string;
+}
+
+export const QuickActions = ({
+  title,
+  showEmpty: _showEmpty,
+  returnPage,
+  ...props
+}: QuickActionsProps) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const { patientId, facilityId, selectedEncounterId } = useEncounter();
+  const formLink = (questionnaire: string) => {
+    const path = `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`;
+    return returnPage
+      ? `${path}?${new URLSearchParams({ return_page: returnPage })}`
+      : path;
+  };
 
   return (
-    <div {...props} className={cn("@container", props.className)}>
+    <div
+      {...props}
+      role="region"
+      aria-label={title ?? t("quick_actions")}
+      className={cn("@container", props.className)}
+    >
+      {title && (
+        <h2 className="mb-2 text-sm font-semibold text-gray-600">{title}</h2>
+      )}
       <Collapsible
         open={expanded}
         onOpenChange={setExpanded}
@@ -67,25 +94,26 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
             title={t("allergy")}
             aria-label={t("add_allergy", { count: 1 })}
             actionId="add-allergy"
-            href={`questionnaire/allergy_intolerance`}
+            href={formLink("allergy_intolerance")}
           />
           <QuickAction
             compact
             icon={<Microscope className="text-pink-600" strokeWidth={1.5} />}
             title={t("service_request")}
             actionId="add-service-request"
-            href={`questionnaire/service_request`}
+            href={formLink("service_request")}
           />
           <QuickAction
             compact
             icon={<MedicineIcon className="text-teal-700" />}
             title={t("medication")}
             aria-label={t("add_medication")}
-            href={`questionnaire/medication_request`}
+            href={formLink("medication_request")}
             actionId="add-medication-request"
           />
           <FormDialog
             subjectType="encounter"
+            returnPage={returnPage}
             trigger={
               <QuickAction
                 compact
@@ -105,7 +133,7 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
               }
               title={t("symptoms")}
               aria-label={t("add_symptom")}
-              href="questionnaire/symptom"
+              href={formLink("symptom")}
               actionId="add-symptoms"
             />
             <QuickAction
@@ -115,7 +143,7 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
               }
               title={t("diagnosis")}
               aria-label={t("add_diagnosis")}
-              href="questionnaire/diagnosis"
+              href={formLink("diagnosis")}
               actionId="add-diagnosis"
             />
           </CollapsibleContent>

@@ -4,6 +4,7 @@ import { t } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
@@ -22,6 +23,8 @@ interface VitalsListProps {
   patientId: string;
   encounterId: string;
   className?: string;
+  title?: string;
+  showEmpty?: boolean;
   codeGroups?: CodeGroup[];
   presentation?: "default" | "panel";
 }
@@ -88,15 +91,24 @@ export const VitalsList = ({
   codeGroups,
   className,
   presentation = "default",
+  title = t("vitals"),
+  showEmpty = false,
 }: VitalsListProps) => {
   // Extract only relevant vital codes from the code groups excluding FiO2
   const vitalCodes = codeGroups?.flatMap((group) => group.codes) ?? [];
   const filteredVitalCodes = vitalCodes.filter(
     (code) => code.display && code.code !== "3151-8",
   );
-  const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationListRead>
-  >({
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery<PaginatedResponse<ObservationListRead>>({
     queryKey: [
       "infinite-observations",
       patientId,
@@ -106,6 +118,7 @@ export const VitalsList = ({
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(observationApi.list, {
         pathParams: { patientId },
+        silent: true,
         queryParams: {
           encounter: encounterId,
           limit: String(LIMIT),
@@ -115,45 +128,55 @@ export const VitalsList = ({
       })({ signal });
       return response as PaginatedResponse<ObservationListRead>;
     },
+    enabled: filteredVitalCodes.length > 0,
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
+      const currentOffset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      return lastPage.results.length > 0 && currentOffset < lastPage.count
+        ? currentOffset
+        : undefined;
     },
   });
   const vitals = extractVitals(
     data?.pages.flatMap((page) => page.results) || [],
     filteredVitalCodes,
   );
-  if (isLoading) {
-    return (
+  if (!isLoading && !isError && !vitals.length && !showEmpty) return null;
+
+  return (
+    <section aria-label={title} className="min-w-0">
       <EncounterAccordionLayout
-        title={t("vitals")}
-        readOnly={true}
+        title={title}
+        readOnly
         className={className}
         presentation={presentation}
       >
-        <Skeleton className="h-[100px] w-full" />
+        {isError && (
+          <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+        )}
+        {isLoading ? (
+          <Skeleton className="h-[100px] w-full" />
+        ) : vitals.length ? (
+          <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
+        ) : !isError ? (
+          <p className="p-2 text-sm text-gray-500">{t("no_vitals_recorded")}</p>
+        ) : null}
+        {hasNextPage && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
+              {t("view_all")}
+            </Button>
+          </div>
+        )}
       </EncounterAccordionLayout>
-    );
-  }
-  if (!vitals || vitals.length === 0) return null;
-
-  return (
-    <EncounterAccordionLayout
-      title={t("vitals")}
-      readOnly={true}
-      className={className}
-      presentation={presentation}
-    >
-      <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
-      {hasNextPage && (
-        <div className="flex justify-center">
-          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
-            {t("view_all")}
-          </Button>
-        </div>
-      )}
-    </EncounterAccordionLayout>
+    </section>
   );
 };
