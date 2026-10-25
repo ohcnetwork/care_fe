@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
+  ResponsePath,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -20,15 +21,10 @@ import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 import type { FileUploadQuestion } from "@/types/files/file";
 import type { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
-/** Subject ids a structured type needs before it can render at all —
- *  `StructuredSlot` shows the "requires context" placeholder when the
- *  mount subject lacks one of these. */
+/** Subject ids a structured type needs before it can render. */
 export type StructuredContextKey = "patientId" | "encounterId" | "facilityId";
 
-/** What the UI edits per type — one entry of `values[0].value`'s array.
- *  (`time_of_death` stores plain strings.) The sole such map: the legacy
- *  one in `components/Questionnaire/structured/` went with the legacy fill
- *  stack that was its only consumer. */
+/** One entry of `values[0].value` per structured type. */
 export interface StructuredDataMap {
   allergy_intolerance: AllergyIntoleranceRequest;
   medication_request: MedicationRequestCreate;
@@ -54,43 +50,69 @@ export interface StructuredBatchEntry {
   body: unknown;
 }
 
-/** Context `buildRequests` composes URLs/bodies from.
- *
- *  `patientId` is GUARANTEED present for a type whose `subjects` are
- *  patient and/or encounter — which is every core type, so core
- *  definitions only need a one-line guard to narrow it. It is optional
- *  because a PLUGIN type may declare a resource subject
- *  (location/device/facility): the studio lets it be authored there and
- *  the slot renders it, so its `buildRequests` must be reachable on a
- *  mount that has no patient at all.
- *
- *  `questionId` keys `reference_id` so server errors map back to the exact
- *  question instance — two questions of the same structured type no longer
- *  collide. */
+/** Context `buildRequests` composes URLs/bodies from. Subject ids are
+ *  optional because plugin types may declare a resource subject; `path`
+ *  is the repeat-row position of the question, when inside repeats. */
 export interface StructuredRequestContext {
   patientId?: string;
   encounterId?: string;
   facilityId?: string;
   questionId: string;
+  path?: ResponsePath;
 }
 
-/** `buildRequests` as every consumer calls it — plugin data is opaque to
- *  the host, so the entries arrive as `unknown[]`. */
+/** `buildRequests` with plugin data opaque to the host. */
 export type StructuredRequestBuilder = (
   data: unknown[],
   context: StructuredRequestContext,
 ) => Promise<StructuredBatchEntry[]>;
 
+const REFERENCE_PREFIX = "structured:";
+const PATH_DELIMITER = "#";
+
+/** `structured:<type>:<questionId>[#r0.r1]` — the suffix lists the row
+ *  index of each repeat level in `path`. */
 export function structuredReferenceId(
   type: StructuredQuestionType,
   questionId: string,
+  path?: ResponsePath,
 ): string {
-  return `structured:${type}:${questionId}`;
+  const rows = path?.map((entry) => `r${entry.rowIndex}`).join(".");
+  return `${REFERENCE_PREFIX}${type}:${questionId}${rows ? PATH_DELIMITER + rows : ""}`;
 }
 
-/** The prop bag `StructuredSlot` hands every structured input. Adapters
- *  narrow it to the legacy component's own props (subject ids are
- *  guaranteed present for the keys the definition `requires`). */
+export interface ParsedStructuredReferenceId {
+  type: string;
+  questionId: string;
+  /** Row index per repeat level, outermost first; empty outside repeats. */
+  rowIndexes: number[];
+}
+
+export function parseStructuredReferenceId(
+  referenceId: string,
+): ParsedStructuredReferenceId | undefined {
+  if (!referenceId.startsWith(REFERENCE_PREFIX)) return undefined;
+  const [head, suffix, ...extra] = referenceId
+    .slice(REFERENCE_PREFIX.length)
+    .split(PATH_DELIMITER);
+  if (extra.length > 0) return undefined;
+  const separator = head.indexOf(":");
+  if (separator <= 0 || separator === head.length - 1) return undefined;
+  const rowIndexes: number[] = [];
+  if (suffix !== undefined) {
+    for (const part of suffix.split(".")) {
+      if (!/^r\d+$/.test(part)) return undefined;
+      rowIndexes.push(Number(part.slice(1)));
+    }
+  }
+  return {
+    type: head.slice(0, separator),
+    questionId: head.slice(separator + 1),
+    rowIndexes,
+  };
+}
+
+/** Props `StructuredSlot` hands every structured input. */
 export interface StructuredInputProps {
   question: Question;
   response: QuestionnaireResponse;
@@ -109,44 +131,25 @@ export interface StructuredInputProps {
   questionnaireSlug?: string;
 }
 
-/**
- * Everything one structured question type needs, in one place: how it
- * renders, what context it needs, how it validates, how it turns data
- * into API requests, and whether its values are safe to persist in a
- * local draft. The registry is a total record over
- * `StructuredQuestionType` — adding a member to the union refuses to
- * compile until a definition exists.
- */
+/** Everything one structured question type needs: rendering, context,
+ *  validation, request building and draft policy. */
 export interface StructuredTypeDefinition<
   K extends StructuredQuestionType = StructuredQuestionType,
 > {
   type: K;
   component: ComponentType<StructuredInputProps>;
   requires: readonly StructuredContextKey[];
-  /** Questionnaire subject types this structured type may appear on —
-   *  gates the studio's picker and the fill renderer. */
+  /** Questionnaire subject types this structured type may appear on. */
   subjects: readonly SubjectType[];
-  /**
-   * `"serialize"` — values are plain user input, safe to store in a local
-   * draft and restore later.
-   * Server-backed values retain their initial context so draft recovery
-   * can reconcile clinician edits with fresh clinical records.
-   * `"exclude"` — values cannot round-trip through JSON (for example,
-   * `files` carries raw `File` objects).
-   */
+  /** `"exclude"` when values cannot round-trip through JSON (e.g. `File`). */
   draftPolicy: "serialize" | "exclude";
-  /** Submit-time validation over the recorded entries (already narrowed
-   *  to this type's data shape). Optional — types without client rules
-   *  rely on server-side validation. */
+  /** Submit-time validation; absent types rely on the server. */
   validate?: (
     data: DataTypeFor<K>[],
     questionId: string,
     required: boolean,
   ) => QuestionValidationError[];
-  /** Turn recorded entries into raw batch requests. May return [] when
-   *  the context it needs is missing or nothing changed (dirty-row
-   *  filtering). Async because some types transform payloads (files →
-   *  base64). */
+  /** Turn recorded entries into batch requests; [] when nothing to send. */
   buildRequests: (
     data: DataTypeFor<K>[],
     context: StructuredRequestContext,

@@ -64,13 +64,11 @@ const getPluginManifest = async (config: PlugConfig) => {
   }
 };
 
-// Import the remote component synchronously
 export default function PluginEngine({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch enabled plugins from the backend API
   const { data: enabledPlugins } = useQuery({
     queryKey: ["enabled-plugins"],
     queryFn: query(plugConfigApi.list, {
@@ -97,11 +95,7 @@ export default function PluginEngine({
           return { ...config, isLoading: true as const };
         }
 
-        // `data` is the remote's OWN manifest — untrusted. `slug` spreads
-        // in AFTER `...data!` so nothing the manifest declares (a stray
-        // `slug` field, or reusing `plugin.plugin`) can shadow the
-        // backend-issued `config.slug` this query was actually fetched
-        // for. That's the identity namespace ownership checks rely on.
+        // `slug` spreads after the untrusted manifest so it can never shadow the backend-issued identity.
         return {
           ...config,
           isLoading: false as const,
@@ -127,15 +121,12 @@ export default function PluginEngine({
     window.__CARE_PLUGIN_RUNTIME__ = deepFreeze({ meta: pluginMeta });
   }, [pluginMeta]);
 
-  // Register plugin overrides and structured question types
   const overrideCleanupRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    // Clean up previous overrides
     overrideCleanupRef.current.forEach((cleanup) => cleanup());
     overrideCleanupRef.current = [];
 
-    // Register new overrides from all loaded plugins
     for (const plugin of pluginsQuery) {
       if (plugin.isLoading) continue;
 
@@ -150,7 +141,6 @@ export default function PluginEngine({
         overrideCleanupRef.current.push(cleanup);
       }
 
-      // A plugin may register groups only in its own namespace.
       for (const definition of plugin.registeredQuestionGroups ?? []) {
         try {
           overrideCleanupRef.current.push(
@@ -165,7 +155,6 @@ export default function PluginEngine({
       }
     }
 
-    // Cleanup on unmount
     return () => {
       overrideCleanupRef.current.forEach((cleanup) => cleanup());
       overrideCleanupRef.current = [];

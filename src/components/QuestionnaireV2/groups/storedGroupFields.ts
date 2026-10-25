@@ -16,6 +16,11 @@ export interface StoredGroupAnswer {
   sub_results?: readonly (readonly StoredGroupAnswer[])[];
 }
 
+/** A bare calendar day parses as UTC midnight; pin it to local time. */
+function localDate(text: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? `${text}T00:00:00` : text;
+}
+
 function restoreValue(
   question: Question,
   entry: NonNullable<StoredGroupAnswer["values"]>[number],
@@ -55,7 +60,11 @@ function restoreValue(
     case "date":
     case "dateTime": {
       const date =
-        raw instanceof Date ? raw : text ? new Date(text) : undefined;
+        raw instanceof Date
+          ? raw
+          : text
+            ? new Date(question.type === "date" ? localDate(text) : text)
+            : undefined;
       return {
         ...codes,
         type: question.type,

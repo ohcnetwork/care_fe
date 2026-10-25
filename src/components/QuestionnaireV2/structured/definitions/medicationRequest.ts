@@ -18,14 +18,9 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
       validateMedicationRequestQuestion(medications, questionId),
     buildRequests: async (
       medications,
-      { patientId, encounterId, questionId },
+      { patientId, encounterId, questionId, path },
     ) => {
-      // Only modified rows submit (`dirty`); new rows get a prescription
-      // shell with a generated alternate identifier.
       const dirtyMedications = medications.filter((m) => m.dirty);
-      // `subjects` is encounter-only, so a patient is always in scope here
-      // — narrowed rather than asserted (the context type is optional for
-      // plugin types that declare a resource subject).
       if (!patientId || dirtyMedications.length === 0) return [];
       const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
       return [
@@ -48,7 +43,11 @@ export const medicationRequestDefinition: StructuredTypeDefinition<"medication_r
               requester: medication.requester?.id,
             })),
           },
-          reference_id: structuredReferenceId("medication_request", questionId),
+          reference_id: structuredReferenceId(
+            "medication_request",
+            questionId,
+            path,
+          ),
         },
       ];
     },

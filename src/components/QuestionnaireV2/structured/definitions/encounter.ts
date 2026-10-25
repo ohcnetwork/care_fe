@@ -15,14 +15,19 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
   subjects: ["encounter"],
   draftPolicy: "serialize",
   validate: (encounters, questionId) =>
-    validateEncounterQuestion(encounters[0], questionId),
+    encounters.flatMap((encounter) =>
+      validateEncounterQuestion(encounter, questionId),
+    ),
   buildRequests: async (
     encounters,
-    { encounterId, facilityId, questionId },
+    { encounterId, facilityId, questionId, path },
   ) => {
     if (!encounterId) return [];
     if (!facilityId) {
       throw new Error("Cannot update an encounter without a facility");
+    }
+    if (encounters.length > 1) {
+      throw new Error("An encounter question cannot hold more than one entry");
     }
     return encounters.map((encounter): StructuredBatchEntry => ({
       url: `/api/v1/encounter/${encounterId}/`,
@@ -35,7 +40,7 @@ export const encounterDefinition: StructuredTypeDefinition<"encounter"> = {
         external_identifier: encounter.external_identifier,
         discharge_summary_advice: encounter.discharge_summary_advice,
       },
-      reference_id: structuredReferenceId("encounter", questionId),
+      reference_id: structuredReferenceId("encounter", questionId, path),
     }));
   },
 };

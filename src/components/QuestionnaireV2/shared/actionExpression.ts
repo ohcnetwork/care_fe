@@ -1,23 +1,13 @@
 /**
- * The bridge between the action editor's structured rules and the raw
- * expression strings the backend stores and evaluates.
+ * Bridge between the action editor's structured rules and the expression
+ * strings the backend evaluates with `evalidate`.
  *
- * The backend evaluates `condition` (and any `{{ … }}` instruction param)
- * with `evalidate` over a whitelist of Python nodes: names, constants,
- * subscripts, comparisons, `in`/`not in`, `and`/`or`/`not`, arithmetic and
- * f-strings — NO attribute access (`patient.age` is rejected; it must be
- * `patient["age"]`), NO list literals, NO calls. Question answers are the
- * names `q_<link_id>` (present only when answered), context values are
- * subscript chains from the submission root (`patient["age"]`).
- *
- * The editor emits one canonical subset and only ever parses that subset
- * back: clauses of the form `ref OP literal` or `literal in ref` /
- * `literal not in ref`, joined by a single connective. Anything else a
- * human wrote (parentheses, arithmetic, f-strings) is a "custom expression"
- * — kept verbatim, edited as text, never rewritten.
- *
- * Refs are represented as dotted paths on this side (`q_fever`,
- * `patient.age`) and compiled to Python on the way out.
+ * Backend grammar: names, constants, subscripts, comparisons (including
+ * `is` / `is not`, `in` / `not in`), `and` / `or` / `not`, `+ - * / %`,
+ * conditional expressions and f-strings. Rejected: attribute access
+ * (`patient.age` must be `patient["age"]`), list/tuple/dict literals,
+ * calls, `**`. Answers are the names `q_<link_id>`; context values are
+ * subscript chains (`patient["age"]`). Refs are dotted paths on this side.
  */
 
 export type ActionRuleOperator =
@@ -39,15 +29,12 @@ export interface ParsedCondition {
   behavior: ActionRuleBehavior;
 }
 
-/** The literal the backend's `Action.condition` needs to fire on every
- *  submission — an EMPTY condition never fires. */
+/** An EMPTY condition never fires; this one fires on every submission. */
 export const ALWAYS_CONDITION = "True";
 
 const QUESTION_REF_PREFIX = "q_";
 
-/** A link_id usable as a condition variable: `q_` + link_id must be a Python
- *  identifier, so only `[A-Za-z0-9_]` survive (the studio's default
- *  `Q-xxxxxxxx` link ids carry a hyphen and cannot be referenced). */
+/** `q_` + link_id must be a Python identifier. */
 export function isIdentifierSafeLinkId(linkId: string): boolean {
   return /^[A-Za-z0-9_]+$/.test(linkId);
 }
@@ -56,9 +43,7 @@ export function questionRef(linkId: string): string {
   return QUESTION_REF_PREFIX + linkId;
 }
 
-/** The link_id a `q_…` ref names (`q_weight.value` included — record
- *  answers are addressed through their `value` key), or undefined for
- *  context refs. */
+/** The link_id a `q_…` ref (or `q_….value`) names; undefined for context refs. */
 export function linkIdOfRef(ref: string): string | undefined {
   const [root] = ref.split(".");
   return root.startsWith(QUESTION_REF_PREFIX)
@@ -67,23 +52,25 @@ export function linkIdOfRef(ref: string): string | undefined {
 }
 
 // ---------------------------------------------------------------------------
-// Tokenizer — position-preserving so `remapQuestionRefs` can rewrite names
-// without touching string literals or anything it does not understand.
+// Tokenizer (position-preserving, so refs can be rewritten in place)
 
 type Token =
   | { kind: "string"; value: string; start: number; end: number }
+  /** A closed string literal outside the canonical subset (odd escapes,
+   *  single quotes around `"`): valid Python, not an editor literal. */
+  | { kind: "quoted"; start: number; end: number }
   | { kind: "number"; value: number; start: number; end: number }
   | { kind: "ident"; value: string; start: number; end: number }
   | { kind: "op"; value: string; start: number; end: number }
-  /** An f-string (`f"temp {q_temp}"`): the `{…}` replacement fields are
-   *  expressions in their own right, tokenized with absolute positions so
-   *  reference scans and remaps reach into them. */
+  /** `fields` holds the tokens of every `{…}` replacement field, positioned
+   *  relative to the whole source. */
   | { kind: "fstring"; fields: Token[]; start: number; end: number }
   | { kind: "other"; value: string; start: number; end: number };
 
 const IDENT_START = /[A-Za-z_]/;
 const IDENT_PART = /[A-Za-z0-9_]/;
 const DIGIT = /[0-9]/;
+const FSTRING_PREFIX = /^([fF][rR]?|[rR][fF])$/;
 const TWO_CHAR_OPS = ["==", "!=", ">=", "<="];
 const ONE_CHAR_OPS = "><[]()+-*/%,";
 
@@ -111,12 +98,7 @@ function tokenize(source: string): Token[] {
       const decoded = decodeStringLiteral(scanned.body, char);
       tokens.push(
         decoded === undefined
-          ? {
-              kind: "other",
-              value: source.slice(start, scanned.end),
-              start,
-              end: scanned.end,
-            }
+          ? { kind: "quoted", start, end: scanned.end }
           : { kind: "string", value: decoded, start, end: scanned.end },
       );
       index = scanned.end;
@@ -125,17 +107,18 @@ function tokenize(source: string): Token[] {
     if (DIGIT.test(char)) {
       const start = index;
       let cursor = index;
-      while (cursor < source.length && DIGIT.test(source[cursor])) cursor += 1;
-      if (
-        source[cursor] === "." &&
-        cursor + 1 < source.length &&
-        DIGIT.test(source[cursor + 1])
-      ) {
-        cursor += 1;
+      const readDigits = () => {
         while (cursor < source.length && DIGIT.test(source[cursor])) {
           cursor += 1;
         }
+      };
+      readDigits();
+      if (source[cursor] === "." && DIGIT.test(source[cursor + 1] ?? "")) {
+        cursor += 1;
+        readDigits();
       }
+      const exponent = /^[eE][+-]?[0-9]+/.exec(source.slice(cursor));
+      if (exponent) cursor += exponent[0].length;
       tokens.push({
         kind: "number",
         value: Number(source.slice(start, cursor)),
@@ -153,7 +136,7 @@ function tokenize(source: string): Token[] {
       }
       const word = source.slice(start, cursor);
       const quote = source[cursor];
-      if ((word === "f" || word === "F") && (quote === '"' || quote === "'")) {
+      if (FSTRING_PREFIX.test(word) && (quote === '"' || quote === "'")) {
         const scanned = scanQuoted(source, cursor);
         if (!scanned.closed) {
           tokens.push({
@@ -198,8 +181,6 @@ function tokenize(source: string): Token[] {
   return tokens;
 }
 
-/** Reads a quoted literal starting at `quoteIndex`, honouring backslash
- *  escapes; `body` is the raw text between the quotes. */
 function scanQuoted(
   source: string,
   quoteIndex: number,
@@ -228,8 +209,7 @@ function scanQuoted(
   };
 }
 
-/** The `{expr}` replacement fields of an f-string body (`{{`/`}}` are
- *  literal braces), each tokenized with positions relative to `source`. */
+/** Tokens of every `{expr}` replacement field in an f-string body. */
 function tokenizeReplacementFields(
   source: string,
   bodyStart: number,
@@ -247,16 +227,9 @@ function tokenizeReplacementFields(
       cursor += 1;
       continue;
     }
-    let depth = 1;
-    let end = cursor + 1;
-    while (end < bodyEnd && depth > 0) {
-      if (source[end] === "{") depth += 1;
-      else if (source[end] === "}") depth -= 1;
-      if (depth > 0) end += 1;
-    }
-    if (depth !== 0) {
-      // An unterminated replacement field: surfaced as a stray token so
-      // `lintExpression` reports it and `parseCondition` rejects it.
+    const field = readReplacementField(source, cursor + 1, bodyEnd);
+    if (!field) {
+      // Unterminated field: a stray token so lint reports it and parse rejects it.
       fields.push({
         kind: "other",
         value: "{",
@@ -265,17 +238,81 @@ function tokenizeReplacementFields(
       });
       break;
     }
-    // Python allows `{expr!r:spec}` — only the expression part is scanned.
-    const field = source.slice(cursor + 1, end);
-    const expressionLength = field.search(/[!:]/);
-    const expression =
-      expressionLength === -1 ? field : field.slice(0, expressionLength);
-    for (const token of tokenize(expression)) {
-      fields.push(shiftToken(token, cursor + 1));
-    }
-    cursor = end + 1;
+    fields.push(...field.tokens);
+    cursor = field.end;
   }
   return fields;
+}
+
+/**
+ * Reads one replacement field starting after its `{`, following CPython:
+ * the expression ends at a top-level `!` (conversion; `!=` is an operator)
+ * or `:` (format spec, which may nest further fields) or the closing `}`.
+ */
+function readReplacementField(
+  source: string,
+  from: number,
+  limit: number,
+): { tokens: Token[]; end: number } | null {
+  const tokens: Token[] = [];
+  const brackets: string[] = [];
+  const scanned = tokenize(source.slice(from, limit)).map((token) =>
+    shiftToken(token, from),
+  );
+  for (let index = 0; index < scanned.length; index += 1) {
+    const token = scanned[index];
+    if (token.kind === "op" && (token.value === "(" || token.value === "[")) {
+      brackets.push(token.value);
+    } else if (
+      token.kind === "op" &&
+      (token.value === ")" || token.value === "]")
+    ) {
+      brackets.pop();
+    } else if (token.kind === "other" && token.value === "{") {
+      brackets.push("{");
+    } else if (token.kind === "other" && token.value === "}") {
+      if (brackets.length === 0) return { tokens, end: token.end };
+      brackets.pop();
+    } else if (
+      token.kind === "other" &&
+      brackets.length === 0 &&
+      (token.value === "!" || token.value === ":")
+    ) {
+      let cursor = token.end;
+      if (token.value === "!") {
+        const conversion = scanned[index + 1];
+        if (conversion?.kind !== "ident") return null;
+        cursor = conversion.end;
+        if (source[cursor] === "}") return { tokens, end: cursor + 1 };
+        if (source[cursor] !== ":") return null;
+        cursor += 1;
+      }
+      return readFormatSpec(source, cursor, limit, tokens);
+    }
+    tokens.push(token);
+  }
+  return null;
+}
+
+function readFormatSpec(
+  source: string,
+  from: number,
+  limit: number,
+  tokens: Token[],
+): { tokens: Token[]; end: number } | null {
+  let cursor = from;
+  while (cursor < limit) {
+    if (source[cursor] === "}") return { tokens, end: cursor + 1 };
+    if (source[cursor] === "{") {
+      const nested = readReplacementField(source, cursor + 1, limit);
+      if (!nested) return null;
+      tokens.push(...nested.tokens);
+      cursor = nested.end;
+      continue;
+    }
+    cursor += 1;
+  }
+  return null;
 }
 
 function shiftToken(token: Token, offset: number): Token {
@@ -300,9 +337,8 @@ function* walkTokens(tokens: Token[]): Generator<Token> {
   }
 }
 
-/** Decodes the body of a Python string literal. Double-quoted bodies go
- *  through JSON (the same escapes, and exactly what `compile` emits);
- *  single-quoted ones are accepted only when trivially convertible. */
+/** Double-quoted bodies share JSON's escapes (what `compile` emits);
+ *  single-quoted ones only when trivially convertible. */
 function decodeStringLiteral(body: string, quote: string): string | undefined {
   try {
     if (quote === '"') return JSON.parse(`"${body}"`) as string;
@@ -316,9 +352,8 @@ function decodeStringLiteral(body: string, quote: string): string | undefined {
 // ---------------------------------------------------------------------------
 // Compile
 
-/** `patient.age` → `patient["age"]`. Inside an f-string body the keys are
- *  single-quoted so the template stays valid on every Python the backend
- *  might run (same-quote reuse inside replacement fields needs 3.12). */
+/** `patient.age` → `patient["age"]`. Inside an f-string body keys are
+ *  single-quoted: same-quote reuse in replacement fields needs Python 3.12. */
 export function compileRef(ref: string, quote: '"' | "'" = '"'): string {
   const [root, ...keys] = ref.split(".");
   return (
@@ -363,11 +398,11 @@ export function compileTemplate(ref: string): string {
 // ---------------------------------------------------------------------------
 // Parse (canonical subset only)
 
-/** `ident ( "[" string "]" )*` → dotted path, consuming from `from`. */
 function isOp(token: Token | undefined, value: string): boolean {
   return token?.kind === "op" && token.value === value;
 }
 
+/** `ident ( "[" string "]" )*` → dotted path. */
 function readRef(
   tokens: Token[],
   from: number,
@@ -474,15 +509,19 @@ function parseClause(tokens: Token[]): ActionRule | null {
 }
 
 /**
- * The structured reading of a stored condition, or null when it is not in
- * the canonical subset the editor emits (the caller then shows it as a
- * custom expression). `True` reads as "no rules".
+ * The structured reading of a stored condition, or null when it is outside
+ * the canonical subset the editor emits. `True` reads as "no rules".
  */
 export function parseCondition(expression: string): ParsedCondition | null {
   const tokens = tokenize(expression);
   if (tokens.length === 0) return null;
   if (
-    tokens.some((token) => token.kind === "other" || token.kind === "fstring")
+    tokens.some(
+      (token) =>
+        token.kind === "other" ||
+        token.kind === "quoted" ||
+        token.kind === "fstring",
+    )
   ) {
     return null;
   }
@@ -518,12 +557,11 @@ export function parseCondition(expression: string): ParsedCondition | null {
 export type ParsedTemplate =
   { kind: "ref"; ref: string } | { kind: "expression"; expression: string };
 
-/** Reads a `{{ … }}` param: a bare ref the picker can display, a custom
- *  expression, or null when the value is a plain literal. */
+/** Reads a `{{ … }}` param: a bare ref, a custom expression, or null for a
+ *  plain literal. */
 export function parseTemplate(value: unknown): ParsedTemplate | null {
   if (typeof value !== "string") return null;
-  // Exact, untrimmed: the backend's check is `startswith("{{") and
-  // endswith("}}")` on the raw value — a leading space makes it text.
+  // Untrimmed on purpose: the backend's check is on the raw value.
   const match = /^\{\{([\s\S]*)\}\}$/.exec(value);
   if (!match) return null;
   const inner = match[1].trim();
@@ -534,11 +572,7 @@ export function parseTemplate(value: unknown): ParsedTemplate | null {
 }
 
 // ---------------------------------------------------------------------------
-// Message templates — instruction params with answers spliced into text.
-//
-// The editor works on plain text with `{ref}` tokens ("Fever, temp {q_temp}");
-// the wire value is the whole-value f-string template the backend evaluates
-// (`{{ f"Fever, temp {q_temp}" }}`). Text without tokens is stored verbatim.
+// Message templates: editor text with `{ref}` tokens ↔ `{{ f"…" }}` params
 
 const MESSAGE_TOKEN =
   /\{([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\}/g;
@@ -563,7 +597,7 @@ function escapeFStringLiteral(segment: string): string {
     .replace(/\}/g, "}}");
 }
 
-/** Editor text → stored param value. */
+/** Editor text → stored param value. Token-free text is stored verbatim. */
 export function compileMessageTemplate(text: string): string {
   if (!MESSAGE_TOKEN.test(text)) return text;
   MESSAGE_TOKEN.lastIndex = 0;
@@ -581,8 +615,17 @@ export function compileMessageTemplate(text: string): string {
 export type ParsedMessageTemplate =
   { kind: "text"; text: string } | { kind: "expression"; expression: string };
 
-/** Decodes one f-string body back to editor text, or undefined when a
- *  replacement field holds something other than a bare ref. */
+const FSTRING_ESCAPES: Record<string, string> = {
+  '"': '"',
+  "'": "'",
+  "\\": "\\",
+  n: "\n",
+  r: "\r",
+  t: "\t",
+};
+
+/** One f-string body → editor text, or undefined when it holds anything
+ *  (a non-ref field, an escape) a re-save would not reproduce byte-for-byte. */
 function decodeFStringBody(body: string): string | undefined {
   let text = "";
   let cursor = 0;
@@ -605,13 +648,10 @@ function decodeFStringBody(body: string): string | undefined {
       cursor = close + 1;
       continue;
     }
-    if (char === "\\" && cursor + 1 < body.length) {
-      const next = body[cursor + 1];
-      const decoded =
-        next === "n" ? "\n" : next === "r" ? "\r" : next === "t" ? "\t" : next;
-      text += ['"', "\\", "n", "r", "t", "'"].includes(next)
-        ? decoded
-        : char + next;
+    if (char === "\\") {
+      const decoded = FSTRING_ESCAPES[body[cursor + 1] ?? ""];
+      if (decoded === undefined) return undefined;
+      text += decoded;
       cursor += 2;
       continue;
     }
@@ -621,8 +661,8 @@ function decodeFStringBody(body: string): string | undefined {
   return text;
 }
 
-/** Stored param value → editor text, or the raw expression when it is
- *  not something the token editor can show. */
+/** Stored param value → editor text, or the raw expression when the token
+ *  editor cannot show it. */
 export function parseMessageTemplate(value: unknown): ParsedMessageTemplate {
   if (typeof value !== "string") return { kind: "text", text: "" };
   const template = parseTemplate(value);
@@ -631,29 +671,30 @@ export function parseMessageTemplate(value: unknown): ParsedMessageTemplate {
     return { kind: "text", text: messageToken(template.ref) };
   }
   const tokens = tokenize(template.expression);
-  if (tokens.length === 1 && tokens[0].kind === "fstring") {
-    const raw = template.expression.trim();
-    const body = raw.slice(2, -1);
-    const text = decodeFStringBody(body);
+  const raw = template.expression;
+  if (
+    tokens.length === 1 &&
+    tokens[0].kind === "fstring" &&
+    /^[fF]["']/.test(raw)
+  ) {
+    const text = decodeFStringBody(raw.slice(2, -1));
     if (text !== undefined) return { kind: "text", text };
   }
   return { kind: "expression", expression: template.expression };
 }
 
 // ---------------------------------------------------------------------------
-// Lint — the backend validates nothing about an expression at save time;
-// a typo would surface as a 500 on every submission instead.
+// Lint (the backend validates nothing at save time; a typo would 500 on
+// every submission)
 
 export type ExpressionProblem = "syntax" | "attribute";
 
 /**
- * Cheap static checks over a hand-written expression: characters the
- * grammar has no place for (an unterminated string, `;`, `.`),
- * unbalanced brackets, and attribute access — `patient.age` — which
- * evalidate rejects where `patient["age"]` works.
+ * Cheap static checks: stray characters, unbalanced brackets, list/tuple
+ * literals (`,` has no place in the grammar), and attribute access.
  */
 export function lintExpression(expression: string): ExpressionProblem | null {
-  const tokens = tokenize(expression);
+  const tokens = [...walkTokens(tokenize(expression))];
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
     if (
@@ -667,10 +708,8 @@ export function lintExpression(expression: string): ExpressionProblem | null {
   }
   const stack: string[] = [];
   let previous: Token | undefined;
-  for (const token of walkTokens(tokens)) {
+  for (const token of tokens) {
     if (token.kind === "other") return "syntax";
-    // `is` / `is not`, list and tuple literals: evalidate rejects them all.
-    if (token.kind === "ident" && token.value === "is") return "syntax";
     if (token.kind === "op") {
       const opensLiteral =
         token.value === "[" &&
@@ -680,7 +719,7 @@ export function lintExpression(expression: string): ExpressionProblem | null {
             (previous.value === "]" || previous.value === ")")) ||
             (previous.kind === "ident" && !isKeyword(previous.value)))
         );
-      if (opensLiteral) return "syntax";
+      if (opensLiteral || token.value === ",") return "syntax";
       if (token.value === "(" || token.value === "[") stack.push(token.value);
       if (token.value === ")" && stack.pop() !== "(") return "syntax";
       if (token.value === "]" && stack.pop() !== "[") return "syntax";
@@ -692,8 +731,7 @@ export function lintExpression(expression: string): ExpressionProblem | null {
 
 /**
  * A link id the expression engine can name, derived from an existing one:
- * every character outside `[A-Za-z0-9_]` becomes `_`, with a numeric
- * suffix when that collides with another question in the tree.
+ * non-identifier characters become `_`, with a numeric suffix on collision.
  */
 export function referenceableLinkId(
   linkId: string,
@@ -709,7 +747,7 @@ export function referenceableLinkId(
 // ---------------------------------------------------------------------------
 // Reference inspection and rewriting
 
-/** Every `q_<link_id>` name an expression reads — canonical or not. */
+/** Every `q_<link_id>` name an expression reads, canonical or not. */
 export function referencedLinkIds(expression: string): string[] {
   const seen = new Set<string>();
   for (const token of walkTokens(tokenize(expression))) {
@@ -720,8 +758,7 @@ export function referencedLinkIds(expression: string): string[] {
   return [...seen];
 }
 
-/** Rewrites `q_<old>` names per `linkIdMap`, leaving string literals and
- *  everything else byte-identical. */
+/** Rewrites `q_<old>` names per `linkIdMap`; everything else stays byte-identical. */
 export function remapQuestionRefs(
   expression: string,
   linkIdMap: ReadonlyMap<string, string>,
@@ -739,7 +776,6 @@ export function remapQuestionRefs(
   return output + expression.slice(cursor);
 }
 
-/** The `{{ … }}` inner expression of a param, rewritten and re-wrapped. */
 function remapTemplateParam(
   value: unknown,
   linkIdMap: ReadonlyMap<string, string>,
@@ -750,8 +786,7 @@ function remapTemplateParam(
   return match[1] + remapQuestionRefs(match[2], linkIdMap) + match[3];
 }
 
-/** Every answer reference inside an action (its condition plus any
- *  templated param) — for validation and the clone remap. */
+/** Every answer reference inside an action: its condition plus templated params. */
 export function actionReferencedLinkIds(action: {
   condition: string;
   instructions: { params: Record<string, unknown> }[];
@@ -769,9 +804,7 @@ export function actionReferencedLinkIds(action: {
   return [...seen];
 }
 
-/** Clone support: follow `regenerateQuestionIds`' link_id map through every
- *  condition and templated param so the copy's actions still point at the
- *  copy's questions. */
+/** Clone support: follow a link_id map through every condition and templated param. */
 export function remapActionLinkIds<
   T extends {
     condition: string;

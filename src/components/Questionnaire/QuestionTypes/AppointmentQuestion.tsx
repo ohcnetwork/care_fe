@@ -149,11 +149,13 @@ export function AppointmentQuestion({
     setSelectedResource(resource);
     setSelectedSlotId(undefined);
     setSelectedSlot(undefined);
-    handleUpdate({
-      slot_id: undefined,
-      slot_object: undefined,
-      resource_object: undefined,
-    });
+    if (value.slot_id || value.slot_object || value.resource_object) {
+      handleUpdate({
+        slot_id: undefined,
+        slot_object: undefined,
+        resource_object: undefined,
+      });
+    }
     if (resource.resource_type !== cachedServiceType) {
       setCachedServiceType(resource.resource_type);
     }

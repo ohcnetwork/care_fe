@@ -1,14 +1,3 @@
-/**
- * The form engine's state scope — one Jotai store per mounted form,
- * created by `form/FormContext`'s provider. `responsesAtom` is the
- * per-instance working state: in preview it stays local; in fill mode the
- * host reads it for submission and autosave. `errorsAtom` is written by
- * the fill submit path
- * (`fill/submit/useSubmitFillSession`) with client validation failures
- * and mapped server errors; editing a question's response clears that
- * question's entries (the write path below), so stale errors never outlive
- * the answer they flagged.
- */
 import type { Getter, Setter } from "jotai";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { selectAtom } from "jotai/utils";
@@ -40,60 +29,55 @@ export const responsesAtom = atom<Record<string, QuestionnaireResponse>>({});
 export const errorsAtom = atom<QuestionValidationError[]>([]);
 
 /**
- * Question ids whose structured slot THREW during render and are now
- * showing the error boundary's notice instead of an input.
- *
- * Submit-time enforcement reads this alongside the subject-mismatch and
- * missing-context cases: all three mean "this question has no input on
- * screen", and requiring an unanswerable question makes the entire form —
- * every other answer included — permanently unsubmittable. Lives in the
- * store because the boundary that discovers it and the validators that
- * must respect it never meet in the component tree.
+ * Keys (see `renderFailedKey`) of structured slots that threw during render
+ * and now show the error boundary's notice instead of an input. Validation
+ * reads it so a required question with no input on screen cannot make the
+ * form unsubmittable.
  */
 export const structuredRenderFailedAtom = atom<ReadonlySet<string>>(
   new Set<string>(),
 );
 
-/** Record a structured slot's render failure. Idempotent: re-entering the
- *  boundary for a question already marked keeps the same Set identity, so
- *  it cannot loop a subscriber. */
+const pathKey = (path: ResponsePath) =>
+  path.map((p) => `${p.questionId}:${p.rowIndex}`).join("/");
+
+export function renderFailedKey(questionId: string, path: ResponsePath) {
+  return `${questionId}@${pathKey(path)}`;
+}
+
 export function useMarkStructuredRenderFailed(questionId: string) {
+  const path = useResponseScope();
   const markAtom = useMemo(
     () =>
       atom(null, (get, set) => {
+        const key = renderFailedKey(questionId, path);
         const failed = get(structuredRenderFailedAtom);
-        if (failed.has(questionId)) return;
-        set(structuredRenderFailedAtom, new Set(failed).add(questionId));
+        if (failed.has(key)) return;
+        set(structuredRenderFailedAtom, new Set(failed).add(key));
       }),
-    [questionId],
+    [questionId, path],
   );
   return useAtom(markAtom)[1];
 }
 
-/** Clear a question's render-failed mark — the recovery half of the pair
- *  above. A slot unmounts and remounts whenever enable_when toggles it (or
- *  an ancestor group), and the fresh boundary may well render fine; the
- *  mark must not outlive the notice it described, or a LIVE required input
- *  would stay exempt from validation for the rest of the session.
- *  Idempotent the same way: clearing an unmarked question keeps the Set
- *  identity. */
 export function useClearStructuredRenderFailed(questionId: string) {
+  const path = useResponseScope();
   const clearAtom = useMemo(
     () =>
       atom(null, (get, set) => {
+        const key = renderFailedKey(questionId, path);
         const failed = get(structuredRenderFailedAtom);
-        if (!failed.has(questionId)) return;
+        if (!failed.has(key)) return;
         const next = new Set(failed);
-        next.delete(questionId);
+        next.delete(key);
         set(structuredRenderFailedAtom, next);
       }),
-    [questionId],
+    [questionId, path],
   );
   return useAtom(clearAtom)[1];
 }
 
-/** link_id → question_id for enable_when lookups — pure so non-atom
- *  consumers (form/validation.ts) share the exact same resolution. */
+/** link_id → question_id for enable_when lookups. */
 export function buildLinkIndex(questions: Question[]): Record<string, string> {
   const index: Record<string, string> = {};
   const walk = (list: Question[]) => {
@@ -106,8 +90,6 @@ export function buildLinkIndex(questions: Question[]): Record<string, string> {
   return index;
 }
 
-/** link_id → question_id, for enable_when lookups. Internal: consumers
- *  outside the engine call `buildLinkIndex` on the tree they hold. */
 const questionIdByLinkIdAtom = atom((get) => {
   const questionnaire = get(questionnaireAtom);
   return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
@@ -148,64 +130,56 @@ export function initializeResponses(
   return responses;
 }
 
-/** Booleans normalize to "Yes"/"No" and numbers stringify before ANY
- *  operator is applied — matching how recorded response values are
- *  normalized, so enable_when comparisons can match them. */
 function normalizeValue(value: unknown): unknown {
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") return value.toString();
   return value;
 }
 
-/** Evaluates one enable_when condition against its controller question's
- *  response, matching backend semantics:
- *  - the unanswered-dependency short-circuit (no recorded values → false)
- *    applies to every operator EXCEPT `exists`, which — matching the
- *    backend — evaluates even when the controller is unanswered, since an
- *    `exists:false` dependent must enable precisely then
- *  - ALL of the controller's values are considered (`.some()` /
- *    `.includes()`), not just the first
- *  - `normalizeValue` is applied before every operator other than
- *    `exists`, which only asks whether real content was recorded */
+// Mirrors the backend's BOOLEAN_TRUE_STRINGS / BOOLEAN_FALSE_STRINGS.
+const BOOLEAN_TRUE_STRINGS = new Set(["true", "on", "ok", "y", "yes", "1"]);
+const BOOLEAN_FALSE_STRINGS = new Set(["false", "off", "no", "n", "0"]);
+
+function foldBoolean(value: unknown): unknown {
+  const normalized = normalizeValue(value);
+  if (typeof normalized !== "string") return normalized;
+  const lower = normalized.trim().toLowerCase();
+  if (BOOLEAN_TRUE_STRINGS.has(lower)) return "Yes";
+  if (BOOLEAN_FALSE_STRINGS.has(lower)) return "No";
+  return normalized;
+}
+
+/** Evaluates one enable_when condition against its controller's response
+ *  the way the backend does: only answered entries count, and every entry
+ *  is considered. */
 export function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {
-  const dependentValues = response?.values;
+  const answered = (response?.values ?? []).filter(entryIsAnswered);
 
-  // "exists" must evaluate even when the controller is unanswered: the
-  // backend enables an exists:false dependent precisely when the controller
-  // has no value. "" is treated as not-existing because serialization drops
-  // content-free entries, so the backend never sees them.
   if (enableWhen.operator === "exists") {
-    const has =
-      !!dependentValues &&
-      dependentValues.some(
-        (v) => v.value !== undefined && v.value !== null && v.value !== "",
-      );
-    return enableWhen.answer === false ? !has : has;
+    return enableWhen.answer === false
+      ? answered.length === 0
+      : answered.length > 0;
   }
 
-  if (!dependentValues || dependentValues.length === 0) return false;
+  if (answered.length === 0) return false;
 
-  const normalizedAnswers = dependentValues.map((v) => normalizeValue(v.value));
+  const normalizedAnswers = answered.map((v) => normalizeValue(v.value));
 
   switch (enableWhen.operator) {
     case "equals":
-      // enableWhen.answer is boolean | string here (EnableWhenBoolean |
-      // EnableWhenString). Legacy questionnaires store JSON true/false while
-      // responses normalize to "Yes"/"No" — run the stored answer through
-      // the same normalization so those conditions can ever match. (Only
-      // literal booleans are normalized; string answers pass through
-      // untouched, so non-boolean comparisons are unaffected.)
-      return normalizedAnswers.includes(normalizeValue(enableWhen.answer));
+      return answered
+        .map((v) => foldBoolean(v.value))
+        .includes(foldBoolean(enableWhen.answer));
 
     case "not_equals":
-      // enableWhen.answer is boolean | string here (EnableWhenBoolean | EnableWhenString)
-      return !normalizedAnswers.includes(normalizeValue(enableWhen.answer));
+      return !answered
+        .map((v) => foldBoolean(v.value))
+        .includes(foldBoolean(enableWhen.answer));
 
     case "greater":
-      // enableWhen.answer is number here (EnableWhenNumeric)
       return normalizedAnswers.some(
         (v) => !isNaN(Number(v)) && Number(v) > enableWhen.answer,
       );
@@ -230,10 +204,6 @@ export function evaluateEnableWhen(
   }
 }
 
-/** Drop one question's entries from `errorsAtom` — shared by the response
- *  write path (edit clears the flag) and the structured slot's
- *  `clearError` prop. No-ops when the question has no errors so
- *  subscribers don't re-render on unrelated edits. */
 export function clearQuestionErrorsInState(
   get: Getter,
   set: Setter,
@@ -277,24 +247,28 @@ export function useQuestionResponse(questionId: string) {
             responsesAtom,
             updateResponsesAtPath(previous, path, { [questionId]: update }),
           );
-          // An edit supersedes any validation error recorded against this
-          // question (client or server) — clear just its entries.
           clearQuestionErrorsInState(get, set, questionId, path);
           if (
             update.sub_results &&
             update.sub_results.length !== current.sub_results?.length
           ) {
+            // Rows shifted: drop every mark and error recorded under a row.
+            const underRow = (rowPath: ResponsePath) =>
+              sameResponsePath(rowPath.slice(0, path.length), path) &&
+              rowPath[path.length]?.questionId === questionId;
             set(errorsAtom, (errors) =>
               errors.filter(
                 (error) =>
-                  !error.response_path ||
-                  !sameResponsePath(
-                    error.response_path.slice(0, path.length),
-                    path,
-                  ) ||
-                  error.response_path[path.length]?.questionId !== questionId,
+                  !error.response_path || !underRow(error.response_path),
               ),
             );
+            const rowPrefix = `@${pathKey(path)}${path.length ? "/" : ""}${questionId}:`;
+            set(structuredRenderFailedAtom, (failed) => {
+              const next = new Set(
+                [...failed].filter((key) => !key.includes(rowPrefix)),
+              );
+              return next.size === failed.size ? failed : next;
+            });
           }
         },
       ),
@@ -303,10 +277,8 @@ export function useQuestionResponse(questionId: string) {
   return useAtom(responseAtom);
 }
 
-/** Shared enable_when resolution — extracted (unchanged semantics) so every
- *  consumer (useQuestionEnabled, the visibility hooks below, and
- *  form/validation.ts) evaluates identically. Exported so the fill path
- *  never re-derives it from evaluateEnableWhen. */
+/** Every condition is evaluated against the root response map, matching
+ *  the backend; row answers never shadow root answers. */
 export function isQuestionEnabledInState(
   question: Question,
   responses: Record<string, QuestionnaireResponse>,
@@ -314,10 +286,9 @@ export function isQuestionEnabledInState(
 ): boolean {
   if (!question.enable_when?.length) return true;
   const results = question.enable_when.map((condition) =>
-    evaluateEnableWhen(
-      condition,
-      responses[linkIndex[condition.question] ?? ""],
-    ),
+    condition.question in linkIndex
+      ? evaluateEnableWhen(condition, responses[linkIndex[condition.question]])
+      : false,
   );
   return question.enable_behavior === "any"
     ? results.some(Boolean)
@@ -325,27 +296,22 @@ export function isQuestionEnabledInState(
 }
 
 export function useQuestionEnabled(question: Question): boolean {
-  const path = useResponseScope();
   const enabledAtom = useMemo(
     () =>
       atom((get) =>
         isQuestionEnabledInState(
           question,
-          getScopedResponses(get(responsesAtom), path),
+          get(responsesAtom),
           get(questionIdByLinkIdAtom),
         ),
       ),
-    [question, path],
+    [question],
   );
   return useAtomValue(enabledAtom);
 }
 
-/**
- * Ids of every question in the tree (any depth) currently hidden by its
- * enable_when conditions — i.e. disabled and not `disabled_display:
- * "protected"` (protected questions still render, greyed). The tree navs
- * use this to drop rows for questions that aren't on the canvas.
- */
+/** Ids of every question currently hidden by enable_when (disabled and not
+ *  `disabled_display: "protected"`). */
 export function useHiddenQuestionIds(): Set<string> {
   const hiddenIdsAtom = useMemo(
     () =>
@@ -365,18 +331,14 @@ export function useHiddenQuestionIds(): Set<string> {
             const shown =
               parentVisible &&
               (question.disabled_display === "protected" ||
-                isQuestionEnabledInState(question, scope, linkIndex));
+                isQuestionEnabledInState(question, responses, linkIndex));
             if (shown) visible.add(question.id);
             else hidden.add(question.id);
             if (question.type === "group" && question.repeats) {
               const rows = scope[question.id]?.sub_results ?? [];
               if (!rows.length) walk(question.questions ?? [], scope, false);
               for (const row of rows)
-                walk(
-                  question.questions ?? [],
-                  { ...scope, ...responseMap(row) },
-                  shown,
-                );
+                walk(question.questions ?? [], responseMap(row), shown);
             } else {
               walk(question.questions ?? [], scope, shown);
             }
@@ -391,12 +353,8 @@ export function useHiddenQuestionIds(): Set<string> {
   return useAtomValue(hiddenIdsAtom);
 }
 
-/**
- * Whether any top-level question is currently on the canvas. Boolean (not
- * the index array) so the value is Object.is-stable across answer edits —
- * the one-scroll canvas body subscribes to this, and answering a question
- * must not re-render every block.
- */
+/** Boolean rather than the index list so the canvas body does not re-render
+ *  on every answer edit. */
 export function useHasVisibleTopLevelQuestions(): boolean {
   const hasVisibleAtom = useMemo(
     () =>
@@ -416,12 +374,7 @@ export function useHasVisibleTopLevelQuestions(): boolean {
   return useAtomValue(hasVisibleAtom);
 }
 
-/**
- * Ids of every question with at least one recorded answer — the fill
- * outline's completion icons subscribe to this. Derived per render of the
- * consuming component only (one subscriber: the outline), so the fresh
- * Set identity per responses change is fine.
- */
+/** Ids of every question with at least one recorded answer. */
 export function useAnsweredQuestionIds(): Set<string> {
   const answeredAtom = useMemo(
     () =>
