@@ -271,13 +271,17 @@ function readReplacementField(
     } else if (token.kind === "other" && token.value === "{") {
       brackets.push("{");
     } else if (token.kind === "other" && token.value === "}") {
-      if (brackets.length === 0) return { tokens, end: token.end };
+      if (brackets.length === 0) {
+        markIncompleteField(tokens, token.start);
+        return { tokens, end: token.end };
+      }
       brackets.pop();
     } else if (
       token.kind === "other" &&
       brackets.length === 0 &&
       (token.value === "!" || token.value === ":")
     ) {
+      markIncompleteField(tokens, token.start);
       let cursor = token.end;
       if (token.value === "!") {
         const conversion = scanned[index + 1];
@@ -292,6 +296,14 @@ function readReplacementField(
     tokens.push(token);
   }
   return null;
+}
+
+function markIncompleteField(tokens: Token[], position: number) {
+  if (!hasCompleteOperands(tokens)) {
+    // Keep the original tokens for reference rewriting and the more useful
+    // attribute-access diagnostic; this marker makes syntax lint fail.
+    tokens.push({ kind: "other", value: "", start: position, end: position });
+  }
 }
 
 function readFormatSpec(
@@ -689,12 +701,109 @@ export function parseMessageTemplate(value: unknown): ParsedMessageTemplate {
 
 export type ExpressionProblem = "syntax" | "attribute";
 
+/** Check operand completeness without evaluating expressions or duplicating
+ * Python's operator precedence. Each bracketed expression and f-string field
+ * must have operands on both sides of its binary operators. */
+function hasCompleteOperands(tokens: Token[]): boolean {
+  let needsOperand = true;
+  const pendingConditionals = [0];
+  let previous: Token | undefined;
+  const isString = (token: Token | undefined) =>
+    token && ["string", "quoted", "fstring"].includes(token.kind);
+  for (let index = 0; index < tokens.length; index += 1) {
+    let token = tokens[index];
+    const nextLiteral = tokens[index + 1];
+    if (
+      token.kind === "ident" &&
+      /^(r|u|b|br|rb)$/i.test(token.value) &&
+      isString(nextLiteral) &&
+      token.end === nextLiteral.start
+    ) {
+      token = nextLiteral;
+      index += 1;
+    }
+    const value =
+      token.kind === "op" || token.kind === "ident" ? token.value : undefined;
+    const level = pendingConditionals.length - 1;
+    if (value === "(" || value === "[") {
+      if ((value === "(" && !needsOperand) || (value === "[" && needsOperand)) {
+        return false;
+      }
+      pendingConditionals.push(0);
+      needsOperand = true;
+    } else if (value === ")" || value === "]") {
+      if (needsOperand || level === 0 || pendingConditionals.pop() !== 0) {
+        return false;
+      }
+      needsOperand = false;
+    } else if (
+      needsOperand &&
+      (value === "+" || value === "-" || value === "not")
+    ) {
+      // Unary operators still need the following operand.
+    } else if (
+      value &&
+      [
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
+        "==",
+        "!=",
+        ">",
+        ">=",
+        "<",
+        "<=",
+        "and",
+        "or",
+        "in",
+        "is",
+        "not",
+        "if",
+        "else",
+      ].includes(value)
+    ) {
+      if (needsOperand) return false;
+      const next = tokens[index + 1];
+      if (value === "not") {
+        if (next?.kind !== "ident" || next.value !== "in") return false;
+        index += 1;
+      } else if (
+        value === "is" &&
+        next?.kind === "ident" &&
+        next.value === "not"
+      ) {
+        index += 1;
+      } else if (value === "if") {
+        pendingConditionals[level] += 1;
+      } else if (value === "else" && pendingConditionals[level]-- === 0) {
+        return false;
+      }
+      needsOperand = true;
+    } else {
+      // Python concatenates adjacent string literals, including f-strings.
+      if (!needsOperand && !(isString(previous) && isString(token)))
+        return false;
+      if (token.kind === "op" || token.kind === "other") return false;
+      needsOperand = false;
+    }
+    previous = token;
+  }
+  return (
+    !needsOperand &&
+    pendingConditionals.length === 1 &&
+    pendingConditionals[0] === 0
+  );
+}
+
 /**
  * Cheap static checks: stray characters, unbalanced brackets, list/tuple
- * literals (`,` has no place in the grammar), and attribute access.
+ * literals (`,` has no place in the grammar), attribute access and missing operands.
  */
 export function lintExpression(expression: string): ExpressionProblem | null {
-  const tokens = [...walkTokens(tokenize(expression))];
+  const expressionTokens = tokenize(expression);
+  const tokens = [...walkTokens(expressionTokens)];
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
     if (
@@ -726,7 +835,9 @@ export function lintExpression(expression: string): ExpressionProblem | null {
     }
     previous = token;
   }
-  return stack.length === 0 ? null : "syntax";
+  return stack.length === 0 && hasCompleteOperands(expressionTokens)
+    ? null
+    : "syntax";
 }
 
 /**

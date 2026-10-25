@@ -96,8 +96,8 @@ export function ValueSetEditor({
         onSuccess(data);
         return;
       }
-      // A facility set is invisible to everyone but superusers until it has
-      // departments, and those are edited on the edit page — land there.
+      // Set department access on the edit page so readers can use the new
+      // facility value set.
       navigate(
         scope.authContext === "facility"
           ? `${scope.basePath}/${data.id}/edit`

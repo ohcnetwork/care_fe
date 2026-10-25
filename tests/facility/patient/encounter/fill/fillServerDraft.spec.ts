@@ -461,7 +461,11 @@ test.describe("Fill page server draft", () => {
     const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
       requests: {
         url: string;
-        body: { form_submission?: string };
+        body: {
+          form_submission?: string;
+          expected_status?: string;
+          status?: string;
+        };
       }[];
     };
     const submit = body.requests.find((request) =>
@@ -474,6 +478,16 @@ test.describe("Fill page server draft", () => {
       submit?.body.form_submission,
       "submit sub-request must link the resumed draft via form_submission",
     ).toBe(draftId);
+
+    // The completion write rejects a second submit, rolling back its whole
+    // batch even when the questionnaire contains only structured resources.
+    const completion = body.requests.find((request) =>
+      request.url.includes(`/form_submission/${draftId}/`),
+    );
+    expect(completion?.body).toMatchObject({
+      expected_status: "draft",
+      status: "submitted",
+    });
 
     // End to end: the server took it, and the draft's record completed —
     // same cleanup contract every test in this describe leaves behind.

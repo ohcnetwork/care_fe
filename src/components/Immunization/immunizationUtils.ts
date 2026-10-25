@@ -126,7 +126,3 @@ export function flattenRecommendations(
     ),
   ];
 }
-
-export function countNodes(node: MaterializedRecommendation): number {
-  return 1 + node.children.reduce((sum, child) => sum + countNodes(child), 0);
-}

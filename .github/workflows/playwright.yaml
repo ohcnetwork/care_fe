@@ -28,9 +28,9 @@ env:
   REACT_CARE_API_URL: http://localhost:9000
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
-  # Questionnaire actions require this companion backend. Restore develop
-  # once that dependency lands, independently of the frontend branch name.
-  CARE_BACKEND_REF: ENG-737
+  # CARE 3.1 requires the companion APIs from care#3809 on ccn_final.
+  # Pin the validated revision; restore develop when 3.1 lands there.
+  CARE_BACKEND_REF: 174b32e18642fbe8eaa15e2e0955d604b9edc0ea
 
 jobs:
   # Detect if test-related files changed

@@ -110,7 +110,9 @@ test.describe("Admin action configurations", () => {
       await expect(row).toBeVisible();
       await expect(row).toContainText("Appointments");
       await expect(row).toContainText("1 action");
-      await row.click();
+      const editorLink = row.getByRole("link", { name, exact: true });
+      await editorLink.focus();
+      await editorLink.press("Enter");
       await page.waitForURL(/\/admin\/actions\/[0-9a-f-]+$/);
       configurationId = page.url().split("/").pop() as string;
     });
@@ -131,8 +133,36 @@ test.describe("Admin action configurations", () => {
       await expect(page.getByText("Appointments").first()).toBeVisible();
       await expect(page.getByText("On demand")).toBeVisible();
       await page.getByRole("textbox", { name: "Name" }).fill(`${name} v2`);
-      await page.getByRole("button", { name: "Save" }).click();
+      const detailUrl = `**/api/v1/action_configuration/${configurationId}/`;
+      let releaseSave!: () => void;
+      const saveHeld = new Promise<void>((resolve) => {
+        releaseSave = resolve;
+      });
+      await page.route(detailUrl, async (route) => {
+        if (route.request().method() === "PUT") await saveHeld;
+        await route.continue();
+      });
+      const saveStarted = page.waitForRequest(
+        (request) =>
+          request.method() === "PUT" &&
+          request.url().endsWith(`/action_configuration/${configurationId}/`),
+      );
+      try {
+        await page.getByRole("button", { name: "Save" }).click();
+        await saveStarted;
+        // A successful response must not mark newer, unsaved edits pristine.
+        await expect(
+          page.getByRole("textbox", { name: "Name" }),
+        ).toBeDisabled();
+        await expect(
+          page.getByRole("button", { name: "Add action", exact: true }),
+        ).toBeDisabled();
+      } finally {
+        releaseSave();
+      }
       await expectToast(page, "Action configuration updated");
+      await page.unroute(detailUrl);
+      await expect(page.getByRole("textbox", { name: "Name" })).toBeEnabled();
       const { body } = await fetchConfiguration(configurationId);
       expect(body?.name).toBe(`${name} v2`);
       expect(body?.actions).toHaveLength(1);

@@ -4,6 +4,7 @@ import type { TFunction } from "i18next";
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
+  renderFailedKey,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import {
   resolveStructuredSlotState,
@@ -43,11 +44,11 @@ export function collectStructuredErrors(
     path: ResponsePath,
   ) => {
     for (const question of list) {
-      if (!isQuestionEnabledInState(question, scope, linkIndex)) continue;
+      if (!isQuestionEnabledInState(question, responses, linkIndex)) continue;
       if (question.type === "group") {
         if (question.repeats) {
           (scope[question.id]?.sub_results ?? []).forEach((row, rowIndex) =>
-            walk(question.questions ?? [], { ...scope, ...responseMap(row) }, [
+            walk(question.questions ?? [], responseMap(row), [
               ...path,
               { questionId: question.id, rowIndex },
             ]),
@@ -66,7 +67,7 @@ export function collectStructuredErrors(
       // non-required one is simply skipped, same as `composeBatch`. Skip
       // resolving state at all once render already failed — there is
       // nothing left to read a `ready` definition from.
-      const state = renderFailed.has(question.id)
+      const state = renderFailed.has(renderFailedKey(question.id, path))
         ? undefined
         : resolveStructuredSlotState(type, questionnaire.subject_type, subject);
       if (!state || state.kind !== "ready") {

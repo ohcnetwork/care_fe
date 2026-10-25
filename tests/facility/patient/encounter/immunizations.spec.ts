@@ -6,7 +6,10 @@ import { getPatientId } from "tests/support/patientId";
 
 import { ImmunizationRead } from "../../../../src/types/emr/immunization/immunization";
 import { ImmunizationPolicyRead } from "../../../../src/types/emr/immunizationPolicy/immunizationPolicy";
-import { ImmunizationRecommendationRead } from "../../../../src/types/emr/immunizationRecommendation/immunizationRecommendation";
+import {
+  ImmunizationRecommendationRead,
+  ImmunizationRecommendationTree,
+} from "../../../../src/types/emr/immunizationRecommendation/immunizationRecommendation";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -77,6 +80,27 @@ async function routeImmunizations(
       }
       writes.push(request);
       const body = request.postDataJSON();
+      if (
+        request.method() === "POST" &&
+        path === `${base}recommendation/create_tree/`
+      ) {
+        // The endpoint returns the root and later list reads contain each node.
+        // Atomic persistence is covered by the backend, not this browser mock.
+        const addNode = ({
+          children,
+          ...fields
+        }: ImmunizationRecommendationTree): ImmunizationRecommendationRead => {
+          const created = {
+            ...fields,
+            id: faker.string.uuid(),
+            forecast_status: "due" as const,
+          };
+          recommendations.push(created);
+          children.forEach(addNode);
+          return created;
+        };
+        return route.fulfill({ json: addNode(body.root) });
+      }
       if (request.method() === "POST") {
         const created = { ...body, id: faker.string.uuid() };
         store.push(created);
@@ -191,21 +215,21 @@ test.describe("Encounter immunizations", () => {
     const creates = writes.filter((request) =>
       isWrite(request, "POST", "recommendation"),
     );
-    expect(creates).toHaveLength(3);
-    const [root, first, second] = creates.map((request) =>
-      request.postDataJSON(),
+    expect(creates).toHaveLength(1);
+    expect(new URL(creates[0].url()).pathname).toBe(
+      `/api/v1/patient/${patientId}/immunization/recommendation/create_tree/`,
     );
-    expect(root).toMatchObject({
+    const body = creates[0].postDataJSON();
+    expect(body).toMatchObject({
       patient: patientId,
       encounter: encounterId,
-      parent: null,
-      is_group: true,
-      forecast_status: "due",
     });
+    const root = body.root;
+    expect(root.is_group).toBe(true);
     expect(root).not.toHaveProperty("codes");
-    const rootId = (await (await creates[0].response())!.json()).id;
+    expect(root.children).toHaveLength(2);
+    const [first, second] = root.children;
     expect(first).toMatchObject({
-      parent: rootId,
       is_group: false,
       codes: [{ ...vaccine, version: "2024" }],
       diseases: [disease],
@@ -214,23 +238,32 @@ test.describe("Encounter immunizations", () => {
       overdue_date: "2026-01-15",
       dose_number: "1",
       series_number: "2",
+      children: [],
     });
     expect(second).toMatchObject({
-      parent: rootId,
+      is_group: false,
+      codes: [vaccine],
       due_date: "2026-01-29",
+      children: [],
     });
     expect(second).not.toHaveProperty("earliest_date");
+    for (const node of [root, first, second]) {
+      expect(node).not.toHaveProperty("parent");
+      expect(node).not.toHaveProperty("forecast_status");
+    }
 
     const schedule = page.getByRole("list", { name: "Schedule" });
     await expect(schedule.getByRole("listitem")).toHaveCount(2);
   });
 
-  test("records a dose for a due recommendation and completes it", async ({
+  test("switches the linked recommendation, records its vaccine and completes it", async ({
     page,
   }) => {
     const due = recommendation();
+    const nextVaccine = { ...vaccine, code: "03", display: "MMR vaccine" };
+    const selected = recommendation({ codes: [nextVaccine], diseases: [] });
     const writes = await routeImmunizations(page, patientId, {
-      recommendations: [due],
+      recommendations: [due, selected],
     });
     await page.goto(tabUrl);
 
@@ -251,6 +284,11 @@ test.describe("Encounter immunizations", () => {
         name: "Mark the recommendation as complete",
       }),
     ).toBeChecked();
+    await sheet.getByRole("combobox", { name: "For recommendation" }).click();
+    await page.getByRole("option", { name: /MMR vaccine/ }).click();
+    await expect(
+      sheet.getByRole("combobox", { name: "Vaccine", exact: true }),
+    ).toContainText(nextVaccine.display);
     await sheet.getByRole("spinbutton", { name: "Dose" }).fill("0.5");
 
     const [record] = await Promise.all([
@@ -261,8 +299,8 @@ test.describe("Encounter immunizations", () => {
       encounter: encounterId,
       status: "completed",
       primary_source: true,
-      recommendation: due.id,
-      code: vaccine,
+      recommendation: selected.id,
+      code: nextVaccine,
       dose_quantity: {
         value: "0.5",
         unit: { code: "mL", system: "http://unitsofmeasure.org" },
@@ -278,14 +316,97 @@ test.describe("Encounter immunizations", () => {
     );
     expect(update?.postDataJSON()).toMatchObject({
       forecast_status: "complete",
-      codes: [vaccine],
-      due_date: due.due_date,
+      codes: [nextVaccine],
+      due_date: selected.due_date,
     });
+    expect(new URL(update!.url()).pathname).toBe(
+      `/api/v1/patient/${patientId}/immunization/recommendation/${selected.id}/`,
+    );
     await expect(
       page
         .getByRole("list", { name: "Administered" })
-        .getByRole("listitem", { name: vaccine.display }),
+        .getByRole("listitem", { name: nextVaccine.display }),
     ).toContainText("Completed");
+    await expect(
+      item.getByRole("button", { name: `Record dose of ${vaccine.display}` }),
+    ).toBeVisible();
+  });
+
+  test("shows load failures separately from empty clinical lists and policy catalogues, with retry", async ({
+    page,
+  }) => {
+    await routeImmunizations(page, patientId);
+    const unavailable = new Set(["recommendation", "record"]);
+    await page.route(
+      (url) =>
+        ["recommendation", "record"].some(
+          (resource) =>
+            url.pathname ===
+            `/api/v1/patient/${patientId}/immunization/${resource}/`,
+        ),
+      (route) => {
+        const resource = new URL(route.request().url()).pathname
+          .split("/")
+          .at(-2)!;
+        return unavailable.has(resource)
+          ? route.fulfill({
+              status: 503,
+              json: { detail: "Temporarily unavailable" },
+            })
+          : route.fallback();
+      },
+    );
+    let catalogueUnavailable = true;
+    await page.route(
+      (url) => url.pathname === "/api/v1/immunization/policy/",
+      (route) =>
+        catalogueUnavailable
+          ? route.fulfill({
+              status: 503,
+              json: { detail: "Temporarily unavailable" },
+            })
+          : route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.goto(tabUrl);
+    for (const [resource, name, empty] of [
+      ["recommendation", "Schedule", "No recommendations scheduled"],
+      ["record", "Administered", "No immunizations recorded"],
+    ]) {
+      const section = page.getByRole("region", { name, exact: true });
+      await expect(section.getByRole("alert")).toContainText(
+        "Could not load this clinical information.",
+      );
+      await expect(section.getByText(empty, { exact: true })).toBeHidden();
+      unavailable.delete(resource);
+      await section
+        .getByRole("button", { name: "Try Again", exact: true })
+        .click();
+      await expect(section.getByText(empty, { exact: true })).toBeVisible();
+      await expect(section.getByRole("alert")).toBeHidden();
+    }
+
+    await page.getByRole("button", { name: "Apply policy" }).click();
+    const dialog = page.getByRole("dialog", { name: "Apply policy" });
+    await expect(dialog.getByRole("alert")).toContainText(
+      "Unable to load immunization policies.",
+    );
+    await expect(
+      dialog.getByText("No immunization policies yet", { exact: true }),
+    ).toBeHidden();
+    await expect(
+      dialog.getByRole("combobox", { name: "Policy" }),
+    ).toBeDisabled();
+    catalogueUnavailable = false;
+    await dialog
+      .getByRole("button", { name: "Try Again", exact: true })
+      .click();
+    await expect(
+      dialog.getByText("No immunization policies yet", { exact: true }),
+    ).toBeVisible();
+    await expect(dialog.getByRole("alert")).toBeHidden();
+    await expect(
+      dialog.getByRole("combobox", { name: "Policy" }),
+    ).toBeEnabled();
   });
 
   test("requires a reason when an immunization was not given", async ({

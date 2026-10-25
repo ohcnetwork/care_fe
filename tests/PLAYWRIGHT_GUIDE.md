@@ -102,7 +102,7 @@ const accountId = getAccountId();
 
 // Admin pages
 /admin/questionnaires
-/admin/valueset
+/admin/valuesets
 ```
 
 ## Data Generation

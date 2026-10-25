@@ -69,8 +69,57 @@ describe("findActionIssues", () => {
       [{ index: 0, messageKey: "action_issue_repeating_group_question" }],
     );
   });
-  it("passes a well-formed action", () => {
-    assert.deepEqual(findActionIssues([valid], context), []);
+  it("passes well-formed canonical and custom expressions", () => {
+    for (const condition of [
+      valid.condition,
+      "not q_fever and -q_temp + 2 * q_temp / 3 % 2 > 0",
+      "q_temp if q_fever else (q_temp + 1)",
+      'q_temp is not None and "x" not in "xyz"',
+      'f"{q_temp:>{q_fever}}" " units"',
+      'r"literal" r"suffix" == "literalsuffix"',
+    ]) {
+      assert.deepEqual(
+        findActionIssues([{ ...valid, condition }], context),
+        [],
+        condition,
+      );
+    }
+  });
+
+  it("blocks incomplete conditions and templated inputs before saving", () => {
+    const incomplete = [
+      "q_temp >",
+      "and",
+      "q_temp + * 2",
+      "patient[]",
+      "()",
+      "q_temp if q_fever",
+      'f"{q_temp +}"',
+      'f"{q_temp:>{q_fever +}}"',
+    ];
+    for (const expression of incomplete) {
+      const actions = [
+        { ...valid, condition: expression },
+        {
+          ...valid,
+          instructions: [
+            {
+              slug: "logging",
+              context: "self",
+              params: { message: `{{ ${expression} }}` },
+            },
+          ],
+        },
+      ];
+      assert.deepEqual(
+        findActionIssues(actions, context),
+        [
+          { index: 0, messageKey: "action_issue_expression_syntax" },
+          { index: 1, messageKey: "action_issue_expression_syntax" },
+        ],
+        expression,
+      );
+    }
   });
 
   it("reports the first failing rule per action, in action order", () => {

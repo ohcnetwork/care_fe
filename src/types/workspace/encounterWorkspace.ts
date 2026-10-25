@@ -7,6 +7,7 @@ export const SYSTEM_PAGE_KEYS = [
   "responses",
   "observations",
   "medicines",
+  "immunizations",
   "service_requests",
   "diagnostic_reports",
   "plots",

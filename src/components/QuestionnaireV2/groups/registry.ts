@@ -36,6 +36,8 @@ export interface GroupField {
 }
 
 export interface GroupRow {
+  /** Host-owned React key; stable across edits and removals of sibling rows. */
+  key: number;
   /** Local schema link_id → binding; missing or incompatible fields are null. */
   fields: Record<string, GroupField | null>;
   onChange: (updates: Record<string, Partial<QuestionnaireResponse>>) => void;

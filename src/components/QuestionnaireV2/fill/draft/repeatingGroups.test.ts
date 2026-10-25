@@ -40,9 +40,7 @@ const childQuestions = [
   }),
   question("visits", "group", {
     repeats: true,
-    enable_when: [
-      { question: "finding", operator: "equals", answer: "caries" },
-    ],
+    enable_when: [{ question: "show", operator: "equals", answer: true }],
     questions: [question("score", "integer"), question("done", "boolean")],
   }),
 ];
@@ -74,7 +72,10 @@ function responses() {
       { type: "dateTime", value: new Date("2026-09-26T12:00:00Z") },
     ]),
     answer("note", [
-      { type: "string", value: index ? "Hidden stale answer" : "Visible note" },
+      {
+        type: "string",
+        value: index ? "Hidden stale answer" : "Row-only stale answer",
+      },
     ]),
     {
       ...answer("visits", []),
@@ -125,7 +126,7 @@ test("repeating drafts retain row boundaries and revive dates recursively", () =
   assert.equal(parsed.mismatch, true);
 });
 
-test("submission scopes conditional children to each row and skips disabled group subtrees", () => {
+test("submission matches root-map visibility while preserving nested rows and skipping hidden subtrees", () => {
   const state = responses();
   const result = serializeQuestionResults(questions, state);
   assert.deepEqual(
@@ -142,16 +143,14 @@ test("submission scopes conditional children to each row and skips disabled grou
     rows[1].find((entry) => entry.question_id === "tooth")?.values?.[0].value,
     "17",
   );
-  assert.equal(
-    rows[0].find((entry) => entry.question_id === "note")?.values?.[0].value,
-    "Visible note",
-  );
-  assert.equal(
-    rows[1].some(
-      (entry) => entry.question_id === "note" || entry.question_id === "visits",
-    ),
-    false,
-  );
+  // A row's finding cannot enable a question the renderer/backend hide:
+  // enable_when always reads the root response map.
+  for (const row of rows) {
+    assert.equal(
+      row.some((entry) => entry.question_id === "note"),
+      false,
+    );
+  }
   const nested = rows[0].find((entry) => entry.question_id === "visits")
     ?.sub_results?.[0];
   assert.deepEqual(

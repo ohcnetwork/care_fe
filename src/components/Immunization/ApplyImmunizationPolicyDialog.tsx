@@ -27,7 +27,6 @@ import {
 
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime } from "@/Utils/utils";
-import { ImmunizationRecommendationRead } from "@/types/emr/immunizationRecommendation/immunizationRecommendation";
 import immunizationRecommendationApi from "@/types/emr/immunizationRecommendation/immunizationRecommendationApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 
@@ -36,7 +35,6 @@ import { fetchImmunizationPolicyCatalogue } from "@/pages/ImmunizationPolicies/u
 import {
   MaterializedRecommendation,
   codingsLabel,
-  countNodes,
   doseLabel,
   flattenRecommendations,
   materializePolicyTemplate,
@@ -96,9 +94,13 @@ function ApplyPolicyForm({
   const [startDate, setStartDate] = useState(
     patient.date_of_birth || todayDateString(),
   );
-  const [progress, setProgress] = useState(0);
-
-  const { data: policies, isLoading } = useQuery({
+  const {
+    data: policies,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["immunization-policies", "facility-catalogue", facilityId],
     queryFn: ({ signal }) =>
       fetchImmunizationPolicyCatalogue(signal, facilityId),
@@ -110,32 +112,12 @@ function ApplyPolicyForm({
       ? materializePolicyTemplate(policy.policy_template, reference)
       : undefined;
   const preview = schedule ? flattenRecommendations(schedule) : [];
-  const total = schedule ? countNodes(schedule) : 0;
 
   const apply = useMutation({
-    mutationFn: async (root: MaterializedRecommendation) => {
-      setProgress(0);
-      const create = mutate(immunizationRecommendationApi.create, {
+    mutationFn: (root: MaterializedRecommendation) =>
+      mutate(immunizationRecommendationApi.createTree, {
         pathParams: { patientId: patient.id },
-      });
-      // Parents are created first so each child can reference its group.
-      const createNode = async (
-        node: MaterializedRecommendation,
-        parent: string | null,
-      ) => {
-        const { children, ...fields } = node;
-        const created: ImmunizationRecommendationRead = await create({
-          ...fields,
-          patient: patient.id,
-          encounter: encounterId,
-          parent,
-          forecast_status: "due",
-        });
-        setProgress((count) => count + 1);
-        for (const child of children) await createNode(child, created.id);
-      };
-      await createNode(root, null);
-    },
+      })({ patient: patient.id, encounter: encounterId, root }),
     onSuccess: () => {
       toast.success(t("immunization_policy_applied"));
       onDone();
@@ -156,7 +138,9 @@ function ApplyPolicyForm({
       className="space-y-5"
       onSubmit={(event) => {
         event.preventDefault();
-        if (schedule && !apply.isPending) apply.mutate(schedule);
+        if (schedule && preview.length && !isError && !apply.isPending) {
+          apply.mutate(schedule);
+        }
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
@@ -167,7 +151,7 @@ function ApplyPolicyForm({
           <Select
             value={policyId}
             onValueChange={setPolicyId}
-            disabled={isLoading || apply.isPending}
+            disabled={isLoading || isError || apply.isPending}
           >
             <SelectTrigger id={`${id}-policy`} className="w-full">
               <SelectValue
@@ -184,7 +168,23 @@ function ApplyPolicyForm({
               ))}
             </SelectContent>
           </Select>
-          {!isLoading && !policies?.results.length && (
+          {isError && (
+            <Alert variant="destructive">
+              <AlertDescription className="space-y-2">
+                <p>{t("immunization_policy_list_error")}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isFetching}
+                  onClick={() => refetch()}
+                >
+                  {t("try_again")}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          {!isLoading && !isError && !policies?.results.length && (
             <p className="text-xs text-gray-500">
               {t("immunization_policy_empty")}
             </p>
@@ -270,15 +270,15 @@ function ApplyPolicyForm({
         >
           {t("cancel")}
         </Button>
-        <Button type="submit" disabled={!preview.length || apply.isPending}>
+        <Button
+          type="submit"
+          disabled={!preview.length || isError || apply.isPending}
+        >
           {apply.isPending && (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           )}
           {apply.isPending
-            ? t("immunization_applying_policy", {
-                done: progress,
-                total,
-              })
+            ? t("immunization_applying_policy")
             : t("immunization_apply_policy_count", {
                 count: preview.length,
               })}

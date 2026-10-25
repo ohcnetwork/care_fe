@@ -10,15 +10,33 @@ interface ValueSetSummary {
 export async function listFacilityValueSets(
   facilityId: string,
 ): Promise<ValueSetSummary[]> {
-  const res = await fetch(
-    `${apiBaseUrl()}/api/v1/valueset/?facility=${facilityId}&limit=100`,
-    { headers: adminApiHeaders() },
-  );
-  if (!res.ok) {
-    throw new Error(`valueset list failed: ${res.status}`);
-  }
-  const body = (await res.json()) as { results: ValueSetSummary[] };
-  return body.results;
+  return listValueSets({ facility: facilityId });
+}
+
+async function listValueSets(
+  filters: Record<string, string>,
+): Promise<ValueSetSummary[]> {
+  const results: ValueSetSummary[] = [];
+  let count: number;
+  do {
+    const params = new URLSearchParams({
+      ...filters,
+      limit: "100",
+      offset: String(results.length),
+    });
+    const res = await fetch(`${apiBaseUrl()}/api/v1/valueset/?${params}`, {
+      headers: adminApiHeaders(),
+    });
+    if (!res.ok) throw new Error(`valueset list failed: ${res.status}`);
+    const body = (await res.json()) as {
+      count: number;
+      results: ValueSetSummary[];
+    };
+    count = body.count;
+    results.push(...body.results);
+    if (!body.results.length) break;
+  } while (results.length < count);
+  return results;
 }
 
 /**
@@ -119,12 +137,8 @@ export async function resolveSlugForFacility(
 export async function getInstanceValueSetIdBySlug(
   slug: string,
 ): Promise<string> {
-  const res = await fetch(
-    `${apiBaseUrl()}/api/v1/valueset/?auth_context=instance&limit=100`,
-    { headers: adminApiHeaders() },
-  );
-  const body = (await res.json()) as { results: ValueSetSummary[] };
-  const match = body.results.find((valueset) => valueset.slug === slug);
+  const valuesets = await listValueSets({ auth_context: "instance" });
+  const match = valuesets.find((valueset) => valueset.slug === slug);
   if (!match) {
     throw new Error(`instance value set ${slug} not found`);
   }

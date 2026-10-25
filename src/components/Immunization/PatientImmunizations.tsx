@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
+
 import query from "@/Utils/request/query";
 import immunizationApi from "@/types/emr/immunization/immunizationApi";
 import immunizationRecommendationApi from "@/types/emr/immunizationRecommendation/immunizationRecommendationApi";
@@ -130,14 +132,21 @@ export function PatientImmunizations({
         >
           {t("immunization_schedule")}
         </h3>
-        <ImmunizationScheduleList
-          patientId={patientId}
-          recommendations={recommendationList}
-          isLoading={recommendations.isLoading}
-          canUpdateStatus={canPlan}
-          canRecord={canRecord}
-          onRecord={(recommendation) => openRecord({ recommendation })}
-        />
+        {recommendations.isError ? (
+          <ClinicalListError
+            isFetching={recommendations.isFetching}
+            onRetry={recommendations.refetch}
+          />
+        ) : (
+          <ImmunizationScheduleList
+            patientId={patientId}
+            recommendations={recommendationList}
+            isLoading={recommendations.isLoading}
+            canUpdateStatus={canPlan}
+            canRecord={canRecord}
+            onRecord={(recommendation) => openRecord({ recommendation })}
+          />
+        )}
       </section>
 
       <section className="space-y-3" aria-labelledby="immunization-records">
@@ -147,12 +156,19 @@ export function PatientImmunizations({
         >
           {t("immunization_records")}
         </h3>
-        <ImmunizationRecordList
-          records={records.data?.results ?? []}
-          isLoading={records.isLoading}
-          canEdit={canRecord}
-          onEdit={(record) => openRecord({ record })}
-        />
+        {records.isError ? (
+          <ClinicalListError
+            isFetching={records.isFetching}
+            onRetry={records.refetch}
+          />
+        ) : (
+          <ImmunizationRecordList
+            records={records.data?.results ?? []}
+            isLoading={records.isLoading}
+            canEdit={canRecord}
+            onEdit={(record) => openRecord({ record })}
+          />
+        )}
       </section>
 
       {write && (

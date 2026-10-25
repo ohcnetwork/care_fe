@@ -339,7 +339,7 @@ export function PolicyTemplateEditor({
                 {t("immunization_day_offsets")}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {OFFSET_FIELDS.map(([field, label, accessibleLabel]) => {
                 const error = fieldError(field);
                 return (

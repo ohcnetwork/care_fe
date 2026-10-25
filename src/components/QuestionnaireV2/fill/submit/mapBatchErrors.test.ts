@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+import type { Question } from "@/types/questionnaire/question";
 
 import { mapBatchErrors } from "./mapBatchErrors";
 
@@ -75,6 +76,69 @@ describe("mapBatchErrors", () => {
 
     assert.equal(mapped.questionErrors.length, 1);
     assert.equal(mapped.questionErrors[0].question_id, "q42");
+  });
+
+  it("pins a nested structured failure to its repeat row without marking sibling rows", () => {
+    const path = [
+      { questionId: "visits", rowIndex: 1 },
+      { questionId: "doses", rowIndex: 2 },
+    ];
+    const questions: Question[] = [
+      {
+        id: "visits",
+        link_id: "visits",
+        text: "Visits",
+        type: "group",
+        repeats: true,
+        questions: [
+          {
+            id: "details",
+            link_id: "details",
+            text: "Details",
+            type: "group",
+            questions: [
+              {
+                id: "doses",
+                link_id: "doses",
+                text: "Doses",
+                type: "group",
+                repeats: true,
+                questions: [
+                  {
+                    id: "q1",
+                    link_id: "q1",
+                    text: "Symptoms",
+                    type: "structured",
+                    structured_type: "symptom",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const results: BatchResults = [
+      {
+        reference_id: structuredReferenceId("symptom", "q1", path),
+        status_code: 400,
+        data: { errors: [{ msg: "Invalid clinical status" }] },
+      },
+    ];
+    assert.deepEqual(
+      mapBatchErrors(results, FALLBACK, questions).questionErrors,
+      [
+        {
+          question_id: "q1",
+          response_path: path,
+          error: "Invalid clinical status",
+          type: "server_error",
+        },
+      ],
+    );
+    const withoutDefinition = mapBatchErrors(results, FALLBACK);
+    assert.equal(withoutDefinition.serverErrors.length, 1);
+    assert.deepEqual(withoutDefinition.questionErrors, []);
   });
 
   it("a structured reference_id with no question id yields a panel entry but pins to nothing", () => {

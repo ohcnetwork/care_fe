@@ -50,7 +50,7 @@ export function collectActionReferenceErrors(
     for (const question of questions) {
       const enabled =
         ancestorsEnabled &&
-        isQuestionEnabledInState(question, scope, linkIndex);
+        isQuestionEnabledInState(question, responses, linkIndex);
       if (
         enabled &&
         question.type !== "group" &&
@@ -65,12 +65,10 @@ export function collectActionReferenceErrors(
       }
       if (question.type === "group" && question.repeats) {
         (scope[question.id]?.sub_results ?? []).forEach((row, rowIndex) =>
-          walk(
-            question.questions ?? [],
-            enabled,
-            { ...scope, ...responseMap(row) },
-            [...path, { questionId: question.id, rowIndex }],
-          ),
+          walk(question.questions ?? [], enabled, responseMap(row), [
+            ...path,
+            { questionId: question.id, rowIndex },
+          ]),
         );
       } else walk(question.questions ?? [], enabled, scope, path);
     }

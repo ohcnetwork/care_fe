@@ -12,6 +12,7 @@ import {
 } from "@/components/QuestionnaireV2/form/engine/responseScope";
 import {
   EMPTY_ROW_KEYS,
+  dropRowKey,
   growRowKeys,
 } from "@/components/QuestionnaireV2/form/engine/rowKeys";
 import {
@@ -120,6 +121,7 @@ export function RegisteredGroupSlot(props: {
     if (locked) return;
     const current = store.get(responsesAtom);
     const scoped = getScopedResponses(current, path);
+    const previousRows = scoped[question.id]?.sub_results ?? [];
     const next = updateGroupRows(
       question,
       definition,
@@ -134,23 +136,33 @@ export function RegisteredGroupSlot(props: {
       }),
     );
     const nextRows = next[question.id]?.sub_results ?? [];
+    if (action.type === "remove" && nextRows.length < previousRows.length) {
+      const index = previousRows.indexOf(action.row);
+      setRowKeys((currentKeys) =>
+        dropRowKey(currentKeys, previousRows.length, index),
+      );
+    }
     store.set(errorsAtom, (previous) =>
       retainGroupRowErrors(
         previous,
         path,
         question.id,
         action,
-        scoped[question.id]?.sub_results ?? [],
+        previousRows,
         nextRows,
       ),
     );
     return nextRows;
   };
-  const rows = (
-    question.repeats ? (responses[question.id]?.sub_results ?? []) : []
-  ).map((row, index) => {
+  const responseRows = question.repeats
+    ? (responses[question.id]?.sub_results ?? [])
+    : [];
+  const keys = growRowKeys(rowKeys, responseRows.length);
+  if (keys !== rowKeys) setRowKeys(keys);
+  const rows = responseRows.map((row, index) => {
     let currentRow: QuestionnaireResponse[] = row;
     return {
+      key: keys.keys[index],
       fields: groupBindings(
         question,
         definition,
@@ -179,8 +191,6 @@ export function RegisteredGroupSlot(props: {
       },
     };
   });
-  const keys = growRowKeys(rowKeys, rows.length);
-  if (keys !== rowKeys) setRowKeys(keys);
   const incompatible =
     incompatibleGroupQuestions(question, definition).length > 0;
   const children = question.questions ?? [];

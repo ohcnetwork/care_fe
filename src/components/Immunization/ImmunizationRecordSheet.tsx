@@ -369,8 +369,11 @@ function ImmunizationRecordForm({
                       (item) => item.id === value,
                     );
                     const code = toCode(next?.codes?.[0]);
-                    if (code && !form.getValues("code"))
-                      form.setValue("code", code, { shouldValidate: true });
+                    if (code)
+                      form.setValue("code", code, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
                   }}
                 >
                   <FormControl>

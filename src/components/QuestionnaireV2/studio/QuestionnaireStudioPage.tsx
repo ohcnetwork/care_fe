@@ -349,10 +349,12 @@ export function QuestionnaireStudioPage({
           >
             <StudioCanvas
               editing={editing}
-              // Cleared while Form settings is the inspector target so the
+              // Cleared while Form settings or Actions is the inspector target so the
               // ring/toolbar don't advertise a question as "editing" that
               // the inspector no longer shows.
-              selectedId={editing && formSelected ? null : state.selectedId}
+              selectedId={
+                editing && panel !== "question" ? null : state.selectedId
+              }
               onSelectQuestion={selectQuestion}
               dispatch={studioDispatch}
               questions={state.questions}

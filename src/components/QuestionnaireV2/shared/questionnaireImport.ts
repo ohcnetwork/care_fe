@@ -62,20 +62,10 @@ function isQuestionLike(value: unknown): value is Question {
         (option: unknown) =>
           isRecord(option) &&
           (typeof option.value === "string" ||
-            typeof option.value === "number"),
-      ))
-  ) {
-    return false;
-  }
-  if (
-    candidate.answer_option != null &&
-    (!Array.isArray(candidate.answer_option) ||
-      !candidate.answer_option.every(
-        (option: unknown) =>
-          typeof option === "object" &&
-          option !== null &&
-          "value" in option &&
-          typeof option.value === "string",
+            (typeof option.value === "number" &&
+              Number.isFinite(option.value))) &&
+          (option.initial_selected === undefined ||
+            typeof option.initial_selected === "boolean"),
       ))
   ) {
     return false;
@@ -94,6 +84,14 @@ function normalizeImportedQuestion(question: Question): Question {
     ...question,
     ...(typeof answerValueSet === "string"
       ? { answer_value_set: { slug: answerValueSet } }
+      : {}),
+    ...(question.answer_option
+      ? {
+          answer_option: question.answer_option.map((option) => ({
+            ...option,
+            value: String(option.value),
+          })),
+        }
       : {}),
     ...(question.questions
       ? { questions: question.questions.map(normalizeImportedQuestion) }
