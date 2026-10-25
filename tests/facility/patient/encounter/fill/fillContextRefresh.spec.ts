@@ -41,21 +41,27 @@ for (const target of [
     const fillUrl = `${patientUrl}${target === "patient" ? "" : `/encounter/${encounterId}`}/questionnaire/${questionnaireId}${target === "server draft" ? `?continue_draft=${draftId}` : ""}`;
     const draftEndpoint = `/api/v1/form_submission/${draftId}/`;
     if (target === "server draft") {
+      const draft = {
+        id: draftId,
+        status: "draft",
+        response_dump: {
+          questionnaireResponses: {
+            questionnaire: { id: questionnaireId },
+            responses: [],
+          },
+        },
+      };
       await page.route(
         (url) => url.pathname === draftEndpoint,
+        (route) => route.fulfill({ json: draft }),
+      );
+      // The page also checks the draft is among this encounter's own drafts.
+      await page.route(
+        (url) => url.pathname === "/api/v1/form_submission/",
         (route) =>
-          route.fulfill({
-            json: {
-              id: draftId,
-              status: "draft",
-              response_dump: {
-                questionnaireResponses: {
-                  questionnaire: { id: questionnaireId },
-                  responses: [],
-                },
-              },
-            },
-          }),
+          route.request().method() === "GET"
+            ? route.fulfill({ json: { count: 1, results: [draft] } })
+            : route.fallback(),
       );
     }
 

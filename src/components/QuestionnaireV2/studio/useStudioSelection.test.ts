@@ -55,13 +55,12 @@ test("studio selection preserves reveal intent and follows question-creating act
   const root = createRoot(dom.window.document.getElementById("root")!);
   try {
     await act(async () => root.render(createElement(Harness)));
-    assert.equal(selection!.panel, "question");
+    assert.equal(selection!.formSelected, false);
     assert.equal(selection!.selectedNumber, "1.1.");
     const handlers = {
       dispatch: selection!.studioDispatch,
       select: selection!.selectQuestion,
       reveal: selection!.revealQuestion,
-      revealAction: selection!.revealAction,
     };
     // Unrelated metadata/sidebar renders must not replace the callbacks
     // used by the canvas's memoized editor context.
@@ -69,16 +68,10 @@ test("studio selection preserves reveal intent and follows question-creating act
     assert.equal(selection!.studioDispatch, handlers.dispatch);
     assert.equal(selection!.selectQuestion, handlers.select);
     assert.equal(selection!.revealQuestion, handlers.reveal);
-    assert.equal(selection!.revealAction, handlers.revealAction);
-
-    await act(async () => selection.revealAction(2));
-    assert.equal(selection!.panel, "actions");
-    assert.equal(selection!.openActionIndex, 2);
-    assert.equal(selection!.selectedQuestion?.id, "child");
 
     // Canvas and mobile navigation select without requesting a scroll.
     await act(async () => selection.selectQuestion("tail"));
-    assert.equal(selection!.panel, "question");
+    assert.equal(selection!.formSelected, false);
     assert.equal(selection!.selectedNumber, "2.");
     assert.equal(selection!.scrollRequest, null);
 
@@ -95,18 +88,18 @@ test("studio selection preserves reveal intent and follows question-creating act
     await act(async () =>
       selection.studioDispatch({ type: "addQuestion", parentId: null }),
     );
-    assert.equal(selection!.panel, "question");
+    assert.equal(selection!.formSelected, false);
     assert.equal(selection!.selectedNumber, "3.");
 
     await act(async () => selection.setInspectorTarget("form"));
     await act(async () =>
       selection.studioDispatch({ type: "duplicateQuestion", id: "child" }),
     );
-    assert.equal(selection!.panel, "question");
+    assert.equal(selection!.formSelected, false);
     assert.equal(selection!.selectedQuestion?.text, "Child (copy)");
     assert.notEqual(selection!.selectedQuestion?.id, "child");
 
-    await act(async () => selection.revealAction(0));
+    await act(async () => selection.setInspectorTarget("form"));
     await act(async () =>
       selection.studioDispatch({
         type: "replaceAll",
@@ -120,13 +113,13 @@ test("studio selection preserves reveal intent and follows question-creating act
         ],
       }),
     );
-    assert.equal(selection!.panel, "question");
+    assert.equal(selection!.formSelected, false);
     assert.equal(selection!.selectedQuestion?.id, "imported");
 
     await act(async () =>
       selection.studioDispatch({ type: "removeQuestions", ids: ["imported"] }),
     );
-    assert.equal(selection!.panel, "form");
+    assert.equal(selection!.formSelected, true);
     assert.equal(selection!.selectedQuestion, undefined);
   } finally {
     await act(async () => root.unmount());

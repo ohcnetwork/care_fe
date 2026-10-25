@@ -116,6 +116,13 @@ export function QuestionInspector({
   };
 
   const handleTypeChange = (patch: Partial<Question>) => {
+    const nextType = patch.type ?? question.type;
+    if (
+      nextType === question.type &&
+      patch.structured_type === question.structured_type
+    ) {
+      return;
+    }
     const changingAwayFromGroup =
       question.type === "group" && patch.type && patch.type !== "group";
     if (changingAwayFromGroup && (question.questions?.length ?? 0) > 0) {
@@ -140,16 +147,9 @@ export function QuestionInspector({
         questions: instantiateGroupQuestions(question, definition.schema),
       };
     }
-    // Switching to a type that never offers Repeats also clears a previously set
-    // flag, so it can't linger invisibly once the chip disappears.
-    const nextType = patch.type ?? question.type;
     if (question.repeats && NON_REPEATABLE_TYPES.includes(nextType)) {
       patch = { ...patch, repeats: false };
     }
-    // Explicit `undefined` clears fields the new type no longer supports. A
-    // stale `structured_type` can route fill-time structured plumbing down the
-    // wrong path, while structured selections set `type` and `structured_type`
-    // together.
     if (nextType !== "structured" && nextType !== "group") {
       patch = { ...patch, structured_type: undefined };
     }

@@ -68,7 +68,10 @@ export function mapBatchErrors(
   const serverErrors: ServerValidationError[] = [];
   const questionErrors: QuestionValidationError[] = [];
 
-  for (const result of results.filter((r) => r.status_code !== 200)) {
+  const failed = results.filter(
+    (result) => result.status_code < 200 || result.status_code >= 300,
+  );
+  for (const result of failed) {
     const referenceId = result.reference_id || "";
     let message = fallbackMessage;
 

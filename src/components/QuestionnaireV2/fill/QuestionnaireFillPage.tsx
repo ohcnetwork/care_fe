@@ -72,9 +72,11 @@ export function QuestionnaireFillPage({
     isQuestionnaireError,
     isEncounterLoading,
     isEncounterError,
+    isPatientLoading,
     isPatientError,
     isServerDraftLoading,
     isServerDraftError,
+    serverDraftForeign,
     contextRefreshFailed,
     isRetryingContext,
     retryContext,
@@ -138,6 +140,7 @@ export function QuestionnaireFillPage({
   if (
     isQuestionnaireLoading ||
     (encounterId && isEncounterLoading) ||
+    isPatientLoading ||
     (continueDraftId && isServerDraftLoading)
   ) {
     // Same fullscreen shell the loaded page uses, so the layout doesn't
@@ -203,6 +206,18 @@ export function QuestionnaireFillPage({
   if (isServerDraftError) {
     return (
       <FillErrorPage message={t("draft_load_failed")} exitTarget={exitTarget} />
+    );
+  }
+
+  // The URL is shareable: a draft the user may read but that belongs to
+  // another patient or encounter must not render beside this route's
+  // clinical context, nor be completed by this route's submit.
+  if (serverDraftForeign) {
+    return (
+      <FillErrorPage
+        message={t("draft_subject_mismatch")}
+        exitTarget={exitTarget}
+      />
     );
   }
 

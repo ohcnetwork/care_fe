@@ -1,6 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import {
   errorsAtom,
@@ -16,8 +19,10 @@ import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { ResponsePath } from "@/types/questionnaire/form";
+import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type { Question } from "@/types/questionnaire/question";
 import { useBatchRequest } from "@/Utils/request/batch";
+import query from "@/Utils/request/query";
 import { Type } from "@/Utils/request/types";
 
 import {
@@ -137,6 +142,7 @@ export function useSubmitFillSession({
   onSuccess,
 }: UseSubmitFillSessionArgs) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>([]);
 
   const { mutate: submitBatch, isPending } = useBatchRequest({
@@ -283,6 +289,28 @@ export function useSubmitFillSession({
       return;
     }
     setServerErrors([]);
+
+    // A resumed draft must still be open. The backend's duplicate guard runs
+    // on the questionnaire POST, which a form with only structured answers
+    // never sends, so re-read the record before any domain write goes out.
+    if (continueDraftId) {
+      try {
+        const draft = await queryClient.fetchQuery({
+          queryKey: formSubmissionKeys.detail(continueDraftId),
+          queryFn: query(formSubmissionApi.get, {
+            pathParams: { external_id: continueDraftId },
+          }),
+          staleTime: 0,
+        });
+        if (draft.status !== "draft") {
+          toast.error(t("draft_already_submitted"));
+          return;
+        }
+      } catch {
+        toast.error(t("draft_load_failed"));
+        return;
+      }
+    }
 
     // 2) One batch across all forms (composeBatch already orders
     //    structured requests first WITHIN a form). Only the primary form

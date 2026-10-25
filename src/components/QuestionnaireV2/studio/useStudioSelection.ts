@@ -16,12 +16,9 @@ export function useStudioSelection(
   state: BuilderState,
   dispatch: Dispatch<BuilderAction>,
 ) {
-  const [inspectorTarget, setInspectorTarget] = useState<
-    "form" | "question" | "actions"
-  >("question");
-  // The expanded card in the Actions panel — owned here so an issue click
-  // from the top bar can open the right one.
-  const [openActionIndex, setOpenActionIndex] = useState<number | null>(null);
+  const [inspectorTarget, setInspectorTarget] = useState<"form" | "question">(
+    "question",
+  );
   const [scrollRequest, setScrollRequest] = useState<{
     id: string;
     nonce: number;
@@ -62,23 +59,11 @@ export function useStudioSelection(
     [selectQuestion],
   );
 
-  const revealAction = useCallback((index: number) => {
-    setInspectorTarget("actions");
-    setOpenActionIndex(index);
-  }, []);
-
   const selectedQuestion = state.selectedId
     ? findQuestion(state.questions, state.selectedId)
     : undefined;
-  // Which inspector shows: Actions when asked for; otherwise Form settings
-  // stands in whenever no question is selected.
-  const panel: "form" | "question" | "actions" =
-    inspectorTarget === "actions"
-      ? "actions"
-      : inspectorTarget === "form" || !selectedQuestion
-        ? "form"
-        : "question";
-  const formSelected = panel === "form";
+  // Form settings stands in whenever no question is selected.
+  const formSelected = inspectorTarget === "form" || !selectedQuestion;
   const topLevelIndex = state.selectedId
     ? findTopLevelIndex(state.questions, state.selectedId)
     : 0;
@@ -92,15 +77,11 @@ export function useStudioSelection(
   return {
     studioDispatch,
     setInspectorTarget,
-    openActionIndex,
-    setOpenActionIndex,
     scrollRequest,
     selectQuestion,
     revealQuestion,
-    revealAction,
     selectedQuestion,
     selectedNumber,
-    panel,
     formSelected,
   };
 }
