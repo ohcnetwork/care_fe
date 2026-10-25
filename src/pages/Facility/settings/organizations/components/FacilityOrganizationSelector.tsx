@@ -12,7 +12,14 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -46,9 +53,14 @@ import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import { useOrganizationSelection } from "./useOrganizationSelection";
+
 interface FacilityOrganizationSelectorProps {
   value?: string[] | null;
-  onChange: (value: string[] | null) => void;
+  onChange: (
+    value: string[] | null,
+    organizations?: FacilityOrganizationRead[],
+  ) => void;
   facilityId: string;
   currentOrganizations?: FacilityOrganizationRead[];
   singleSelection?: boolean;
@@ -71,9 +83,18 @@ export default function FacilityOrganizationSelector(
 
   const queryClient = useQueryClient();
 
-  const [selectedOrganizations, setSelectedOrganizations] = useState<
-    FacilityOrganizationRead[]
-  >([]);
+  const {
+    selectedIds,
+    selectedOrganizations,
+    selectOrganization,
+    replaceSelection,
+    removeOrganization,
+  } = useOrganizationSelection({
+    value,
+    currentOrganizations,
+    singleSelection,
+    onChange,
+  });
   const [currentSelection, setCurrentSelection] =
     useState<FacilityOrganizationRead | null>(null);
   const [navigationLevels, setNavigationLevels] = useState<
@@ -82,9 +103,7 @@ export default function FacilityOrganizationSelector(
   const [facilityOrgSearch, setFacilityOrgSearch] = useState("");
   const [showAllOrgs, setShowAllOrgs] = useState(false);
   const [open, setOpen] = useState(false);
-  const [alreadySelected, setAlreadySelected] = useState(false);
-  const [hasAutoSelectedPreferred, setHasAutoSelectedPreferred] =
-    useState(false);
+  const preferredSelectionApplied = useRef(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
   const { ref: inViewRef, inView } = useInView();
 
@@ -187,19 +206,12 @@ export default function FacilityOrganizationSelector(
 
   const handleConfirmSelection = useCallback(
     (org: FacilityOrganizationRead) => {
-      if (!selectedOrganizations.includes(org)) {
-        const newSelection = singleSelection
-          ? [org]
-          : [...selectedOrganizations, org];
-        setSelectedOrganizations(newSelection);
-        onChange(newSelection.map((org) => org.id));
-        setAlreadySelected(true);
-      }
+      selectOrganization(org);
       setCurrentSelection(null);
       setNavigationLevels([]);
       setOpen(false);
     },
-    [selectedOrganizations, onChange, singleSelection],
+    [selectOrganization],
   );
 
   const getCurrentLevelOrganizations = useCallback(() => {
@@ -244,90 +256,54 @@ export default function FacilityOrganizationSelector(
     fetchNextPageChild,
   ]);
 
-  // Auto-select when there's only one organization available
+  // Query results can supply the form's initial department. The parent owns
+  // the selected IDs; notify it once when this external default becomes ready,
+  // without copying value props into local selection or chaining two effects.
+  const soleOrganization =
+    rootOrganizationsData?.results.length === 1
+      ? rootOrganizationsData.results[0]
+      : undefined;
+  const defaultOrganization =
+    navigationLevels.length === 0 &&
+    !facilityOrgSearch &&
+    selectedIds.length === 0 &&
+    !isLoadingRoot &&
+    !isLoadingPreferred &&
+    preferredOrgIds.length === 0 &&
+    !props.optional &&
+    !currentOrganizations?.some((org) => org.id === soleOrganization?.id)
+      ? soleOrganization
+      : undefined;
+  const selectDefaultOrganization = useEffectEvent(
+    (org: FacilityOrganizationRead) => {
+      handleConfirmSelection(org);
+    },
+  );
   useEffect(() => {
-    const availableOrganizations = getCurrentLevelOrganizations();
+    if (defaultOrganization) selectDefaultOrganization(defaultOrganization);
+  }, [defaultOrganization]);
 
-    // Only auto-select if:
-    // 1. We're at the root level (no navigation levels)
-    // 2. There's exactly one organization
-    // 3. No search is active
-    // 4. No organizations are currently selected
-    // 5. Not loading
-    if (
-      navigationLevels.length === 0 &&
-      availableOrganizations.length === 1 &&
-      !facilityOrgSearch &&
-      selectedOrganizations.length === 0 &&
-      !isLoadingRoot &&
-      !isLoadingPreferred &&
-      preferredOrgIds.length === 0
-    ) {
-      const singleOrg = availableOrganizations[0];
-
-      // Check if this organization is already selected in currentOrganizations prop
-      const isAlreadyInCurrent = currentOrganizations?.find(
-        (org) => org.id === singleOrg.id,
-      );
-
-      if (!isAlreadyInCurrent && !props.optional) {
-        handleConfirmSelection(singleOrg);
-      }
-    }
-  }, [
-    getCurrentLevelOrganizations,
-    handleConfirmSelection,
-    navigationLevels,
-    facilityOrgSearch,
-    selectedOrganizations,
-    isLoadingRoot,
-    isLoadingPreferred,
-    preferredOrgIds.length,
-    currentOrganizations,
-    props.optional,
-    isLoadingPreferred,
-    preferredOrgIds.length,
-  ]);
-
-  useEffect(() => {
-    if (value && value.length > 0) {
-      const resolvedOrganizations = value
-        .map((id) => currentOrganizations?.find((org) => org.id === id))
-        .filter((org) => org !== undefined);
-      if (resolvedOrganizations.length > 0) {
-        setSelectedOrganizations(resolvedOrganizations);
-      }
-    } else {
-      setSelectedOrganizations([]);
-      // Reset the auto-select flag when value is cleared (e.g., form reset)
-      // setHasAutoSelectedPreferred(false);
-    }
-  }, [value, currentOrganizations, showAllOrgs]);
-
-  // Auto-select preferred departments
+  const selectPreferredOrganizations = useEffectEvent(
+    (organizations: FacilityOrganizationRead[]) => {
+      // A ref also guards StrictMode's repeated setup before a state update
+      // would commit; clearing a selection must not reapply its old preference.
+      if (preferredSelectionApplied.current) return;
+      preferredSelectionApplied.current = true;
+      replaceSelection(singleSelection ? [organizations[0]] : organizations);
+    },
+  );
   useEffect(() => {
     if (
       favoriteList &&
-      preferredOrganizations?.results &&
-      preferredOrganizations.results.length > 0 &&
-      selectedOrganizations.length === 0 &&
-      !hasAutoSelectedPreferred &&
-      !value?.length
+      preferredOrganizations?.results.length &&
+      selectedIds.length === 0
     ) {
-      const orgsToSelect = singleSelection
-        ? [preferredOrganizations.results[0]]
-        : preferredOrganizations.results;
-      setSelectedOrganizations(orgsToSelect);
-      onChange(orgsToSelect.map((org) => org.id));
-      setHasAutoSelectedPreferred(true);
+      selectPreferredOrganizations(preferredOrganizations.results);
     }
   }, [
     favoriteList,
     preferredOrganizations,
-    selectedOrganizations,
-    hasAutoSelectedPreferred,
-    value,
-    onChange,
+    selectedIds.length,
     singleSelection,
   ]);
 
@@ -374,13 +350,6 @@ export default function FacilityOrganizationSelector(
   };
 
   const handleSelect = (org: FacilityOrganizationRead) => {
-    const isAlreadySelected = !!currentOrganizations?.find(
-      (o) => o.id === org.id,
-    );
-    if (isAlreadySelected) {
-      setAlreadySelected(true);
-      setCurrentSelection(org);
-    }
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);
     } else {
@@ -388,14 +357,6 @@ export default function FacilityOrganizationSelector(
     }
     setCurrentSelection(org);
     setFacilityOrgSearch("");
-  };
-
-  const handleRemoveOrganization = (index: number) => {
-    const newSelection = selectedOrganizations.filter((_, i) => i !== index);
-    setSelectedOrganizations(newSelection);
-    onChange(
-      newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
-    );
   };
 
   const handleOrganizationViewChange = (value: string) => {
@@ -534,12 +495,13 @@ export default function FacilityOrganizationSelector(
                 {currentSelection.name}
               </span>
             </div>
-            {alreadySelected && !currentSelection.has_children && (
+            {isDisabled && !currentSelection.has_children && (
               <Button
+                type="button" // Prevents unintended form submission
                 variant="ghost"
                 size="sm"
                 className="h-8 gap-2"
-                disabled={alreadySelected}
+                disabled={isDisabled}
               >
                 <span>{t("already_selected")}</span>
                 <CareIcon icon="l-multiply" className="h-4 w-4" />
@@ -547,6 +509,7 @@ export default function FacilityOrganizationSelector(
             )}
             {currentSelection.has_children && (
               <Button
+                type="button" // Prevents unintended form submission
                 variant="ghost"
                 size="sm"
                 className="h-8 gap-2"
@@ -572,13 +535,9 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const isDisabled = useMemo(() => {
-    return (
-      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === currentSelection?.id))
-    );
-  }, [currentSelection, currentOrganizations, selectedOrganizations]);
+  const isDisabled =
+    selectedIds.includes(currentSelection?.id ?? "") ||
+    !!currentOrganizations?.some((org) => org.id === currentSelection?.id);
 
   return (
     <div className="space-y-4">
@@ -634,6 +593,7 @@ export default function FacilityOrganizationSelector(
               <Popover open={open} onOpenChange={handleOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button" // Prevents unintended form submission
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
@@ -656,11 +616,11 @@ export default function FacilityOrganizationSelector(
                 </PopoverContent>
               </Popover>
             )}
-            {selectedOrganizations.map((org, index) => {
+            {selectedOrganizations.map((org) => {
               const isPreferred = preferredOrgIds.includes(org.id);
               return (
                 <div
-                  key={index}
+                  key={org.id}
                   className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
                 >
                   <Building className="size-4 text-sky-600 shrink-0" />
@@ -701,7 +661,7 @@ export default function FacilityOrganizationSelector(
                     size="sm"
                     className="size-8 p-0 text-gray-500 hover:text-gray-900"
                     type="button"
-                    onClick={() => handleRemoveOrganization(index)}
+                    onClick={() => removeOrganization(org.id)}
                   >
                     <X className="size-4" />
                     <span className="sr-only">{t("remove_organization")}</span>

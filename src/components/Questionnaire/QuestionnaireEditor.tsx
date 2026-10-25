@@ -2544,7 +2544,7 @@ function QuestionEditor({
                         onValueChange={(val: string) =>
                           updateField(
                             "answer_value_set",
-                            val === "custom" ? undefined : "valueset",
+                            val === "custom" ? undefined : {},
                             {
                               answer_option: [],
                             },
@@ -2777,11 +2777,7 @@ function QuestionEditor({
                       onValueSetChange={(val) =>
                         updateField("answer_value_set", val)
                       }
-                      value={
-                        question.answer_value_set === "valueset"
-                          ? ""
-                          : (question.answer_value_set ?? "")
-                      }
+                      value={question.answer_value_set}
                     />
                   </CardContent>
                 )}

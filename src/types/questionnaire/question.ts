@@ -1,5 +1,7 @@
 import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 
+import { ValueSetConfig } from "@/types/valueSet/valueSet";
+
 import { Code } from "@/types/base/code/code";
 
 export type QuestionType =
@@ -156,7 +158,7 @@ export interface Question {
   max_length?: number;
   answer_constraint?: string;
   answer_option?: AnswerOption[];
-  answer_value_set?: string;
+  answer_value_set?: ValueSetConfig;
   answer_unit?: Code;
   is_observation?: boolean;
   unit?: Code;
