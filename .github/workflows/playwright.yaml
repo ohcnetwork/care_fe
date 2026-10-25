@@ -26,6 +26,7 @@ concurrency:
 env:
   NODE_VERSION: "24"
   REACT_CARE_API_URL: http://localhost:9000
+  REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
   # CARE 3.1 requires the companion APIs from care#3809 on ccn_final.
