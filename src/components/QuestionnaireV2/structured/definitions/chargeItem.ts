@@ -1,0 +1,34 @@
+import type { StructuredTypeDefinition } from "@/components/QuestionnaireV2/structured/types";
+import { structuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
+
+import { ChargeItemInput } from "@/components/QuestionnaireV2/structured/inputs/ChargeItemInput";
+
+export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
+  type: "charge_item",
+  component: ChargeItemInput,
+  requires: ["encounterId", "facilityId"],
+  subjects: ["encounter"],
+  draftPolicy: "serialize",
+  buildRequests: async (chargeItems, { facilityId, questionId, path }) => {
+    if (chargeItems.length === 0) return [];
+    return [
+      {
+        url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
+        method: "POST",
+        body: {
+          requests: chargeItems.map((item) => ({
+            charge_item_definition: item.charge_item_definition,
+            encounter: item.encounter,
+            patient: item.patient,
+            service_resource: item.service_resource,
+            service_resource_id: item.service_resource_id,
+            account: item.account,
+            quantity: item.quantity,
+            performer_actor: item.performer_actor,
+          })),
+        },
+        reference_id: structuredReferenceId("charge_item", questionId, path),
+      },
+    ];
+  },
+};

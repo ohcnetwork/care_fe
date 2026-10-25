@@ -65,6 +65,9 @@ bun.lockb
 /tests/.auth/
 test-results.json
 
+# Local browser automation logs
+/.gstack/*.log
+
 # Federation Temp files
 /.__mf__temp
 public/sbom/*

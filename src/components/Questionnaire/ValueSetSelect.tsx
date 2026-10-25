@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
+import { ValueSetPickerSearch } from "@/components/Questionnaire/ValueSetPickerSearch";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -27,6 +27,8 @@ type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
 
 interface Props {
   system: string;
+  /** Pins the lookup to one exact valueset, bypassing slug resolution. */
+  valuesetId?: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
@@ -42,6 +44,7 @@ interface Props {
 
 export default function ValueSetSelect({
   system,
+  valuesetId,
   value,
   onSelect,
   placeholder = "Search...",
@@ -57,15 +60,8 @@ export default function ValueSetSelect({
 }: Props & ButtonProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (controlledOpen || internalOpen) {
-      setSearch("");
-    }
-  }, [controlledOpen, internalOpen]);
 
   useEffect(() => {
     if (internalOpen && isMobile) {
@@ -75,6 +71,28 @@ export default function ValueSetSelect({
       return () => clearTimeout(timer);
     }
   }, [internalOpen, isMobile]);
+  const searchContent = (
+    <ValueSetPickerSearch
+      key={`${controlledOpen}-${internalOpen}`}
+      inputRef={inputRef}
+      system={system}
+      valuesetId={valuesetId}
+      onSelect={(selected) => {
+        onSelect(selected);
+        if (closeOnSelect) {
+          setInternalOpen(false);
+        } else {
+          inputRef.current?.focus();
+        }
+      }}
+      placeholder={placeholder}
+      count={count}
+      searchPostFix={searchPostFix}
+      showCode={showCode}
+      title={title}
+    />
+  );
+
   if (isMobile && !hideTrigger) {
     return (
       <Drawer
@@ -108,50 +126,14 @@ export default function ValueSetSelect({
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
-          <ValueSetSearchContent
-            system={system}
-            onSelect={(selected) => {
-              onSelect(selected);
-              if (closeOnSelect) {
-                setInternalOpen(false);
-              } else {
-                inputRef.current?.focus();
-              }
-            }}
-            placeholder={placeholder}
-            count={count}
-            searchPostFix={searchPostFix}
-            showCode={showCode}
-            search={search}
-            onSearchChange={setSearch}
-            title={title}
-          />
+          {searchContent}
         </DrawerContent>
       </Drawer>
     );
   }
 
   if (hideTrigger) {
-    return (
-      <ValueSetSearchContent
-        system={system}
-        onSelect={(selected) => {
-          onSelect(selected);
-          if (closeOnSelect) {
-            setInternalOpen(false);
-          } else {
-            inputRef.current?.focus();
-          }
-        }}
-        count={count}
-        searchPostFix={searchPostFix}
-        showCode={showCode}
-        search={search}
-        onSearchChange={setSearch}
-        title={title}
-        placeholder={placeholder}
-      />
-    );
+    return searchContent;
   }
 
   return (
@@ -182,24 +164,7 @@ export default function ValueSetSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="transition-all w-150 p-0" align="start">
-          <ValueSetSearchContent
-            system={system}
-            onSelect={(selected) => {
-              onSelect(selected);
-              if (closeOnSelect) {
-                setInternalOpen(false);
-              } else {
-                inputRef.current?.focus();
-              }
-            }}
-            placeholder={placeholder}
-            count={count}
-            searchPostFix={searchPostFix}
-            showCode={showCode}
-            search={search}
-            onSearchChange={setSearch}
-            title={title}
-          />
+          {searchContent}
         </PopoverContent>
       </Popover>
     </>

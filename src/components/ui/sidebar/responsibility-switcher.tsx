@@ -1,8 +1,9 @@
-import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
-import { ShieldCheck } from "lucide-react";
+import { ChevronsUpDown, LayoutDashboard } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { cn } from "@/lib/utils";
 
 import {
@@ -13,12 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { useAccessibleRoleOrganizationsList } from "@/hooks/useAccessibleRoleOrganizationsList";
@@ -28,7 +24,8 @@ interface Props {
 }
 
 export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const { handleMenuOpenChange } = useAppSidebar();
   const { t } = useTranslation();
 
   const { data } = useAccessibleRoleOrganizationsList();
@@ -39,42 +36,44 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
   );
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleMenuOpenChange}>
       <DropdownMenuTrigger asChild>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
-              tooltip={t("responsibilities")}
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
-                <ShieldCheck className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-sm font-normal text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
+          aria-label={selectedItem?.organization.name || t("responsibilities")}
+        >
+          {
+            <>
+              <div className="grid min-w-0 flex-1 gap-0.5 text-left text-sm leading-tight">
+                <span className="truncate font-normal">
                   {selectedItem?.organization.name || t("responsibilities")}
                 </span>
                 {selectedItem?.role && (
-                  <span className="truncate text-xs text-gray-500">
+                  <span className="truncate text-xs text-neutral-600">
                     {selectedItem.role.name}
                   </span>
                 )}
               </div>
-              <CaretSortIcon className="ml-auto" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+              <ChevronsUpDown className="ml-auto size-4 shrink-0 text-neutral-500" />
+            </>
+          }
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
         align="start"
-        side={isMobile ? "bottom" : "right"}
+        side="bottom"
         sideOffset={4}
       >
         <DropdownMenuItem asChild>
-          <Link className="flex items-center gap-2 cursor-pointer" href="/">
-            <DashboardIcon className="size-4" />
+          <Link
+            className="flex items-center gap-2 cursor-pointer"
+            href="/"
+            onClick={() => isMobile && setOpenMobile(false)}
+          >
+            <LayoutDashboard className="size-4" />
             {t("view_dashboard")}
           </Link>
         </DropdownMenuItem>
@@ -87,10 +86,18 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
             className={cn(
               "gap-2 p-2",
               item.organization.id === selectedResponsibilityId &&
-                "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
+                "bg-neutral-100 font-medium text-neutral-950 focus:bg-neutral-200 focus:text-neutral-950",
             )}
           >
-            <Link href={`/responsibilities/${item.organization.id}`}>
+            <Link
+              href={`/responsibilities/${item.organization.id}`}
+              aria-current={
+                item.organization.id === selectedResponsibilityId
+                  ? "true"
+                  : undefined
+              }
+              onClick={() => isMobile && setOpenMobile(false)}
+            >
               <div className="flex flex-col">
                 <span>{item.organization.name}</span>
                 {item.role && (

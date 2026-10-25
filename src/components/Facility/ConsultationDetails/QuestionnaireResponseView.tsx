@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,12 +9,15 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
+
+import { formatValue } from "./QuestionnaireResponsesList";
 
 export default function QuestionnaireResponseView({
   responseId,
@@ -48,6 +52,74 @@ export default function QuestionnaireResponseView({
     );
   }
 
+  const renderQuestion = (
+    question: Question,
+    responses: Response[],
+  ): ReactNode => {
+    if (question.type === "structured" || question.type === "display")
+      return null;
+    if (question.type === "group") {
+      const rows = question.repeats
+        ? (responses.find((answer) => answer.question_id === question.id)
+            ?.sub_results ?? [])
+        : [responses];
+      return (
+        <div key={question.id} className="space-y-4">
+          <h3 className="font-medium">{question.text}</h3>
+          <RegisteredGroupAnswerView
+            question={question}
+            responses={responses}
+            fallback={
+              <div className="grid gap-4">
+                {rows.map((row, index) => (
+                  <div key={index} className="grid gap-4">
+                    {question.repeats && (
+                      <h4 className="font-medium">
+                        {question.text} ({index + 1})
+                      </h4>
+                    )}
+                    {question.questions?.map((child) =>
+                      renderQuestion(child, row),
+                    )}
+                  </div>
+                ))}
+              </div>
+            }
+          />
+        </div>
+      );
+    }
+
+    const questionResponse = responses.find(
+      (r: Response) => r.question_id === question.id,
+    );
+    if (!questionResponse) return null;
+
+    return (
+      <div key={question.id} className="grid grid-cols-2 gap-4">
+        <div className="text-sm text-gray-500">{question.text}</div>
+        <div className="font-medium">
+          {(questionResponse.values ?? []).map((entry, index) => (
+            <div key={index}>
+              {formatValue(entry.value, question.type)}
+              {entry.unit && <span className="ml-1">{entry.unit.code}</span>}
+              {entry.coding && (
+                <span className="ml-1">
+                  {entry.coding.display} ({entry.coding.code})
+                </span>
+              )}
+            </div>
+          ))}
+          {questionResponse.note && (
+            <span className="ml-2 text-sm text-gray-500">
+              ({questionResponse.note})
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Page title={formResponse.questionnaire?.title || ""}>
       <div className="space-y-6 p-4">
@@ -78,37 +150,9 @@ export default function QuestionnaireResponseView({
 
         <Card className="p-6">
           <div className="space-y-6">
-            {formResponse.questionnaire?.questions.map((group: Question) => (
-              <div key={group.id} className="space-y-4">
-                <h3 className="font-medium">{group.text}</h3>
-                <div className="grid gap-4">
-                  {group.questions?.map((question: Question) => {
-                    const questionResponse = formResponse.responses.find(
-                      (r: Response) => r.question_id === question.id,
-                    );
-                    if (!questionResponse) return null;
-
-                    const value = questionResponse.values[0]?.value;
-
-                    return (
-                      <div key={question.id} className="grid grid-cols-2 gap-4">
-                        <div className="text-sm text-gray-500">
-                          {question.text}
-                        </div>
-                        <div className="font-medium">
-                          {String(value)}
-                          {questionResponse.note && (
-                            <span className="ml-2 text-sm text-gray-500">
-                              ({questionResponse.note})
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+            {formResponse.questionnaire?.questions.map((question) =>
+              renderQuestion(question, formResponse.responses),
+            )}
           </div>
         </Card>
       </div>

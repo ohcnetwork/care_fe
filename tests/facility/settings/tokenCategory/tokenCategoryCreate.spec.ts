@@ -176,38 +176,19 @@ test.describe("Token Category Create - Permission Tests", () => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
 
-      // Wait for page to load by checking for either access denied message or page heading
-      await Promise.race([
-        page
-          .getByText("Access Denied to Token Category")
-          .waitFor({ timeout: 5000 })
-          .catch(() => null),
+      await expect(
         page
           .getByRole("heading", { name: "Token Categories" })
-          .waitFor({ timeout: 5000 })
-          .catch(() => null),
-      ]);
-
-      // Step 2: Check if we have access to the page
-      // If nurse has access to the page, verify Add Token Category button is NOT visible
-      const pageAccessible = await page
-        .getByText(/Token Category|token_category/i)
-        .isVisible()
-        .catch(() => false);
-
-      if (pageAccessible) {
-        // Verify we're on the token category list page
-        await expect(page).toHaveURL(
-          /\/facility\/[^/]+\/settings\/token_category/,
-        );
-
-        // Verify Add Token Category button is NOT visible
-        const addButton = page.getByRole("button", {
-          name: "Add Token Category",
-        });
-        await expect(addButton).not.toBeVisible();
-      }
-      // If page is not accessible, that's also valid for nurses (access denied)
+          .or(
+            page.getByText("Access Denied to Token Category", { exact: true }),
+          ),
+      ).toBeVisible();
+      await expect(page).toHaveURL(
+        /\/facility\/[^/]+\/settings\/token_category/,
+      );
+      await expect(
+        page.getByRole("button", { name: "Add Token Category" }),
+      ).not.toBeVisible();
     });
   });
 });
