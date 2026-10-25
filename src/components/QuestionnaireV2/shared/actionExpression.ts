@@ -593,11 +593,6 @@ export function messageToken(ref: string): string {
   return `{${ref}}`;
 }
 
-/** The refs a message text splices in, in order of appearance. */
-export function messageTokens(text: string): string[] {
-  return [...text.matchAll(MESSAGE_TOKEN)].map((match) => match[1]);
-}
-
 function escapeFStringLiteral(segment: string): string {
   return segment
     .replace(/\\/g, "\\\\")
@@ -859,7 +854,7 @@ export function referenceableLinkId(
 // Reference inspection and rewriting
 
 /** Every `q_<link_id>` name an expression reads, canonical or not. */
-export function referencedLinkIds(expression: string): string[] {
+function referencedLinkIds(expression: string): string[] {
   const seen = new Set<string>();
   for (const token of walkTokens(tokenize(expression))) {
     if (token.kind !== "ident") continue;
@@ -870,7 +865,7 @@ export function referencedLinkIds(expression: string): string[] {
 }
 
 /** Rewrites `q_<old>` names per `linkIdMap`; everything else stays byte-identical. */
-export function remapQuestionRefs(
+function remapQuestionRefs(
   expression: string,
   linkIdMap: ReadonlyMap<string, string>,
 ): string {
