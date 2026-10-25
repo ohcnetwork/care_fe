@@ -27,6 +27,7 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import AdminOrganizationNavbar from "@/pages/Admin/organizations/components/AdminOrganizationNavbar";
+import { OrganizationReferralLinks } from "@/pages/Organization/components/OrganizationReferralLinks";
 import RoleOrganizationConnections from "@/pages/Organization/components/RoleOrganizationConnections";
 import {
   Organization,
@@ -191,6 +192,7 @@ export default function AdminOrganizationList({
                         org={org}
                       />
                     </div>
+                    <OrganizationReferralLinks organization={org} />
                     {/* Role orgs show connections; suppliers just show the org info */}
                     {isRoleOrg && (
                       <RoleOrganizationConnections organization={org} />
@@ -309,6 +311,9 @@ export default function AdminOrganizationList({
                           {org.description}
                         </p>
                       )}
+                    </div>
+                    <div className="mt-3">
+                      <OrganizationReferralLinks organization={org} />
                     </div>
                   </>
                 )}

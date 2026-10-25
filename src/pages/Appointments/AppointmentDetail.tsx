@@ -94,6 +94,7 @@ import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { ReferralAppointmentContext } from "@/components/Referral/ReferralAppointmentContext";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -216,6 +217,9 @@ export default function AppointmentDetail(props: Props) {
             {t("appointment_details")}
           </h4>
         </div>
+        {params.referralId && (
+          <ReferralAppointmentContext appointment={appointment} />
+        )}
         {showSuccess && (
           <div className="mb-4 flex flex-col gap-2">
             <Alert className="bg-green-50 border-green-400 items-center">
@@ -225,7 +229,10 @@ export default function AppointmentDetail(props: Props) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setQueryParams({})}
+                  onClick={() => {
+                    const { showSuccess: _, ...remainingParams } = params;
+                    setQueryParams(remainingParams);
+                  }}
                   className="self-end"
                   aria-label={t("close")}
                 >

@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowRight, Menu, MoreVertical, Printer } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -99,12 +99,14 @@ interface DiagnosticReportDetailCardProps {
   reportId: string;
   patientId: string;
   facilityId?: string;
+  embedded?: boolean;
 }
 
 function DiagnosticReportDetailCard({
   reportId,
   patientId,
   facilityId,
+  embedded = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -163,21 +165,24 @@ function DiagnosticReportDetailCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  asChild
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() =>
-                    navigate(
-                      buildEncounterUrl(
-                        patientId,
-                        `/diagnostic_reports/${report.id}/print`,
-                        facilityId,
-                      ),
-                    )
-                  }
+                  aria-label={t("print")}
                   data-shortcut-id="print-button"
                 >
-                  <Printer className="size-4" />
+                  <Link
+                    href={buildEncounterUrl(
+                      patientId,
+                      `/diagnostic_reports/${report.id}/print`,
+                      facilityId,
+                    )}
+                    target={embedded ? "_blank" : undefined}
+                    rel={embedded ? "noopener noreferrer" : undefined}
+                  >
+                    <Printer className="size-4" />
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t("print")}</TooltipContent>
@@ -390,12 +395,14 @@ interface DiagnosticReportsTabProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  embedded?: boolean;
 }
 
 export const DiagnosticReportsTab = ({
   patientId,
   encounterId,
   facilityId,
+  embedded = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -554,6 +561,7 @@ export const DiagnosticReportsTab = ({
                   reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
+                  embedded={embedded}
                 />
               )
             )}

@@ -41,7 +41,7 @@ import {
   OrgType,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { Bot } from "lucide-react";
+import { Bot, GitPullRequestArrow, Settings2 } from "lucide-react";
 
 export type RouteContext = "responsibility" | "organization";
 
@@ -135,6 +135,21 @@ export default function OrganizationLayout({
       name: t("patients"),
       icon: <CareIcon icon="d-people" />,
       visibility: hasPermission("can_list_patients", org.permissions),
+    },
+    {
+      url: `${baseUrl}/${id}/referrals`,
+      name: t("referrals"),
+      icon: <GitPullRequestArrow className="size-4" />,
+      visibility: hasPermission("can_read_referral", org.permissions),
+    },
+    {
+      url: `${baseUrl}/${id}/settings/referrals`,
+      name: t("referral_availability_settings"),
+      icon: <Settings2 className="size-4" />,
+      visibility: hasPermission(
+        "can_manage_referral_availability",
+        org.permissions,
+      ),
     },
     {
       url: `${baseUrl}/${id}/facilities`,

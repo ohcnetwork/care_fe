@@ -22,6 +22,7 @@ import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
 import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
+import ReferralRoutes from "@/Routers/routes/ReferralRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
@@ -37,6 +38,7 @@ import UserDashboard from "@/pages/UserDashboard";
 
 // List of paths and patterns where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = [
+  /^\/referrals\/[^/]+(?:\/respond)?$/,
   // Exact matches
   "/",
   "/login",
@@ -90,6 +92,7 @@ const Routes: AppRoutes = {
   ...ConsultationRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
+  ...ReferralRoutes,
   ...ResourceRoutes,
   ...ScheduleRoutes,
   ...UserRoutes,

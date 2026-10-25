@@ -12,6 +12,7 @@ import {
   FileCheck,
   FileText,
   Folder,
+  GitPullRequestArrow,
   ListChecks,
   MessageCircle,
   Monitor,
@@ -20,6 +21,7 @@ import {
   Syringe,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { EncounterReferralsTab } from "./tabs/referrals";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -82,6 +84,7 @@ export const EncounterShow = (props: Props) => {
     canWriteSelectedEncounter,
     canReadClinicalData,
     canReadSelectedEncounter,
+    selectedEncounterPermissions,
   } = useEncounter();
 
   useSidebarAutoCollapse();
@@ -153,6 +156,14 @@ export const EncounterShow = (props: Props) => {
       visible: canReadClinicalData,
       component: <EncounterImmunizationsTab />,
       shortcutId: "immunizations",
+    },
+    referrals: {
+      icon: GitPullRequestArrow,
+      label: t("referrals"),
+      visible:
+        selectedEncounterPermissions.canReadReferral ||
+        selectedEncounterPermissions.canCreateReferral,
+      component: <EncounterReferralsTab />,
     },
     service_requests: {
       icon: ListChecks,

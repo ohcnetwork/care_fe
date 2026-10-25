@@ -136,7 +136,17 @@ export const PERMISSION_READ_ACCOUNT = "can_read_account";
 export const PERMISSION_MANAGE_LOCKED_INVOICE =
   "can_manage_locked_invoice_in_facility";
 
+export const PERMISSION_MANAGE_REFERRAL_AVAILABILITY =
+  "can_manage_referral_availability";
+export const PERMISSION_CREATE_REFERRAL = "can_create_referral";
+export const PERMISSION_READ_REFERRAL = "can_read_referral";
+export const PERMISSION_WRITE_REFERRAL = "can_write_referral";
+
 export interface Permissions {
+  canManageReferralAvailability: boolean;
+  canCreateReferral: boolean;
+  canReadReferral: boolean;
+  canWriteReferral: boolean;
   // Patient Permissions
   /** Permission slug: "can_create_patient" */
   canCreatePatient: boolean;
@@ -329,6 +339,13 @@ export function getPermissions(
   permissions: string[],
 ): Permissions {
   return {
+    canManageReferralAvailability: hasPermission(
+      PERMISSION_MANAGE_REFERRAL_AVAILABILITY,
+      permissions,
+    ),
+    canCreateReferral: hasPermission(PERMISSION_CREATE_REFERRAL, permissions),
+    canReadReferral: hasPermission(PERMISSION_READ_REFERRAL, permissions),
+    canWriteReferral: hasPermission(PERMISSION_WRITE_REFERRAL, permissions),
     // Patients
     canCreatePatient: hasPermission(PERMISSION_CREATE_PATIENT, permissions),
     canWritePatient: hasPermission(PERMISSION_WRITE_PATIENT, permissions),

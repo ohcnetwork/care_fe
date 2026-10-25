@@ -1,0 +1,183 @@
+/* CareUI semantic tokens from ohcnetwork/careui, scoped for incremental adoption. */
+@theme inline {
+  --color-cui-background: var(--cui-background);
+  --color-cui-soft-background: var(--cui-soft-background);
+  --color-cui-muted-background: var(--cui-muted-background);
+  --color-cui-strong-background: var(--cui-strong-background);
+  --color-cui-muted: var(--cui-muted);
+  --color-cui-foreground: var(--cui-foreground);
+  --color-cui-muted-foreground: var(--cui-muted-foreground);
+  --color-cui-soft-foreground: var(--cui-soft-foreground);
+  --color-cui-disabled-foreground: var(--cui-disabled-foreground);
+  --color-cui-placeholder-foreground: var(--cui-placeholder-foreground);
+  --color-cui-inverse-foreground: var(--cui-inverse-foreground);
+  --color-cui-card: var(--cui-card);
+  --color-cui-card-foreground: var(--cui-card-foreground);
+  --color-cui-popover: var(--cui-popover);
+  --color-cui-popover-foreground: var(--cui-popover-foreground);
+  --color-cui-primary: var(--cui-primary);
+  --color-cui-primary-foreground: var(--cui-primary-foreground);
+  --color-cui-secondary: var(--cui-secondary);
+  --color-cui-secondary-foreground: var(--cui-secondary-foreground);
+  --color-cui-accent: var(--cui-accent);
+  --color-cui-accent-foreground: var(--cui-accent-foreground);
+  --color-cui-destructive: var(--cui-destructive);
+  --color-cui-destructive-foreground: var(--cui-destructive-foreground);
+  --color-cui-soft-border: var(--cui-soft-border);
+  --color-cui-border: var(--cui-border);
+  --color-cui-strong-border: var(--cui-strong-border);
+  --color-cui-stronger-border: var(--cui-stronger-border);
+  --color-cui-inverse-border: var(--cui-inverse-border);
+  --color-cui-input: var(--cui-input);
+  --color-cui-ring: var(--cui-ring);
+  --color-cui-primary-50: var(--color-emerald-50);
+  --color-cui-primary-100: var(--color-emerald-100);
+  --color-cui-primary-200: var(--color-emerald-200);
+  --color-cui-primary-300: var(--color-emerald-300);
+  --color-cui-primary-400: var(--color-emerald-400);
+  --color-cui-primary-500: var(--color-emerald-500);
+  --color-cui-primary-600: var(--color-emerald-600);
+  --color-cui-primary-700: var(--color-emerald-700);
+  --color-cui-primary-800: var(--color-emerald-800);
+  --color-cui-primary-900: var(--color-emerald-900);
+  --color-cui-primary-950: var(--color-emerald-950);
+}
+
+.careui {
+  --cui-primary-50: var(--color-emerald-50);
+  --cui-primary-100: var(--color-emerald-100);
+  --cui-primary-200: var(--color-emerald-200);
+  --cui-primary-300: var(--color-emerald-300);
+  --cui-primary-400: var(--color-emerald-400);
+  --cui-primary-500: var(--color-emerald-500);
+  --cui-primary-600: var(--color-emerald-600);
+  --cui-primary-700: var(--color-emerald-700);
+  --cui-primary-800: var(--color-emerald-800);
+  --cui-primary-900: var(--color-emerald-900);
+  --cui-primary-950: var(--color-emerald-950);
+  --cui-radius: 0.625rem;
+  --cui-background: var(--color-white);
+  --cui-soft-background: var(--color-neutral-50);
+  --cui-muted-background: var(--color-neutral-100);
+  --cui-strong-background: var(--color-neutral-200);
+  --cui-muted: var(--color-neutral-100);
+  --cui-foreground: var(--color-neutral-950);
+  --cui-muted-foreground: var(--color-neutral-700);
+  --cui-soft-foreground: var(--color-neutral-600);
+  --cui-disabled-foreground: var(--color-neutral-300);
+  --cui-placeholder-foreground: var(--color-neutral-500);
+  --cui-inverse-foreground: var(--color-white);
+  --cui-card: var(--color-white);
+  --cui-card-foreground: var(--color-neutral-950);
+  --cui-popover: var(--color-white);
+  --cui-popover-foreground: var(--color-neutral-950);
+  --cui-primary: var(--color-emerald-800);
+  --cui-primary-foreground: var(--color-emerald-50);
+  --cui-secondary: var(--color-neutral-100);
+  --cui-secondary-foreground: var(--color-neutral-900);
+  --cui-accent: var(--color-neutral-100);
+  --cui-accent-foreground: var(--color-neutral-900);
+  --cui-destructive: var(--color-red-600);
+  --cui-destructive-foreground: var(--color-red-50);
+  --cui-soft-border: var(--color-neutral-100);
+  --cui-border: var(--color-neutral-200);
+  --cui-strong-border: var(--color-neutral-300);
+  --cui-stronger-border: var(--color-neutral-400);
+  --cui-inverse-border: var(--color-white);
+  --cui-input: var(--color-neutral-300);
+  --cui-ring: --alpha(var(--color-indigo-500) / 75%);
+  --radius: var(--cui-radius);
+  --cui-radius-xl: calc(var(--cui-radius) + 4px);
+  color: var(--cui-foreground);
+}
+
+.dark .careui,
+.careui.dark {
+  --cui-background: var(--color-neutral-950);
+  --cui-soft-background: var(--color-neutral-900);
+  --cui-muted-background: var(--color-neutral-800);
+  --cui-strong-background: var(--color-neutral-700);
+  --cui-muted: var(--color-neutral-800);
+  --cui-foreground: var(--color-neutral-50);
+  --cui-muted-foreground: var(--color-neutral-200);
+  --cui-soft-foreground: var(--color-neutral-300);
+  --cui-disabled-foreground: var(--color-neutral-700);
+  --cui-placeholder-foreground: var(--color-neutral-600);
+  --cui-inverse-foreground: var(--color-black);
+  --cui-card: var(--color-neutral-900);
+  --cui-card-foreground: var(--color-white);
+  --cui-popover: var(--color-neutral-950);
+  --cui-popover-foreground: var(--color-neutral-50);
+  --cui-primary: var(--color-emerald-400);
+  --cui-primary-foreground: var(--color-emerald-950);
+  --cui-secondary: var(--color-neutral-800);
+  --cui-secondary-foreground: var(--color-neutral-50);
+  --cui-accent: var(--color-neutral-700);
+  --cui-accent-foreground: var(--color-neutral-50);
+  --cui-destructive: var(--color-red-400);
+  --cui-destructive-foreground: var(--color-red-50);
+  --cui-soft-border: --alpha(var(--color-white) / 5%);
+  --cui-border: --alpha(var(--color-white) / 9%);
+  --cui-strong-border: --alpha(var(--color-white) / 15%);
+  --cui-stronger-border: --alpha(var(--color-white) / 22%);
+  --cui-inverse-border: var(--color-neutral-50);
+  --cui-input: --alpha(var(--color-white) / 15%);
+  --cui-ring: --alpha(var(--color-indigo-500) / 75%);
+}
+
+@layer base {
+  .careui *,
+  .careui *::before,
+  .careui *::after {
+    border-color: var(--cui-border);
+  }
+}
+
+@utility rounded-squircle-sm {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-sm!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-md {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-lg!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-lg {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-lg!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-2xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-3xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-3xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-full {
+  @supports (corner-shape: superellipse(1)) {
+    @apply rounded-full!;
+    corner-shape: superellipse(1);
+  }
+}

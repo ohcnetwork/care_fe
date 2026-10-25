@@ -31,6 +31,7 @@ import {
   encounterPageKeySchema,
 } from "@/types/workspace/encounterWorkspace";
 
+import { EncounterReferralsWidget } from "./EncounterReferralsWidget";
 import { EncounterResponsesWidget } from "./EncounterResponsesWidget";
 import { EncounterServiceRequestsWidget } from "./EncounterServiceRequestsWidget";
 import { EncounterVitalsWidget } from "./EncounterVitalsWidget";
@@ -129,6 +130,16 @@ export function EncounterWidget({
       case "audit_logs":
         return <AuditLogs title={title} />;
     }
+  }
+
+  if (type === "referrals") {
+    return (
+      <EncounterReferralsWidget
+        title={title}
+        showEmpty={showEmpty}
+        config={config}
+      />
+    );
   }
 
   if (!canReadClinicalData) return noClinicalAccess;

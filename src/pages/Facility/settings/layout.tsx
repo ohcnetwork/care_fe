@@ -1,5 +1,7 @@
 import { Redirect, useRoutes } from "raviger";
 
+import ReferralAvailabilitySettings from "./referrals/ReferralAvailabilitySettings";
+
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
@@ -63,6 +65,7 @@ interface SettingsLayoutProps {
 }
 
 const getRoutes = (facilityId: string) => ({
+  "/referrals": () => <ReferralAvailabilitySettings facilityId={facilityId} />,
   "/immunization-policies": () => (
     <ImmunizationPolicyList scope={immunizationPolicyScope(facilityId)} />
   ),

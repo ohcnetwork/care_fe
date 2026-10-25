@@ -83,6 +83,7 @@ export const HealthcareServiceSelector = ({
     <Button
       variant="outline"
       role="combobox"
+      aria-label={t("select_healthcare_service")}
       className="min-w-60 w-full justify-start"
       disabled={isLoading}
     >

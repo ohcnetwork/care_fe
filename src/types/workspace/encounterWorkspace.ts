@@ -9,6 +9,7 @@ export const SYSTEM_PAGE_KEYS = [
   "medicines",
   "immunizations",
   "service_requests",
+  "referrals",
   "diagnostic_reports",
   "plots",
   "files",

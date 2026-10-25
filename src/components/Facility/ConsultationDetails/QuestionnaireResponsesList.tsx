@@ -54,6 +54,7 @@ interface Props {
   title?: string;
   showEmpty?: boolean;
   readOnly?: boolean;
+  embedded?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
@@ -331,12 +332,14 @@ function ResponseActionsMenu({
   encounterId,
   facilityId,
   readOnly = false,
+  embedded = false,
 }: {
   item: QuestionnaireResponse;
   patientId: string;
   encounterId?: string;
   facilityId?: string;
   readOnly?: boolean;
+  embedded?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -345,7 +348,8 @@ function ResponseActionsMenu({
   const routeScope = fullPath.match(/^\/(facility|organization)\/[^/]+/)?.[0];
   const scope = facilityId ? `/facility/${facilityId}` : routeScope;
   const printEncounterId =
-    encounterId ?? fullPath.match(/\/encounter\/([^/?]+)/)?.[1];
+    encounterId ??
+    (embedded ? undefined : fullPath.match(/\/encounter\/([^/?]+)/)?.[1]);
   const printBase = `${scope ?? ""}/patient/${patientId}${scope && printEncounterId ? `/encounter/${printEncounterId}` : ""}`;
 
   const isUnstructured = !!item.questionnaire;
@@ -383,7 +387,11 @@ function ResponseActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Link href={`${printBase}/questionnaire_response/${item.id}/print`}>
+          <Link
+            href={`${printBase}/questionnaire_response/${item.id}/print`}
+            target={embedded ? "_blank" : undefined}
+            rel={embedded ? "noopener noreferrer" : undefined}
+          >
             <DropdownMenuItem>
               <Printer className="size-4" />
               {t("print_this_response")}
@@ -392,6 +400,8 @@ function ResponseActionsMenu({
           {item.questionnaire && (
             <Link
               href={`${printBase}/questionnaire/${item.questionnaire.id}/responses/print`}
+              target={embedded ? "_blank" : undefined}
+              rel={embedded ? "noopener noreferrer" : undefined}
             >
               <DropdownMenuItem>
                 <Printer className="size-4" />
@@ -613,6 +623,7 @@ interface ResponseCardProps {
   encounterId?: string;
   facilityId?: string;
   readOnly?: boolean;
+  embedded?: boolean;
   patientId: string;
   isPrintPreview?: boolean;
   onTitleClick?: (questionnaireSlug: string) => void;
@@ -626,6 +637,7 @@ export function ResponseCard({
   encounterId,
   facilityId,
   readOnly = false,
+  embedded = false,
   onTitleClick,
   showTitle = true,
   isPrintPreview = false,
@@ -712,6 +724,7 @@ export function ResponseCard({
                     encounterId={encounterId}
                     facilityId={facilityId}
                     readOnly={readOnly}
+                    embedded={embedded}
                   />
                 </div>
               )}
@@ -738,6 +751,7 @@ export default function QuestionnaireResponsesList({
   title,
   showEmpty = true,
   readOnly = false,
+  embedded = false,
   isPrintPreview = false,
   onlyUnstructured,
   canAccess = true,
@@ -887,6 +901,7 @@ export default function QuestionnaireResponsesList({
                     facilityId={facilityId}
                     encounterId={encounterId}
                     readOnly={readOnly}
+                    embedded={embedded}
                     isPrintPreview={isPrintPreview}
                     presentation={presentation}
                   />

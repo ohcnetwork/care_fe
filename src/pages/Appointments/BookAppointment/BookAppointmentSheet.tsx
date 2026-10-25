@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +32,7 @@ export default function BookAppointmentSheet({
   defaultOpen,
 }: Props) {
   const [qParams] = useQueryParams();
+  const referralContext = useAppointmentReferral(patientId);
   const [isOpen, setIsOpen] = useState(
     defaultOpen || qParams.open_schedule === "true",
   );
@@ -82,6 +84,7 @@ export default function BookAppointmentSheet({
               <BookingsList
                 patientId={patientId}
                 facilityId={facilityId ?? ""}
+                appointmentQueryParams={referralContext.successQueryParams}
               />
             </TabsContent>
           </Tabs>

@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,8 +19,8 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
+import { DiagnosticReportSummary } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportSummary";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
-import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import { FileReadMinimal } from "@/types/files/file";
@@ -30,7 +28,6 @@ import fileApi from "@/types/files/fileApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
 
 export default function DiagnosticReportView({
   facilityId,
@@ -109,75 +106,12 @@ export default function DiagnosticReportView({
           facilityId={report.encounter.facility.id}
           className="md:p-0 p-0"
         />
-        {/* Report Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {report.code ? (
-                <p className="flex flex-col gap-1">
-                  {report.code.display}
-                  <span className="text-xs text-gray-500">
-                    {report.code.system} <br />
-                    {report.code.code}
-                  </span>
-                </p>
-              ) : (
-                report.service_request?.title ||
-                t("diagnostic_report", { count: 1 })
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <div className="text-sm font-medium text-gray-500">
-                  {t("category")}
-                </div>
-                <div>{report.category?.display || "-"}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">
-                  {t("status")}
-                </div>
-                <div>
-                  <Badge
-                    variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}
-                  >
-                    {t(report.status)}
-                  </Badge>
-                </div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">
-                  {t("report_date")}
-                </div>
-                <div>{format(new Date(report.created_date), "dd-MM-yyyy")}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">
-                  {t("requested_by")}
-                </div>
-                <div>{formatName(report.requester)}</div>
-              </div>
-              {report.note && (
-                <div className="col-span-full">
-                  <div className="text-sm font-medium text-gray-500">
-                    {t("notes")}
-                  </div>
-                  <div className="whitespace-pre-wrap">{report.note}</div>
-                </div>
-              )}
-              {report.conclusion && (
-                <div className="col-span-full">
-                  <div className="text-sm font-medium text-gray-500">
-                    {t("conclusion")}
-                  </div>
-                  <div className="whitespace-pre-wrap">{report.conclusion}</div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <DiagnosticReportSummary
+          report={report}
+          title={report.service_request?.title}
+          createdDate={report.created_date}
+          requester={report.requester}
+        />
         {files?.results && files.results.length > 0 && (
           <Card>
             <CardHeader>

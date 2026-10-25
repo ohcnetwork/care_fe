@@ -1,6 +1,7 @@
 import { TFunction } from "i18next";
 import {
   Activity,
+  ArrowUpRight,
   BookOpen,
   Building2,
   ClipboardList,
@@ -38,6 +39,7 @@ interface SettingsPermissions {
   canReadPatientIdentifierConfig: boolean;
   canListTemplate: boolean;
   canReadImmunizationPolicy: boolean;
+  canManageReferralAvailability: boolean;
 }
 
 interface SettingsPage {
@@ -80,6 +82,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "clinical",
     pages: [
+      {
+        path: "settings/referrals",
+        title: "referral_availability",
+        icon: ArrowUpRight,
+        permission: "canManageReferralAvailability",
+      },
       {
         path: "settings/immunization-policies",
         title: "immunization_policies",

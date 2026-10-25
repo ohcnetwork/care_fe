@@ -12,6 +12,8 @@
 
 @config "../../tailwind.config.js";
 
+@import "./careui.css";
+
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {
   0% {
@@ -675,8 +677,8 @@
     @apply -ml-1 text-red-500 content-['*'];
   }
 
-  /* Style for tabs */
-  [data-slot="tabs-trigger"] {
+  /* Radix tabs use data-state; CareUI tabs provide their own active styles. */
+  [data-slot="tabs-trigger"][data-state] {
     @apply not-data-[state=active]:text-gray-500;
   }
 

@@ -4,8 +4,12 @@ import { NavTabs } from "@/components/ui/nav-tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import type { ClinicalHistoryTabKey } from "@/pages/Patient/History/clinicalHistoryTabs";
+import type {
+  ClinicalHistoryAccess,
+  ClinicalHistoryTabKey,
+} from "@/pages/Patient/History/clinicalHistoryTabs";
 import { useClinicalHistoryTabs } from "@/pages/Patient/History/clinicalHistoryTabs";
+import { keysOf } from "@/Utils/utils";
 
 /**
  * Tab 2 of the fill page: the patient's clinical history, embedded. Same
@@ -16,12 +20,22 @@ import { useClinicalHistoryTabs } from "@/pages/Patient/History/clinicalHistoryT
 export function ClinicalHistoryTab({
   patientId,
   facilityId,
+  access,
 }: {
   patientId: string;
   facilityId?: string;
+  access?: ClinicalHistoryAccess;
 }) {
   const [tab, setTab] = useState<ClinicalHistoryTabKey>("responses");
-  const tabs = useClinicalHistoryTabs({ patientId, facilityId });
+  const tabs = useClinicalHistoryTabs({
+    patientId,
+    facilityId,
+    embedded: true,
+    access,
+  });
+  const currentTab = tabs[tab].visible
+    ? tab
+    : keysOf(tabs).find((key) => tabs[key].visible);
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
     xs: 2,
@@ -30,12 +44,14 @@ export function ClinicalHistoryTab({
     "2xl": 12,
   });
 
+  if (!currentTab) return null;
+
   return (
     <NavTabs
       className="w-full"
       tabContentClassName="mt-6"
       tabs={tabs}
-      currentTab={tab}
+      currentTab={currentTab}
       onTabChange={setTab}
       setPageTitle={false}
       showMoreAfterIndex={showMoreAfterIndex}

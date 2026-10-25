@@ -69,6 +69,7 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
+import { SpecimenCollectionDetails } from "@/pages/Facility/services/serviceRequests/components/SpecimenCollectionDetails";
 import {
   EDITABLE_SERVICE_REQUEST_STATUSES,
   ServiceRequestReadSpec,
@@ -673,91 +674,11 @@ export function SpecimenWorkflowCard({
                     <p className="font-semibold text-xs mb-2 flex items-center gap-2">
                       {t("collected_specimen_details")}
                     </p>
-                    <Card className="rounded-xl overflow-clip border-none shadow-md">
-                      <Table>
-                        <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
-                          <TableRow>
-                            <TableHead className="w-[150px] text-gray-700 ">
-                              {t("field")}
-                            </TableHead>
-                            <TableHead className="text-gray-700">
-                              {t("details")}
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {collectedSpecimen.collection?.collector && (
-                            <TableRow>
-                              <TableHead className="w-[150px] text-gray-700">
-                                {t("collector")}
-                              </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
-                                {collectedSpecimen.collection.collector_object
-                                  ? formatName(
-                                      collectedSpecimen.collection
-                                        .collector_object,
-                                    )
-                                  : "--"}
-                              </TableCell>
-                            </TableRow>
-                          )}
-                          {collectedSpecimen.collection
-                            ?.collected_date_time && (
-                            <TableRow>
-                              <TableHead className="text-gray-700">
-                                {t("collected_time")}
-                              </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
-                                {new Date(
-                                  collectedSpecimen.collection
-                                    .collected_date_time,
-                                ).toLocaleString()}
-                              </TableCell>
-                            </TableRow>
-                          )}
-                          {collectedSpecimen.collection?.body_site && (
-                            <TableRow>
-                              <TableHead className="text-gray-700">
-                                {t("body_site")}
-                              </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
-                                {collectedSpecimen.collection.body_site.display}
-                              </TableCell>
-                            </TableRow>
-                          )}
-                          {collectedSpecimen.collection?.quantity && (
-                            <TableRow>
-                              <TableHead className="text-gray-700">
-                                {t("quantity")}
-                              </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
-                                {formatQuantity({
-                                  quantity:
-                                    collectedSpecimen.collection.quantity,
-                                })}
-                              </TableCell>
-                            </TableRow>
-                          )}
-                          {collectedSpecimen.collection
-                            ?.fasting_status_codeable_concept && (
-                            <TableRow>
-                              <TableHead className="text-gray-700">
-                                {t("fasting_status")}
-                              </TableHead>
-                              <TableCell className="text-gray-950 font-semibold">
-                                {
-                                  collectedSpecimen.collection
-                                    .fasting_status_codeable_concept.display
-                                }{" "}
-                                {collectedSpecimen.collection
-                                  .fasting_status_duration &&
-                                  `(${formatQuantity({ quantity: collectedSpecimen.collection.fasting_status_duration })})`}
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </Card>
+                    {collectedSpecimen.collection && (
+                      <SpecimenCollectionDetails
+                        collection={collectedSpecimen.collection}
+                      />
+                    )}
                   </AccordionContent>
                 </AccordionItem>
               )}

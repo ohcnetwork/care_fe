@@ -127,6 +127,7 @@ export function SelectedFilterBar({
           <Button
             variant="ghost"
             onClick={clearFilter}
+            aria-label={t("remove_filter")}
             size="icon"
             className="ml-auto size-9 shrink-0 rounded-l-none border-l border-gray-200 p-0 hover:bg-gray-50"
           >

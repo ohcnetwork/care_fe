@@ -21,8 +21,10 @@ import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
 import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
+import ReferralRoutes from "./routes/ReferralRoutes";
 
 const DashboardRoutes = {
+  ...ReferralRoutes,
   "/nearby_facilities": () => <FacilitiesPage />,
   "/facility/:facilityId/appointments/:appointmentId/success": ({
     appointmentId,

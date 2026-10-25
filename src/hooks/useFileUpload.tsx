@@ -5,6 +5,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -123,29 +124,35 @@ export default function useFileUpload(
       return null;
     }
   };
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (!e.target.files?.length) {
-      return;
-    }
-    const selectedFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...selectedFiles]);
-    if (options.compress) {
-      selectedFiles.forEach((file) => {
-        const ext = file.name.split(".").pop()?.toLowerCase();
-        if (ext && (FILE_EXTENSIONS.IMAGE as readonly string[]).includes(ext)) {
-          const options = {
-            initialQuality: 0.6,
-            alwaysKeepResolution: true,
-          };
-          imageCompression(file, options).then((compressedFile: File) => {
-            setFiles((prev) =>
-              prev.map((f) => (f.name === file.name ? compressedFile : f)),
-            );
-          });
-        }
-      });
-    }
-  };
+  const onFileChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.files?.length) {
+        return;
+      }
+      const selectedFiles = Array.from(e.target.files);
+      setFiles((prev) => [...prev, ...selectedFiles]);
+      if (options.compress) {
+        selectedFiles.forEach((file) => {
+          const ext = file.name.split(".").pop()?.toLowerCase();
+          if (
+            ext &&
+            (FILE_EXTENSIONS.IMAGE as readonly string[]).includes(ext)
+          ) {
+            const options = {
+              initialQuality: 0.6,
+              alwaysKeepResolution: true,
+            };
+            imageCompression(file, options).then((compressedFile: File) => {
+              setFiles((prev) =>
+                prev.map((f) => (f.name === file.name ? compressedFile : f)),
+              );
+            });
+          }
+        });
+      }
+    },
+    [options.compress],
+  );
 
   useEffect(() => {
     const blanks = Array(files.length).fill("");
@@ -352,23 +359,28 @@ export default function useFileUpload(
     </>
   );
 
-  const Input = (props: FileInputProps) => (
-    <input
-      {...props}
-      id={`file_upload_${fileType}`}
-      title={t("change_file")}
-      onChange={onFileChange}
-      type="file"
-      multiple={multiple}
-      accept={
-        "allowedExtensions" in options
-          ? options.allowedExtensions?.map((e) => "." + e).join(",")
-          : "allowAllExtensions" in options
-            ? "*"
-            : DEFAULT_ALLOWED_EXTENSIONS.join(",")
-      }
-      hidden={props.hidden || true}
-    />
+  const accept =
+    "allowedExtensions" in options
+      ? options.allowedExtensions?.map((e) => "." + e).join(",")
+      : "allowAllExtensions" in options
+        ? "*"
+        : DEFAULT_ALLOWED_EXTENSIONS.join(",");
+  // Consumers render Input as a component. Keep its identity stable so a
+  // parent rerender cannot replace the native picker during file selection.
+  const Input = useCallback(
+    (props: FileInputProps) => (
+      <input
+        {...props}
+        id={`file_upload_${fileType}`}
+        title={t("change_file")}
+        onChange={onFileChange}
+        type="file"
+        multiple={multiple}
+        accept={accept}
+        hidden={props.hidden || true}
+      />
+    ),
+    [fileType, t, onFileChange, multiple, accept],
   );
 
   return {

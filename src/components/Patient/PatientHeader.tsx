@@ -25,12 +25,17 @@ import {
 import dayjs from "dayjs";
 
 interface PatientHeaderProps {
-  patient: PatientRead | PublicPatientRead | PatientListRead;
+  patient:
+    | PatientRead
+    | PublicPatientRead
+    | PatientListRead
+    | Pick<PatientRead, "id" | "name">;
   facilityId?: string;
   className?: string;
   isPatientPage?: boolean;
   variant?: "default" | "encounter";
   showBloodGroup?: boolean;
+  showDetails?: boolean;
 }
 
 export function PatientHeader({
@@ -40,8 +45,30 @@ export function PatientHeader({
   isPatientPage = false,
   variant = "default",
   showBloodGroup = true,
+  showDetails = true,
 }: PatientHeaderProps) {
   const { t } = useTranslation();
+
+  // Some workflows share patient identity without granting chart access.
+  // Keep the same header without inventing demographics or a chart link.
+  if (!("gender" in patient)) {
+    return (
+      <div className={cn("flex min-w-0 items-center gap-3", className)}>
+        <Avatar
+          name={patient.name}
+          aria-hidden="true"
+          colors={["#def7ec", "#014737"]}
+          className="flex size-10 shrink-0 items-center justify-center"
+        />
+        <div className="min-w-0">
+          <p className="text-xs text-gray-500">{t("patient")}</p>
+          <p className="text-base font-semibold wrap-anywhere text-gray-950">
+            {patient.name}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (variant === "encounter") {
     const identifiers = getPatientIdentifiers(patient);
@@ -50,7 +77,9 @@ export function PatientHeader({
     const hasBloodGroup =
       bloodGroup !== BloodGroupChoices.Unknown &&
       BLOOD_GROUP_CHOICES.some((choice) => choice.id === bloodGroup);
-    const bloodGroupDescription = t(`BLOOD_GROUP_LONG__${bloodGroup}`);
+    const bloodGroupDescription = t(
+      `BLOOD_GROUP_LONG__${hasBloodGroup ? bloodGroup : BloodGroupChoices.Unknown}`,
+    );
     const bloodGroupLabel = `${t("blood_group")}: ${bloodGroupDescription}`;
 
     return (
@@ -64,9 +93,10 @@ export function PatientHeader({
           />
           <div className="min-w-0 flex-1">
             <PatientHoverCard
+              key={`${patient.id}:${isPatientPage || !showDetails}`}
               patient={patient}
               facilityId={facilityId}
-              disabled={isPatientPage}
+              disabled={isPatientPage || !showDetails}
               presentation="encounter"
             />
             <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-600">
@@ -165,9 +195,10 @@ export function PatientHeader({
     >
       <div className="flex flex-col md:flex-row gap-4 xl:gap-8 xl:items-center">
         <PatientHoverCard
+          key={`${patient.id}:${isPatientPage || !showDetails}`}
           patient={patient}
           facilityId={facilityId}
-          disabled={isPatientPage}
+          disabled={isPatientPage || !showDetails}
         />
         <div className="flex flex-wrap xl:gap-5 gap-2">
           {getPatientIdentifiers(patient).map((identifier) => (
