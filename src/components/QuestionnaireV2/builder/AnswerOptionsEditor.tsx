@@ -21,6 +21,7 @@ import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useVal
 import { ValueSetScope } from "@/types/valueSet/valueSet";
 
 import { AnswerOption, Question } from "@/types/questionnaire/question";
+import { swapElements } from "@/Utils/array";
 
 import { useEditorRowKeys } from "./useEditorRowKeys";
 
@@ -149,18 +150,13 @@ export function AnswerOptionsEditor({
   const mode: Mode =
     modeOverride?.questionId === question.id ? modeOverride.mode : derivedMode;
 
+  // Only a picked valueset (onValueSetChange below) replaces custom options,
+  // so a stray click on the chip loses nothing.
   const handleModeChange = (next: Mode) => {
     if (next === mode) return;
     setModeOverride({ questionId: question.id, mode: next });
-    if (next === "custom") {
-      onChange({
-        answer_value_set: undefined,
-        answer_option: question.answer_option ?? [],
-      });
-    } else {
-      // Keep answer_value_set undefined until SelectOrCreateValueset returns
-      // a real valueset (see onValueSetChange below).
-      onChange({ answer_option: undefined });
+    if (next === "custom" && question.answer_value_set) {
+      onChange({ answer_value_set: undefined, answer_option: options });
     }
   };
 
@@ -176,11 +172,16 @@ export function AnswerOptionsEditor({
     );
   };
 
+  // Repeating (multi-select) questions may pre-select several options.
   const handleSetDefault = (index: number) => {
     updateOptions(
       options.map((option, i) => ({
         ...option,
-        initial_selected: i === index,
+        initial_selected: question.repeats
+          ? i === index
+            ? !option.initial_selected
+            : !!option.initial_selected
+          : i === index,
       })),
     );
   };
@@ -200,9 +201,7 @@ export function AnswerOptionsEditor({
     const target = index + direction;
     if (target < 0 || target >= options.length) return;
     moveRowKey(index, target);
-    const next = [...options];
-    [next[index], next[target]] = [next[target], next[index]];
-    updateOptions(next);
+    updateOptions(swapElements(options, index, target));
   };
 
   const handleAddOption = () => {
@@ -257,7 +256,7 @@ export function AnswerOptionsEditor({
             </Button>
           </div>
           <div
-            role="radiogroup"
+            role={question.repeats ? "group" : "radiogroup"}
             aria-label={t("default")}
             className="overflow-hidden rounded-md border border-gray-200 bg-white"
           >
@@ -285,8 +284,10 @@ export function AnswerOptionsEditor({
                       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                         <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
                           <input
-                            type="radio"
-                            name={defaultGroupName}
+                            type={question.repeats ? "checkbox" : "radio"}
+                            name={
+                              question.repeats ? undefined : defaultGroupName
+                            }
                             checked={!!option.initial_selected}
                             aria-checked={!!option.initial_selected}
                             aria-label={t("questionnaire_default_option", {

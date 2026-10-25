@@ -91,24 +91,18 @@ export function VisibilityConditionRow({
     onChange(buildEnableWhen(linkId, target?.type, operators[0]));
   };
 
+  const target = availableTargets.find((q) => q.link_id === condition.question);
+  const operators = operatorsForType(target?.type);
+
   const handleOperatorChange = (operator: ConditionOperator) => {
-    // `exists` stores a literal boolean; comparisons use the target's
-    // own answer shape. Reset it when leaving the presence check.
+    // `exists` stores a literal boolean; comparisons use the target's own
+    // answer shape. Start over whenever the change crosses that line.
     onChange(
-      condition.operator === "exists" && operator !== "exists"
-        ? buildEnableWhen(
-            condition.question,
-            availableTargets.find(
-              (question) => question.link_id === condition.question,
-            )?.type,
-            operator,
-          )
+      (condition.operator === "exists") !== (operator === "exists")
+        ? buildEnableWhen(condition.question, target?.type, operator)
         : buildCondition(condition.question, operator, condition.answer),
     );
   };
-
-  const target = availableTargets.find((q) => q.link_id === condition.question);
-  const operators = operatorsForType(target?.type);
   // A saved condition may target a question the renderer never
   // answers; surface it as invalid instead of keeping it silently.
   const invalidTarget = condition.question
@@ -160,6 +154,7 @@ export function VisibilityConditionRow({
             >
               <SelectTrigger
                 className="w-full"
+                aria-label={t("question")}
                 aria-invalid={Boolean(invalidTarget)}
               >
                 <SelectValue placeholder={t("select")} />
@@ -201,7 +196,7 @@ export function VisibilityConditionRow({
                 if (operator) handleOperatorChange(operator);
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" aria-label={t("operator")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -219,6 +214,7 @@ export function VisibilityConditionRow({
             <VisibilityConditionAnswerInput
               condition={condition}
               targetType={target?.type}
+              aria-label={t("answer")}
               onChange={(answer) =>
                 onChange(
                   buildCondition(

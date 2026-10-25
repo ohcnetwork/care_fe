@@ -9,9 +9,20 @@ import { Question } from "@/types/questionnaire/question";
 const MAX_IMPORT_SIZE = 5_000_000;
 
 async function fetchQuestionnaire(url: string, signal: AbortSignal) {
-  const response = await fetch(url, {
-    signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
-  });
+  // Hand-rolled instead of AbortSignal.any/timeout, which older supported
+  // browsers lack.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  signal.addEventListener("abort", () => controller.abort(), { once: true });
+  try {
+    return await readQuestionnaire(url, controller.signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function readQuestionnaire(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { signal });
   if (!response.ok) throw new Error("Failed to fetch questionnaire");
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType && !/json|text/i.test(contentType)) {

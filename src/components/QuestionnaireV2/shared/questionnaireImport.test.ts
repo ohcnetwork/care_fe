@@ -36,6 +36,24 @@ const exported = {
 };
 
 describe("questionnaire definition import", () => {
+  it("rejects answer options that are not an array of valued options", () => {
+    const choice = { text: "Choice", type: "choice", link_id: "c" };
+    assert.equal(
+      extractQuestions({ questions: [{ ...choice, answer_option: "bad" }] }),
+      null,
+    );
+    assert.equal(
+      extractQuestions({ questions: [{ ...choice, answer_option: [{}] }] }),
+      null,
+    );
+    assert.equal(
+      extractQuestions({
+        questions: [{ ...choice, answer_option: [{ value: "a" }] }],
+      })?.length,
+      1,
+    );
+  });
+
   it("normalizes legacy value-set slugs at every question depth without changing the source", () => {
     const binding = { slug: "current-options", external_id: "current-id" };
     const legacy = {

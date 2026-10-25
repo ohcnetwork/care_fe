@@ -16,13 +16,19 @@ export function useStudioSelection(
   state: BuilderState,
   dispatch: Dispatch<BuilderAction>,
 ) {
-  const [inspectorTarget, setInspectorTarget] = useState<"form" | "question">(
-    "question",
-  );
+  const [inspectorTarget, setInspectorTarget] = useState<
+    "form" | "question" | "actions"
+  >("question");
+  // The expanded card in the Actions panel — owned here so an issue click
+  // from the top bar can open the right one.
+  const [openActionIndex, setOpenActionIndex] = useState<number | null>(null);
   const [scrollRequest, setScrollRequest] = useState<{
     id: string;
     nonce: number;
   } | null>(null);
+  // The inspector focuses its title only after the author changed the
+  // selection themselves — never on page load or on returning from preview.
+  const [focusTitle, setFocusTitle] = useState(false);
   // Creating or importing questions selects them in the reducer — the
   // inspector must follow, or it would stay on Form settings showing
   // nothing about the question that just appeared.
@@ -35,6 +41,9 @@ export function useStudioSelection(
       ) {
         setInspectorTarget("question");
       }
+      if (action.type !== "reset" && action.type !== "updateQuestion") {
+        setFocusTitle(true);
+      }
       dispatch(action);
     },
     [dispatch],
@@ -44,6 +53,7 @@ export function useStudioSelection(
     (questionId: string) => {
       dispatch({ type: "select", id: questionId });
       setInspectorTarget("question");
+      setFocusTitle(true);
     },
     [dispatch],
   );
@@ -59,11 +69,23 @@ export function useStudioSelection(
     [selectQuestion],
   );
 
+  const revealAction = useCallback((index: number) => {
+    setInspectorTarget("actions");
+    setOpenActionIndex(index);
+  }, []);
+
   const selectedQuestion = state.selectedId
     ? findQuestion(state.questions, state.selectedId)
     : undefined;
-  // Form settings stands in whenever no question is selected.
-  const formSelected = inspectorTarget === "form" || !selectedQuestion;
+  // Which inspector shows: Actions when asked for; otherwise Form settings
+  // stands in whenever no question is selected.
+  const panel: "form" | "question" | "actions" =
+    inspectorTarget === "actions"
+      ? "actions"
+      : inspectorTarget === "form" || !selectedQuestion
+        ? "form"
+        : "question";
+  const formSelected = panel === "form";
   const topLevelIndex = state.selectedId
     ? findTopLevelIndex(state.questions, state.selectedId)
     : 0;
@@ -77,11 +99,17 @@ export function useStudioSelection(
   return {
     studioDispatch,
     setInspectorTarget,
+    focusTitle,
+    clearTitleFocus: () => setFocusTitle(false),
+    openActionIndex,
+    setOpenActionIndex,
     scrollRequest,
     selectQuestion,
     revealQuestion,
+    revealAction,
     selectedQuestion,
     selectedNumber,
+    panel,
     formSelected,
   };
 }
