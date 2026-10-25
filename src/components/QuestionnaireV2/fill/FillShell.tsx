@@ -116,10 +116,10 @@ export function FillShell({
   }, [minimizeOnEscape]);
 
   return (
-    // -m-4 cancels AppRouter's page-wrapper p-4 below md, where this shell
+    // Cancel AppRouter's page-wrapper p-2 while the mobile shell stays in flow.
     <div
       ref={shellRef}
-      className="-m-4 flex min-h-dvh flex-col bg-gray-100 [--fill-shell-header-height:56px] md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden"
+      className="-m-2 flex min-h-dvh flex-col bg-gray-100 [--fill-shell-header-height:56px] md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden"
       onKeyDown={minimizeOnEscape}
     >
       {/* min-w-0 + overflow on the strip: a long questionnaire title (or
