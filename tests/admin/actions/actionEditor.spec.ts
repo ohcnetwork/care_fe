@@ -247,8 +247,13 @@ test.describe("Action editor regression checks", () => {
     await expect(expression).toHaveValue('patient["age"] == 19');
     await expression.fill('patient["age"] == (');
     await expect(expression).toHaveAttribute("aria-invalid", "true");
-    const error = page.locator("#action-0-expression-error");
-    await expect(error).toContainText("syntax error");
+    const error = page.getByText("The action's expression has a syntax error", {
+      exact: true,
+    });
+    await expect(error).toBeVisible();
+    await expect(expression).toHaveAccessibleDescription(
+      "The action's expression has a syntax error",
+    );
     const expressionBounds = await expression.boundingBox();
     const errorBounds = await error.boundingBox();
     expect(errorBounds!.y).toBeGreaterThan(

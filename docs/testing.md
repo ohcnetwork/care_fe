@@ -48,6 +48,8 @@ npm run playwright:db-status     # Check snapshot info
 
 The `globalSetup` automatically restores the DB snapshot before each local test run (skipped on CI). To set up for the first time:
 
+The reset command and CI both load the backend's default fixtures followed by `care/fixtures/scripts/questionnaire_e2e_fixtures.py`, which supplies the versioned, scoped, and pagination questionnaire fixtures.
+
 ```bash
 npm run playwright:db-reset      # Creates snapshot with fixtures
 npm run playwright:test           # Tests run against clean DB, auto-restores on next run

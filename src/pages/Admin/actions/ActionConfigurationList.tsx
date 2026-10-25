@@ -122,6 +122,11 @@ export function ActionConfigurationList() {
                       <Link
                         href={`${ADMIN_ACTIONS_PATH}/${configuration.id}`}
                         onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => {
+                          // Preserve native link activation before the global
+                          // Enter shortcut prevents the browser's click.
+                          if (event.key === "Enter") event.stopPropagation();
+                        }}
                         className="block truncate text-sm font-medium text-gray-900 focus-visible:outline-hidden focus-visible:ring-1"
                       >
                         {configuration.name}
