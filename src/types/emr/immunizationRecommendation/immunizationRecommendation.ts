@@ -60,17 +60,6 @@ export interface ImmunizationRecommendationCreate extends ImmunizationRecommenda
   forecast_status: ImmunizationForecastStatus;
 }
 
-export interface ImmunizationRecommendationTree extends ImmunizationRecommendationFields {
-  is_group: boolean;
-  children: ImmunizationRecommendationTree[];
-}
-
-export interface ImmunizationRecommendationTreeCreate {
-  patient: string;
-  encounter: string;
-  root: ImmunizationRecommendationTree;
-}
-
 export interface ImmunizationRecommendationUpdate extends ImmunizationRecommendationFields {
   forecast_status: ImmunizationForecastStatus;
 }
