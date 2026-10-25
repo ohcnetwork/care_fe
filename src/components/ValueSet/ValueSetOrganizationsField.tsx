@@ -21,9 +21,9 @@ const valueSetOrganizationsKey = (valuesetId: string) =>
 
 /**
  * Departments that can see and use a facility value set. A facility set
- * with no departments is visible to superusers only (the backend gates
- * reads on organization membership), so this is the first thing to fill in
- * after creating one.
+ * with no departments is hidden from ordinary readers. Users with root
+ * organization write permission can manage it before assigning departments,
+ * so this is the first thing to fill in after creating one.
  *
  * The organizations endpoints 403 for anything but a facility-context set;
  * a user's own set listed under the same facility therefore renders

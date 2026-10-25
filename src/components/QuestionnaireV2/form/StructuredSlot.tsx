@@ -135,6 +135,12 @@ export function StructuredSlot({
   return (
     <PluginErrorBoundary
       pluginName={definition.type}
+      // Once the notice is showing there is no input to answer — same as
+      // the subject-mismatch and missing-context notices above. A REQUIRED
+      // question still hard-blocks the submit by name for this reason
+      // (`collectStructuredErrors`); marking it here only tells that
+      // validator (and `collectQuestionErrors`, staying out of the way)
+      // which slots are in this state.
       onError={markRenderFailed}
       resetKey={definition}
       fallback={

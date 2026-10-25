@@ -431,18 +431,3 @@ export function useScopedResponses() {
   );
   return useAtomValue(scoped);
 }
-
-export function useScopedErrors() {
-  const path = useResponseScope();
-  const scoped = useMemo(
-    () =>
-      selectAtom(errorsAtom, (errors) =>
-        errors.filter(
-          (error) =>
-            !error.response_path || sameResponsePath(error.response_path, path),
-        ),
-      ),
-    [path],
-  );
-  return useAtomValue(scoped);
-}

@@ -7,6 +7,7 @@ import {
   isQuestionEnabledInState,
   renderFailedKey,
 } from "@/components/QuestionnaireV2/form/engine/store";
+import { getQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { groupsNeedingSchemaUpdate } from "@/components/QuestionnaireV2/groups/schema";
 import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 
@@ -20,7 +21,9 @@ import type {
 import type { Question } from "@/types/questionnaire/question";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
-export interface RequiredCheckContext {
+/** Where the questionnaire is being filled — what decides whether a
+ *  structured question's slot can show an input at all. */
+export interface QuestionValidationContext {
   questionnaire: QuestionnaireRead;
   subject: RendererSubject;
   /** `structuredRenderFailedAtom`: slots showing the error boundary's notice. */
@@ -34,7 +37,7 @@ function structuredQuestionIsAnswerable(
   structuredType: string,
   questionId: string,
   path: ResponsePath,
-  context: RequiredCheckContext,
+  context: QuestionValidationContext,
 ): boolean {
   if (context.renderFailed.has(renderFailedKey(questionId, path))) return false;
   const state = resolveStructuredSlotState(
@@ -45,13 +48,21 @@ function structuredQuestionIsAnswerable(
   return state.kind === "ready";
 }
 
-/** Required-field errors for every enabled question, by the same
- *  `entryIsAnswered` rule the submit serializer filters on. */
-export function collectRequiredErrors(
+/**
+ * The fill-mode validation seam. Pure function: `fill/submit/` runs it per
+ * form at submit time and writes the result into that form's `errorsAtom`;
+ * server-side errors merge back through the same `QuestionValidationError`
+ * shape.
+ *
+ * Only questions that are currently enabled and record answers can be
+ * required-invalid; a response counts as answered when any of its entries
+ * does, by the same `entryIsAnswered` rule the submit serializer filters on.
+ */
+export function collectQuestionErrors(
   questions: Question[],
   responses: Record<string, QuestionnaireResponse>,
   t: TFunction,
-  context: RequiredCheckContext,
+  context: QuestionValidationContext,
 ): QuestionValidationError[] {
   const linkIndex = buildLinkIndex(questions);
 
@@ -76,6 +87,23 @@ export function collectRequiredErrors(
             error: t("registered_group_schema_update_required"),
           });
           continue;
+        }
+        const definition = question.structured_type
+          ? getQuestionGroup(question.structured_type)
+          : undefined;
+        if (
+          definition?.validate &&
+          definition.subjects.includes(context.questionnaire.subject_type)
+        ) {
+          try {
+            errors.push(...definition.validate(question, scope, path));
+          } catch {
+            errors.push({
+              question_id: question.id,
+              response_path: path,
+              error: t("registered_group_validation_failed"),
+            });
+          }
         }
         if (question.repeats) {
           const rows = scope[question.id]?.sub_results ?? [];

@@ -1,0 +1,57 @@
+import { faker } from "@faker-js/faker";
+import { expect, test } from "@playwright/test";
+import { createQuestionnaire } from "tests/helper/questionnaireV2";
+
+test.use({ storageState: "tests/.auth/user.json" });
+
+test.describe("Questionnaire v2 list", () => {
+  test("status tabs and search jointly scope the results to a real outcome", async ({
+    page,
+  }) => {
+    const draftTitle = `QV2 List Draft ${Date.now()}`;
+
+    await test.step("Create a draft questionnaire to filter for", async () => {
+      await createQuestionnaire(page, {
+        basePath: "/admin/questionnaires",
+        title: draftTitle,
+        status: "Draft",
+      });
+    });
+
+    await test.step("Page renders with status tabs", async () => {
+      await page.goto("/admin/questionnaires");
+      await expect(
+        page.getByRole("heading", { name: "Questionnaires" }),
+      ).toBeVisible();
+      await expect(page.getByRole("radio", { name: "Active" })).toBeVisible();
+    });
+
+    await test.step("Search for a non-existent questionnaire shows the empty state", async () => {
+      await page
+        .getByPlaceholder("Search Questionnaires")
+        .fill(faker.string.uuid());
+      await expect(page.getByText("No questionnaires found")).toBeVisible();
+    });
+
+    await test.step("Searching the draft title under the default Active tab finds nothing", async () => {
+      await page.getByPlaceholder("Search Questionnaires").fill(draftTitle);
+      await expect(page.getByText("No questionnaires found")).toBeVisible();
+    });
+
+    await test.step("Switching to the Draft tab reveals it (search still applied)", async () => {
+      await page.getByRole("radio", { name: "Draft" }).click();
+      await expect(page.getByRole("radio", { name: "Draft" })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+      await expect(page.locator('[data-slot="table-body"]')).toContainText(
+        draftTitle,
+      );
+    });
+
+    await test.step("Switching back to Active hides it again", async () => {
+      await page.getByRole("radio", { name: "Active" }).click();
+      await expect(page.getByText("No questionnaires found")).toBeVisible();
+    });
+  });
+});

@@ -1,7 +1,10 @@
 import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import { QUESTION_TYPES, type Question } from "@/types/questionnaire/question";
 import {
   SUBJECT_TYPES,
@@ -33,6 +36,8 @@ export interface GroupField {
 }
 
 export interface GroupRow {
+  /** Host-owned React key; stable across edits and removals of sibling rows. */
+  key: number;
   /** Local schema link_id → binding; missing or incompatible fields are null. */
   fields: Record<string, GroupField | null>;
   onChange: (updates: Record<string, Partial<QuestionnaireResponse>>) => void;
@@ -59,6 +64,14 @@ export interface RegisteredGroupDefinition {
   schema: readonly GroupQuestionDefinition[];
   builder: ComponentType<GroupBuilderProps>;
   component: ComponentType<GroupInputProps>;
+  /** Pure, synchronous checks over the saved question and current response scope.
+   * The plugin returns ordinary errors with complete response paths using `path`.
+   * Core appends errors unchanged and continues validating children. */
+  validate?: (
+    question: Question,
+    responses: Record<string, QuestionnaireResponse>,
+    path: ResponsePath,
+  ) => QuestionValidationError[];
 }
 
 const groups = new Map<string, RegisteredGroupDefinition>();
