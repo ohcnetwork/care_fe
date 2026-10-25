@@ -10,12 +10,8 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
     requires: ["encounterId", "facilityId"],
     subjects: ["encounter"],
     draftPolicy: "serialize",
-    // No validate: the exported legacy validateServiceRequestQuestion
-    // expects flat ServiceRequestReadSpec fields, but the recorded data is
-    // ServiceRequestApplyActivityDefinitionForm with those fields nested
-    // under `service_request` — wiring it would fail every submission.
-    // (That mismatch is also why the legacy form never wired it.)
-    buildRequests: async (serviceRequests, { facilityId, questionId }) =>
+    // No validate: legacy validateServiceRequestQuestion expects a flat shape.
+    buildRequests: async (serviceRequests, { facilityId, questionId, path }) =>
       serviceRequests.map((serviceRequest) => ({
         url: `/api/v1/facility/${facilityId}/service_request/apply_activity_definition/`,
         method: "POST" as const,
@@ -26,6 +22,10 @@ export const serviceRequestDefinition: StructuredTypeDefinition<"service_request
             requester: serviceRequest.service_request.requester.id,
           },
         },
-        reference_id: structuredReferenceId("service_request", questionId),
+        reference_id: structuredReferenceId(
+          "service_request",
+          questionId,
+          path,
+        ),
       })),
   };

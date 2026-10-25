@@ -119,6 +119,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const handleClose = () => {
     setPreviewImage(null);
     onResetCapture();
+    setPreview?.(false);
     onOpenChange(false);
     setCameraFacingMode("environment");
   };

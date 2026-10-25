@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Zap } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -119,9 +119,18 @@ export function ActionConfigurationList() {
                     }
                   >
                     <TableCell className="py-2.5">
-                      <span className="block truncate text-sm font-medium text-gray-900">
+                      <Link
+                        href={`${ADMIN_ACTIONS_PATH}/${configuration.id}`}
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => {
+                          // Preserve native link activation before the global
+                          // Enter shortcut prevents the browser's click.
+                          if (event.key === "Enter") event.stopPropagation();
+                        }}
+                        className="block truncate text-sm font-medium text-gray-900 focus-visible:outline-hidden focus-visible:ring-1"
+                      >
                         {configuration.name}
-                      </span>
+                      </Link>
                       {configuration.description && (
                         <span className="block truncate text-xs text-gray-500">
                           {configuration.description}

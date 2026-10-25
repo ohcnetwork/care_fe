@@ -40,12 +40,7 @@ export function QuestionAnswerInput({
   // Keep the same precedence as ChoiceInput when a value set is also present.
   const isSelfManagedChoice =
     question.type === "choice" && !!question.answer_option?.length;
-  if (
-    InputComponent &&
-    question.repeats === true &&
-    question.type !== "display" &&
-    !isSelfManagedChoice
-  ) {
+  if (InputComponent && question.repeats === true && !isSelfManagedChoice) {
     return (
       <RepeatedQuestionInput
         question={question}
@@ -77,9 +72,7 @@ export function QuestionAnswerInput({
           </p>
         )}
       </div>
-      {question.type !== "display" && (
-        <NoteControl questionId={question.id} locked={locked} />
-      )}
+      <NoteControl questionId={question.id} locked={locked} />
     </div>
   );
 }

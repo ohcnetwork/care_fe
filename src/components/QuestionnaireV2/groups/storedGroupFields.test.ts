@@ -66,3 +66,14 @@ test("saved group fields restore ordinary typed answers without inventing defaul
   assert.equal(repeated.choice?.response.values[1].coding?.code, "second");
   assert.equal(repeated.choice?.response.note, "Saved note");
 });
+
+test("date-only answers restore as local calendar days", () => {
+  const date: Question = { id: "d", link_id: "d", text: "Date", type: "date" };
+  const fields = storedGroupFields({ date }, [
+    { question_id: "d", values: [{ value: "2026-09-26" }] },
+  ]);
+  assert.deepEqual(
+    fields.date?.response.values[0]?.value,
+    new Date(2026, 8, 26),
+  );
+});

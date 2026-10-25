@@ -5,6 +5,7 @@ import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
+import { ImmunizationHistory } from "./ImmunizationHistory";
 import { ResponsesHistory } from "./ResponsesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
 
@@ -49,6 +50,10 @@ export function useClinicalHistoryTabs({
     medications: {
       label: t("past_medications"),
       component: <MedicationHistory patientId={patientId} />,
+    },
+    immunizations: {
+      label: t("immunizations"),
+      component: <ImmunizationHistory patientId={patientId} />,
     },
   } as const;
 }

@@ -100,10 +100,14 @@ test("studio selection preserves reveal intent and follows question-creating act
 
     await act(async () => selection.setInspectorTarget("form"));
     await act(async () =>
-      selection.studioDispatch({ type: "duplicateQuestion", id: "child" }),
+      selection.studioDispatch({
+        type: "duplicateQuestion",
+        id: "child",
+        text: "Child (Copy)",
+      }),
     );
     assert.equal(selection!.panel, "question");
-    assert.equal(selection!.selectedQuestion?.text, "Child (copy)");
+    assert.equal(selection!.selectedQuestion?.text, "Child (Copy)");
     assert.notEqual(selection!.selectedQuestion?.id, "child");
 
     await act(async () => selection.revealAction(0));

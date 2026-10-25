@@ -63,12 +63,8 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
 
   const { data: revisions, isLoading } = useQuery({
     queryKey: questionnaireKeys.revisions(questionnaire.id),
-    queryFn: query(questionnaireApi.list, {
-      // Backend gap: the revisions list has no way to request "all of them"
-      // — pass a generously large page size so questionnaires with a long
-      // history don't silently lose older versions off the end of the
-      // default page. The count-vs-length check below surfaces the rest.
-      queryParams: { parent_revision: questionnaire.id, limit: 100 },
+    queryFn: query.paginated(questionnaireApi.list, {
+      queryParams: { parent_revision: questionnaire.id },
     }),
   });
 
@@ -77,7 +73,6 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
   const pastRevisions = [...(revisions?.results ?? [])].sort(
     (a, b) => revisionOf(b) - revisionOf(a),
   );
-  const totalRevisions = revisions?.count ?? pastRevisions.length;
 
   const auditDetails = (record: QuestionnaireRead) => (
     <dl className="mt-2 space-y-1 text-sm text-gray-500">
@@ -213,15 +208,6 @@ export function VersionsTab({ scope, questionnaire }: VersionsTabProps) {
                 </div>
               </div>
             ))
-          )}
-
-          {totalRevisions > pastRevisions.length && (
-            <p className="pl-9 text-sm text-gray-400">
-              {t("showing_latest_of_versions", {
-                shown: pastRevisions.length,
-                total: totalRevisions,
-              })}
-            </p>
           )}
         </div>
       )}

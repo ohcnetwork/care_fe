@@ -252,9 +252,17 @@ export function FillPageBody({
   const frozen =
     isPending || serverDraftSave.isSavingDraft || discardServerDraft.isPending;
 
+  // A detected local draft stays untouched until Resume or Discard; a
+  // successful submit would delete it unreviewed, so Save waits too.
+  const restoredDraftPending = !!autosave.restoredDraft;
   const saveChanges = useCallback(() => {
-    if (!frozen && !contextRefreshFailed) void submit();
-  }, [frozen, contextRefreshFailed, submit]);
+    if (frozen || contextRefreshFailed) return;
+    if (restoredDraftPending) {
+      toast.error(t("resolve_draft_before_saving"));
+      return;
+    }
+    void submit();
+  }, [frozen, contextRefreshFailed, restoredDraftPending, submit, t]);
 
   useEffect(() => {
     const saveOnShortcut = (event: KeyboardEvent) => {

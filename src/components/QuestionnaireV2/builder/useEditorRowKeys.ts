@@ -1,3 +1,4 @@
+import { swapElements } from "@/Utils/array";
 import { useState } from "react";
 
 interface EditorRowKeys {
@@ -33,9 +34,7 @@ export function useEditorRowKeys(scope: string, count: number) {
       });
     },
     moveRowKey: (index: number, target: number) => {
-      const keys = [...current.keys];
-      [keys[index], keys[target]] = [keys[target], keys[index]];
-      setState({ ...current, keys });
+      setState({ ...current, keys: swapElements(current.keys, index, target) });
     },
   };
 }

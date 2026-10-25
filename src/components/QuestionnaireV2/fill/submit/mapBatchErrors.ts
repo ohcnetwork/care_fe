@@ -1,8 +1,10 @@
+import { parseStructuredReferenceId } from "@/components/QuestionnaireV2/structured/types";
 import type {
   BatchRequestError,
   QuestionValidationError,
   StructuredDataError,
 } from "@/types/questionnaire/batch";
+import type { Question } from "@/types/questionnaire/question";
 
 /** Page-level entry for the server-error panel (one per failed batch
  *  sub-request). */
@@ -24,6 +26,25 @@ export interface MappedBatchErrors {
 }
 
 const STRUCTURED_REFERENCE_PREFIX = "structured:";
+
+function repeatedAncestors(
+  questions: Question[],
+  questionId: string,
+  ancestors: string[] = [],
+): string[] | undefined {
+  for (const question of questions) {
+    if (question.id === questionId) return ancestors;
+    const found = repeatedAncestors(
+      question.questions ?? [],
+      questionId,
+      question.type === "group" && question.repeats
+        ? [...ancestors, question.id]
+        : ancestors,
+    );
+    if (found) return found;
+  }
+  return undefined;
+}
 
 /** Django validation errors may wrap another { type, msg } inside `msg`.
  * Only extracted text reaches React; unknown objects use the normal fallback. */
@@ -56,19 +77,23 @@ function locatedErrorMessage(
  * server-error panel; failures that identify a question additionally feed
  * `errorsAtom`:
  * - structured entries carry their question id inside the reference_id
- *   (`structured:{type}:{questionId}`), so repeated structured types map
- *   to the right question;
+ *   (`structured:{type}:{questionId}[#r0.r1]`), so repeated structured types map
+ *   to the right question and repeat row;
  * - the questionnaire submit entry's pydantic errors carry `question_id`
  *   directly, making reference_id authoritative across forms.
  */
 export function mapBatchErrors(
   results: FailedBatchResult[],
   fallbackMessage: string,
+  questions: Question[] = [],
 ): MappedBatchErrors {
   const serverErrors: ServerValidationError[] = [];
   const questionErrors: QuestionValidationError[] = [];
 
-  for (const result of results.filter((r) => r.status_code !== 200)) {
+  const failed = results.filter(
+    (result) => result.status_code < 200 || result.status_code >= 300,
+  );
+  for (const result of failed) {
     const referenceId = result.reference_id || "";
     let message = fallbackMessage;
 
@@ -90,10 +115,25 @@ export function mapBatchErrors(
     });
 
     if (referenceId.startsWith(STRUCTURED_REFERENCE_PREFIX)) {
-      const questionId = referenceId.split(":").slice(2).join(":");
-      if (questionId) {
+      const parsed = parseStructuredReferenceId(referenceId);
+      if (parsed) {
+        const ancestors = parsed.rowIndexes.length
+          ? repeatedAncestors(questions, parsed.questionId)
+          : [];
+        // Keep unknown/malformed row addresses in the panel instead of
+        // attaching the error to every occurrence of the question.
+        if (!ancestors || ancestors.length !== parsed.rowIndexes.length)
+          continue;
         questionErrors.push({
-          question_id: questionId,
+          question_id: parsed.questionId,
+          ...(ancestors.length
+            ? {
+                response_path: ancestors.map((questionId, index) => ({
+                  questionId,
+                  rowIndex: parsed.rowIndexes[index],
+                })),
+              }
+            : {}),
           error: message,
           type: "server_error",
         });

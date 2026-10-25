@@ -599,7 +599,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
   const template = {
     schema_version: 1,
     pages: [
-      { kind: "system", key: "medicines", hidden: true },
+      { kind: "system", key: "immunizations", hidden: true },
       {
         kind: "custom",
         key: "rounds",
@@ -863,7 +863,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
       .getByRole("button", { name: "Add system page", exact: true })
       .click();
     await page
-      .getByRole("menuitem", { name: "Medications", exact: true })
+      .getByRole("menuitem", { name: "Immunizations", exact: true })
       .click();
     await page
       .getByRole("checkbox", {

@@ -1,6 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import {
   errorsAtom,
@@ -16,8 +19,10 @@ import { rendererSubjectOf } from "@/components/QuestionnaireV2/fill/subject";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
 import type { ResponsePath } from "@/types/questionnaire/form";
+import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
 import type { Question } from "@/types/questionnaire/question";
 import { useBatchRequest } from "@/Utils/request/batch";
+import query from "@/Utils/request/query";
 import { Type } from "@/Utils/request/types";
 
 import {
@@ -137,6 +142,7 @@ export function useSubmitFillSession({
   onSuccess,
 }: UseSubmitFillSessionArgs) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>([]);
 
   const { mutate: submitBatch, isPending } = useBatchRequest({
@@ -173,6 +179,7 @@ export function useSubmitFillSession({
         const mapped = mapBatchErrors(
           error.cause.results,
           t("validation_failed"),
+          forms.flatMap((form) => form.questionnaire.questions),
         );
         setServerErrors(mapped.serverErrors);
 
@@ -189,7 +196,10 @@ export function useSubmitFillSession({
           getStore(form.key)?.set(errorsAtom, byForm.get(form.key) ?? []);
         }
         if (mapped.questionErrors.length > 0) {
-          scrollToQuestion(mapped.questionErrors[0].question_id);
+          scrollToQuestion(
+            mapped.questionErrors[0].question_id,
+            mapped.questionErrors[0].response_path,
+          );
         }
       }
       toast.error(t("questionnaire_submission_failed"));
@@ -284,6 +294,28 @@ export function useSubmitFillSession({
     }
     setServerErrors([]);
 
+    // A resumed draft must still be open. The backend's duplicate guard runs
+    // on the questionnaire POST, which a form with only structured answers
+    // never sends, so re-read the record before any domain write goes out.
+    if (continueDraftId) {
+      try {
+        const draft = await queryClient.fetchQuery({
+          queryKey: formSubmissionKeys.detail(continueDraftId),
+          queryFn: query(formSubmissionApi.get, {
+            pathParams: { external_id: continueDraftId },
+          }),
+          staleTime: 0,
+        });
+        if (draft.status !== "draft") {
+          toast.error(t("draft_already_submitted"));
+          return;
+        }
+      } catch {
+        toast.error(t("draft_load_failed"));
+        return;
+      }
+    }
+
     // 2) One batch across all forms (composeBatch already orders
     //    structured requests first WITHIN a form). Only the primary form
     //    carries the resumed server draft's completion PUT.
@@ -330,6 +362,7 @@ export function useSubmitFillSession({
             ? [
                 {
                   question_id: error.questionId,
+                  response_path: error.responsePath,
                   error: t("structured_question_submit_failed"),
                 },
               ]
@@ -337,7 +370,7 @@ export function useSubmitFillSession({
         );
       }
       toast.error(t("questionnaire_submission_failed"));
-      scrollToQuestion(error.questionId);
+      scrollToQuestion(error.questionId, error.responsePath);
       return;
     }
     if (requests.length === 0) {

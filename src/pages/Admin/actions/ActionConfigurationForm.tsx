@@ -271,6 +271,7 @@ function ActionConfigurationEditor({
   };
 
   const onSubmit = (values: ActionConfigurationFormValues) => {
+    if (isSaving || isDeleting) return;
     // The action rules gate Save the way the studio's do: the failing
     // action is opened so the author sees what to fix.
     const issue = issues[0];
@@ -351,12 +352,19 @@ function ActionConfigurationEditor({
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button type="submit" disabled={isSaving || (isEditing && !dirty)}>
+            <Button
+              type="submit"
+              disabled={isSaving || isDeleting || (isEditing && !dirty)}
+            >
               {t("save")}
             </Button>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+          <fieldset
+            disabled={isSaving || isDeleting}
+            aria-busy={isSaving || isDeleting}
+            className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
+          >
             <ActionConfigurationFields
               isEditing={isEditing}
               existing={existing}
@@ -389,7 +397,7 @@ function ActionConfigurationEditor({
                 emptyHint={t("action_configuration_empty_hint")}
               />
             </section>
-          </div>
+          </fieldset>
         </form>
       </Form>
     </Page>

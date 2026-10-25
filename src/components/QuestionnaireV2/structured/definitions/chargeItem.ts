@@ -9,15 +9,13 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
   requires: ["encounterId", "facilityId"],
   subjects: ["encounter"],
   draftPolicy: "serialize",
-  buildRequests: async (chargeItems, { facilityId, questionId }) => {
+  buildRequests: async (chargeItems, { facilityId, questionId, path }) => {
     if (chargeItems.length === 0) return [];
     return [
       {
         url: `/api/v1/facility/${facilityId}/charge_item/apply_charge_item_defs/`,
         method: "POST",
         body: {
-          // Display objects stay with the response so rows survive remounts.
-          // The API receives only its request fields.
           requests: chargeItems.map((item) => ({
             charge_item_definition: item.charge_item_definition,
             encounter: item.encounter,
@@ -29,7 +27,7 @@ export const chargeItemDefinition: StructuredTypeDefinition<"charge_item"> = {
             performer_actor: item.performer_actor,
           })),
         },
-        reference_id: structuredReferenceId("charge_item", questionId),
+        reference_id: structuredReferenceId("charge_item", questionId, path),
       },
     ];
   },

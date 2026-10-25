@@ -26,11 +26,12 @@ concurrency:
 env:
   NODE_VERSION: "24"
   REACT_CARE_API_URL: http://localhost:9000
+  REACT_ENABLE_QUESTIONNAIRE_DRAFT: "true"
   BACKEND_STARTUP_TIMEOUT: 120
   TEST_SHARDS: 3
-  # Questionnaire actions require this companion backend. Restore develop
-  # once that dependency lands, independently of the frontend branch name.
-  CARE_BACKEND_REF: ENG-737
+  # CARE 3.1 requires the companion APIs from care#3809 on ccn_final.
+  # Pin the validated revision; restore develop when 3.1 lands there.
+  CARE_BACKEND_REF: 091f562494e9c3fec682510c95b7bc8a49f26f17
 
 jobs:
   # Detect if test-related files changed
@@ -135,6 +136,7 @@ jobs:
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
           make docker_config_file=docker-compose.local.yaml up load-fixtures
+          make docker_config_file=docker-compose.local.yaml load-fixtures path=care/fixtures/scripts/questionnaire_e2e_fixtures.py
           cd ..
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}

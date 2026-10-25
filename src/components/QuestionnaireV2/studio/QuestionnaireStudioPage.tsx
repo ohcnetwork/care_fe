@@ -84,6 +84,8 @@ export function QuestionnaireStudioPage({
     selectQuestion,
     revealQuestion,
     revealAction,
+    focusTitle,
+    clearTitleFocus,
     selectedQuestion,
     selectedNumber,
     panel,
@@ -224,7 +226,10 @@ export function QuestionnaireStudioPage({
             questionnaire={questionnaire}
             questions={state.questions}
             view={view}
-            onViewChange={setView}
+            onViewChange={(next) => {
+              if (next === "preview") clearTitleFocus();
+              setView(next);
+            }}
             issues={issues}
             onSelectIssue={(questionId) => {
               setView("edit");
@@ -321,6 +326,7 @@ export function QuestionnaireStudioPage({
                   // selects a question programmatically.
                   key={selectedQuestion!.id}
                   question={selectedQuestion!}
+                  autoFocusTitle={focusTitle}
                   number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}
@@ -343,9 +349,9 @@ export function QuestionnaireStudioPage({
           >
             <StudioCanvas
               editing={editing}
-              // Cleared while Form settings or Actions is the inspector
-              // target so the ring/toolbar don't advertise a question as
-              // "editing" that the inspector no longer shows.
+              // Cleared while Form settings or Actions is the inspector target so the
+              // ring/toolbar don't advertise a question as "editing" that
+              // the inspector no longer shows.
               selectedId={
                 editing && panel !== "question" ? null : state.selectedId
               }

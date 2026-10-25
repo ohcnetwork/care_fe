@@ -26,7 +26,7 @@ export function policySchema(t: TFunction) {
     z
       .object({
         id: z.string().nullable().optional(),
-        codes: z.array(coding).min(1, t("immunization_codes_required")),
+        codes: z.array(coding),
         diseases: z.array(coding).optional(),
         is_group: z.boolean(),
         children: z.array(template),
@@ -39,6 +39,14 @@ export function policySchema(t: TFunction) {
         overdue_date: offset,
       })
       .superRefine((node, context) => {
+        // Groups may share vaccine codes, but only recommendations need them.
+        if (!node.is_group && node.codes.length === 0) {
+          context.addIssue({
+            code: "custom",
+            path: ["codes"],
+            message: t("immunization_codes_required"),
+          });
+        }
         if (!node.is_group && node.children.length > 0) {
           context.addIssue({
             code: "custom",
@@ -76,7 +84,7 @@ export function normalizePolicyTemplate(
 ): ImmunizationPolicyTemplate {
   return {
     id: template.id,
-    codes: template.codes,
+    codes: template.codes ?? [],
     is_group: template.is_group,
     children: (template.children ?? []).map(normalizePolicyTemplate),
     diseases: template.diseases ?? [],

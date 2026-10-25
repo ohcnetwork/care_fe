@@ -5,7 +5,11 @@ import { SUPPORTED_ACTION_CONFIGURATION_CONTEXTS } from "@/types/actions/actionC
 
 export const actionConfigurationFormSchema = (t: TFunction) =>
   z.object({
-    name: z.string().trim().min(1, t("field_required")).max(254),
+    name: z
+      .string()
+      .trim()
+      .min(1, t("field_required"))
+      .max(254, t("maximum_characters_allowed", { count: 254 })),
     description: z.string().trim(),
     action_context: z.enum(SUPPORTED_ACTION_CONFIGURATION_CONTEXTS),
     performable: z.boolean(),

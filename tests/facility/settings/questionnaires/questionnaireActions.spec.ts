@@ -103,7 +103,21 @@ test.describe("Questionnaire v2 actions authoring", () => {
     let feverRef = "";
 
     await test.step("The outline's Actions row opens the empty panel", async () => {
+      const canvas = page.getByRole("region", { name: "Form canvas" });
+      const question = canvas.getByRole("button", {
+        name: `Select question: ${feverTitle}`,
+        exact: true,
+      });
+      await question.focus();
+      await question.press("Enter");
+      await expect(
+        canvas.getByRole("button", { name: "Delete question", exact: true }),
+      ).toBeVisible();
       await actionsRow.click();
+      await expect(question).toHaveAttribute("aria-pressed", "false");
+      await expect(
+        canvas.getByRole("button", { name: "Delete question", exact: true }),
+      ).toHaveCount(0);
       await expect(page.getByText("No actions yet")).toBeVisible();
       await page.getByRole("button", { name: "Add action" }).click();
       await expect(

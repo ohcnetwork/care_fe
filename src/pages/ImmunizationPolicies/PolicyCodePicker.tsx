@@ -12,6 +12,7 @@ interface PolicyCodePickerProps {
   codes: ImmunizationPolicyCoding[];
   onChange: (codes: ImmunizationPolicyCoding[]) => void;
   kind: "vaccine" | "disease";
+  required?: boolean;
   disabled: boolean;
   error?: string;
 }
@@ -20,6 +21,7 @@ export function PolicyCodePicker({
   codes,
   onChange,
   kind,
+  required = false,
   disabled,
   error,
 }: PolicyCodePickerProps) {
@@ -33,7 +35,7 @@ export function PolicyCodePicker({
             ? "immunization_vaccine_codes"
             : "immunization_target_diseases",
         )}
-        {kind === "vaccine" && <span aria-hidden="true"> *</span>}
+        {required && <span aria-hidden="true"> *</span>}
       </Label>
       {codes.length > 0 && (
         <ul className="flex flex-wrap gap-2">
@@ -87,7 +89,7 @@ export function PolicyCodePicker({
             ? "immunization_add_vaccine"
             : "immunization_add_disease",
         )}
-        aria-required={kind === "vaccine"}
+        aria-required={required}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
         disabled={disabled}

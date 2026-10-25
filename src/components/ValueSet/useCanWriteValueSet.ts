@@ -13,8 +13,7 @@ import { ValueSetScope } from "@/types/valueSet/valueSet";
  *
  * Facility mounts gate on the facility's *object* permissions (the backend
  * checks `can_write_valueset` in the facility's root organization); the
- * admin mount falls back to the user's own permission union, since no
- * object-scoped permissions apply to an instance-wide list.
+ * instance-wide writes require a superuser.
  *
  * `isLoading` is true while the facility (and its permissions) is still
  * being fetched on a facility mount, so callers can hold a skeleton instead
@@ -24,18 +23,17 @@ export function useCanWriteValueSet(scope: ValueSetScope): {
   canWrite: boolean;
   isLoading: boolean;
 } {
-  const { hasPermission, userPermissions } = usePermissions();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const { facility, isFacilityLoading } = useCurrentFacilitySilently();
 
   const { canWriteValueSet } = getPermissions(
     hasPermission,
-    scope.authContext === "facility"
-      ? (facility?.permissions ?? [])
-      : userPermissions,
+    facility?.root_org_permissions ?? [],
   );
 
   return {
-    canWrite: canWriteValueSet,
+    canWrite:
+      scope.authContext === "facility" ? canWriteValueSet : isSuperAdmin,
     // Track the fetch, not data presence — a user who cannot read the
     // facility (404) would otherwise leave `!facility` true forever.
     isLoading: scope.authContext === "facility" && isFacilityLoading,

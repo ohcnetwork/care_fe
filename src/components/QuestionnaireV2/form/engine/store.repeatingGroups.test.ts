@@ -81,7 +81,7 @@ test("repeating groups seed containers and independent rows, ordinary groups sta
   );
 });
 
-test("row writes and conditions use only that occurrence and preserve its siblings", () => {
+test("row writes touch only that occurrence, and conditions read the root map like the backend", () => {
   const responses = initializeResponses([group, plain]);
   responses.chart.sub_results = [row("11", "caries"), row("21", "crown")];
   const path = [{ questionId: group.id, rowIndex: 0 }];
@@ -103,23 +103,24 @@ test("row writes and conditions use only that occurrence and preserve its siblin
     ],
   };
   const index = buildLinkIndex([group, plain]);
+  // In-row controllers are never in the root map, so an in-row condition
+  // is unanswered server-side and the client agrees.
+  assert.equal(isQuestionEnabledInState(dependent, updated, index), false);
   assert.equal(
     isQuestionEnabledInState(
-      dependent,
-      getScopedResponses(updated, path),
+      {
+        ...dependent,
+        enable_when: [
+          { question: tooth.link_id, operator: "exists", answer: false },
+        ],
+      },
+      updated,
       index,
     ),
     true,
   );
-  assert.equal(
-    isQuestionEnabledInState(
-      dependent,
-      getScopedResponses(updated, [{ questionId: group.id, rowIndex: 1 }]),
-      index,
-    ),
-    false,
-  );
   assert.equal(getScopedResponses(updated, path).plain, responses.plain);
+  assert.equal(getScopedResponses(updated, path).tooth.values[0].value, "11");
   assert.equal(updated.finding, undefined);
 });
 

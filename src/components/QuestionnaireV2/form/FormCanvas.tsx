@@ -15,16 +15,11 @@ import type { FormMode, RendererSubject } from "./types";
 
 const EMPTY_CHROME: FormChrome = {};
 
-/** Presentation slots shared by every canvas entry point. */
 export interface CanvasSlots {
-  /** Replaces the default "no questions" text (the studio passes its
-   *  add-first/import affordances). */
+  /** Replaces the default "no questions" text. */
   emptyState?: React.ReactNode;
-  /** Hide the questionnaire title/description header (hosts that already
-   *  show them elsewhere). */
   hideHeader?: boolean;
-  /** Right-aligned hint next to the header (the studio's "click any
-   *  question to edit it"). */
+  /** Right-aligned hint next to the header. */
   headerHint?: React.ReactNode;
   className?: string;
 }
@@ -37,19 +32,11 @@ export interface QuestionnaireFormRendererProps extends CanvasSlots {
   revealHidden?: boolean;
   /** Builder edit canvas: inputs visible but non-interactive. */
   inert?: boolean;
-  /** Creation-time seed overrides (a restored draft) — forwarded verbatim
-   *  to the provider, which applies them once. See FormContext. */
   initialResponses?: Record<string, QuestionnaireResponse>;
-  /** Decoration seam — see chrome.tsx. */
   chrome?: FormChrome;
 }
 
-/**
- * The renderer: the whole questionnaire on one scroll — top-level groups
- * as section cards, everything live against the per-instance store. The
- * studio canvas, the read-only previews and the fill flow all mount this
- * one module; there is no second renderer.
- */
+/** The whole questionnaire on one scroll, live against a per-instance store. */
 export function QuestionnaireFormRenderer({
   questionnaire,
   mode,
@@ -84,11 +71,7 @@ export function QuestionnaireFormRenderer({
   );
 }
 
-/**
- * The canvas body for hosts that mount `QuestionnaireFormProvider`
- * themselves — the studio does, so its outline and canvas share one store
- * (the outline's preview mode reads live enable_when hidden ids).
- */
+/** The canvas body for hosts that mount `QuestionnaireFormProvider` themselves. */
 export function QuestionnaireFormCanvas({
   chrome = EMPTY_CHROME,
   emptyState,
@@ -162,9 +145,6 @@ function CanvasBody({
     );
   }
 
-  // Every top-level question hidden by enable_when: explain the empty form
-  // instead of a blank canvas. The edit canvas (`revealHidden`) never hits
-  // this — hidden questions render there with a logic badge.
   if (!revealHidden && !hasVisibleQuestions) {
     return (
       <div className={cn("mx-auto w-full max-w-3xl", className)}>

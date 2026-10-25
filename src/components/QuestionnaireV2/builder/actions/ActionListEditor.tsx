@@ -1,5 +1,5 @@
 import { Plus, Trash2, TriangleAlert, Zap } from "lucide-react";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,11 +20,13 @@ import {
   reachableContextValues,
 } from "@/components/QuestionnaireV2/builder/actionVariables";
 
+import { useEditorRowKeys } from "@/components/QuestionnaireV2/builder/useEditorRowKeys";
+
 import { QuestionnaireAction } from "@/types/questionnaire/actions";
 import { Question } from "@/types/questionnaire/question";
 
 import { ActionConditionEditor } from "./ActionConditionEditor";
-import { InstructionEditor } from "./InstructionEditor";
+import { ActionInstructionList } from "./ActionInstructionList";
 import { actionPlainWords } from "./actionSummary";
 import { isInstructionCompatible } from "./instructionCompatibility";
 import { newInstruction } from "./instructionDefaults";
@@ -80,6 +82,8 @@ export function ActionListEditor({
   onMarkRequired,
 }: ActionListEditorProps) {
   const { t } = useTranslation();
+  const listId = useId();
+  const { rowKeys, removeRowKey } = useEditorRowKeys(listId, actions.length);
 
   const sources = useMemo<ActionVariableSources>(
     () => ({
@@ -129,6 +133,7 @@ export function ActionListEditor({
   };
 
   const removeAction = (index: number) => {
+    removeRowKey(index);
     onActionsChange(actions.filter((_, i) => i !== index));
     if (openIndex === index) onOpenIndexChange(null);
     else if (openIndex !== null && openIndex > index) {
@@ -178,10 +183,10 @@ export function ActionListEditor({
               ].includes(issueKey) &&
               (action.condition.trim() === "" ||
                 !!lintExpression(action.condition));
-            const idPrefix = `action-${index}`;
+            const idPrefix = `${listId}-action-${rowKeys[index]}`;
             return (
               <CollapsibleSettingsCard
-                key={index}
+                key={rowKeys[index]}
                 title={t("action_n", { n: index + 1 })}
                 subtitle={actionPlainWords(
                   action,
@@ -242,58 +247,17 @@ export function ActionListEditor({
                     <h3 className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
                       {t("action_then")}
                     </h3>
-                    {action.instructions.map(
-                      (instruction, instructionIndex) => (
-                        <InstructionEditor
-                          key={instructionIndex}
-                          idPrefix={`${idPrefix}-instruction-${instructionIndex}`}
-                          instruction={instruction}
-                          definitions={registry.instructions}
-                          contextPaths={contextPaths}
-                          sources={sources}
-                          facilityId={facilityId}
-                          onChange={(next) =>
-                            setAction(index, {
-                              ...action,
-                              instructions: action.instructions.map(
-                                (entry, i) =>
-                                  i === instructionIndex ? next : entry,
-                              ),
-                            })
-                          }
-                          onRemove={() =>
-                            setAction(index, {
-                              ...action,
-                              instructions: action.instructions.filter(
-                                (_, i) => i !== instructionIndex,
-                              ),
-                            })
-                          }
-                        />
-                      ),
-                    )}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setAction(index, {
-                          ...action,
-                          instructions: [
-                            ...action.instructions,
-                            compatibleInstructions?.length === 1
-                              ? newInstruction(
-                                  compatibleInstructions[0],
-                                  contextPaths,
-                                )
-                              : { slug: "", params: {}, context: "self" },
-                          ],
-                        })
+                    <ActionInstructionList
+                      idPrefix={idPrefix}
+                      instructions={action.instructions}
+                      definitions={registry.instructions}
+                      contextPaths={contextPaths}
+                      sources={sources}
+                      facilityId={facilityId}
+                      onChange={(instructions) =>
+                        setAction(index, { ...action, instructions })
                       }
-                    >
-                      <Plus className="size-4" />
-                      {t("action_add_instruction")}
-                    </Button>
+                    />
                   </section>
                 </div>
               </CollapsibleSettingsCard>

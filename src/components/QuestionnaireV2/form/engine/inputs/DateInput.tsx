@@ -16,8 +16,6 @@ export function DateInput({
   valueIndex,
 }: RendererInputProps) {
   const [response, updateResponse] = useQuestionResponse(question.id);
-  // Discriminant check instead of a cast — a mismatched stored value (e.g. a
-  // seeded string from answer_option) renders empty instead of crashing.
   const entry = response?.values[valueIndex ?? 0];
   const value = entry?.type === "date" ? entry.value : undefined;
 
@@ -33,10 +31,7 @@ export function DateInput({
   };
 
   return (
-    // The picker's trigger button takes no id/aria props (ui/ primitives
-    // stay unmodified), so the question association rides on a named
-    // group — without it every date question announces as an identical
-    // bare "Pick a date" stop.
+    // The picker trigger takes no aria props, so the group carries the label.
     <QuestionInputGroup
       labelId={labelId}
       required={question.required}
@@ -45,6 +40,7 @@ export function DateInput({
       <CombinedDatePicker
         value={value}
         onChange={handleChange}
+        allowClear
         disabled={disabled}
         buttonClassName="border-gray-300 shadow-none"
       />

@@ -228,7 +228,8 @@ async function expectOneLine(row: Locator, viewportWidth: number) {
       .map((child) => child.getBoundingClientRect())
       .filter((child) => child.width > 0 && child.height > 0);
     return {
-      height: row.height,
+      // A row divider does not change whether its content fits on one line.
+      height: element.clientHeight,
       left: row.left,
       right: row.right,
       centers: children.map((child) => child.y + child.height / 2),
@@ -297,7 +298,9 @@ test("local Continue preserves the saved prescription and discharge context and 
     `${fixture.encounterUrl}/questionnaire/${questionnaire.id}`,
   );
   expect(url.searchParams.get("resume_local_draft")).toBe("true");
+  expect(url.searchParams.get("return_page")).toBe("updates");
   url.searchParams.delete("resume_local_draft");
+  url.searchParams.delete("return_page");
   expect(url.searchParams.toString()).toBe(fixture.contextKey);
   expect(url.searchParams.has("continue_draft")).toBe(false);
   await expect(
