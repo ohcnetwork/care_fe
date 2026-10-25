@@ -55,15 +55,15 @@ export function EncounterAccordionLayout({
         >
           <CardHeader
             className={cn(
-              "w-full flex flex-row items-center justify-between p-0",
+              "min-w-0 w-full flex flex-row items-center justify-between p-0",
               isPanel ? "gap-3 space-y-0" : "pl-2",
             )}
           >
             <CardTitle
               className={
                 isPanel
-                  ? "text-sm font-bold uppercase tracking-wide text-gray-600"
-                  : "text-base mt-1"
+                  ? "min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600"
+                  : "min-w-0 [overflow-wrap:anywhere] text-base mt-1"
               }
             >
               {t(title)}

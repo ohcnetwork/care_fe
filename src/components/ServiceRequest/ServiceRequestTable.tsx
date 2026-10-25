@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import { LocationNode } from "@/components/Location/LocationTree";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ interface ServiceRequestTableProps {
   facilityId: string;
   locationId?: string;
   showPatientInfo?: boolean;
+  readOnly?: boolean;
   onPatientClick?: (request: ServiceRequestReadSpec) => void;
 }
 
@@ -38,6 +40,7 @@ export default function ServiceRequestTable({
   facilityId,
   locationId,
   showPatientInfo = true,
+  readOnly = false,
   onPatientClick,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
@@ -51,7 +54,7 @@ export default function ServiceRequestTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="min-w-0 rounded-md border">
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
@@ -62,7 +65,7 @@ export default function ServiceRequestTable({
             </TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
             <TableHead>{t("location")}</TableHead>
-            <TableHead>{t("actions")}</TableHead>
+            {!readOnly && <TableHead>{t("actions")}</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -108,18 +111,22 @@ export default function ServiceRequestTable({
                 </Badge>
               </TableCell>
               <TableCell>
-                <TagAssignmentSheet
-                  entityType="service_request"
-                  entityId={request.id}
-                  facilityId={facilityId}
-                  currentTags={request.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["serviceRequests", facilityId],
-                    });
-                  }}
-                  patientId={request.encounter.patient.id}
-                />
+                {readOnly ? (
+                  <TagBadges tags={request.tags ?? []} />
+                ) : (
+                  <TagAssignmentSheet
+                    entityType="service_request"
+                    entityId={request.id}
+                    facilityId={facilityId}
+                    currentTags={request.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["serviceRequests", facilityId],
+                      });
+                    }}
+                    patientId={request.encounter.patient.id}
+                  />
+                )}
               </TableCell>
               <TableCell>
                 <div className="text-xs text-gray-500">
@@ -131,16 +138,18 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-left">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewDetails(request)}
-                >
-                  <CareIcon icon="l-edit" />
-                  {t("see_details")}
-                </Button>
-              </TableCell>
+              {!readOnly && (
+                <TableCell className="text-left">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(request)}
+                  >
+                    <CareIcon icon="l-edit" />
+                    {t("see_details")}
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

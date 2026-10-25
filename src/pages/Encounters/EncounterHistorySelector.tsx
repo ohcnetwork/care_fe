@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Drawer,
   DrawerContent,
@@ -20,15 +19,19 @@ import {
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import RailPanel from "@/components/Common/RailPanel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
+  EncounterListRead,
   EncounterRead,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
@@ -47,19 +50,31 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString, formatName } from "@/Utils/utils";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
 import { encounterHistoryFiltersAtom } from "@/atoms/encounterFilterAtom";
+
+function getEncounterHistoryScope(
+  patientId: string,
+  facilityId: string | undefined,
+  primaryEncounter: EncounterRead | undefined,
+) {
+  return facilityId &&
+    completedEncounterStatus.includes(primaryEncounter?.status ?? "")
+    ? { patient_filter: patientId, facility: facilityId }
+    : { patient: patientId };
+}
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -80,9 +95,11 @@ function EncounterCard({
   const additionalMembersCount = careTeam.length - 1;
 
   const cardContent = (
-    <Card
+    <button
+      type="button"
+      aria-pressed={isSelected}
       className={cn(
-        "rounded-md relative cursor-pointer transition-colors w-full lg:w-80",
+        "relative w-full cursor-pointer rounded-md border text-left text-gray-950 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600",
         isSelected
           ? "bg-white border-primary-600 shadow-md"
           : "bg-gray-100 hover:bg-gray-100 shadow-none",
@@ -90,11 +107,11 @@ function EncounterCard({
       onClick={() => onSelect(encounter.id)}
     >
       {isSelected && (
-        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
+        <span className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex flex-col px-4 py-3 gap-2">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-1 min-w-0">
+      <span className="flex flex-col px-4 py-3 gap-2">
+        <span className="flex justify-between items-center">
+          <span className="flex flex-col gap-1 min-w-0">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
@@ -115,17 +132,17 @@ function EncounterCard({
               )}
             </span>
             {encounter.tags.length > 0 && (
-              <div className="hidden md:flex items-center py-1 pr-1 gap-2">
+              <span className="hidden md:flex items-center py-1 pr-1 gap-2">
                 <Tags className="size-4 text-gray-700" />
                 <span className="text-sm text-gray-700 font-medium">
                   {t("encounter_tag_count", {
                     count: encounter.tags.length,
                   })}
                 </span>
-              </div>
+              </span>
             )}
-          </div>
-          <div className="flex flex-col gap-1 pt-0.5 items-end">
+          </span>
+          <span className="flex flex-col gap-1 pt-0.5 items-end">
             <span className="text-sm text-gray-600 whitespace-nowrap">
               {encounter.period.start && (
                 <span>
@@ -151,21 +168,21 @@ function EncounterCard({
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
-          </div>
-        </div>
+          </span>
+        </span>
         {encounter.tags.length > 0 && (
-          <div className="md:hidden flex flex-wrap gap-2">
+          <span className="md:hidden flex flex-wrap gap-2">
             {encounter.tags.map((tag) => (
               <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
             ))}
-          </div>
+          </span>
         )}
         {isSameFacility && additionalMembersCount > 0 && (
-          <div className="md:hidden flex flex-col gap-1">
+          <span className="md:hidden flex flex-col gap-1">
             <span className="text-xs text-gray-500 font-medium">
               {t("care_team")}:
             </span>
-            <div className="flex flex-wrap gap-2">
+            <span className="flex flex-wrap gap-2">
               {careTeam.map((member, index) => (
                 <span
                   key={`${member.member.id}-${index}`}
@@ -180,11 +197,11 @@ function EncounterCard({
                   )}
                 </span>
               ))}
-            </div>
-          </div>
+            </span>
+          </span>
         )}
-      </CardContent>
-    </Card>
+      </span>
+    </button>
   );
 
   return (
@@ -275,6 +292,12 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     onSelect?.();
   };
 
+  const historyScope = getEncounterHistoryScope(
+    patientId,
+    facilityId,
+    primaryEncounter,
+  );
+
   const {
     data: encounters,
     fetchNextPage,
@@ -285,7 +308,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     queryKey: [
       "infinite-encounters",
       "past",
-      patientId,
+      historyScope,
       filters.status,
       filters.selectedTags,
       filters.tagsBehavior,
@@ -299,11 +322,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
         queryParams: {
           limit: 14,
           offset: String(pageParam),
-          ...(facilityId
-            ? completedEncounterStatus.includes(primaryEncounter?.status ?? "")
-              ? { patient_filter: patientId, facility: facilityId }
-              : { patient: patientId }
-            : { patient: patientId }),
+          ...historyScope,
           ...(filters.status && { status: filters.status }),
           ...(filters.selectedTags?.length > 0 && {
             tags: filters.selectedTags.map((t) => t.id).join(","),
@@ -516,107 +535,79 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 };
 
 export default function EncounterHistorySelector() {
-  const [isRailOpen, setIsRailOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-
+  const isDesktop = useBreakpoints({ default: false, lg: true });
   const { t } = useTranslation();
-
-  return (
-    <>
-      <div className="lg:hidden">
-        <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
-          {t("chosen_encounter")}
-        </h2>
-        <Drawer open={isOpen} onOpenChange={setIsOpen}>
-          <DrawerTrigger className="w-full">
-            <EncounterSheetTrigger />
-          </DrawerTrigger>
-          <DrawerContent className="px-4">
-            <DrawerHeader className="py-1.5">
-              <DrawerTitle className="text-lg font-semibold">
-                {t("past_encounters")}
-              </DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto pb-4 pr-2">
-              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-            </div>
-          </DrawerContent>
-        </Drawer>
-      </div>
-      <div className="hidden lg:block shrink-0 pr-3">
-        <RailPanel open={isRailOpen} onOpenChange={setIsRailOpen}>
-          <ScrollArea className="w-84 min-w-0 pr-3 h-[calc(100vh-9rem-var(--encounter-header-offset))]">
-            <EncounterHistoryList />
-          </ScrollArea>
-        </RailPanel>
-      </div>
-    </>
+  const { patientId, facilityId, primaryEncounter } = useEncounter();
+  const historyScope = getEncounterHistoryScope(
+    patientId,
+    facilityId,
+    primaryEncounter,
   );
-}
+  const { data: encounters } = useQuery<PaginatedResponse<EncounterListRead>>({
+    queryKey: ["encounters", "history-count", historyScope],
+    queryFn: query(encounterApi.list, {
+      queryParams: { ...historyScope, limit: 1 },
+    }),
+    enabled: !!primaryEncounter,
+  });
+  const encounterCount = encounters?.count;
 
-const EncounterSheetTrigger = () => {
-  const { t } = useTranslation();
+  const trigger = (
+    <Button
+      type="button"
+      variant="outline"
+      className="h-11 w-full justify-between gap-2 rounded-[10px] border-gray-200 bg-white px-3 text-[15px] font-semibold text-gray-950 shadow-none"
+    >
+      <span>{t("encounter_history")}</span>
+      <span className="flex items-center gap-2">
+        {encounterCount !== undefined && (
+          <span className="flex h-5.5 min-w-5.5 items-center justify-center rounded-full bg-gray-100 px-1 text-sm font-semibold text-gray-700 tabular-nums">
+            {encounterCount}
+          </span>
+        )}
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("size-4 text-gray-500 transition-transform", {
+            "rotate-180": isOpen,
+          })}
+        />
+      </span>
+    </Button>
+  );
 
-  const { selectedEncounter: encounter } = useEncounter();
-
-  if (!encounter) {
-    return null;
+  if (isDesktop) {
+    return (
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+        <PopoverContent
+          align="start"
+          sideOffset={8}
+          aria-label={t("encounter_history")}
+          className="max-h-[min(36rem,var(--radix-popover-content-available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
+        >
+          <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+        </PopoverContent>
+      </Popover>
+    );
   }
 
   return (
-    <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="flex flex-col px-4 py-3 gap-2">
-        <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
-        <div className="flex justify-between items-start">
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-base font-semibold">
-              {t(`encounter_class__${encounter.encounter_class}`)}
-            </span>
-            <span className="text-sm font-medium text-gray-700 truncate max-w-40">
-              {encounter.facility.name}
-            </span>
-          </div>
-          <div className="flex flex-col items-start">
-            <div className="flex items-center gap-1 -mt-2">
-              <span className="text-sm text-gray-600 whitespace-nowrap">
-                {encounter.period.start && (
-                  <span>
-                    {format(new Date(encounter.period.start!), "dd MMM")}
-                  </span>
-                )}
-                {encounter.period.end && encounter.period.start && (
-                  <span> - </span>
-                )}
-                {encounter.period.end ? (
-                  <span>
-                    {format(new Date(encounter.period.end), "dd MMM")}
-                  </span>
-                ) : (
-                  <span> - {t("ongoing")}</span>
-                )}
-              </span>
-              <div
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                )}
-                aria-hidden="true"
-              >
-                <ChevronDown />
-              </div>
-            </div>
-            <Badge
-              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-              size="sm"
-              className="whitespace-nowrap"
-            >
-              {t(`encounter_status__${encounter.status}`)}
-            </Badge>
-          </div>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+      <DrawerContent className="px-4" aria-describedby={undefined}>
+        <DrawerHeader className="py-3">
+          <DrawerTitle className="text-lg font-semibold">
+            {t("encounter_history")}
+          </DrawerTitle>
+        </DrawerHeader>
+        <div className="min-h-0 overflow-y-auto pb-4 pr-2">
+          <EncounterHistoryList onSelect={() => setIsOpen(false)} />
         </div>
-      </CardContent>
-    </Card>
+      </DrawerContent>
+    </Drawer>
   );
-};
+}
 
 const EncounterDetailsHoverCard = ({
   encounter,
