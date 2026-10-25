@@ -28,13 +28,7 @@ export interface QuestionBlockProps {
   number?: string;
 }
 
-/**
- * One node of the questionnaire tree on the one-scroll canvas — the full
- * renderer's counterpart to the old paginated QuestionField. Same response
- * semantics (single-entry vs positional repeats, chip inputs, structured
- * slot, sanitized styling), new layout, plus the two canvas seams: chrome
- * wrapping and `revealHidden`/`inert` handling from the form context.
- */
+/** One node of the questionnaire tree on the one-scroll canvas. */
 export const QuestionBlock = memo(function QuestionBlock(
   props: QuestionBlockProps,
 ) {
@@ -46,11 +40,8 @@ export const QuestionBlock = memo(function QuestionBlock(
   const hiddenByLogic = !enabled && question.disabled_display !== "protected";
   if (hiddenByLogic && !revealHidden) return null;
 
-  // Two distinct states, and only inputs take both: `locked` is the question's
-  // persistent inertness, `frozen` is the in-flight submit. Anything that
-  // decides whether a control RENDERS must read `locked` alone — the freeze
-  // lasts one request, and a control that unmounts for it reflows the form
-  // mid-submit and flickers back on failure.
+  // `locked` is persistent; `frozen` lasts one submit and must never decide
+  // whether a control renders.
   const locked = mode === "readonly" || question.read_only === true || !enabled;
   const effectiveDisabled = locked || frozen;
 
@@ -90,10 +81,6 @@ export const QuestionBlock = memo(function QuestionBlock(
   );
 });
 
-/**
- * The non-group chrome subscribes only to validation errors. Answer controls
- * own their response subscriptions; groups never mount either subscription.
- */
 function LeafBlock({
   question,
   depth,
@@ -113,26 +100,46 @@ function LeafBlock({
   const errors = useQuestionErrors(question.id);
   const errorsId = useId();
   const errorId = errors.length > 0 ? errorsId : undefined;
-  // Text-like inputs use htmlFor; chip groups use aria-labelledby.
   const suffix = path.length
     ? `-row-${path.map((entry) => entry.rowIndex).join("-")}`
     : "";
   const inputId = `question-input-${question.id}${suffix}`;
   const labelId = `question-label-${question.id}${suffix}`;
 
+  const containerClassName = cn(
+    "space-y-1.5",
+    depth <= 1 && "rounded-lg border border-gray-200 bg-white p-3.5",
+    sanitizeStylingClasses(question.styling_metadata?.containerClasses),
+  );
+
+  if (question.type === "display") {
+    return (
+      <div
+        data-question-id={question.id}
+        data-response-path={JSON.stringify(path)}
+        className={containerClassName}
+      >
+        <div className="flex items-start gap-2">
+          {number && (
+            <span className="shrink-0 text-sm font-medium text-gray-500 tabular-nums">
+              {number}
+            </span>
+          )}
+          <p className="text-sm text-gray-800">{question.text}</p>
+        </div>
+        {question.description && (
+          <p className="text-xs text-gray-500">{question.description}</p>
+        )}
+        {QuestionAnnotation && <QuestionAnnotation question={question} />}
+      </div>
+    );
+  }
+
   return (
-    // data-question-id is the renderer's stable per-question DOM anchor —
-    // hosts scroll to it (outline selection, future scroll-to-error) and
-    // tests scope input assertions with it.
     <div
       data-question-id={question.id}
       data-response-path={JSON.stringify(path)}
-      className={cn(
-        "space-y-1.5",
-        depth <= 1 && "rounded-lg border border-gray-200 bg-white p-3.5",
-        // Questionnaire-authored classes — sanitized, never raw.
-        sanitizeStylingClasses(question.styling_metadata?.containerClasses),
-      )}
+      className={containerClassName}
     >
       <div className="flex items-start gap-2">
         <span
@@ -151,14 +158,11 @@ function LeafBlock({
         >
           {question.text}
         </label>
-        {/* Visual-only: inputs expose their required state directly, and
-            composite groups describe the requirement accessibly. */}
         {question.required && (
           <span aria-hidden className="text-red-500">
             *
           </span>
         )}
-        {/* Question-level unit display for types without answer-time unit pickers. */}
         {question.unit?.code && (
           <span className="text-sm text-gray-500">({question.unit.code})</span>
         )}
@@ -167,9 +171,6 @@ function LeafBlock({
         <p className="pl-2.5 text-xs text-gray-500">{question.description}</p>
       )}
       {QuestionAnnotation && <QuestionAnnotation question={question} />}
-      {/* The interactive area: inert on the builder's edit canvas so clicks
-          fall through to the selection chrome and none of these controls
-          surface in the a11y tree. */}
       <div inert={inert || undefined}>
         <QuestionAnswerInput
           question={question}
@@ -180,9 +181,6 @@ function LeafBlock({
           errorId={errorId}
         />
       </div>
-      {/* role="alert" so a validation failure is ANNOUNCED, not only
-          drawn: client-side validation writes these straight into the
-          store with no other live region anywhere on the fill page. */}
       {errors.length > 0 && (
         <div id={errorId} className="space-y-1">
           {errors.map((error, i) => (

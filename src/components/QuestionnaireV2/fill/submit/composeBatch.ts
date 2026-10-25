@@ -14,9 +14,13 @@ import {
   rendererSubjectOf,
 } from "@/components/QuestionnaireV2/fill/subject";
 
-import type { QuestionnaireResponse } from "@/types/questionnaire/form";
+import type {
+  QuestionnaireResponse,
+  ResponsePath,
+} from "@/types/questionnaire/form";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
+import { renderFailedKey } from "@/components/QuestionnaireV2/form/engine/store";
 import { getQuestionGroup } from "@/components/QuestionnaireV2/groups/registry";
 import { incompatibleGroupQuestions } from "@/components/QuestionnaireV2/groups/schema";
 import { serializeQuestionResults } from "./serializeQuestionResults";
@@ -29,6 +33,7 @@ import { planPlainSubmit } from "./submitTarget";
 interface FormSubmissionCompletionBody {
   patient: string;
   encounter?: string;
+  expected_status: "draft";
   status: "submitted";
   response_dump: {
     questionnaireResponses: {
@@ -70,13 +75,19 @@ export class MissingEncounterError extends Error {
  */
 export class StructuredBuildError extends Error {
   readonly questionId: string;
+  readonly responsePath: ResponsePath;
 
-  constructor(questionId: string, cause: unknown) {
+  constructor(
+    questionId: string,
+    cause: unknown,
+    responsePath: ResponsePath = [],
+  ) {
     super(`buildRequests failed for structured question ${questionId}`, {
       cause,
     });
     this.name = "StructuredBuildError";
     this.questionId = questionId;
+    this.responsePath = responsePath;
   }
 }
 
@@ -91,7 +102,7 @@ async function buildStructuredRequests(
   try {
     return await buildRequests(data, context);
   } catch (error) {
-    throw new StructuredBuildError(context.questionId, error);
+    throw new StructuredBuildError(context.questionId, error, context.path);
   }
 }
 
@@ -99,7 +110,7 @@ export interface ComposeBatchArgs {
   questionnaire: QuestionnaireRead;
   responses: Record<string, QuestionnaireResponse>;
   subject: FillSubject;
-  /** Question ids whose structured slot threw and shows the error
+  /** Row-scoped keys of structured slots that threw and show the error
    *  boundary's notice (`structuredRenderFailedAtom`). The validators skip
    *  these on the premise that their data never submits — this is the
    *  compose half of that bargain. Without it, rows recorded BEFORE the
@@ -132,18 +143,15 @@ export async function composeBatch({
   const patientBound = isPatientBound(subject) ? subject : undefined;
   const renderCtx = rendererSubjectOf(subject);
   const requests: StructuredBatchEntry[] = [];
-  const structuredAnswers = new Map<
-    string,
-    {
-      buildRequests: StructuredRequestBuilder;
-      data: unknown[];
-      context: StructuredRequestContext;
-    }
-  >();
+  const structuredAnswers: {
+    buildRequests: StructuredRequestBuilder;
+    data: unknown[];
+    context: StructuredRequestContext;
+  }[] = [];
   const results = serializeQuestionResults(
     questionnaire.questions,
     responses,
-    (question, response) => {
+    (question, response, path) => {
       if (question.type === "group" && question.structured_type) {
         const definition = getQuestionGroup(question.structured_type);
         if (
@@ -162,7 +170,7 @@ export async function composeBatch({
       )
         return;
       if (
-        renderFailed?.has(question.id) ||
+        renderFailed?.has(renderFailedKey(question.id, path)) ||
         response.structured_type !== question.structured_type
       )
         return;
@@ -174,25 +182,23 @@ export async function composeBatch({
       if (state.kind !== "ready" || !patientBound) return;
       const data = structuredDataAny(response);
       if (!data.length) return;
-      const existing = structuredAnswers.get(question.id);
-      if (existing) existing.data.push(...data);
-      else
-        structuredAnswers.set(question.id, {
-          buildRequests: state.definition.buildRequests,
-          data: [...data],
-          context: {
-            patientId: patientBound.patientId,
-            encounterId: renderCtx.encounterId,
-            facilityId: renderCtx.facilityId,
-            questionId: question.id,
-          },
-        });
+      structuredAnswers.push({
+        buildRequests: state.definition.buildRequests,
+        data: [...data],
+        context: {
+          patientId: patientBound.patientId,
+          encounterId: renderCtx.encounterId,
+          facilityId: renderCtx.facilityId,
+          questionId: question.id,
+          path,
+        },
+      });
     },
   );
 
   // Structured requests first; domain mutations run before the questionnaire submit.
   for (const entries of await Promise.all(
-    Array.from(structuredAnswers.values(), ({ buildRequests, data, context }) =>
+    structuredAnswers.map(({ buildRequests, data, context }) =>
       buildStructuredRequests(buildRequests, data, context),
     ),
   )) {
@@ -203,10 +209,9 @@ export async function composeBatch({
     // Endpoint and body come from the questionnaire's subject_type, not the
     // mount — see `planPlainSubmit`. `continueDraftId` links the submission
     // to the resumed server draft so the backend's duplicate-submission
-    // guard (keyed off `form_submission`) catches a second tab completing
-    // the same draft concurrently; the completion PUT below still runs
-    // alongside it — the backend doesn't flip the draft's status
-    // server-side yet.
+    // guard (keyed off `form_submission`) also protects plain responses.
+    // The conditional completion below guards every resumed draft,
+    // including ones that contain only structured answers.
     const plan = planPlainSubmit({
       questionnaireId: questionnaire.id,
       subjectType: questionnaire.subject_type,
@@ -232,6 +237,7 @@ export async function composeBatch({
     const body: FormSubmissionCompletionBody = {
       patient: patientBound.patientId,
       encounter: renderCtx.encounterId,
+      expected_status: "draft",
       status: "submitted",
       response_dump: {
         questionnaireResponses: {

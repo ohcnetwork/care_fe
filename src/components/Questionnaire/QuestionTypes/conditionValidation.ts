@@ -3,8 +3,7 @@ interface ClinicalCodeRecord {
   verification_status: string;
 }
 
-/** Matches the diagnosis and symptom pickers: records entered in error
- *  do not prevent recording the same code again. */
+/** Records entered in error do not count as duplicates. */
 export function hasDuplicateClinicalCode(
   records: readonly ClinicalCodeRecord[],
   code: string,

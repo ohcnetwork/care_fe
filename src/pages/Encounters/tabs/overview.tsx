@@ -1,28 +1,15 @@
-import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
 import { ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 
 import { EmptyState } from "@/components/ui/empty-state";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { AllergyList } from "@/components/Patient/allergy/list";
-import { DiagnosisList } from "@/components/Patient/diagnosis/list";
-import { SymptomsList } from "@/components/Patient/symptoms/list";
-import { VitalsList } from "@/components/Patient/vitals/list";
-import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
-import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
-import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
-import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterWidget } from "@/pages/Encounters/widgets/EncounterWidget";
 import EncounterOverviewDevices from "@/pages/Facility/settings/devices/components/EncounterOverviewDevices";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 export const EncounterOverviewTab = () => {
   const { t } = useTranslation();
@@ -30,27 +17,22 @@ export const EncounterOverviewTab = () => {
     selectedEncounter: encounter,
     patientId,
     selectedEncounterId: encounterId,
-    canReadSelectedEncounter: canAccess,
-    canWriteSelectedEncounter: canWrite,
     canReadClinicalData,
   } = useEncounter();
 
-  const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
-    queryKey: ["plots-config"],
-    queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
-    enabled: canReadClinicalData,
-  });
-
-  const vitalGroups =
-    plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
-
   return (
-    <div className="flex gap-3 @max-md:w-full">
-      {canReadClinicalData ? (
-        <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
-          <div className="flex flex-col gap-4">
-            {canWrite && <QuickActions />}
-            {canWrite && <FavoriteFormsQuickActions />}
+    <div className="flex items-start gap-3 @max-md:w-full">
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex min-h-10 flex-wrap items-center justify-between gap-2">
+          <h1 className="text-lg font-semibold tracking-tight text-gray-950">
+            {t("ENCOUNTER_TAB__updates")}
+          </h1>
+          {canReadClinicalData && <ClinicalHistoryOverview />}
+        </div>
+        {canReadClinicalData ? (
+          <div className="flex flex-col gap-3">
+            <EncounterWidget type="quick_actions" />
+            <EncounterWidget type="favorite_forms" />
             {encounter && (
               <PLUGIN_Component
                 __name="EncounterOverviewTop"
@@ -59,74 +41,42 @@ export const EncounterOverviewTab = () => {
                 encounterId={encounterId}
               />
             )}
-            {<ClinicalHistoryOverview />}
 
             <div className="xl:hidden">
               <SummaryPanel />
             </div>
 
             {
-              <div className="flex flex-col gap-8 overflow-x-auto">
+              <div className="flex flex-col gap-3 overflow-x-auto">
                 {/* Show preview of devices associated with the encounter */}
                 {encounter && (
                   <EncounterOverviewDevices encounter={encounter} />
                 )}
-                {encounter &&
-                  !inactiveEncounterStatus.includes(encounter.status) && (
-                    <FormSubmissionDrafts
-                      facilityId={encounter.facility.id}
-                      patientId={patientId}
-                      encounterId={encounterId}
-                    />
-                  )}
+                <EncounterWidget type="draft_forms" />
                 {/* Clinical informations */}
-                <AllergyList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  encounterStatus={encounter?.status}
-                  showViewEncounter={false}
-                />
-                <SymptomsList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  showViewEncounter={false}
-                />
-                <DiagnosisList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  readOnly={!canWrite}
-                  showViewEncounter={false}
-                />
-                <VitalsList
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  codeGroups={vitalGroups}
-                />
-                <QuestionnaireResponsesList
-                  encounterId={encounterId}
-                  patientId={patientId}
-                  canAccess={canAccess}
-                />
+                <EncounterWidget type="allergies" />
+                <EncounterWidget type="symptoms" />
+                <EncounterWidget type="diagnosis" />
+                <EncounterWidget type="vitals" />
+                <EncounterWidget type="questionnaire_responses" showEmpty />
               </div>
             }
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 xl:pr-3 flex items-center justify-center">
-          <EmptyState
-            icon={<ShieldAlert className="text-gray-400 size-8" />}
-            title={t("no_permission_to_view_clinical_data")}
-            description={t("no_permission_to_view_clinical_data_description")}
-            className="h-full w-full bg-transparent"
-          />
-        </div>
-      )}
+        ) : (
+          <div className="flex-1 xl:pr-3 flex items-center justify-center">
+            <EmptyState
+              icon={<ShieldAlert className="text-gray-400 size-8" />}
+              title={t("no_permission_to_view_clinical_data")}
+              description={t("no_permission_to_view_clinical_data_description")}
+              className="h-full w-full bg-transparent"
+            />
+          </div>
+        )}
+      </div>
 
-      <ScrollArea className="w-72 hidden xl:block h-[calc(100vh-14rem-var(--encounter-header-offset))]">
+      <aside className="hidden w-72 shrink-0 xl:block">
         <SummaryPanel />
-      </ScrollArea>
+      </aside>
     </div>
   );
 };

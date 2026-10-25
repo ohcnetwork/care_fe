@@ -234,7 +234,7 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
     <div>
       <div className="font-medium text-base">{question.text}</div>
       <div className="space-y-1">
-        {response.values.map((valueObj, index) => {
+        {(response.values ?? []).map((valueObj, index) => {
           const value = valueObj.value;
           const coding = valueObj.coding;
           const unit = valueObj.unit;
@@ -257,9 +257,10 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
                   {coding.display} ({coding.code})
                 </span>
               )}
-              {index === response.values.length - 1 && response.note && (
-                <span className="text-gray-500">({response.note})</span>
-              )}
+              {index === (response.values?.length ?? 0) - 1 &&
+                response.note && (
+                  <span className="text-gray-500">({response.note})</span>
+                )}
             </div>
           );
         })}

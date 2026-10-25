@@ -161,7 +161,9 @@ function ImportQuestionsContent({
                 placeholder="https://example.com/questionnaire.json"
               />
               {urlError && (
-                <p className="text-sm text-destructive">{urlError}</p>
+                <p role="alert" className="text-sm text-destructive">
+                  {urlError}
+                </p>
               )}
             </div>
           )}

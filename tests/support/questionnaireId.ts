@@ -25,12 +25,7 @@ interface QuestionnaireListEntry {
  * list endpoint has no slug filter, so the slug is resolved client-side from
  * a title-filtered list; the questionnaire is created when missing and
  * updated in place when the fixture version changed.
- *
- * Plain fetch + fs on purpose: this also runs on demand from
- * `getQuestionnaireId` inside an already-running worker, and shelling out to
- * a nested `playwright test --project=setup` there would re-run
- * `globalSetup` — restoring the DB snapshot mid-run, under the feet of every
- * other worker.
+
  */
 export async function ensureEnableWhenQuestionnaire(): Promise<string> {
   if (!fs.existsSync(AUTH_PATH)) {
@@ -48,6 +43,8 @@ export async function ensureEnableWhenQuestionnaire(): Promise<string> {
   // and this runs as the admin superuser.
   fixture.auth_context ??= "instance";
   fixture.organizations ??= [];
+  // The backend iterates `actions` on create/update and 500s when absent.
+  fixture.actions ??= [];
 
   const saveMeta = (id: string) => {
     fs.mkdirSync(path.dirname(META_PATH), { recursive: true });
@@ -132,31 +129,18 @@ export async function ensureEnableWhenQuestionnaire(): Promise<string> {
 }
 
 /**
- * Returns the enable-when fixture questionnaire's id saved during setup.
- * The fill-flow routes fetch questionnaires by external_id (slug lookup was
- * not supported), so specs must navigate by id.
- * Seeds the fixture in-process only when the meta file is ABSENT; a present
- * but unparseable meta file throws instead, because silently re-seeding over
- * one would hide a corrupt setup behind specs that still pass.
+ * The enable-when fixture questionnaire's id, written by the setup project.
+ * The fill route fetches by external_id, so specs must navigate by id.
  */
-export async function getQuestionnaireId(): Promise<string> {
+export function getQuestionnaireId(): string {
   if (cachedId) return cachedId;
-
   if (!fs.existsSync(META_PATH)) {
-    console.warn("⚠️ Questionnaire meta missing — seeding the fixture...");
-    cachedId = await ensureEnableWhenQuestionnaire();
-    return cachedId;
+    throw new Error("questionnaireMeta.json not found — run the setup project");
   }
-
-  const raw = fs.readFileSync(META_PATH, "utf8");
-  try {
-    const { id } = JSON.parse(raw) as { id?: string };
-    if (!id) throw new Error("Missing id in questionnaireMeta.json");
-    cachedId = id;
-    return id;
-  } catch (err) {
-    throw new Error(
-      `Invalid questionnaireMeta.json: ${err instanceof Error ? err.message : err}`,
-    );
-  }
+  const { id } = JSON.parse(fs.readFileSync(META_PATH, "utf8")) as {
+    id?: string;
+  };
+  if (!id) throw new Error("Missing id in questionnaireMeta.json");
+  cachedId = id;
+  return id;
 }

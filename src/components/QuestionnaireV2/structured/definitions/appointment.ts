@@ -12,28 +12,27 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
   subjects: ["patient", "encounter"],
   draftPolicy: "serialize",
   validate: (appointments, questionId, required) =>
-    validateAppointmentQuestion(appointments[0], questionId, required),
+    appointments.length === 0
+      ? validateAppointmentQuestion(undefined, questionId, required)
+      : appointments.flatMap((appointment) =>
+          validateAppointmentQuestion(appointment, questionId, required),
+        ),
   buildRequests: async (
     appointments,
-    { patientId, facilityId, questionId },
+    { patientId, facilityId, questionId, path },
   ) => {
-    // `subjects` is patient/encounter, so a patient is always in scope
-    // here — narrowed rather than asserted (the context type is optional
-    // for plugin types that declare a resource subject).
-    if (!patientId || appointments.length === 0) return [];
-    const { note, slot_id, tags } = appointments[0];
-    if (!slot_id) return [];
-    return [
-      {
+    if (!patientId) return [];
+    return appointments
+      .filter((appointment) => appointment.slot_id)
+      .map(({ note, slot_id, tags }) => ({
         url: `/api/v1/facility/${facilityId}/slots/${slot_id}/create_appointment/`,
-        method: "POST",
+        method: "POST" as const,
         body: {
           note,
           patient: patientId,
           tags,
         },
-        reference_id: structuredReferenceId("appointment", questionId),
-      },
-    ];
+        reference_id: structuredReferenceId("appointment", questionId, path),
+      }));
   },
 };

@@ -3,7 +3,6 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   addTopLevelQuestion,
   createQuestionnaireAndOpenBuilder,
-  expectQuestionBlock,
   pickValuesetFromAutocomplete,
 } from "tests/helper/questionnaireV2";
 import { expectToast, selectFromValueSet } from "tests/helper/ui";
@@ -275,14 +274,14 @@ test.describe("Questionnaire v2 builder authoring matrix", () => {
     await expectToast(page, "Questionnaire updated successfully");
 
     await page.getByRole("button", { name: "Preview" }).click();
-    // Anchor the block first — questionBlock() resolves to zero elements
-    // silently, so a bare negative assertion would pass with the question
-    // missing entirely. Then: no input control inside the block, no note
-    // affordance anywhere (single-question form, page level is stronger).
-    const block = await expectQuestionBlock(page, displayText);
-    // The text renders twice inside the block by design (label + display
-    // paragraph) — assert the label node specifically.
-    await expect(block.locator("label")).toBeVisible();
+    // Display-only content has no control label. Anchor its visible text
+    // before asserting that no input or note control is rendered.
+    const block = page
+      .getByRole("region", { name: "Form canvas" })
+      .locator("[data-question-id]")
+      .filter({ has: page.getByText(displayText, { exact: true }) });
+    await expect(block).toHaveCount(1);
+    await expect(block.getByText(displayText, { exact: true })).toBeVisible();
     await expect(block.getByRole("textbox")).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Add note" }),

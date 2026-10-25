@@ -94,6 +94,32 @@ test.describe("Fill page server draft", () => {
       const fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}${operation === "update" ? `?continue_draft=${draftId}` : ""}`;
       const saveMethod = operation === "create" ? "POST" : "PUT";
       const saveUrl = `**/api/v1/form_submission/${operation === "update" ? `${draftId}/` : ""}`;
+      const draft = {
+        id: draftId,
+        status: "draft",
+        response_dump: {
+          questionnaireResponses: {
+            questionnaire: { id: questionnaireId },
+            responses: [],
+          },
+        },
+      };
+
+      if (operation === "update") {
+        await page.route(/\/api\/v1\/form_submission\/\?/, (route) => {
+          const request = route.request();
+          const params = new URL(request.url()).searchParams;
+          if (
+            request.method() !== "GET" ||
+            params.get("encounter") !== getEncounterId() ||
+            params.get("status") !== "draft"
+          ) {
+            return route.fallback();
+          }
+          // Resuming also verifies membership in this encounter's drafts.
+          return route.fulfill({ json: { count: 1, results: [draft] } });
+        });
+      }
 
       let releaseRequest: (() => void) | undefined;
       const pendingResponse = new Promise<void>((resolve) => {
@@ -109,18 +135,7 @@ test.describe("Fill page server draft", () => {
       }[] = [];
       await page.route(saveUrl, async (route) => {
         if (operation === "update" && route.request().method() === "GET") {
-          return route.fulfill({
-            json: {
-              id: draftId,
-              status: "draft",
-              response_dump: {
-                questionnaireResponses: {
-                  questionnaire: { id: questionnaireId },
-                  responses: [],
-                },
-              },
-            },
-          });
+          return route.fulfill({ json: draft });
         }
         if (route.request().method() !== saveMethod) return route.fallback();
         savedBodies.push(route.request().postDataJSON());
@@ -461,7 +476,11 @@ test.describe("Fill page server draft", () => {
     const body = JSON.parse((await batchRequest).postData() ?? "{}") as {
       requests: {
         url: string;
-        body: { form_submission?: string };
+        body: {
+          form_submission?: string;
+          expected_status?: string;
+          status?: string;
+        };
       }[];
     };
     const submit = body.requests.find((request) =>
@@ -474,6 +493,16 @@ test.describe("Fill page server draft", () => {
       submit?.body.form_submission,
       "submit sub-request must link the resumed draft via form_submission",
     ).toBe(draftId);
+
+    // The completion write rejects a second submit, rolling back its whole
+    // batch even when the questionnaire contains only structured resources.
+    const completion = body.requests.find((request) =>
+      request.url.includes(`/form_submission/${draftId}/`),
+    );
+    expect(completion?.body).toMatchObject({
+      expected_status: "draft",
+      status: "submitted",
+    });
 
     // End to end: the server took it, and the draft's record completed —
     // same cleanup contract every test in this describe leaves behind.

@@ -9,11 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  normalizeBooleanConditionAnswer,
-  normalizeExistsConditionAnswer,
-} from "@/components/QuestionnaireV2/builder/builderReducer";
-
 import { EnableWhen, QuestionType } from "@/types/questionnaire/question";
 
 import { NumericConditionInput } from "./NumericConditionInput";
@@ -22,25 +17,22 @@ interface VisibilityConditionAnswerInputProps {
   condition: EnableWhen;
   targetType: QuestionType | undefined;
   onChange: (answer: EnableWhen["answer"]) => void;
+  "aria-label"?: string;
 }
 
 export function VisibilityConditionAnswerInput({
   condition,
   targetType,
   onChange,
+  "aria-label": ariaLabel,
 }: VisibilityConditionAnswerInputProps) {
   const { t } = useTranslation();
   return condition.operator === "exists" ? (
-    // `exists` asks whether the target carries a value at
-    // all — never which value — and persists that as a
-    // literal boolean.
     <Select
-      value={
-        normalizeExistsConditionAnswer(condition.answer) ? "true" : "false"
-      }
+      value={condition.answer === false ? "false" : "true"}
       onValueChange={(value) => onChange(value === "true")}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full" aria-label={ariaLabel}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -49,13 +41,8 @@ export function VisibilityConditionAnswerInput({
       </SelectContent>
     </Select>
   ) : targetType === "boolean" ? (
-    <Select
-      // Tolerates true/false answers on load; any change
-      // re-writes them as "Yes"/"No".
-      value={normalizeBooleanConditionAnswer(condition.answer)}
-      onValueChange={onChange}
-    >
-      <SelectTrigger className="w-full">
+    <Select value={String(condition.answer)} onValueChange={onChange}>
+      <SelectTrigger className="w-full" aria-label={ariaLabel}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -64,10 +51,15 @@ export function VisibilityConditionAnswerInput({
       </SelectContent>
     </Select>
   ) : targetType === "integer" || targetType === "decimal" ? (
-    <NumericConditionInput value={condition.answer} onChange={onChange} />
+    <NumericConditionInput
+      value={condition.answer}
+      onChange={onChange}
+      aria-label={ariaLabel}
+    />
   ) : (
     <Input
       value={String(condition.answer ?? "")}
+      aria-label={ariaLabel}
       onChange={(e) => onChange(e.target.value)}
     />
   );

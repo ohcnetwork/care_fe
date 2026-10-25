@@ -24,7 +24,7 @@ import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
  * batch roll back, and the clinician see a generic failure with no field
  * to fix. Caught here, on the question, before anything is sent.
  *
- * Runs alongside `collectRequiredErrors` and follows the same visibility
+ * Runs alongside `collectQuestionErrors` and follows the same visibility
  * rule: a question hidden by enable_when (or inside a hidden group) is
  * not on the canvas and gets no error — the studio refuses to save an
  * action that references one, so that case never reaches a form.
@@ -50,7 +50,7 @@ export function collectActionReferenceErrors(
     for (const question of questions) {
       const enabled =
         ancestorsEnabled &&
-        isQuestionEnabledInState(question, scope, linkIndex);
+        isQuestionEnabledInState(question, responses, linkIndex);
       if (
         enabled &&
         question.type !== "group" &&
@@ -65,12 +65,10 @@ export function collectActionReferenceErrors(
       }
       if (question.type === "group" && question.repeats) {
         (scope[question.id]?.sub_results ?? []).forEach((row, rowIndex) =>
-          walk(
-            question.questions ?? [],
-            enabled,
-            { ...scope, ...responseMap(row) },
-            [...path, { questionId: question.id, rowIndex }],
-          ),
+          walk(question.questions ?? [], enabled, responseMap(row), [
+            ...path,
+            { questionId: question.id, rowIndex },
+          ]),
         );
       } else walk(question.questions ?? [], enabled, scope, path);
     }

@@ -11,7 +11,7 @@ function equal(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-/** Apply only fields the clinician changed, retaining refreshed server fields. */
+/** Keep `fresh` except where `edited` differs from `baseline`. */
 function mergeFields(
   baseline: unknown,
   edited: unknown,
@@ -64,24 +64,20 @@ function mergeRows(
   const merged = fresh.flatMap((row) => {
     const id = rowId(row);
     if (!id || !baselineIds.has(id)) return [editedIds.get(id ?? "") ?? row];
-    // Removing a baseline row is an intentional removal; a newly arrived
-    // server row is outside that baseline and remains visible.
     if (!editedIds.has(id)) return [];
     return [mergeFields(baselineIds.get(id), editedIds.get(id), row)];
   });
   for (const row of edited) {
     const id = rowId(row);
     if (id && freshIds.has(id)) continue;
-    // An untouched record removed on the server must not be resurrected.
     if (id && baselineIds.has(id) && equal(row, baselineIds.get(id))) continue;
     merged.push(row);
   }
   return merged;
 }
 
-/** Rebase saved/current user changes onto a new structured server prefill.
- * Values with stable record ids merge by id. Encounter is a singleton
- * request without an id, so its individual fields merge instead. */
+/** Rebase clinician edits onto a fresh server prefill: rows merge by id,
+ * the id-less encounter singleton merges by field. */
 export function initializeStructuredResponse(
   response: QuestionnaireResponse,
   fresh: ResponseValue[],
@@ -110,7 +106,6 @@ export function initializeStructuredResponse(
       ),
     } as ResponseValue;
   });
-  // An empty server result may omit the typed entry altogether.
   for (const entry of response.values) {
     if (!fresh.some((value) => value.type === entry.type)) values.push(entry);
   }
@@ -126,8 +121,7 @@ export function structuredResponseHasEdits(
   );
 }
 
-/** A prefill is not clinician input. Normalize it to the same empty value
- * as the initial store so arriving server records cannot arm autosave. */
+/** Strip untouched prefills so arriving server records cannot arm autosave. */
 export function draftIntentResponse(
   response: QuestionnaireResponse,
 ): QuestionnaireResponse {

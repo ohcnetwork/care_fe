@@ -25,9 +25,11 @@ import careConfig from "@careConfig";
 export const FormDialog = ({
   subjectType,
   trigger,
+  returnPage,
 }: {
   subjectType: string;
   trigger?: React.ReactNode;
+  returnPage?: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -156,12 +158,12 @@ export const FormDialog = ({
               <div key={questionnaire.id}>
                 <CommandGroup className="px-2">
                   <CommandItem
-                    key={questionnaire.slug}
+                    key={questionnaire.id}
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     onSelect={() => {
                       navigate(
-                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}`,
+                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
                       );
                       setOpen(false);
                     }}

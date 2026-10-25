@@ -48,7 +48,8 @@ export function getResponsesAtPath(
   return current;
 }
 
-/** A row's answers shadow ancestor answers for local enable_when conditions. */
+/** Root responses overlaid with each row on the path; what a registered
+ *  group component receives. Not used for enable_when. */
 export function getScopedResponses(
   responses: Record<string, QuestionnaireResponse>,
   path: ResponsePath,

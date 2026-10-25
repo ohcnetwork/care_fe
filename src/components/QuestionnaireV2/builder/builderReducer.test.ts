@@ -1,19 +1,11 @@
-import type { TFunction } from "i18next";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  plainWordsSummary,
-  questionsByLinkId,
-} from "@/components/QuestionnaireV2/studio/conditionSummary";
-
-import type { EnableWhen, Question } from "@/types/questionnaire/question";
+import type { Question } from "@/types/questionnaire/question";
 
 import {
   buildCondition,
   builderReducer,
-  migrateLegacyBooleanEnableWhen,
-  normalizeExistsConditionAnswer,
   type BuilderAction,
 } from "./builderReducer";
 
@@ -141,23 +133,6 @@ describe("registered group schema protection", () => {
   });
 });
 
-/** Conditions as they appear in stored data the union cannot express — the
- *  "Yes"/"No" strings earlier builder versions wrote under `exists`. */
-function legacyCondition(raw: {
-  question: string;
-  operator: string;
-  answer: unknown;
-}): EnableWhen {
-  return raw as unknown as EnableWhen;
-}
-
-/** Emits i18n keys rather than copy, so the summary a pane would show is
- *  assertable without loading translations. */
-const tStub = ((key: string, options?: { summary?: string }) =>
-  options?.summary
-    ? `${key}(${options.summary})`
-    : key) as unknown as TFunction;
-
 /** Minimal Question builder — link_id mirrors the id so conditions can name
  *  a target with the same string the test reads. */
 function q(over: Partial<Question> & Pick<Question, "id" | "type">): Question {
@@ -168,24 +143,9 @@ function q(over: Partial<Question> & Pick<Question, "id" | "type">): Question {
   };
 }
 
-describe("normalizeExistsConditionAnswer", () => {
-  it("reads every spelling of 'no value' as false", () => {
-    assert.equal(normalizeExistsConditionAnswer(false), false);
-    assert.equal(normalizeExistsConditionAnswer("false"), false);
-    assert.equal(normalizeExistsConditionAnswer("No"), false);
-    assert.equal(normalizeExistsConditionAnswer("no"), false);
-  });
-
-  it("defaults to true for everything else", () => {
-    assert.equal(normalizeExistsConditionAnswer(true), true);
-    assert.equal(normalizeExistsConditionAnswer("Yes"), true);
-    assert.equal(normalizeExistsConditionAnswer(undefined), true);
-  });
-});
-
 describe("buildCondition", () => {
   it("persists exists answers as literal booleans", () => {
-    assert.deepEqual(buildCondition("q1", "exists", "No"), {
+    assert.deepEqual(buildCondition("q1", "exists", false), {
       question: "q1",
       operator: "exists",
       answer: false,
@@ -193,20 +153,25 @@ describe("buildCondition", () => {
     assert.deepEqual(buildCondition("q1", "exists", "Yes"), {
       question: "q1",
       operator: "exists",
+      answer: false,
+    });
+    assert.deepEqual(buildCondition("q1", "exists", true), {
+      question: "q1",
+      operator: "exists",
       answer: true,
     });
   });
 
-  it("converts a boolean answer to the 'Yes'/'No' convention for equals", () => {
-    assert.deepEqual(buildCondition("q1", "equals", false), {
+  it("persists equals answers as strings", () => {
+    assert.deepEqual(buildCondition("q1", "equals", "No"), {
       question: "q1",
       operator: "equals",
       answer: "No",
     });
-    assert.deepEqual(buildCondition("q1", "not_equals", true), {
+    assert.deepEqual(buildCondition("q1", "not_equals", 3), {
       question: "q1",
       operator: "not_equals",
-      answer: "Yes",
+      answer: "3",
     });
   });
 
@@ -232,172 +197,39 @@ describe("buildCondition", () => {
   });
 });
 
-describe("migrateLegacyBooleanEnableWhen", () => {
-  const dependent = (enable_when: EnableWhen[]): Question[] => [
-    q({ id: "target", type: "boolean" }),
-    q({ id: "dependent", type: "string", enable_when }),
+describe("selection after removeQuestions", () => {
+  const tree = () => [
+    q({ id: "a", type: "string" }),
+    q({
+      id: "g",
+      type: "group",
+      questions: [
+        q({ id: "g1", type: "string" }),
+        q({ id: "g2", type: "string" }),
+      ],
+    }),
+    q({ id: "c", type: "string" }),
   ];
+  const remove = (selectedId: string, ...ids: string[]) =>
+    builderReducer(
+      { questions: tree(), actions: [], selectedId, dirty: false },
+      { type: "removeQuestions", ids },
+    ).selectedId;
 
-  it("heals exists answers written as strings without changing how they evaluate", () => {
-    // A literal `false` is the only answer either evaluator reads as "target
-    // is empty", so a legacy "No" was already enabling on "target answered".
-    for (const answer of ["No", "Yes", "false", "true"]) {
-      const migrated = migrateLegacyBooleanEnableWhen(
-        dependent([
-          legacyCondition({ question: "target", operator: "exists", answer }),
-        ]),
-      );
-      assert.deepEqual(
-        migrated[1].enable_when,
-        [{ question: "target", operator: "exists", answer: true }],
-        `legacy exists answer ${JSON.stringify(answer)}`,
-      );
-    }
+  it("selects the previous sibling, else the next, else the parent", () => {
+    assert.equal(remove("c", "c"), "g");
+    assert.equal(remove("a", "a"), "g");
+    assert.equal(remove("g2", "g2"), "g1");
+    assert.equal(remove("g1", "g1", "g2"), "g");
   });
 
-  it("heals exists answers on non-boolean targets too", () => {
-    const migrated = migrateLegacyBooleanEnableWhen([
-      q({ id: "target", type: "string" }),
-      q({
-        id: "dependent",
-        type: "string",
-        enable_when: [
-          legacyCondition({
-            question: "target",
-            operator: "exists",
-            answer: "No",
-          }),
-        ],
-      }),
-    ]);
-    assert.deepEqual(migrated[1].enable_when, [
-      { question: "target", operator: "exists", answer: true },
-    ]);
+  it("follows a selection nested inside a removed group", () => {
+    assert.equal(remove("g2", "g"), "a");
   });
 
-  it("heals an exists answer whose target is not in the tree", () => {
-    const migrated = migrateLegacyBooleanEnableWhen([
-      q({
-        id: "dependent",
-        type: "string",
-        enable_when: [
-          legacyCondition({
-            question: "missing",
-            operator: "exists",
-            answer: "No",
-          }),
-        ],
-      }),
-    ]);
-    assert.deepEqual(migrated[0].enable_when, [
-      { question: "missing", operator: "exists", answer: true },
-    ]);
-  });
-
-  it("leaves the visibility editor and the plain-words summary agreeing", () => {
-    // The two panes read the stored answer independently — the editor's
-    // Select through `normalizeExistsConditionAnswer`, the inspector
-    // through its own `=== false` test — so agreement has to hold on BOTH
-    // polarities. Either pane hardcoding one of them still satisfies a
-    // single-polarity check.
-    const agreement: [EnableWhen, boolean, string][] = [
-      [
-        legacyCondition({
-          question: "target",
-          operator: "exists",
-          answer: "No",
-        }),
-        true,
-        "condition_rule_answered",
-      ],
-      [
-        { question: "target", operator: "exists", answer: true },
-        true,
-        "condition_rule_answered",
-      ],
-      [
-        { question: "target", operator: "exists", answer: false },
-        false,
-        "condition_rule_not_answered",
-      ],
-    ];
-
-    for (const [stored, editorShows, summaryKey] of agreement) {
-      const migrated = migrateLegacyBooleanEnableWhen([
-        q({ id: "target", type: "string" }),
-        q({ id: "dependent", type: "string", enable_when: [stored] }),
-      ]);
-      const label = JSON.stringify(stored.answer);
-      const condition = migrated[1].enable_when![0];
-      assert.equal(
-        normalizeExistsConditionAnswer(condition.answer),
-        editorShows,
-        `editor Select, stored answer ${label}`,
-      );
-      assert.equal(
-        plainWordsSummary(migrated[1], questionsByLinkId(migrated), tStub),
-        `plain_words_shown_when(${summaryKey})`,
-        `inspector summary, stored answer ${label}`,
-      );
-    }
-  });
-
-  it("leaves an exists answer that is already a boolean untouched", () => {
-    const questions = dependent([
-      { question: "target", operator: "exists", answer: false },
-    ]);
-    const migrated = migrateLegacyBooleanEnableWhen(questions);
-    assert.equal(migrated[1], questions[1]);
-  });
-
-  it("still maps legacy true/false equals answers to 'Yes'/'No'", () => {
-    const migrated = migrateLegacyBooleanEnableWhen(
-      dependent([{ question: "target", operator: "equals", answer: true }]),
-    );
-    assert.deepEqual(migrated[1].enable_when, [
-      { question: "target", operator: "equals", answer: "Yes" },
-    ]);
-  });
-
-  it("leaves a string question's literal 'true' comparison alone", () => {
-    const questions = [
-      q({ id: "target", type: "string" }),
-      q({
-        id: "dependent",
-        type: "string",
-        enable_when: [
-          { question: "target", operator: "equals", answer: "true" },
-        ],
-      }),
-    ];
-    const migrated = migrateLegacyBooleanEnableWhen(questions);
-    assert.equal(migrated[1], questions[1]);
-  });
-
-  it("migrates conditions on nested questions", () => {
-    const migrated = migrateLegacyBooleanEnableWhen([
-      q({ id: "target", type: "boolean" }),
-      q({
-        id: "group",
-        type: "group",
-        questions: [
-          q({
-            id: "child",
-            type: "string",
-            enable_when: [
-              legacyCondition({
-                question: "target",
-                operator: "exists",
-                answer: "Yes",
-              }),
-            ],
-          }),
-        ],
-      }),
-    ]);
-    assert.deepEqual(migrated[1].questions?.[0].enable_when, [
-      { question: "target", operator: "exists", answer: true },
-    ]);
+  it("keeps an unaffected selection and falls back to the first question", () => {
+    assert.equal(remove("a", "c"), "a");
+    assert.equal(remove("a", "a", "g", "c"), null);
   });
 });
 

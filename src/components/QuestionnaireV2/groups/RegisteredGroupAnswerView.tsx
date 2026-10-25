@@ -43,7 +43,9 @@ export function RegisteredGroupAnswerView({
       question={question}
       fields={storedGroupFields(schema, question.repeats ? [] : responses)}
       onChange={noop}
-      rows={rows.map((row) => ({
+      rows={rows.map((row, index) => ({
+        // Saved answer snapshots expose no row mutation operations.
+        key: index,
         fields: storedGroupFields(schema, row),
         onChange: noop,
         remove: noop,

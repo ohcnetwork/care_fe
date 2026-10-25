@@ -627,8 +627,7 @@ export function ServiceRequestQuestion({
     data: selectedActivityDefinitionData,
     isLoading: isLoadingSelectedAD,
   } = useQuery({
-    // Slugs resolve within a facility. Another facility's cached definition
-    // must never seed the new request while this facility's lookup is pending.
+    // Keyed by facility so another facility's cached definition never seeds this request.
     queryKey: ["activity_definition", facilityId, selectedActivityDefinition],
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {

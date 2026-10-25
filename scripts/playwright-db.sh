@@ -74,6 +74,7 @@ case "${1:-}" in
     cd "$CARE_DIR"
     DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv/bin/python manage.py migrate --verbosity=0
     DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv/bin/python manage.py load_fixtures
+    DJANGO_SETTINGS_MODULE=config.settings.local DJANGO_READ_DOT_ENV_FILE=true .venv/bin/python manage.py load_fixtures --path care/fixtures/scripts/questionnaire_e2e_fixtures.py
 
     # Take snapshot of clean state
     pg_cmd pg_dump -Fc "$DB_NAME" -f "$SNAPSHOT_FILE"

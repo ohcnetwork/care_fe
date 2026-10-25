@@ -77,9 +77,9 @@ test.describe("Questionnaire v2 builder navigation", () => {
 
     await test.step("Duplicate creates a selected copy right after", async () => {
       await page.getByRole("button", { name: "Duplicate question" }).click();
-      await expect(titleInput).toHaveValue(`${titles[1]} (copy)`);
+      await expect(titleInput).toHaveValue(`${titles[1]} (Copy)`);
       await expect(
-        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+        nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
       ).toContainText("3.");
     });
 
@@ -90,15 +90,15 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await expectToast(page, "Questionnaire updated successfully");
       await page.reload();
       await expect(
-        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+        nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
       ).toContainText("3.");
     });
 
     await test.step("Delete removes the copy via the toolbar", async () => {
-      await questionBlock(page, `${titles[1]} (copy)`).locator("label").click();
+      await questionBlock(page, `${titles[1]} (Copy)`).locator("label").click();
       await page.getByRole("button", { name: "Delete question" }).click();
       await expect(
-        nav.getByRole("button", { name: `${titles[1]} (copy)` }),
+        nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
       ).not.toBeVisible();
     });
   });

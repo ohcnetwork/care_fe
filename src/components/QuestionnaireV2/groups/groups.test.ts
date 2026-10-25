@@ -7,6 +7,7 @@ import type { Question } from "@/types/questionnaire/question";
 
 import {
   groupBindings,
+  retainGroupRowErrors,
   updateGroupResponses,
   updateGroupRows,
 } from "./bindings";
@@ -68,6 +69,20 @@ test("registry verifies namespace and schema keys and preserves replacement on s
       "test_group",
     ),
   );
+  const malformed = (patch: Record<string, unknown>) =>
+    ({ ...definition, ...patch }) as RegisteredGroupDefinition;
+  assert.throws(() =>
+    registerQuestionGroup(malformed({ subjects: undefined }), "test_group"),
+  );
+  assert.throws(() =>
+    registerQuestionGroup(malformed({ subjects: ["visit"] }), "test_group"),
+  );
+  assert.throws(() =>
+    registerQuestionGroup(malformed({ component: undefined }), "test_group"),
+  );
+  assert.throws(() =>
+    registerQuestionGroup(malformed({ builder: "Builder" }), "test_group"),
+  );
   const first = registerQuestionGroup(definition, "test_group");
   const replacement = { ...definition };
   const second = registerQuestionGroup(replacement, "test_group");
@@ -106,7 +121,7 @@ test("saved children have unique IDs and scoped references, new fields are nulla
 
 test("backend null structured markers match ordinary children and malformed imports are rejected", () => {
   const group = makeGroup();
-  const saved = JSON.parse(JSON.stringify(group)) as Question;
+  const saved = structuredClone(group);
   Object.assign(saved.questions![0], { structured_type: null });
   assert.equal(
     compatibleGroupFields(saved, definition).teeth?.id,
@@ -473,5 +488,81 @@ test("repeated group rows keep paired child answers and remove by row identity",
   assert.equal(
     compatibleGroupFields({ ...group, repeats: false }, repeated).teeth,
     null,
+  );
+});
+
+test("row update clears only the edited row's changed errors; add/remove clear every row", () => {
+  const repeated = { ...definition, repeats: true };
+  const group = { ...makeGroup(), repeats: true };
+  const [noteId, teethId] = [group.questions![2].id, group.questions![0].id];
+  const questions = [group];
+  let responses = initializeResponses(questions);
+  for (const action of [
+    { type: "add" as const, updates: {} },
+    { type: "add" as const, updates: {} },
+  ]) {
+    responses = updateGroupRows(group, repeated, questions, responses, action);
+  }
+  const rows = responses[group.id].sub_results!;
+  const rowPath = (rowIndex: number) => [{ questionId: group.id, rowIndex }];
+  const errors = [
+    { question_id: group.id, msg: "Group" },
+    { question_id: noteId, response_path: rowPath(0), msg: "First note" },
+    { question_id: teethId, response_path: rowPath(0), msg: "First teeth" },
+    { question_id: noteId, response_path: rowPath(1), msg: "Second note" },
+    { question_id: noteId, msg: "Server note" },
+    { question_id: "other", msg: "Other" },
+  ];
+  const update = {
+    type: "update" as const,
+    row: rows[0],
+    updates: {
+      note: { values: [{ type: "string" as const, value: "changed" }] },
+    },
+  };
+  const updated = updateGroupRows(
+    group,
+    repeated,
+    questions,
+    responses,
+    update,
+  );
+  const retain = (
+    action: Parameters<typeof retainGroupRowErrors>[3],
+    next = updated,
+  ) =>
+    retainGroupRowErrors(
+      errors,
+      [],
+      group.id,
+      action,
+      rows,
+      next[group.id].sub_results!,
+    ).map((error) => error.msg);
+  assert.deepEqual(retain(update), [
+    "Group",
+    "First teeth",
+    "Second note",
+    "Other",
+  ]);
+  const untouched = {
+    type: "update" as const,
+    row: rows[0],
+    updates: { unknown: {} },
+  };
+  assert.deepEqual(
+    retain(
+      untouched,
+      updateGroupRows(group, repeated, questions, responses, untouched),
+    ),
+    errors.map((error) => error.msg),
+  );
+  const removed = { type: "remove" as const, row: rows[1] };
+  assert.deepEqual(
+    retain(
+      removed,
+      updateGroupRows(group, repeated, questions, responses, removed),
+    ),
+    ["Server note", "Other"],
   );
 });

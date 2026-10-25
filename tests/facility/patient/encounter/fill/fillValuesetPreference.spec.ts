@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   addTopLevelQuestion,
+  adminApiHeaders,
+  apiBaseUrl,
   createQuestionnaireAndOpenBuilder,
   pickValuesetFromAutocomplete,
   questionBlock,
@@ -46,7 +48,7 @@ test.describe("Fill page: choosing between value-set variants", () => {
     let questionnaireId = "";
 
     await deleteFacilityValueSetsBySlug(facilityId, PARENT_SLUG);
-    await createFacilityOverride({
+    const overrideId = await createFacilityOverride({
       facilityId,
       parentId: await getInstanceValueSetIdBySlug(PARENT_SLUG),
       parentSlug: PARENT_SLUG,
@@ -73,6 +75,36 @@ test.describe("Fill page: choosing between value-set variants", () => {
         await page.getByRole("button", { name: "Save Changes" }).click();
         await expectToast(page, "Questionnaire updated successfully");
       });
+
+      // Put the real override beyond the first page. Preference writes and
+      // terminology resolution still reach the backend.
+      const overrideResponse = await fetch(
+        `${apiBaseUrl()}/api/v1/valueset/${overrideId}/`,
+        {
+          headers: adminApiHeaders(),
+        },
+      );
+      expect(overrideResponse.ok).toBe(true);
+      const override = await overrideResponse.json();
+      await page.route(
+        (url) =>
+          url.pathname === "/api/v1/valueset/" &&
+          url.searchParams.get("facility") === facilityId,
+        async (route) => {
+          const offset = Number(
+            new URL(route.request().url()).searchParams.get("offset") ?? 0,
+          );
+          const results =
+            offset === 0
+              ? Array.from({ length: 100 }, (_, index) => ({
+                  ...override,
+                  id: `unrelated-${index}`,
+                  slug: `unrelated-${index}`,
+                }))
+              : [override];
+          await route.fulfill({ json: { count: 101, results } });
+        },
+      );
 
       await page.goto(
         `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/questionnaire/${questionnaireId}`,

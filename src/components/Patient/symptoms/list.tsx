@@ -1,14 +1,13 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { History } from "lucide-react";
-import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
+import { ClinicalListPanel } from "@/components/Patient/Common/ClinicalListPanel";
 import EmptyState from "@/components/Patient/Common/EmptyState";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -19,6 +18,9 @@ import symptomApi from "@/types/emr/symptom/symptomApi";
 import { SymptomTable } from "./SymptomTable";
 
 interface SymptomsListProps {
+  title?: string;
+  showEmpty?: boolean;
+  facilityId?: string;
   patientId: string;
   encounterId?: string;
   className?: string;
@@ -35,6 +37,9 @@ interface GroupedSymptoms {
 }
 
 export function SymptomsList({
+  title,
+  showEmpty = false,
+  facilityId: providedFacilityId,
   patientId,
   encounterId,
   className,
@@ -46,38 +51,54 @@ export function SymptomsList({
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-  const { facilityId } = useCurrentFacilitySilently();
-  const sourceUrl = usePath();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-symptoms", patientId, encounterId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(symptomApi.listSymptoms, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            limit: LIMIT,
-            offset: String(pageParam),
-            exclude_verification_status: "entered_in_error",
-          },
-        })({ signal });
-        return response as PaginatedResponse<Symptom>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+  const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
+  const facilityId = providedFacilityId ?? currentFacilityId;
+  const queryState = useInfiniteQuery({
+    queryKey: ["infinite-symptoms", patientId, encounterId],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(symptomApi.listSymptoms, {
+        pathParams: { patientId },
+        silent: true,
+        queryParams: {
+          encounter: encounterId,
+          limit: LIMIT,
+          offset: String(pageParam),
+          exclude_verification_status: "entered_in_error",
+        },
+      })({ signal });
+      return response as PaginatedResponse<Symptom>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      return lastPage.results.length > 0 && currentOffset < lastPage.count
+        ? currentOffset
+        : undefined;
+    },
+  });
 
-  if (isLoading) {
-    return <TableSkeleton count={5} />;
-  }
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = queryState;
 
   const symptoms = data?.pages.flatMap((page) => page.results) ?? [];
 
-  if (!symptoms?.length) {
-    if (showTimeline) {
+  if (showTimeline) {
+    if (isLoading) return <TableSkeleton count={5} />;
+    if (!symptoms.length) {
+      if (isError) {
+        return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
+      }
       return (
         <EmptyState
           title={t("no_symptoms")}
@@ -85,10 +106,6 @@ export function SymptomsList({
         />
       );
     }
-    return null;
-  }
-
-  if (showTimeline) {
     const groupedByYear = symptoms.reduce((acc, symptom) => {
       const dateStr = format(symptom.created_date, "yyyy-MM-dd");
       const year = format(symptom.created_date, "yyyy");
@@ -100,6 +117,9 @@ export function SymptomsList({
 
     return (
       <div className="space-y-8">
+        {isError && (
+          <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+        )}
         {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
           return (
             <div key={year}>
@@ -149,30 +169,20 @@ export function SymptomsList({
   }
 
   return (
-    <EncounterAccordionLayout
-      title={t("symptoms")}
+    <ClinicalListPanel
+      title={title ?? t("symptoms")}
+      facilityId={facilityId}
+      patientId={patientId}
+      encounterId={encounterId}
       readOnly={readOnly}
       className={className}
       presentation={presentation}
-      editLink={!readOnly ? "questionnaire/symptom" : undefined}
-      actionButton={
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
-        >
-          <Link
-            href={
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
-                : `/patient/${patientId}/history/symptoms?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
-            }
-          >
-            <History className="size-4" />
-          </Link>
-        </Button>
-      }
+      questionnaire="symptom"
+      history="symptoms"
+      emptyMessage={t("no_symptoms_recorded_description")}
+      hasData={symptoms.length > 0}
+      showEmpty={showEmpty}
+      queryState={queryState}
     >
       <SymptomTable
         symptoms={symptoms}
@@ -180,13 +190,6 @@ export function SymptomsList({
         showViewEncounter={showViewEncounter}
         compact={presentation === "panel"}
       />
-      {hasNextPage && (
-        <div className="flex justify-center">
-          <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
-            {t("load_more")}
-          </Button>
-        </div>
-      )}
-    </EncounterAccordionLayout>
+    </ClinicalListPanel>
   );
 }

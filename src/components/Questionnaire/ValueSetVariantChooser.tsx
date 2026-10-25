@@ -46,16 +46,16 @@ export function ValueSetVariantChooser({
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
-  // The list endpoint has no slug filter, so the facility's (small) set of
-  // value sets is fetched once and narrowed here.
+  // The list endpoint has no slug filter. Include every page before
+  // narrowing so overrides remain available in larger catalogues.
   const facilityQuery = useQuery({
     queryKey: ["valuesets", "variants", facilityId],
-    queryFn: query(valueSetApi.list, {
+    queryFn: query.paginated(valueSetApi.list, {
       queryParams: {
         facility: facilityId,
         status: ValueSetStatus.ACTIVE,
-        limit: 100,
       },
+      pageSize: 100,
       silent: true,
     }),
     staleTime: 5 * 60 * 1000,

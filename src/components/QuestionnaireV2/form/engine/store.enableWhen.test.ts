@@ -6,7 +6,9 @@ import type {
   ResponseValue,
 } from "@/types/questionnaire/form";
 
-import { evaluateEnableWhen } from "./store";
+import type { EnableWhen, Question } from "@/types/questionnaire/question";
+
+import { evaluateEnableWhen, isQuestionEnabledInState } from "./store";
 
 function response(values: ResponseValue[]): QuestionnaireResponse {
   return {
@@ -92,4 +94,129 @@ test("exists distinguishes a recorded false answer from no answer", () => {
       !answer,
     );
   }
+});
+
+test("placeholder entries do not count as answers for any operator", () => {
+  const placeholder = response([{ type: "string", value: "" }]);
+  const cases: [EnableWhen, boolean][] = [
+    [{ question: "source", operator: "exists", answer: true }, false],
+    [{ question: "source", operator: "exists", answer: false }, true],
+    [{ question: "source", operator: "equals", answer: "" }, false],
+    [{ question: "source", operator: "not_equals", answer: "x" }, false],
+    [{ question: "source", operator: "less", answer: 1 }, false],
+    [{ question: "source", operator: "less_or_equals", answer: 0 }, false],
+    [{ question: "source", operator: "greater_or_equals", answer: 0 }, false],
+    [{ question: "source", operator: "greater", answer: -1 }, false],
+  ];
+  for (const [condition, expected] of cases) {
+    assert.equal(
+      evaluateEnableWhen(condition, placeholder),
+      expected,
+      `${condition.operator} ${String(condition.answer)}`,
+    );
+  }
+  const mixed = response([
+    { type: "string", value: "" },
+    { type: "string", value: "5" },
+  ]);
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "less", answer: 1 },
+      mixed,
+    ),
+    false,
+  );
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "greater", answer: 1 },
+      mixed,
+    ),
+    true,
+  );
+});
+
+test("a coding-only entry exists", () => {
+  const codingOnly = response([
+    {
+      type: "string",
+      value: undefined,
+      coding: { code: "1", system: "s", display: "One" },
+    },
+  ]);
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "exists", answer: true },
+      codingOnly,
+    ),
+    true,
+  );
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "exists", answer: false },
+      codingOnly,
+    ),
+    false,
+  );
+});
+
+test("equals and not_equals fold boolean strings on both sides", () => {
+  const recordedTrue = response([{ type: "boolean", value: true }]);
+  for (const answer of ["true", "TRUE", " yes ", "1", "on"]) {
+    assert.equal(
+      evaluateEnableWhen(
+        { question: "source", operator: "equals", answer },
+        recordedTrue,
+      ),
+      true,
+      answer,
+    );
+    assert.equal(
+      evaluateEnableWhen(
+        { question: "source", operator: "not_equals", answer },
+        recordedTrue,
+      ),
+      false,
+      answer,
+    );
+  }
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "equals", answer: "No" },
+      response([{ type: "string", value: "false" }]),
+    ),
+    true,
+  );
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "equals", answer: "1" },
+      response([{ type: "number", value: 1 }]),
+    ),
+    true,
+  );
+  assert.equal(
+    evaluateEnableWhen(
+      { question: "source", operator: "greater", answer: 0 },
+      response([{ type: "string", value: "yes" }]),
+    ),
+    false,
+  );
+});
+
+test("a condition on an unknown link_id disables the question", () => {
+  const question: Question = {
+    id: "dependent",
+    link_id: "dependent",
+    text: "Dependent",
+    type: "string",
+    enable_when: [{ question: "missing", operator: "exists", answer: false }],
+  };
+  assert.equal(isQuestionEnabledInState(question, {}, {}), false);
+  assert.equal(
+    isQuestionEnabledInState(
+      { ...question, enable_behavior: "any" },
+      {},
+      { missing: "" },
+    ),
+    true,
+  );
 });

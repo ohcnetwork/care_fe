@@ -10,7 +10,7 @@ import {
   responsesAtom,
   structuredRenderFailedAtom,
 } from "@/components/QuestionnaireV2/form/engine/store";
-import { collectRequiredErrors } from "@/components/QuestionnaireV2/form/validation";
+import { collectQuestionErrors } from "@/components/QuestionnaireV2/form/validation";
 
 import type { FillFormEntry } from "@/components/QuestionnaireV2/fill/formSession";
 import type { FormStore } from "@/components/QuestionnaireV2/fill/StoreRegistrar";
@@ -179,6 +179,7 @@ export function useSubmitFillSession({
         const mapped = mapBatchErrors(
           error.cause.results,
           t("validation_failed"),
+          forms.flatMap((form) => form.questionnaire.questions),
         );
         setServerErrors(mapped.serverErrors);
 
@@ -195,7 +196,10 @@ export function useSubmitFillSession({
           getStore(form.key)?.set(errorsAtom, byForm.get(form.key) ?? []);
         }
         if (mapped.questionErrors.length > 0) {
-          scrollToQuestion(mapped.questionErrors[0].question_id);
+          scrollToQuestion(
+            mapped.questionErrors[0].question_id,
+            mapped.questionErrors[0].response_path,
+          );
         }
       }
       toast.error(t("questionnaire_submission_failed"));
@@ -239,7 +243,7 @@ export function useSubmitFillSession({
       const responses = store.get(responsesAtom);
       const renderFailed = store.get(structuredRenderFailedAtom);
       const clientErrors: QuestionValidationError[] = [
-        ...collectRequiredErrors(form.questionnaire.questions, responses, t, {
+        ...collectQuestionErrors(form.questionnaire.questions, responses, t, {
           questionnaire: form.questionnaire,
           subject: rendererSubject,
           renderFailed,
@@ -358,6 +362,7 @@ export function useSubmitFillSession({
             ? [
                 {
                   question_id: error.questionId,
+                  response_path: error.responsePath,
                   error: t("structured_question_submit_failed"),
                 },
               ]
@@ -365,7 +370,7 @@ export function useSubmitFillSession({
         );
       }
       toast.error(t("questionnaire_submission_failed"));
-      scrollToQuestion(error.questionId);
+      scrollToQuestion(error.questionId, error.responsePath);
       return;
     }
     if (requests.length === 0) {

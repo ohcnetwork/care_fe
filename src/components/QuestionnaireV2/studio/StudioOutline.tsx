@@ -1,7 +1,15 @@
-import { Plus, Search, Settings2, Split, TriangleAlert } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Settings2,
+  Split,
+  TriangleAlert,
+  Zap,
+} from "lucide-react";
 import { Dispatch, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -24,6 +32,16 @@ export interface StudioOutlineProps {
   /** question id → save-rule i18n key — rows get a warning cue. */
   issueKeysByQuestionId: ReadonlyMap<string, string>;
   onSelectForm: () => void;
+  /** Whether to offer the Actions row at all — resource-subject
+   *  questionnaires never run actions, so they only get the row when one
+   *  is already stored (to let the author remove it). */
+  actionsRow: boolean;
+  actionsSelected: boolean;
+  actionCount: number;
+  actionsHaveIssues: boolean;
+  /** link_ids some action reads — those rows get a cue. */
+  actionLinkIds: ReadonlySet<string>;
+  onSelectActions: () => void;
   onSelectQuestion: (id: string) => void;
   dispatch: Dispatch<BuilderAction>;
 }
@@ -42,6 +60,12 @@ export function StudioOutline({
   formSelected,
   issueKeysByQuestionId,
   onSelectForm,
+  actionsRow,
+  actionsSelected,
+  actionCount,
+  actionsHaveIssues,
+  actionLinkIds,
+  onSelectActions,
   onSelectQuestion,
   dispatch,
 }: StudioOutlineProps) {
@@ -96,6 +120,36 @@ export function StudioOutline({
         </button>
       )}
 
+      {editing && actionsRow && (
+        <button
+          type="button"
+          onClick={onSelectActions}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium",
+            actionsSelected
+              ? "bg-gray-100 text-gray-900"
+              : "text-gray-700 hover:bg-gray-50",
+          )}
+        >
+          <Zap aria-hidden className="size-4 text-gray-500" />
+          {t("actions")}
+          {actionCount > 0 && (
+            <Badge variant="secondary" className="ml-auto tabular-nums">
+              {actionCount}
+            </Badge>
+          )}
+          {actionsHaveIssues && (
+            <TriangleAlert
+              aria-label={t("actions_have_issues")}
+              className={cn(
+                "size-3 text-red-500",
+                actionCount === 0 && "ml-auto",
+              )}
+            />
+          )}
+        </button>
+      )}
+
       {questions.length > 0 && (
         <div className="flex items-baseline justify-between px-3 pt-1">
           <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
@@ -124,6 +178,9 @@ export function StudioOutline({
           <>
             {(question.enable_when?.length ?? 0) > 0 && (
               <Split className="size-3 text-amber-600" />
+            )}
+            {actionLinkIds.has(question.link_id) && (
+              <Zap className="size-3 text-amber-600" />
             )}
             {editing && issueKeysByQuestionId.has(question.id) && (
               <TriangleAlert className="size-3 text-red-500" />
