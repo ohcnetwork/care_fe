@@ -1,8 +1,8 @@
 import { UserReadMinimal } from "@/types/user/user";
 
-import { StructuredQuestionType } from "@/components/Questionnaire/data/StructuredFormData";
 import { QuestionnaireResponse as Response } from "./form";
 import { QuestionnaireRead } from "./questionnaire";
+import { StructuredQuestionType } from "./structured";
 
 export type StructuredResponseValue = {
   id: string;

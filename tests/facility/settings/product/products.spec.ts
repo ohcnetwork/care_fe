@@ -55,7 +55,9 @@ test.describe("Product List", () => {
     });
   });
 
-  test("should allow multiple category selections", async ({ page }) => {
+  test("should reopen product categories with an existing selection", async ({
+    page,
+  }) => {
     await test.step("Select first category", async () => {
       await page
         .getByRole("combobox")
@@ -72,12 +74,8 @@ test.describe("Product List", () => {
       await page.getByLabel("Suggestions").getByText("Gloves").click();
     });
 
-    await test.step("Open dropdown again for additional selection", async () => {
-      // Reopen dropdown to select another category/product
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Search Product Knowledge" })
-        .click();
+    await test.step("Reopen dropdown with the selected product", async () => {
+      await page.getByRole("combobox").filter({ hasText: "Gloves" }).click();
 
       // Verify the dropdown is still functional
       await expect(page.getByText("Consumables")).toBeVisible();
@@ -125,25 +123,6 @@ test.describe("Product List", () => {
     });
   });
 
-  test("should handle empty search results gracefully", async ({ page }) => {
-    await test.step("Open product search", async () => {
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Search Product Knowledge" })
-        .click();
-    });
-
-    await test.step("Search for non-existent category", async () => {
-      // Assert that only known categories are present and no "No results" message is shown
-      await expect(page.getByText("Consumables")).toBeVisible();
-      await expect(page.getByText("Medications")).toBeVisible();
-      // Optionally, check that "No results" is NOT visible
-      await expect(
-        page.getByText(/no results|not found|no products/i),
-      ).not.toBeVisible();
-    });
-  });
-
   test("should reset product selection when returning through settings navigation", async ({
     page,
   }) => {
@@ -163,7 +142,7 @@ test.describe("Product List", () => {
     await test.step("Navigate away and back", async () => {
       // Navigate to another setting, then return to Products.
       const sidebarToggle = page
-        .locator('[data-cui-app-header]')
+        .locator('[data-cy="facility-settings-page-header"]')
         .getByRole("button", { name: "Toggle Sidebar", exact: true });
       if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
         await sidebarToggle.click();

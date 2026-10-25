@@ -30,9 +30,11 @@ import {
 const AllergyCard = ({
   allergy,
   onViewEncounter,
+  compact = false,
 }: {
   allergy: AllergyIntolerance;
   onViewEncounter?: () => void;
+  compact?: boolean;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -96,7 +98,9 @@ const AllergyCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div className="mt-4 flex gap-8 flex-wrap">
+      <div
+        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-8")}
+      >
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("criticality")}</div>
           <Badge variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}>
@@ -142,10 +146,12 @@ export const AllergyTable = ({
   allergies,
   patientId,
   showViewEncounter = true,
+  compact = false,
 }: {
   allergies: AllergyIntolerance[];
   patientId: string;
   showViewEncounter?: boolean;
+  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -155,12 +161,19 @@ export const AllergyTable = ({
   return (
     <>
       {/* Mobile: Card layout */}
-      <div className="space-y-3 block sm:hidden">
+      <div
+        className={
+          compact
+            ? "block space-y-2 @3xl/clinical-widget:hidden"
+            : "block space-y-3 sm:hidden"
+        }
+      >
         {allergies.map((allergy) => {
           return (
             <AllergyCard
               key={allergy.id}
               allergy={allergy}
+              compact={compact}
               onViewEncounter={
                 showViewEncounter
                   ? () =>
@@ -176,9 +189,19 @@ export const AllergyTable = ({
         })}
       </div>
       {/* Desktop: Table layout */}
-      <div className="overflow-x-auto hidden sm:block">
-        <div className="min-w-xl pb-2">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
+      <div
+        className={cn(
+          "overflow-x-auto hidden",
+          compact ? "@3xl/clinical-widget:block" : "sm:block",
+        )}
+      >
+        <div className={cn("min-w-xl", !compact && "pb-2")}>
+          <div
+            className={cn(
+              "grid grid-cols-[1fr_auto_auto_auto_auto]",
+              compact ? "gap-y-1" : "gap-y-2",
+            )}
+          >
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("allergen")}
             </div>
@@ -198,6 +221,7 @@ export const AllergyTable = ({
             ></div>
             {allergies.map((allergy) => (
               <ClinicalInformationRow
+                compact={compact}
                 key={allergy.id}
                 onViewEncounter={
                   showViewEncounter

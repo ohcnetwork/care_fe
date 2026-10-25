@@ -56,7 +56,7 @@ export function FacilitySwitcher({
           variant="outline"
           size="sm"
           className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-sm font-normal text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
-          aria-label={t("select_facility")}
+          aria-label={selectedFacility?.name || t("select_facility")}
         >
           {
             <>

@@ -2,7 +2,9 @@ import {
   Bed,
   CalendarClock,
   CalendarDays,
+  ClipboardList,
   FlaskConical,
+  House,
   Package,
   Pill,
   Users,
@@ -25,6 +27,11 @@ export function LocationNav() {
   return (
     <NavMain
       links={[
+        {
+          name: t("overview"),
+          url: `${baseUrl}/overview`,
+          icon: <House />,
+        },
         {
           section: t("patient_care"),
           name: t("beds"),
@@ -100,6 +107,12 @@ export function LocationNav() {
           name: t("queues"),
           url: `${baseUrl}/queues`,
           icon: <Users />,
+        },
+        {
+          section: t("forms"),
+          name: t("responses"),
+          url: `${baseUrl}/responses`,
+          icon: <ClipboardList />,
         },
       ]}
     />

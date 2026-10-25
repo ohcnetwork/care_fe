@@ -11,7 +11,7 @@ test("admin navigation indicates overflow and explains the header search", async
     { name: "sidebar:state", value: "true", url: baseURL! },
   ]);
   await page.setViewportSize({ width: 1280, height: 440 });
-  await page.goto("/admin/questionnaire");
+  await page.goto("/admin/questionnaires");
   const content = page.locator('[data-sidebar="content"]');
   const more = page.getByRole("button", { name: "More navigation" });
   await expect(more).toBeVisible();
