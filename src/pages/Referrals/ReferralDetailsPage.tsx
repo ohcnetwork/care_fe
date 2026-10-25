@@ -30,10 +30,8 @@ import { ReferralAssignmentDialog } from "@/components/Referral/ReferralAssignme
 import { ReferralConversation } from "@/components/Referral/ReferralConversation";
 import { ReferralFormResponseCard } from "@/components/Referral/ReferralFormResponseCard";
 import { ReferralPatientHeader } from "@/components/Referral/ReferralPatientHeader";
-import { ReferralReferences } from "@/components/Referral/ReferralReferences";
 import { ReferralResponseDialog } from "@/components/Referral/ReferralResponseDialog";
 import { ReferralResponsesSection } from "@/components/Referral/ReferralResponsesSection";
-import { ReferralRoute } from "@/components/Referral/ReferralRoute";
 import { ReferralSharedRecords } from "@/components/Referral/ReferralSharedRecords";
 import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 import {
@@ -44,6 +42,7 @@ import {
   getReferralDetailUrl,
   getReferralResponseUrl,
 } from "@/components/Referral/referralNavigation";
+import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
 
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
@@ -69,7 +68,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
   const isNotFound = error instanceof HTTPError && error.status === 404;
   const isUnauthorized = error instanceof HTTPError && error.status === 401;
   const canShowCached = !!data && !isDenied && !isNotFound && !isUnauthorized;
-  const canWrite = data?.permissions?.includes("can_write_referral") === true;
+  const { canWrite } = useReferralPermissions(canShowCached ? data : undefined);
   // Shared links have no source context. Only accept a same-origin return path.
   let backUrl = "/";
   if (typeof sourceUrl === "string" && sourceUrl.startsWith("/")) {
@@ -187,7 +186,11 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
         {data && canShowCached && (
           <>
             <ReferralPatientHeader referral={data}>
-              <ReferralWorkflowActions referral={data} onCopyLink={copyLink} />
+              <ReferralWorkflowActions
+                referral={data}
+                canWrite={canWrite}
+                onCopyLink={copyLink}
+              />
             </ReferralPatientHeader>
             <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
               <div className="min-w-0 space-y-5">
@@ -231,18 +234,6 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                       {formatDateTime(data.created_date)}
                     </p>
                   </header>
-                  <div className="border-y border-cui-border bg-cui-muted/50 px-4 py-3 sm:px-5">
-                    <ReferralRoute
-                      source={data.source}
-                      destination={data.destination}
-                      labeled
-                      sourceAuthor={
-                        data.created_by
-                          ? formatName(data.created_by)
-                          : undefined
-                      }
-                    />
-                  </div>
                   <section
                     aria-label={t("assigned_to")}
                     className="flex flex-wrap items-center justify-between gap-3 border-b border-cui-border px-4 py-3 sm:px-5"
@@ -274,7 +265,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                     </div>
                     {canWrite && <ReferralAssignmentDialog referral={data} />}
                   </section>
-                  <ReferralAppointments referral={data} canWrite={canWrite} />
+                  <ReferralAppointments referral={data} />
                   <div
                     id={requestId}
                     role="region"
@@ -338,7 +329,6 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                   canWrite={canWrite}
                   responseUrl={getReferralResponseUrl(data.id, sourceUrl)}
                 />
-                <ReferralReferences referralId={data.id} />
                 <details className="group rounded-lg border border-cui-border bg-cui-background">
                   <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium focus-visible:outline-cui-ring [&::-webkit-details-marker]:hidden">
                     {t("referral_details")}

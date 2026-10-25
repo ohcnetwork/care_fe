@@ -74,15 +74,15 @@ export function ReferralProgress({ referral }: { referral: ReferralRetrieve }) {
 
 export function ReferralWorkflowActions({
   referral,
+  canWrite,
   onCopyLink,
 }: {
   referral: ReferralRetrieve;
+  canWrite: boolean;
   onCopyLink?: () => void | Promise<void>;
 }) {
   const { t } = useTranslation();
   const client = useQueryClient();
-  const canWrite =
-    referral.permissions?.includes("can_write_referral") === true;
   const [editOpen, setEditOpen] = useState(false);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);

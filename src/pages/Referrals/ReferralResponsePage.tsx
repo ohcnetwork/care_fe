@@ -16,6 +16,7 @@ import Page from "@/components/Common/Page";
 import { FillShell } from "@/components/QuestionnaireV2/fill/FillShell";
 import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
 import { ReferralResponseEditor } from "@/components/Referral/ReferralResponseEditor";
+import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
 import { Skeleton } from "@/components/ui/skeleton";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
@@ -40,9 +41,10 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
     error instanceof HTTPError && [401, 403].includes(error.status);
   const isNotFound = error instanceof HTTPError && error.status === 404;
   const canShowCached = !!data && !isDenied && !isNotFound;
-  const canWrite =
-    canShowCached && data.permissions?.includes("can_write_referral") === true;
-  const readOnly = canShowCached && !canWrite;
+  const { canWrite, isLoading: permissionsLoading } = useReferralPermissions(
+    canShowCached ? data : undefined,
+  );
+  const readOnly = canShowCached && !permissionsLoading && !canWrite;
   const close = () => navigate(detailUrl);
 
   return (
@@ -64,7 +66,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
             </div>
           }
         >
-          {isLoading ? (
+          {isLoading || permissionsLoading ? (
             <div
               role="status"
               aria-label={t("loading")}

@@ -12,12 +12,6 @@ export default {
     TBody: Type<{ title?: string }>(),
     TRes: Type<ReferralConversationThread>(),
   },
-  renameThread: {
-    path: "/api/v1/referral/{referralId}/thread/",
-    method: HttpMethod.PUT,
-    TBody: Type<{ title: string }>(),
-    TRes: Type<ReferralConversationThread>(),
-  },
   list: {
     path: "/api/v1/referral/{referralId}/notes/",
     method: HttpMethod.GET,

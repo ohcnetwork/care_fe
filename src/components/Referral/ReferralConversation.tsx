@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { NoteManager } from "@/components/Notes/NoteManager";
 import { NoteThreadSource } from "@/components/Notes/noteSource";
@@ -23,29 +24,26 @@ function ReferralConversationContent({
   referral,
   canWrite,
 }: ReferralConversationProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [createdThread, setCreatedThread] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
-  const threadId = referral.thread || createdThread?.id;
+  const [createdThreadId, setCreatedThreadId] = useState<string>();
+  const threadId = referral.thread || createdThreadId;
   const pathParams = { referralId: referral.id };
   const detailKey = ["referrals", "detail", referral.id];
 
-  const saveThread = (thread: { id: string; title: string }) => {
-    setCreatedThread(thread);
+  const saveThread = (thread: { id: string }) => {
+    setCreatedThreadId(thread.id);
     queryClient.setQueryData<ReferralRetrieve>(detailKey, (current) =>
-      current
-        ? { ...current, thread: thread.id, thread_title: thread.title }
-        : current,
+      current ? { ...current, thread: thread.id } : current,
     );
   };
 
   const source: NoteThreadSource = {
     key: `referral:${referral.id}`,
     queryKey: ["referrals", "conversation", referral.id],
-    title: referral.thread_title || createdThread?.title || referral.title,
-    canRename: !!threadId,
+    // The baseline referral API does not expose the persisted thread title.
+    title: t("notes__discussion"),
+    canRename: false,
     listMessages: ({ offset, limit, signal }) =>
       callApi(referralConversationApi.list, {
         pathParams,
@@ -72,10 +70,7 @@ function ReferralConversationContent({
         });
         queryClient.setQueryData(detailKey, current);
         if (!current.thread) throw error;
-        saveThread({
-          id: current.thread,
-          title: current.thread_title || current.title,
-        });
+        saveThread({ id: current.thread });
       }
     },
     sendMessage: (message) =>
@@ -95,14 +90,7 @@ function ReferralConversationContent({
         body: { message },
         silent: true,
       }),
-    renameThread: async (title) =>
-      saveThread(
-        await callApi(referralConversationApi.renameThread, {
-          pathParams,
-          body: { title },
-          silent: true,
-        }),
-      ),
+    renameThread: async () => undefined,
     onRefresh: () => {
       void queryClient.invalidateQueries({ queryKey: detailKey });
     },

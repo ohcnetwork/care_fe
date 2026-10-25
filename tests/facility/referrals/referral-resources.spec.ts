@@ -378,6 +378,20 @@ test.describe("Referral shared records", () => {
     await expect(preview).toBeVisible();
     await expect(unavailable).toHaveCount(0);
     await expect(preview.getByText(finding, { exact: true })).toBeVisible();
+    await page
+      .getByRole("button", { name: "Hide request", exact: true })
+      .click();
+    await expect(preview).not.toBeVisible();
+    await expect(
+      diagnosisRecord.getByText(diagnosisNote, { exact: true }),
+    ).toBeVisible();
+    const showRequest = page.getByRole("button", {
+      name: "Show request",
+      exact: true,
+    });
+    await expect(showRequest).toHaveAttribute("aria-expanded", "false");
+    await showRequest.click();
+    await expect(preview.getByText(finding, { exact: true })).toBeVisible();
     const detailUrl = page.url();
     await page
       .getByRole("region", { name: "Responses", exact: true })
@@ -636,17 +650,19 @@ test.describe("Referral shared records", () => {
         },
       ],
     });
-    const sourceUrl = `/facility/${fixture.facilityId}/referrals?direction=outgoing`;
+    const sourceUrl = `/facility/${fixture.facilityId}/referrals?referralStatus=pending`;
     const referralPath = `${fixture.path}?${new URLSearchParams({ sourceUrl })}`;
     const appointmentsPath = `/facility/${fixture.facilityId}/patient/${fixture.patientId}/appointments`;
-    await page.goto(referralPath);
     const records = page
       .getByRole("region", { name: "Responses", exact: true })
       .getByRole("region", { name: "Response records", exact: true });
-    await page
-      .getByRole("region", { name: "Appointment and visit", exact: true })
-      .getByRole("link", { name: "Book appointment", exact: true })
-      .click();
+    await page.goto(
+      `${appointmentsPath}?${new URLSearchParams({
+        open_schedule: "true",
+        referralId: fixture.referralId,
+        referralSourceUrl: sourceUrl,
+      })}`,
+    );
     await expect(page).toHaveURL(
       (url) =>
         url.pathname === appointmentsPath &&

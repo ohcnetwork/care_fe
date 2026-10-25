@@ -23,10 +23,6 @@ export async function invalidateReferralResources(
       [...prefix, "resource-link"],
     );
   }
-  if (attachment.resource_type === "referral") {
-    // The linked referral's reverse list gains/loses the referring referral.
-    keys.push(["referrals", attachment.resource_id, "references"]);
-  }
 
   await Promise.all(
     keys.map((queryKey) => client.invalidateQueries({ queryKey })),

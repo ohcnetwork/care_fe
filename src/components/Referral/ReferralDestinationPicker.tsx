@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/careui/badge";
 import { Button } from "@/components/careui/button";
-import { Field, FieldDescription, FieldLabel } from "@/components/careui/field";
+import { Field, FieldLabel } from "@/components/careui/field";
 import {
   Command,
   CommandGroup,
@@ -38,13 +38,15 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import type { PaginatedResponse } from "@/Utils/request/types";
-import type {
-  ReferralAvailabilityRead,
-  ReferralDestinationOption,
-} from "@/types/emr/referral/referral";
+import type { ReferralAvailabilityRead } from "@/types/emr/referral/referral";
 import { referralAvailabilityApi } from "@/types/emr/referral/referralApi";
 
 const PAGE_SIZE = 20;
+
+interface DestinationOption {
+  id: string;
+  name: string;
+}
 
 interface SearchPage {
   search: string;
@@ -52,7 +54,7 @@ interface SearchPage {
   signal: AbortSignal;
 }
 
-interface DestinationComboboxProps<T extends ReferralDestinationOption> {
+interface DestinationComboboxProps<T extends DestinationOption> {
   label: string;
   placeholder: string;
   searchPlaceholder: string;
@@ -62,12 +64,10 @@ interface DestinationComboboxProps<T extends ReferralDestinationOption> {
   queryKey: QueryKey;
   fetchOptions: (page: SearchPage) => Promise<PaginatedResponse<T>>;
   disabled?: boolean;
-  description?: string;
-  clearOption?: { label: string; onSelect: () => void };
   renderOption?: (option: T) => ReactNode;
 }
 
-function DestinationCombobox<T extends ReferralDestinationOption>({
+function DestinationCombobox<T extends DestinationOption>({
   label,
   placeholder,
   searchPlaceholder,
@@ -77,8 +77,6 @@ function DestinationCombobox<T extends ReferralDestinationOption>({
   queryKey,
   fetchOptions,
   disabled,
-  description,
-  clearOption,
   renderOption,
 }: DestinationComboboxProps<T>) {
   const { t } = useTranslation();
@@ -124,7 +122,6 @@ function DestinationCombobox<T extends ReferralDestinationOption>({
       variant="outline"
       role="combobox"
       aria-labelledby={`${id}-label`}
-      aria-describedby={description ? `${id}-description` : undefined}
       aria-expanded={open}
       disabled={disabled}
       className="w-full min-w-0 justify-between font-normal tracking-normal shadow-none"
@@ -132,7 +129,7 @@ function DestinationCombobox<T extends ReferralDestinationOption>({
       <span
         className={cn("truncate", !selected && "text-cui-muted-foreground")}
       >
-        {selected?.name ?? clearOption?.label ?? placeholder}
+        {selected?.name ?? placeholder}
       </span>
       <ChevronsUpDown className="size-4 opacity-50" aria-hidden="true" />
     </Button>
@@ -153,23 +150,6 @@ function DestinationCombobox<T extends ReferralDestinationOption>({
         className="max-h-[min(320px,45dvh)]"
         aria-busy={optionsQuery.isFetching}
       >
-        {clearOption && (
-          <CommandGroup>
-            <CommandItem
-              value="all-departments"
-              onSelect={() => {
-                clearOption.onSelect();
-                handleOpenChange(false);
-              }}
-            >
-              <Check
-                className={cn("size-4", selected && "opacity-0")}
-                aria-hidden="true"
-              />
-              {clearOption.label}
-            </CommandItem>
-          </CommandGroup>
-        )}
         {optionsQuery.isPending ? (
           <div
             role="status"
@@ -289,176 +269,72 @@ function DestinationCombobox<T extends ReferralDestinationOption>({
           </PopoverContent>
         </Popover>
       )}
-      {description && (
-        <FieldDescription id={`${id}-description`}>
-          {description}
-        </FieldDescription>
-      )}
     </Field>
   );
 }
 
 interface ReferralDestinationPickerProps {
-  defaultFacility?: ReferralDestinationOption;
   selected: ReferralAvailabilityRead | null;
   onSelect: (availability: ReferralAvailabilityRead) => void;
 }
 
+const DESTINATION_TYPES = [
+  { value: "facility", label: "referral_destination_facility" },
+  { value: "internal_organization", label: "referral_destination_departments" },
+  {
+    value: "external_organization",
+    label: "referral_destination_organization",
+  },
+] as const;
+
+type DestinationType = (typeof DESTINATION_TYPES)[number]["value"];
+
 export function ReferralDestinationPicker({
-  defaultFacility,
   selected,
   onSelect,
 }: ReferralDestinationPickerProps) {
   const { t } = useTranslation();
   const id = useId();
-  const [mode, setMode] = useState<"facility" | "organization">(
-    selected?.entity_type === "external_organization"
-      ? "organization"
+  const [entityType, setEntityType] = useState<DestinationType>(
+    selected?.entity_type === "internal_organization" ||
+      selected?.entity_type === "external_organization"
+      ? selected.entity_type
       : "facility",
   );
-  // An unresolved default may arrive later; an explicit user choice takes precedence.
-  const [facilityOverride, setFacilityOverride] =
-    useState<ReferralDestinationOption | null>();
-  const facility =
-    facilityOverride === undefined
-      ? (selected?.destination.facility ?? defaultFacility ?? null)
-      : facilityOverride;
-  const [department, setDepartment] =
-    useState<ReferralDestinationOption | null>(
-      selected?.destination.departments[0] ?? null,
-    );
-  const [organization, setOrganization] =
-    useState<ReferralDestinationOption | null>(
-      selected?.destination.organization ?? null,
-    );
-  const [unit, setUnit] = useState(selected);
-  const fetchDestinations =
-    (kind: "facility" | "department" | "organization") =>
-    ({ search, offset, signal }: SearchPage) =>
-      query.debounced(referralAvailabilityApi.destinations, {
-        queryParams: {
-          kind,
-          facility: kind === "department" ? facility?.id : undefined,
-          name: search || undefined,
-          limit: PAGE_SIZE,
-          offset,
-        },
-        silent: true,
-      })({ signal });
 
   return (
     <div className="careui space-y-4">
       <Field className="max-w-xs">
         <FieldLabel htmlFor={id}>{t("referral_destination_type")}</FieldLabel>
         <Select
-          value={mode}
-          onValueChange={(value: "facility" | "organization") => {
-            setMode(value);
-            setDepartment(null);
-            setUnit(null);
-          }}
+          value={entityType}
+          onValueChange={(value: DestinationType) => setEntityType(value)}
         >
           <SelectTrigger id={id}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="careui">
-            <SelectItem value="facility">
-              {t("referral_picker_facility")}
-            </SelectItem>
-            <SelectItem value="organization">
-              {t("referral_picker_organization")}
-            </SelectItem>
+            {DESTINATION_TYPES.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {t(type.label)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </Field>
-      {mode === "facility" ? (
-        <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-          <DestinationCombobox
-            label={t("referral_picker_facility")}
-            placeholder={t("referral_picker_select_facility")}
-            searchPlaceholder={t("referral_picker_search_facilities")}
-            emptyMessage={t("referral_picker_no_facilities")}
-            selected={facility}
-            onSelect={(option) => {
-              setFacilityOverride(option);
-              setDepartment(null);
-              setUnit(null);
-            }}
-            queryKey={["referrals", "destination-picker", "facility"]}
-            fetchOptions={fetchDestinations("facility")}
-          />
-          <DestinationCombobox
-            key={facility?.id ?? "department"}
-            label={t("referral_picker_department")}
-            placeholder={t("referral_picker_all_departments")}
-            searchPlaceholder={t("referral_picker_search_departments")}
-            emptyMessage={t("referral_picker_no_departments")}
-            selected={department}
-            onSelect={(option) => {
-              setDepartment(option);
-              setUnit(null);
-            }}
-            clearOption={{
-              label: t("referral_picker_all_departments"),
-              onSelect: () => {
-                setDepartment(null);
-                setUnit(null);
-              },
-            }}
-            description={t("referral_picker_department_hint")}
-            disabled={!facility}
-            queryKey={[
-              "referrals",
-              "destination-picker",
-              "department",
-              facility?.id,
-            ]}
-            fetchOptions={fetchDestinations("department")}
-          />
-        </div>
-      ) : (
-        <DestinationCombobox
-          label={t("referral_picker_organization")}
-          placeholder={t("referral_picker_select_organization")}
-          searchPlaceholder={t("referral_picker_search_organizations")}
-          emptyMessage={t("referral_picker_no_organizations")}
-          selected={organization}
-          onSelect={(option) => {
-            setOrganization(option);
-            setUnit(null);
-          }}
-          queryKey={["referrals", "destination-picker", "organization"]}
-          fetchOptions={fetchDestinations("organization")}
-        />
-      )}
       <DestinationCombobox
-        key={`${mode}:${facility?.id}:${department?.id}:${organization?.id}`}
+        key={entityType}
         label={t("referral_picker_unit")}
         placeholder={t("referral_picker_select_unit")}
         searchPlaceholder={t("referral_picker_search_units")}
         emptyMessage={t("referral_picker_no_units")}
-        selected={unit}
+        selected={selected?.entity_type === entityType ? selected : null}
         onSelect={onSelect}
-        disabled={mode === "facility" ? !facility : !organization}
-        queryKey={[
-          "referrals",
-          "destination-picker",
-          "unit",
-          mode,
-          facility?.id,
-          department?.id,
-          organization?.id,
-        ]}
+        queryKey={["referrals", "destination-picker", "unit", entityType]}
         fetchOptions={({ search, offset, signal }) =>
           query.debounced(referralAvailabilityApi.list, {
             queryParams: {
-              facility: mode === "facility" ? facility?.id : undefined,
-              internal_organization:
-                mode === "facility" ? department?.id : undefined,
-              entity_type:
-                mode === "organization" ? "external_organization" : undefined,
-              external_organization:
-                mode === "organization" ? organization?.id : undefined,
+              entity_type: entityType,
               status: "active",
               name: search || undefined,
               ordering: "name",
@@ -474,13 +350,11 @@ export function ReferralDestinationPicker({
               <span className="block break-words font-medium">
                 {option.name}
               </span>
-              <span className="block break-words text-xs text-cui-muted-foreground">
-                {option.destination.departments
-                  .map((item) => item.name)
-                  .join(", ") ||
-                  option.destination.organization?.name ||
-                  t("referral_picker_facility_wide")}
-              </span>
+              {option.description && (
+                <span className="block line-clamp-2 break-words text-xs text-cui-muted-foreground">
+                  {option.description}
+                </span>
+              )}
             </div>
             <Badge variant="neutral" size="xs" className="shrink-0">
               {t(`referral_type_${option.referral_type}`)}

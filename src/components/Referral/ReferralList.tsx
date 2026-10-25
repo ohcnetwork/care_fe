@@ -52,13 +52,11 @@ import {
 
 import Pagination from "@/components/Common/Pagination";
 import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
-import { ReferralRoute } from "@/components/Referral/ReferralRoute";
 import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 
 import {
   REFERRAL_STATUSES,
   ReferralDestinationType,
-  ReferralDirection,
   ReferralStatus,
 } from "@/types/emr/referral/referral";
 import referralApi from "@/types/emr/referral/referralApi";
@@ -71,7 +69,6 @@ export type ReferralListScope =
   | {
       entityType: ReferralDestinationType;
       entityId: string;
-      direction?: ReferralDirection;
     };
 
 interface ReferralListProps {
@@ -116,7 +113,7 @@ export function ReferralList({
   // selected encounter must not carry an out-of-range page into its list.
   const scopeKey =
     "entityType" in scope
-      ? `${scope.entityType}:${scope.entityId}:${scope.direction ?? "incoming"}`
+      ? `${scope.entityType}:${scope.entityId}`
       : scope.encounterId
         ? `encounter:${scope.encounterId}`
         : `patient:${scope.patientId}`;
@@ -168,7 +165,6 @@ export function ReferralList({
     ? {
         entity_type: scope.entityType,
         entity_id: scope.entityId,
-        direction: scope.direction,
       }
     : { patient: scope.patientId, encounter: scope.encounterId };
   const queryParams: QueryParams = {
@@ -316,10 +312,6 @@ export function ReferralList({
                         <ItemDescription className="truncate text-xs">
                           {referral.availability_name}
                         </ItemDescription>
-                        <ReferralRoute
-                          source={referral.source}
-                          destination={referral.destination}
-                        />
                       </ItemContent>
                       <ItemActions>
                         <ReferralStatusBadge status={referral.status} />
@@ -333,9 +325,7 @@ export function ReferralList({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4">
-                    {t("referral_with_route")}
-                  </TableHead>
+                  <TableHead className="pl-4">{t("referral")}</TableHead>
                   {isEntityScope && <TableHead>{t("patient")}</TableHead>}
                   <TableHead>{t("status")}</TableHead>
                   <TableHead>{t("assigned_to")}</TableHead>
@@ -355,12 +345,6 @@ export function ReferralList({
                       <p className="mt-1 truncate text-xs text-cui-muted-foreground">
                         {referral.availability_name}
                       </p>
-                      <div className="mt-2">
-                        <ReferralRoute
-                          source={referral.source}
-                          destination={referral.destination}
-                        />
-                      </div>
                     </TableCell>
                     {isEntityScope && (
                       <TableCell className="max-w-52 truncate">

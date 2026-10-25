@@ -49,37 +49,9 @@ import {
 } from "./referralResourceCandidates";
 import { referralResourceError } from "./referralResourceError";
 
-export interface ReferralResourceContext {
-  patientId: string;
-  encounterId?: string;
-  sourceFacility?: { id: string; name: string } | null;
-  destinationFacility?: { id: string; name: string } | null;
-}
-
-export interface StagedReferralResource {
-  resource: ReferralResourceCreate;
-  title: string;
-  detail?: string;
-}
-
-function useResourceFacilities(context: ReferralResourceContext) {
+export function useReferralFacilities() {
   const { user } = useAuthContext();
-  const facilities = [
-    context.destinationFacility,
-    context.sourceFacility,
-    ...(user?.facilities ?? []),
-  ].filter((facility) => facility != null);
-  return [
-    ...new Map(facilities.map((facility) => [facility.id, facility])).values(),
-  ];
-}
-
-export function useReferralFacilities(referral: ReferralRetrieve) {
-  return useResourceFacilities({
-    patientId: referral.patient,
-    sourceFacility: referral.source?.facility,
-    destinationFacility: referral.destination.facility,
-  });
+  return user?.facilities ?? [];
 }
 
 export function ReferralResourceCategoryField({
@@ -119,39 +91,22 @@ export function ReferralResourceCategoryField({
   );
 }
 
-type ReferralResourcePickerProps = {
+interface ReferralResourcePickerProps {
+  referral: ReferralRetrieve;
   attachments: Pick<ReferralResource, "resource_type" | "resource_id">[];
   onClose: () => void;
   categories?: readonly ReferralResourceCategory[];
-} & (
-  | { referral: ReferralRetrieve; context?: never; onSelect?: never }
-  | {
-      referral?: never;
-      context: ReferralResourceContext;
-      onSelect: (record: StagedReferralResource) => void;
-    }
-);
+}
 
-export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
-  const {
-    referral,
-    attachments,
-    onClose,
-    categories = REFERRAL_RESOURCE_CATEGORIES,
-  } = props;
-  const context: ReferralResourceContext = referral
-    ? {
-        patientId: referral.patient,
-        encounterId: referral.encounter ?? undefined,
-        sourceFacility: referral.source?.facility,
-        destinationFacility: referral.destination.facility,
-      }
-    : props.context;
-  const staged = !referral;
+export function ReferralResourcePicker({
+  referral,
+  attachments,
+  onClose,
+  categories = REFERRAL_RESOURCE_CATEGORIES,
+}: ReferralResourcePickerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { user } = useAuthContext();
-  const facilities = useResourceFacilities(context);
+  const facilities = useReferralFacilities();
   const [resourceType, setResourceType] =
     useState<ReferralResourceType>("diagnostic_report");
   const [selectedCategory, setCategory] = useState<ReferralResourceCategory>(
@@ -160,14 +115,7 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
   const category = categories.includes(selectedCategory)
     ? selectedCategory
     : categories[0];
-  const [facilityId, setFacilityId] = useState(
-    facilities.find((facility) =>
-      user?.facilities?.some((member) => member.id === facility.id),
-    )?.id ??
-      context.destinationFacility?.id ??
-      context.sourceFacility?.id ??
-      "",
-  );
+  const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
   const [offset, setOffset] = useState(0);
   const [fileScope, setFileScope] = useState<FileType>(FileType.PATIENT);
   const [parent, setParent] = useState<ReferralResourceCandidate>();
@@ -199,15 +147,15 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
   const associationId =
     parent?.id ??
     (fileScope === FileType.REFERRAL
-      ? referral?.id
+      ? referral.id
       : fileScope === FileType.ENCOUNTER
-        ? context.encounterId
-        : context.patientId);
+        ? (referral.encounter ?? undefined)
+        : referral.patient);
   const candidates = useQuery({
     queryKey: [
       "referrals",
-      referral?.id ?? "staged",
-      context.patientId,
+      referral.id,
+      referral.patient,
       "candidates",
       listingType,
       facilityId,
@@ -218,7 +166,7 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
     queryFn: ({ signal }) =>
       loadReferralCandidates({
         resourceType: listingType,
-        patientId: context.patientId,
+        patientId: referral.patient,
         facilityId,
         offset,
         fileType: fileScope,
@@ -232,16 +180,14 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
   });
   const add = useMutation<ReferralResource, Error, ReferralResourceCreate>({
     mutationFn: mutate(referralResourceApi.create, {
-      pathParams: { referralId: referral?.id ?? "" },
+      pathParams: { referralId: referral.id },
     }),
     onSuccess: (_data, resource) => {
-      if (referral) {
-        void invalidateReferralResources(queryClient, {
-          referral: referral.id,
-          resource_type: resource.resource_type,
-          resource_id: resource.resource_id,
-        });
-      }
+      void invalidateReferralResources(queryClient, {
+        referral: referral.id,
+        resource_type: resource.resource_type,
+        resource_id: resource.resource_id,
+      });
       toast.success(t("referral_record_added"));
       onClose();
     },
@@ -257,7 +203,7 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
       .map((item) => item.resource_id),
   );
   const choices = (candidates.data?.results ?? []).filter(
-    (item) => resourceType !== "referral" || item.id !== referral?.id,
+    (item) => resourceType !== "referral" || item.id !== referral.id,
   );
 
   return (
@@ -271,11 +217,7 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
         <DialogHeader>
           <DialogTitle>{t("referral_add_record")}</DialogTitle>
           <DialogDescription>
-            {t(
-              staged
-                ? "referral_stage_record_description"
-                : "referral_add_record_description",
-            )}
+            {t("referral_add_record_description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -301,14 +243,12 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
               </SelectContent>
             </Select>
           </Field>
-          {!staged && (
-            <ReferralResourceCategoryField
-              value={category}
-              onChange={setCategory}
-              disabled={add.isPending}
-              categories={categories}
-            />
-          )}
+          <ReferralResourceCategoryField
+            value={category}
+            onChange={setCategory}
+            disabled={add.isPending}
+            categories={categories}
+          />
         </div>
         {resourceType === "file_upload" && (
           <Field>
@@ -332,13 +272,11 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
                   FileType.REFERRAL,
                   FileType.DIAGNOSTIC_REPORT,
                   FileType.SERVICE_REQUEST,
-                ]
-                  .filter((scope) => !staged || scope !== FileType.REFERRAL)
-                  .map((scope) => (
-                    <SelectItem key={scope} value={scope}>
-                      {t(`referral_file_source_${scope}`)}
-                    </SelectItem>
-                  ))}
+                ].map((scope) => (
+                  <SelectItem key={scope} value={scope}>
+                    {t(`referral_file_source_${scope}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -521,21 +459,14 @@ export function ReferralResourcePicker(props: ReferralResourcePickerProps) {
               const resource: ReferralResourceCreate = {
                 resource_type: resourceType,
                 resource_id: selected.id,
-                attachment_type: staged ? "source" : category,
+                attachment_type: category,
                 metadata: selected.metadata,
               };
-              if (props.onSelect) {
-                props.onSelect({
-                  resource,
-                  title: selected.title,
-                  detail: selected.detail,
-                });
-                onClose();
-              } else add.mutate(resource);
+              add.mutate(resource);
             }}
           >
             {add.isPending && <Loader2 className="size-4 animate-spin" />}
-            {t(staged ? "referral_stage_record" : "referral_add_record")}
+            {t("referral_add_record")}
           </Button>
         </DialogFooter>
       </DialogContent>

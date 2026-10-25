@@ -143,9 +143,7 @@ test("configures an organization destination and receives its referral in the or
     ).toBeVisible();
     const row = page.getByRole("row").filter({ hasText: referralTitle });
     await expect(row).toHaveCount(1);
-    await expect(
-      row.getByRole("group", { name: "To", exact: true }),
-    ).toContainText(organizationName);
+    await expect(row).toContainText(availabilityName);
     await openMultiFilter(page, /^Status$/);
     await page.getByRole("menu").getByText("Pending", { exact: true }).click();
     await page.keyboard.press("Escape");

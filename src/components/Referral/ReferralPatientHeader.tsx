@@ -156,15 +156,6 @@ export function ReferralPatientHeader({
             />
           ) : (
             <div className="space-y-2 rounded-lg border border-cui-border bg-cui-background px-4 py-3 text-sm">
-              <p className="break-words font-medium">
-                {[
-                  referral.source?.facility?.name,
-                  ...(referral.source?.departments.map(({ name }) => name) ??
-                    []),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
               <p className="text-cui-muted-foreground">
                 {t(
                   accessUnavailable(encounterError)

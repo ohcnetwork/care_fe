@@ -30,6 +30,7 @@ import referralApi from "@/types/emr/referral/referralApi";
 import { callApi } from "@/Utils/request/query";
 
 import { referralResourceError } from "./referralResourceError";
+import { useReferralFacilities } from "./ReferralResourcePicker";
 
 export function ReferralAssignmentDialog({
   referral,
@@ -81,13 +82,7 @@ function AssignmentContent({
   const client = useQueryClient();
   const [baseline] = useState(referral.assignees);
   const [assignees, setAssignees] = useState(baseline);
-  const facilities = Array.from(
-    new Map(
-      [referral.destination.facility, referral.source?.facility]
-        .filter((item) => !!item)
-        .map((item) => [item.id, item]),
-    ).values(),
-  );
+  const facilities = useReferralFacilities();
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "all");
   const changed =
     JSON.stringify(serialize(assignees)) !==

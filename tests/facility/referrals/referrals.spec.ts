@@ -92,7 +92,6 @@ test.describe("Referrals", () => {
     let referralPath: string;
     let departmentId: string;
     let facilityName: string;
-    let sourceDepartmentNames: string[];
     let clinicalResponseId: string;
     let questionnaireId: string;
     let originPatient: { name: string; gender: string };
@@ -270,22 +269,6 @@ test.describe("Referrals", () => {
       if (originalViewport) await page.setViewportSize(originalViewport);
     };
 
-    const expectReferralRoute = async (container: Locator) => {
-      const route = container.getByRole("group", {
-        name: "From → To",
-        exact: true,
-      });
-      const from = route.getByRole("group", { name: "From", exact: true });
-      const to = route.getByRole("group", { name: "To", exact: true });
-      await expect(from).toContainText(facilityName);
-      for (const name of sourceDepartmentNames) {
-        await expect(from).toContainText(name);
-      }
-      await expect(from).not.toContainText(departmentName);
-      await expect(to).toContainText(departmentName);
-      await expect(to).toContainText(facilityName);
-    };
-
     await test.step("Read independent origin details from the encounter", async () => {
       const response = await request.get(
         `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
@@ -297,16 +280,12 @@ test.describe("Referrals", () => {
       ).toBeTruthy();
       const encounter = (await response.json()) as {
         facility: { id: string; name: string };
-        organizations: { name: string; org_type: string }[];
         patient: { name: string; gender: string };
       };
       originPatient = encounter.patient;
       expect(encounter.facility.id).toBe(facilityId);
       facilityName = encounter.facility.name;
       expect(facilityName).not.toBe("");
-      sourceDepartmentNames = encounter.organizations
-        .filter(({ org_type }) => org_type !== "root")
-        .map(({ name }) => name);
     });
 
     await test.step("Create an isolated receiving department", async () => {
@@ -611,26 +590,11 @@ test.describe("Referrals", () => {
       await expect(
         encounterDetails.getByText("End date", { exact: true }),
       ).toBeVisible();
-      await expect(
-        dialog.getByRole("combobox", {
-          name: "Facility",
-          exact: true,
-        }),
-      ).toContainText(facilityName);
       await dialog
-        .getByRole("combobox", {
-          name: "Department / team",
-          exact: true,
-        })
+        .getByRole("combobox", { name: "Refer to", exact: true })
         .click();
       await page
-        .getByRole("combobox", {
-          name: "Search departments / teams",
-          exact: true,
-        })
-        .fill(departmentName);
-      await page
-        .getByRole("option", { name: departmentName, exact: true })
+        .getByRole("option", { name: "Departments", exact: true })
         .click();
       await captureDestinationPicker(dialog);
       await searchReferralUnits(page, unitPrefix);
@@ -690,38 +654,6 @@ test.describe("Referrals", () => {
           .getByRole("textbox")
           .fill(historyAnswer);
       }
-      await dialog
-        .getByRole("button", { name: "Add record", exact: true })
-        .click();
-      const picker = page.getByRole("dialog", {
-        name: "Add record",
-        exact: true,
-      });
-      await picker
-        .getByRole("combobox", { name: "Record type", exact: true })
-        .click();
-      await expect(page.getByRole("option")).toHaveText([
-        "Diagnosis",
-        "Response",
-        "Diagnostic report",
-        "File",
-        "Specimen",
-        "Related referral",
-      ]);
-      await page.screenshot({
-        path: testInfo.outputPath("referral-attachment-types.png"),
-      });
-      await page.getByRole("option", { name: "Response", exact: true }).click();
-      await picker
-        .getByRole("button", {
-          name: `Select ${questionnaireTitle}`,
-          exact: true,
-        })
-        .click();
-      await picker
-        .getByRole("button", { name: "Add to referral", exact: true })
-        .click();
-      await expect(picker).not.toBeVisible();
       const historyTab = dialog.getByRole("tab", {
         name: "Patient Clinical History",
         exact: true,
@@ -776,12 +708,6 @@ test.describe("Referrals", () => {
           exact: true,
         }),
       ).toBeChecked();
-      await expect(
-        dialog.getByRole("button", {
-          name: `Remove ${questionnaireTitle}`,
-          exact: true,
-        }),
-      ).toBeVisible();
       await dialog
         .getByRole("button", { name: "Review referral", exact: true })
         .click();
@@ -805,11 +731,6 @@ test.describe("Referrals", () => {
         dialog.getByRole("button", { name: "Review referral", exact: true }),
       ).toHaveCount(0);
       await expect(dialog.getByText(answer, { exact: true })).toBeVisible();
-      await expect(
-        dialog
-          .getByText("1 record selected", { exact: true })
-          .filter({ visible: true }),
-      ).toBeVisible();
       await dialog
         .getByRole("button", { name: "Back to editing", exact: true })
         .click();
@@ -834,30 +755,12 @@ test.describe("Referrals", () => {
       expect(createResponse.ok()).toBeTruthy();
       expect(createRequests).toBe(1);
       expect(createResponse.request().postDataJSON()).toMatchObject({
-        resources: [
-          {
-            resource_type: "questionnaire_response",
-            resource_id: clinicalResponseId,
-          },
-        ],
+        patient: patientId,
+        encounter: encounterId,
+        questionnaire: questionnaireId,
+        title: referralTitle,
       });
-      const created = await createResponse.json();
-      expect(created).toMatchObject({ assignees: [] });
-      const attachments = await request.get(
-        `${apiBaseUrl()}/api/v1/referral/${created.id}/resources/`,
-        { headers: adminApiHeaders() },
-      );
-      expect(attachments.ok()).toBeTruthy();
-      expect(await attachments.json()).toMatchObject({
-        count: 1,
-        results: [
-          {
-            resource_type: "questionnaire_response",
-            resource_id: clinicalResponseId,
-            attachment_type: "source",
-          },
-        ],
-      });
+      expect(await createResponse.json()).toMatchObject({ assignees: [] });
       await expect(dialog).not.toBeVisible();
       await expect(
         page.getByRole("row").filter({ hasText: referralTitle }),
@@ -868,7 +771,6 @@ test.describe("Referrals", () => {
       const row = page.getByRole("row").filter({ hasText: referralTitle });
       await expect(row).toContainText(availabilityName);
       await expect(row).toContainText("Pending");
-      await expectReferralRoute(row);
       await row.getByRole("link", { name: referralTitle, exact: true }).click();
       await expect(page).toHaveURL(
         (url) =>
@@ -916,7 +818,6 @@ test.describe("Referrals", () => {
       const referralLink = widget
         .getByRole("link")
         .filter({ hasText: referralTitle });
-      await expectReferralRoute(referralLink);
       await referralLink.click();
       await expect(page).toHaveURL(
         (url) =>
@@ -944,7 +845,6 @@ test.describe("Referrals", () => {
         .getByRole("row")
         .filter({ hasText: referralTitle });
       await expect(patientRow).toContainText(availabilityName);
-      await expectReferralRoute(patientRow);
       await patientRow
         .getByRole("link", { name: referralTitle, exact: true })
         .click();
@@ -968,9 +868,6 @@ test.describe("Referrals", () => {
       await page
         .getByRole("heading", { name: "Referrals", level: 1, exact: true })
         .hover();
-      await expect(
-        page.getByRole("tab", { name: "All referrals", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
       await selectDepartment(page, departmentName);
       await expect(page).toHaveURL(
         (url) => url.searchParams.get("referralDepartment") === departmentId,
@@ -984,7 +881,6 @@ test.describe("Referrals", () => {
       const row = page.getByRole("row").filter({ hasText: referralTitle });
       await expect(row).toHaveCount(1);
       await expect(row).toContainText("Pending");
-      await expectReferralRoute(row);
       // Moving into the results dismisses the app shell's unpinned hover navigation.
       await row.hover();
       await row.getByRole("link", { name: referralTitle, exact: true }).click();
@@ -1004,104 +900,41 @@ test.describe("Referrals", () => {
       // Back leaves the pointer over the remounted shell's hover navigation.
       // Move into the results before opening filters beneath that preview.
       await row.hover();
-      const completedResponse = page.waitForResponse((response) => {
-        const url = new URL(response.url());
-        return (
-          url.pathname === "/api/v1/referral/" &&
-          url.searchParams.get("status") === "completed"
-        );
-      });
-      await selectReferralFilter(page, /^Status\b/, "Completed");
-      expect((await completedResponse).ok()).toBeTruthy();
       const list = page.locator('[data-cy="referral-list"]');
-      await expect(list.getByRole("status")).toHaveCount(0);
-      await expect(list.getByRole("alert")).toHaveCount(0);
-      await expect(row).not.toBeVisible();
-      await selectReferralFilter(page, /^Status\b/, "Pending");
-      await expect(row).toBeVisible();
 
-      // A bookmarked later page must not carry over into a different direction.
+      // Changing a filter must reset a bookmarked later page in this scope.
       const laterPageUrl = new URL(page.url());
       laterPageUrl.searchParams.set("referralPage", "7");
       laterPageUrl.searchParams.set(
         "referralScope",
-        `internal_organization:${departmentId}:all`,
+        `internal_organization:${departmentId}`,
       );
       const laterPageResponse = page.waitForResponse((response) => {
         const url = new URL(response.url());
         return (
           url.pathname === "/api/v1/referral/" &&
           url.searchParams.get("entity_id") === departmentId &&
-          url.searchParams.get("direction") === "all" &&
           url.searchParams.get("offset") === "90"
         );
       });
       await page.goto(laterPageUrl.pathname + laterPageUrl.search);
       expect((await laterPageResponse).ok()).toBeTruthy();
       await expect(row).not.toBeVisible();
-      const incomingResponse = page.waitForResponse((response) => {
+      const firstPageResponse = page.waitForResponse((response) => {
         const url = new URL(response.url());
         return (
           url.pathname === "/api/v1/referral/" &&
           url.searchParams.get("entity_id") === departmentId &&
-          url.searchParams.get("direction") === "incoming" &&
-          url.searchParams.get("status") === "pending" &&
+          url.searchParams.get("status") === "completed" &&
           url.searchParams.get("offset") === "0"
         );
       });
-      await page.getByRole("tab", { name: "Incoming", exact: true }).click();
-      expect((await incomingResponse).ok()).toBeTruthy();
-      await expect(page).toHaveURL(
-        (url) =>
-          url.searchParams.get("referralDirection") === "incoming" &&
-          url.searchParams.get("referralDepartment") === departmentId &&
-          url.searchParams.get("referralStatus") === "pending" &&
-          url.searchParams.get("referralPage") === "1" &&
-          !url.searchParams.has("referralScope"),
-      );
-      await expect(row).toHaveCount(1);
-      await row.hover();
-      await row.getByRole("link", { name: referralTitle, exact: true }).click();
-      await expect(
-        page.getByRole("heading", {
-          name: referralTitle,
-          level: 1,
-          exact: true,
-        }),
-      ).toBeVisible();
-      await page.getByRole("link", { name: "Back", exact: true }).click();
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname === facilityReferralsUrl &&
-          url.searchParams.get("referralDepartment") === departmentId &&
-          url.searchParams.get("referralStatus") === "pending" &&
-          url.searchParams.get("referralDirection") === "incoming",
-      );
-      await expect(
-        page.getByRole("tab", { name: "Incoming", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
-      await expect(selectedMultiFilterBar(page, /^Status$/)).toContainText(
-        "Pending",
-      );
-      await expect(row).toBeVisible();
-
-      const outgoingResponse = page.waitForResponse((response) => {
-        const url = new URL(response.url());
-        return (
-          url.pathname === "/api/v1/referral/" &&
-          url.searchParams.get("entity_id") === departmentId &&
-          url.searchParams.get("direction") === "outgoing" &&
-          url.searchParams.get("status") === "pending"
-        );
-      });
-      await page.getByRole("tab", { name: "Outgoing", exact: true }).click();
-      expect((await outgoingResponse).ok()).toBeTruthy();
+      await selectReferralFilter(page, /^Status\b/, "Completed");
+      expect((await firstPageResponse).ok()).toBeTruthy();
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
       await expect(row).not.toBeVisible();
-      await page
-        .getByRole("tab", { name: "All referrals", exact: true })
-        .click();
+      await selectReferralFilter(page, /^Status\b/, "Pending");
       await expect(row).toHaveCount(1);
 
       const assignedResponse = page.waitForResponse((response) => {
@@ -1124,18 +957,13 @@ test.describe("Referrals", () => {
       await expect(row).toBeVisible();
 
       await selectReferralFilter(page, /^Assigned to me\b/, "Yes");
-      await page.getByRole("tab", { name: "Incoming", exact: true }).click();
       await page.reload();
       await expect(page).toHaveURL(
         (url) =>
           url.searchParams.get("referralDepartment") === departmentId &&
           url.searchParams.get("referralStatus") === "pending" &&
-          url.searchParams.get("referralAssignedToMe") === "true" &&
-          url.searchParams.get("referralDirection") === "incoming",
+          url.searchParams.get("referralAssignedToMe") === "true",
       );
-      await expect(
-        page.getByRole("tab", { name: "Incoming", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
       await expect(selectedMultiFilterBar(page, /^Department$/)).toContainText(
         departmentName,
       );
@@ -1155,7 +983,6 @@ test.describe("Referrals", () => {
           url.pathname === "/api/v1/referral/" &&
           url.searchParams.get("entity_type") === "facility" &&
           url.searchParams.get("entity_id") === facilityId &&
-          url.searchParams.get("direction") === "incoming" &&
           !url.searchParams.has("status") &&
           !url.searchParams.has("assigned_to_me")
         );
@@ -1168,8 +995,7 @@ test.describe("Referrals", () => {
         (url) =>
           !url.searchParams.get("referralDepartment") &&
           !url.searchParams.get("referralStatus") &&
-          !url.searchParams.get("referralAssignedToMe") &&
-          url.searchParams.get("referralDirection") === "incoming",
+          !url.searchParams.get("referralAssignedToMe"),
       );
       await expect(
         selectedMultiFilterBar(page, /Department/),
@@ -1180,42 +1006,9 @@ test.describe("Referrals", () => {
       ).not.toBeVisible();
       await expect(list.getByRole("status")).toHaveCount(0);
       await expect(list.getByRole("alert")).toHaveCount(0);
-      await expect(row).toHaveCount(1);
-      const facilityOutgoingResponse = page.waitForResponse((response) => {
-        const url = new URL(response.url());
-        return (
-          url.pathname === "/api/v1/referral/" &&
-          url.searchParams.get("entity_type") === "facility" &&
-          url.searchParams.get("entity_id") === facilityId &&
-          url.searchParams.get("direction") === "outgoing"
-        );
-      });
-      await page.getByRole("tab", { name: "Outgoing", exact: true }).click();
-      expect((await facilityOutgoingResponse).ok()).toBeTruthy();
-      await expect(
-        page.getByRole("tab", { name: "Outgoing", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
-      await expect(row).toHaveCount(1);
-      const facilityAllResponse = page.waitForResponse((response) => {
-        const url = new URL(response.url());
-        return (
-          url.pathname === "/api/v1/referral/" &&
-          url.searchParams.get("entity_type") === "facility" &&
-          url.searchParams.get("entity_id") === facilityId &&
-          url.searchParams.get("direction") === "all"
-        );
-      });
-      await page
-        .getByRole("tab", { name: "All referrals", exact: true })
-        .click();
-      expect((await facilityAllResponse).ok()).toBeTruthy();
-      await expect(
-        page.getByRole("tab", { name: "All referrals", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
-      await expect(page).toHaveURL(
-        (url) => url.searchParams.get("referralDirection") === "all",
-      );
-      await expect(row).toHaveCount(1);
+      // Facility scope contains referrals addressed to the facility itself;
+      // this referral belongs to its selected receiving department.
+      await expect(row).not.toBeVisible();
     });
 
     await test.step("Deactivate the destination without hiding its existing referral", async () => {
@@ -1254,6 +1047,13 @@ test.describe("Referrals", () => {
       ).toBeVisible();
       await page
         .getByRole("button", { name: "New referral", exact: true })
+        .click();
+      await page
+        .getByRole("dialog", { name: "Request form", exact: true })
+        .getByRole("combobox", { name: "Refer to", exact: true })
+        .click();
+      await page
+        .getByRole("option", { name: "Departments", exact: true })
         .click();
       const createDialog = await searchReferralUnits(page, availabilityName);
       await expect(

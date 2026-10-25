@@ -145,10 +145,6 @@ test("creates a patient referral using a patient form without attaching an encou
     await expect(dialog.getByLabel("Encounter", { exact: true })).toHaveCount(
       0,
     );
-    const facilityPicker = dialog.getByRole("combobox", {
-      name: "Facility",
-      exact: true,
-    });
     const unitPicker = dialog.getByRole("combobox", {
       name: "Referral unit",
       exact: true,
@@ -163,29 +159,13 @@ test("creates a patient referral using a patient form without attaching an encou
     const receivingUnit = page.getByRole("option").filter({
       hasText: availabilityName,
     });
-    await expect(facilityPicker).toContainText(originFacility.name);
+    await expect(
+      dialog.getByRole("combobox", { name: "Refer to", exact: true }),
+    ).toContainText("Facilities");
     await unitPicker.click();
     await unitSearch.fill(unitPrefix);
     await expect(originUnit).toBeVisible();
-    await expect(receivingUnit).toHaveCount(0);
-    await page.keyboard.press("Escape");
-    await facilityPicker.click();
-    await page
-      .getByRole("combobox", {
-        name: "Search facilities",
-        exact: true,
-      })
-      .fill(receivingFacilityName);
-    await page
-      .getByRole("option", {
-        name: receivingFacilityName,
-        exact: true,
-      })
-      .click();
-    await unitPicker.click();
-    await unitSearch.fill(unitPrefix);
     await expect(receivingUnit).toBeVisible();
-    await expect(originUnit).toHaveCount(0);
     await receivingUnit.click();
     await expect(questionBlock(page, patientQuestion)).toBeVisible();
     await expect(questionBlock(page, encounterQuestion)).toHaveCount(0);
@@ -208,21 +188,8 @@ test("creates a patient referral using a patient form without attaching an encou
         exact: true,
       })
       .click();
-    await facilityPicker.click();
-    await page
-      .getByRole("combobox", {
-        name: "Search facilities",
-        exact: true,
-      })
-      .fill(originFacility.name);
-    await page
-      .getByRole("option", {
-        name: originFacility.name,
-        exact: true,
-      })
-      .click();
     await unitPicker.click();
-    await unitSearch.fill(unitPrefix);
+    await unitSearch.fill(originAvailabilityName);
     await expect(originUnit).toBeVisible();
     await expect(receivingUnit).toHaveCount(0);
     await page.keyboard.press("Escape");
@@ -230,7 +197,6 @@ test("creates a patient referral using a patient form without attaching an encou
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
     await expect(destination).toContainText(availabilityName);
-    await expect(destination).toContainText(receivingFacilityName);
     await expect(
       dialog.getByRole("textbox", {
         name: "Referral title",
@@ -322,10 +288,7 @@ test("creates a patient referral using a patient form without attaching an encou
     expect(await saved.json()).toMatchObject({
       patient: patientId,
       encounter: null,
-      source: null,
-      destination: {
-        facility: { id: receivingFacilityId, name: receivingFacilityName },
-      },
+      availability: availabilityId,
       questionnaire_responses: [
         {
           questionnaire: patientFormId,
@@ -357,8 +320,5 @@ test("creates a patient referral using a patient form without attaching an encou
     await expect(
       page.getByRole("region", { name: "Originating encounter", exact: true }),
     ).toHaveCount(0);
-    await expect(
-      page.getByText("Source not recorded", { exact: true }),
-    ).toBeVisible();
   });
 });

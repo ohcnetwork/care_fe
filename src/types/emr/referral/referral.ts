@@ -2,7 +2,6 @@ import { Code } from "@/types/base/code/code";
 import { CareTeamMember, CareTeamResponse } from "@/types/careTeam/careTeam";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import { UserReadMinimal } from "@/types/user/user";
-import type { ReferralResourceCreate } from "./referralResource";
 
 export const REFERRAL_STATUSES = [
   "pending",
@@ -12,8 +11,6 @@ export const REFERRAL_STATUSES = [
   "rejected",
 ] as const;
 export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
-export const REFERRAL_DIRECTIONS = ["all", "incoming", "outgoing"] as const;
-export type ReferralDirection = (typeof REFERRAL_DIRECTIONS)[number];
 export type ReferralDestinationType =
   "facility" | "internal_organization" | "external_organization";
 export type ReferralEntityType = ReferralDestinationType | "external";
@@ -24,11 +21,6 @@ export type ReferralQuestionnaireType = "request" | "response";
 export interface ReferralQuestionnaireMapping {
   questionnaire: string;
   questionnaire_type: ReferralQuestionnaireType;
-}
-
-export interface ReferralDestinationOption {
-  id: string;
-  name: string;
 }
 
 export interface ReferralAvailabilityRead {
@@ -43,7 +35,6 @@ export interface ReferralAvailabilityRead {
   internal_organization: string | null;
   external_organization: string | null;
   external_entity: Record<string, unknown>;
-  destination: ReferralEndpoint;
   care_team: CareTeamResponse[];
   created_date: string;
   modified_date: string;
@@ -121,21 +112,12 @@ export interface ReferralQuestionnaireResponse {
   updated_by: UserReadMinimal | null;
 }
 
-export interface ReferralEndpoint {
-  facility: { id: string; name: string } | null;
-  departments: { id: string; name: string }[];
-  organization: { id: string; name: string } | null;
-  external_name: string | null;
-}
-
 export interface ReferralRead {
   id: string;
   title: string;
   note: string;
   availability: string;
   availability_name: string;
-  source: ReferralEndpoint | null;
-  destination: ReferralEndpoint;
   patient: string;
   patient_name: string;
   status: ReferralStatus;
@@ -145,10 +127,8 @@ export interface ReferralRead {
 }
 
 export interface ReferralRetrieve extends ReferralRead {
-  permissions: string[];
   encounter: string | null;
   thread: string | null;
-  thread_title: string | null;
   questionnaire_responses: ReferralQuestionnaireResponse[];
   created_by: UserReadMinimal | null;
   updated_by: UserReadMinimal | null;
@@ -174,5 +154,4 @@ export interface ReferralCreate {
   note: string;
   questionnaire: string;
   questionnaire_response: ReferralQuestionnaireSubmission;
-  resources?: ReferralResourceCreate[];
 }

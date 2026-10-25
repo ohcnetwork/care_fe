@@ -8,6 +8,7 @@ import referralResourceApi from "@/types/emr/referral/referralResourceApi";
 import query, { callApi } from "@/Utils/request/query";
 
 import { getReferralDetailUrl } from "./referralNavigation";
+import { useReferralPermissions } from "./useReferralPermissions";
 
 export interface ReferralAppointment {
   id: string;
@@ -78,7 +79,14 @@ export function useAppointmentReferral(patientId: string) {
     enabled: !!referralId,
     retry: false,
   });
-  const isLoading = !!referralId && referralQuery.isPending;
+  const readableReferral =
+    !referralQuery.isError && referralQuery.data?.patient === patientId
+      ? referralQuery.data
+      : undefined;
+  const { canWrite, isLoading: permissionsLoading } =
+    useReferralPermissions(readableReferral);
+  const isLoading =
+    !!referralId && (referralQuery.isPending || permissionsLoading);
   let error: string | null = null;
   if (requested && !referralId)
     error = t("referral_appointment_context_invalid");
@@ -86,18 +94,11 @@ export function useAppointmentReferral(patientId: string) {
     error = t("referral_appointment_context_unavailable");
   else if (referralQuery.data && referralQuery.data.patient !== patientId)
     error = t("referral_appointment_context_mismatch");
-  else if (
-    referralQuery.data &&
-    !referralQuery.data.permissions?.includes("can_write_referral")
-  )
+  else if (referralQuery.data && !permissionsLoading && !canWrite)
     error = t("referral_appointment_context_readonly");
 
   const referral = !error && !isLoading ? referralQuery.data : undefined;
   const sourceUrl = localSourceUrl(params.referralSourceUrl);
-  const readableReferral =
-    !referralQuery.isError && referralQuery.data?.patient === patientId
-      ? referralQuery.data
-      : undefined;
   const returnUrl = readableReferral
     ? getReferralDetailUrl(readableReferral.id, sourceUrl)
     : undefined;

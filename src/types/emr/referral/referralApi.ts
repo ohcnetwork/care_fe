@@ -5,7 +5,6 @@ import {
   ReferralAvailabilityRetrieve,
   ReferralAvailabilityUpdate,
   ReferralCreate,
-  ReferralDestinationOption,
   ReferralQuestionnaire,
   ReferralQuestionnaireResponse,
   ReferralRead,
@@ -15,11 +14,6 @@ import {
 } from "./referral";
 
 export const referralAvailabilityApi = {
-  destinations: {
-    path: "/api/v1/referral_availability/destinations/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<ReferralDestinationOption>>(),
-  },
   list: {
     path: "/api/v1/referral_availability/",
     method: HttpMethod.GET,

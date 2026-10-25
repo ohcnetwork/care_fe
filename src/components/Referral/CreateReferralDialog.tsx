@@ -38,30 +38,21 @@ import patientApi from "@/types/emr/patient/patientApi";
 import {
   ReferralAvailabilityRead,
   ReferralCreate,
-  ReferralEndpoint,
   ReferralQuestionnaireResult,
   ReferralRetrieve,
 } from "@/types/emr/referral/referral";
 import referralApi, {
   referralAvailabilityApi,
 } from "@/types/emr/referral/referralApi";
-import facilityApi from "@/types/facility/facilityApi";
-import { FacilityOrganizationType } from "@/types/facilityOrganization/facilityOrganization";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 
-import { ReferralCreateRecords } from "./ReferralCreateRecords";
 import { ReferralDestinationPicker } from "./ReferralDestinationPicker";
 import { ReferralQuestionnaireAnswers } from "./ReferralQuestionnaireAnswers";
 import { ReferralQuestionnaireForm } from "./ReferralQuestionnaireForm";
 import { hasUnsupportedReferralQuestions } from "./referralQuestionnaireUtils";
 import { referralResourceError } from "./referralResourceError";
-import {
-  ReferralResourceContext,
-  StagedReferralResource,
-} from "./ReferralResourcePicker";
-import { ReferralRoute } from "./ReferralRoute";
 
 interface CreateReferralDialogProps {
   children?: ReactNode;
@@ -162,19 +153,16 @@ function CreationSection({
   );
 }
 
-function DestinationName({ endpoint }: { endpoint: ReferralEndpoint }) {
-  const names = endpoint.departments.length
-    ? endpoint.departments.map((item) => item.name).join(", ")
-    : (endpoint.organization?.name ??
-      endpoint.facility?.name ??
-      endpoint.external_name);
+function AvailabilitySummary({
+  availability,
+}: {
+  availability: ReferralAvailabilityRead;
+}) {
+  const { t } = useTranslation();
   return (
-    <div className="text-sm text-cui-muted-foreground">
-      <p>{names}</p>
-      {endpoint.departments.length > 0 && endpoint.facility && (
-        <p>{endpoint.facility.name}</p>
-      )}
-    </div>
+    <p className="text-sm text-cui-muted-foreground">
+      {t(`referral_type_${availability.referral_type}`)}
+    </p>
   );
 }
 
@@ -206,7 +194,6 @@ function CreateReferralContent({
   const [reviewResults, setReviewResults] = useState<
     ReferralQuestionnaireResult[]
   >([]);
-  const [records, setRecords] = useState<StagedReferralResource[]>([]);
   const patientQuery = useQuery({
     queryKey: ["patient", patientId, facilityId],
     queryFn: query(patientApi.get, {
@@ -226,13 +213,6 @@ function CreateReferralContent({
     enabled: !!encounter,
     retry: false,
   });
-  const facilityQuery = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.get, {
-      pathParams: { facilityId: facilityId ?? "" },
-    }),
-    enabled: !encounter && !!facilityId,
-  });
   const patientData =
     !patientQuery.isError && patientQuery.data?.id === patientId
       ? patientQuery.data
@@ -243,31 +223,6 @@ function CreateReferralContent({
       : undefined
     : patientData;
   const patient = encounter?.patient ?? patientData;
-  const sourceFacility = encounter?.facility ?? facilityQuery.data;
-  const permissions = encounter?.permissions ?? patient?.permissions ?? [];
-  const canStageRecords = hasPermission("can_write_referral", permissions);
-  const canUpload = encounter
-    ? hasPermission("can_write_encounter_clinical_data", permissions) &&
-      !["completed", "cancelled", "entered_in_error", "discontinued"].includes(
-        encounter.status,
-      )
-    : hasPermission("can_write_patient", permissions);
-  const source: ReferralEndpoint | null = encounter
-    ? {
-        facility: { id: encounter.facility.id, name: encounter.facility.name },
-        departments: encounter.organizations
-          .filter((item) => item.org_type !== FacilityOrganizationType.ROOT)
-          .map(({ id, name }) => ({ id, name })),
-        organization: null,
-        external_name: null,
-      }
-    : null;
-  const resourceContext: ReferralResourceContext = {
-    patientId,
-    encounterId,
-    sourceFacility,
-    destinationFacility: availability?.destination.facility,
-  };
   const questionnairesQuery = useQuery({
     queryKey: [
       "referral-availabilities",
@@ -343,9 +298,6 @@ function CreateReferralContent({
       note: note.trim(),
       questionnaire: questionnaire.id,
       questionnaire_response: { results: reviewResults },
-      ...(canStageRecords && records.length
-        ? { resources: records.map((item) => item.resource) }
-        : {}),
     });
   };
   const unknownDelivery =
@@ -485,7 +437,7 @@ function CreateReferralContent({
                         <p className="text-sm font-semibold">
                           {availability.name}
                         </p>
-                        <DestinationName endpoint={availability.destination} />
+                        <AvailabilitySummary availability={availability} />
                       </div>
                       <Button
                         type="button"
@@ -511,7 +463,6 @@ function CreateReferralContent({
                 )}
                 {choosingDestination && (
                   <ReferralDestinationPicker
-                    defaultFacility={sourceFacility}
                     selected={availability}
                     onSelect={(item) => {
                       if (availability?.id !== item.id) {
@@ -561,7 +512,7 @@ function CreateReferralContent({
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{availability.name}</p>
-                    <DestinationName endpoint={availability.destination} />
+                    <AvailabilitySummary availability={availability} />
                     <p className="text-sm text-cui-muted-foreground">
                       {t("referral_service_questions_description")}
                     </p>
@@ -636,33 +587,18 @@ function CreateReferralContent({
                   )}
                 </CreationSection>
               )}
-              {canStageRecords && (
-                <CreationSection
-                  title={t("referral_selected_records")}
-                  number={availability ? 4 : 3}
-                >
-                  <p className="text-sm text-cui-muted-foreground">
-                    {t("referral_stage_record_description")}
-                  </p>
-                  <ReferralCreateRecords
-                    context={resourceContext}
-                    value={records}
-                    onChange={setRecords}
-                    canUpload={canUpload}
-                  />
-                </CreationSection>
-              )}
             </div>
             {step === "review" && availability && questionnaire && (
               <div className="space-y-6">
                 <CreationSection title={t("referral_destination")}>
-                  <ReferralRoute
-                    source={source}
-                    destination={availability.destination}
-                    labeled
-                  />
-                  <div className="border-t border-cui-border pt-3">
+                  <div className="space-y-1">
                     <p className="text-sm font-semibold">{availability.name}</p>
+                    <AvailabilitySummary availability={availability} />
+                    {availability.description && (
+                      <p className="text-sm text-cui-muted-foreground">
+                        {availability.description}
+                      </p>
+                    )}
                   </div>
                 </CreationSection>
                 <CreationSection title={t("referral_reason")}>
@@ -678,17 +614,6 @@ function CreateReferralContent({
                     questions={questionnaire.questions}
                   />
                 </CreationSection>
-                {canStageRecords && (
-                  <CreationSection title={t("referral_selected_records")}>
-                    <ReferralCreateRecords
-                      context={resourceContext}
-                      value={records}
-                      onChange={setRecords}
-                      canUpload={false}
-                      readOnly
-                    />
-                  </CreationSection>
-                )}
               </div>
             )}
             {createMutation.isError && (

@@ -51,9 +51,9 @@ import { ReferralPatientHeader } from "@/components/Referral/ReferralPatientHead
 import { ReferralQuestionnaireAnswers } from "@/components/Referral/ReferralQuestionnaireAnswers";
 import { ReferralQuestionnaireForm } from "@/components/Referral/ReferralQuestionnaireForm";
 import { referralResourceError } from "@/components/Referral/referralResourceError";
-import { ReferralRoute } from "@/components/Referral/ReferralRoute";
 import { ReferralSharedRecords } from "@/components/Referral/ReferralSharedRecords";
 import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
+import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
 import useAuthUser from "@/hooks/useAuthUser";
 import { Code } from "@/types/base/code/code";
 import {
@@ -132,6 +132,7 @@ export function ReferralResponseEditor({
   const formId = useId();
   const client = useQueryClient();
   const user = useAuthUser();
+  const { canWrite, facilityId } = useReferralPermissions(referral);
   const recoveryKey = [
     "referral-response-recovery",
     user.id,
@@ -334,7 +335,7 @@ export function ReferralResponseEditor({
   });
   const busy =
     create.isPending || complete.isPending || checkDelivery.isPending;
-  const frozen = busy || responseSaved || !!uncertainAttempt;
+  const frozen = !canWrite || busy || responseSaved || !!uncertainAttempt;
   useNavigationPrompt(
     page &&
       !leaving &&
@@ -473,10 +474,7 @@ export function ReferralResponseEditor({
               questionnaire={selected}
               patientId={referral.patient}
               encounterId={referral.encounter ?? undefined}
-              facilityId={
-                referral.source?.facility?.id ??
-                referral.destination?.facility?.id
-              }
+              facilityId={facilityId}
               disabled={frozen}
               hideHeader
               onReadyChange={setReady}
@@ -499,12 +497,7 @@ export function ReferralResponseEditor({
         <div className="border-t border-cui-border pt-5">
           <ReferralSharedRecords
             referral={referral}
-            canWrite={
-              referral.permissions?.includes("can_write_referral") === true &&
-              !frozen &&
-              !lockedForm &&
-              !formsAccessLost
-            }
+            canWrite={canWrite && !frozen && !lockedForm && !formsAccessLost}
             categories={RESPONSE_RECORD_CATEGORIES}
             title={t("referral_records_response")}
             description={t("referral_response_records_help")}
@@ -520,11 +513,9 @@ export function ReferralResponseEditor({
         <h1 className="text-xl font-semibold">{referral.title}</h1>
         <p className="text-sm font-medium">{referral.patient_name}</p>
         <ReferralStatusBadge status={referral.status} />
-        <ReferralRoute
-          source={referral.source}
-          destination={referral.destination}
-          labeled
-        />
+        <p className="text-sm text-cui-muted-foreground">
+          {referral.availability_name}
+        </p>
       </header>
       {referral.note && (
         <p className="whitespace-pre-wrap break-words text-sm text-cui-foreground">
@@ -608,7 +599,7 @@ export function ReferralResponseEditor({
         </Button>
         {responseSaved ? (
           <Button
-            disabled={complete.isPending || recordsDialogOpen}
+            disabled={!canWrite || complete.isPending || recordsDialogOpen}
             onClick={() => complete.mutate({ status: "completed" })}
           >
             {complete.isPending && <Loader2 className="size-4 animate-spin" />}

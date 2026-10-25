@@ -186,6 +186,75 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await questionBlock(page, fixture.responseLabel)
       .getByRole("textbox")
       .fill(recommendation);
+    const formsUrl = (url: URL) =>
+      url.pathname === `/api/v1/referral/${fixture.referralId}/questionnaires/`;
+    await page.route(formsUrl, async (route) => {
+      await route.fulfill({
+        status: 503,
+        json: { detail: "Response forms temporarily unavailable" },
+      });
+    });
+    const failedRefresh = page.waitForResponse(
+      (result) =>
+        formsUrl(new URL(result.url())) &&
+        result.request().method() === "GET" &&
+        result.status() === 503,
+    );
+    await page.context().setOffline(true);
+    await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false);
+    await page.context().setOffline(false);
+    await failedRefresh;
+    const refreshWarning = responseForm.getByRole("alert");
+    await expect(refreshWarning).toBeVisible();
+    await expect(
+      questionBlock(page, fixture.responseLabel).getByRole("textbox"),
+    ).toHaveValue(recommendation);
+    await expect(refreshWarning).toContainText(
+      "The response forms could not be refreshed. Your answers are still here. Retry to refresh the available forms.",
+    );
+    await page.unroute(formsUrl);
+    const retriedForms = page.waitForResponse(
+      (result) =>
+        formsUrl(new URL(result.url())) &&
+        result.request().method() === "GET" &&
+        result.ok(),
+    );
+    await refreshWarning
+      .getByRole("button", { name: "Retry", exact: true })
+      .click();
+    await retriedForms;
+    await expect(refreshWarning).not.toBeVisible();
+    await expect(
+      questionBlock(page, fixture.responseLabel).getByRole("textbox"),
+    ).toHaveValue(recommendation);
+    await page
+      .getByRole("tab", { name: "Referral and shared records", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("tabpanel", {
+          name: "Referral and shared records",
+          exact: true,
+        })
+        .getByText("Specialist assessment requested", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("tab", { name: /^Respond(?:\s+Draft)?$/ }).click();
+    await expect(
+      questionBlock(page, fixture.responseLabel).getByRole("textbox"),
+    ).toHaveValue(recommendation);
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    const discard = page.getByRole("alertdialog", {
+      name: "Discard response?",
+      exact: true,
+    });
+    await discard
+      .getByRole("button", { name: "Keep editing", exact: true })
+      .click();
+    await expect(discard).not.toBeVisible();
+    await expect(page).toHaveURL(responsePageUrl.href);
+    await expect(
+      questionBlock(page, fixture.responseLabel).getByRole("textbox"),
+    ).toHaveValue(recommendation);
     const referralUrl = (url: URL) =>
       url.pathname === `/api/v1/referral/${fixture.referralId}/`;
     const responseUrl = (url: URL) =>
@@ -383,25 +452,6 @@ test("coordinates a referral with persisted status, team, response, and conversa
     await expect(updated.getByText(edited, { exact: true })).toBeVisible();
     await updated.locator("summary").click();
     await expect(updated.getByText(original, { exact: true })).toBeVisible();
-    await conversation
-      .getByRole("button", { name: "Rename discussion", exact: true })
-      .click();
-    const rename = page.getByRole("dialog", {
-      name: "Rename discussion",
-      exact: true,
-    });
-    const conversationTitle = `Specialist discussion ${fixture.suffix}`;
-    await rename
-      .getByRole("textbox", { name: "Discussion title", exact: true })
-      .fill(conversationTitle);
-    await rename
-      .getByRole("button", { name: "Save Changes", exact: true })
-      .click();
-    await expect(rename).not.toBeVisible();
-    await page.reload();
-    await expect(
-      conversation.getByText(conversationTitle, { exact: true }),
-    ).toBeVisible();
     // The shared notes UI must use the referral adapter rather than creating
     // a patient discussion that only appears linked in client state.
     const savedReferral = await request.get(
@@ -411,7 +461,6 @@ test("coordinates a referral with persisted status, team, response, and conversa
     expect(savedReferral.ok()).toBeTruthy();
     expect(await savedReferral.json()).toMatchObject({
       thread: expect.any(String),
-      thread_title: conversationTitle,
     });
     const savedMessages = await request.get(
       `${apiBaseUrl()}/api/v1/referral/${fixture.referralId}/notes/`,
@@ -431,75 +480,5 @@ test("coordinates a referral with persisted status, team, response, and conversa
         },
       ],
     });
-  });
-
-  await test.step("Follow an authorized reverse reference and return to this referral", async () => {
-    const references = page.getByRole("region", {
-      name: "Referenced by",
-      exact: true,
-    });
-    const initialReferences = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname ===
-          `/api/v1/referral/${fixture.referralId}/referenced_by/` &&
-        response.request().method() === "GET",
-    );
-    await page.reload();
-    const emptyReferences = await initialReferences;
-    expect(emptyReferences.ok()).toBeTruthy();
-    expect(await emptyReferences.json()).toMatchObject({
-      count: 0,
-      results: [],
-    });
-    await expect(references).toHaveCount(0);
-    const related = await createReferralFixture(request);
-    const response = await request.post(
-      `${apiBaseUrl()}/api/v1/referral/${related.referralId}/resources/`,
-      {
-        headers: adminApiHeaders(),
-        data: {
-          resource_type: "referral",
-          resource_id: fixture.referralId,
-          attachment_type: "source",
-        },
-      },
-    );
-    expect(response.ok(), (await response.text()).slice(0, 2000)).toBeTruthy();
-    await page.reload();
-    await references
-      .getByRole("link")
-      .filter({ hasText: related.title })
-      .click();
-    await expect(
-      page.getByRole("heading", { name: related.title, exact: true, level: 1 }),
-    ).toBeVisible();
-    await page.getByRole("link", { name: "Back", exact: true }).click();
-    await expect(page).toHaveURL(fixture.path);
-    await expect(
-      page.getByRole("heading", { name: title, exact: true, level: 1 }),
-    ).toBeVisible();
-    await references
-      .getByRole("link")
-      .filter({ hasText: related.title })
-      .click();
-    await expect(
-      page.getByRole("heading", { name: related.title, exact: true, level: 1 }),
-    ).toBeVisible();
-    const relatedUrl = page.url();
-    const shared = page
-      .getByRole("region", { name: "Referral request", exact: true })
-      .getByRole("region", { name: "Shared records", exact: true });
-    const referencedReferral = shared.getByRole("region", {
-      name: title,
-      exact: true,
-    });
-    await expect(
-      referencedReferral.getByText(note, { exact: true }),
-    ).toBeVisible();
-    await expect(
-      referencedReferral.getByText("Completed", { exact: true }),
-    ).toBeVisible();
-    await expect(page).toHaveURL(relatedUrl);
-    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });

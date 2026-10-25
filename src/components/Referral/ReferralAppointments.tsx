@@ -11,7 +11,6 @@ import referralResourceApi from "@/types/emr/referral/referralResourceApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
-import { ReferralAppointmentAction } from "./ReferralAppointmentAction";
 import { ReferralResourceContent } from "./ReferralResourceContent";
 import { useReferralResourceLink } from "./useReferralResourceLink";
 import {
@@ -109,10 +108,8 @@ function AppointmentSummary({
 
 export function ReferralAppointments({
   referral,
-  canWrite,
 }: {
   referral: ReferralRetrieve;
-  canWrite: boolean;
 }) {
   const { t } = useTranslation();
   const records = useQuery({
@@ -126,7 +123,7 @@ export function ReferralAppointments({
   });
   const attachments = records.data?.results ?? [];
   const resolved = useResolvedReferralResources(attachments);
-  if (records.isSuccess && !attachments.length && !canWrite) return null;
+  if (records.isSuccess && !attachments.length) return null;
   return (
     <section
       aria-label={t("referral_appointment_visit")}
@@ -136,7 +133,6 @@ export function ReferralAppointments({
         <h2 className="text-sm font-semibold">
           {t("referral_appointment_visit")}
         </h2>
-        {canWrite && <ReferralAppointmentAction referral={referral} />}
       </div>
       {records.isPending ? (
         <p

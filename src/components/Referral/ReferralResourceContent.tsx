@@ -12,7 +12,6 @@ import { ResolvedReferralResource } from "@/types/emr/referral/referralResource"
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 import { QuestionnaireResponseContent } from "@/components/Facility/ConsultationDetails/QuestionnaireResponseContent";
-import { ReferralRoute } from "./ReferralRoute";
 import { ReferralStatusBadge } from "./ReferralStatusBadge";
 
 const displayCode = (code?: Code | null) => code?.display || code?.code || "";
@@ -124,13 +123,6 @@ export function ReferralResourceContent({
       add("created_date", date(data.resource.created_date));
       add("modified_date", date(data.resource.modified_date));
       add("note", data.resource.note);
-      extra = (
-        <ReferralRoute
-          source={data.resource.source}
-          destination={data.resource.destination}
-          labeled
-        />
-      );
       break;
     }
     case "diagnostic_report": {
