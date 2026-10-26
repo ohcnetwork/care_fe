@@ -1,9 +1,15 @@
-import { useRef } from "react";
+import { useId } from "react";
 
-import { cn } from "@/lib/utils";
+import {
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface SegmentedRadioGroupProps<T extends string> {
-  value: T;
+  value: T | undefined;
   onChange: (value: T) => void;
   options: { value: T; label: string }[];
   disabled?: boolean;
@@ -17,75 +23,39 @@ export function SegmentedRadioGroup<T extends string>({
   disabled,
   "aria-label": ariaLabel,
 }: SegmentedRadioGroupProps<T>) {
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const selectedIndex = Math.max(
-    options.findIndex((option) => option.value === value),
-    0,
-  );
-
-  // ARIA APG radiogroup pattern: one Tab stop for the whole group (roving
-  // tabindex on the selected option), all arrow keys move selection.
-  const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
-    if (
-      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
-    )
-      return;
-    event.preventDefault();
-    const delta =
-      event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
-    const next = (index + delta + options.length) % options.length;
-    onChange(options[next].value);
-    buttonRefs.current[next]?.focus();
-  };
+  const groupId = useId();
 
   return (
-    <div
-      role="radiogroup"
+    <RadioGroup<T>
+      // Async form values must keep this controlled from the first render.
+      value={value ?? ""}
+      onValueChange={onChange}
+      disabled={disabled}
       aria-label={ariaLabel}
-      // flex-wrap + min-w-fit keep every option label fully visible in
-      // narrow containers (e.g. the 280px detail sidebar) instead of
-      // clipping the text. gap-px over the gray container paints 1px
-      // dividers between cells that survive wrapping onto multiple rows
-      // (divide-x only draws left borders, leaving wrapped rows fused).
-      className="flex w-full flex-wrap gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200"
+      className="flex flex-wrap gap-2"
     >
       {options.map((option, index) => {
-        const selected = option.value === value;
+        const id = `${groupId}-${index}`;
         return (
-          <button
+          <FieldLabel
             key={option.value}
-            ref={(element) => {
-              buttonRefs.current[index] = element;
-            }}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            tabIndex={index === selectedIndex ? 0 : -1}
-            disabled={disabled}
-            onClick={() => onChange(option.value)}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-            className={cn(
-              "flex min-w-fit flex-1 items-center justify-center gap-1.5 px-2 py-2 text-sm",
-              selected
-                ? "bg-primary-50 font-medium text-primary-800"
-                : "bg-white text-gray-600 hover:bg-gray-50",
-              disabled && "cursor-not-allowed opacity-50",
-            )}
+            htmlFor={id}
+            className="max-w-full flex-1 basis-auto has-[>[data-slot=field]]:w-auto"
           >
-            <span
-              className={cn(
-                "flex size-4 shrink-0 items-center justify-center rounded-full border",
-                selected ? "border-primary-700" : "border-gray-300",
-              )}
+            <Field
+              orientation="horizontal"
+              data-disabled={disabled || undefined}
             >
-              {selected && (
-                <span className="size-2 rounded-full bg-primary-700" />
-              )}
-            </span>
-            {option.label}
-          </button>
+              <RadioGroupItem id={id} value={option.value} />
+              <FieldContent className="min-w-0">
+                <FieldTitle className="whitespace-normal wrap-anywhere">
+                  {option.label}
+                </FieldTitle>
+              </FieldContent>
+            </Field>
+          </FieldLabel>
         );
       })}
-    </div>
+    </RadioGroup>
   );
 }

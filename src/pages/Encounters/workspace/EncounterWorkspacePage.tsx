@@ -97,7 +97,7 @@ export function WorkspacePage({
         />
       ) : (
         !page.invalid && (
-          <p className="rounded-lg border border-dashed p-6 text-sm text-gray-600">
+          <p className="rounded-lg border border-dashed p-6 text-sm text-soft-foreground">
             {t("encounter_workspace_empty_page")}
           </p>
         )

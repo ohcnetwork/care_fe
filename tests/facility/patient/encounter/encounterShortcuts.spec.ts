@@ -1,9 +1,52 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import {
+  dischargeDispositionCombobox,
+  encounterStatusCombobox,
+  getEncounterCreateDialog,
+  openCreateEncounterDialog,
+} from "tests/facility/patient/encounter/encounterFormHelpers";
+import { submitAndExpectSuccess } from "tests/helper/questionnaire";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+async function createEncounter(
+  page: Page,
+  encounterClass: "Ambulatory" | "Inpatient",
+) {
+  await openCreateEncounterDialog(page);
+  const dialog = getEncounterCreateDialog(page);
+  await dialog
+    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
+    .click();
+
+  await Promise.all([
+    page.waitForURL(/\/encounter\/[^/]+/),
+    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
+  ]);
+
+  await expect(page.getByText("Encounter created successfully")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+}
+
+async function markEncounterAsComplete(page: Page) {
+  await page.keyboard.press("m");
+  await page.keyboard.press("c");
+
+  const dialog = page.getByRole("alertdialog", { name: "Mark as Complete" });
+  await expect(dialog).toBeVisible();
+  await expect(
+    page.getByText("This action will close Appointment, Token and Encounter"),
+  ).toBeVisible();
+
+  await dialog.getByRole("button", { name: /^Mark as Complete/ }).click();
+  await expect(
+    page.getByText("Encounter Completed", { exact: true }),
+  ).toBeVisible();
+}
 
 test.describe("Encounter Keyboard Shortcuts", () => {
   let encounterUrl: string;
@@ -30,8 +73,8 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await page.keyboard.press("p");
 
       await expect(page.getByRole("tab", { name: "Plots" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
 
       await expect(page.getByText("Primary Parameters").first()).toBeVisible();
@@ -45,7 +88,7 @@ test.describe("Encounter Keyboard Shortcuts", () => {
 
       await expect(
         page.getByRole("tab", { name: "Medications" }),
-      ).toHaveAttribute("data-state", "active");
+      ).toHaveAttribute("aria-selected", "true");
 
       await expect(page.getByText("All Prescriptions").first()).toBeVisible();
     });
@@ -57,8 +100,8 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await page.keyboard.press("n");
 
       await expect(page.getByRole("tab", { name: "Notes" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
 
       await expect(page.getByText("Discussions").first()).toBeVisible();
@@ -113,7 +156,9 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await page.keyboard.press("Shift+?");
 
       // Keyboard shortcuts dialog/panel should be visible
-      await expect(page.getByText("Search").first()).toBeVisible();
+      await expect(
+        page.getByRole("dialog", { name: "Search", exact: true }),
+      ).toBeVisible();
     });
 
     test("should navigate back to Overview tab using 'g g' shortcut after switching tabs", async ({
@@ -123,17 +168,58 @@ test.describe("Encounter Keyboard Shortcuts", () => {
       await page.keyboard.press("g");
       await page.keyboard.press("n");
       await expect(page.getByRole("tab", { name: "Notes" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
 
       // Then navigate back to Overview using 'g g'
       await page.keyboard.press("g");
       await page.keyboard.press("g");
       await expect(page.getByRole("tab", { name: "Overview" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
     });
+  });
+});
+
+test.describe("Mark as Completed Shortcut ('m c')", () => {
+  test("should complete a non-inpatient encounter", async ({ page }) => {
+    await createEncounter(page, "Ambulatory");
+
+    await markEncounterAsComplete(page);
+  });
+
+  test("should navigate to update encounter page with Discharged status for an Inpatient encounter", async ({
+    page,
+  }) => {
+    await createEncounter(page, "Inpatient");
+
+    await page.keyboard.press("m");
+    await page.keyboard.press("c");
+
+    await expect(page).toHaveURL(/questionnaire\/encounter\?toDischarge=true/);
+    await expect(encounterStatusCombobox(page)).toHaveText("Discharged");
+
+    await dischargeDispositionCombobox(page).click();
+    await page.getByRole("option", { name: "Home", exact: true }).click();
+    await submitAndExpectSuccess(page);
+    await expect(page).toHaveURL(/\/updates$/);
+    await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+
+    await expect(
+      page.getByText("Discharged", { exact: true }).first(),
+    ).toBeVisible();
+
+    const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
+    expect(encounterId).toBeTruthy();
+    const response = await page.request.get(
+      `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+      { headers: getApiHeaders() },
+    );
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).status).toBe("discharged");
+
+    await markEncounterAsComplete(page);
   });
 });

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
+  SidebarContent,
   SidebarFooter,
   SidebarHeader,
   useSidebar,
@@ -33,10 +34,20 @@ import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
 
 import PinPageDialog from "@/components/Common/PinPageDialog";
-import { ScrollableSidebarContent } from "@/components/Common/ScrollableSidebarContent";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
+
+const hasCustomLogo = [
+  careConfig.mainLogo?.dark,
+  careConfig.mainLogo?.light,
+].some((source) => source && source !== "/images/care_logo.svg");
+const logoOnLight = hasCustomLogo
+  ? (careConfig.mainLogo?.dark ?? careConfig.mainLogo?.light)
+  : "/images/care_logo_on_light.svg";
+const logoOnDark = hasCustomLogo
+  ? (careConfig.mainLogo?.light ?? careConfig.mainLogo?.dark)
+  : "/images/care_logo_on_dark.svg";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: CurrentUserRead;
@@ -107,10 +118,11 @@ export function AppSidebar({
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
 
+  const userOrganizations = user?.organizations;
   const selectedOrganization = React.useMemo(() => {
-    if (!user?.organizations || !organizationId) return undefined;
-    return user.organizations.find((org) => org.id === organizationId);
-  }, [user?.organizations, organizationId]);
+    if (!userOrganizations || !organizationId) return undefined;
+    return userOrganizations.find((org) => org.id === organizationId);
+  }, [userOrganizations, organizationId]);
 
   React.useEffect(() => {
     if (
@@ -141,20 +153,16 @@ export function AppSidebar({
       onFocusCapture={handleSidebarFocus}
       onBlurCapture={handleSidebarBlur}
       {...props}
-      className={cn(
-        "z-30 border-neutral-200 [&_[data-sidebar=sidebar]]:bg-neutral-100 [&_[data-sidebar=sidebar]]:text-neutral-950",
-        props.className,
-      )}
+      className={cn("z-30", props.className)}
     >
       <SidebarHeader
         inert={!showHeader}
         aria-hidden={!showHeader}
         className={cn(
-          "overflow-hidden border-b border-neutral-200 bg-neutral-100 text-neutral-950 transition-[max-height,padding] motion-reduce:transition-none",
-          !innerWorkspace && "px-0",
+          "overflow-hidden border-b",
           showHeader
-            ? "min-h-14 py-2"
-            : "max-h-0 min-h-0 border-transparent py-0",
+            ? "border-border min-h-14 py-2"
+            : "max-h-0 border-transparent py-0",
         )}
       >
         {facilitySettingsSidebar ? (
@@ -164,17 +172,29 @@ export function AppSidebar({
         ) : facilityServiceSidebar ? (
           <ServiceSwitcher />
         ) : (
-          <div className="flex min-h-9 items-center gap-2 px-2">
+          <div
+            className={cn(
+              "flex items-center gap-2 px-2 transition-[opacity,transform] duration-150 ease-linear",
+              showHeader
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-2 opacity-0",
+            )}
+          >
             <Link
               href="/"
               basePath="/"
               aria-label={t("view_dashboard")}
-              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+              className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               <img
-                src={careConfig.mainLogo?.dark}
+                src={logoOnLight}
                 alt={t("care")}
-                className="h-9 w-auto max-w-full object-contain"
+                className="h-9 w-auto max-w-full object-contain dark:hidden"
+              />
+              <img
+                src={logoOnDark}
+                alt={t("care")}
+                className="hidden h-9 w-auto max-w-full object-contain dark:block"
               />
             </Link>
             {isMobile && (
@@ -182,7 +202,7 @@ export function AppSidebar({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="ml-auto size-8 text-neutral-600 hover:bg-neutral-200 focus-visible:ring-indigo-400"
+                className="ml-auto"
                 aria-label={t("close_sidebar")}
                 onClick={() => setOpenMobile(false)}
               >
@@ -193,7 +213,7 @@ export function AppSidebar({
         )}
       </SidebarHeader>
 
-      <ScrollableSidebarContent>
+      <SidebarContent>
         {facilityLocationSidebar && <LocationNav />}
         {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
@@ -214,9 +234,9 @@ export function AppSidebar({
           facilityServiceSidebar ||
           facilitySettingsSidebar ||
           adminSidebar) && <PinPageDialog />}
-      </ScrollableSidebarContent>
+      </SidebarContent>
 
-      <SidebarFooter className="border-t border-neutral-200 bg-neutral-100 text-neutral-950">
+      <SidebarFooter className="border-t">
         {patientSidebar ? (
           <PatientNavUser />
         ) : (

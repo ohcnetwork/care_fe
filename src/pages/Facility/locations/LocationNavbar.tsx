@@ -87,8 +87,10 @@ export function LocationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div
-          className="flex items-center flex-1 text-sm gap-2 w-0"
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-w-0 justify-start p-0 text-left flex items-center flex-1 text-sm gap-2 w-0"
           onClick={(e) => {
             e.stopPropagation();
             onSelect(location);
@@ -97,7 +99,7 @@ export function LocationTreeNode({
         >
           <Icon className="size-4 shrink-0" />
           <span className="truncate">{location.name}</span>
-        </div>
+        </Button>
       </div>
       {hasChildren &&
         isExpanded &&

@@ -8,7 +8,7 @@ setup("authenticate as facility admin", async ({ page }) => {
 
   // Fill in credentials for care-fac-admin
   await page.getByRole("textbox", { name: /username/i }).fill("care-fac-admin");
-  await page.getByLabel(/password/i).fill("Ohcn@123");
+  await page.getByLabel(/^password$/i).fill("Ohcn@123");
 
   // Click login button
   await page.getByRole("button", { name: /login/i }).click();

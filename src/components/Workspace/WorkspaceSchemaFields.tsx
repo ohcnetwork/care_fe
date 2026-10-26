@@ -149,7 +149,7 @@ export function WorkspaceSchemaFields({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-0 text-xs text-gray-500"
+                className="h-6 px-0 text-xs text-soft-foreground"
                 disabled={disabled || config[field.name] === undefined}
                 onClick={() => {
                   if (disabled) return;
@@ -184,7 +184,7 @@ function EnumArrayField({
   return (
     <fieldset disabled={disabled} className="space-y-2">
       <legend className="text-sm font-medium">{field.label}</legend>
-      <div className="space-y-2 rounded-lg border border-gray-200 p-3">
+      <div className="space-y-2 rounded-lg border border-border p-3">
         {options.map((option) => {
           const key = String(option.value);
           const checked = value.includes(option.value);
@@ -219,7 +219,9 @@ function EnumArrayField({
         })}
       </div>
       {field.description && (
-        <p className="text-xs leading-5 text-gray-500">{field.description}</p>
+        <p className="text-xs leading-5 text-soft-foreground">
+          {field.description}
+        </p>
       )}
     </fieldset>
   );

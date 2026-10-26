@@ -1,4 +1,5 @@
-import { CircleAlert, LoaderCircle, RefreshCw, Search } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { CircleAlert, RefreshCw, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export function ValueSetPreviewResults({
       >
         {isFetching ? (
           <>
-            <LoaderCircle aria-hidden className="size-4 animate-spin" />
+            <Spinner aria-hidden className="size-4 animate-spin" />
             {t("searching")}
           </>
         ) : (

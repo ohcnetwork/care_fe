@@ -27,10 +27,10 @@ export function WorkspaceStarterPicker({
   return (
     <div className="space-y-8 px-5 py-8 sm:px-8">
       <div className="max-w-2xl">
-        <h3 className="text-xl font-semibold tracking-tight text-gray-950">
+        <h3 className="text-xl font-semibold tracking-tight text-foreground">
           {t("workspace_studio_starter_title")}
         </h3>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+        <p className="mt-2 text-sm leading-relaxed text-soft-foreground">
           {t("workspace_studio_starter_hint")}
         </p>
       </div>
@@ -41,14 +41,14 @@ export function WorkspaceStarterPicker({
           className="space-y-3"
         >
           <div className="flex items-center gap-2">
-            <Icon className="size-4 text-gray-500" aria-hidden="true" />
+            <Icon className="size-4 text-soft-foreground" aria-hidden="true" />
             <h4
               id={`workspace-starter-${surface}`}
-              className="text-sm font-semibold text-gray-800"
+              className="text-sm font-semibold text-foreground"
             >
               {t(`workspace_studio_surface_${surface}`)}
             </h4>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-soft-foreground">
               {t(`workspace_studio_surface_${surface}_hint`)}
             </span>
           </div>
@@ -69,7 +69,7 @@ export function WorkspaceStarterPicker({
                   )}
                 >
                   <span className="flex w-full items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-foreground">
                       {t(starter.titleKey)}
                     </span>
                     {starter.recommended && (
@@ -79,7 +79,7 @@ export function WorkspaceStarterPicker({
                       </span>
                     )}
                   </span>
-                  <span className="text-xs leading-relaxed font-normal text-gray-600">
+                  <span className="text-xs leading-relaxed font-normal text-soft-foreground">
                     {t(starter.descriptionKey)}
                   </span>
                 </Button>
@@ -93,7 +93,7 @@ export function WorkspaceStarterPicker({
         variant="link"
         disabled={disabled}
         onClick={onUseJson}
-        className="h-auto px-0 text-xs text-gray-500"
+        className="h-auto px-0 text-xs text-soft-foreground"
       >
         <Braces className="size-3.5" />
         {t("workspace_studio_start_from_json")}

@@ -79,7 +79,7 @@ export function VitalsCodePicker({
             className={
               selected
                 ? "border-primary-300 bg-primary-50 text-primary-900 hover:bg-primary-100"
-                : "text-gray-700"
+                : "text-muted-foreground"
             }
           >
             {!selected && <Plus className="size-3" aria-hidden="true" />}
@@ -126,11 +126,11 @@ export function VitalsCodePicker({
             ))}
           </ul>
         ) : (
-          <p className="text-xs leading-5 text-gray-500">
+          <p className="text-xs leading-5 text-soft-foreground">
             {t("workspace_vitals_picker_empty")}
           </p>
         )}
-        <p className="text-xs leading-5 text-gray-500">
+        <p className="text-xs leading-5 text-soft-foreground">
           {t("workspace_widget_vital_codes_hint", {
             maximum: VITALS_MAX_CODES,
           })}
@@ -139,32 +139,32 @@ export function VitalsCodePicker({
 
       {primaryGroup && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-gray-600">
+          <p className="text-xs font-medium text-soft-foreground">
             {t("workspace_vitals_picker_presets")}
           </p>
           <fieldset disabled={disabled} className="space-y-1.5">
-            <legend className="text-xs text-gray-500">
+            <legend className="text-xs text-soft-foreground">
               {primaryGroup.title}
             </legend>
             {presetButtons(primaryGroup.codes)}
           </fieldset>
           {moreGroups.length > 0 && (
-            <details className="group rounded-lg border border-gray-200">
-              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 [&::-webkit-details-marker]:hidden">
+            <details className="group rounded-lg border border-border">
+              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-soft-foreground [&::-webkit-details-marker]:hidden">
                 {t("workspace_vitals_picker_more_presets")}
                 <ChevronDown
                   className="ml-auto size-3.5 transition-transform group-open:rotate-180"
                   aria-hidden="true"
                 />
               </summary>
-              <div className="space-y-3 border-t border-gray-100 p-3">
+              <div className="space-y-3 border-t border-soft-border p-3">
                 {moreGroups.map((group) => (
                   <fieldset
                     key={group.id}
                     disabled={disabled}
                     className="space-y-1.5"
                   >
-                    <legend className="text-xs text-gray-500">
+                    <legend className="text-xs text-soft-foreground">
                       {group.title}
                     </legend>
                     {presetButtons(group.codes)}
@@ -190,7 +190,7 @@ export function VitalsCodePicker({
           className="w-full"
         />
         {atLimit && (
-          <p className="text-xs leading-5 text-gray-500">
+          <p className="text-xs leading-5 text-soft-foreground">
             {t("workspace_vitals_picker_limit", { maximum: VITALS_MAX_CODES })}
           </p>
         )}

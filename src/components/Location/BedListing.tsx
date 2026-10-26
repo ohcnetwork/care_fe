@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 
+import { Card } from "@/components/ui/card";
+import { FieldLabel } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Tooltip,
@@ -36,9 +38,15 @@ export function BedListing({
   return (
     <RadioGroup
       value={selectedBed?.id || ""}
-      onValueChange={(id) => {
+      onValueChange={(id, eventDetails) => {
         const bed = beds.find((b) => b.id === id);
-        if (bed) onBedSelect(bed);
+        if (bed?.operational_status === "U") {
+          onBedSelect(bed);
+        } else {
+          eventDetails?.cancel();
+          if (bed?.current_encounter?.status === "discharged")
+            onCheckStatus(bed);
+        }
       }}
       className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     >
@@ -55,7 +63,7 @@ export function BedListing({
           .join(" › ");
 
         return (
-          <div
+          <Card
             key={bed.id}
             className={cn(
               "min-h-32 relative border rounded-lg pt-3 pb-1",
@@ -67,7 +75,14 @@ export function BedListing({
                 !isClickable &&
                 "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed",
             )}
-            onClick={() => {
+            onClick={(event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest("button, a, input, [role='radio']")
+              )
+                return;
+              // The card supplies pointer convenience; its radio owns keyboard selection.
+              event.preventDefault();
               if (isAvailable) {
                 onBedSelect(bed);
               } else if (isDischargedBed) {
@@ -75,17 +90,24 @@ export function BedListing({
               }
             }}
           >
-            <div className="absolute top-2 right-2">
+            <FieldLabel
+              htmlFor={bed.id}
+              className="w-full flex-col gap-0 cursor-inherit"
+            >
               <RadioGroupItem
                 value={bed.id}
                 id={bed.id}
-                className="size-4"
+                className="absolute top-2 right-2 size-4"
                 disabled={!isClickable}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!isAvailable && isDischargedBed) {
+                    event.preventDefault();
+                    onCheckStatus(bed);
+                  }
+                }}
               />
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="relative">
+              <span className="relative">
                 {isAvailable ? (
                   isSelected ? (
                     <BedAvailableSelected className="size-10 mt-4" />
@@ -97,8 +119,12 @@ export function BedListing({
                 ) : (
                   <BedUnavailableUnselected className="size-10 mt-4" />
                 )}
-              </div>
-              <p className="text-xs text-center font-medium mt-2">{bed.name}</p>
+              </span>
+              <span className="text-xs text-center font-medium mt-2">
+                {bed.name}
+              </span>
+            </FieldLabel>
+            <div className="flex flex-col items-center">
               <TagBadges
                 tags={bed.tags}
                 className="justify-center mt-1 px-1"
@@ -115,7 +141,7 @@ export function BedListing({
                 </Tooltip>
               )}
             </div>
-          </div>
+          </Card>
         );
       })}
     </RadioGroup>

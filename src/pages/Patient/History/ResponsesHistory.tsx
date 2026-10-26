@@ -23,7 +23,11 @@ export const ResponsesHistory = ({
           <h4 className="text-xl">{t("responses")}</h4>
         </div>
       )}
-      <EncounterResponsesTab patientId={patientId} readOnly />
+      <EncounterResponsesTab
+        patientId={patientId}
+        embedded={embedded}
+        readOnly
+      />
     </div>
   );
 };

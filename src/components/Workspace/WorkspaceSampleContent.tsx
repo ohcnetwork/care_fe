@@ -22,11 +22,11 @@ export function WorkspaceSampleContent({
   const definition = CORE_WIDGET_CATALOG.find((item) => item.type === type);
 
   if (denied) {
-    return <p className="text-sm text-gray-600">{deniedMessage}</p>;
+    return <p className="text-sm text-soft-foreground">{deniedMessage}</p>;
   }
   if (unavailable) {
     return (
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-soft-foreground">
         {t("encounter_workspace_widget_unavailable")}
       </p>
     );
@@ -72,11 +72,13 @@ export function WorkspaceSampleContent({
         {[82, 118, 98, 37].map((value) => (
           <li
             key={value}
-            className="rounded-lg border border-gray-100 bg-gray-50 p-2.5"
+            className="rounded-lg border border-soft-border bg-soft-background p-2.5"
           >
-            <div className="h-1.5 w-1/2 rounded bg-gray-200" />
-            <p className="mt-2 text-lg font-semibold text-gray-700">{value}</p>
-            <div className="mt-1.5 h-1.5 w-1/3 rounded bg-gray-100" />
+            <div className="h-1.5 w-1/2 rounded bg-strong-background" />
+            <p className="mt-2 text-lg font-semibold text-muted-foreground">
+              {value}
+            </p>
+            <div className="mt-1.5 h-1.5 w-1/3 rounded bg-muted-background" />
           </li>
         ))}
       </ul>
@@ -87,14 +89,14 @@ export function WorkspaceSampleContent({
       {[1, 2, 3].map((number) => (
         <div
           key={number}
-          className="flex min-w-0 items-center gap-3 rounded-md border border-gray-100 p-2"
+          className="flex min-w-0 items-center gap-3 rounded-md border border-soft-border p-2"
         >
           <span className="size-7 shrink-0 rounded-md bg-primary-50" />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-gray-600">
+            <p className="text-xs font-medium text-soft-foreground">
               {t("workspace_preview_sample_record", { number })}
             </p>
-            <div className="mt-2 h-1.5 w-2/3 rounded bg-gray-100" />
+            <div className="mt-2 h-1.5 w-2/3 rounded bg-muted-background" />
           </div>
         </div>
       ))}

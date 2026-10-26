@@ -178,8 +178,8 @@ export function WorkspaceSectionSettings({
         aria-label={t("workspace_studio_section_settings")}
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
       >
-        <SheetHeader className="space-y-3 border-b border-gray-200 p-5 text-left">
-          <SheetTitle className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+        <SheetHeader className="space-y-3 border-b border-border p-5 text-left">
+          <SheetTitle className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
             {t("workspace_studio_section_settings")}
           </SheetTitle>
           <div className="flex items-start gap-3 pr-8">
@@ -187,7 +187,7 @@ export function WorkspaceSectionSettings({
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h3 className="text-base font-semibold break-words text-gray-950">
+              <h3 className="text-base font-semibold break-words text-foreground">
                 {name}
               </h3>
               <SheetDescription className="mt-1 text-xs leading-5">
@@ -222,7 +222,7 @@ export function WorkspaceSectionSettings({
               }}
               className="h-9 text-sm shadow-none"
             />
-            <p className="text-xs leading-5 text-gray-500">
+            <p className="text-xs leading-5 text-soft-foreground">
               {t("workspace_widget_title_hint")}
             </p>
           </div>
@@ -233,7 +233,7 @@ export function WorkspaceSectionSettings({
                 aria-label={t("workspace_studio_section_options")}
                 className="space-y-4"
               >
-                <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
                   {t("workspace_studio_section_options")}
                 </h4>
                 {fields.length > 0 && (
@@ -292,7 +292,7 @@ export function WorkspaceSectionSettings({
                         updateConfig(nextConfig);
                       }}
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-soft-foreground">
                       {t("author_role_filter_hint")}
                     </p>
                   </div>
@@ -315,7 +315,7 @@ export function WorkspaceSectionSettings({
               </section>
             )
           ) : (
-            <p className="text-xs leading-5 text-gray-500">
+            <p className="text-xs leading-5 text-soft-foreground">
               {t(
                 schema
                   ? "workspace_widget_schema_unsupported"
@@ -328,7 +328,7 @@ export function WorkspaceSectionSettings({
             aria-label={t("workspace_studio_section_visibility")}
             className="space-y-3"
           >
-            <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+            <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
               {t("workspace_studio_section_visibility")}
             </h4>
             <div className="space-y-2">
@@ -366,7 +366,7 @@ export function WorkspaceSectionSettings({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs leading-5 text-gray-500">
+              <p className="text-xs leading-5 text-soft-foreground">
                 {t(
                   requirements.encounter === "active"
                     ? "workspace_studio_show_hint_active_only"
@@ -379,7 +379,7 @@ export function WorkspaceSectionSettings({
             {visibility === "custom" && statuses && (
               <fieldset
                 disabled={disabled}
-                className="space-y-2.5 rounded-lg border border-gray-200 p-3"
+                className="space-y-2.5 rounded-lg border border-border p-3"
               >
                 <legend className="sr-only">
                   {t("workspace_widget_encounter_statuses")}
@@ -417,11 +417,11 @@ export function WorkspaceSectionSettings({
           </section>
 
           <details
-            className="group rounded-lg border border-gray-200"
+            className="group rounded-lg border border-border"
             open={advancedOpen}
             onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
           >
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-600 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-soft-foreground [&::-webkit-details-marker]:hidden">
               <Braces className="size-3.5" aria-hidden="true" />
               {t("workspace_widget_advanced_config")}
               <ChevronDown
@@ -429,8 +429,8 @@ export function WorkspaceSectionSettings({
                 aria-hidden="true"
               />
             </summary>
-            <div className="space-y-3 border-t border-gray-100 p-3">
-              <p className="text-xs leading-5 text-gray-500">
+            <div className="space-y-3 border-t border-soft-border p-3">
+              <p className="text-xs leading-5 text-soft-foreground">
                 {schema?.description && !preparedSchema?.fieldMetadata.length
                   ? widgetSchemaText(schema.description, t)
                   : t("workspace_widget_advanced_hint")}
@@ -471,13 +471,13 @@ export function WorkspaceSectionSettings({
           </details>
         </div>
 
-        <SheetFooter className="gap-2 border-t border-gray-200 p-4 sm:justify-between">
+        <SheetFooter className="gap-2 border-t border-border p-4 sm:justify-between">
           <Button
             type="button"
             variant="ghost"
             disabled={disabled}
             onClick={onRemove}
-            className="text-gray-600 hover:bg-red-50 hover:text-red-700"
+            className="text-soft-foreground hover:bg-red-50 hover:text-red-700"
           >
             <Trash2 className="size-4" />
             {t("workspace_studio_remove_section")}

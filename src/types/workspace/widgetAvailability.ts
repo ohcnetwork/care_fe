@@ -13,6 +13,8 @@ export interface WorkspaceAvailabilityContext {
   canReadPatientHistory: boolean;
   canReadSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
+  /** Referral creation keeps quick actions useful without clinical write access. */
+  selectedEncounterPermissions?: { canCreateReferral: boolean };
 }
 
 export interface WorkspaceWidgetContext extends WorkspaceAvailabilityContext {
@@ -22,12 +24,17 @@ export interface WorkspaceWidgetContext extends WorkspaceAvailabilityContext {
 
 export interface WidgetRequirements {
   encounter: "none" | "any" | "active";
-  access: "clinical" | "encounter" | "write";
+  /** "actions" also accepts referral creation, matching the quick actions strip. */
+  access: "clinical" | "encounter" | "write" | "actions";
 }
 
 const clinical: WidgetRequirements = { encounter: "any", access: "clinical" };
 const details: WidgetRequirements = { encounter: "any", access: "encounter" };
 const action: WidgetRequirements = { encounter: "active", access: "write" };
+const shortcuts: WidgetRequirements = {
+  encounter: "active",
+  access: "actions",
+};
 const history: WidgetRequirements = { encounter: "none", access: "clinical" };
 const patient: WidgetRequirements = { encounter: "none", access: "encounter" };
 
@@ -38,10 +45,11 @@ export const CORE_WIDGET_REQUIREMENTS = {
   vitals: clinical,
   questionnaire_responses: clinical,
   service_requests: clinical,
+  referrals: details,
   outstanding_orders: clinical,
   current_medications: history,
   recent_encounters: patient,
-  quick_actions: action,
+  quick_actions: shortcuts,
   favorite_forms: action,
   draft_forms: action,
   encounter_actions: action,
@@ -109,10 +117,17 @@ export function getWidgetAvailability(
   if (requirements.encounter !== "none" && !encounter) {
     return { state: "hidden", reason: "workspace_requires_encounter" };
   }
+  // Referrals can still be raised from a closed encounter, so the shortcut
+  // strip stays for users who hold that permission.
+  const referralShortcut =
+    requirements.access === "actions" &&
+    !!context.facilityId &&
+    !!context.selectedEncounterPermissions?.canCreateReferral;
   if (
     requirements.encounter === "active" &&
     encounter &&
-    inactiveEncounterStatus.includes(encounter.status)
+    inactiveEncounterStatus.includes(encounter.status) &&
+    !referralShortcut
   ) {
     return { state: "hidden", reason: "workspace_auto_hides_closed" };
   }
@@ -126,9 +141,13 @@ export function getWidgetAvailability(
       : context.canReadClinicalData) ||
     (requirements.access === "encounter" && context.canReadSelectedEncounter);
   if (!canRead) return { state: "denied" };
+  const canAct =
+    context.canWriteClinicalData ||
+    (requirements.access === "actions" &&
+      !!context.selectedEncounterPermissions?.canCreateReferral);
   if (
-    requirements.access === "write" &&
-    (!context.facilityId || !context.canWriteClinicalData)
+    (requirements.access === "write" || requirements.access === "actions") &&
+    (!context.facilityId || !canAct)
   ) {
     return {
       state: "hidden",

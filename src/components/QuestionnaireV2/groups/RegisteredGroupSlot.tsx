@@ -225,7 +225,7 @@ export function RegisteredGroupSlot(props: {
     <section
       data-question-id={question.id}
       data-response-path={JSON.stringify(path)}
-      className="space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-3.5"
+      className="space-y-3 rounded-xl border border-border bg-background p-3.5"
     >
       <h3 className="text-sm font-semibold">
         {props.number} {question.text}

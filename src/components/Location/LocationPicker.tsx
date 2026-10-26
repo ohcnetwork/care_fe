@@ -218,7 +218,7 @@ export function LocationPicker({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] min-w-[300px] max-w-[420px] p-0 shadow-lg border-0"
+        className="w-[var(--anchor-width)] min-w-[300px] max-w-[420px] p-0 shadow-lg border-0"
         align="start"
         sideOffset={4}
         onWheel={(e) => e.stopPropagation()}

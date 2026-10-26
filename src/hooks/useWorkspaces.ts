@@ -25,6 +25,9 @@ export function useWorkspaceList(surface: WorkspaceSurface) {
         (workspace) => getWorkspaceSurface(workspace.template) === surface,
       ),
     retry: false,
+    // The header and content share this read. Remounting an observer must
+    // preserve a failed result until the user explicitly chooses Try Again.
+    retryOnMount: false,
   });
 }
 

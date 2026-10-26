@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -190,29 +191,33 @@ export default function UserDashboard() {
       </div>
 
       {availableTabs.length > 0 && (
-        <div className="w-full">
-          <div
-            className="flex border-b border-gray-200 overflow-auto"
-            role="tablist"
-            aria-label="Dashboard Sections"
-          >
-            {availableTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                role="tab"
-                id={`${tab.toLowerCase()}-tab`}
-                aria-selected={activeTab === tab}
-                aria-controls={`${tab.toLowerCase()}-panel`}
-                className={`px-4 py-2 text-sm md:text-base font-medium transition-all duration-75 ${
-                  activeTab === tab
-                    ? "border-b-2 border-green-600 text-green-700"
-                    : "text-gray-500"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+        <Tabs
+          value={activeTab?.toLowerCase() ?? ""}
+          onValueChange={(value) => {
+            const tab = availableTabs.find(
+              (item) => item.toLowerCase() === value,
+            );
+            if (tab) setActiveTab(tab);
+          }}
+          className="w-full"
+        >
+          <div className="max-w-full overflow-x-auto pb-1">
+            <TabsList
+              variant="line"
+              className="w-full justify-start border-b border-border"
+              aria-label={t("dashboard_sections")}
+            >
+              {availableTabs.map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab.toLowerCase()}
+                  id={`${tab.toLowerCase()}-tab`}
+                  aria-controls={`${tab.toLowerCase()}-panel`}
+                >
+                  {tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
 
           {/* Tabs Content */}
@@ -255,7 +260,7 @@ export default function UserDashboard() {
 
             {activeTab === DashboardTabs.TAB_ASSOCIATIONS && (
               <TabContent
-                tabId="associations-panel"
+                tabId="responsibilities-panel"
                 tabItems={responsibilities}
                 description={t("dashboard_tab_associations")}
                 isLoading={isLoadingRoleOrgs}
@@ -328,7 +333,7 @@ export default function UserDashboard() {
               />
             )}
           </div>
-        </div>
+        </Tabs>
       )}
     </div>
   );
@@ -349,11 +354,10 @@ const TabContent = ({
     return tabItems.filter((item) => item.name.toLowerCase().includes(query));
   }, [tabItems, search]);
   return (
-    <section
+    <TabsContent
+      value={tabId.replace(/-panel$/, "")}
       className="space-y-3 md:space-y-4"
       id={tabId}
-      role="tabpanel"
-      aria-labelledby={tabId}
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
       {tabItems.length > 1 && (
@@ -396,6 +400,6 @@ const TabContent = ({
           })}
         </div>
       )}
-    </section>
+    </TabsContent>
   );
 };

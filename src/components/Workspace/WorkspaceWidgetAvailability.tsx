@@ -21,7 +21,9 @@ export function WorkspaceWidgetAvailability({
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
-        activeOnly ? "bg-amber-50 text-amber-900" : "bg-gray-100 text-gray-600",
+        activeOnly
+          ? "bg-amber-50 text-amber-900"
+          : "bg-muted-background text-soft-foreground",
       )}
     >
       <Icon className="size-3 shrink-0" aria-hidden />

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -134,7 +135,7 @@ export function TokenGenerationSheet({
         <div className="mt-6 space-y-6">
           {isLoadingCategories ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="size-6 animate-spin" />
+              <Spinner className="size-6 animate-spin" />
             </div>
           ) : (
             <>
@@ -191,7 +192,7 @@ export function TokenGenerationSheet({
                 >
                   {isGenerating ? (
                     <>
-                      <Loader2 className="size-4 animate-spin mr-2" />
+                      <Spinner className="size-4 animate-spin mr-2" />
                       {t("generating")}
                     </>
                   ) : (

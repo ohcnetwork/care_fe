@@ -1,5 +1,6 @@
 import { TFunction } from "i18next";
 import {
+  ArrowUpRight,
   Box,
   CalendarDays,
   CreditCard,
@@ -36,6 +37,7 @@ function generateFacilityLinks(
     canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canReadEncounter: boolean;
+    canReadReferral: boolean;
   },
   pluginLinks: NavigationLink[],
   pluginBillingLinks: NavigationLink[],
@@ -100,6 +102,12 @@ function generateFacilityLinks(
       name: t("services"),
       url: `${baseUrl}/services`,
       icon: <Package />,
+    },
+    {
+      name: t("referrals"),
+      url: `${baseUrl}/referrals`,
+      icon: <ArrowUpRight />,
+      visibility: permissions.canReadReferral,
     },
     {
       name: t("resource"),
@@ -172,6 +180,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canReadEncounter,
+    canReadReferral,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
@@ -179,6 +188,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canReadEncounter,
+    canReadReferral,
   };
   return (
     <NavMain

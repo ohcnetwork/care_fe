@@ -1,4 +1,3 @@
-import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -6,6 +5,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CopyPlus,
+  CircleMinus as MinusCircledIcon,
   MoreVerticalIcon,
   Pipette,
   PlusIcon,
@@ -1194,12 +1194,17 @@ export function MedicationRequestQuestion({
                   {t("duration")}
                 </div>
                 {/* Expand/Collapse bar for advanced fields */}
-                <div
+                <Button
+                  type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
-                    showAdvancedFields
-                      ? "bg-primary-50 hover:bg-primary-100"
-                      : "bg-gray-100 hover:bg-gray-200",
+                    "h-full rounded-none px-0",
+                    cn(
+                      "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                      showAdvancedFields
+                        ? "bg-primary-50 hover:bg-primary-100"
+                        : "bg-gray-100 hover:bg-gray-200",
+                    ),
                   )}
                   onClick={() => setShowAdvancedFields(!showAdvancedFields)}
                   title={
@@ -1213,7 +1218,7 @@ export function MedicationRequestQuestion({
                   ) : (
                     <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
                   )}
-                </div>
+                </Button>
                 {/* Advanced fields - inserted between bar and notes when expanded */}
                 {showAdvancedFields && (
                   <>
@@ -1725,13 +1730,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             {displayMedicationName(medication)}
           </span>
           {!isReadOnly && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
-              className="text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
+              className="h-auto w-auto p-1 text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
               onClick={handleAddDosageInstruction}
+              aria-label={t("add_dosage_step")}
             >
               <PlusIcon className="size-3" />
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -1796,24 +1803,28 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 </div>
                 <div className="flex items-center">
                   <div className="flex items-end">
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="size-3 rounded-full hover:bg-transparent text-gray-500"
+                      className="h-auto p-0 size-3 rounded-full hover:bg-transparent text-gray-500"
                       onClick={() => handleDoseRangeClick(dIdx)}
+                      aria-label={t("configure_dose_range")}
                       disabled={disabled || isReadOnly}
                     >
                       <Pipette className="size-3" />
-                    </button>
+                    </Button>
                   </div>
                   {isMultiple && !isReadOnly && (
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
+                      className="h-auto w-auto p-1 shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
                       onClick={() => handleRemoveDosageInstruction(dIdx)}
+                      aria-label={t("remove_dosage_step")}
                       title={t("remove_dosage_step")}
                     >
                       <Trash2 className="size-3" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1962,12 +1973,17 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Clickable expand/collapse bar column - Desktop only */}
       {desktopLayout && (
-        <div
+        <Button
+          type="button"
+          variant="ghost"
           className={cn(
-            "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
-            showAdvancedFields
-              ? "bg-primary-50 hover:bg-primary-100"
-              : "bg-gray-100 hover:bg-gray-200",
+            "h-full rounded-none px-0",
+            cn(
+              "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
+              showAdvancedFields
+                ? "bg-primary-50 hover:bg-primary-100"
+                : "bg-gray-100 hover:bg-gray-200",
+            ),
           )}
           onClick={onToggleAdvanced}
           title={
@@ -1981,7 +1997,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ) : (
             <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
           )}
-        </div>
+        </Button>
       )}
       {/* Advanced Fields - Desktop: inserted between bar and notes when expanded */}
       {showAdvancedFields && desktopLayout && (

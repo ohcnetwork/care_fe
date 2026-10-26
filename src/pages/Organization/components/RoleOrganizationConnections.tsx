@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link2, Loader2, Plus, Unlink, X } from "lucide-react";
+import { Link2, Plus, Unlink, X } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -64,7 +65,7 @@ function OrganizationRow({
           disabled={isPending}
         >
           {isPending ? (
-            <Loader2 className="size-3.5 animate-spin" />
+            <Spinner className="size-3.5 animate-spin" />
           ) : (
             <X className="size-3.5" />
           )}
@@ -289,7 +290,7 @@ export default function RoleOrganizationConnections({
                   disabled={!selectedManagingOrganization || isPending}
                 >
                   {isPending ? (
-                    <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                    <Spinner className="mr-1.5 size-3.5 animate-spin" />
                   ) : (
                     <Plus className="mr-1.5 size-3.5" />
                   )}
@@ -321,7 +322,7 @@ export default function RoleOrganizationConnections({
           <div className="space-y-2 p-3">
             {isLoadingManagedOrganizations ? (
               <div className="flex items-center justify-center gap-2 py-5 text-sm text-gray-400">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
                 {t("loading")}
               </div>
             ) : currentManagedOrganizations.length > 0 ? (
@@ -375,7 +376,7 @@ export default function RoleOrganizationConnections({
                   disabled={!selectedManagedOrganization || isPending}
                 >
                   {isPending ? (
-                    <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                    <Spinner className="mr-1.5 size-3.5 animate-spin" />
                   ) : (
                     <Plus className="mr-1.5 size-3.5" />
                   )}

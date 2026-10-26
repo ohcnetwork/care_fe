@@ -74,7 +74,7 @@ export function WorkspaceSectionPicker({
           </DialogDescription>
         </DialogHeader>
         <div className="relative mx-6 mb-4">
-          <Search className="absolute top-3 left-3 size-4 text-gray-400" />
+          <Search className="absolute top-3 left-3 size-4 text-placeholder-foreground" />
           <Input
             autoFocus
             value={search}
@@ -84,13 +84,13 @@ export function WorkspaceSectionPicker({
             className="pl-9"
           />
         </div>
-        <div className="max-h-[55dvh] space-y-6 overflow-y-auto border-t bg-gray-50/70 p-6">
+        <div className="max-h-[55dvh] space-y-6 overflow-y-auto border-t bg-soft-background/70 p-6">
           {GROUP_ORDER[surface].map((group) => {
             const items = options.filter((item) => item.group === group);
             if (!items.length) return null;
             return (
               <section key={group} className="space-y-2">
-                <h3 className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                <h3 className="text-xs font-semibold tracking-wider text-soft-foreground uppercase">
                   {t(`workspace_studio_group_${group}`)}
                 </h3>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -115,16 +115,16 @@ export function WorkspaceSectionPicker({
                             : undefined
                         }
                         onClick={() => onAdd(item.type)}
-                        className="group h-auto min-h-24 justify-start gap-3 bg-white p-3 text-left whitespace-normal shadow-none hover:border-primary-400 hover:bg-primary-50/50"
+                        className="group h-auto min-h-24 justify-start gap-3 bg-background p-3 text-left whitespace-normal shadow-none hover:border-primary-400 hover:bg-primary-50/50"
                       >
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 group-hover:bg-primary-100 group-hover:text-primary-700">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted-background text-soft-foreground group-hover:bg-primary-100 group-hover:text-primary-700">
                           <Icon className="size-4" />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold break-words text-gray-900">
+                          <span className="block text-sm font-semibold break-words text-foreground">
                             {item.label}
                           </span>
-                          <span className="mt-1 block text-xs leading-relaxed font-normal text-gray-500">
+                          <span className="mt-1 block text-xs leading-relaxed font-normal text-soft-foreground">
                             {item.description}
                           </span>
                           <span className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -135,7 +135,7 @@ export function WorkspaceSectionPicker({
                               }
                             />
                             {item.fullWidth && (
-                              <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-700">
+                              <span className="inline-flex items-center gap-1 rounded bg-muted-background px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                                 <StretchHorizontal
                                   className="size-3"
                                   aria-hidden="true"
@@ -145,7 +145,7 @@ export function WorkspaceSectionPicker({
                             )}
                           </span>
                         </span>
-                        <Plus className="size-4 shrink-0 text-gray-400" />
+                        <Plus className="size-4 shrink-0 text-placeholder-foreground" />
                       </Button>
                     );
                   })}
@@ -154,12 +154,12 @@ export function WorkspaceSectionPicker({
             );
           })}
           {!options.length && (
-            <p className="py-8 text-center text-sm text-gray-500">
+            <p className="py-8 text-center text-sm text-soft-foreground">
               {t("workspace_builder_no_widgets")}
             </p>
           )}
           {loadingPlugins.size > 0 && (
-            <p role="status" className="text-xs text-gray-500">
+            <p role="status" className="text-xs text-soft-foreground">
               {t("workspace_builder_plugins_loading")}
             </p>
           )}

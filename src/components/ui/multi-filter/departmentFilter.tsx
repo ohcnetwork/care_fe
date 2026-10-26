@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -75,7 +76,7 @@ function TreeViewItem({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Checkbox
             checked={isSelected}
-            className="data-[state=checked]:border-primary-700 text-white shrink-0"
+            className="data-checked:border-primary-700 text-white shrink-0"
           />
           <div
             className={cn("size-3 rounded-full border", getColorForOrg(org.id))}
@@ -207,7 +208,7 @@ function DepartmentFilterDropdown({
                   >
                     <Checkbox
                       checked={true}
-                      className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                      className="data-checked:border-primary-700 text-white shrink-0"
                     />
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div
@@ -261,7 +262,7 @@ function DepartmentFilterDropdown({
                 >
                   <Checkbox
                     checked={selectedOrgs.some((o) => o.id === org.id)}
-                    className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                    className="data-checked:border-primary-700 text-white shrink-0"
                   />
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div
@@ -291,7 +292,7 @@ function DepartmentFilterDropdown({
 
         {isLoading && (
           <div className="px-2 py-4 text-sm text-gray-500 text-center flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Spinner className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         )}

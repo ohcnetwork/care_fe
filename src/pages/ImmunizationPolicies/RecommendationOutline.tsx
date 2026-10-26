@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronRight, Layers2, Syringe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -47,17 +48,21 @@ export function RecommendationOutline({
 
     return (
       <li key={node.id ?? path.join(".")} className="min-w-0">
-        <button
+        <Button
+          variant="ghost"
           type="button"
           aria-label={t("immunization_select_node", { name: title })}
           title={label}
           aria-current={selected ? "true" : undefined}
           onClick={() => onSelect(path)}
           className={cn(
-            "group flex w-full items-start gap-2.5 rounded-md px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
-            selected
-              ? "bg-primary-50 text-primary-900 ring-1 ring-inset ring-primary-200"
-              : "text-gray-700 hover:bg-gray-100",
+            "h-auto justify-start whitespace-normal",
+            cn(
+              "group flex w-full items-start gap-2.5 rounded-md px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+              selected
+                ? "bg-primary-50 text-primary-900 ring-1 ring-inset ring-primary-200"
+                : "text-gray-700 hover:bg-gray-100",
+            ),
           )}
         >
           <Icon
@@ -97,7 +102,7 @@ export function RecommendationOutline({
               aria-hidden="true"
             />
           )}
-        </button>
+        </Button>
         {node.is_group && node.children.length > 0 && (
           <ul className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-2">
             {node.children.map((child, index) =>

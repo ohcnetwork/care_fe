@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandGroup,
@@ -60,6 +61,7 @@ interface Props {
   onSelect: (patientId: string | undefined, patientName?: string) => void;
   placeholder?: string;
   className?: string;
+  size?: "sm" | "default";
   patientId?: string;
   patientName?: string;
   align?: "start" | "center" | "end";
@@ -168,12 +170,12 @@ function PatientSearchSelector({
             }}
             className="w-full p-2"
           >
-            <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
+            <TabsList className="w-full">
               {allIdentifierConfigs.map((config) => (
                 <TabsTrigger
                   key={config.id}
                   value={config.id}
-                  className="flex-1 rounded-sm truncate"
+                  className="min-w-0 flex-1"
                 >
                   <span className="truncate">{config.config.display}</span>
                 </TabsTrigger>
@@ -278,6 +280,7 @@ export default function PatientIdentifierFilter({
   patientName,
   align = "start",
   hideScanButton = false,
+  size = "sm",
   open: externalOpen = false,
 }: Props) {
   const { t } = useTranslation();
@@ -468,14 +471,17 @@ export default function PatientIdentifierFilter({
   const triggerButton = (
     <Button
       variant="outline"
+      size={size}
       role="combobox"
       aria-expanded={open}
-      className="flex-1 justify-between bg-white border-none rounded-none font-normal"
+      className="min-w-0 flex-1 justify-between font-normal"
     >
       {selectedPatient && !verificationOpen ? (
-        <span className="text-primary-500 text-sm">{selectedPatient.name}</span>
+        <span className="truncate text-primary-500 text-sm">
+          {selectedPatient.name}
+        </span>
       ) : (
-        <span className="text-sm text-gray-900">
+        <span className="truncate text-sm text-foreground">
           {placeholder || t("filter_by_identifier")}
         </span>
       )}
@@ -485,17 +491,16 @@ export default function PatientIdentifierFilter({
 
   return (
     <>
-      <div
-        className={cn(
-          "flex overflow-hidden border-gray-400 rounded-lg border",
-          className,
-        )}
+      <ButtonGroup
+        className={cn("w-auto", className)}
+        aria-label={placeholder || t("filter_by_identifier")}
       >
         {!hideScanButton && (
           <Button
-            variant="ghost"
+            variant="outline"
+            size={size}
             onClick={() => setScanDialogOpen(true)}
-            className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
+            className="shrink-0 text-foreground"
             aria-label={t("scan_patient_qr")}
             data-shortcut-id="scan-patient"
           >
@@ -545,15 +550,16 @@ export default function PatientIdentifierFilter({
         )}
         {selectedPatient && !verificationOpen && (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="outline"
+            size={size === "sm" ? "icon-sm" : "icon"}
             onClick={handleClear}
-            className="h-auto border-l px-2 hover:bg-transparent w-8 mr-3 pr-px rounded-none border-gray-400 text-gray-950"
+            aria-label={t("clear")}
+            className="text-foreground"
           >
             <X className="size-4" />
           </Button>
         )}
-      </div>
+      </ButtonGroup>
 
       <PatientIDScanDialog
         open={scanDialogOpen}

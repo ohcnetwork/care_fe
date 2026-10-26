@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,18 +32,23 @@ const LanguageSelectorLogin = () => {
       <br />
       <div className="inline-flex flex-wrap items-center justify-center gap-3">
         {availableLocales.map((e) => (
-          <button
+          <Button
+            variant="ghost"
+            type="button"
             key={e}
             onClick={() => handleLanguage(e)}
             className={cn(
-              "text-primary-400 hover:text-primary-600",
-              (i18n.language === e ||
-                (i18n.language === "en-US" && e === "en")) &&
-                "text-primary-600 underline",
+              "h-auto p-0",
+              cn(
+                "text-primary-400 hover:text-primary-600",
+                (i18n.language === e ||
+                  (i18n.language === "en-US" && e === "en")) &&
+                  "text-primary-600 underline",
+              ),
             )}
           >
             {LANGUAGES[e]}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

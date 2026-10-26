@@ -6,6 +6,7 @@ import {
   ENCOUNTER_CLASS,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
+import { REFERRAL_STATUSES } from "@/types/emr/referral/referral";
 import { Status } from "@/types/emr/serviceRequest/serviceRequest";
 import type { JSONSchema2020, JSONSchemaProperty } from "@/Utils/schema/types";
 
@@ -114,6 +115,12 @@ export const serviceRequestsConfigSchema = z.strictObject({
   limit: widgetLimitSchema,
 });
 
+export const referralsConfigSchema = z.strictObject({
+  status: z.enum(REFERRAL_STATUSES).optional(),
+  assigned_to_me: z.boolean().optional(),
+  limit: widgetLimitSchema,
+});
+
 // These validators use only object, string, boolean, integer, array, and enum
 // keywords, all supported by CARE's JSON Schema form contract.
 function toJsonSchema(schema: z.ZodType): JSONSchema2020 {
@@ -124,6 +131,7 @@ function toJsonSchema(schema: z.ZodType): JSONSchema2020 {
 }
 const responsesJsonSchema = toJsonSchema(responsesConfigSchema);
 const serviceRequestsJsonSchema = toJsonSchema(serviceRequestsConfigSchema);
+const referralsJsonSchema = toJsonSchema(referralsConfigSchema);
 const vitalsJsonSchema = toJsonSchema(vitalsConfigSchema);
 const outstandingOrdersJsonSchema = toJsonSchema(outstandingOrdersConfigSchema);
 const currentMedicationsJsonSchema = toJsonSchema(
@@ -472,6 +480,34 @@ function noConfigSchema(t: TFunction): JSONSchema2020 {
   };
 }
 
+function referralsSchema(t: TFunction): JSONSchema2020 {
+  const properties = referralsJsonSchema.properties!;
+  const { enum: statuses, ...statusProperty } = properties.status;
+  return {
+    ...referralsJsonSchema,
+    title: t("referrals"),
+    properties: {
+      status: {
+        ...statusProperty,
+        oneOf: statuses!.map((status) => ({
+          const: status,
+          title: t(`referral_status_${status}`),
+        })),
+        title: t("referral_filter_status"),
+        description: t("workspace_widget_referral_status_hint"),
+      },
+      assigned_to_me: {
+        ...properties.assigned_to_me,
+        title: t("assigned_to_me"),
+      },
+      limit: {
+        ...limitProperty(properties.limit, t),
+        description: t("workspace_widget_referral_limit_hint"),
+      },
+    },
+  };
+}
+
 const coreConfigSchemas = {
   allergies: noConfigSchema,
   symptoms: noConfigSchema,
@@ -482,6 +518,7 @@ const coreConfigSchemas = {
   outstanding_orders: outstandingOrdersSchema,
   current_medications: currentMedicationsSchema,
   recent_encounters: recentEncountersSchema,
+  referrals: referralsSchema,
   quick_actions: noConfigSchema,
   favorite_forms: noConfigSchema,
   draft_forms: noConfigSchema,

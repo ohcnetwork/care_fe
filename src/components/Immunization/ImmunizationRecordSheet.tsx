@@ -1,8 +1,9 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { TFunction } from "i18next";
-import { Loader2 } from "lucide-react";
+
 import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -748,7 +749,7 @@ function ImmunizationRecordForm({
           </Button>
           <Button type="submit" disabled={isPending}>
             {isPending && (
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              <Spinner className="size-4 animate-spin" aria-hidden="true" />
             )}
             {t(isEdit ? "save" : "immunization_save_record")}
           </Button>

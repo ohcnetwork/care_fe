@@ -79,7 +79,7 @@ export function ObservationChartPicker({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs leading-5 text-gray-500">
+        <p className="text-xs leading-5 text-soft-foreground">
           {t("workspace_widget_chart_plot_hint")}
         </p>
       </div>
@@ -88,7 +88,7 @@ export function ObservationChartPicker({
           <legend className="text-sm font-medium">
             {t("workspace_widget_chart_groups")}
           </legend>
-          <div className="space-y-2 rounded-lg border border-gray-200 p-3">
+          <div className="space-y-2 rounded-lg border border-border p-3">
             {groupTitles.map((title) => {
               const checked = !groups || groups.includes(title);
               return (
@@ -122,7 +122,7 @@ export function ObservationChartPicker({
               );
             })}
           </div>
-          <p className="text-xs leading-5 text-gray-500">
+          <p className="text-xs leading-5 text-soft-foreground">
             {t("workspace_widget_chart_groups_hint")}
           </p>
         </fieldset>

@@ -1,10 +1,11 @@
+import { Spinner } from "@/components/ui/spinner";
 import {
   QueryKey,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+
 import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -281,7 +282,7 @@ function WorkspaceOrganizationsForm<TOrganization extends { id: string }>({
           disabled={disabled || save.isPending || !dirty}
           onClick={() => save.mutate(ids)}
         >
-          {save.isPending && <Loader2 className="size-4 animate-spin" />}
+          {save.isPending && <Spinner className="size-4 animate-spin" />}
           {t("workspace_save_access")}
         </Button>
       </div>

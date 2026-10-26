@@ -528,22 +528,18 @@ export function LocationSheet({
             onValueChange={(value) => setTab(value as "assign" | "history")}
             className="mt-2"
           >
-            <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
-              {!readOnly && (
-                <TabsTrigger
-                  value="assign"
-                  className="border-0 data-[state=active]:border-b-2 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                >
-                  {t("assign_location")}
+            <div className="max-w-full overflow-x-auto pb-1">
+              <TabsList variant="line">
+                {!readOnly && (
+                  <TabsTrigger value="assign">
+                    {t("assign_location")}
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="history">
+                  {t("location_history")}
                 </TabsTrigger>
-              )}
-              <TabsTrigger
-                value="history"
-                className="border-0 data-[state=active]:border-b px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("location_history")}
-              </TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
 
             {!readOnly && (
               <TabsContent value="assign" className="mt-2">

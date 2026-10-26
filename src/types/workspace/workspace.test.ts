@@ -157,6 +157,39 @@ test("active-only widgets hide for closed encounters without an explicit status 
   );
 });
 
+test("referral creation keeps quick actions on closed encounters", () => {
+  const referrer = {
+    ...closed,
+    selectedEncounterPermissions: { canCreateReferral: true },
+  };
+  assert.equal(
+    getWidgetAvailability({ type: "quick_actions" }, referrer).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "favorite_forms" }, referrer).state,
+    "hidden",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "quick_actions" },
+      { ...referrer, facilityId: undefined },
+    ).state,
+    "hidden",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "referrals" }, closed).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "referrals" },
+      { ...closed, canReadClinicalData: false, canReadSelectedEncounter: true },
+    ).state,
+    "visible",
+  );
+});
+
 test("read-only views and patient history have distinct requirements", () => {
   assert.equal(
     getWidgetAvailability(

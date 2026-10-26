@@ -200,10 +200,12 @@ function LatestVitals({
         ) : isError ? (
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         ) : !newest ? (
-          <p className="p-2 text-sm text-gray-500">{t("no_vitals_recorded")}</p>
+          <p className="p-2 text-sm text-soft-foreground">
+            {t("no_vitals_recorded")}
+          </p>
         ) : (
           <div className="@container space-y-3">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-soft-foreground">
               <Trans
                 i18nKey="workspace_vitals_last_recorded"
                 values={{
@@ -215,7 +217,7 @@ function LatestVitals({
                     <time
                       dateTime={newest.effective_datetime}
                       title={formatDateTime(newest.effective_datetime)}
-                      className="font-medium text-gray-700"
+                      className="font-medium text-muted-foreground"
                     />
                   ),
                 }}
@@ -267,27 +269,27 @@ function VitalTile({
   return (
     <li
       aria-label={code.display}
-      className="min-w-0 rounded-lg border border-gray-100 bg-gray-50 p-2.5"
+      className="min-w-0 rounded-lg border border-soft-border bg-soft-background p-2.5"
     >
-      <p className="truncate text-xs text-gray-500" title={code.display}>
+      <p className="truncate text-xs text-soft-foreground" title={code.display}>
         {code.display}
       </p>
       {value ? (
-        <p className="mt-1 text-lg leading-6 font-semibold break-words text-gray-900">
+        <p className="mt-1 text-lg leading-6 font-semibold break-words text-foreground">
           {value.text}
           {value.unit && (
-            <span className="ml-1 text-xs font-normal text-gray-500">
+            <span className="ml-1 text-xs font-normal text-soft-foreground">
               {value.unit}
             </span>
           )}
         </p>
       ) : (
-        <p className="mt-1 text-sm leading-6 text-gray-400">
+        <p className="mt-1 text-sm leading-6 text-placeholder-foreground">
           {t("workspace_vitals_no_reading")}
         </p>
       )}
       {delta !== undefined && DeltaIcon && (
-        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-600">
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-soft-foreground">
           <DeltaIcon className="size-3" aria-hidden="true" />
           {delta === 0
             ? t("workspace_vitals_no_change")
@@ -301,7 +303,7 @@ function VitalTile({
         <time
           dateTime={latest.effective_datetime}
           title={formatDateTime(latest.effective_datetime)}
-          className="mt-0.5 block text-[11px] text-gray-400"
+          className="mt-0.5 block text-[11px] text-placeholder-foreground"
         >
           {relativeTime(latest.effective_datetime)}
         </time>

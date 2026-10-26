@@ -161,18 +161,18 @@ export function WorkspaceTabDialog({
             </div>
           </fieldset>
           <details
-            className="group rounded-lg border border-gray-200"
+            className="group rounded-lg border border-border"
             open={advancedOpen}
             onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
           >
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-600 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-semibold text-soft-foreground [&::-webkit-details-marker]:hidden">
               {t("workspace_studio_tab_advanced")}
               <ChevronDown
                 className="ml-auto size-3.5 transition-transform group-open:rotate-180"
                 aria-hidden="true"
               />
             </summary>
-            <div className="space-y-2 border-t border-gray-100 p-3">
+            <div className="space-y-2 border-t border-soft-border p-3">
               <Label htmlFor={`${id}-key`}>
                 {t("workspace_studio_tab_key")}
               </Label>
@@ -186,7 +186,7 @@ export function WorkspaceTabDialog({
                 aria-invalid={showErrors && !validKey}
                 className="font-mono text-sm"
               />
-              <p className="text-xs leading-relaxed text-gray-500">
+              <p className="text-xs leading-relaxed text-soft-foreground">
                 {t("workspace_studio_tab_key_hint")}
               </p>
             </div>

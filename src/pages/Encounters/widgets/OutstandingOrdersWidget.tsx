@@ -69,7 +69,7 @@ const OUTCOME_STYLES: Record<
   },
   on_hold: {
     icon: CirclePause,
-    className: "text-gray-600",
+    className: "text-soft-foreground",
     labelKey: "on_hold",
   },
 };
@@ -163,18 +163,18 @@ export function OutstandingOrdersWidget({
         ) : isError ? (
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         ) : !orders.length ? (
-          <p className="px-2 py-5 text-sm text-gray-500">
+          <p className="px-2 py-5 text-sm text-soft-foreground">
             {t("no_service_requests_found")}
           </p>
         ) : (
           <div className="@container space-y-2">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-soft-foreground">
               {t("workspace_orders_summary", {
                 ready: ready.length,
                 awaiting: orders.length - ready.length,
               })}
             </p>
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-soft-border">
               {orders.map((order) => {
                 const outcome = orderOutcome(order);
                 const style = OUTCOME_STYLES[outcome];
@@ -186,10 +186,10 @@ export function OutstandingOrdersWidget({
                     className="flex flex-col gap-1.5 py-2.5 @md:flex-row @md:items-center @md:gap-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-900">
+                      <p className="truncate text-sm font-medium text-foreground">
                         {order.title || order.code?.display}
                       </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-soft-foreground">
                         <Badge
                           variant={
                             order.category === "imaging" ? "indigo" : "sky"

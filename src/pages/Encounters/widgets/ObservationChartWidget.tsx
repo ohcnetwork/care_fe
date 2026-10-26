@@ -76,7 +76,7 @@ export function ObservationChartWidget({
         ) : isError ? (
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         ) : !groups.length ? (
-          <p className="p-2 text-sm text-gray-500">
+          <p className="p-2 text-sm text-soft-foreground">
             {t("workspace_observation_chart_no_groups")}
           </p>
         ) : (

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -259,7 +260,7 @@ export function RoleOrgAccessSummary({
                     disabled={isPending}
                   >
                     {isRemoving ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <Spinner className="size-3.5 animate-spin" />
                     ) : (
                       <Trash2 className="size-3.5" />
                     )}
@@ -302,7 +303,7 @@ export function RoleOrgAccessSummary({
                     disabled={isPending || !newOrg || !newRole}
                   >
                     {isAssigning ? (
-                      <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                      <Spinner className="mr-1.5 size-3.5 animate-spin" />
                     ) : (
                       <Plus className="mr-1.5 size-3.5" />
                     )}

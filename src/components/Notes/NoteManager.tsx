@@ -1,29 +1,12 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { formatRelative } from "date-fns";
-import {
-  Info,
-  Loader2,
-  MessageCircle,
-  MessageSquare,
-  MessageSquarePlus,
-  Plus,
-  Send,
-  Users,
-} from "lucide-react";
-import { Link, usePathParams } from "raviger";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Info, MessageCircle, MessageSquarePlus, Plus } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import { AutoExpandingTextarea } from "@/components/ui/auto-expanding-textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +19,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Markdown } from "@/components/ui/markdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -46,23 +28,15 @@ import {
 } from "@/components/ui/sheet";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { PLUGIN_Component } from "@/PluginEngine";
+import { NoteThreadSource } from "@/components/Notes/noteSource";
+import { NoteThreadConversation } from "@/components/Notes/NoteThreadConversation";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import useAuthUser from "@/hooks/useAuthUser";
-
-import { NoteRead } from "@/types/notes/messages";
 import { ThreadRead, threadTemplates } from "@/types/notes/thread";
 import threadApi from "@/types/notes/threadApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
-
-const MESSAGES_LIMIT = 20;
+import query, { callApi } from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -81,12 +55,17 @@ const ThreadItem = ({
   isSelected: boolean;
   onClick: () => void;
 }) => (
-  <button
+  <Button
+    variant="outline"
+    type="button"
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border",
-      isSelected
-        ? "bg-primary-100 hover:bg-primary/15 border-primary"
-        : "hover:bg-gray-100 hover:border-gray-200",
+      "h-auto block whitespace-normal",
+      cn(
+        "group relative w-full p-4 text-left rounded-lg transition-colors border",
+        isSelected
+          ? "bg-primary-100 hover:bg-primary/15 border-primary"
+          : "hover:bg-gray-100 hover:border-gray-200",
+      ),
     )}
     onClick={onClick}
   >
@@ -98,89 +77,8 @@ const ThreadItem = ({
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
       )}
     </div>
-  </button>
+  </Button>
 );
-
-// Message item component
-
-function MessageItem({
-  message,
-  className,
-  ...props
-}: React.ComponentProps<"div"> & { message: NoteRead }) {
-  const authUser = useAuthUser();
-  const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
-  const isCurrentUser = authUser?.id === message.created_by.id;
-
-  return (
-    <div
-      className={cn(
-        "flex w-full mb-4 animate-in fade-in-0 slide-in-from-bottom-4",
-        isCurrentUser ? "justify-end" : "justify-start",
-        className,
-      )}
-      {...props}
-    >
-      <div
-        className={cn(
-          "flex max-w-[80%] items-start gap-3",
-          isCurrentUser ? "flex-row-reverse" : "flex-row",
-        )}
-      >
-        <TooltipComponent content={message.created_by?.username}>
-          <Link
-            href={
-              facilityId
-                ? `/facility/${facilityId}/users/${message.created_by?.username}`
-                : `/users/${message.created_by?.username}`
-            }
-          >
-            <span className="flex pr-2">
-              <Avatar
-                name={formatName(message.created_by, true)}
-                imageUrl={message.created_by?.profile_picture_url}
-                className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
-              />
-            </span>
-          </Link>
-        </TooltipComponent>
-        <div
-          className={cn(
-            "p-3 rounded-lg break-words whitespace-pre-wrap w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg",
-            isCurrentUser
-              ? "bg-white text-black rounded-tr-none border border-gray-200"
-              : "bg-gray-100 rounded-tl-none border border-gray-200",
-          )}
-        >
-          <p className="text-xs space-x-2 mb-1">
-            <span className="text-gray-700 font-medium">
-              {formatName(message.created_by)}
-            </span>
-            <time
-              className="text-gray-500"
-              dateTime={message.created_date}
-              title={formatDateTime(message.created_date)}
-            >
-              {formatRelative(message.created_date, new Date())}
-            </time>
-          </p>
-          <div
-            className={cn(
-              "p-3 rounded-lg break-words",
-              isCurrentUser
-                ? "bg-white text-black rounded-tr-none border border-gray-200"
-                : "bg-gray-100 rounded-tl-none border border-gray-200",
-            )}
-          >
-            {message.message && (
-              <Markdown content={message.message} className="text-sm" />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // New thread dialog component
 const NewThreadDialog = ({
@@ -198,11 +96,6 @@ const NewThreadDialog = ({
 }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
-  useEffect(() => {
-    if (isOpen) {
-      setTitle("");
-    }
-  }, [isOpen]);
 
   return (
     <Dialog
@@ -260,7 +153,7 @@ const NewThreadDialog = ({
             disabled={!title.trim() || isCreating}
           >
             {isCreating ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
+              <Spinner className="size-4 animate-spin mr-2" />
             ) : (
               <MessageSquarePlus className="size-4 mr-2" />
             )}
@@ -319,9 +212,36 @@ interface NoteManagerProps {
   encounterId?: string;
   patientId: string;
   hideEncounterNotes?: boolean;
+  /** A fixed discussion can use its own permission-scoped transport. */
+  source?: NoteThreadSource;
 }
 
-export function NoteManager({
+export function NoteManager(props: NoteManagerProps) {
+  const { t } = useTranslation();
+  if (props.source) {
+    return (
+      <section
+        aria-label={t("notes__discussion")}
+        className="flex h-[26rem] max-h-[65vh] min-h-72 min-w-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
+      >
+        <NoteThreadConversation
+          key={props.source.key}
+          source={props.source}
+          canAccess={props.canAccess}
+          canWrite={props.canWrite}
+        />
+      </section>
+    );
+  }
+  return (
+    <PatientNoteManager
+      key={`${props.patientId}:${props.encounterId ?? ""}:${props.hideEncounterNotes ?? false}`}
+      {...props}
+    />
+  );
+}
+
+function PatientNoteManager({
   canAccess,
   canWrite,
   encounterId,
@@ -330,166 +250,130 @@ export function NoteManager({
 }: NoteManagerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedThread, setSelectedThread] = useState<string | null>(null);
+  const [selectedThreadId, setSelectedThread] = useState<string | null>(null);
   const [isThreadsExpanded, setIsThreadsExpanded] = useState(false);
   const [showNewThreadDialog, setShowNewThreadDialog] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  // points to the first message fetched in the last page or the newly created message
-  const recentMessageRef = useRef<HTMLDivElement | null>(null);
-  const { ref, inView } = useInView();
-  const [commentAdded, setCommentAdded] = useState(false);
-  const isMobile = useIsMobile();
-
-  // Fetch threads
-  const { data: threadsData, isLoading: threadsLoading } = useQuery({
-    queryKey: ["threads", encounterId],
-    queryFn: query(threadApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: {
-        ...(hideEncounterNotes
-          ? { encounter_isnull: "true" }
-          : encounterId && { encounter: encounterId }),
-      },
+  const threadsKey = ["threads", patientId, encounterId, hideEncounterNotes];
+  const threadQuery = useQuery({
+    queryKey: threadsKey,
+    queryFn: query.paginated(threadApi.list, {
+      pathParams: { patientId },
+      queryParams: hideEncounterNotes
+        ? { encounter_isnull: "true" }
+        : { encounter: encounterId },
     }),
     enabled: canAccess,
+    retry: false,
   });
+  const { data: threadsData, isLoading: threadsLoading } = threadQuery;
+  const activeThread =
+    threadsData?.results.find((thread) => thread.id === selectedThreadId) ??
+    threadsData?.results[0];
+  const selectedThread = activeThread?.id;
+  const threads = threadTemplates.filter(
+    (template) =>
+      !threadsData?.results.some((thread) => thread.title === template),
+  );
 
-  // Fetch messages with infinite scroll
-  const {
-    data: messagesData,
-    isLoading: messagesLoading,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedResponse<NoteRead>>({
-    queryKey: ["messages", selectedThread],
-    queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(threadApi.listNotes, {
-        pathParams: {
-          patientId,
-          threadId: selectedThread!,
-        },
-        queryParams: {
-          limit: String(MESSAGES_LIMIT),
-          offset: String(pageParam),
-        },
-      })({ signal: new AbortController().signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * MESSAGES_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    enabled: !!selectedThread && canAccess,
-  });
-
-  // reset selected thread when encounter changes
-  useEffect(() => {
-    setSelectedThread(null);
-  }, [encounterId]);
-
-  // Create thread mutation
   const createThreadMutation = useMutation({
-    mutationFn: mutate(threadApi.create, {
-      pathParams: { patientId },
-    }),
+    mutationFn: mutate(threadApi.create, { pathParams: { patientId } }),
+    retry: false,
     onSuccess: (newThread: ThreadRead) => {
-      queryClient.invalidateQueries({ queryKey: ["threads"] });
+      queryClient.setQueryData(
+        threadsKey,
+        (current: { count: number; results: ThreadRead[] } | undefined) => ({
+          count: (current?.count ?? 0) + 1,
+          results: [newThread, ...(current?.results ?? [])],
+        }),
+      );
+      void queryClient.invalidateQueries({ queryKey: threadsKey });
       setShowNewThreadDialog(false);
       setSelectedThread(newThread.id);
       toast.success(t("notes__thread_created"));
     },
-    onError: () => {
-      toast.error(t("notes__failed_create_thread"));
-    },
+    onError: () => toast.error(t("notes__failed_create_thread")),
   });
-
-  // Create message mutation
-  const createMessageMutation = useMutation({
-    mutationFn: mutate(threadApi.createNote, {
-      pathParams: { patientId, threadId: selectedThread! },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", selectedThread] });
-      setNewMessage("");
-      setCommentAdded(true);
-    },
-  });
-
-  const [threads, setThreads] = useState<string[]>([...threadTemplates]);
-
-  // Auto-select first thread
-
-  useEffect(() => {
-    if (threadsData?.results.length) {
-      if (!selectedThread) setSelectedThread(threadsData.results[0].id);
-      const threadTitles = threadsData.results.map((thread) => thread.title);
-      setThreads(
-        threads.filter((template) => !threadTitles.includes(template)),
-      );
-    }
-  }, [threadsData, selectedThread]);
-
-  // hack to scroll to bottom on initial load
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView();
-  }, [messagesLoading]);
-
-  // Handle infinite scroll
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      setCommentAdded(false);
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  useEffect(() => {
-    recentMessageRef.current?.scrollIntoView({ block: "start" });
-  }, [messagesData]);
 
   const handleCreateThread = (title: string) => {
-    if (title.trim()) {
-      if (
-        threadsData?.results.some((thread) => thread.title === title.trim())
-      ) {
-        toast.error(t("thread_already_exists"));
-        return;
-      }
-      createThreadMutation.mutate({
-        title: title.trim(),
-        encounter: encounterId,
-      });
+    if (!canWrite || !title.trim() || createThreadMutation.isPending) return;
+    if (threadsData?.results.some((thread) => thread.title === title.trim())) {
+      toast.error(t("thread_already_exists"));
+      return;
     }
+    createThreadMutation.mutate({
+      title: title.trim(),
+      encounter: encounterId,
+    });
   };
 
-  const handleSendMessage = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const canSend =
-      newMessage.trim() && selectedThread && !createMessageMutation.isPending;
-    if (canSend) {
-      createMessageMutation.mutate({ message: newMessage.trim() });
-    }
-  };
-
-  const recentMessage = useMemo(() => {
-    if (commentAdded) return messagesData?.pages[0]?.results[0];
-    return messagesData?.pages[messagesData.pages.length - 1]?.results[0];
-  }, [messagesData]);
-
-  if (threadsLoading) {
-    return <Loading />;
+  if (
+    !canAccess ||
+    (threadQuery.error instanceof HTTPError && threadQuery.error.status === 403)
+  ) {
+    return (
+      <p role="alert" className="p-4 text-sm text-gray-500">
+        {t("notes__read_denied")}
+      </p>
+    );
   }
+  if (threadsLoading) return <Loading />;
+  if (threadQuery.isError)
+    return (
+      <div role="alert" className="space-y-3 p-4">
+        <p>{t("notes__load_failed")}</p>
+        <Button variant="outline" onClick={() => void threadQuery.refetch()}>
+          {t("retry")}
+        </Button>
+      </div>
+    );
 
-  const messages = messagesData?.pages.flatMap((page) => page.results) ?? [];
-  const totalMessages = messagesData?.pages[0]?.count ?? 0;
+  const pathParams = { patientId, threadId: selectedThread ?? "" };
+  const queryParams = { encounter: encounterId };
+  const source: NoteThreadSource | undefined = activeThread && {
+    key: `${patientId}:${activeThread.id}`,
+    queryKey: ["messages", patientId, activeThread.id],
+    title: activeThread.title,
+    canRename: true,
+    listMessages: ({ offset, limit, signal }) =>
+      callApi(threadApi.listNotes, {
+        pathParams,
+        queryParams: { ...queryParams, limit, offset },
+        signal,
+        silent: true,
+      }),
+    sendMessage: (message) =>
+      callApi(threadApi.createNote, {
+        pathParams,
+        body: { message },
+        silent: true,
+      }),
+    getMessage: (messageId) =>
+      callApi(threadApi.getNote, {
+        pathParams: { ...pathParams, messageId },
+        queryParams,
+        silent: true,
+      }),
+    updateMessage: (messageId, message) =>
+      callApi(threadApi.updateNote, {
+        pathParams: { ...pathParams, messageId },
+        queryParams,
+        body: { message },
+        silent: true,
+      }),
+    renameThread: (title) =>
+      callApi(threadApi.update, {
+        pathParams,
+        queryParams,
+        body: { title },
+        silent: true,
+      }),
+    onRefresh: () => {
+      void queryClient.invalidateQueries({ queryKey: threadsKey });
+    },
+  };
 
   return (
-    <div className="flex h-[calc(100vh-15rem)] overflow-hidden">
+    <div className="flex h-[calc(100vh-15rem)] min-h-80 overflow-hidden max-lg:pb-14">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -559,6 +443,7 @@ export function NoteManager({
                     setIsThreadsExpanded(false);
                   }}
                   className="h-8 hidden lg:block"
+                  disabled={!canWrite}
                 >
                   <MessageSquarePlus className="size-4 mr-2" />
                   {t("notes__new")}
@@ -594,188 +479,46 @@ export function NoteManager({
         </SheetContent>
       </Sheet>
 
-      {/* Main Content */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <div className="flex flex-col h-full relative">
-          {/* Header */}
-          <div className="p-3 sm:p-4 border-b border-gray-200 bg-white z-1">
-            {selectedThread ? (
-              <div className="flex items-center gap-3">
-                <h2 className="text-base font-medium truncate flex-1">
-                  {
-                    threadsData?.results.find((t) => t.id === selectedThread)
-                      ?.title
-                  }
-                </h2>
-                <TooltipComponent
-                  content={`${t("participants")}: ${new Set(messages.map((m) => m.created_by.id)).size}
-                    ${t("messages")}: ${totalMessages}`}
-                >
-                  <div className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                    <Users className="size-4" />
-                    <span>
-                      {new Set(messages.map((m) => m.created_by.id)).size}
-                    </span>
-                    <MessageSquare className="size-4 ml-3" />
-                    <span>{totalMessages}</span>
-                  </div>
-                </TooltipComponent>
-              </div>
-            ) : (
-              <div className="text-center text-sm font-medium text-gray-500">
-                {t("notes__select_create_thread")}
-              </div>
-            )}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {source ? (
+          <NoteThreadConversation
+            key={source.key}
+            source={source}
+            canAccess={canAccess}
+            canWrite={canWrite}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+            <MessageSquarePlus className="size-12 text-primary mb-4" />
+            <h3 className="text-lg font-medium mb-2">{t("notes__welcome")}</h3>
+            <p className="text-sm text-gray-500 mb-6 max-w-sm">
+              {t("notes__welcome_description")}
+            </p>
+            <Button
+              onClick={() => setShowNewThreadDialog(true)}
+              disabled={!canWrite}
+            >
+              <MessageSquarePlus className="size-5 mr-2" />
+              {t("notes__start_new_discussion")}
+            </Button>
           </div>
-          {selectedThread ? (
-            <>
-              {messagesLoading ? (
-                <div className="flex-1 p-4">
-                  <div className="space-y-4">
-                    <CardListSkeleton count={4} />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* Messages List */}
-                  {isMobile ? (
-                    <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
-                      <div className="flex flex-col-reverse py-2 min-h-full">
-                        {messages.map((message, i) => (
-                          <MessageItem
-                            key={message.id}
-                            message={message}
-                            ref={
-                              message.id === recentMessage?.id
-                                ? recentMessageRef
-                                : undefined
-                            }
-                            className={cn(i === 0 && "mb-14")}
-                          />
-                        ))}
-                        {isFetchingNextPage && (
-                          <div className="py-2">
-                            <div className="space-y-4">
-                              <CardListSkeleton count={3} />
-                            </div>
-                          </div>
-                        )}
-                        <div ref={ref} />
-                      </div>
-                    </div>
-                  ) : (
-                    <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
-                      <div className="flex flex-col-reverse py-4 min-h-full">
-                        {messages.map((message, i) => (
-                          <MessageItem
-                            key={message.id}
-                            message={message}
-                            ref={
-                              message.id === recentMessage?.id
-                                ? recentMessageRef
-                                : undefined
-                            }
-                            className={cn(i === 0 && "mb-14")}
-                          />
-                        ))}
-                        {isFetchingNextPage && (
-                          <div className="py-2">
-                            <div className="space-y-4">
-                              <CardListSkeleton count={3} />
-                            </div>
-                          </div>
-                        )}
-                        <div ref={ref} />
-                      </div>
-                    </ScrollArea>
-                  )}
-
-                  {/* Message Input */}
-                  {canWrite && (
-                    <div className="border-t border-gray-200 p-3 sm:p-4 bg-white sticky bottom-0 max-lg:bottom-14">
-                      <form onSubmit={handleSendMessage}>
-                        <div className="flex gap-2">
-                          <AutoExpandingTextarea
-                            placeholder={t("notes__type_message")}
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyDown={(e) => {
-                              // Skip on mobile devices
-                              if (isTouchDevice) {
-                                return;
-                              }
-                              if (e.key === "Enter" && e.shiftKey) {
-                                handleSendMessage(e);
-                              }
-                            }}
-                            className="flex-1 min-h-10 max-h-[50vh]"
-                          />
-                          {/* Make sure to mark any buttons inside plugins utilizing this slot with `type="button"` to prevent unintentionally submitting the form*/}
-                          <PLUGIN_Component
-                            __name="NoteMessageInput"
-                            message={newMessage}
-                            setMessage={setNewMessage}
-                          />
-                          <Button
-                            aria-label="send message"
-                            type="submit"
-                            size="icon"
-                            disabled={
-                              !newMessage.trim() ||
-                              createMessageMutation.isPending
-                            }
-                            className="size-10 shrink-0"
-                          >
-                            {createMessageMutation.isPending ? (
-                              <Loader2 className="size-5 animate-spin" />
-                            ) : (
-                              <Send className="size-5" />
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-              <MessageSquarePlus className="size-12 text-primary mb-4" />
-              <h3 className="text-lg font-medium mb-2">
-                {t("notes__welcome")}
-              </h3>
-              <p className="text-sm text-gray-500 mb-6 max-w-sm">
-                {t("notes__welcome_description")}
-              </p>
-              <Button
-                onClick={() => setShowNewThreadDialog(true)}
-                className="shadow-lg"
-                disabled={!canWrite}
-              >
-                <MessageSquarePlus className="size-5 mr-2" />
-                {t("notes__start_new_discussion")}
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
-
-      {/* Mobile Navigation */}
       <MobileNav
-        threadsCount={threadsData?.results.length || 0}
+        threadsCount={threadsData?.results.length ?? 0}
         onOpenThreads={() => setIsThreadsExpanded(true)}
         onNewThread={() => setShowNewThreadDialog(true)}
         canWrite={canWrite}
       />
-
-      <NewThreadDialog
-        isOpen={showNewThreadDialog}
-        onClose={() => setShowNewThreadDialog(false)}
-        onCreate={handleCreateThread}
-        isCreating={createThreadMutation.isPending}
-        threadsUnused={threads}
-      />
+      {showNewThreadDialog && (
+        <NewThreadDialog
+          isOpen={showNewThreadDialog}
+          onClose={() => setShowNewThreadDialog(false)}
+          onCreate={handleCreateThread}
+          isCreating={createThreadMutation.isPending}
+          threadsUnused={threads}
+        />
+      )}
     </div>
   );
 }

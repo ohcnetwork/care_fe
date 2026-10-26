@@ -20,6 +20,9 @@ export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
     queryKey: ["workspace-user-defaults", user.id, "encounter"],
     queryFn: query(workspaceApi.getUserDefaultAttributes, { silent: true }),
     retry: false,
+    // The header and content share these reads. Remounting an observer must
+    // preserve a failed result until the user explicitly chooses Try Again.
+    retryOnMount: false,
   });
   const list = useWorkspaceList("encounter");
   const accessibleWorkspaces = new Map(

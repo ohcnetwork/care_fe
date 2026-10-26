@@ -362,23 +362,23 @@ export function WorkspaceStudio({
     page.kind === "custom" ? page.title : systemPageLabel(page.key, t);
 
   const toolbar = (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 sm:px-5">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
           <LayoutDashboard className="size-4" />
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-semibold text-gray-950">
+            <h2 className="text-sm font-semibold text-foreground">
               {t("workspace_studio_title")}
             </h2>
             {template && (
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+              <span className="rounded-full bg-muted-background px-2 py-0.5 text-[11px] font-medium text-soft-foreground">
                 {t(`workspace_studio_surface_${surface}`)}
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-xs text-gray-500">
+          <p className="mt-0.5 text-xs text-soft-foreground">
             {template
               ? t("workspace_studio_counts", {
                   tabs: pages.length,
@@ -417,7 +417,7 @@ export function WorkspaceStudio({
           <div
             role="group"
             aria-label={t("workspace_studio_preview_as")}
-            className="flex rounded-lg bg-gray-100 p-1"
+            className="flex rounded-lg bg-muted-background p-1"
           >
             {(["active", "closed"] as const).map((state) => (
               <Button
@@ -428,7 +428,7 @@ export function WorkspaceStudio({
                 aria-pressed={previewEncounter === state}
                 className={cn(
                   "h-7 px-3 text-xs",
-                  previewEncounter === state && "bg-white shadow-sm",
+                  previewEncounter === state && "bg-background shadow-sm",
                 )}
                 onClick={() => setPreviewEncounter(state)}
               >
@@ -441,7 +441,7 @@ export function WorkspaceStudio({
           <div
             role="group"
             aria-label={t("workspace_preview_size")}
-            className="flex rounded-lg bg-gray-100 p-1"
+            className="flex rounded-lg bg-muted-background p-1"
           >
             {DEVICE_OPTIONS.map(([size, Icon]) => (
               <Button
@@ -453,7 +453,7 @@ export function WorkspaceStudio({
                 aria-pressed={device === size}
                 className={cn(
                   "size-7",
-                  device === size && "bg-white shadow-sm",
+                  device === size && "bg-background shadow-sm",
                 )}
                 onClick={() => setDevice(size)}
               >
@@ -499,7 +499,7 @@ export function WorkspaceStudio({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
+                  <DropdownMenuSubTrigger openOnHover={false}>
                     <Settings2 className="size-4" />
                     {t("workspace_studio_preview_access")}
                   </DropdownMenuSubTrigger>
@@ -531,7 +531,7 @@ export function WorkspaceStudio({
   return (
     <section
       aria-label={t("workspace_studio_title")}
-      className="overflow-clip rounded-xl border border-gray-200 bg-white shadow-xs"
+      className="overflow-clip rounded-xl border border-border bg-background shadow-xs"
     >
       {toolbar}
       {unsupportedWidgets.length > 0 && (
@@ -608,9 +608,9 @@ export function WorkspaceStudio({
               setMode("json");
               commit(event.target.value);
             }}
-            className="min-h-96 resize-y bg-gray-50/70 font-mono text-xs leading-6"
+            className="min-h-96 resize-y bg-soft-background/70 font-mono text-xs leading-6"
           />
-          <p className="text-xs leading-relaxed text-gray-500">
+          <p className="text-xs leading-relaxed text-soft-foreground">
             {t("workspace_template_hint")}
           </p>
           {formatError && (
@@ -630,12 +630,12 @@ export function WorkspaceStudio({
         />
       ) : (
         <div className="grid min-h-[560px] lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="min-w-0 border-b border-gray-200 bg-white lg:border-r lg:border-b-0">
+          <aside className="min-w-0 border-b border-border bg-background lg:border-r lg:border-b-0">
             <div className="flex items-center justify-between px-4 py-4">
-              <h3 className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
+              <h3 className="text-xs font-semibold tracking-wider text-soft-foreground uppercase">
                 {t("workspace_studio_tabs")}
               </h3>
-              <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-500">
+              <span className="rounded bg-muted-background px-1.5 text-xs text-soft-foreground">
                 {pages.length}
               </span>
             </div>
@@ -657,13 +657,13 @@ export function WorkspaceStudio({
                       "h-auto min-h-10 shrink-0 justify-start gap-2 px-3 py-2 text-left text-sm font-normal lg:w-full lg:whitespace-normal",
                       item.key === tab?.key &&
                         "bg-primary-50 font-semibold text-primary-900 hover:bg-primary-100",
-                      item.hidden && "text-gray-400",
+                      item.hidden && "text-placeholder-foreground",
                     )}
                   >
                     <Icon
                       className={cn(
                         "size-3.5 shrink-0",
-                        item.kind === "system" && "text-gray-400",
+                        item.kind === "system" && "text-placeholder-foreground",
                       )}
                       aria-hidden="true"
                     />
@@ -692,7 +692,7 @@ export function WorkspaceStudio({
                   >
                     <Plus className="size-3.5" />
                     {t("workspace_studio_add_tab")}
-                    <ChevronDown className="ml-auto size-3.5 text-gray-400" />
+                    <ChevronDown className="ml-auto size-3.5 text-placeholder-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -708,7 +708,7 @@ export function WorkspaceStudio({
                     {t("workspace_studio_new_tab")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-xs text-gray-500">
+                  <DropdownMenuLabel className="text-xs text-soft-foreground">
                     {t("workspace_studio_builtin_tabs")}
                   </DropdownMenuLabel>
                   {systemKeys.map((key) => {
@@ -719,7 +719,7 @@ export function WorkspaceStudio({
                         disabled={added}
                         onSelect={() => addTab({ kind: "system", key })}
                       >
-                        <LockKeyhole className="size-4 text-gray-400" />
+                        <LockKeyhole className="size-4 text-placeholder-foreground" />
                         <span className="flex-1">
                           {systemPageLabel(key, t)}
                         </span>
@@ -728,7 +728,7 @@ export function WorkspaceStudio({
                   })}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <p className="mt-3 hidden text-xs leading-relaxed text-gray-400 lg:block">
+              <p className="mt-3 hidden text-xs leading-relaxed text-placeholder-foreground lg:block">
                 {t("workspace_studio_tabs_hint")}
               </p>
             </div>
@@ -737,36 +737,38 @@ export function WorkspaceStudio({
           <div className="min-w-0">
             {tab && (
               <>
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background px-4 py-3 sm:px-5">
                   <div className="flex min-w-0 items-center gap-3">
                     {(() => {
                       const Icon = tabIcon(tab);
                       return (
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted-background text-soft-foreground">
                           <Icon className="size-4" aria-hidden="true" />
                         </span>
                       );
                     })()}
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase">
+                      <p className="text-[10px] font-semibold tracking-widest text-placeholder-foreground uppercase">
                         {t(
                           tab.kind === "custom"
                             ? "workspace_studio_tab"
                             : "workspace_studio_builtin_tab",
                         )}
                       </p>
-                      <h3 className="text-base font-semibold tracking-tight break-words text-gray-950">
+                      <h3 className="text-base font-semibold tracking-tight break-words text-foreground">
                         {tabTitle(tab)}
                       </h3>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-1">
                     <div className="mr-2 flex items-center gap-2">
+                      {/* The state text describes the switch; an associated label
+                          would replace its stable name with the changing text. */}
                       <Switch
-                        id={`${id}-tab-visible`}
                         checked={!tab.hidden}
                         disabled={busy}
                         aria-label={t("workspace_studio_show_tab")}
+                        aria-describedby={`${id}-tab-visible-state`}
                         onCheckedChange={(checked) => {
                           const next = { ...tab };
                           if (checked) delete next.hidden;
@@ -774,16 +776,16 @@ export function WorkspaceStudio({
                           updateTab(next);
                         }}
                       />
-                      <Label
-                        htmlFor={`${id}-tab-visible`}
-                        className="text-xs font-medium text-gray-600"
+                      <span
+                        id={`${id}-tab-visible-state`}
+                        className="text-xs font-medium text-soft-foreground"
                       >
                         {t(
                           tab.hidden
                             ? "workspace_studio_tab_hidden"
                             : "workspace_studio_tab_visible",
                         )}
-                      </Label>
+                      </span>
                     </div>
                     {tab.kind === "custom" && (
                       <Button
@@ -836,7 +838,7 @@ export function WorkspaceStudio({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="size-8 text-gray-400 hover:text-red-700"
+                      className="size-8 text-placeholder-foreground hover:text-red-700"
                       aria-label={t("workspace_studio_remove_tab")}
                       disabled={busy || pages.length === 1}
                       onClick={() =>
@@ -856,9 +858,9 @@ export function WorkspaceStudio({
                     <div
                       role="group"
                       aria-label={t("workspace_studio_layout")}
-                      className="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-4 py-2.5 sm:px-5"
+                      className="flex flex-wrap items-center gap-2 border-b border-border bg-background px-4 py-2.5 sm:px-5"
                     >
-                      <span className="text-xs font-medium text-gray-500">
+                      <span className="text-xs font-medium text-soft-foreground">
                         {t("workspace_studio_layout")}
                       </span>
                       {WORKSPACE_LAYOUTS.map((option) => {
@@ -889,7 +891,7 @@ export function WorkspaceStudio({
                         );
                       })}
                       {layout === "custom" && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-soft-foreground">
                           {t("workspace_studio_layout_custom")}
                         </span>
                       )}
@@ -913,20 +915,20 @@ export function WorkspaceStudio({
                         })
                       }
                     />
-                    <p className="flex items-start gap-2 px-5 pb-5 text-xs leading-relaxed text-gray-400">
+                    <p className="flex items-start gap-2 px-5 pb-5 text-xs leading-relaxed text-placeholder-foreground">
                       <Monitor className="mt-0.5 size-3.5 shrink-0" />
                       {t("workspace_studio_canvas_hint")}
                     </p>
                   </>
                 ) : (
                   <div className="flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center">
-                    <span className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-gray-200 bg-white shadow-xs">
-                      <LockKeyhole className="size-6 text-gray-400" />
+                    <span className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-xs">
+                      <LockKeyhole className="size-6 text-placeholder-foreground" />
                     </span>
-                    <h4 className="text-base font-semibold text-gray-800">
+                    <h4 className="text-base font-semibold text-foreground">
                       {t("workspace_studio_builtin_title")}
                     </h4>
-                    <p className="mt-2 max-w-sm text-sm leading-relaxed text-gray-500">
+                    <p className="mt-2 max-w-sm text-sm leading-relaxed text-soft-foreground">
                       {t(
                         convertibleTab
                           ? "workspace_studio_builtin_hint_convertible"

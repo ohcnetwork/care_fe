@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
+import type { ClinicalHistoryAccess } from "@/pages/Patient/History/clinicalHistoryTabs";
+
 /**
  * Tab 2 of the fill page: the patient's clinical history, embedded. Same
  * tab map as the standalone ClinicalHistoryPage (one shared source),
@@ -11,9 +13,11 @@ import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistory
 export function ClinicalHistoryTab({
   patientId,
   facilityId,
+  access,
 }: {
   patientId: string;
   facilityId?: string;
+  access?: ClinicalHistoryAccess;
 }) {
   const [tab, setTab] = useState("responses");
 
@@ -23,6 +27,7 @@ export function ClinicalHistoryTab({
       facilityId={facilityId}
       currentTab={tab}
       onTabChange={setTab}
+      access={access}
       embedded
     />
   );

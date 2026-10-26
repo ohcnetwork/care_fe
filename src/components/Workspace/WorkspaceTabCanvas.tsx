@@ -122,7 +122,7 @@ export function WorkspaceTabCanvas({
   };
 
   return (
-    <div className="min-w-0 bg-gray-100/70 p-4 sm:p-5">
+    <div className="min-w-0 bg-muted-background/70 p-4 sm:p-5">
       <div
         className={cn(
           "@container mx-auto min-w-0 transition-[max-width]",
@@ -170,10 +170,10 @@ export function WorkspaceTabCanvas({
                     });
                   dragged.current = null;
                 }}
-                className="min-w-0 rounded-xl border border-dashed border-gray-300 bg-white/40 p-2"
+                className="min-w-0 rounded-xl border border-dashed border-strong-border bg-background/40 p-2"
               >
                 <div className="mb-2 flex min-h-6 flex-wrap items-center justify-between gap-2 px-1">
-                  <span className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  <span className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
                     {label}
                   </span>
                   {allHidden && (
@@ -240,16 +240,16 @@ export function WorkspaceTabCanvas({
                           dragged.current = null;
                         }}
                         className={cn(
-                          "group relative min-w-0 rounded-xl border bg-white shadow-xs transition-colors",
+                          "group relative min-w-0 rounded-xl border bg-background shadow-xs transition-colors",
                           hidden
                             ? "border-dashed border-amber-300"
-                            : "border-gray-200 hover:border-primary-300",
+                            : "border-border hover:border-primary-300",
                         )}
                       >
-                        <div className="flex items-center gap-2 border-b border-gray-100 px-2 py-1.5">
+                        <div className="flex items-center gap-2 border-b border-soft-border px-2 py-1.5">
                           <GripVertical
                             aria-hidden="true"
-                            className="size-4 shrink-0 cursor-grab text-gray-300"
+                            className="size-4 shrink-0 cursor-grab text-disabled-foreground"
                           />
                           <button
                             type="button"
@@ -270,7 +270,7 @@ export function WorkspaceTabCanvas({
                             >
                               <Icon className="size-3.5" aria-hidden="true" />
                             </span>
-                            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-800">
+                            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                               {title}
                             </span>
                           </button>
@@ -278,7 +278,7 @@ export function WorkspaceTabCanvas({
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="size-7 text-gray-500"
+                            className="size-7 text-soft-foreground"
                             aria-label={t(
                               "workspace_studio_section_settings_for",
                               {
@@ -305,7 +305,7 @@ export function WorkspaceTabCanvas({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="size-7 text-gray-500"
+                                className="size-7 text-soft-foreground"
                                 aria-label={t(
                                   "workspace_studio_section_actions",
                                   {
@@ -346,7 +346,7 @@ export function WorkspaceTabCanvas({
                               </DropdownMenuItem>
                               {page.columns.length > 1 && (
                                 <DropdownMenuSub>
-                                  <DropdownMenuSubTrigger>
+                                  <DropdownMenuSubTrigger openOnHover={false}>
                                     <ArrowLeftRight className="size-4" />
                                     {t("workspace_studio_move_to")}
                                   </DropdownMenuSubTrigger>
@@ -441,7 +441,7 @@ export function WorkspaceTabCanvas({
                           </p>
                         )}
                         {!hidden && cramped && (
-                          <p className="flex items-start gap-2 rounded-b-xl border-t border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700">
+                          <p className="flex items-start gap-2 rounded-b-xl border-t border-border bg-soft-background px-3 py-2 text-xs text-muted-foreground">
                             <StretchHorizontal
                               className="mt-0.5 size-3.5 shrink-0"
                               aria-hidden="true"
@@ -464,7 +464,8 @@ export function WorkspaceTabCanvas({
                     })}
                     className={cn(
                       "w-full border-dashed shadow-none",
-                      column.widgets.length === 0 && "min-h-28 bg-white/60",
+                      column.widgets.length === 0 &&
+                        "min-h-28 bg-background/60",
                     )}
                   >
                     <Plus className="size-4" />

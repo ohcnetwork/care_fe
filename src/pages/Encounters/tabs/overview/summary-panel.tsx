@@ -45,19 +45,10 @@ export const SummaryPanel = ({
         className="gap-2"
       >
         {visibleTabs.length > 1 && (
-          <TabsList
-            className={cn(
-              "h-10 w-full justify-between rounded-xl border border-gray-200 bg-white p-1",
-              !embedded && "sm:w-72",
-            )}
-          >
+          <TabsList className={cn("w-full", !embedded && "sm:w-72")}>
             {visibleTabs.map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className="w-full rounded-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-100 data-[state=active]:shadow-none"
-              >
-                <span className="text-black">{t(tab)}</span>
+              <TabsTrigger key={tab} value={tab}>
+                {t(tab)}
               </TabsTrigger>
             ))}
           </TabsList>

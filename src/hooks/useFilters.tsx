@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { QueryParam, setQueryParamsOptions } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -237,13 +238,15 @@ export default function useFilters({
         ))}
         {children}
         {show && (
-          <button
+          <Button
+            variant="outline"
+            type="button"
             id="clear-all-filters"
-            className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
+            className="h-auto rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
             onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
-          </button>
+          </Button>
         )}
       </div>
     );

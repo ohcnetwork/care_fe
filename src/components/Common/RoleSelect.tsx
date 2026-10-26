@@ -1,5 +1,8 @@
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  Check as CheckIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -216,7 +219,7 @@ export function RoleSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent className="w-[var(--anchor-width)] p-0">
         <RoleCommandContent
           setSearchTerm={setSearchTerm}
           rolesList={rolesList}

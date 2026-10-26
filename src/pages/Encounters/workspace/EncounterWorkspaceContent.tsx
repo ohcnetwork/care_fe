@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 
 import EncounterNavigation, {
   EncounterTab,
@@ -139,7 +140,13 @@ export function EncounterWorkspaceContent({
     }
     target.searchParams.delete("workspace");
     if (target.href !== window.location.href)
-      navigate(`${target.pathname}${target.search}`, { replace });
+      navigate(
+        appendReferralNativeContext(
+          `${target.pathname}${target.search}`,
+          window.location.search,
+        ),
+        { replace },
+      );
   };
 
   useEffect(() => {

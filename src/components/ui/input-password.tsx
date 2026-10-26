@@ -1,37 +1,46 @@
+import { Eye, EyeOff } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 function PasswordInput({
   className,
   ref,
+  disabled,
   ...props
 }: React.ComponentProps<"input">) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = React.useState(false);
   return (
-    <div className="relative">
-      <Input
+    <InputGroup>
+      <InputGroupInput
         type={showPassword ? "text" : "password"}
-        className={cn("pr-10", className)}
+        className={className}
         ref={ref}
+        disabled={disabled}
         {...props}
       />
-      <button
-        type="button"
-        tabIndex={-1}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-hidden"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
-      </button>
-    </div>
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton
+          type="button"
+          size="icon-xs"
+          disabled={disabled}
+          aria-label={t(showPassword ? "hide_password" : "show_password")}
+          aria-pressed={showPassword}
+          onClick={() => setShowPassword((visible) => !visible)}
+        >
+          {showPassword ? <EyeOff /> : <Eye />}
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   );
 }
 
 PasswordInput.displayName = "PasswordInput";
-
 export { PasswordInput };

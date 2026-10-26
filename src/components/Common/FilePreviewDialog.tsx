@@ -250,6 +250,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 {file_state.extension === "pdf" && (
                   <Button
                     variant="outline"
+                    aria-label={t("print")}
                     onClick={async () => {
                       try {
                         const response = await fetch(fileUrl);

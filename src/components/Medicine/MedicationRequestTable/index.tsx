@@ -104,11 +104,7 @@ export default function MedicationRequestTable({
           <ScrollArea className="w-full">
             <TabsList>
               {visibleTabs.map((tab) => (
-                <TabsTrigger
-                  key={tab}
-                  value={tab}
-                  className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-                >
+                <TabsTrigger key={tab} value={tab}>
                   {t(
                     {
                       prescriptions: "prescriptions",

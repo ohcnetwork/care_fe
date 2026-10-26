@@ -1,6 +1,7 @@
 import { TFunction } from "i18next";
 import {
   Activity,
+  ArrowUpRight,
   BookOpen,
   Building2,
   ClipboardList,
@@ -38,6 +39,7 @@ interface SettingsPermissions {
   canReadPatientIdentifierConfig: boolean;
   canListTemplate: boolean;
   canReadImmunizationPolicy: boolean;
+  canManageReferralAvailability: boolean;
 }
 
 interface SettingsPage {
@@ -80,6 +82,12 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     label: "clinical",
     pages: [
+      {
+        path: "settings/referrals",
+        title: "referral_availability",
+        icon: ArrowUpRight,
+        permission: "canManageReferralAvailability",
+      },
       {
         path: "settings/immunization-policies",
         title: "immunization_policies",
@@ -235,7 +243,10 @@ export function FacilitySettingsNav() {
         return (
           <Fragment key={group.label ?? "general"}>
             {index > 0 && (
-              <Separator className="mx-4 bg-neutral-200 data-[orientation=horizontal]:w-auto group-data-[collapsible=icon]:mx-2" />
+              <Separator
+                variant="inset"
+                className="mx-3 data-horizontal:w-auto group-data-[collapsible=icon]:mx-2"
+              />
             )}
             <NavMain
               label={group.label ? t(group.label) : undefined}

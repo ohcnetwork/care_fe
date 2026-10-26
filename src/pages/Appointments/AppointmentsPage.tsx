@@ -1,8 +1,7 @@
-import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon, InfoIcon } from "lucide-react";
+import { Check as CheckIcon, FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -388,7 +387,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               className="mt-2 w-full min-w-0 items-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
               triggerButtonClassName="self-start sm:self-center h-9"
               clearAllButtonClassName="self-center"
-              selectedBarClassName="h-9"
               facilityId={facilityId}
             />
           </div>

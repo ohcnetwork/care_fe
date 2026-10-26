@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ArrowLeft, History, SquarePen } from "lucide-react";
 import { Link } from "raviger";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +24,10 @@ interface Props {
   encounter?: EncounterRead;
   isLoading: boolean;
   isHistorical: boolean;
-  onReturnToCurrent: () => void;
+  onReturnToCurrent?: () => void;
   editUrl?: string;
   currentFacilityId?: string;
+  actions?: ReactNode;
 }
 
 export default function EncounterDetailsHeader({
@@ -35,6 +37,7 @@ export default function EncounterDetailsHeader({
   onReturnToCurrent,
   editUrl,
   currentFacilityId,
+  actions,
 }: Props) {
   const { t } = useTranslation();
   const showFacility =
@@ -54,18 +57,6 @@ export default function EncounterDetailsHeader({
   return (
     <section
       aria-label={t("encounter")}
-      onKeyDown={(event) => {
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey &&
-          !event.ctrlKey &&
-          !event.metaKey &&
-          !event.altKey
-        ) {
-          // Preserve native activation despite the global Enter shortcut.
-          event.stopPropagation();
-        }
-      }}
       className={cn(
         "rounded-xl border px-3 py-2",
         isHistorical
@@ -82,15 +73,17 @@ export default function EncounterDetailsHeader({
             <History aria-hidden="true" className="size-4 shrink-0" />
             {t("viewing_another_encounter")}
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-8 border-amber-300 bg-white px-2.5 text-xs text-amber-950 shadow-xs hover:border-amber-400 hover:bg-amber-100"
-            onClick={onReturnToCurrent}
-          >
-            <ArrowLeft aria-hidden="true" />
-            {t("back_to_current_encounter")}
-          </Button>
+          {onReturnToCurrent && (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 border-amber-300 bg-white px-2.5 text-xs text-amber-950 shadow-xs hover:border-amber-400 hover:bg-amber-100"
+              onClick={onReturnToCurrent}
+            >
+              <ArrowLeft aria-hidden="true" />
+              {t("back_to_current_encounter")}
+            </Button>
+          )}
         </div>
       )}
       {isLoading ? (
@@ -121,13 +114,14 @@ export default function EncounterDetailsHeader({
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   aria-label={`${t("encounter_dates")}: ${periodLabel}`}
-                  className="rounded-sm text-left underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                  className="h-auto p-0 rounded-sm text-left underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
                 >
                   {periodLabel}
-                </button>
+                </Button>
               </PopoverTrigger>
               <PopoverContent
                 align="start"
@@ -205,6 +199,7 @@ export default function EncounterDetailsHeader({
               </Link>
             </Button>
           )}
+          {actions && <div className="ml-auto shrink-0">{actions}</div>}
         </div>
       ) : null}
     </section>

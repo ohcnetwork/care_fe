@@ -15,7 +15,10 @@ import { useHistoryWorkspace } from "@/hooks/useWorkspaces";
 import { WorkspacePage } from "@/pages/Encounters/workspace/EncounterWorkspacePage";
 import { EncounterWorkspacePicker } from "@/pages/Encounters/workspace/EncounterWorkspacePicker";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
-import { useClinicalHistoryTabs } from "@/pages/Patient/History/clinicalHistoryTabs";
+import {
+  useClinicalHistoryTabs,
+  type ClinicalHistoryAccess,
+} from "@/pages/Patient/History/clinicalHistoryTabs";
 import patientApi from "@/types/emr/patient/patientApi";
 import type { WorkspaceWidgetContext } from "@/types/workspace/widgetAvailability";
 import query from "@/Utils/request/query";
@@ -25,12 +28,15 @@ export function ClinicalHistoryWorkspace({
   facilityId,
   currentTab,
   onTabChange,
+  access,
   embedded = false,
 }: {
   patientId: string;
   facilityId?: string;
   currentTab: string;
   onTabChange: (tab: string) => void;
+  /** Scoped access decided by the caller; otherwise the patient's permissions apply. */
+  access?: ClinicalHistoryAccess;
   embedded?: boolean;
 }) {
   const { t } = useTranslation();
@@ -43,11 +49,12 @@ export function ClinicalHistoryWorkspace({
       queryParams: { facility: facilityId },
       silent: true,
     }),
+    enabled: !access,
   });
-  const canRead = getPermissions(
-    hasPermission,
-    patient.data?.permissions ?? [],
-  ).canViewClinicalData;
+  const canRead = access
+    ? access.clinicalData
+    : getPermissions(hasPermission, patient.data?.permissions ?? [])
+        .canViewClinicalData;
   const context: WorkspaceWidgetContext = {
     patientId,
     facilityId,
@@ -60,6 +67,7 @@ export function ClinicalHistoryWorkspace({
     patientId,
     facilityId,
     embedded,
+    access,
   });
   const parsed = workspace
     ? parseEncounterWorkspace(workspace.template, Object.keys(systemTabs))
@@ -79,7 +87,7 @@ export function ClinicalHistoryWorkspace({
         if (systemTab)
           tabs[page.key] = {
             ...systemTab,
-            visible: !page.hidden,
+            visible: !page.hidden && systemTab.visible,
             component: (
               <ScopedQueryParamsProvider key={`${workspace?.id}:${page.key}`}>
                 {systemTab.component}
@@ -148,7 +156,7 @@ export function ClinicalHistoryWorkspace({
   if (!canRead)
     return (
       <EmptyState
-        icon={<ShieldAlert className="size-8 text-gray-400" />}
+        icon={<ShieldAlert className="size-8 text-placeholder-foreground" />}
         title={t("workspace_patient_history_access_denied")}
         description={t("no_permission_to_view_clinical_data_description")}
       />
@@ -158,7 +166,7 @@ export function ClinicalHistoryWorkspace({
     <div className="min-w-0 space-y-3">
       <div className="flex items-center justify-end gap-2">
         {workspace && (
-          <span className="text-sm text-gray-600">{workspace.name}</span>
+          <span className="text-sm text-soft-foreground">{workspace.name}</span>
         )}
         <EncounterWorkspacePicker
           surface="patient_history"

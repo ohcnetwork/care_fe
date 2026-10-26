@@ -49,6 +49,7 @@ import {
   plotsConfigSchema,
 } from "@/types/workspace/widgetConfigSchemas";
 
+import { EncounterReferralsWidget } from "@/pages/Encounters/widgets/EncounterReferralsWidget";
 import { EncounterResponsesWidget } from "@/pages/Encounters/widgets/EncounterResponsesWidget";
 import { EncounterServiceRequestsWidget } from "@/pages/Encounters/widgets/EncounterServiceRequestsWidget";
 import { EncounterVitalsWidget } from "@/pages/Encounters/widgets/EncounterVitalsWidget";
@@ -131,7 +132,7 @@ function WorkspaceWidgetContent({
 
   const noClinicalAccess = (
     <EmptyState
-      icon={<ShieldAlert className="size-8 text-gray-400" />}
+      icon={<ShieldAlert className="size-8 text-placeholder-foreground" />}
       title={t(
         getWidgetRequirements(type, pluginWidget?.requiresActiveEncounter)
           .encounter === "none"
@@ -153,9 +154,9 @@ function WorkspaceWidgetContent({
   const frame = (content: ReactNode) => (
     <section
       aria-label={title ?? workspaceWidgetLabel(type, t)}
-      className="min-w-0 rounded-xl border border-gray-200 bg-white"
+      className="min-w-0 rounded-xl border border-border bg-background"
     >
-      <h2 className="flex min-h-11 items-center border-b border-gray-200 px-3 py-1 text-sm font-bold tracking-wide text-gray-600 uppercase [overflow-wrap:anywhere]">
+      <h2 className="flex min-h-11 items-center border-b border-border px-3 py-1 text-sm font-bold tracking-wide text-soft-foreground uppercase [overflow-wrap:anywhere]">
         {title ?? workspaceWidgetLabel(type, t)}
       </h2>
       <div className="min-w-0 overflow-auto p-3">{content}</div>
@@ -263,6 +264,15 @@ function WorkspaceWidgetContent({
       }
       case "consents":
         return frame(<EncounterConsentsTab />);
+      case "referrals":
+        // Referral access is granted separately from clinical data access.
+        return (
+          <EncounterReferralsWidget
+            title={title}
+            showEmpty={showEmpty}
+            config={config}
+          />
+        );
     }
   }
 
@@ -335,7 +345,9 @@ function WorkspaceWidgetContent({
       );
     }
     case "quick_actions":
-      return facilityId && canWriteClinicalData ? (
+      return facilityId &&
+        (canWriteClinicalData ||
+          context.selectedEncounterPermissions?.canCreateReferral) ? (
         <QuickActions {...actionProps} />
       ) : null;
     case "favorite_forms":

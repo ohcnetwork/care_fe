@@ -1,6 +1,5 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { ChevronsUpDown as CaretSortIcon, Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,7 +43,7 @@ interface QuestionnaireSearchProps {
   onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
   facilityId?: string;
-  appearance?: "default" | "careui";
+
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
 }
@@ -58,14 +57,13 @@ export function QuestionnaireSearch({
   onSelect = (selected) => navigate(`questionnaire/${selected.id}`),
   subjectType,
   facilityId,
-  appearance = "default",
+
   disabled,
 }: QuestionnaireSearchProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const isCareUI = appearance === "careui";
 
   const {
     data,
@@ -114,8 +112,7 @@ export function QuestionnaireSearch({
     <Command
       shouldFilter={false}
       className={cn(
-        isCareUI &&
-          "rounded-xl bg-white p-1 text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border [&_[data-slot=command-input-wrapper]]:border-neutral-300/30 [&_[data-slot=command-input-wrapper]]:bg-neutral-300/30 [&_[data-slot=command-input-wrapper]]:px-2 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[data-slot=command-group]]:text-neutral-950",
+        "rounded-xl bg-white p-1 text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border [&_[data-slot=command-input-wrapper]]:border-neutral-300/30 [&_[data-slot=command-input-wrapper]]:bg-neutral-300/30 [&_[data-slot=command-input-wrapper]]:px-2 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[data-slot=command-group]]:text-neutral-950",
       )}
     >
       <CommandInput
@@ -123,13 +120,13 @@ export function QuestionnaireSearch({
         placeholder={t("search_forms")}
         className={cn(
           "outline-hidden border-none ring-0 shadow-none text-base sm:text-sm",
-          isCareUI && "h-full text-neutral-950 placeholder:text-neutral-500",
+          "h-full text-neutral-950 placeholder:text-neutral-500",
         )}
         onValueChange={setSearch}
         value={search}
         autoFocus={!isIOSDevice}
       />
-      <CommandList className={cn("overflow-y-auto", isCareUI && "max-h-72")}>
+      <CommandList className={cn("overflow-y-auto", "max-h-72")}>
         {isLoading ? (
           <div
             role="status"
@@ -162,8 +159,7 @@ export function QuestionnaireSearch({
                   value={item.id}
                   disabled={disabled}
                   className={cn(
-                    isCareUI &&
-                      "min-h-12 rounded-md px-2.5 text-base text-neutral-950 data-[selected=true]:bg-neutral-100 data-[selected=true]:text-neutral-950 md:min-h-10 md:text-sm",
+                    "min-h-12 rounded-md px-2.5 text-base text-neutral-950 data-[selected=true]:bg-neutral-100 data-[selected=true]:text-neutral-950 md:min-h-10 md:text-sm",
                   )}
                   onSelect={() => {
                     onSelect(item);
@@ -184,8 +180,7 @@ export function QuestionnaireSearch({
                   onSelect={() => void fetchNextPage()}
                   className={cn(
                     "justify-center text-primary-700",
-                    isCareUI &&
-                      "min-h-12 text-emerald-800 data-[selected=true]:bg-neutral-100 data-[selected=true]:text-emerald-800 md:min-h-10",
+                    "min-h-12 text-emerald-800 data-[selected=true]:bg-neutral-100 data-[selected=true]:text-emerald-800 md:min-h-10",
                   )}
                 >
                   {isFetchingNextPage ? t("loading") : t("load_more")}
@@ -228,7 +223,7 @@ export function QuestionnaireSearch({
         <DrawerContent
           className={cn(
             "min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg",
-            isCareUI && "border-neutral-200 bg-white text-neutral-950",
+            "border-neutral-200 bg-white text-neutral-950",
           )}
         >
           <DrawerTitle className="sr-only">{t("forms")}</DrawerTitle>
@@ -273,8 +268,7 @@ export function QuestionnaireSearch({
         aria-label={t("forms")}
         className={cn(
           "w-[300px] p-0",
-          isCareUI &&
-            "w-[min(24rem,calc(100vw-2rem))] rounded-xl border-neutral-200 bg-white text-neutral-950 shadow-md",
+          "w-[min(24rem,calc(100vw-2rem))] rounded-xl border-neutral-200 bg-white text-neutral-950 shadow-md",
         )}
         align="start"
       >

@@ -261,10 +261,7 @@ export function InstructionEditor({
             <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-(--radix-popover-trigger-width) p-0"
-          align="start"
-        >
+        <PopoverContent className="w-(--anchor-width) p-0" align="start">
           <Command>
             <CommandInput placeholder={t("search")} aria-label={t("search")} />
             <CommandList>

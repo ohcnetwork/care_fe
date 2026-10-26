@@ -13,7 +13,7 @@ import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistory
 import query from "@/Utils/request/query";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { Separator } from "@radix-ui/react-separator";
+import { Separator } from "@/components/ui/separator";
 
 function ClinicalHistoryPage({
   patientId,

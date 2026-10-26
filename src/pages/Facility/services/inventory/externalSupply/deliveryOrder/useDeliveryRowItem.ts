@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 
@@ -21,6 +20,7 @@ import productApi from "@/types/inventory/product/productApi";
 import query from "@/Utils/request/query";
 
 import { add, divide, multiply, round } from "@/Utils/decimal";
+import { dateQueryString } from "@/Utils/utils";
 import {
   SupplyDeliveryFormValues,
   SupplyDeliveryItemValues,
@@ -60,7 +60,7 @@ export function useDeliveryRowItem({
     unit_price: unitPrice,
     purchase_price: purchasePrice,
     total_purchase_price: totalPurchasePrice,
-    supplied_item_quantity: quantity = "1",
+    supplied_item_quantity: quantity = "",
     supplied_item_pack_quantity: packQuantity,
     supplied_item_pack_size: packSize,
     tax_components: taxComponents,
@@ -68,7 +68,13 @@ export function useDeliveryRowItem({
     informational_components: informationalComponents,
     charge_item_category: chargeItemCategory,
     is_tax_inclusive: isTaxInclusive,
+    is_total_purchase_price_edited: isTotalPurchasePriceEdited,
+    is_charge_item_edited: isChargeItemEdited,
+    _created_charge_item_definition: createdChargeItemDefinition,
+    _created_product: createdProduct,
+    replaces_delivery: replacesDelivery,
   } = item || {};
+  const isReplacement = Boolean(replacesDelivery);
 
   // Helper to set a form field value
   const setField = useCallback(
@@ -88,6 +94,8 @@ export function useDeliveryRowItem({
       batch_number: "",
       expiry_date: "",
       charge_item_definition: undefined,
+      _created_charge_item_definition: undefined,
+      _created_product: undefined,
       unit_price: "0",
       purchase_price: undefined,
       total_purchase_price: undefined,
@@ -96,8 +104,11 @@ export function useDeliveryRowItem({
       discount_components: [],
       charge_item_category: undefined,
       is_manually_edited: false,
-      supplied_item_pack_quantity: 1,
+      is_total_purchase_price_edited: false,
+      is_charge_item_edited: false,
+      supplied_item_pack_quantity: undefined,
       supplied_item_pack_size: 1,
+      supplied_item_quantity: "",
     };
 
     Object.entries(fieldsToReset).forEach(([field, value]) => {
@@ -106,12 +117,19 @@ export function useDeliveryRowItem({
     setIsCreatingNew(false);
   }, [setField]);
 
-  // Mark item as manually edited (creating new product)
-  const markAsEdited = useCallback(() => {
-    setField("is_manually_edited", true);
-    setField("supplied_item", undefined);
-    setIsCreatingNew(true);
-  }, [setField]);
+  // Keep the reference product until preparation succeeds so retries retain its metadata.
+  const markAsEdited = useCallback(
+    (chargeItemChanged = false) => {
+      setField("is_manually_edited", true);
+      if (chargeItemChanged) {
+        setField("is_charge_item_edited", true);
+      }
+      setField("_created_charge_item_definition", undefined);
+      setField("_created_product", undefined);
+      setIsCreatingNew(true);
+    },
+    [setField],
+  );
 
   // Fetch products for selected product knowledge
   const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
@@ -158,33 +176,26 @@ export function useDeliveryRowItem({
   // Fill form from existing product
   const fillFromProduct = useCallback(
     (product: ProductRead) => {
+      const currentPackQuantity = form.getValues(
+        `items.${index}.supplied_item_pack_quantity`,
+      );
+      const currentTotalPurchasePrice = form.getValues(
+        `items.${index}.total_purchase_price`,
+      );
       resetFields();
 
       setField("supplied_item", product);
+      setField("supplied_item_pack_quantity", currentPackQuantity);
+      setField("purchase_price", product.purchase_price ?? undefined);
+      if (isReplacement) {
+        setField("total_purchase_price", currentTotalPurchasePrice);
+      }
       setField("batch_number", product.batch?.lot_number || "");
       if (product.expiration_date) {
-        setField(
-          "expiry_date",
-          format(new Date(product.expiration_date), "yyyy-MM-dd"),
-        );
+        setField("expiry_date", dateQueryString(product.expiration_date));
       }
       if (product.standard_pack_size) {
         setField("supplied_item_pack_size", product.standard_pack_size);
-      }
-
-      // Auto-populate tpr = purchase_price × quantity
-      if (product.purchase_price != null) {
-        const packQty =
-          form.getValues(`items.${index}.supplied_item_pack_quantity`) || 1;
-        const packSz =
-          product.standard_pack_size ||
-          form.getValues(`items.${index}.supplied_item_pack_size`) ||
-          1;
-        const qty = packQty * packSz;
-        setField(
-          "total_purchase_price",
-          round(multiply(product.purchase_price, qty)),
-        );
       }
 
       const chargeItemDef = product.charge_item_definition;
@@ -228,7 +239,7 @@ export function useDeliveryRowItem({
         }
       }
     },
-    [resetFields, setField, form, index],
+    [resetFields, setField, form, index, isReplacement],
   );
 
   // Auto-fill from last product when product knowledge is selected
@@ -244,8 +255,9 @@ export function useDeliveryRowItem({
   // Whether category selection is needed for charge item definition
   const needsCategorySelection = useMemo(() => {
     if (!productKnowledge) return false;
+    if (isCreatingNew) return true;
     if (suppliedItem?.charge_item_definition?.category) return false;
-    return isCreatingNew || products.length === 0;
+    return products.length === 0;
   }, [productKnowledge, suppliedItem, products.length, isCreatingNew]);
 
   // Available tax components from facility
@@ -282,12 +294,12 @@ export function useDeliveryRowItem({
 
   // Calculate base price from MRP when tax inclusive is enabled
   useEffect(() => {
-    if (isTaxInclusive && mrpValue > 0) {
+    if (isTaxInclusive && isChargeItemEdited && mrpValue > 0) {
       let calculatedBasePrice = divide(
         mrpValue,
         add(1, divide(totalTaxFactor, 100)),
       );
-      if (packSize && packQuantity && packSize > 0)
+      if (packSize && packSize > 0)
         calculatedBasePrice = divide(calculatedBasePrice, packSize);
       const newUnitPrice = round(calculatedBasePrice);
       // Only update if value actually changed to prevent infinite loops
@@ -297,41 +309,84 @@ export function useDeliveryRowItem({
     }
   }, [
     isTaxInclusive,
+    isChargeItemEdited,
     mrpValue,
     totalTaxFactor,
     packSize,
-    packQuantity,
     unitPrice,
     setField,
   ]);
 
   // Auto-calculate quantity when pack quantity or pack size changes
+  const hasValidPackQuantity =
+    Number.isInteger(packQuantity) && (packQuantity ?? 0) > 0;
+  const hasValidPackSize = Number.isInteger(packSize) && (packSize ?? 0) > 0;
   useEffect(() => {
-    if (packQuantity && packSize && packQuantity > 0 && packSize > 0) {
-      const calculatedQuantity = packQuantity * packSize;
-      setField("supplied_item_quantity", round(calculatedQuantity));
+    const calculatedQuantity =
+      hasValidPackQuantity && hasValidPackSize
+        ? round(multiply(packQuantity!, packSize!))
+        : "";
+    if (calculatedQuantity !== quantity) {
+      setField("supplied_item_quantity", calculatedQuantity);
     }
-  }, [packQuantity, packSize, setField]);
+  }, [
+    packQuantity,
+    packSize,
+    hasValidPackQuantity,
+    hasValidPackSize,
+    quantity,
+    setField,
+  ]);
 
-  // Auto-calculate purchase_price = tpr / (pack_size × pack_quantity)
+  // TPR is the price of one pack (purchase_price × pack_size), not a line total.
+  // New rows derive it from the selected product once a pack quantity is entered.
+  // Manual totals and saved delivery totals remain under the user's control.
   useEffect(() => {
     if (
-      totalPurchasePrice &&
-      packSize &&
-      packSize > 0 &&
-      packQuantity &&
-      packQuantity > 0
+      !isReplacement &&
+      suppliedItem &&
+      !isTotalPurchasePriceEdited &&
+      !createdChargeItemDefinition &&
+      !createdProduct
     ) {
-      const newPurchasePrice = round(divide(totalPurchasePrice, packSize));
+      const knownPurchasePrice = suppliedItem.purchase_price ?? undefined;
+      const calculatedTotal =
+        knownPurchasePrice != null && hasValidPackQuantity && hasValidPackSize
+          ? round(multiply(knownPurchasePrice, packSize!))
+          : undefined;
+      if (calculatedTotal !== totalPurchasePrice) {
+        setField("total_purchase_price", calculatedTotal);
+      }
+      if (purchasePrice !== knownPurchasePrice) {
+        setField("purchase_price", knownPurchasePrice);
+      }
+      return;
+    }
+
+    if (totalPurchasePrice && hasValidPackSize && hasValidPackQuantity) {
+      const newPurchasePrice = round(divide(totalPurchasePrice, packSize!));
       if (newPurchasePrice !== purchasePrice) {
         setField("purchase_price", newPurchasePrice);
       }
     } else {
-      if (purchasePrice) {
+      if (purchasePrice && !isReplacement) {
         setField("purchase_price", undefined);
       }
     }
-  }, [totalPurchasePrice, packSize, packQuantity, purchasePrice, setField]);
+  }, [
+    totalPurchasePrice,
+    packSize,
+    packQuantity,
+    hasValidPackQuantity,
+    hasValidPackSize,
+    purchasePrice,
+    isReplacement,
+    suppliedItem,
+    isTotalPurchasePriceEdited,
+    createdChargeItemDefinition,
+    createdProduct,
+    setField,
+  ]);
 
   // Update informational component
   const updateInformationalComponent = useCallback(
@@ -348,7 +403,7 @@ export function useDeliveryRowItem({
         ...(value > 0 ? [newComponent] : []),
       ];
       setField("informational_components", updated);
-      markAsEdited();
+      markAsEdited(true);
     },
     [informationalComponents, setField, markAsEdited],
   );

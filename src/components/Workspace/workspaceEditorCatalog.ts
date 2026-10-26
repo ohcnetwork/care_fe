@@ -13,6 +13,7 @@ import {
   FileHeart,
   FileText,
   FlaskConical,
+  GitPullRequestArrow,
   HeartPulse,
   History,
   Hospital,
@@ -106,6 +107,13 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     descriptionKey: "workspace_recent_encounters_description",
     icon: CalendarClock,
     group: "history",
+  },
+  {
+    type: "referrals",
+    labelKey: "referrals",
+    descriptionKey: "workspace_widget_referrals_description",
+    icon: GitPullRequestArrow,
+    group: "workflow",
   },
   {
     type: "reports",

@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import {
   CommandDialog,
   CommandEmpty,
@@ -31,8 +32,11 @@ import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
+import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
+import { useEncounterWorkspaces } from "@/pages/Encounters/workspace/useEncounterWorkspaces";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { SYSTEM_PAGE_KEYS } from "@/types/workspace/encounterWorkspace";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -66,6 +70,7 @@ export function EncounterCommandDialog({
   const {
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
+    selectedEncounterPermissions,
     actions,
     selectedEncounterId,
     primaryEncounterId,
@@ -73,6 +78,17 @@ export function EncounterCommandDialog({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { defaults, list, workspace } = useEncounterWorkspaces(
+    encounter.encounter_class,
+  );
+  const canNavigateToReferrals =
+    !defaults.isLoading &&
+    !list.isLoading &&
+    (!workspace ||
+      parseEncounterWorkspace(workspace.template, SYSTEM_PAGE_KEYS).pages.some(
+        (page) =>
+          page.kind === "system" && page.key === "referrals" && !page.hidden,
+      ));
 
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
@@ -125,10 +141,13 @@ export function EncounterCommandDialog({
         selectedEncounterId !== primaryEncounterId
       ) {
         const separator = path.includes("?") ? "&" : "?";
-        return `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`;
+        return appendReferralNativeContext(
+          `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`,
+          window.location.search,
+        );
       }
 
-      return baseUrl;
+      return appendReferralNativeContext(baseUrl, window.location.search);
     },
     [encounter, selectedEncounterId, primaryEncounterId],
   );
@@ -166,6 +185,7 @@ export function EncounterCommandDialog({
         immunizations: () => navigate(buildEncounterUrl("/immunizations")),
         responses: () => navigate(buildEncounterUrl("/responses")),
         files: () => navigate(buildEncounterUrl("/files")),
+        referrals: () => navigate(buildEncounterUrl("/referrals")),
         notes: () => navigate(buildEncounterUrl("/notes")),
         devices: () => navigate(buildEncounterUrl("/devices")),
         consents: () => navigate(buildEncounterUrl("/consents")),
@@ -333,6 +353,18 @@ export function EncounterCommandDialog({
       items: actionItems,
     });
 
+    if (
+      canNavigateToReferrals &&
+      (selectedEncounterPermissions.canReadReferral ||
+        selectedEncounterPermissions.canCreateReferral)
+    ) {
+      actionItems.push({
+        id: "referrals",
+        label: t("referrals"),
+        icon: <ArrowBigRight />,
+      });
+    }
+
     // Go to navigation - always available
     groups.push({
       group: t("go_to"),
@@ -434,7 +466,10 @@ export function EncounterCommandDialog({
     getShortcutDisplay,
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
+    canNavigateToReferrals,
     encounter,
+    selectedEncounterPermissions.canReadReferral,
+    selectedEncounterPermissions.canCreateReferral,
   ]);
 
   const findRecentActions = useCallback(

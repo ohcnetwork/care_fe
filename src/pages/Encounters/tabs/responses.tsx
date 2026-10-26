@@ -168,6 +168,7 @@ interface EncounterResponsesTabProps {
   encounterId?: string;
   canAccess?: boolean;
   readOnly?: boolean;
+  embedded?: boolean;
 }
 
 export const EncounterResponsesTab = ({
@@ -175,6 +176,7 @@ export const EncounterResponsesTab = ({
   encounterId,
   canAccess = true,
   readOnly = false,
+  embedded = false,
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
   const scoped = useIsScopedQueryParams();
@@ -282,6 +284,7 @@ export const EncounterResponsesTab = ({
             <QuestionnaireResponsesList
               encounterId={encounterId}
               patientId={patientId}
+              embedded={embedded}
               canAccess={canAccess}
               readOnly={readOnly}
               questionnaireSlug={questionnaireSlug}
@@ -304,6 +307,7 @@ export const EncounterResponsesTab = ({
                         patientId={patientId}
                         encounterId={encounterId}
                         readOnly={readOnly}
+                        embedded={embedded}
                         showTitle={!questionnaireSlug}
                         onTitleClick={() => {
                           setQueryParams({

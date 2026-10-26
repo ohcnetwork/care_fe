@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { NotebookPen } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,16 +48,17 @@ export function NoteControl({
       <div className="ml-auto flex shrink-0 items-center gap-1.5 self-center pl-1.5">
         <span aria-hidden className="h-6 w-px bg-gray-200" />
         <PopoverTrigger asChild>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             aria-label={viewOnly ? t("note") : t("add_note")}
             aria-describedby={response.note ? noteStateId : undefined}
             disabled={frozen}
-            className="relative flex size-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="p-0 relative flex size-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <NotebookPen className="size-4" />
             {noteIndicator}
-          </button>
+          </Button>
         </PopoverTrigger>
       </div>
       <PopoverContent align="end" className="w-72">

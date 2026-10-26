@@ -8,6 +8,8 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
 import { useDisableSmoothScroll } from "@/components/QuestionnaireV2/shared/useDisableSmoothScroll";
@@ -22,6 +24,7 @@ export function FillShell({
   onMinimize,
   exitDisabled = false,
   minimizeDisabled = false,
+  contained = false,
   tabs,
 }: {
   children: React.ReactNode;
@@ -29,6 +32,8 @@ export function FillShell({
   onMinimize?: () => void;
   exitDisabled?: boolean;
   minimizeDisabled?: boolean;
+  /** Use the host's fullscreen frame (for example an accessible dialog). */
+  contained?: boolean;
   /** Content of the header strip's left side (tab list or plain title). */
   tabs?: React.ReactNode;
 }) {
@@ -119,7 +124,12 @@ export function FillShell({
     // Cancel AppRouter's page-wrapper p-2 while the mobile shell stays in flow.
     <div
       ref={shellRef}
-      className="-m-2 flex min-h-dvh flex-col bg-gray-100 [--fill-shell-header-height:56px] md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden"
+      className={cn(
+        "flex flex-col bg-background [--fill-shell-header-height:56px]",
+        contained
+          ? "h-full min-h-0 overflow-hidden"
+          : "-m-2 min-h-dvh md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden",
+      )}
       onKeyDown={minimizeOnEscape}
     >
       {/* min-w-0 + overflow on the strip: a long questionnaire title (or

@@ -15,6 +15,7 @@ import type { LocalFillDraftSummary } from "@/components/QuestionnaireV2/fill/dr
 import { discardLocalFillDraft } from "@/components/QuestionnaireV2/fill/draft/fillDraftList";
 import { useLocalFillDrafts } from "@/components/QuestionnaireV2/fill/draft/useLocalFillDrafts";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -126,7 +127,10 @@ export function FormSubmissionDrafts({
       title: draft.title || t("questionnaire_one"),
       savedAt: draft.savedAt,
       formCount: draft.formCount,
-      url: `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}?${params}`,
+      url: appendReferralNativeContext(
+        `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}?${params}`,
+        window.location.search,
+      ),
       draft,
     };
   });
@@ -141,7 +145,10 @@ export function FormSubmissionDrafts({
       title: questionnaire.title,
       savedAt: draft.modified_date || draft.created_date,
       formCount: 1,
-      url: `${fillBase}/${encodeURIComponent(questionnaire.id)}?${params}`,
+      url: appendReferralNativeContext(
+        `${fillBase}/${encodeURIComponent(questionnaire.id)}?${params}`,
+        window.location.search,
+      ),
       draft,
     });
   }

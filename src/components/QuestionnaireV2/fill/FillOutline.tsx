@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { CheckCheck, Dot } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,7 +45,8 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const row = (item: TreeItem, indent: boolean) => {
     const active = activeQuestionId === item.question.id;
     return (
-      <button
+      <Button
+        variant="ghost"
         key={item.question.id}
         type="button"
         aria-current={active ? "true" : undefined}
@@ -55,14 +57,17 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
           scrollToQuestion(item.question.id, { focus: event.detail === 0 })
         }
         className={cn(
-          "relative flex w-full items-center gap-2 rounded-lg py-1.5 pr-2 text-left text-sm",
-          indent ? "min-h-9 px-3" : "min-h-10 pl-2",
-          active
-            ? "font-semibold text-indigo-600"
-            : cn(
-                "font-medium hover:bg-gray-100",
-                indent ? "text-gray-700" : "text-gray-900",
-              ),
+          "h-auto justify-start whitespace-normal",
+          cn(
+            "relative flex w-full items-center gap-2 rounded-lg py-1.5 pr-2 text-left text-sm",
+            indent ? "min-h-9 px-3" : "min-h-10 pl-2",
+            active
+              ? "font-semibold text-indigo-600"
+              : cn(
+                  "font-medium hover:bg-gray-100",
+                  indent ? "text-gray-700" : "text-gray-900",
+                ),
+          ),
         )}
       >
         <span className="min-w-0 flex-1">
@@ -84,7 +89,7 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
             className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-l-full bg-indigo-600"
           />
         )}
-      </button>
+      </Button>
     );
   };
 

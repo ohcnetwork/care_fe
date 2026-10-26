@@ -1,13 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Loader2,
-  Settings2,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Settings2, Trash2 } from "lucide-react";
 import { Link, navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useId, useState } from "react";
 import { flushSync } from "react-dom";
@@ -396,7 +390,7 @@ export function WorkspaceForm({
               }
               className="h-10 w-full rounded-lg px-5 shadow-none sm:w-auto"
             >
-              {save.isPending && <Loader2 className="size-4 animate-spin" />}
+              {save.isPending && <Spinner className="size-4 animate-spin" />}
               {t(existing ? "save_changes" : "create_workspace")}
             </Button>
           </div>
@@ -451,13 +445,13 @@ export function WorkspaceForm({
                         {t("workspace_unsaved_changes")}
                       </span>
                     )}
-                    <ChevronDown className="size-4 shrink-0 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="size-4 shrink-0 text-gray-400 transition-transform group-data-open:rotate-180" />
                   </span>
                 </CollapsibleTrigger>
               </h2>
               <CollapsibleContent
                 forceMount
-                className="space-y-4 border-t border-gray-100 px-4 py-4 data-[state=closed]:hidden sm:px-5"
+                className="space-y-4 border-t border-gray-100 px-4 py-4 data-closed:hidden sm:px-5"
               >
                 <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
                   <FormField
@@ -706,7 +700,7 @@ export function WorkspaceForm({
                     }}
                   >
                     {remove.isPending && (
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                     )}
                     {t("delete")}
                   </AlertDialogAction>

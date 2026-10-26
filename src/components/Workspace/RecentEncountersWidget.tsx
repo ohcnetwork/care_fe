@@ -120,7 +120,7 @@ export function RecentEncountersWidget({
         ) : isError ? (
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         ) : !encounters.length ? (
-          <p className="px-2 py-5 text-sm text-gray-500">
+          <p className="px-2 py-5 text-sm text-soft-foreground">
             {t(
               careTeamUser
                 ? "workspace_encounters_none_for_care_team"
@@ -128,7 +128,7 @@ export function RecentEncountersWidget({
             )}
           </p>
         ) : (
-          <ul className="@container divide-y divide-gray-100">
+          <ul className="@container divide-y divide-soft-border">
             {encounters.map((encounter) => {
               const ClassIcon =
                 ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
@@ -147,9 +147,9 @@ export function RecentEncountersWidget({
                   )}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-gray-900">
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-foreground">
                       <ClassIcon
-                        className="size-4 shrink-0 text-gray-500"
+                        className="size-4 shrink-0 text-soft-foreground"
                         aria-hidden="true"
                       />
                       <time
@@ -162,7 +162,10 @@ export function RecentEncountersWidget({
                           "DD MMM YYYY",
                         )}
                       </time>
-                      <span aria-hidden="true" className="text-gray-300">
+                      <span
+                        aria-hidden="true"
+                        className="text-disabled-foreground"
+                      >
                         ·
                       </span>
                       <span>
@@ -178,7 +181,7 @@ export function RecentEncountersWidget({
                         </Badge>
                       )}
                     </p>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-soft-foreground">
                       <span className="flex min-w-0 items-center gap-1">
                         <Users className="size-3 shrink-0" aria-hidden="true" />
                         <span className="truncate">

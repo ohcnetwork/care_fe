@@ -191,13 +191,13 @@ export function CurrentMedicationsWidget({
             }}
           />
         ) : !rows.length ? (
-          <p className="px-2 py-5 text-sm text-gray-500">
+          <p className="px-2 py-5 text-sm text-soft-foreground">
             {t("no_active_medication_recorded")}
           </p>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50">
+              <TableRow className="bg-soft-background">
                 <TableHead className="h-8 text-xs">{t("medicine")}</TableHead>
                 <TableHead className="h-8 text-xs">{t("dosage")}</TableHead>
                 <TableHead className="h-8 text-xs">{t("duration")}</TableHead>
@@ -209,13 +209,13 @@ export function CurrentMedicationsWidget({
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="py-2 text-sm font-medium break-words whitespace-normal text-gray-900">
+                  <TableCell className="py-2 text-sm font-medium break-words whitespace-normal text-foreground">
                     {row.name}
                   </TableCell>
-                  <TableCell className="py-2 text-sm break-words whitespace-normal text-gray-700">
+                  <TableCell className="py-2 text-sm break-words whitespace-normal text-muted-foreground">
                     {row.dosage || "-"}
                   </TableCell>
-                  <TableCell className="py-2 text-sm whitespace-nowrap text-gray-700">
+                  <TableCell className="py-2 text-sm whitespace-nowrap text-muted-foreground">
                     {row.since ? (
                       <>
                         <time
@@ -226,7 +226,7 @@ export function CurrentMedicationsWidget({
                             date: formatDateTime(row.since, "DD MMM YYYY"),
                           })}
                         </time>
-                        <span className="block text-xs text-gray-500">
+                        <span className="block text-xs text-soft-foreground">
                           {relativeDate(row.since, true)}
                         </span>
                       </>
@@ -234,13 +234,13 @@ export function CurrentMedicationsWidget({
                       "-"
                     )}
                   </TableCell>
-                  <TableCell className="py-2 text-sm whitespace-nowrap text-gray-700">
+                  <TableCell className="py-2 text-sm whitespace-nowrap text-muted-foreground">
                     {row.prescriber === "you" ? (
                       <span className="font-medium text-primary-700">
                         {t("workspace_medications_prescribed_by_you")}
                       </span>
                     ) : row.prescriber === "outside" ? (
-                      <span className="text-gray-500">
+                      <span className="text-soft-foreground">
                         {t("workspace_medications_outside_rx")}
                       </span>
                     ) : (
