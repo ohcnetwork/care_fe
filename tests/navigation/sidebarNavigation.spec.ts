@@ -73,6 +73,7 @@ test.describe("Shared workspace navigation", () => {
         ["Overview", "/overview"],
         ["Appointments", "/appointments"],
         ["Queues", "/queues"],
+        ["Search patients", "/patients"],
         ["Services", "/services"],
         ["Resource", "/resource"],
         ["Users", "/users"],
@@ -89,9 +90,6 @@ test.describe("Shared workspace navigation", () => {
       await navigation
         .getByRole("button", { name: "Patients", exact: true })
         .click();
-      await expect(
-        navigation.getByRole("link", { name: "Search patients", exact: true }),
-      ).toHaveAttribute("href", `${facilityPath}/patients`);
       await expect(
         navigation.getByRole("link", { name: "Locations", exact: true }),
       ).toHaveAttribute("href", `${facilityPath}/encounters/locations`);
