@@ -65,6 +65,26 @@ export const QuickActions = ({
 
   if (!canWriteClinicalData && !canCreateReferral) return null;
 
+  const referralAction = canCreateReferral && selectedEncounter && (
+    <CreateReferralDialog
+      key={selectedEncounter.id}
+      encounter={selectedEncounter}
+    >
+      <QuickAction
+        compact
+        className={
+          canWriteClinicalData
+            ? "col-span-full @min-[38rem]:col-span-1"
+            : undefined
+        }
+        icon={
+          <GitPullRequestArrow className="text-primary-700" strokeWidth={1.5} />
+        }
+        title={t("referral_new")}
+      />
+    </CreateReferralDialog>
+  );
+
   return (
     <div
       {...props}
@@ -113,9 +133,7 @@ export const QuickActions = ({
             "grid min-w-0 flex-1 gap-1.5",
             !canWriteClinicalData
               ? "grid-cols-1"
-              : canCreateReferral
-                ? "grid-cols-2 @min-[38rem]:grid-cols-5"
-                : "grid-cols-2 @min-[38rem]:grid-cols-[repeat(4,auto)]",
+              : "grid-cols-2 @min-[38rem]:grid-cols-[repeat(4,auto)]",
           )}
         >
           {canWriteClinicalData && (
@@ -164,25 +182,14 @@ export const QuickActions = ({
               />
             </>
           )}
-          {canCreateReferral && selectedEncounter && (
-            <CreateReferralDialog
-              key={selectedEncounter.id}
-              encounter={selectedEncounter}
-            >
-              <QuickAction
-                compact
-                icon={
-                  <GitPullRequestArrow
-                    className="text-primary-700"
-                    strokeWidth={1.5}
-                  />
-                }
-                title={t("referral_new")}
-              />
-            </CreateReferralDialog>
-          )}
+          {!canWriteClinicalData && referralAction}
           {canWriteClinicalData && (
-            <CollapsibleContent className="col-span-full grid grid-cols-2 gap-1.5 data-closed:hidden">
+            <CollapsibleContent
+              className={cn(
+                "col-span-full grid grid-cols-2 gap-1.5 data-closed:hidden",
+                canCreateReferral && "@min-[38rem]:grid-cols-3",
+              )}
+            >
               <QuickAction
                 compact
                 icon={
@@ -203,6 +210,7 @@ export const QuickActions = ({
                 href={formLink("diagnosis")}
                 actionId="add-diagnosis"
               />
+              {referralAction}
             </CollapsibleContent>
           )}
         </div>
