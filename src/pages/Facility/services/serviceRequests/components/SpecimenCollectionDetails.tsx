@@ -59,12 +59,14 @@ export function SpecimenCollectionDetails({
   return (
     <Card className="min-w-0 rounded-xl overflow-hidden border-none shadow-md">
       <Table className="table-fixed">
-        <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+        <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
           <TableRow>
-            <TableHead className="w-2/5 text-gray-700 whitespace-normal">
+            <TableHead className="w-2/5 text-muted-foreground whitespace-normal">
               {t("field")}
             </TableHead>
-            <TableHead className="text-gray-700">{t("details")}</TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("details")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,11 +74,11 @@ export function SpecimenCollectionDetails({
             <TableRow key={label}>
               <TableHead
                 scope="row"
-                className="text-gray-700 whitespace-normal break-words"
+                className="text-muted-foreground whitespace-normal break-words"
               >
                 {t(label)}
               </TableHead>
-              <TableCell className="text-gray-950 font-semibold whitespace-normal break-words">
+              <TableCell className="text-foreground font-semibold whitespace-normal break-words">
                 {value}
               </TableCell>
             </TableRow>

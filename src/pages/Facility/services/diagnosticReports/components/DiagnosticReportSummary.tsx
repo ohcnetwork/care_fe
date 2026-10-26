@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Markdown } from "@/components/ui/markdown";
 import { cn } from "@/lib/utils";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -35,7 +36,7 @@ export function DiagnosticReportSummary({
           {report.code ? (
             <div className="flex flex-col gap-1">
               {report.code.display || report.code.code}
-              <span className="text-xs font-normal text-gray-500 break-all">
+              <span className="text-xs font-normal text-muted-foreground break-all">
                 {report.code.system} <br />
                 {report.code.code}
               </span>
@@ -48,7 +49,7 @@ export function DiagnosticReportSummary({
       <CardContent>
         <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="min-w-0">
-            <dt className="text-sm font-medium text-gray-500">
+            <dt className="text-sm font-medium text-muted-foreground">
               {t("category")}
             </dt>
             <dd className="break-words">
@@ -56,7 +57,9 @@ export function DiagnosticReportSummary({
             </dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">{t("status")}</dt>
+            <dt className="text-sm font-medium text-muted-foreground">
+              {t("status")}
+            </dt>
             <dd>
               <Badge variant={DIAGNOSTIC_REPORT_STATUS_COLORS[report.status]}>
                 {t(report.status)}
@@ -65,7 +68,7 @@ export function DiagnosticReportSummary({
           </div>
           {createdDate && (
             <div>
-              <dt className="text-sm font-medium text-gray-500">
+              <dt className="text-sm font-medium text-muted-foreground">
                 {t("report_date")}
               </dt>
               <dd>{format(new Date(createdDate), "dd-MM-yyyy")}</dd>
@@ -73,7 +76,7 @@ export function DiagnosticReportSummary({
           )}
           {requester && (
             <div className="min-w-0">
-              <dt className="text-sm font-medium text-gray-500">
+              <dt className="text-sm font-medium text-muted-foreground">
                 {t("requested_by")}
               </dt>
               <dd className="break-words">{formatName(requester)}</dd>
@@ -81,7 +84,7 @@ export function DiagnosticReportSummary({
           )}
           {report.note && (
             <div className="col-span-full min-w-0">
-              <dt className="text-sm font-medium text-gray-500">
+              <dt className="text-sm font-medium text-muted-foreground">
                 {t("notes")}
               </dt>
               <dd className="whitespace-pre-wrap break-words">{report.note}</dd>
@@ -89,11 +92,15 @@ export function DiagnosticReportSummary({
           )}
           {report.conclusion && (
             <div className="col-span-full min-w-0">
-              <dt className="text-sm font-medium text-gray-500">
+              <dt className="text-sm font-medium text-muted-foreground">
                 {t("conclusion")}
               </dt>
-              <dd className="whitespace-pre-wrap break-words">
-                {report.conclusion}
+              <dd>
+                <Markdown
+                  richText
+                  content={report.conclusion}
+                  className="prose-sm wrap-anywhere [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+                />
               </dd>
             </div>
           )}

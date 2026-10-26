@@ -46,6 +46,7 @@ interface FileUploadDialogProps {
   /** A completed upload can require a separate save/link operation. Retrying
    * this action must never upload the selected file again. */
   completion?: FileUploadCompletion;
+  instanceId?: string;
 }
 
 export default function FileUploadDialog({
@@ -58,12 +59,14 @@ export default function FileUploadDialog({
   children,
   uploadLabel,
   completion,
+  instanceId,
 }: FileUploadDialogProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const combineId = useId();
   const descriptionId = useId();
   const [isPdf, setIsPdf] = useState(false);
+  const idPrefix = instanceId ? `${instanceId}-` : "";
   const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([]);
   const pending = fileUpload.uploading || completion?.pending === true;
   const hasFiles = fileUpload.files.length > 0;
@@ -86,12 +89,12 @@ export default function FileUploadDialog({
 
   const fileNameField = (index: number) => (
     <Field>
-      <FieldLabel htmlFor={`upload-file-name-${index}`}>
+      <FieldLabel htmlFor={`${idPrefix}upload-file-name-${index}`}>
         {t("file_name")}
       </FieldLabel>
       <Input
         name={`file_name_${index}`}
-        id={`upload-file-name-${index}`}
+        id={`${idPrefix}upload-file-name-${index}`}
         required
         value={fileUpload.fileNames[index] || ""}
         disabled={pending}
@@ -247,7 +250,7 @@ export default function FileUploadDialog({
               else void fileUpload.handleFileUpload(associatingId, isPdf);
             }}
             disabled={pending || (!completion && !hasFiles)}
-            id="upload_file_button"
+            id={`${idPrefix}upload_file_button`}
           >
             {pending && <Spinner className="size-4 animate-spin" />}
             {completion ? completion.retryLabel : (uploadLabel ?? t("upload"))}

@@ -165,7 +165,10 @@ export default function TagAssignmentSheet({
         : entityConfig.removeTagsApi;
 
     const createBodyPayload = (tags: string[]) => {
-      if (entityType === "location") {
+      if (
+        entityType === "location" ||
+        entityType === "charge_item_definition"
+      ) {
         return { tags: tags.map((tag) => ({ tag })) };
       }
       return isFacilityPatientTag

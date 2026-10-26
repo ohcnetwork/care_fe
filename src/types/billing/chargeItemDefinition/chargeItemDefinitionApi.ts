@@ -28,7 +28,7 @@ export default {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/",
     method: HttpMethod.PUT,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<ChargeItemDefinitionCreate>(),
+    TBody: Type<Omit<ChargeItemDefinitionCreate, "tags">>(),
   },
   listMetrics: {
     // TODO: To be changed to /api/v1/charge_item_definition/metrics/ when BE is ready
@@ -40,12 +40,12 @@ export default {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/set_tags/",
     method: HttpMethod.POST,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: { tag: string }[] }>(),
   },
   removeTags: {
     path: "/api/v1/facility/{facilityId}/charge_item_definition/{slug}/remove_tags/",
     method: HttpMethod.POST,
     TRes: Type<ChargeItemDefinitionRead>(),
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: { tag: string }[] }>(),
   },
 } as const;

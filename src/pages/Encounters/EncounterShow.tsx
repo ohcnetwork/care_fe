@@ -86,6 +86,7 @@ export const EncounterShow = (props: Props) => {
     canReadClinicalData,
     canReadSelectedEncounter,
     selectedEncounterPermissions,
+    actions: { markAsCompleted, dispense },
   } = useEncounter();
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -229,6 +230,22 @@ export const EncounterShow = (props: Props) => {
 
   return (
     <Page title={t("encounter")} className="block md:px-1" hideTitleOnPage>
+      {canWriteSelectedEncounter && (
+        <>
+          <Button
+            className="sr-only"
+            tabIndex={-1}
+            onClick={() => markAsCompleted(true)}
+          >
+            {t("mark_as_completed")}
+            <ShortcutBadge actionId="mark-as-completed" />
+          </Button>
+          <Button className="sr-only" tabIndex={-1} onClick={dispense}>
+            {t("dispense")}
+            <ShortcutBadge actionId="dispense" />
+          </Button>
+        </>
+      )}
       <WorkspaceHeaderContent>
         {/* The API returns an empty object when there is no appointment. */}
         {primaryEncounter.appointment?.id ? (
