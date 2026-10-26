@@ -74,6 +74,7 @@ async function createLocationResponseHistory(
           subject_type: "location",
           auth_context: "facility",
           facility: facilityId,
+          actions: [],
           questions: [
             {
               id: questionId,
