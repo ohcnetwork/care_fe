@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import { PanelLeft } from "lucide-react";
 import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,7 +9,17 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { TooltipComponent } from "@/components/ui/tooltip";
-import careConfig from "@careConfig";
+
+const hasCustomLogo = [
+  careConfig.mainLogo?.dark,
+  careConfig.mainLogo?.light,
+].some((source) => source && source !== "/images/care_logo.svg");
+const iconOnLight = hasCustomLogo
+  ? (careConfig.mainLogo?.dark ?? careConfig.mainLogo?.light)
+  : "/images/care_icon_on_light.svg";
+const iconOnDark = hasCustomLogo
+  ? (careConfig.mainLogo?.light ?? careConfig.mainLogo?.dark)
+  : "/images/care_icon_on_dark.svg";
 
 export function AppSidebarToggle({
   className,
@@ -27,7 +38,7 @@ export function AppSidebarToggle({
     handleToggleMouseEnter,
     scheduleClose,
   } = useAppSidebar();
-  const showLogo = isMobile ? !openMobile : !pinned;
+  const showLogo = isMobile || !(pinned || isOverlay);
 
   const button = (
     <Button
@@ -38,8 +49,7 @@ export function AppSidebarToggle({
       aria-label={t("toggle_sidebar")}
       aria-expanded={isMobile ? openMobile : pinned || isOverlay}
       className={cn(
-        "relative -ml-1 size-7 shrink-0 text-neutral-700 after:absolute after:-inset-3 after:content-[''] hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
-        showLogo && "h-9 w-auto px-1",
+        "group/sidebar-toggle relative -ml-1 size-7 shrink-0 p-0 after:absolute after:-inset-3 after:content-['']",
         className,
       )}
       onClick={(event) => {
@@ -63,13 +73,26 @@ export function AppSidebarToggle({
       {...props}
     >
       {showLogo ? (
-        <img
-          src={careConfig.mainLogo?.dark ?? "/images/care_logo.svg"}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="h-9 w-auto max-w-28 shrink-0 object-contain"
-        />
+        <>
+          <img
+            src={iconOnLight}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="size-6 object-contain transition-opacity group-hover/sidebar-toggle:opacity-0 group-focus-visible/sidebar-toggle:opacity-0 dark:hidden"
+          />
+          <img
+            src={iconOnDark}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="hidden size-6 object-contain transition-opacity group-hover/sidebar-toggle:opacity-0 group-focus-visible/sidebar-toggle:opacity-0 dark:block"
+          />
+          <PanelLeft
+            className="absolute size-4 opacity-0 transition-opacity group-hover/sidebar-toggle:opacity-100 group-focus-visible/sidebar-toggle:opacity-100"
+            aria-hidden="true"
+          />
+        </>
       ) : (
         <PanelLeft className="size-4" aria-hidden="true" />
       )}

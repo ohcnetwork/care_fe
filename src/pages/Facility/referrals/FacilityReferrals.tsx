@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import Page from "@/components/Common/Page";
+import { ReferralList } from "@/components/Referral/ReferralList";
 import {
   Muted,
   CareUIPageTitle as PageTitle,
-} from "@/components/careui/typography";
-import Page from "@/components/Common/Page";
-import { ReferralList } from "@/components/Referral/ReferralList";
+} from "@/components/ui/typography";
 
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import query from "@/Utils/request/query";
@@ -35,7 +35,7 @@ export default function FacilityReferrals({
   });
 
   return (
-    <Page title={t("referrals")} hideTitleOnPage className="careui">
+    <Page title={t("referrals")} hideTitleOnPage>
       <div className="space-y-6 px-3 pb-6 md:px-0">
         <header className="space-y-2">
           <PageTitle>{t("referrals")}</PageTitle>

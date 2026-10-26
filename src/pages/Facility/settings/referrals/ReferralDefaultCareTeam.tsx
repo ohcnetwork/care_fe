@@ -3,12 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import {
-  FieldDescription,
-  FieldLegend,
-  FieldSet,
-} from "@/components/careui/field";
+import { Button } from "@/components/ui/button";
+import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 import {
   Item,
   ItemActions,
@@ -16,7 +12,7 @@ import {
   ItemDescription,
   ItemGroup,
   ItemTitle,
-} from "@/components/careui/item";
+} from "@/components/ui/item";
 
 import UserSelector from "@/components/Common/UserSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -68,7 +64,6 @@ export function ReferralDefaultCareTeam({
       </FieldDescription>
       <div className="space-y-2">
         <UserSelector
-          appearance="careui"
           selected={selectedUser}
           onChange={setSelectedUser}
           facilityId={facilityId}

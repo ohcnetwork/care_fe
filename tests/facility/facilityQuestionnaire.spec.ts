@@ -57,6 +57,7 @@ async function createFacilityForm(facilityId: string): Promise<FacilityForm> {
       subject_type: "facility",
       auth_context: "facility",
       facility: facilityId,
+      actions: [],
       questions: [
         { id: questionId, link_id: "notes", text: "Notes", type: "string" },
       ],

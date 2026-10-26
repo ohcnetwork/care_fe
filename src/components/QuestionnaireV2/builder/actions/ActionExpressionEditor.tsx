@@ -99,14 +99,15 @@ export function ActionExpressionEditor({
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {chips.map((chip) => (
-            <button
+            <Button
+              variant="outline"
               key={chip.key}
               type="button"
               onClick={() => insertAtCaret(chip.insert)}
-              className="rounded-md border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-700 hover:border-primary-300 hover:text-primary-800"
+              className="h-auto rounded-md border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-700 hover:border-primary-300 hover:text-primary-800"
             >
               {chip.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}

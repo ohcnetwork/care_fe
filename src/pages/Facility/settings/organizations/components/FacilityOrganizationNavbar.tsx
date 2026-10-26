@@ -75,17 +75,19 @@ function OrganizationTreeNode({
         ) : (
           <span className="w-6" />
         )}
-        <div
+        <Button
+          type="button"
+          variant="ghost"
           onClick={() => {
             onSelect(organization);
             if (organization.has_children) {
               onToggleExpand(organization.id);
             }
           }}
-          className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
+          className="h-auto min-w-0 justify-start p-0 text-left flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
-        </div>
+        </Button>
       </div>
       {isExpanded && children?.results && children.results.length > 0 && (
         <div className="pl-2">

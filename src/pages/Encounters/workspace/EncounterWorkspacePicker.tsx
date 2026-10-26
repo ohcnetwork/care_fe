@@ -1,4 +1,5 @@
-import { Check, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -76,7 +77,7 @@ export function EncounterWorkspacePicker({
               className="size-9 shrink-0 rounded-lg border-gray-200 bg-white text-sm font-bold text-gray-700 shadow-none"
             >
               {isSaving ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                <Spinner className="size-4 animate-spin" aria-hidden="true" />
               ) : (
                 <span aria-hidden="true">W</span>
               )}

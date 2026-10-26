@@ -1,3 +1,5 @@
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -6,7 +8,6 @@ import {
   ArrowUp,
   ChevronLeft,
   Component,
-  Loader2,
   Space,
   Tag as TagIcon,
 } from "lucide-react";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -184,46 +186,42 @@ export function MultiFilterStyleTagSelector({
   // Render tag list for mobile
   const renderMobileTagList = (tags: TagConfig[]) => (
     <div className="space-y-1">
-      {tags?.map((tag) => (
-        <div
-          key={tag.id}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-          onClick={() => {
-            if (tag.has_children) {
-              handleMobileGroupClick(tag);
-            } else {
-              handleSelect(tag);
-            }
-          }}
-        >
-          {tag.has_children ? (
-            // Group Tags
-            <div className="flex items-center justify-between w-full min-w-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <Component className="size-4 text-gray-600 flex-shrink-0" />
-                <span className="text-sm truncate">{tag.display}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Badge className="text-xs px-1 py-0.5 bg-gray-100 border-gray-300 text-gray-900">
-                  {t("group")}
-                </Badge>
-                <ArrowRight className="size-4 text-gray-400" />
-              </div>
-            </div>
-          ) : (
-            // Other Tags
-            <>
-              <Checkbox checked={isSelected(tag)} className="size-4" />
-              {renderTagNameWithParent(tag)}
-            </>
-          )}
-        </div>
-      ))}
+      {tags?.map((tag) =>
+        tag.has_children ? (
+          <Button
+            key={tag.id}
+            type="button"
+            variant="ghost"
+            className="h-auto w-full justify-between gap-3 rounded-lg p-3"
+            onClick={() => handleMobileGroupClick(tag)}
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <Component className="size-4 shrink-0 text-gray-600" />
+              <span className="truncate text-sm">{tag.display}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <Badge className="border-gray-300 bg-gray-100 px-1 py-0.5 text-xs text-gray-900">
+                {t("group")}
+              </Badge>
+              <ArrowRight className="size-4 text-gray-400" />
+            </span>
+          </Button>
+        ) : (
+          <Label
+            key={tag.id}
+            className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-gray-50"
+          >
+            <Checkbox
+              checked={isSelected(tag)}
+              onCheckedChange={() => handleSelect(tag)}
+              className="size-4"
+            />
+            {renderTagNameWithParent(tag)}
+          </Label>
+        ),
+      )}
     </div>
-  );
-
-  // Common trigger button
+  ); // Common trigger button
   const triggerButton = trigger ? (
     trigger
   ) : (
@@ -238,7 +236,7 @@ export function MultiFilterStyleTagSelector({
     >
       <div className="flex items-center gap-2 min-w-0 w-full">
         {isTagMutationInProgress ? (
-          <Loader2 className="size-3 animate-spin" />
+          <Spinner className="size-3 animate-spin" />
         ) : (
           <TagIcon className="size-3" />
         )}
@@ -302,14 +300,17 @@ export function MultiFilterStyleTagSelector({
                       {t("selected_tags")}
                     </div>
                     {selected.map((tag) => (
-                      <div
+                      <Label
                         key={tag.id}
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleSelect(tag)}
                       >
-                        <Checkbox checked className="size-4" />
+                        <Checkbox
+                          checked
+                          className="size-4"
+                          onCheckedChange={() => handleSelect(tag)}
+                        />
                         {renderTagNameWithParent(tag)}
-                      </div>
+                      </Label>
                     ))}
                   </div>
                 )}
@@ -377,14 +378,14 @@ export function MultiFilterStyleTagSelector({
                   ) : childTags?.results?.length ? (
                     <div className="space-y-1">
                       {childTags.results.map((childTag) => (
-                        <div
+                        <Label
                           key={childTag.id}
                           className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleSelect(childTag)}
                         >
                           <Checkbox
                             checked={isSelected(childTag)}
                             className="size-4"
+                            onCheckedChange={() => handleSelect(childTag)}
                           />
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <TagColorDot
@@ -395,7 +396,7 @@ export function MultiFilterStyleTagSelector({
                               {childTag.display}
                             </span>
                           </div>
-                        </div>
+                        </Label>
                       ))}
                     </div>
                   ) : (
@@ -448,14 +449,15 @@ export function MultiFilterStyleTagSelector({
                       {t("selected_tags")}
                     </div>
                     {selected.map((tag) => (
-                      <div
+                      <DropdownMenuCheckboxItem
                         key={tag.id}
                         className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                        onClick={() => handleSelect(tag)}
+                        checked
+                        closeOnClick={false}
+                        onCheckedChange={() => handleSelect(tag)}
                       >
-                        <Checkbox checked className="size-4" />
                         {renderTagNameWithParent(tag)}
-                      </div>
+                      </DropdownMenuCheckboxItem>
                     ))}
                   </>
                 )}
@@ -486,7 +488,11 @@ export function MultiFilterStyleTagSelector({
                               }
                             >
                               <PopoverTrigger asChild>
-                                <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="h-auto w-full focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5"
+                                >
                                   <div className="flex items-center gap-2 flex-1 justify-between">
                                     <div className="flex items-center gap-1">
                                       <Component className="size-4 text-black/80" />
@@ -499,7 +505,7 @@ export function MultiFilterStyleTagSelector({
                                     </Badge>
                                   </div>
                                   <ArrowRight className="ml-auto size-4" />
-                                </div>
+                                </Button>
                               </PopoverTrigger>
                               <PopoverContent
                                 className="w-64 p-0"
@@ -518,14 +524,16 @@ export function MultiFilterStyleTagSelector({
                                   </div>
                                 ) : childTags?.results?.length ? (
                                   childTags.results.map((childTag) => (
-                                    <div
+                                    <Label
                                       key={childTag.id}
                                       className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
-                                      onClick={() => handleSelect(childTag)}
                                     >
                                       <Checkbox
                                         checked={isSelected(childTag)}
                                         className="size-4"
+                                        onCheckedChange={() =>
+                                          handleSelect(childTag)
+                                        }
                                       />
                                       <div className="flex items-center gap-2 flex-1">
                                         <TagColorDot
@@ -536,7 +544,7 @@ export function MultiFilterStyleTagSelector({
                                           {childTag.display}
                                         </span>
                                       </div>
-                                    </div>
+                                    </Label>
                                   ))
                                 ) : (
                                   <div className="p-2 text-sm text-gray-500">
@@ -558,17 +566,15 @@ export function MultiFilterStyleTagSelector({
                           {t("other_tags")}
                         </div>
                         {otherTags.map((tag) => (
-                          <div
+                          <DropdownMenuCheckboxItem
                             key={tag.id}
                             className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                            onClick={() => handleSelect(tag)}
+                            checked={isSelected(tag)}
+                            closeOnClick={false}
+                            onCheckedChange={() => handleSelect(tag)}
                           >
-                            <Checkbox
-                              checked={isSelected(tag)}
-                              className="size-4"
-                            />
                             {renderTagNameWithParent(tag)}
-                          </div>
+                          </DropdownMenuCheckboxItem>
                         ))}
                       </>
                     )}

@@ -1,10 +1,9 @@
-import { FileUp, Loader2, Paperclip, Trash2, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { FileUp, Paperclip, Trash2, X } from "lucide-react";
 import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
-import { Input } from "@/components/careui/input";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -14,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 
@@ -45,6 +46,7 @@ interface FileUploadDialogProps {
   /** A completed upload can require a separate save/link operation. Retrying
    * this action must never upload the selected file again. */
   completion?: FileUploadCompletion;
+  instanceId?: string;
 }
 
 export default function FileUploadDialog({
@@ -57,12 +59,14 @@ export default function FileUploadDialog({
   children,
   uploadLabel,
   completion,
+  instanceId,
 }: FileUploadDialogProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const combineId = useId();
   const descriptionId = useId();
   const [isPdf, setIsPdf] = useState(false);
+  const idPrefix = instanceId ? `${instanceId}-` : "";
   const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([]);
   const pending = fileUpload.uploading || completion?.pending === true;
   const hasFiles = fileUpload.files.length > 0;
@@ -85,12 +89,12 @@ export default function FileUploadDialog({
 
   const fileNameField = (index: number) => (
     <Field>
-      <FieldLabel htmlFor={`upload-file-name-${index}`}>
+      <FieldLabel htmlFor={`${idPrefix}upload-file-name-${index}`}>
         {t("file_name")}
       </FieldLabel>
       <Input
         name={`file_name_${index}`}
-        id={`upload-file-name-${index}`}
+        id={`${idPrefix}upload-file-name-${index}`}
         required
         value={fileUpload.fileNames[index] || ""}
         disabled={pending}
@@ -106,7 +110,7 @@ export default function FileUploadDialog({
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent
-        className="careui flex max-h-[90dvh] flex-col gap-5 overflow-hidden bg-cui-background text-cui-foreground sm:max-w-lg"
+        className="flex max-h-[90dvh] flex-col gap-5 overflow-hidden bg-background text-foreground sm:max-w-lg"
         aria-describedby={description ? descriptionId : undefined}
       >
         <DialogHeader>
@@ -122,10 +126,10 @@ export default function FileUploadDialog({
         <div className="min-h-0 space-y-5 overflow-y-auto px-1">
           {children}
           {completion ? (
-            <div className="space-y-3 rounded-md border border-cui-border p-4">
+            <div className="space-y-3 rounded-md border border-border p-4">
               <p role="status" className="flex items-start gap-2 text-sm">
                 {completion.pending && (
-                  <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin" />
+                  <Spinner className="mt-0.5 size-4 shrink-0 animate-spin" />
                 )}
                 {completion.message}
               </p>
@@ -134,8 +138,8 @@ export default function FileUploadDialog({
               )}
             </div>
           ) : !hasFiles ? (
-            <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-cui-border px-6 py-8">
-              <FileUp className="size-6 text-cui-muted-foreground" />
+            <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-border px-6 py-8">
+              <FileUp className="size-6 text-muted-foreground" />
               <fileUpload.Input
                 ref={inputRef}
                 disabled={pending}
@@ -155,7 +159,7 @@ export default function FileUploadDialog({
                 {fileUpload.files.map((file, index) => (
                   <div
                     key={`${file.name}-${index}`}
-                    className="space-y-3 rounded-md border border-cui-border p-3"
+                    className="space-y-3 rounded-md border border-border p-3"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       {!isPdf && previewUrls[index] ? (
@@ -164,10 +168,10 @@ export default function FileUploadDialog({
                           alt={t("file_upload_preview_named", {
                             name: file.name,
                           })}
-                          className="size-16 shrink-0 rounded-md border border-cui-border object-contain"
+                          className="size-16 shrink-0 rounded-md border border-border object-contain"
                         />
                       ) : (
-                        <Paperclip className="size-4 shrink-0 text-cui-muted-foreground" />
+                        <Paperclip className="size-4 shrink-0 text-muted-foreground" />
                       )}
                       <span className="min-w-0 flex-1 break-words text-sm">
                         {file.name}
@@ -216,7 +220,7 @@ export default function FileUploadDialog({
           {fileUpload.uploading && !completion && (
             <div className="space-y-2">
               <p role="status" className="flex items-center gap-2 text-sm">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
                 {t("file_upload_progress", {
                   progress: fileUpload.progress ?? 0,
                 })}
@@ -246,9 +250,9 @@ export default function FileUploadDialog({
               else void fileUpload.handleFileUpload(associatingId, isPdf);
             }}
             disabled={pending || (!completion && !hasFiles)}
-            id="upload_file_button"
+            id={`${idPrefix}upload_file_button`}
           >
-            {pending && <Loader2 className="size-4 animate-spin" />}
+            {pending && <Spinner className="size-4 animate-spin" />}
             {completion ? completion.retryLabel : (uploadLabel ?? t("upload"))}
           </Button>
         </DialogFooter>

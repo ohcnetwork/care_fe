@@ -133,10 +133,8 @@ export const FormDialog = ({
 
   return (
     <>
-      <div className="flex" onClick={() => handleOpenChange(true)}>
-        {trigger}
-      </div>
       <CommandDialog
+        trigger={trigger}
         className="md:max-w-2xl"
         open={open}
         onOpenChange={handleOpenChange}

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -41,9 +41,10 @@ export const ServicePointsDropDown = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
+          variant="outline"
           type="button"
-          className="flex w-full sm:w-auto items-stretch text-left rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="h-auto w-full items-stretch p-0 text-left sm:w-auto"
         >
           <div className="flex min-w-0 flex-1 gap-1 p-1 overflow-hidden items-center">
             {assignedServicePointIds.length === 0 ? (
@@ -84,7 +85,7 @@ export const ServicePointsDropDown = () => {
           <div className="flex items-center justify-center w-10 border-l border-gray-300 shrink-0">
             <ChevronDownIcon className="size-4" />
           </div>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
@@ -101,24 +102,16 @@ export const ServicePointsDropDown = () => {
                   subQueue.id,
                 );
                 return (
-                  <div
+                  <DropdownMenuCheckboxItem
                     key={subQueue.id}
-                    className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      toggleServicePoint(subQueue.id, !isSelected);
-                    }}
+                    checked={isSelected}
+                    closeOnClick={false}
+                    onCheckedChange={(checked) =>
+                      toggleServicePoint(subQueue.id, checked)
+                    }
                   >
-                    <div className="flex items-center space-x-3 p-1">
-                      <Checkbox
-                        checked={isSelected}
-                        className="pointer-events-none"
-                        tabIndex={-1}
-                      />
-                      <span className="text-sm font-medium">
-                        {subQueue.name}
-                      </span>
-                    </div>
-                  </div>
+                    {subQueue.name}
+                  </DropdownMenuCheckboxItem>
                 );
               })}
             </div>

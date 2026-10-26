@@ -2,7 +2,7 @@ import { GitPullRequestArrow, Settings2 } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { buttonVariants } from "@/components/careui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 import { usePermissions } from "@/context/PermissionContext";
 import { Organization } from "@/types/organization/organization";
@@ -23,7 +23,7 @@ export function OrganizationReferralLinks({
   );
   if (!canRead && !canManage) return null;
   return (
-    <div className="careui flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2">
       {canRead && (
         <Link
           href={`/${base}/${organization.id}/referrals`}

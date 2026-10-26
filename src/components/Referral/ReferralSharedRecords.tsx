@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import {
   useInfiniteQuery,
   useMutation,
@@ -18,7 +19,6 @@ import {
   Files,
   FlaskConical,
   Link2,
-  Loader2,
   type LucideIcon,
   Plus,
   ShieldAlert,
@@ -32,15 +32,6 @@ import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Frame, FrameHeader, FramePanel } from "@/components/careui/frame";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/careui/item";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
 import {
   AlertDialog,
@@ -51,12 +42,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { cn } from "@/lib/utils";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import {
@@ -169,7 +169,7 @@ function SharedRecordRow({
         <Button
           variant="ghost"
           size="icon-sm"
-          className="size-11 text-cui-muted-foreground sm:size-9"
+          className="size-11 text-muted-foreground sm:size-9"
           ref={menuTriggerRef}
           aria-label={t("referral_record_actions", { name: title })}
         >
@@ -177,7 +177,6 @@ function SharedRecordRow({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="careui"
         align="end"
         onCloseAutoFocus={(event) => {
           if (removalRequestedRef.current) event.preventDefault();
@@ -201,7 +200,7 @@ function SharedRecordRow({
       {isFile ? (
         <Item
           size="sm"
-          className="flex-nowrap items-center gap-2 border-cui-border bg-cui-background p-2 sm:gap-3 focus-within:border-cui-ring focus-within:ring-2 focus-within:ring-cui-ring/20"
+          className="flex-nowrap items-center gap-2 border-border bg-background p-2 sm:gap-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20"
         >
           <ItemMedia
             aria-hidden="true"
@@ -209,10 +208,10 @@ function SharedRecordRow({
             className={cn(
               "size-10 rounded-md self-center! translate-y-0!",
               isPdf
-                ? "bg-cui-destructive/10 text-cui-destructive"
+                ? "bg-destructive/10 text-destructive"
                 : isImage
                   ? "bg-blue-50 text-blue-700"
-                  : "bg-cui-muted text-cui-muted-foreground",
+                  : "bg-muted text-muted-foreground",
             )}
           >
             <FileIcon className="size-5" />
@@ -249,7 +248,7 @@ function SharedRecordRow({
         </Item>
       ) : (
         !hasNativeCard && (
-          <h5 className="min-w-0 break-words text-base font-semibold text-cui-foreground">
+          <h5 className="min-w-0 break-words text-base font-semibold text-foreground">
             {title}
           </h5>
         )
@@ -258,12 +257,12 @@ function SharedRecordRow({
         <div className="min-w-0">
           {resolved.isLoading ? (
             <p role="status" className="flex items-center gap-2 text-sm">
-              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              <Spinner aria-hidden="true" className="size-4 animate-spin" />
               {t("loading")}
             </p>
           ) : unavailable ? (
             <div role="alert" className="space-y-3">
-              <p className="text-sm text-cui-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {t("referral_record_unavailable")}
               </p>
               <Button
@@ -280,7 +279,7 @@ function SharedRecordRow({
         </div>
       )}
       {!isFile && (
-        <footer className="flex items-center justify-between gap-3 border-t border-cui-border/60 pt-2 text-xs text-cui-muted-foreground">
+        <footer className="flex items-center justify-between gap-3 border-t border-border/60 pt-2 text-xs text-muted-foreground">
           <time dateTime={attachment.created_date}>
             {t("referral_attachment_date", {
               date: formatDateTime(attachment.created_date),
@@ -448,19 +447,19 @@ export function ReferralSharedRecords({
   const isEmpty = !isLoading && !isError && attachments.length === 0;
   if (hideWhenEmpty && isEmpty) return null;
   return (
-    <section className="careui space-y-4" aria-labelledby={titleId}>
+    <section className="space-y-4" aria-labelledby={titleId}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <h2
             id={titleId}
             ref={headingRef}
             tabIndex={-1}
-            className="text-base font-semibold text-cui-foreground"
+            className="text-base font-semibold text-foreground"
           >
             {title ?? t("referral_shared_records")}
           </h2>
           {(description || isEmpty) && (
-            <p className="max-w-xl text-sm text-cui-muted-foreground">
+            <p className="max-w-xl text-sm text-muted-foreground">
               {description ?? t("referral_no_shared_records")}
             </p>
           )}
@@ -488,16 +487,16 @@ export function ReferralSharedRecords({
       </div>
       {isLoading && (
         <p role="status" className="flex items-center gap-2 py-6 text-sm">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner className="size-4 animate-spin" />
           {t("loading")}
         </p>
       )}
       {isError && (
         <div
           role="alert"
-          className="space-y-3 rounded-md border border-cui-border p-4"
+          className="space-y-3 rounded-md border border-border p-4"
         >
-          <p className="text-sm text-cui-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("referral_records_load_error")}
           </p>
           <Button
@@ -535,7 +534,7 @@ export function ReferralSharedRecords({
         return (
           <div key={category} className="space-y-4">
             {categories?.length !== 1 && (
-              <h3 className="text-sm font-medium text-cui-muted-foreground">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 {t(`referral_records_${category}`)}
               </h3>
             )}
@@ -548,13 +547,13 @@ export function ReferralSharedRecords({
                 <Frame
                   key={type}
                   spacing="sm"
-                  className="min-w-0 border-cui-border"
+                  className="min-w-0 border-border"
                 >
                   <FrameHeader>
-                    <h4 className="flex items-center gap-2 text-base font-semibold text-cui-foreground">
+                    <h4 className="flex items-center gap-2 text-base font-semibold text-foreground">
                       <Icon aria-hidden="true" className="size-5 shrink-0" />
                       {t(label, { count: group.length })}
-                      <span className="text-sm font-normal text-cui-muted-foreground">
+                      <span className="text-sm font-normal text-muted-foreground">
                         · {group.length}
                         {(
                           categories
@@ -574,7 +573,7 @@ export function ReferralSharedRecords({
                     group.map((attachment) => (
                       <FramePanel
                         key={attachment.id}
-                        className="min-w-0 border-cui-border shadow-none sm:p-4"
+                        className="min-w-0 border-border shadow-none sm:p-4"
                       >
                         {renderRecord(attachment)}
                       </FramePanel>
@@ -598,7 +597,7 @@ export function ReferralSharedRecords({
             );
           }}
         >
-          {isFetchingNextPage && <Loader2 className="size-4 animate-spin" />}
+          {isFetchingNextPage && <Spinner className="size-4 animate-spin" />}
           {t("load_more")}
         </Button>
       )}
@@ -625,7 +624,6 @@ export function ReferralSharedRecords({
         }}
       >
         <AlertDialogContent
-          className="careui"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             const target =
@@ -653,7 +651,7 @@ export function ReferralSharedRecords({
                 if (removing) remove.mutate(removing);
               }}
             >
-              {remove.isPending && <Loader2 className="size-4 animate-spin" />}
+              {remove.isPending && <Spinner className="size-4 animate-spin" />}
               {t("remove")}
             </Button>
           </AlertDialogFooter>

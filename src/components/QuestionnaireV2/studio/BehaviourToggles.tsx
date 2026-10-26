@@ -1,7 +1,8 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 import { NON_REPEATABLE_TYPES } from "@/components/QuestionnaireV2/builder/questionTypeRules";
 
@@ -34,12 +35,6 @@ const FLAGS: readonly {
   },
 ];
 
-/**
- * The reference design's behaviour rows: title + explanatory subtitle with
- * a switch visual. Semantically these stay checkboxes (role + aria-checked
- * + aria-label), matching the previous chips' accessibility contract —
- * `checkbox "Required"` etc. — so the Playwright surface is unchanged.
- */
 export function BehaviourToggles({
   question,
   onChange,
@@ -64,16 +59,8 @@ export function BehaviourToggles({
       {flags.map((flag) => {
         const checked = !!question[flag.key];
         return (
-          <button
+          <Label
             key={flag.key}
-            type="button"
-            role="checkbox"
-            aria-checked={checked}
-            // labelledby/describedby keeps the visible title as the accessible
-            // name while the explanatory hint remains announced as description.
-            aria-labelledby={`${idBase}-${flag.key}-label`}
-            aria-describedby={`${idBase}-${flag.key}-hint`}
-            onClick={() => onChange({ [flag.key]: !checked })}
             className="flex w-full items-center gap-3 py-2.5 text-left"
           >
             <span className="min-w-0 flex-1">
@@ -90,21 +77,13 @@ export function BehaviourToggles({
                 {t(flag.hintKey)}
               </span>
             </span>
-            <span
-              aria-hidden
-              className={cn(
-                "relative h-[22px] w-[38px] shrink-0 rounded-full transition-colors",
-                checked ? "bg-primary-600" : "bg-gray-200",
-              )}
-            >
-              <span
-                className={cn(
-                  "absolute top-[3px] size-4 rounded-full bg-white shadow transition-all",
-                  checked ? "left-[19px]" : "left-[3px]",
-                )}
-              />
-            </span>
-          </button>
+            <Checkbox
+              checked={checked}
+              aria-labelledby={`${idBase}-${flag.key}-label`}
+              aria-describedby={`${idBase}-${flag.key}-hint`}
+              onCheckedChange={(value) => onChange({ [flag.key]: value })}
+            />
+          </Label>
         );
       })}
     </div>

@@ -3,7 +3,13 @@ import { AlertCircle, ArrowLeft, LockKeyhole } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/careui/button";
+import Page from "@/components/Common/Page";
+import { FillShell } from "@/components/QuestionnaireV2/fill/FillShell";
+import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
+import { ReferralResponseEditor } from "@/components/Referral/ReferralResponseEditor";
+import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
+import { useReferralReceivingEncounter } from "@/components/Referral/useReferralReceivingEncounter";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -11,13 +17,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/careui/empty";
-import Page from "@/components/Common/Page";
-import { FillShell } from "@/components/QuestionnaireV2/fill/FillShell";
-import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
-import { ReferralResponseEditor } from "@/components/Referral/ReferralResponseEditor";
-import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
-import { useReferralReceivingEncounter } from "@/components/Referral/useReferralReceivingEncounter";
+} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
@@ -80,7 +80,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
   const close = () => navigate(detailUrl);
 
   return (
-    <Page title={t("referral_respond")} hideTitleOnPage className="careui">
+    <Page title={t("referral_respond")} hideTitleOnPage>
       {data && canShowCached && canWrite && visitReady ? (
         <ReferralResponseEditor
           key={data.id}
@@ -93,7 +93,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
             visit.previousEncounter && visit.error ? (
               <div
                 role="alert"
-                className="mb-5 space-y-3 rounded-lg border border-cui-border bg-cui-muted p-3 text-sm"
+                className="mb-5 space-y-3 rounded-lg border border-border bg-muted p-3 text-sm"
               >
                 <p>{t("referral_receiving_visit_refresh_failed")}</p>
                 <Button
@@ -124,9 +124,9 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
               aria-label={t("loading")}
               className="mx-auto w-full max-w-5xl space-y-5 px-4 py-6 md:px-8"
             >
-              <Skeleton className="h-12 w-2/3 bg-cui-muted" />
-              <Skeleton className="h-24 w-full bg-cui-muted" />
-              <Skeleton className="h-80 w-full bg-cui-muted" />
+              <Skeleton className="h-12 w-2/3 bg-muted" />
+              <Skeleton className="h-24 w-full bg-muted" />
+              <Skeleton className="h-80 w-full bg-muted" />
             </div>
           ) : (
             <div className="flex min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6">

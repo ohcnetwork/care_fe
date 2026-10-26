@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -32,9 +33,11 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
           className="min-h-7 cursor-pointer px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
           asChild
         >
-          <button
+          <Button
+            variant="ghost"
             type="button"
             aria-label={`${t("status_history")}: ${t(`encounter_status__${encounter.status}`)}`}
+            className="h-auto p-0 gap-1 text-inherit"
           >
             {React.createElement(ENCOUNTER_STATUS_ICONS[encounter.status], {
               className: "size-3",
@@ -42,7 +45,7 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
             })}
             {t(`encounter_status__${encounter.status}`)}
             <ChevronDown aria-hidden="true" className="size-3 opacity-50" />
-          </button>
+          </Button>
         </Badge>
       </PopoverTrigger>
       <PopoverContent align={"start"} className="w-auto p-2">

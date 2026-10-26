@@ -6,7 +6,7 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
-} from "@/components/careui/field";
+} from "@/components/ui/field";
 import { FormControl, useFormField } from "@/components/ui/form";
 
 interface Props {

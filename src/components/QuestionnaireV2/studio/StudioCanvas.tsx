@@ -11,6 +11,7 @@ import {
 import { Dispatch, createContext, useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { BuilderAction } from "@/components/QuestionnaireV2/builder/builderReducer";
@@ -87,7 +88,8 @@ function StudioQuestionShell({
     onClick: () => void,
     options?: { disabled?: boolean; destructive?: boolean },
   ) => (
-    <button
+    <Button
+      variant={options?.destructive ? "destructive" : "ghost"}
       type="button"
       aria-label={label}
       title={label}
@@ -97,14 +99,14 @@ function StudioQuestionShell({
         onClick();
       }}
       className={cn(
-        "flex size-7 items-center justify-center rounded-md text-gray-500 transition-colors disabled:opacity-40",
+        "flex size-7 items-center justify-center rounded-md p-0 text-gray-500 transition-colors disabled:opacity-40",
         options?.destructive
           ? "hover:bg-red-50 hover:text-red-600"
           : "hover:bg-gray-100 hover:text-gray-900",
       )}
     >
       <Icon className="size-3.5" />
-    </button>
+    </Button>
   );
 
   return (
@@ -215,17 +217,18 @@ function StudioAppendZone({ parentId }: { parentId: string | null }) {
     return null;
 
   return (
-    <button
+    <Button
+      variant="outline"
       type="button"
       onClick={(event) => {
         event.stopPropagation();
         studio.dispatch({ type: "addQuestion", parentId });
       }}
-      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 bg-transparent py-2 text-xs font-semibold text-gray-500 hover:border-primary-500 hover:text-primary-700"
+      className="mt-3 flex h-auto w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 bg-transparent py-2 text-xs font-semibold text-gray-500 hover:border-primary-500 hover:text-primary-700"
     >
       <Plus className="size-3.5" />
       {parentId ? t("add_question_here") : t("add_new_question")}
-    </button>
+    </Button>
   );
 }
 

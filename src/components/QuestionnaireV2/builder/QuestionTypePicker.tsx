@@ -223,11 +223,11 @@ export function QuestionTypePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-1rem)] overflow-hidden p-0"
+        className="w-(--anchor-width) max-w-[calc(100vw-1rem)] overflow-hidden p-0"
         align="start"
       >
         {step === "list" ? (
-          <Command className="max-h-(--radix-popover-content-available-height)">
+          <Command className="max-h-(--available-height)">
             <CommandInput
               placeholder={t("search")}
               className="border-0 ring-0 focus:ring-0"
@@ -243,7 +243,7 @@ export function QuestionTypePicker({
             </CommandList>
           </Command>
         ) : (
-          <Command className="max-h-(--radix-popover-content-available-height)">
+          <Command className="max-h-(--available-height)">
             <div className="flex items-center gap-2 border-b border-gray-100 p-2">
               <Button
                 type="button"

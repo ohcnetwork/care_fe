@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRightLeft } from "lucide-react";
 import { useState } from "react";
@@ -156,14 +157,18 @@ export default function ChangeAccountSheet({
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {accounts.map((account) => (
-                  <button
+                  <Button
+                    variant="outline"
                     key={account.id}
                     type="button"
-                    className={`w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
-                      selectedAccountId === account.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200"
-                    }`}
+                    className={cn(
+                      "h-auto block whitespace-normal",
+                      `w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
+                        selectedAccountId === account.id
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-gray-200"
+                      }`,
+                    )}
                     onClick={() => setSelectedAccountId(account.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -185,7 +190,7 @@ export default function ChangeAccountSheet({
                         </Badge>
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

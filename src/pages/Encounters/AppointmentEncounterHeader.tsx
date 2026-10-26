@@ -33,8 +33,8 @@ import { renderTokenNumber } from "@/types/tokens/token/token";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { EllipsisVertical as DotsVerticalIcon } from "lucide-react";
 
 import {
   CalendarCheck,

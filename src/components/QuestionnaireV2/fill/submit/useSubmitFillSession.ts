@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { scrollFillQuestionIntoView } from "@/components/QuestionnaireV2/fill/scrollFillQuestionIntoView";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
 
 import {
@@ -45,6 +46,8 @@ import { collectStructuredErrors } from "./validateStructured";
 const MAX_BATCH_REQUESTS = 20;
 
 interface UseSubmitFillSessionArgs {
+  /** Keep validation jumps inside the host canvas and its sticky actions. */
+  scrollContainer?: HTMLElement | null;
   /** Every questionnaire in the session, primary first. */
   forms: FillFormEntry[];
   getStore: (key: string) => FormStore | undefined;
@@ -65,9 +68,14 @@ interface UseSubmitFillSessionArgs {
  * to the input or block as well as scrolling, so keyboard and screen-reader
  * users land on the error context rather than staying on Save.
  */
-function scrollToQuestion(questionId: string, responsePath?: ResponsePath) {
+function scrollToQuestion(
+  questionId: string,
+  responsePath?: ResponsePath,
+  scrollContainer?: HTMLElement | null,
+) {
   setTimeout(() => {
-    const blocks = document.querySelectorAll<HTMLElement>(
+    const root = scrollContainer ?? document;
+    const blocks = root.querySelectorAll<HTMLElement>(
       `[data-question-id="${questionId}"]`,
     );
     const block = responsePath?.length
@@ -77,11 +85,9 @@ function scrollToQuestion(questionId: string, responsePath?: ResponsePath) {
         )
       : blocks[0];
     if (!block) return;
-    block.scrollIntoView({
+    scrollFillQuestionIntoView(block, {
+      container: scrollContainer,
       block: "center",
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
     });
     const input = block.querySelector<HTMLElement>(
       `[id^="question-input-${questionId}"]`,
@@ -134,6 +140,7 @@ function buildQuestionOwnerIndex(forms: FillFormEntry[]): Map<string, string> {
  * reference_id into the owning form's `errorsAtom` plus the page panel.
  */
 export function useSubmitFillSession({
+  scrollContainer,
   forms,
   getStore,
   subject,
@@ -199,6 +206,7 @@ export function useSubmitFillSession({
           scrollToQuestion(
             mapped.questionErrors[0].question_id,
             mapped.questionErrors[0].response_path,
+            scrollContainer,
           );
         }
       }
@@ -289,7 +297,11 @@ export function useSubmitFillSession({
       // without it a screen-reader user who pressed Save Changes gets no
       // signal that the submission was rejected at all.
       toast.error(t("validation_failed"));
-      scrollToQuestion(firstError.questionId, firstError.responsePath);
+      scrollToQuestion(
+        firstError.questionId,
+        firstError.responsePath,
+        scrollContainer,
+      );
       return;
     }
     setServerErrors([]);
@@ -370,7 +382,7 @@ export function useSubmitFillSession({
         );
       }
       toast.error(t("questionnaire_submission_failed"));
-      scrollToQuestion(error.questionId, error.responsePath);
+      scrollToQuestion(error.questionId, error.responsePath, scrollContainer);
       return;
     }
     if (requests.length === 0) {

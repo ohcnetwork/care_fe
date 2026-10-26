@@ -13,7 +13,10 @@ import {
   questionRef,
   referenceableLinkId,
 } from "@/components/QuestionnaireV2/shared/actionExpression";
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import {
   AnswerShape,
@@ -186,8 +189,7 @@ export function ActionConditionEditor({
           <p className="text-xs font-medium text-gray-500">
             {t("action_run_when")}
           </p>
-          <div
-            role="radiogroup"
+          <ChoiceChipGroup
             aria-label={t("action_run_when")}
             className="flex flex-wrap gap-2"
           >
@@ -205,7 +207,7 @@ export function ActionConditionEditor({
               checked={behavior === "any"}
               onCheckedChange={() => update(rules, "any")}
             />
-          </div>
+          </ChoiceChipGroup>
         </div>
       )}
 

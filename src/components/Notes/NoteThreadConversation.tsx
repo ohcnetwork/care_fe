@@ -1,9 +1,10 @@
+import { Spinner } from "@/components/ui/spinner";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Loader2, MessageSquare, Pencil, RefreshCw, Send } from "lucide-react";
+import { MessageSquare, Pencil, RefreshCw, Send } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -293,7 +294,7 @@ export function NoteThreadConversation({
                   onClick={() => void loadOlder()}
                 >
                   {conversation.isFetchingNextPage && (
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Spinner className="mr-2 size-4 animate-spin" />
                   )}
                   {t("notes__load_older")}
                 </Button>
@@ -367,7 +368,7 @@ export function NoteThreadConversation({
                             }
                           >
                             {editMutation.isPending && (
-                              <Loader2 className="mr-2 size-4 animate-spin" />
+                              <Spinner className="mr-2 size-4 animate-spin" />
                             )}
                             {t("save_changes")}
                           </Button>
@@ -461,7 +462,7 @@ export function NoteThreadConversation({
                 }
               >
                 {sendMutation.isPending ? (
-                  <Loader2 className="size-5 animate-spin" />
+                  <Spinner className="size-5 animate-spin" />
                 ) : (
                   <Send className="size-5" />
                 )}
@@ -585,7 +586,7 @@ export function NoteThreadConversation({
                 }
               >
                 {renameMutation.isPending && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Spinner className="mr-2 size-4 animate-spin" />
                 )}
                 {t("save_changes")}
               </Button>

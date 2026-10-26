@@ -11,7 +11,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button, buttonVariants } from "@/components/careui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -19,10 +19,10 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/careui/empty";
-import { Frame, FramePanel } from "@/components/careui/frame";
-import { Muted, SubsectionTitle } from "@/components/careui/typography";
+} from "@/components/ui/empty";
+import { Frame, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Muted, SubsectionTitle } from "@/components/ui/typography";
 
 import Page from "@/components/Common/Page";
 import { ReferralAppointments } from "@/components/Referral/ReferralAppointments";
@@ -115,7 +115,6 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
     <Page
       title={(canShowCached && data?.title) || t("referral_details")}
       hideTitleOnPage
-      className="careui"
     >
       <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 md:px-4 md:py-5">
         <nav
@@ -132,15 +131,15 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
         </nav>
         {isLoading && (
           <div className="space-y-5" role="status" aria-label={t("loading")}>
-            <Skeleton className="h-10 w-2/3 bg-cui-muted" />
-            <Skeleton className="h-24 w-full bg-cui-muted" />
-            <Skeleton className="h-80 w-full bg-cui-muted" />
+            <Skeleton className="h-10 w-2/3 bg-muted" />
+            <Skeleton className="h-24 w-full bg-muted" />
+            <Skeleton className="h-80 w-full bg-muted" />
           </div>
         )}
         {error && canShowCached && (
           <div
             role="alert"
-            className="flex flex-wrap items-center gap-3 rounded-lg border border-cui-border bg-cui-muted p-4 text-sm"
+            className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted p-4 text-sm"
           >
             <p>{t("referral_refresh_failed")}</p>
             <Button
@@ -206,11 +205,11 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
             </ReferralPatientHeader>
             <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
               <div className="min-w-0 space-y-5">
-                <article className="overflow-hidden rounded-lg border border-cui-border bg-cui-background">
+                <article className="overflow-hidden rounded-lg border border-border bg-background">
                   <header className="space-y-3 p-4 sm:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
-                        <p className="text-xs text-cui-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {t("referral_letter")} ·{" "}
                           {data.id.slice(0, 8).toUpperCase()}
                         </p>
@@ -241,17 +240,17 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                         )}
                       </Button>
                     </div>
-                    <p className="text-xs text-cui-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {data.availability_name} ·{" "}
                       {formatDateTime(data.created_date)}
                     </p>
                   </header>
                   <section
                     aria-label={t("assigned_to")}
-                    className="flex flex-wrap items-center justify-between gap-3 border-b border-cui-border px-4 py-3 sm:px-5"
+                    className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5"
                   >
                     <div className="min-w-0 space-y-1">
-                      <h2 className="text-xs font-medium text-cui-muted-foreground">
+                      <h2 className="text-xs font-medium text-muted-foreground">
                         {t("assigned_to")}
                       </h2>
                       {data.assignees.length ? (
@@ -262,7 +261,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                                 {formatName(member)}
                               </span>
                               {role.display && (
-                                <span className="ml-1.5 text-cui-muted-foreground">
+                                <span className="ml-1.5 text-muted-foreground">
                                   · {role.display}
                                 </span>
                               )}
@@ -270,7 +269,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-sm text-cui-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {t("unassigned")}
                         </p>
                       )}
@@ -285,7 +284,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                     hidden={requestHidden}
                   >
                     {data.note && (
-                      <section className="space-y-2 border-b border-cui-border p-4 sm:p-5">
+                      <section className="space-y-2 border-b border-border p-4 sm:p-5">
                         <h2 className="text-sm font-semibold">
                           {t("referral_clinical_context")}
                         </h2>
@@ -295,7 +294,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                       </section>
                     )}
                     <section
-                      className="space-y-4 border-b border-cui-border p-4 sm:p-5"
+                      className="space-y-4 border-b border-border p-4 sm:p-5"
                       aria-label={t("referral_requests")}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -327,7 +326,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                         <Muted>{t("referral_no_form_responses")}</Muted>
                       )}
                     </section>
-                    <section className="border-b border-cui-border p-4 sm:p-5">
+                    <section className="border-b border-border p-4 sm:p-5">
                       <ReferralSharedRecords
                         referral={data}
                         canWrite={canWrite}
@@ -345,19 +344,19 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                     facilityId: referralFacilityId,
                   })}
                 />
-                <details className="group rounded-lg border border-cui-border bg-cui-background">
-                  <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium focus-visible:outline-cui-ring [&::-webkit-details-marker]:hidden">
+                <details className="group rounded-lg border border-border bg-background">
+                  <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
                     {t("referral_details")}
                     <ChevronDown
                       aria-hidden="true"
-                      className="size-4 text-cui-muted-foreground group-open:rotate-180"
+                      className="size-4 text-muted-foreground group-open:rotate-180"
                     />
                   </summary>
                   <div className="px-4 pb-4">
                     <dl className="grid gap-4 text-sm sm:grid-cols-2">
                       {data.created_by && (
                         <div>
-                          <dt className="text-cui-muted-foreground">
+                          <dt className="text-muted-foreground">
                             {t("created_by")}
                           </dt>
                           <dd className="mt-1 font-medium">
@@ -366,7 +365,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                         </div>
                       )}
                       <div>
-                        <dt className="text-cui-muted-foreground">
+                        <dt className="text-muted-foreground">
                           {t("created_date")}
                         </dt>
                         <dd className="mt-1">
@@ -374,7 +373,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-cui-muted-foreground">
+                        <dt className="text-muted-foreground">
                           {t("last_updated")}
                         </dt>
                         <dd className="mt-1">
@@ -387,10 +386,10 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-cui-muted-foreground">
+                        <dt className="text-muted-foreground">
                           {t("referral_reference")}
                         </dt>
-                        <dd className="mt-1 break-all font-mono text-xs text-cui-muted-foreground">
+                        <dd className="mt-1 break-all font-mono text-xs text-muted-foreground">
                           {data.id}
                         </dd>
                       </div>

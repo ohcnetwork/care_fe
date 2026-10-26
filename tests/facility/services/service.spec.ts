@@ -38,17 +38,23 @@ test.describe("Services", () => {
   }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
-      page.getByRole("heading").getByText(serviceName),
+      page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
     ).toBeVisible();
     await toggleSidebar(page, true);
     await page.getByRole("button", { name: serviceName }).click();
+    const dialog = page.getByRole("dialog");
     await expect(
-      page.getByRole("heading").getByText(serviceName),
+      dialog.getByRole("heading", { name: serviceName, exact: true }),
     ).toBeVisible();
-    await page.getByPlaceholder("Search").fill("Pathology Lab");
-    await page.getByRole("option", { name: "Pathology Lab" }).click();
+    await dialog.getByPlaceholder("Search").fill("Pathology Lab");
+    await dialog.getByRole("option", { name: "Pathology Lab" }).click();
+    await expect(dialog).not.toBeVisible();
     await expect(
-      page.getByRole("heading").getByText("Pathology Lab"),
+      page.getByRole("heading", {
+        level: 1,
+        name: "Pathology Lab",
+        exact: true,
+      }),
     ).toBeVisible();
   });
 
@@ -57,20 +63,36 @@ test.describe("Services", () => {
   }) => {
     await page.getByRole("link", { name: serviceName }).click();
     await expect(
-      page.getByRole("heading").getByText(serviceName),
+      page.getByRole("heading", { level: 1, name: serviceName, exact: true }),
     ).toBeVisible();
     await toggleSidebar(page, false);
+    const toggle = page
+      .getByRole("button", {
+        name: "Toggle Sidebar",
+        exact: true,
+        includeHidden: true,
+      })
+      .and(page.locator('[data-sidebar="trigger"]:visible'));
+    await page.mouse.move(900, 700);
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.hover();
     await page
-      .getByRole("button")
-      .filter({ hasText: /Current Service/ })
+      .getByRole("button", { name: serviceName, exact: true })
+      .and(page.locator('[aria-haspopup="dialog"]'))
       .click();
+    const dialog = page.getByRole("dialog");
     await expect(
-      page.getByRole("heading").getByText(serviceName),
+      dialog.getByRole("heading", { name: serviceName, exact: true }),
     ).toBeVisible();
-    await page.getByPlaceholder("Search").fill("Pathology Lab");
-    await page.getByRole("option", { name: "Pathology Lab" }).click();
+    await dialog.getByPlaceholder("Search").fill("Pathology Lab");
+    await dialog.getByRole("option", { name: "Pathology Lab" }).click();
+    await expect(dialog).not.toBeVisible();
     await expect(
-      page.getByRole("heading").getByText("Pathology Lab"),
+      page.getByRole("heading", {
+        level: 1,
+        name: "Pathology Lab",
+        exact: true,
+      }),
     ).toBeVisible();
   });
 });

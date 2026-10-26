@@ -49,7 +49,8 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
         }}
       >
         <SelectTrigger
-          className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
+          size="sm"
+          className="max-w-full gap-2 font-normal shadow-sm"
           aria-label={patientUserContext.selectedPatient.name}
         >
           <SelectValue placeholder={t("select_patient")}>

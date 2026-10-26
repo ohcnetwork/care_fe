@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/careui/badge";
+import { Badge } from "@/components/ui/badge";
 
 import { ReferralStatus } from "@/types/emr/referral/referral";
 

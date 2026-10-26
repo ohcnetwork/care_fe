@@ -1,15 +1,11 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  GitPullRequestArrow,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, GitPullRequestArrow } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button, buttonVariants } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import {
   Item,
   ItemActions,
@@ -17,7 +13,7 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@/components/careui/item";
+} from "@/components/ui/item";
 
 import { referralResourceError } from "./referralResourceError";
 import {
@@ -57,14 +53,11 @@ export function ReferralAppointmentContext({
   const checking = context.isLoading || (!!referralId && attachment.isPending);
   const linked = !!attachment.data;
   return (
-    <section
-      className="careui mb-4"
-      aria-label={t("referral_appointment_context")}
-    >
-      <Item variant="outline" className="bg-cui-background text-cui-foreground">
+    <section className="mb-4" aria-label={t("referral_appointment_context")}>
+      <Item variant="outline" className="bg-background text-foreground">
         <ItemMedia variant="icon">
           {checking ? (
-            <Loader2 className="animate-spin" />
+            <Spinner className="animate-spin" />
           ) : linked ? (
             <CheckCircle2 />
           ) : (
@@ -120,7 +113,7 @@ export function ReferralAppointmentContext({
               disabled={attach.isPending}
               onClick={() => attach.mutate()}
             >
-              {attach.isPending && <Loader2 className="size-4 animate-spin" />}
+              {attach.isPending && <Spinner className="size-4 animate-spin" />}
               {t("referral_appointment_link")}
             </Button>
           )}

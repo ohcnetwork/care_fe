@@ -2,7 +2,7 @@ import { CircleDashed, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/careui/button";
+import { Button } from "@/components/ui/button";
 import { departmentFilter } from "@/components/ui/multi-filter/filterConfigs";
 import { GenericSelectedBadge } from "@/components/ui/multi-filter/genericFilter";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";

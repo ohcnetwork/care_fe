@@ -592,6 +592,10 @@ test.describe("Referrals", () => {
         name: "New referral",
         exact: true,
       });
+      await expect(newReferral).not.toBeVisible();
+      await quickActions
+        .getByRole("button", { name: "More Actions", exact: true })
+        .click();
       await expect(newReferral).toBeVisible();
       await captureResponsiveView(
         "referral-overview-empty",

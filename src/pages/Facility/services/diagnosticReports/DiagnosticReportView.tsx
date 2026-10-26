@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -86,17 +86,15 @@ export default function DiagnosticReportView({
           <ArrowLeft />
           <span>{t("back")}</span>
         </BackButton>
-        <Button
-          variant="outline"
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`,
-            )
-          }
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          {t("print")}
-          <ShortcutBadge actionId="print-report" />
+        <Button variant="outline" asChild>
+          <Link
+            href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`}
+            className="flex items-center gap-2"
+          >
+            <Printer className="size-4 mr-2" />
+            {t("print")}
+            <ShortcutBadge actionId="print-report" />
+          </Link>
         </Button>
       </div>
 
@@ -123,7 +121,6 @@ export default function DiagnosticReportView({
                 type="diagnostic_report"
                 associatingId={report.id}
                 canEdit={true}
-                showHeader={false}
               />
             </CardContent>
           </Card>

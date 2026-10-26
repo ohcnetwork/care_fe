@@ -5,8 +5,7 @@ import { RefObject, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FieldError } from "@/components/ui/field";
 
 import {
   DropdownMenu,
@@ -75,7 +75,7 @@ export function ReferralVoidResponseDialog({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="careui"
+
           onCloseAutoFocus={(event) => {
             if (open) event.preventDefault();
           }}
@@ -90,7 +90,6 @@ export function ReferralVoidResponseDialog({
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent
-        className="careui"
         onCloseAutoFocus={(event) => {
           event.preventDefault();
           const target = triggerRef.current?.isConnected

@@ -187,7 +187,7 @@ export function FillHeader({
         ref={actionsRef}
         onKeyDown={handleKeyDown}
         className={cn(
-          "sticky z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 shadow-sm",
+          "sticky z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-border bg-background px-3 py-1.5 shadow-sm",
           contained ? "top-0" : "top-(--fill-shell-header-height) md:top-0",
         )}
       >

@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isValid, parseISO } from "date-fns";
-import { Loader2 } from "lucide-react";
+
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -314,7 +315,7 @@ function ApplyPolicyForm({
           }
         >
           {apply.isPending && (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            <Spinner className="size-4 animate-spin" aria-hidden="true" />
           )}
           {apply.isPending
             ? t("immunization_applying_policy")

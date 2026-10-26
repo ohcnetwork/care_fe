@@ -10,6 +10,7 @@ import {
   clearQuestionnaireFillDrafts,
   sweepExpiredFillDrafts,
 } from "@/components/QuestionnaireV2/fill/draft/fillDraftCache";
+import { AppearanceUserSync } from "@/context/AppearanceContext";
 
 import { AuthUserContext } from "@/hooks/useAuthUser";
 
@@ -297,13 +298,18 @@ export default function AuthUserProvider({
     ],
   );
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
     <AuthUserContext.Provider value={contextValue}>
-      {user ? children : patientToken?.token ? otpAuthorized : unauthorized}
+      <AppearanceUserSync user={accessToken ? user : undefined} />
+      {isLoading ? (
+        <Loading />
+      ) : user ? (
+        children
+      ) : patientToken?.token ? (
+        otpAuthorized
+      ) : (
+        unauthorized
+      )}
     </AuthUserContext.Provider>
   );
 }

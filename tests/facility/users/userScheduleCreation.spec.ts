@@ -288,7 +288,7 @@ test.describe("Schedule Template Management", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     await page.goto(`/facility/${facilityId}/users/admin`);
-    await page.getByRole("link", { name: "Availability" }).click();
+    await page.getByRole("tab", { name: "Availability" }).click();
   });
 
   test("should create and verify a weekday schedule template", async ({

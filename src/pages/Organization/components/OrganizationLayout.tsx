@@ -278,7 +278,7 @@ export default function OrganizationLayout({
               <DropdownMenuContent
                 align="start"
                 sideOffset={5}
-                className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                className="w-[var(--anchor-width)]"
               >
                 {visibleNavItems.map((item) => (
                   <DropdownMenuItem

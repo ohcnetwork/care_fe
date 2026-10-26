@@ -243,7 +243,10 @@ export function FacilitySettingsNav() {
         return (
           <Fragment key={group.label ?? "general"}>
             {index > 0 && (
-              <Separator className="mx-4 bg-neutral-200 data-[orientation=horizontal]:w-auto group-data-[collapsible=icon]:mx-2" />
+              <Separator
+                variant="inset"
+                className="mx-3 data-horizontal:w-auto group-data-[collapsible=icon]:mx-2"
+              />
             )}
             <NavMain
               label={group.label ? t(group.label) : undefined}

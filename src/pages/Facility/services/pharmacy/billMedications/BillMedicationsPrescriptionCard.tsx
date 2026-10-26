@@ -61,7 +61,6 @@ import {
 } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
-import { DotsVerticalIcon, MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -69,7 +68,9 @@ import {
   Check,
   CheckCircleIcon,
   CheckIcon,
+  EllipsisVertical as DotsVerticalIcon,
   FileTextIcon,
+  CircleMinus as MinusCircledIcon,
   Pill,
   PrinterIcon,
   RefreshCcwIcon,
@@ -777,7 +778,7 @@ const MedicineLineItem = ({
                   <FormItem>
                     <FormControl>
                       <Switch
-                        className="data-[state=checked]:bg-primary-600"
+                        className="data-checked:bg-primary-600"
                         checked={field.value}
                         onCheckedChange={field.onChange}
                         disabled={disabled}

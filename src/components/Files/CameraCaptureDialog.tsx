@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { Check, Loader2, RotateCcw, SwitchCamera, X } from "lucide-react";
+import { Check, RotateCcw, SwitchCamera, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Webcam from "react-webcam";
@@ -14,10 +14,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useMediaStream } from "@/hooks/useMediaStream";
@@ -175,21 +178,19 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                                 {t("select_camera")}
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <div className="space-y-2 p-3">
+                              <DropdownMenuRadioGroup
+                                value={selectedDeviceId ?? ""}
+                                onValueChange={(deviceId) => {
+                                  setSelectedDeviceId(deviceId);
+                                  setShowCameraSelector(false);
+                                }}
+                                className="space-y-2 p-3"
+                              >
                                 {videoDevices.map((camera) => (
-                                  <div
+                                  <DropdownMenuRadioItem
                                     key={camera.deviceId}
-                                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:bg-gray-50 ${
-                                      selectedDeviceId === camera.deviceId
-                                        ? "border-green-500 bg-green-50"
-                                        : "border-gray-200"
-                                    }`}
-                                    onClick={() => {
-                                      setSelectedDeviceId(camera.deviceId);
-                                      setShowCameraSelector(
-                                        !showCameraSelector,
-                                      );
-                                    }}
+                                    value={camera.deviceId}
+                                    className="rounded-lg border border-border p-3 pr-8 data-checked:border-primary data-checked:bg-primary/10"
                                   >
                                     <div className="flex items-center gap-3">
                                       <CareIcon
@@ -222,9 +223,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                                         )}
                                       </div>
                                     </div>
-                                  </div>
+                                  </DropdownMenuRadioItem>
                                 ))}
-                              </div>
+                              </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         ) : null
@@ -318,7 +319,7 @@ const CameraPermissionRequesting = () => {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-50">
       <div className="text-primary-500">
-        <Loader2 className="size-10 animate-spin" />
+        <Spinner className="size-10" />
       </div>
       <div className="flex flex-col items-center gap-2">
         <span className="text-lg font-semibold">

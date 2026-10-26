@@ -95,14 +95,18 @@ function EncounterCard({
   const additionalMembersCount = careTeam.length - 1;
 
   const cardContent = (
-    <button
+    <Button
+      variant="outline"
       type="button"
       aria-pressed={isSelected}
       className={cn(
-        "relative w-full cursor-pointer rounded-md border text-left text-gray-950 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600",
-        isSelected
-          ? "bg-white border-primary-600 shadow-md"
-          : "bg-gray-100 hover:bg-gray-100 shadow-none",
+        "h-auto block whitespace-normal p-0",
+        cn(
+          "relative w-full cursor-pointer rounded-md border text-left text-gray-950 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600",
+          isSelected
+            ? "bg-white border-primary-600 shadow-md"
+            : "bg-gray-100 hover:bg-gray-100 shadow-none",
+        ),
       )}
       onClick={() => onSelect(encounter.id)}
     >
@@ -201,7 +205,7 @@ function EncounterCard({
           </span>
         )}
       </span>
-    </button>
+    </Button>
   );
 
   return (
@@ -584,7 +588,7 @@ export default function EncounterHistorySelector() {
           align="start"
           sideOffset={8}
           aria-label={t("encounter_history")}
-          className="max-h-[min(36rem,var(--radix-popover-content-available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
+          className="max-h-[min(36rem,var(--available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
         >
           <EncounterHistoryList onSelect={() => setIsOpen(false)} />
         </PopoverContent>

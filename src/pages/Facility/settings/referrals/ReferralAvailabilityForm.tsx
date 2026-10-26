@@ -1,18 +1,18 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/careui/button";
-import { FieldError, FieldGroup, FieldSet } from "@/components/careui/field";
-import { Frame, FrameFooter, FramePanel } from "@/components/careui/frame";
-import { Input } from "@/components/careui/input";
-import { Textarea } from "@/components/careui/textarea";
+import { Button } from "@/components/ui/button";
+import { FieldError, FieldGroup, FieldSet } from "@/components/ui/field";
 import { Form, FormField, FormItem } from "@/components/ui/form";
+import { Frame, FrameFooter, FramePanel } from "@/components/ui/frame";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
@@ -315,7 +316,7 @@ export function ReferralAvailabilityForm({
                 <FieldError>{formError}</FieldError>
               </div>
             )}
-            <FrameFooter className="sticky bottom-0 flex-row flex-wrap justify-end gap-2 border-t border-cui-border bg-cui-background">
+            <FrameFooter className="sticky bottom-0 flex-row flex-wrap justify-end gap-2 border-t border-border bg-background">
               {availability && onDelete && (
                 <Button
                   type="button"
@@ -337,7 +338,7 @@ export function ReferralAvailabilityForm({
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="size-4 animate-spin" />}
+                {isPending && <Spinner className="size-4 animate-spin" />}
                 {t(
                   availability
                     ? "save_changes"

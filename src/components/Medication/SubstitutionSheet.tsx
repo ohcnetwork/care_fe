@@ -183,7 +183,7 @@ export function SubstitutionSheet({
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="max-w-(--radix-select-trigger-width) w-full">
+                      <SelectContent className="max-w-(--anchor-width) w-full">
                         {Object.values(SubstitutionType).map((type) => (
                           <SelectItem key={type} value={type} className="py-3">
                             <div className="space-y-1">
@@ -224,7 +224,7 @@ export function SubstitutionSheet({
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="max-w-(--radix-select-trigger-width) w-full">
+                      <SelectContent className="max-w-(--anchor-width) w-full">
                         {Object.values(SubstitutionReason).map((reason) => (
                           <SelectItem
                             key={reason}

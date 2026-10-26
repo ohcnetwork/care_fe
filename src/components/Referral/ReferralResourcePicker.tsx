@@ -1,17 +1,11 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "@/components/careui/item";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/components/ui/item";
 import {
   Select,
   SelectContent,
@@ -71,7 +72,7 @@ export function ReferralResourceCategoryField({
     <Field>
       <FieldLabel>{t("referral_record_category")}</FieldLabel>
       {categories.length === 1 ? (
-        <p className="text-sm text-cui-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {t(`referral_records_${value}`)}
         </p>
       ) : (
@@ -232,7 +233,7 @@ export function ReferralResourcePicker({
         if (!open && !add.isPending) onClose();
       }}
     >
-      <DialogContent className="careui max-h-[90dvh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t("referral_add_record")}</DialogTitle>
           <DialogDescription>
@@ -366,25 +367,25 @@ export function ReferralResourcePicker({
               <ArrowLeft className="size-4" />
               {t("back")}
             </Button>
-            <p className="min-w-0 truncate text-sm text-cui-muted-foreground">
+            <p className="min-w-0 truncate text-sm text-muted-foreground">
               {parent.title}
             </p>
           </div>
         )}
         {choosingParent && (
-          <p className="text-sm text-cui-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("referral_choose_parent_record")}
           </p>
         )}
         <div className="space-y-2" aria-busy={candidates.isFetching}>
           {candidates.isLoading ? (
             <p role="status" className="flex items-center gap-2 py-6 text-sm">
-              <Loader2 className="size-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
               {t("loading")}
             </p>
           ) : candidates.isError ? (
             <div role="alert" className="space-y-2 py-4">
-              <p className="text-sm text-cui-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {t("referral_records_load_error")}
               </p>
               <Button
@@ -395,7 +396,7 @@ export function ReferralResourcePicker({
               </Button>
             </div>
           ) : choices.length === 0 ? (
-            <p className="py-6 text-sm text-cui-muted-foreground">
+            <p className="py-6 text-sm text-muted-foreground">
               {needsFacility && !facilityId
                 ? t("select_facility")
                 : t("referral_no_available_records")}
@@ -410,7 +411,7 @@ export function ReferralResourcePicker({
                   size="sm"
                   className={
                     selected?.id === candidate.id
-                      ? "border-cui-primary bg-cui-accent"
+                      ? "border-primary bg-accent"
                       : ""
                   }
                 >
@@ -515,7 +516,7 @@ export function ReferralResourcePicker({
               add.mutate(resource);
             }}
           >
-            {add.isPending && <Loader2 className="size-4 animate-spin" />}
+            {add.isPending && <Spinner className="size-4 animate-spin" />}
             {t("referral_add_record")}
           </Button>
         </DialogFooter>

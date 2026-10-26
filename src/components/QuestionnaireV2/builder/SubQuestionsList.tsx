@@ -141,9 +141,10 @@ export function SubQuestionsList({
             {/* Keep the title and badges in one flexible column so row
                 actions never wrap below a long subquestion title. */}
             <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-              <button
+              <Button
+                variant="ghost"
                 type="button"
-                className="w-full min-w-0 truncate text-left text-sm text-gray-900"
+                className="h-auto p-0 justify-start w-full min-w-0 truncate text-left text-sm text-gray-900"
                 onClick={() => dispatch({ type: "select", id: child.id })}
               >
                 {child.text || (
@@ -151,7 +152,7 @@ export function SubQuestionsList({
                     {t("untitled_question")}
                   </span>
                 )}
-              </button>
+              </Button>
               <div className="flex max-w-full flex-wrap gap-1">
                 <QuestionTypeBadge
                   type={child.type}

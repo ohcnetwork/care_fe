@@ -126,7 +126,7 @@ export default function EditUserRoleSheet({
         <SheetTrigger asChild>
           {trigger || <Button variant="outline">{t("edit_role")}</Button>}
         </SheetTrigger>
-        <SheetContent className="w-[var(--radix-select-trigger-width)]">
+        <SheetContent className="w-[var(--anchor-width)]">
           <SheetHeader>
             <SheetTitle>{t("edit_user_role")}</SheetTitle>
             <SheetDescription>

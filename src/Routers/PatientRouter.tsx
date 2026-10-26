@@ -1,5 +1,6 @@
 import { useRoutes } from "raviger";
 
+import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
 import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
@@ -101,10 +102,9 @@ export default function PatientRouter() {
     <PatientUserProvider>
       <AppSidebarProvider defaultOpen={sidebarOpen}>
         <AppSidebar sidebarFor={SidebarFor.PATIENT} />
-        <main
+        <SidebarInset
           id="pages"
-          data-slot="sidebar-inset"
-          className="flex min-w-0 flex-1 flex-col bg-white focus:outline-hidden md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2"
+          className="min-h-svh min-w-0 focus:outline-hidden md:min-h-[calc(100svh-1rem)]"
         >
           <BrowserWarning />
           <WorkspaceHeader patient />
@@ -113,7 +113,7 @@ export default function PatientRouter() {
               {pages}
             </ErrorBoundary>
           </div>
-        </main>
+        </SidebarInset>
       </AppSidebarProvider>
     </PatientUserProvider>
   );

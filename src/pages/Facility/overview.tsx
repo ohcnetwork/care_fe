@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -190,9 +191,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    aria-label={t("configure")}
+                    className="h-auto w-auto p-1 p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
                     <Wrench className="size-5" />
-                  </button>
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={resetCustomLinks}>
@@ -208,13 +214,15 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   key={link.link}
                   className="relative group block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <button
+                  <Button
+                    variant="ghost"
+                    type="button"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="h-auto w-auto p-1 absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                     aria-label={t("remove")}
                   >
                     <X className="size-4" />
-                  </button>
+                  </Button>
                   <Link href={link.link} className="block h-full">
                     <Card className="h-full border border-gray-200 shadow-sm rounded-xl p-5">
                       <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">

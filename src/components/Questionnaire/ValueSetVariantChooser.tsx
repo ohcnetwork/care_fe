@@ -133,7 +133,8 @@ export function ValueSetVariantChooser({
             {variants.map(({ valueset, scope }) => {
               const selected = valueset.id === current?.id;
               return (
-                <button
+                <Button
+                  variant="ghost"
                   key={valueset.id}
                   type="button"
                   role="option"
@@ -141,8 +142,11 @@ export function ValueSetVariantChooser({
                   disabled={isPending}
                   onClick={() => setPreference(valueset.id)}
                   className={cn(
-                    "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-gray-100 disabled:opacity-50",
-                    selected && "font-medium",
+                    "h-auto justify-start whitespace-normal",
+                    cn(
+                      "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-gray-100 disabled:opacity-50",
+                      selected && "font-medium",
+                    ),
                   )}
                 >
                   <span className="min-w-0">
@@ -152,7 +156,7 @@ export function ValueSetVariantChooser({
                     </span>
                   </span>
                   {selected && <Check className="size-4 shrink-0" />}
-                </button>
+                </Button>
               );
             })}
             {instanceQuery.isLoading && (

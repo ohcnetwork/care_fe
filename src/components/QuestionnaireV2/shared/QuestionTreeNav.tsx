@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -45,17 +46,21 @@ export function QuestionTreeNav({
   const row = (item: TreeItem, indent: boolean) => {
     const { icon: TypeIcon, tint } = QUESTION_TYPE_ICONS[item.question.type];
     return (
-      <button
+      <Button
+        variant="ghost"
         key={item.question.id}
         type="button"
         aria-current={activeId === item.question.id ? "true" : undefined}
         onClick={() => onSelect(item.question.id)}
         className={cn(
-          "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
-          indent && "ml-2",
-          activeId === item.question.id
-            ? "bg-gray-100 font-medium text-gray-900"
-            : "text-gray-700 hover:bg-gray-50",
+          "h-auto justify-start whitespace-normal",
+          cn(
+            "relative flex w-full items-start gap-1 rounded-md px-3 py-2 text-left text-sm",
+            indent && "ml-2",
+            activeId === item.question.id
+              ? "bg-gray-100 font-medium text-gray-900"
+              : "text-gray-700 hover:bg-gray-50",
+          ),
         )}
       >
         <span className="shrink-0">{item.number}</span>
@@ -87,7 +92,7 @@ export function QuestionTreeNav({
         {activeId === item.question.id && (
           <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-gray-900" />
         )}
-      </button>
+      </Button>
     );
   };
 

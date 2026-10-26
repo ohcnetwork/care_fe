@@ -1,10 +1,9 @@
-import { ChevronsUpDown, LayoutDashboard } from "lucide-react";
+import { Check, ChevronsUpDown, LayoutDashboard } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
-import { cn } from "@/lib/utils";
 
 import {
   DropdownMenu,
@@ -37,36 +36,30 @@ export function OrganizationSwitcher({
         <Button
           variant="outline"
           size="sm"
-          className="h-9 max-w-full gap-2 rounded-lg border-neutral-300 bg-white px-3 text-sm font-normal text-neutral-950 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400"
+          className="max-w-full gap-2 font-normal shadow-sm"
           aria-label={
             selectedOrganization
               ? t("my_organizations")
               : t("select_organization")
           }
         >
-          {
-            <>
-              <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-normal">
-                  {selectedOrganization
-                    ? t("my_organizations")
-                    : t("select_organization")}
-                </span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4 shrink-0 text-neutral-500" />
-            </>
-          }
+          <span className="truncate">
+            {selectedOrganization
+              ? t("my_organizations")
+              : t("select_organization")}
+          </span>
+          <ChevronsUpDown className="ml-auto size-3.5 shrink-0 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
+        className="w-(--anchor-width) min-w-56"
         align="start"
         side="bottom"
         sideOffset={4}
       >
         <DropdownMenuItem asChild>
           <Link
-            className="flex items-center gap-2 cursor-pointer"
+            className="gap-2"
             href="/"
             onClick={() => isMobile && setOpenMobile(false)}
           >
@@ -79,15 +72,7 @@ export function OrganizationSwitcher({
         {organizations
           .filter((org) => org.org_type === "govt")
           .map((org) => (
-            <DropdownMenuItem
-              key={org.id}
-              asChild
-              className={cn(
-                "gap-2 p-2",
-                org?.id === selectedOrganization?.id &&
-                  "bg-neutral-100 font-medium text-neutral-950 focus:bg-neutral-200 focus:text-neutral-950",
-              )}
-            >
+            <DropdownMenuItem key={org.id} asChild className="gap-2">
               <Link
                 href={`/organization/${org.id}`}
                 aria-current={
@@ -95,6 +80,11 @@ export function OrganizationSwitcher({
                 }
                 onClick={() => isMobile && setOpenMobile(false)}
               >
+                {org.id === selectedOrganization?.id ? (
+                  <Check className="size-4 text-primary" />
+                ) : (
+                  <span className="size-4 shrink-0" aria-hidden="true" />
+                )}
                 {org.name}
               </Link>
             </DropdownMenuItem>

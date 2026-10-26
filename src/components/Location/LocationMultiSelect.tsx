@@ -401,8 +401,9 @@ export default function LocationMultiSelect<T extends LocationValue>({
     });
   }, []);
 
+  const searchLocations = searchResultsData?.results;
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim() || !searchResultsData?.results) return [];
+    if (!searchQuery.trim() || !searchLocations) return [];
 
     const results: Array<{
       location: LocationRead;
@@ -424,13 +425,13 @@ export default function LocationMultiSelect<T extends LocationValue>({
       return path;
     };
 
-    searchResultsData.results.forEach((location) => {
+    searchLocations.forEach((location) => {
       const path = buildPath(location);
       results.push({ location, level: path.length, path });
     });
 
     return results;
-  }, [searchQuery, searchResultsData?.results]);
+  }, [searchQuery, searchLocations]);
 
   // Create a map of all available locations for quick lookup
   const locationsMap = useMemo(() => {

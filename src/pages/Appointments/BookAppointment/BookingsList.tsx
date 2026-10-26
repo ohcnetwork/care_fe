@@ -56,25 +56,10 @@ export const BookingsList = ({
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
         <div className="flex flex-col gap-2">
-          <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
-            <TabsTrigger
-              value="upcoming"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("upcoming")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="past"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("past")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="cancelled"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("cancelled")}
-            </TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full sm:w-fit">
+            <TabsTrigger value="upcoming">{t("upcoming")}</TabsTrigger>
+            <TabsTrigger value="past">{t("past")}</TabsTrigger>
+            <TabsTrigger value="cancelled">{t("cancelled")}</TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-auto">
             <BookingListContent

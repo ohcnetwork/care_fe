@@ -3,14 +3,15 @@ import { FileText, X } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/careui/badge";
-import { Button } from "@/components/careui/button";
+import Autocomplete from "@/components/ui/autocomplete";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   FieldDescription,
   FieldError,
   FieldLegend,
   FieldSet,
-} from "@/components/careui/field";
+} from "@/components/ui/field";
 import {
   Item,
   ItemActions,
@@ -18,8 +19,7 @@ import {
   ItemGroup,
   ItemMedia,
   ItemTitle,
-} from "@/components/careui/item";
-import Autocomplete from "@/components/ui/autocomplete";
+} from "@/components/ui/item";
 import {
   Select,
   SelectContent,

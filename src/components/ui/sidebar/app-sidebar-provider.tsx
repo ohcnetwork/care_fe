@@ -305,7 +305,7 @@ export function AppSidebarProvider({
           data-app-sidebar-preview={isOverlay}
           data-app-sidebar-ready={overlayReady}
           className={cn(
-            "bg-neutral-100 [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
+            "bg-sidebar [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
             pinningTransition &&
               "[&_[data-collapsible]>div:last-child]:transition-[left,right,width,top,height,box-shadow,background-color,border-radius] [&>main]:transition-[margin] [&>main]:duration-100 [&>main]:motion-reduce:transition-none",
             !isMobile &&
@@ -318,7 +318,7 @@ export function AppSidebarProvider({
               overlayReady &&
               "[&_[data-collapsible]>div:last-child]:invisible",
             isOverlay &&
-              "[&_[data-collapsible]>div:first-child]:w-0! [&_[data-collapsible]>div:last-child]:border-t [&_[data-collapsible]>div:last-child]:border-r [&_[data-collapsible]>div:last-child]:border-neutral-200 [&_[data-collapsible]>div:last-child]:rounded-r-md [&_[data-collapsible]>div:last-child]:bg-neutral-100 [&_[data-collapsible]>div:last-child]:shadow-xl",
+              "[&_[data-collapsible]>div:first-child]:w-0! [&_[data-collapsible]>div:last-child]:border-t [&_[data-collapsible]>div:last-child]:border-r [&_[data-collapsible]>div:last-child]:border-border [&_[data-collapsible]>div:last-child]:rounded-r-md [&_[data-collapsible]>div:last-child]:bg-sidebar [&_[data-collapsible]>div:last-child]:shadow-xl",
             isOverlay && (innerWorkspace ? "[&>main]:ml-0!" : "[&>main]:ml-2!"),
             className,
           )}

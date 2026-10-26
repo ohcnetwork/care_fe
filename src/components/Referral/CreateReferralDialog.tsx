@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import {
   CSSProperties,
   ReactNode,
@@ -11,12 +12,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
-import { Input } from "@/components/careui/input";
-import { Textarea } from "@/components/careui/textarea";
 import { FillHeader } from "@/components/QuestionnaireV2/fill/FillHeader";
 import { FillSessionTabs } from "@/components/QuestionnaireV2/fill/FillSessionTabs";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +22,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -81,7 +82,7 @@ export function CreateReferralDialog({
     >
       <DialogTrigger asChild>
         {children ?? (
-          <Button variant="outline" className="careui">
+          <Button variant="outline">
             <Plus className="size-4" />
             {t("referral_new")}
           </Button>
@@ -129,18 +130,18 @@ function CreationSection({
     <section
       className={cn(
         "space-y-4",
-        framed && "rounded-xl border border-cui-border bg-cui-muted/30 p-3.5",
+        framed && "rounded-xl border border-border bg-muted/30 p-3.5",
       )}
       aria-label={title}
     >
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-cui-foreground">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <span
           aria-hidden
-          className="h-4 w-1 shrink-0 rounded-full bg-cui-primary"
+          className="h-4 w-1 shrink-0 rounded-full bg-primary"
         />
         {number != null && (
           <span
-            className="shrink-0 text-sm font-medium text-cui-muted-foreground tabular-nums"
+            className="shrink-0 text-sm font-medium text-muted-foreground tabular-nums"
             aria-hidden
           >
             {number}.
@@ -160,7 +161,7 @@ function AvailabilitySummary({
 }) {
   const { t } = useTranslation();
   return (
-    <p className="text-sm text-cui-muted-foreground">
+    <p className="text-sm text-muted-foreground">
       {t(`referral_type_${availability.referral_type}`)}
     </p>
   );
@@ -307,7 +308,7 @@ function CreateReferralContent({
 
   return (
     <DialogContent
-      className="careui fixed inset-0 flex h-full w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-cui-background p-0 text-cui-foreground sm:max-w-none dark:bg-cui-background"
+      className="fixed inset-0 flex h-full w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-background p-0 text-foreground sm:max-w-none dark:bg-background"
       showCloseButton={false}
       onInteractOutside={(event) => event.preventDefault()}
     >
@@ -389,7 +390,7 @@ function CreateReferralContent({
                     onClick={send}
                   >
                     {createMutation.isPending && (
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                     )}
                     {t(
                       createMutation.isPending
@@ -403,7 +404,7 @@ function CreateReferralContent({
             }
           />
           {!patient && (
-            <p role="status" className="text-sm text-cui-muted-foreground">
+            <p role="status" className="text-sm text-muted-foreground">
               {t(
                 patientQuery.isError
                   ? "referral_patient_context_failed"
@@ -420,7 +421,7 @@ function CreateReferralContent({
               >
                 {t(step === "review" ? "referral_review" : "referral_new")}
               </h1>
-              <p className="text-sm text-cui-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {t(
                   step === "review"
                     ? "referral_review_description"
@@ -455,7 +456,7 @@ function CreateReferralContent({
                       </Button>
                     </div>
                     {!choosingDestination && availability.description && (
-                      <p className="text-sm text-cui-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {availability.description}
                       </p>
                     )}
@@ -513,7 +514,7 @@ function CreateReferralContent({
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{availability.name}</p>
                     <AvailabilitySummary availability={availability} />
-                    <p className="text-sm text-cui-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {t("referral_service_questions_description")}
                     </p>
                   </div>
@@ -522,7 +523,7 @@ function CreateReferralContent({
                       role="status"
                       className="flex items-center gap-2 py-6 text-sm"
                     >
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                       {t("loading")}
                     </p>
                   ) : questionnairesQuery.isError ? (
@@ -538,7 +539,7 @@ function CreateReferralContent({
                       </Button>
                     </div>
                   ) : !questionnaire ? (
-                    <p className="text-sm text-cui-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {t(
                         encounterId
                           ? "referral_no_request_form"
@@ -562,7 +563,7 @@ function CreateReferralContent({
                             <SelectTrigger id={`${formId}-questionnaire`}>
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="careui">
+                            <SelectContent>
                               {questionnaires.map((item) => (
                                 <SelectItem key={item.id} value={item.id}>
                                   {item.title}
@@ -595,7 +596,7 @@ function CreateReferralContent({
                     <p className="text-sm font-semibold">{availability.name}</p>
                     <AvailabilitySummary availability={availability} />
                     {availability.description && (
-                      <p className="text-sm text-cui-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {availability.description}
                       </p>
                     )}
@@ -621,7 +622,7 @@ function CreateReferralContent({
                 ref={sendErrorRef}
                 role="alert"
                 tabIndex={-1}
-                className="space-y-2 rounded-lg border border-cui-destructive/30 p-4 outline-none"
+                className="space-y-2 rounded-lg border border-destructive/30 p-4 outline-none"
               >
                 <FieldError role={undefined}>
                   {referralResourceError(
@@ -630,7 +631,7 @@ function CreateReferralContent({
                   )}
                 </FieldError>
                 {unknownDelivery && (
-                  <p className="text-sm text-cui-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {t("referral_send_delivery_unknown")}
                   </p>
                 )}

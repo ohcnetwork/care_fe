@@ -1,6 +1,5 @@
-import { CaretDownIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
+import { ChevronDown as CaretDownIcon, CheckIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -42,7 +41,7 @@ interface Props {
   selected?: UserReadMinimal;
   selectedId?: string;
   dialogTitle?: string;
-  appearance?: "default" | "careui";
+
   onChange: (user: UserReadMinimal) => void;
   placeholder?: string;
   noOptionsMessage?: string;
@@ -60,7 +59,6 @@ interface Props {
 const PAGE_LIMIT = 50;
 
 interface UserCommandContentProps {
-  appearance: "default" | "careui";
   search: string;
   setSearch: (value: string) => void;
   usersList?: UserReadMinimal[];
@@ -75,7 +73,6 @@ interface UserCommandContentProps {
 }
 
 function UserCommandContent({
-  appearance,
   search,
   setSearch,
   usersList,
@@ -93,8 +90,7 @@ function UserCommandContent({
   return (
     <Command
       className={cn(
-        appearance === "careui" &&
-          "rounded-xl bg-white p-1 text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border [&_[data-slot=command-input-wrapper]]:border-neutral-300/30 [&_[data-slot=command-input-wrapper]]:bg-neutral-300/30 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[data-slot=command-input]]:h-full [&_[data-slot=command-group]]:text-neutral-950 [&_[data-slot=command-item]]:min-h-12 [&_[data-slot=command-item]]:text-neutral-950 md:[&_[data-slot=command-item]]:min-h-10 [&_[data-selected=true]]:bg-neutral-100",
+        "rounded-xl bg-white p-1 text-neutral-950 [&_[data-slot=command-input-wrapper]]:m-1 [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:rounded-lg [&_[data-slot=command-input-wrapper]]:border [&_[data-slot=command-input-wrapper]]:border-neutral-300/30 [&_[data-slot=command-input-wrapper]]:bg-neutral-300/30 md:[&_[data-slot=command-input-wrapper]]:h-10 [&_[data-slot=command-input]]:h-full [&_[data-slot=command-group]]:text-neutral-950 [&_[data-slot=command-item]]:min-h-12 [&_[data-slot=command-item]]:text-neutral-950 md:[&_[data-slot=command-item]]:min-h-10 [&_[data-selected=true]]:bg-neutral-100",
       )}
     >
       <CommandInput
@@ -167,7 +163,7 @@ export default function UserSelector({
   selected,
   selectedId,
   dialogTitle,
-  appearance = "default",
+
   onChange,
   placeholder,
   noOptionsMessage,
@@ -282,8 +278,7 @@ export default function UserSelector({
         <DrawerContent
           className={cn(
             "px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg",
-            appearance === "careui" &&
-              "border-neutral-200 bg-white text-neutral-950",
+            "border-neutral-200 bg-white text-neutral-950",
           )}
         >
           {dialogTitle && (
@@ -291,7 +286,6 @@ export default function UserSelector({
           )}
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <UserCommandContent
-              appearance={appearance}
               search={search}
               setSearch={setSearch}
               usersList={usersList}
@@ -318,16 +312,14 @@ export default function UserSelector({
       <PopoverContent
         aria-label={dialogTitle}
         className={cn(
-          "p-0 w-(--radix-popover-trigger-width)",
-          appearance === "careui" &&
-            "rounded-xl border-neutral-200 bg-white text-neutral-950 shadow-md",
+          "p-0 w-(--anchor-width)",
+          "rounded-xl border-neutral-200 bg-white text-neutral-950 shadow-md",
           contentClassName,
         )}
         align={contentAlign || "start"}
         sideOffset={4}
       >
         <UserCommandContent
-          appearance={appearance}
           search={search}
           setSearch={setSearch}
           usersList={usersList}
