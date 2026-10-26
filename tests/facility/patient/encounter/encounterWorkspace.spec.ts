@@ -1478,6 +1478,12 @@ test.describe("Encounter workspace rendering", () => {
     const fixture = await mockEncounterWorkspaceApi(page, {
       includeSectionData: true,
     });
+    // Referral creation remains authorized on this historical encounter while
+    // its clinical actions stay read-only.
+    fixture.pastEncounter.permissions = [
+      ...fixture.pastEncounter.permissions,
+      "can_create_referral",
+    ];
     fixture.workspace.template = {
       schema_version: 1,
       pages: [
@@ -1659,7 +1665,7 @@ test.describe("Encounter workspace rendering", () => {
       await page.goto(`${fixture.basePath}/rounds`);
     });
 
-    await test.step("Overview displays the same records and historical selection removes write actions", async () => {
+    await test.step("Overview retains records and historical referral creation without clinical edits", async () => {
       await page.getByRole("tab", { name: "Overview", exact: true }).click();
       await expect(
         page.getByRole("cell", { name: "82 /min", exact: true }),
@@ -1706,8 +1712,17 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         careTeam.getByRole("button", { name: "Manage Care Team", exact: true }),
       ).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "New referral", exact: true }),
+      ).toBeVisible();
+      await expect(shortcuts.getByRole("link")).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "Forms", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "More Actions", exact: true }),
+      ).toHaveCount(0);
       for (const name of [
-        "Ward shortcuts",
         "Favorite ward forms",
         "Pending ward forms",
         "Visit actions",

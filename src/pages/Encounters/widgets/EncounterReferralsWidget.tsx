@@ -1,10 +1,8 @@
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Frame, FrameHeader, FrameTitle } from "@/components/careui/frame";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { CreateReferralDialog } from "@/components/Referral/CreateReferralDialog";
 import { ReferralList } from "@/components/Referral/ReferralList";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -43,12 +41,12 @@ export function EncounterReferralsWidget({
         (page) =>
           page.kind === "system" && page.key === "referrals" && !page.hidden,
       ));
-  const { canReadReferral, canCreateReferral } = selectedEncounterPermissions;
+  const { canReadReferral } = selectedEncounterPermissions;
   if (
     !selectedEncounter ||
     selectedEncounter.id !== selectedEncounterId ||
     selectedEncounter.patient.id !== patientId ||
-    (!canReadReferral && !canCreateReferral)
+    !canReadReferral
   )
     return null;
 
@@ -66,25 +64,6 @@ export function EncounterReferralsWidget({
     );
   }
 
-  const createAction = canCreateReferral && (
-    <CreateReferralDialog
-      key={selectedEncounterId}
-      encounter={selectedEncounter}
-    />
-  );
-  if (!canReadReferral) {
-    return (
-      <section aria-label={heading} className="careui">
-        <Frame spacing="sm">
-          <FrameHeader className="flex-row flex-wrap items-center justify-between gap-3">
-            <FrameTitle>{heading}</FrameTitle>
-            {createAction}
-          </FrameHeader>
-        </Frame>
-      </section>
-    );
-  }
-
   return (
     <ReferralList
       scope={{ patientId, encounterId: selectedEncounterId }}
@@ -92,7 +71,6 @@ export function EncounterReferralsWidget({
       title={heading}
       showEmpty={showEmpty}
       widgetConfig={parsedConfig.data}
-      actions={createAction}
       onViewAll={
         canViewAll
           ? () =>

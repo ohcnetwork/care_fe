@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   ClipboardList,
+  GitPullRequestArrow,
   HeartPulse,
   Microscope,
   Stethoscope,
@@ -9,6 +10,7 @@ import { Link } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { CreateReferralDialog } from "@/components/Referral/CreateReferralDialog";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -39,7 +41,18 @@ export const QuickActions = ({
 }: QuickActionsProps) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const { patientId, facilityId, selectedEncounterId } = useEncounter();
+  const {
+    patientId,
+    facilityId,
+    selectedEncounter,
+    selectedEncounterId,
+    selectedEncounterPermissions,
+    canWriteClinicalData,
+  } = useEncounter();
+  const canCreateReferral =
+    selectedEncounterPermissions.canCreateReferral &&
+    selectedEncounter?.id === selectedEncounterId &&
+    selectedEncounter?.patient.id === patientId;
   const formLink = (questionnaire: string) => {
     const path = `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`;
     return appendReferralNativeContext(
@@ -49,6 +62,8 @@ export const QuickActions = ({
       window.location.search,
     );
   };
+
+  if (!canWriteClinicalData && !canCreateReferral) return null;
 
   return (
     <div
@@ -65,92 +80,131 @@ export const QuickActions = ({
         onOpenChange={setExpanded}
         className="flex w-full items-start gap-1.5 rounded-xl border border-gray-300 bg-gray-100 p-1.5"
       >
-        <CollapsibleTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-11 w-8 shrink-0 self-center rounded-lg p-0 text-gray-600 hover:bg-gray-200 hover:text-gray-950"
-            aria-label={expanded ? t("show_less") : t("more_actions")}
-            title={expanded ? t("show_less") : t("more_actions")}
-            onKeyDown={(event) => {
-              if (
-                event.key === "Enter" &&
-                !event.shiftKey &&
-                !event.ctrlKey &&
-                !event.metaKey &&
-                !event.altKey
-              ) {
-                // Let Enter activate this button instead of the global shortcut.
-                event.stopPropagation();
-              }
-            }}
-          >
-            <ChevronDown
-              aria-hidden="true"
-              className={cn("transition-transform", expanded && "rotate-180")}
-            />
-          </Button>
-        </CollapsibleTrigger>
-        <div className="grid min-w-0 flex-1 grid-cols-2 gap-1.5 @min-[38rem]:grid-cols-[repeat(4,auto)]">
-          <QuickAction
-            compact
-            icon={<AllergyIcon className="text-amber-700" />}
-            title={t("allergy")}
-            aria-label={t("add_allergy", { count: 1 })}
-            actionId="add-allergy"
-            href={formLink("allergy_intolerance")}
-          />
-          <QuickAction
-            compact
-            icon={<Microscope className="text-pink-600" strokeWidth={1.5} />}
-            title={t("service_request")}
-            actionId="add-service-request"
-            href={formLink("service_request")}
-          />
-          <QuickAction
-            compact
-            icon={<MedicineIcon className="text-teal-700" />}
-            title={t("medication")}
-            aria-label={t("add_medication")}
-            href={formLink("medication_request")}
-            actionId="add-medication-request"
-          />
-          <FormDialog
-            subjectType="encounter"
-            returnPage={returnPage}
-            trigger={
+        {canWriteClinicalData && (
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-11 w-8 shrink-0 self-center rounded-lg p-0 text-gray-600 hover:bg-gray-200 hover:text-gray-950"
+              aria-label={expanded ? t("show_less") : t("more_actions")}
+              title={expanded ? t("show_less") : t("more_actions")}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey &&
+                  !event.ctrlKey &&
+                  !event.metaKey &&
+                  !event.altKey
+                ) {
+                  // Let Enter activate this button instead of the global shortcut.
+                  event.stopPropagation();
+                }
+              }}
+            >
+              <ChevronDown
+                aria-hidden="true"
+                className={cn("transition-transform", expanded && "rotate-180")}
+              />
+            </Button>
+          </CollapsibleTrigger>
+        )}
+        <div
+          className={cn(
+            "grid min-w-0 flex-1 gap-1.5",
+            !canWriteClinicalData
+              ? "grid-cols-1"
+              : canCreateReferral
+                ? "grid-cols-2 @min-[38rem]:grid-cols-5"
+                : "grid-cols-2 @min-[38rem]:grid-cols-[repeat(4,auto)]",
+          )}
+        >
+          {canWriteClinicalData && (
+            <>
+              <QuickAction
+                compact
+                icon={<AllergyIcon className="text-amber-700" />}
+                title={t("allergy")}
+                aria-label={t("add_allergy", { count: 1 })}
+                actionId="add-allergy"
+                href={formLink("allergy_intolerance")}
+              />
               <QuickAction
                 compact
                 icon={
-                  <ClipboardList className="text-teal-700" strokeWidth={1.5} />
+                  <Microscope className="text-pink-600" strokeWidth={1.5} />
                 }
-                title={t("forms")}
-                actionId="add-questionnaire"
+                title={t("service_request")}
+                actionId="add-service-request"
+                href={formLink("service_request")}
               />
-            }
-          />
-          <CollapsibleContent className="col-span-full grid grid-cols-2 gap-1.5 data-[state=closed]:hidden">
-            <QuickAction
-              compact
-              icon={
-                <HeartPulse className="text-orange-700" strokeWidth={1.5} />
-              }
-              title={t("symptoms")}
-              aria-label={t("add_symptom")}
-              href={formLink("symptom")}
-              actionId="add-symptoms"
-            />
-            <QuickAction
-              compact
-              icon={
-                <Stethoscope className="text-purple-700" strokeWidth={1.5} />
-              }
-              title={t("diagnosis")}
-              aria-label={t("add_diagnosis")}
-              href={formLink("diagnosis")}
-              actionId="add-diagnosis"
-            />
-          </CollapsibleContent>
+              <QuickAction
+                compact
+                icon={<MedicineIcon className="text-teal-700" />}
+                title={t("medication")}
+                aria-label={t("add_medication")}
+                href={formLink("medication_request")}
+                actionId="add-medication-request"
+              />
+              <FormDialog
+                subjectType="encounter"
+                returnPage={returnPage}
+                trigger={
+                  <QuickAction
+                    compact
+                    icon={
+                      <ClipboardList
+                        className="text-teal-700"
+                        strokeWidth={1.5}
+                      />
+                    }
+                    title={t("forms")}
+                    actionId="add-questionnaire"
+                  />
+                }
+              />
+            </>
+          )}
+          {canCreateReferral && selectedEncounter && (
+            <CreateReferralDialog
+              key={selectedEncounter.id}
+              encounter={selectedEncounter}
+            >
+              <QuickAction
+                compact
+                icon={
+                  <GitPullRequestArrow
+                    className="text-primary-700"
+                    strokeWidth={1.5}
+                  />
+                }
+                title={t("referral_new")}
+              />
+            </CreateReferralDialog>
+          )}
+          {canWriteClinicalData && (
+            <CollapsibleContent className="col-span-full grid grid-cols-2 gap-1.5 data-[state=closed]:hidden">
+              <QuickAction
+                compact
+                icon={
+                  <HeartPulse className="text-orange-700" strokeWidth={1.5} />
+                }
+                title={t("symptoms")}
+                aria-label={t("add_symptom")}
+                href={formLink("symptom")}
+                actionId="add-symptoms"
+              />
+              <QuickAction
+                compact
+                icon={
+                  <Stethoscope className="text-purple-700" strokeWidth={1.5} />
+                }
+                title={t("diagnosis")}
+                aria-label={t("add_diagnosis")}
+                href={formLink("diagnosis")}
+                actionId="add-diagnosis"
+              />
+            </CollapsibleContent>
+          )}
         </div>
       </Collapsible>
     </div>

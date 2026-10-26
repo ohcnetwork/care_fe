@@ -60,6 +60,7 @@ export function EncounterWidget({
     patientId,
     selectedEncounterId,
     selectedEncounter,
+    selectedEncounterPermissions,
     isSelectedEncounterLoading,
     canReadSelectedEncounter,
     canReadClinicalData,
@@ -147,7 +148,9 @@ export function EncounterWidget({
   const actionProps = { title, showEmpty, returnPage };
   switch (type) {
     case "quick_actions":
-      return facilityId && canWriteClinicalData ? (
+      return facilityId &&
+        (canWriteClinicalData ||
+          selectedEncounterPermissions.canCreateReferral) ? (
         <QuickActions {...actionProps} />
       ) : null;
     case "favorite_forms":

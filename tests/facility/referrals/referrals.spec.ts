@@ -4,14 +4,13 @@ import {
   openMultiFilter,
   selectedMultiFilterBar,
 } from "tests/helper/multiFilter";
+import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
   apiBaseUrl,
   questionBlock,
 } from "tests/helper/questionnaireV2";
-import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
-import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -64,8 +63,8 @@ test.describe("Referrals", () => {
     // This is one connected clinical workflow with several persisted UI transitions.
     test.slow();
     const facilityId = getFacilityId();
-    const patientId = getPatientId();
-    const encounterId = getEncounterId();
+    const { patientId, encounterId } =
+      await createQuestionnaireEncounter(facilityId);
     const suffix = `${Date.now().toString(36)}${faker.string.alphanumeric(4).toLowerCase()}`;
     const questionnaireTitle = `Referral intake ${suffix}`;
     const departmentName = `Referral department ${suffix}`;
@@ -103,6 +102,7 @@ test.describe("Referrals", () => {
     const captureResponsiveView = async (
       name: string,
       fullscreenDialog?: Locator,
+      focus?: Locator,
     ) => {
       const originalViewport = page.viewportSize();
       for (const viewport of [
@@ -117,6 +117,12 @@ test.describe("Referrals", () => {
             ),
           )
           .toBe(true);
+        if (focus) {
+          await expect(async () => {
+            await focus.scrollIntoViewIfNeeded();
+            await expect(focus).toBeInViewport({ ratio: 1 });
+          }).toPass();
+        }
         if (fullscreenDialog) {
           const withinViewport = async (locator: Locator, vertical = true) => {
             await expect
@@ -554,10 +560,45 @@ test.describe("Referrals", () => {
           createRequests++;
         }
       });
-      await page.goto(`${encounterUrl}/referrals`);
-      await page
-        .getByRole("button", { name: "New referral", exact: true })
-        .click();
+      const emptyReferralsLoaded = page.waitForResponse((response) => {
+        const url = new URL(response.url());
+        return (
+          url.pathname === "/api/v1/referral/" &&
+          url.searchParams.get("encounter") === encounterId &&
+          url.searchParams.get("patient") === patientId &&
+          response.request().method() === "GET"
+        );
+      });
+      await page.goto(`${encounterUrl}/updates`);
+      const emptyReferrals = await emptyReferralsLoaded;
+      expect(emptyReferrals.ok(), await emptyReferrals.text()).toBeTruthy();
+      expect(await emptyReferrals.json()).toMatchObject({ count: 0 });
+      const widget = page.getByRole("region", {
+        name: "Referrals",
+        exact: true,
+      });
+      await expect(widget).not.toBeVisible();
+      const quickActions = page.getByRole("region", {
+        name: "Quick Actions",
+        exact: true,
+      });
+      await expect(
+        quickActions.getByRole("button", {
+          name: "More Actions",
+          exact: true,
+        }),
+      ).toHaveAttribute("aria-expanded", "false");
+      const newReferral = quickActions.getByRole("button", {
+        name: "New referral",
+        exact: true,
+      });
+      await expect(newReferral).toBeVisible();
+      await captureResponsiveView(
+        "referral-overview-empty",
+        undefined,
+        quickActions,
+      );
+      await newReferral.click();
       const dialog = page.getByRole("dialog", {
         name: "Request form",
         exact: true,
@@ -697,7 +738,7 @@ test.describe("Referrals", () => {
       );
       await printPage.close();
       await expect(dialog).toBeVisible();
-      await expect(page).toHaveURL(`${encounterUrl}/referrals`);
+      await expect(page).toHaveURL(`${encounterUrl}/updates`);
       await requestTab.click();
       await expect(
         questionBlock(page, questionLabel).getByRole("textbox"),
@@ -762,6 +803,25 @@ test.describe("Referrals", () => {
       });
       expect(await createResponse.json()).toMatchObject({ assignees: [] });
       await expect(dialog).not.toBeVisible();
+      await expect(page).toHaveURL(`${encounterUrl}/updates`);
+      await expect(widget).toBeVisible();
+      await expect(
+        widget.getByRole("link").filter({ hasText: referralTitle }),
+      ).toBeVisible();
+      await expect(widget).toContainText(availabilityName);
+      await expect(widget).toContainText("Pending");
+      await expect(
+        widget.getByRole("button", { name: "New referral", exact: true }),
+      ).toHaveCount(0);
+      await captureResponsiveView(
+        "referral-overview-populated",
+        undefined,
+        widget,
+      );
+      await widget
+        .getByRole("button", { name: "View all referrals", exact: true })
+        .click();
+      await expect(page).toHaveURL(`${encounterUrl}/referrals`);
       await expect(
         page.getByRole("row").filter({ hasText: referralTitle }),
       ).toBeVisible();
