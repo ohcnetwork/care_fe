@@ -408,7 +408,7 @@ test.describe("Schedule Template Management", () => {
     });
 
     await test.step("Entering a new slot count recalculates the duration", async () => {
-      await slotCountInput.pressSequentially("6");
+      await slotCountInput.pressSequentially("6e");
       await expect(slotCountInput).toHaveValue("6");
       await expect(slotDurationInput).toHaveValue("50");
       await expect(getFieldErrorMessage(slotCountInput)).toBeHidden();

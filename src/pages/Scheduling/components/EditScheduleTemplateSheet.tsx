@@ -578,7 +578,11 @@ const NewAvailabilityCard = ({
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
-      num_of_slots: z.number().min(1, t("number_min_error", { min: 0 })),
+      num_of_slots: z
+        .union([z.number().min(1, t("number_min_error", { min: 1 })), z.null()])
+        .refine((val) => val !== null, {
+          message: t("field_required"),
+        }),
     })
     .refine(
       (data) => {
@@ -708,7 +712,7 @@ const NewAvailabilityCard = ({
       const start = form.watch("start_time");
       const end = form.watch("end_time");
       const numOfSlots = form.watch("num_of_slots");
-      if (!start || !end) return;
+      if (!start || !end || !numOfSlots) return;
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue("slot_size_in_minutes", duration);
     }
@@ -857,11 +861,21 @@ const NewAvailabilityCard = ({
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 min={1}
-                                defaultValue={1}
                                 {...field}
+                                value={field.value ?? ""}
                                 className="shadow-none"
+                                onBeforeInput={(e) => {
+                                  if (
+                                    /[eE+]/.test(
+                                      (e.nativeEvent as InputEvent).data ?? "",
+                                    )
+                                  ) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 onChange={(e) => {
-                                  field.onChange(e.target.valueAsNumber);
+                                  const value = e.target.valueAsNumber;
+                                  field.onChange(isNaN(value) ? null : value);
                                   updateSlotDuration();
                                 }}
                               />
