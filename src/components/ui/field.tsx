@@ -1,5 +1,3 @@
-// CareUI registry source: ohcnetwork/careui (d5cff874). Semantic color utilities
-// are namespaced cui-* to coexist with CARE 3.1's existing theme.
 /**
  * @name field
  * @description A form field component with label, description, and error message support.
@@ -60,7 +58,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const fieldVariants = cva(
-  "data-[invalid=true]:text-cui-destructive group/field flex w-full",
+  "data-[invalid=true]:text-destructive group/field flex w-full",
   {
     variants: {
       orientation: {
@@ -114,7 +112,7 @@ function FieldLabel({
     <Label
       data-slot="field-label"
       className={cn(
-        "has-data-checked:text-cui-primary-950 has-data-checked:bg-cui-primary-50 has-data-checked:border-cui-primary-600 dark:has-data-checked:text-cui-primary-300 dark:has-data-checked:border-cui-primary-500/50 dark:has-data-checked:bg-cui-primary-950/70 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border *:data-[slot=field]:p-3",
+        "has-data-checked:text-primary-950 has-data-checked:bg-primary-50 has-data-checked:border-primary-600 dark:has-data-checked:text-primary-300 dark:has-data-checked:border-primary-500/50 dark:has-data-checked:bg-primary-950/70 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border *:data-[slot=field]:p-3",
         "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
         className,
       )}
@@ -141,9 +139,9 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="field-description"
       className={cn(
-        "text-cui-soft-foreground text-left text-sm leading-normal font-normal group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
+        "text-soft-foreground text-left text-sm leading-normal font-normal group-has-data-horizontal/field:text-balance [[data-variant=legend]+&]:-mt-1.5",
         "last:mt-0 nth-last-2:-mt-1",
-        "[&>a:hover]:text-cui-primary [&>a]:underline [&>a]:underline-offset-4",
+        "[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
         className,
       )}
       {...props}
@@ -171,7 +169,7 @@ function FieldSeparator({
       <Separator className="absolute inset-0 top-1/2" />
       {children && (
         <span
-          className="text-cui-muted-foreground bg-cui-background relative mx-auto block w-fit px-2"
+          className="text-muted-foreground bg-background relative mx-auto block w-fit px-2"
           data-slot="field-separator-content"
         >
           {children}
@@ -225,7 +223,7 @@ function FieldError({
       role="alert"
       data-slot="field-error"
       className={cn(
-        "text-cui-destructive bg-cui-destructive/10 inline-flex max-w-fit items-start gap-1 rounded px-1.5 text-sm font-normal",
+        "text-destructive bg-destructive/10 inline-flex max-w-fit items-start gap-1 rounded px-1.5 text-sm font-normal",
         className,
       )}
       {...props}

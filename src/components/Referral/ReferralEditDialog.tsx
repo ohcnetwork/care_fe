@@ -5,10 +5,7 @@ import { ComponentProps, ReactNode, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
-import { Input } from "@/components/careui/input";
-import { Textarea } from "@/components/careui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +15,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ReferralRetrieve,
   ReferralUpdate,
@@ -114,7 +114,7 @@ function ReferralEditContent({
 
   return (
     <DialogContent
-      className="careui max-h-[90vh] overflow-y-auto sm:max-w-2xl"
+      className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"
       onCloseAutoFocus={onCloseAutoFocus}
     >
       <DialogHeader>

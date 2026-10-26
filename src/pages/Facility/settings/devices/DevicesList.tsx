@@ -1,6 +1,10 @@
-import { CaretSortIcon, CubeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  Box as CubeIcon,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -101,7 +105,7 @@ export default function DevicesList({ facilityId }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-[var(--radix-dropdown-menu-trigger-width)] md:w-auto"
+              className="w-[var(--anchor-width)] md:w-auto"
             >
               {pluginDevices.map((pluginDevice) => {
                 const DeviceIcon = pluginDevice.icon || CubeIcon;
@@ -162,7 +166,7 @@ export default function DevicesList({ facilityId }: Props) {
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="min-w-[var(--radix-popover-trigger-width)] max-w-[200px] p-2"
+              className="min-w-[var(--anchor-width)] max-w-[200px] p-2"
               align="end"
             >
               <div className="space-y-2">

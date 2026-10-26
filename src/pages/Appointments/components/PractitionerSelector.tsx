@@ -1,8 +1,9 @@
-import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Building2,
+  ChevronDown as CaretDownIcon,
+  Check as CheckIcon,
   ChevronRight,
   Loader2,
   Search,
@@ -714,10 +715,7 @@ export const PractitionerSelector = ({
           <PopoverContent
             align="start"
             side="bottom"
-            className={cn(
-              "p-0",
-              !multiple && "w-[var(--radix-popover-trigger-width)]",
-            )}
+            className={cn("p-0", !multiple && "w-[var(--anchor-width)]")}
           >
             {content}
           </PopoverContent>

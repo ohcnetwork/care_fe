@@ -73,13 +73,13 @@ export const FilesTab = ({
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
           <TabsTrigger
             value="all"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            className="data-active:bg-white rounded-md px-4 font-semibold"
           >
             {t("files")}
           </TabsTrigger>
           <TabsTrigger
             value="reports"
-            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            className="data-active:bg-white rounded-md px-4 font-semibold"
           >
             {t("reports")}
           </TabsTrigger>
@@ -87,7 +87,7 @@ export const FilesTab = ({
             <TabsTrigger
               key={tab}
               value={tab}
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold capitalize"
+              className="data-active:bg-white rounded-md px-4 font-semibold capitalize"
             >
               {t(tab)}
             </TabsTrigger>

@@ -51,7 +51,7 @@ import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliati
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { DottedDivider } from "@/components/careui/dotted-divider";
+import { DottedDivider } from "@/components/ui/dotted-divider";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 

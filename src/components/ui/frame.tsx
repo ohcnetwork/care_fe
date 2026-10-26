@@ -1,5 +1,3 @@
-// CareUI registry source: ohcnetwork/careui (d5cff874). Semantic color utilities
-// are namespaced cui-* to coexist with CARE 3.1's existing theme.
 /**
  * @name frame
  * @description Displays related content in a structured frame with header, content, and footer.
@@ -25,13 +23,13 @@ import { cn } from "@/lib/utils";
 const frameVariants = cva(
   [
     "relative flex flex-col rounded-(--frame-radius)",
-    "[--frame-radius:var(--cui-radius-xl)]",
+    "[--frame-radius:var(--radius-xl)]",
   ],
   {
     variants: {
       variant: {
-        default: "border bg-cui-muted/50 bg-clip-padding",
-        ghost: "bg-cui-muted/50 bg-clip-padding",
+        default: "border bg-muted/50 bg-clip-padding",
+        ghost: "bg-muted/50 bg-clip-padding",
       },
       spacing: {
         sm: "gap-0.5 p-0.5 [--frame-panel-p:--spacing(3)] [--frame-panel-header-px:--spacing(3)] [--frame-panel-header-py:--spacing(2)] [--frame-panel-footer-px:--spacing(3)] [--frame-panel-footer-py:--spacing(2)]",
@@ -48,7 +46,7 @@ const frameVariants = cva(
           // Hide the panel's own top border but render the divider via box-shadow
           // so it stays visible even when dense pulls panels with negative margins.
           "*:[[data-slot=frame-panel]+[data-slot=frame-panel]]:border-t-0",
-          "*:[[data-slot=frame-panel]+[data-slot=frame-panel]]:shadow-[0_-1px_0_0_var(--cui-border)]",
+          "*:[[data-slot=frame-panel]+[data-slot=frame-panel]]:shadow-[0_-1px_0_0_var(--border)]",
           "[&:not(:has([data-slot=frame-panel-header]))_[data-slot=frame-panel]:is(:first-child)]:border-t-0",
         ],
         false: "",
@@ -96,7 +94,7 @@ function FramePanel({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="frame-panel"
       className={cn(
-        "bg-cui-background relative grow rounded-(--frame-radius) border bg-clip-padding shadow-xs",
+        "bg-background relative grow rounded-(--frame-radius) border bg-clip-padding shadow-xs",
         "before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--frame-radius)-1px)] before:shadow-black/5",
         "dark:bg-clip-border dark:before:shadow-white/5",
         "p-(--frame-panel-p)",
@@ -137,7 +135,7 @@ function FrameDescription({
   return (
     <div
       data-slot="frame-panel-description"
-      className={cn("text-cui-muted-foreground text-sm", className)}
+      className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
   );

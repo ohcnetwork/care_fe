@@ -126,7 +126,7 @@ export function ValueSetRuleCard({
       </div>
       <CollapsibleContent
         forceMount
-        className="border-t border-gray-100 p-3 data-[state=closed]:hidden sm:p-4"
+        className="border-t border-gray-100 p-3 data-closed:hidden sm:p-4"
       >
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">

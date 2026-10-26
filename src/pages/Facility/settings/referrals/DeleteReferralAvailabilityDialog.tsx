@@ -3,7 +3,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -70,17 +70,17 @@ export function DeleteReferralAvailabilityDialog({
         if (!open && !deletion.isPending) onClose();
       }}
     >
-      <DialogContent className="careui border-cui-border bg-cui-background text-cui-foreground">
+      <DialogContent className="border-border bg-background text-foreground">
         <DialogHeader>
           <DialogTitle>{t("referral_delete_availability")}</DialogTitle>
-          <DialogDescription className="text-cui-muted-foreground">
+          <DialogDescription className="text-muted-foreground">
             {t("referral_delete_availability_description", {
               name: availability.name,
             })}
           </DialogDescription>
         </DialogHeader>
         {deletion.isError && (
-          <p role="alert" className="text-sm text-cui-destructive">
+          <p role="alert" className="text-sm text-destructive">
             {t(
               deletion.error instanceof HTTPError &&
                 deletion.error.status === 403

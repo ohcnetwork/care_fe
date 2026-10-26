@@ -51,27 +51,25 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
-import {
-  AvatarIcon,
-  CalendarIcon,
-  CheckCircledIcon,
-  ClockIcon,
-  DotsVerticalIcon,
-  DrawingPinIcon,
-  EnterIcon,
-  EyeNoneIcon,
-  MobileIcon,
-  PersonIcon,
-  PlusCircledIcon,
-} from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, isBefore, isWithinInterval, subDays } from "date-fns";
 import {
+  CircleUserRound as AvatarIcon,
   BanIcon,
+  Calendar as CalendarIcon,
   CheckCircle2Icon,
+  CircleCheck as CheckCircledIcon,
   ChevronLeft,
+  Clock as ClockIcon,
+  EllipsisVertical as DotsVerticalIcon,
+  Pin as DrawingPinIcon,
+  LogIn as EnterIcon,
   EyeIcon,
+  EyeOff as EyeNoneIcon,
   Loader2,
+  Smartphone as MobileIcon,
+  UserRound as PersonIcon,
+  CirclePlus as PlusCircledIcon,
   PlusSquare,
   PrinterIcon,
   ReceiptText,

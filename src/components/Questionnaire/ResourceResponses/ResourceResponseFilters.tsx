@@ -255,7 +255,6 @@ export default function ResourceResponseFilters({
           {t("submitted_by")}
         </Label>
         <UserSelector
-          appearance="careui"
           facilityId={facilityId}
           selectedId={value.createdBy}
           dialogTitle={t("submitted_by")}

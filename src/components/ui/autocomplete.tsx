@@ -1,4 +1,8 @@
-import { CaretSortIcon, CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  Check as CheckIcon,
+  X as Cross2Icon,
+} from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -299,7 +303,7 @@ export default function Autocomplete({
         </PopoverTrigger>
         <PopoverContent
           className={cn(
-            "p-0 pointer-events-auto w-(--radix-popover-trigger-width)",
+            "p-0 pointer-events-auto w-(--anchor-width)",
             popoverContentClassName,
           )}
           align={align}

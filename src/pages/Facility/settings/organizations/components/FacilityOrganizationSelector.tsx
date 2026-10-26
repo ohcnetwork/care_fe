@@ -612,7 +612,7 @@ export default function FacilityOrganizationSelector(
                 <PopoverContent
                   align="start"
                   sideOffset={4}
-                  className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                  className="p-0 w-[var(--anchor-width)] max-h-[80vh] overflow-auto"
                 >
                   {renderOrganizationCommand()}
                 </PopoverContent>

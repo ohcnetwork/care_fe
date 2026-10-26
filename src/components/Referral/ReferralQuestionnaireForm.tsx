@@ -4,15 +4,15 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
+import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import {
   Item,
   ItemContent,
   ItemDescription,
   ItemMedia,
-} from "@/components/careui/item";
-import { Muted } from "@/components/careui/typography";
+} from "@/components/ui/item";
+import { Muted } from "@/components/ui/typography";
 
 import { sessionEditSignature } from "@/components/QuestionnaireV2/fill/draft/fillDraftStore";
 import { QuestionnaireFormCanvas } from "@/components/QuestionnaireV2/form/FormCanvas";
@@ -121,11 +121,7 @@ export function ReferralQuestionnaireForm({
             <ItemDescription>{t("referral_form_unsupported")}</ItemDescription>
           </Item>
         ) : resolution.hasError ? (
-          <Item
-            variant="outline"
-            size="sm"
-            className="border-cui-destructive/30"
-          >
+          <Item variant="outline" size="sm" className="border-destructive/30">
             <ItemContent className="items-start gap-3">
               <FieldError>{t("referral_form_choices_unavailable")}</FieldError>
               <Muted>
@@ -156,7 +152,7 @@ export function ReferralQuestionnaireForm({
           </Item>
         ) : (
           <div
-            className="flex items-center justify-center gap-2 py-8 text-sm text-cui-muted-foreground"
+            className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"
             role="status"
           >
             <Loader2 className="size-4 animate-spin" />
@@ -274,7 +270,7 @@ function ReferralFormBody({
           <ItemDescription>{t("referral_form_unsupported")}</ItemDescription>
         </Item>
       ) : (
-        <div className="space-y-4 border-t border-cui-border pt-5">
+        <div className="space-y-4 border-t border-border pt-5">
           {errors.length > 0 && (
             <FieldError>{t("referral_check_required_answers")}</FieldError>
           )}

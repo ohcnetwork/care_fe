@@ -25,21 +25,21 @@ export const SummaryPanel = () => {
         <TabsList className="h-10 w-full sm:w-72 justify-between rounded-xl border border-gray-200 bg-white p-1">
           <TabsTrigger
             value="details"
-            className="w-full rounded-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-100 data-[state=active]:shadow-none"
+            className="w-full rounded-lg data-active:border-gray-200 data-active:bg-gray-100 data-active:shadow-none"
           >
             <span className="text-black">{t("details")}</span>
           </TabsTrigger>
           {canWriteSelectedEncounter && (
             <TabsTrigger
               value="actions"
-              className="w-full rounded-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-100 data-[state=active]:shadow-none"
+              className="w-full rounded-lg data-active:border-gray-200 data-active:bg-gray-100 data-active:shadow-none"
             >
               <span className="text-black">{t("actions")}</span>
             </TabsTrigger>
           )}
           <TabsTrigger
             value="reports"
-            className="w-full rounded-lg data-[state=active]:border-gray-200 data-[state=active]:bg-gray-100 data-[state=active]:shadow-none"
+            className="w-full rounded-lg data-active:border-gray-200 data-active:bg-gray-100 data-active:shadow-none"
           >
             <span className="text-black">{t("reports")}</span>
           </TabsTrigger>

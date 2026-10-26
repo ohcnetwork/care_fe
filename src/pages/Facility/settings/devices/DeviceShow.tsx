@@ -57,7 +57,7 @@ const buttonClassName =
 const linkClassName =
   "inline-flex min-w-0 items-center gap-1.5 rounded-sm text-sm text-neutral-950 underline underline-offset-4 hover:text-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
 const tabClassName =
-  "-mb-px h-12 rounded-t-lg rounded-b-none border-neutral-200 bg-neutral-100 px-4 text-neutral-700 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.06)] hover:text-neutral-950 focus-visible:border-indigo-500 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 data-[state=active]:border-neutral-200 data-[state=active]:border-b-white data-[state=active]:bg-white data-[state=active]:text-neutral-950 data-[state=active]:shadow-none md:h-10";
+  "-mb-px h-12 rounded-t-lg rounded-b-none border-neutral-200 bg-neutral-100 px-4 text-neutral-700 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.06)] hover:text-neutral-950 focus-visible:border-indigo-500 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 data-active:border-neutral-200 data-active:border-b-white data-active:bg-white data-active:text-neutral-950 data-active:shadow-none md:h-10";
 
 export default function DeviceShow({
   facilityId,

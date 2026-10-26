@@ -68,23 +68,6 @@ export default function MultiFilter({
     0,
   );
 
-  const nonClearableFilterCount = Object.values(selectedFilters).reduce(
-    (sum, filterState) => {
-      if (filterState.filter.disableClear) {
-        return sum;
-      }
-      if (Array.isArray(filterState.selected)) {
-        if (filterState.selected.length === 0) {
-          return sum;
-        }
-      }
-      return sum + 1;
-    },
-    0,
-  );
-
-  const hasAnyFilters = nonClearableFilterCount > 0;
-
   const handleFilterSelect = (filterKey: string) => {
     setActiveFilter(filterKey);
     setOpen(true);
@@ -123,19 +106,18 @@ export default function MultiFilter({
   );
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div
+      data-slot="filters"
+      className={cn("flex flex-wrap items-center gap-2.5", className)}
+    >
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className={cn(
-              "justify-between font-semibold",
-              hasAnyFilters && "border-blue-300 bg-blue-50",
-              triggerButtonClassName,
-            )}
+            className={cn("shadow-sm", triggerButtonClassName)}
             disabled={disabled}
           >
-            <ListFilter className="h-3 w-3" />
+            <ListFilter aria-hidden="true" />
             <span className="truncate">{placeholder}</span>
           </Button>
         </DropdownMenuTrigger>
@@ -196,7 +178,7 @@ export default function MultiFilter({
           variant="ghost"
           onClick={handleClearAll}
           className={cn(
-            "text-sm text-gray-950 underline items-center w-auto self-start",
+            "text-muted-foreground hover:text-foreground gap-1.5 underline underline-offset-4 w-auto self-start",
             clearAllButtonClassName,
           )}
         >
@@ -260,12 +242,14 @@ function FilterList({
             onFocus={() => setFocusItemIndex(index)}
           >
             <div className="flex items-center gap-2">
-              <span className="border border-dotted border-gray-600 rounded w-3 h-3 mb-0.5"></span>
+              <span className="border border-dotted border-muted-foreground rounded w-3 h-3 mb-0.5"></span>
               <span className="text-sm">{t(filter.label)}</span>
             </div>
             <div className="flex items-center gap-2">
               {selected.length > 0 && (
-                <span className="text-xs text-gray-500">{selected.length}</span>
+                <span className="text-xs text-muted-foreground">
+                  {selected.length}
+                </span>
               )}
               <ChevronRight className="h-4 w-4" />
             </div>

@@ -584,7 +584,7 @@ export default function EncounterHistorySelector() {
           align="start"
           sideOffset={8}
           aria-label={t("encounter_history")}
-          className="max-h-[min(36rem,var(--radix-popover-content-available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
+          className="max-h-[min(36rem,var(--available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
         >
           <EncounterHistoryList onSelect={() => setIsOpen(false)} />
         </PopoverContent>

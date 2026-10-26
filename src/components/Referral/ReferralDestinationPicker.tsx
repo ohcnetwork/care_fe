@@ -5,9 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/careui/badge";
-import { Button } from "@/components/careui/button";
-import { Field, FieldLabel } from "@/components/careui/field";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
@@ -21,6 +20,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
@@ -126,19 +126,14 @@ function DestinationCombobox<T extends DestinationOption>({
       disabled={disabled}
       className="w-full min-w-0 justify-between font-normal tracking-normal shadow-none"
     >
-      <span
-        className={cn("truncate", !selected && "text-cui-muted-foreground")}
-      >
+      <span className={cn("truncate", !selected && "text-muted-foreground")}>
         {selected?.name ?? placeholder}
       </span>
       <ChevronsUpDown className="size-4 opacity-50" aria-hidden="true" />
     </Button>
   );
   const content = (
-    <Command
-      shouldFilter={false}
-      className="bg-cui-background text-cui-foreground"
-    >
+    <Command shouldFilter={false} className="bg-background text-foreground">
       <CommandInput
         aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
@@ -153,7 +148,7 @@ function DestinationCombobox<T extends DestinationOption>({
         {optionsQuery.isPending ? (
           <div
             role="status"
-            className="flex items-center justify-center gap-2 p-4 text-sm text-cui-muted-foreground"
+            className="flex items-center justify-center gap-2 p-4 text-sm text-muted-foreground"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             {t("loading")}
@@ -173,7 +168,7 @@ function DestinationCombobox<T extends DestinationOption>({
         ) : options.length === 0 ? (
           <div
             role="status"
-            className="p-4 text-center text-sm text-cui-muted-foreground"
+            className="p-4 text-center text-sm text-muted-foreground"
           >
             {emptyMessage}
           </div>
@@ -209,12 +204,9 @@ function DestinationCombobox<T extends DestinationOption>({
       </CommandList>
       {!hasPageError &&
         (optionsQuery.hasNextPage || optionsQuery.isFetchNextPageError) && (
-          <div className="border-t border-cui-border p-2">
+          <div className="border-t border-border p-2">
             {optionsQuery.isFetchNextPageError && (
-              <p
-                role="alert"
-                className="mb-2 text-sm text-cui-muted-foreground"
-              >
+              <p role="alert" className="mb-2 text-sm text-muted-foreground">
                 {t("referral_picker_load_error")}
               </p>
             )}
@@ -249,10 +241,10 @@ function DestinationCombobox<T extends DestinationOption>({
         <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent
-            className="careui bg-cui-background text-cui-foreground pb-4"
+            className="bg-background text-foreground pb-4"
             aria-describedby={undefined}
           >
-            <DrawerTitle className="px-4 pt-4 pb-2 text-cui-foreground">
+            <DrawerTitle className="px-4 pt-4 pb-2 text-foreground">
               {label}
             </DrawerTitle>
             {content}
@@ -263,7 +255,7 @@ function DestinationCombobox<T extends DestinationOption>({
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent
             align="start"
-            className="careui w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] overflow-hidden border-cui-border bg-cui-background p-0 text-cui-foreground"
+            className="w-[var(--anchor-width)] max-w-[calc(100vw-2rem)] overflow-hidden border-border bg-background p-0 text-foreground"
           >
             {content}
           </PopoverContent>
@@ -303,7 +295,7 @@ export function ReferralDestinationPicker({
   );
 
   return (
-    <div className="careui space-y-4">
+    <div className="space-y-4">
       <Field className="max-w-xs">
         <FieldLabel htmlFor={id}>{t("referral_destination_type")}</FieldLabel>
         <Select
@@ -313,7 +305,7 @@ export function ReferralDestinationPicker({
           <SelectTrigger id={id}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="careui">
+          <SelectContent>
             {DESTINATION_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {t(type.label)}
@@ -351,7 +343,7 @@ export function ReferralDestinationPicker({
                 {option.name}
               </span>
               {option.description && (
-                <span className="block line-clamp-2 break-words text-xs text-cui-muted-foreground">
+                <span className="block line-clamp-2 break-words text-xs text-muted-foreground">
                   {option.description}
                 </span>
               )}

@@ -1,16 +1,13 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 export function selectedMultiFilterBar(page: Page, label: RegExp) {
-  return page
-    .locator('[data-slot="dropdown-menu-trigger"]')
-    .filter({ hasText: label })
-    .locator("xpath=..");
+  return page.getByRole("group", { name: label });
 }
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
   await page.keyboard.press("Escape");
   await selectedMultiFilterBar(page, label)
-    .locator('[data-slot="button"]')
+    .getByRole("button", { name: "Remove filter", exact: true })
     .click();
 }
 

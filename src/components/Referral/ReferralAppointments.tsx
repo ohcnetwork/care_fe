@@ -4,16 +4,16 @@ import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { getPermissions } from "@/common/Permissions";
-import { Badge } from "@/components/careui/badge";
-import { Button, buttonVariants } from "@/components/careui/button";
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@/components/careui/item";
-import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+} from "@/components/ui/item";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
@@ -74,11 +74,11 @@ function AppointmentSummary({
       ? resolved.data.resource
       : undefined;
   return (
-    <div className="rounded-lg border border-cui-border bg-cui-muted/30">
+    <div className="rounded-lg border border-border bg-muted/30">
       <div className="flex flex-wrap items-center justify-between gap-3 p-3">
         <div className="min-w-0 space-y-1 text-sm">
           <div className="flex flex-wrap items-center gap-2 font-medium">
-            <CalendarDays className="size-4 text-cui-primary" />
+            <CalendarDays className="size-4 text-primary" />
             {appointment
               ? formatDateTime(appointment.token_slot.start_datetime)
               : t("appointment")}
@@ -99,7 +99,7 @@ function AppointmentSummary({
               </Badge>
             )}
           </div>
-          <p className="break-words text-xs text-cui-muted-foreground">
+          <p className="break-words text-xs text-muted-foreground">
             <span className="mr-2">
               {t(`referral_records_${attachment.attachment_type}`)}
             </span>
@@ -141,14 +141,14 @@ function AppointmentSummary({
         </div>
       </div>
       {visit.encounter && (
-        <p className="px-3 pb-3 text-sm text-cui-muted-foreground">
+        <p className="px-3 pb-3 text-sm text-muted-foreground">
           {t("referral_receiving_encounter_summary", {
             facility: visit.encounter.facility.name,
             status: t(`encounter_status__${visit.encounter.status}`),
           })}
         </p>
       )}
-      <div className="border-t border-cui-border p-3">
+      <div className="border-t border-border p-3">
         {resolved.isLoading ? (
           <p role="status" className="flex items-center gap-2 text-sm">
             <Loader2 aria-hidden="true" className="size-4 animate-spin" />
@@ -156,7 +156,7 @@ function AppointmentSummary({
           </p>
         ) : resolved.isError ? (
           <div role="alert" className="space-y-3">
-            <p className="text-sm text-cui-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {t("referral_record_unavailable")}
             </p>
             <Button
@@ -285,7 +285,7 @@ export function ReferralAppointments({
   return (
     <section
       aria-label={t("referral_appointment_visit")}
-      className="space-y-3 border-b border-cui-border p-4 sm:p-5"
+      className="space-y-3 border-b border-border p-4 sm:p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold">
@@ -335,7 +335,7 @@ export function ReferralAppointments({
       {canOfferNewVisit &&
         (canBook || canStartConsultation) &&
         destinationFacility && (
-          <p className="text-sm text-cui-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("referral_receiving_visit_help", {
               facility: destinationFacility.name,
             })}
@@ -344,7 +344,7 @@ export function ReferralAppointments({
       {hasVisitContext && selectedVisit.isLoading && (
         <p
           role="status"
-          className="flex items-center gap-2 text-sm text-cui-muted-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <Loader2 aria-hidden="true" className="size-4 animate-spin" />
           {t("referral_appointment_context_loading")}
@@ -364,7 +364,7 @@ export function ReferralAppointments({
         </div>
       )}
       {directEncounter && directEncounterUrl && (
-        <Item variant="outline" className="bg-cui-muted/30">
+        <Item variant="outline" className="bg-muted/30">
           <ItemContent className="min-w-0">
             <ItemTitle>{t("referral_receiving_encounter")}</ItemTitle>
             <ItemDescription>
@@ -399,7 +399,7 @@ export function ReferralAppointments({
       {records.isPending ? (
         <p
           role="status"
-          className="flex items-center gap-2 text-sm text-cui-muted-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <Loader2 className="size-4 animate-spin" />
           {t("loading")}

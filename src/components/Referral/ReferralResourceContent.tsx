@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { formatDateTime } from "@/Utils/utils";
 import { DiagnosisCard } from "@/components/Patient/diagnosis/DiagnosisTable";
-import { Badge } from "@/components/careui/badge";
+import { Badge } from "@/components/ui/badge";
 import { DiagnosticReportSummary } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportSummary";
 import { SpecimenDetails } from "@/pages/Facility/services/serviceRequests/components/SpecimenDetails";
 import { Code } from "@/types/base/code/code";
@@ -94,7 +94,7 @@ export function ReferralResourceContent({
         <div className="space-y-4">
           {(hasStructuredAnswers(response.responses) ||
             Object.keys(response.structured_responses ?? {}).length > 0) && (
-            <p className="border-l-2 border-cui-border pl-3 text-sm text-cui-muted-foreground">
+            <p className="border-l-2 border-border pl-3 text-sm text-muted-foreground">
               {t("referral_structured_response_notice")}
             </p>
           )}
@@ -195,13 +195,13 @@ export function ReferralResourceContent({
         <dl className="grid gap-3">
           {record.component.map((component, index) => (
             <div key={index}>
-              <dt className="text-sm text-cui-muted-foreground">
+              <dt className="text-sm text-muted-foreground">
                 {displayCode(component.code) ||
                   t("referral_observation_component")}
               </dt>
               <dd className="text-sm">{value(component.value)}</dd>
               {component.note && (
-                <dd className="whitespace-pre-wrap text-sm text-cui-muted-foreground">
+                <dd className="whitespace-pre-wrap text-sm text-muted-foreground">
                   {component.note}
                 </dd>
               )}
@@ -227,7 +227,7 @@ export function ReferralResourceContent({
             key={index}
             className={fullWidth ? "min-w-0 sm:col-span-2" : "min-w-0"}
           >
-            <dt className="text-xs text-cui-muted-foreground">{label}</dt>
+            <dt className="text-xs text-muted-foreground">{label}</dt>
             <dd className="whitespace-pre-wrap break-words text-sm">{value}</dd>
           </div>
         ))}

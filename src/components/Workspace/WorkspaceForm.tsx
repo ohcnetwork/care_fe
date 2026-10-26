@@ -435,13 +435,13 @@ export function WorkspaceForm({
                         {t("workspace_unsaved_changes")}
                       </span>
                     )}
-                    <ChevronDown className="size-4 shrink-0 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="size-4 shrink-0 text-gray-400 transition-transform group-data-open:rotate-180" />
                   </span>
                 </CollapsibleTrigger>
               </h2>
               <CollapsibleContent
                 forceMount
-                className="space-y-4 border-t border-gray-100 px-4 py-4 data-[state=closed]:hidden sm:px-5"
+                className="space-y-4 border-t border-gray-100 px-4 py-4 data-closed:hidden sm:px-5"
               >
                 <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
                   <FormField

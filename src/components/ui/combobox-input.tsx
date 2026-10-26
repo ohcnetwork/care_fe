@@ -157,10 +157,7 @@ export function ComboboxInput({
       <PopoverTrigger asChild>{field}</PopoverTrigger>
       <PopoverContent
         align={align}
-        className={cn(
-          "w-[var(--radix-popover-trigger-width)] min-w-56 p-0",
-          contentClassName,
-        )}
+        className={cn("w-[var(--anchor-width)] min-w-56 p-0", contentClassName)}
         // Keep the caret in the field when the dropdown opens, so the user can
         // keep typing instead of having focus yanked into the list.
         onOpenAutoFocus={(e) => {

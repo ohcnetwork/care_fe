@@ -4,8 +4,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -132,7 +132,7 @@ function AssignmentContent({
     },
   });
   return (
-    <DialogContent className="careui max-h-[90vh] overflow-y-auto sm:max-w-xl">
+    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
       <DialogHeader>
         <DialogTitle>{t("referral_manage_assignees")}</DialogTitle>
         <DialogDescription>
@@ -159,7 +159,7 @@ function AssignmentContent({
               <SelectTrigger id={id}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="careui">
+              <SelectContent>
                 {facilities.map((facility) => (
                   <SelectItem key={facility.id} value={facility.id}>
                     {facility.name}

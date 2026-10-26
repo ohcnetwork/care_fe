@@ -1,5 +1,3 @@
-// CareUI registry source: ohcnetwork/careui (d5cff874). Semantic color utilities
-// are namespaced cui-* to coexist with CARE 3.1's existing theme.
 /**
  * @name typography
  * @description App-shell heading components (h1-h6) tuned for clinical UI density.
@@ -18,7 +16,7 @@ import { cn } from "@/lib/utils";
  * is carried by weight and rhythm, not visual drama.
  *
  *   Element  Component         Tailwind     px    Line     Weight           Typical use
- *   H1       <PageTitle>       text-3xl     30    36       font-bold        Page title
+ *   H1       <CareUIPageTitle>       text-3xl     30    36       font-bold        Page title
  *   H2       <SectionTitle>    text-2xl     24    32       font-semibold    Main section
  *   H3       <SubsectionTitle> text-xl      20    28       font-semibold    Card / section title
  *   H4       <GroupTitle>      text-lg      18    28       font-medium      Subsection
@@ -65,11 +63,11 @@ import { cn } from "@/lib/utils";
  * weights, body sits at 16px with comfortable leading):
  *
  *   Component       Tailwind                                  Typical use
- *   <Lead>          text-lg text-cui-muted-foreground             Intro / sub-title
+ *   <Lead>          text-lg text-muted-foreground             Intro / sub-title
  *   <Large>         text-base font-semibold                   Strong-emphasis body (Apple “Headline”)
  *   <Small>         text-sm font-medium leading-none          Form labels, captions, meta
- *   <Muted>         text-sm text-cui-muted-foreground             Helper / secondary text
- *   <InlineCode>    bg-cui-muted px-1.5 py-0.5 font-mono text-sm  Inline identifier / value
+ *   <Muted>         text-sm text-muted-foreground             Helper / secondary text
+ *   <InlineCode>    bg-muted px-1.5 py-0.5 font-mono text-sm  Inline identifier / value
  */
 
 type HeadingProps = React.HTMLAttributes<HTMLHeadingElement>;
@@ -155,7 +153,7 @@ export function Lead({ className, ...props }: ParagraphProps) {
     <p
       data-slot="lead"
       className={cn(
-        "text-cui-muted-foreground text-lg leading-7 text-balance",
+        "text-muted-foreground text-lg leading-7 text-balance",
         className,
       )}
       {...props}
@@ -193,7 +191,7 @@ export function Muted({ className, ...props }: ParagraphProps) {
   return (
     <p
       data-slot="muted"
-      className={cn("text-cui-muted-foreground text-sm leading-5", className)}
+      className={cn("text-muted-foreground text-sm leading-5", className)}
       {...props}
     />
   );
@@ -207,7 +205,7 @@ export function InlineCode({
     <code
       data-slot="inline-code"
       className={cn(
-        "bg-cui-muted relative rounded px-1.5 py-0.5 font-mono text-sm font-medium",
+        "bg-muted relative rounded px-1.5 py-0.5 font-mono text-sm font-medium",
         className,
       )}
       {...props}

@@ -4,12 +4,12 @@ import { Link, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button, buttonVariants } from "@/components/careui/button";
 import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
+import { Button, buttonVariants } from "@/components/ui/button";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -114,7 +114,7 @@ export function ReferralPatientHeader({
     <div className="space-y-2">
       <section
         aria-label={t("patient_details")}
-        className="grid min-w-0 gap-3 rounded-lg border border-cui-border bg-cui-background px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+        className="grid min-w-0 gap-3 rounded-lg border border-border bg-background px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
       >
         <PatientHeader
           patient={
@@ -135,7 +135,7 @@ export function ReferralPatientHeader({
         )}
         {!patient && (
           <div
-            className="flex flex-wrap items-center gap-2 text-sm text-cui-muted-foreground lg:col-span-2"
+            className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground lg:col-span-2"
             role="status"
           >
             <p>
@@ -163,7 +163,7 @@ export function ReferralPatientHeader({
       {patient && <PatientDeceasedInfo patient={patient} />}
       {(referral.encounter || receivingEncounter) && (
         <section aria-label={t(encounterLabel)} className="space-y-1">
-          <h2 className="px-1 text-xs font-medium text-cui-muted-foreground">
+          <h2 className="px-1 text-xs font-medium text-muted-foreground">
             {t(encounterLabel)}
           </h2>
           {encounter || encounterLoading ? (
@@ -187,8 +187,8 @@ export function ReferralPatientHeader({
               }
             />
           ) : (
-            <div className="space-y-2 rounded-lg border border-cui-border bg-cui-background px-4 py-3 text-sm">
-              <p className="text-cui-muted-foreground">
+            <div className="space-y-2 rounded-lg border border-border bg-background px-4 py-3 text-sm">
+              <p className="text-muted-foreground">
                 {t(
                   accessUnavailable(encounterError)
                     ? "referral_encounter_details_unavailable"

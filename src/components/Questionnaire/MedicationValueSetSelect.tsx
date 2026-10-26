@@ -1,6 +1,11 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, FolderOpen, Home, Loader2 } from "lucide-react";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  ChevronRight,
+  FolderOpen,
+  Home,
+  Loader2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 

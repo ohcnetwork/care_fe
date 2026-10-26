@@ -235,7 +235,10 @@ export function DurationInput({
       drawerOnMobile
       title={t("duration")}
       onFocus={() => inputRef.current?.select()}
-      contentClassName="w-72"
+      contentClassName={cn(
+        "max-w-[calc(100vw-2rem)]",
+        view === "period" ? "w-auto" : "w-72",
+      )}
       className={cn(
         "h-9 text-sm",
         BoundIcon && "pl-9",
@@ -387,6 +390,7 @@ export function DurationInput({
           </button>
           <div className="flex justify-center p-2">
             <Calendar
+              className="[--cell-size:min(--spacing(10),calc((100vw-4rem)/7))]"
               mode="range"
               selected={draftRange}
               onSelect={setDraftRange}

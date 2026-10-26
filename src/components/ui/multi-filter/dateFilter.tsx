@@ -353,10 +353,16 @@ export const SelectedDateBadge = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
-        <span className="block min-w-0 flex-1 truncate whitespace-nowrap">
-          {selectedDateLabel}
-        </span>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-w-0 flex-1 justify-start rounded-none border-0 p-0 font-normal shadow-none hover:bg-transparent focus-visible:outline-offset-0"
+        >
+          <span className="block min-w-0 truncate whitespace-nowrap">
+            {selectedDateLabel}
+          </span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={15} className="w-80 p-0">
         <RenderDateFilter

@@ -8,8 +8,8 @@ import {
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button, buttonVariants } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import {
   Item,
   ItemActions,
@@ -17,7 +17,7 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@/components/careui/item";
+} from "@/components/ui/item";
 
 import { referralResourceError } from "./referralResourceError";
 import {
@@ -57,11 +57,8 @@ export function ReferralAppointmentContext({
   const checking = context.isLoading || (!!referralId && attachment.isPending);
   const linked = !!attachment.data;
   return (
-    <section
-      className="careui mb-4"
-      aria-label={t("referral_appointment_context")}
-    >
-      <Item variant="outline" className="bg-cui-background text-cui-foreground">
+    <section className="mb-4" aria-label={t("referral_appointment_context")}>
+      <Item variant="outline" className="bg-background text-foreground">
         <ItemMedia variant="icon">
           {checking ? (
             <Loader2 className="animate-spin" />

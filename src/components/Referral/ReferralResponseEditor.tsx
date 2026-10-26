@@ -15,15 +15,6 @@ import { flushSync } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { Field, FieldError, FieldLabel } from "@/components/careui/field";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/careui/tabs";
-import { Muted } from "@/components/careui/typography";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -33,12 +24,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -46,6 +39,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Muted } from "@/components/ui/typography";
 
 import { FillSessionTabs } from "@/components/QuestionnaireV2/fill/FillSessionTabs";
 import { ReferralPatientHeader } from "@/components/Referral/ReferralPatientHeader";
@@ -425,7 +420,7 @@ export function ReferralResponseEditor({
       {forms.error && selected && !formsAccessLost && !lockedForm && (
         <div
           role="alert"
-          className="space-y-3 rounded-lg border border-cui-border bg-cui-muted p-3"
+          className="space-y-3 rounded-lg border border-border bg-muted p-3"
         >
           <p className="text-sm">
             {t("referral_response_forms_refresh_failed")}
@@ -471,7 +466,7 @@ export function ReferralResponseEditor({
                 <SelectTrigger id={`${formId}-form`}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="careui">
+                <SelectContent>
                   {(lockedForm ? [lockedForm] : choices).map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.title} ·{" "}
@@ -483,7 +478,7 @@ export function ReferralResponseEditor({
             </Field>
           ) : (
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-cui-foreground">
+              <p className="text-sm font-semibold text-foreground">
                 {selected.title}
               </p>
               <Muted>
@@ -527,7 +522,7 @@ export function ReferralResponseEditor({
         </>
       )}
       {responseOnly && (
-        <div className="border-t border-cui-border pt-5">
+        <div className="border-t border-border pt-5">
           <ReferralSharedRecords
             referral={referral}
             canWrite={canWrite && !frozen && !lockedForm && !formsAccessLost}
@@ -542,23 +537,23 @@ export function ReferralResponseEditor({
     </div>
   );
   const context = (
-    <div className="careui mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <header className="space-y-3">
         <h1 className="text-xl font-semibold">{referral.title}</h1>
         <p className="text-sm font-medium">{referral.patient_name}</p>
         <ReferralStatusBadge status={referral.status} />
-        <p className="text-sm text-cui-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {referral.availability_name}
         </p>
       </header>
       {referral.note && (
-        <p className="whitespace-pre-wrap break-words text-sm text-cui-foreground">
+        <p className="whitespace-pre-wrap break-words text-sm text-foreground">
           {referral.note}
         </p>
       )}
       {requests.map((request) => (
         <section key={request.id} className="space-y-4">
-          <h3 className="text-base font-semibold text-cui-foreground">
+          <h3 className="text-base font-semibold text-foreground">
             {request.questionnaire_snapshot.title}
           </h3>
           <ReferralQuestionnaireAnswers
@@ -570,23 +565,23 @@ export function ReferralResponseEditor({
       {requests.length === 0 && (
         <Muted>{t("referral_response_no_request")}</Muted>
       )}
-      <div className="border-t border-cui-border pt-5">
+      <div className="border-t border-border pt-5">
         <ReferralSharedRecords referral={referral} canWrite={false} />
       </div>
     </div>
   );
   const footer = (
-    <div className="max-h-[45dvh] shrink-0 space-y-3 overflow-y-auto border-t border-cui-border p-4">
+    <div className="max-h-[45dvh] shrink-0 space-y-3 overflow-y-auto border-t border-border p-4">
       {responseSaved && (
-        <p role="status" className="text-sm text-cui-primary">
+        <p role="status" className="text-sm text-primary">
           {t("referral_response_saved_completion_pending")}
         </p>
       )}
       {uncertainAttempt && (
-        <div role="alert" className="space-y-3 rounded-lg bg-cui-muted p-3">
+        <div role="alert" className="space-y-3 rounded-lg bg-muted p-3">
           <p className="text-sm">{t("referral_response_delivery_unknown")}</p>
           {checkDelivery.data && !checkDelivery.data.confirmed && (
-            <p className="text-sm text-cui-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {t("referral_response_delivery_unconfirmed")}
             </p>
           )}
@@ -698,19 +693,19 @@ export function ReferralResponseEditor({
             content: context,
           }}
         >
-          <div className="careui min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-8">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-8">
             <div className="mx-auto max-w-5xl space-y-5">
               <ReferralPatientHeader
                 referral={referral}
                 receivingEncounter={receivingEncounter}
               >
-                <span className="text-sm text-cui-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {referral.title}
                 </span>
               </ReferralPatientHeader>
               <section
                 aria-label={t("referral_respond")}
-                className="rounded-xl border border-cui-border bg-cui-background p-4 sm:p-6"
+                className="rounded-xl border border-border bg-background p-4 sm:p-6"
               >
                 <h1 className="mb-5 text-xl font-semibold">
                   {t("referral_respond")}
@@ -720,14 +715,14 @@ export function ReferralResponseEditor({
               </section>
             </div>
           </div>
-          <div className="careui bg-cui-background">{footer}</div>
+          <div className="bg-background">{footer}</div>
         </FillSessionTabs>
       ) : (
         <DialogContent
-          className="careui flex h-[90dvh] max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl"
+          className="flex h-[90dvh] max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl"
           onCloseAutoFocus={onCloseAutoFocus}
         >
-          <DialogHeader className="shrink-0 border-b border-cui-border p-4 pr-12 text-left sm:p-5 sm:pr-12">
+          <DialogHeader className="shrink-0 border-b border-border p-4 pr-12 text-left sm:p-5 sm:pr-12">
             <DialogTitle>
               {t(
                 responseOnly
@@ -735,7 +730,7 @@ export function ReferralResponseEditor({
                   : "referral_add_request_information",
               )}
             </DialogTitle>
-            <DialogDescription className="break-words text-cui-foreground">
+            <DialogDescription className="break-words text-foreground">
               <span className="font-medium">{referral.patient_name}</span> ·{" "}
               {referral.title}
             </DialogDescription>
@@ -747,7 +742,7 @@ export function ReferralResponseEditor({
             }}
             className="min-h-0 flex-1 gap-0"
           >
-            <div className="shrink-0 border-b border-cui-border px-4 pt-2 sm:px-5">
+            <div className="shrink-0 border-b border-border px-4 pt-2 sm:px-5">
               <TabsList
                 variant="line"
                 aria-label={t("referral_response_context")}
@@ -784,7 +779,7 @@ export function ReferralResponseEditor({
           if (!value) setDiscardAction(undefined);
         }}
       >
-        <AlertDialogContent className="careui">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t(

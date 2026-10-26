@@ -699,14 +699,14 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <TabsList className="h-[38px] border border-gray-200">
                   <TabsTrigger
                     value={ProductKnowledgeType.medication}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
+                    className="flex-1 data-active:bg-primary-700 data-active:text-white"
                   >
                     <Pill className="size-4" />
                     {t("medications")}
                   </TabsTrigger>
                   <TabsTrigger
                     value={ProductKnowledgeType.nutritional_product}
-                    className="flex-1 data-[state=active]:bg-primary-700 data-[state=active]:text-white"
+                    className="flex-1 data-active:bg-primary-700 data-active:text-white"
                   >
                     <Utensils className="size-4" />
                     {t("nutrition")}

@@ -9,8 +9,8 @@ import { Link, usePath, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/careui/badge";
-import { Button } from "@/components/careui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -18,14 +18,14 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/careui/empty";
+} from "@/components/ui/empty";
 import {
   Frame,
   FrameFooter,
   FrameHeader,
   FramePanel,
   FrameTitle,
-} from "@/components/careui/frame";
+} from "@/components/ui/frame";
 import {
   Item,
   ItemActions,
@@ -33,7 +33,8 @@ import {
   ItemDescription,
   ItemGroup,
   ItemTitle,
-} from "@/components/careui/item";
+} from "@/components/ui/item";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -41,8 +42,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/careui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/table";
 
 import {
   ReferralDepartmentFilterConfig,
@@ -191,7 +191,7 @@ export function ReferralList({
 
   return (
     <section
-      className="careui min-w-0"
+      className="min-w-0"
       aria-label={isWidget ? (title ?? t("referrals")) : undefined}
       data-cy="referral-list"
     >
@@ -199,7 +199,7 @@ export function ReferralList({
         <FrameHeader className="flex-row flex-wrap items-center justify-between gap-3">
           {isWidget ? (
             <div className="flex min-w-0 items-center gap-2">
-              <GitPullRequestArrow className="size-4 shrink-0 text-cui-muted-foreground" />
+              <GitPullRequestArrow className="size-4 shrink-0 text-muted-foreground" />
               <FrameTitle>{title ?? t("referrals")}</FrameTitle>
               {data && (
                 <Badge variant="neutral" size="xs" counter>
@@ -222,7 +222,7 @@ export function ReferralList({
           )}
           {actions && <div className="flex items-center gap-2">{actions}</div>}
           {!isWidget && filterDescription && (
-            <p className="basis-full text-sm text-cui-muted-foreground">
+            <p className="basis-full text-sm text-muted-foreground">
               {filterDescription}
             </p>
           )}
@@ -235,7 +235,7 @@ export function ReferralList({
               aria-label={t("loading")}
             >
               {Array.from({ length: isWidget ? 2 : 5 }, (_, index) => (
-                <Skeleton key={index} className="h-12 w-full bg-cui-muted" />
+                <Skeleton key={index} className="h-12 w-full bg-muted" />
               ))}
             </div>
           ) : error ? (
@@ -296,13 +296,13 @@ export function ReferralList({
               )}
             </Empty>
           ) : isWidget ? (
-            <ItemGroup className="gap-0 has-data-[size=sm]:gap-0 divide-y divide-cui-border">
+            <ItemGroup className="gap-0 has-data-[size=sm]:gap-0 divide-y divide-border">
               {data.results.map((referral) => (
                 <div key={referral.id} role="listitem">
                   <Item
                     asChild
                     size="sm"
-                    className="rounded-none text-left hover:bg-cui-muted/50"
+                    className="rounded-none text-left hover:bg-muted/50"
                   >
                     <Link href={getReferralDetailUrl(referral.id, sourceUrl)}>
                       <ItemContent className="min-w-0">
@@ -338,11 +338,11 @@ export function ReferralList({
                     <TableCell className="min-w-80 max-w-lg py-3 pl-4">
                       <Link
                         href={getReferralDetailUrl(referral.id, sourceUrl)}
-                        className="block max-w-full truncate text-left font-medium text-cui-foreground underline-offset-4 hover:underline focus-visible:outline-cui-ring"
+                        className="block max-w-full truncate text-left font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-ring"
                       >
                         {referral.title}
                       </Link>
-                      <p className="mt-1 truncate text-xs text-cui-muted-foreground">
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
                         {referral.availability_name}
                       </p>
                     </TableCell>
@@ -354,14 +354,14 @@ export function ReferralList({
                     <TableCell>
                       <ReferralStatusBadge status={referral.status} />
                     </TableCell>
-                    <TableCell className="max-w-52 whitespace-normal text-cui-muted-foreground">
+                    <TableCell className="max-w-52 whitespace-normal text-muted-foreground">
                       {referral.assignees.length
                         ? referral.assignees
                             .map(({ member }) => formatName(member))
                             .join(", ")
                         : t("unassigned")}
                     </TableCell>
-                    <TableCell className="pr-4 text-cui-muted-foreground">
+                    <TableCell className="pr-4 text-muted-foreground">
                       {formatDateTime(referral.created_date)}
                     </TableCell>
                   </TableRow>
@@ -372,7 +372,7 @@ export function ReferralList({
         </FramePanel>
         {!isWidget && data && data.results.length > 0 && !error && (
           <FrameFooter className="flex-row flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-cui-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {t("referral_result_range", {
                 start: (page - 1) * limit + 1,
                 end: Math.min(page * limit, data.count),

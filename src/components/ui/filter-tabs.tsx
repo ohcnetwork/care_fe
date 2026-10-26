@@ -115,9 +115,9 @@ export function FilterTabs({
 
   const getTriggerClassName = () => {
     if (variant === "underline") {
-      return "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none";
+      return "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-active:border-b-primary-700 data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none";
     }
-    return "data-[state=active]:bg-white data-[state=active]:text-gray-950 px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 data-[state=active]:shadow-sm";
+    return "data-active:bg-white data-active:text-gray-950 px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 data-active:shadow-sm";
   };
 
   const getMoreButtonClassName = () => {

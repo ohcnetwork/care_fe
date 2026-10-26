@@ -73,7 +73,7 @@ import fileApi from "@/types/files/fileApi";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 
-import { DottedDivider } from "@/components/careui/dotted-divider";
+import { DottedDivider } from "@/components/ui/dotted-divider";
 import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 
 interface DiagnosticReportFormProps {

@@ -144,7 +144,7 @@ export function OrgSelector({
     >
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
-        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", className)}
+        className={cn("p-0 w-[var(--anchor-width)]", className)}
         align="start"
       >
         {content}

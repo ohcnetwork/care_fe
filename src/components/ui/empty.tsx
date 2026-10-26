@@ -1,5 +1,3 @@
-// CareUI registry source: ohcnetwork/careui (d5cff874). Semantic color utilities
-// are namespaced cui-* to coexist with CARE 3.1's existing theme.
 /**
  * @name empty
  * @description Displays an empty state when no data is available.
@@ -39,7 +37,7 @@ const emptyMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-cui-muted text-cui-foreground [&_svg:not([class*='size-'])]:size-6",
+        icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
       },
     },
     defaultVariants: {
@@ -78,7 +76,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
     <div
       data-slot="empty-description"
       className={cn(
-        "text-cui-muted-foreground [&>a:hover]:text-cui-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4",
+        "text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4",
         className,
       )}
       {...props}

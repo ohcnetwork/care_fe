@@ -263,7 +263,7 @@ function TagFilterDropdown({
                   >
                     <Checkbox
                       checked={true}
-                      className="data-[state=checked]:border-primary-700 text-white"
+                      className="data-checked:border-primary-700 text-white"
                     />
                     <div className="flex items-center gap-2 max-w-xs truncate">
                       {tag.parent && (

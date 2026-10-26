@@ -59,19 +59,19 @@ export const BookingsList = ({
           <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
             <TabsTrigger
               value="upcoming"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-active:bg-white data-active:shadow-sm data-active:text-primary-800"
             >
               {t("upcoming")}
             </TabsTrigger>
             <TabsTrigger
               value="past"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-active:bg-white data-active:shadow-sm data-active:text-primary-800"
             >
               {t("past")}
             </TabsTrigger>
             <TabsTrigger
               value="cancelled"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
+              className="data-active:bg-white data-active:shadow-sm data-active:text-primary-800"
             >
               {t("cancelled")}
             </TabsTrigger>

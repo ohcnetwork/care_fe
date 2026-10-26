@@ -170,7 +170,7 @@ export function QuestionnaireDetailPage({
   }
 
   const tabTriggerClasses =
-    "-mb-px h-auto rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 pb-2 pt-0 text-gray-500 shadow-none data-[state=active]:border-gray-900 data-[state=active]:bg-transparent data-[state=active]:text-gray-900 data-[state=active]:shadow-none";
+    "-mb-px h-auto rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 pb-2 pt-0 text-gray-500 shadow-none data-active:border-gray-900 data-active:bg-transparent data-active:text-gray-900 data-active:shadow-none";
 
   return (
     <div className="space-y-4">

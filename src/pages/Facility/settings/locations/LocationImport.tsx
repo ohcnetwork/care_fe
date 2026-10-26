@@ -399,7 +399,7 @@ const HierarchicalLocationPreview = ({
           </CollapsibleTrigger>
 
           {hasChildren && (
-            <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+            <CollapsibleContent className="data-open:animate-collapsible-down data-closed:animate-collapsible-up overflow-hidden">
               <div className="ml-6 border-l-2 border-gray-200">
                 {location.children.map((child) =>
                   renderLocationItem(child, depth + 1),

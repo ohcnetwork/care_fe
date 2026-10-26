@@ -9,7 +9,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {

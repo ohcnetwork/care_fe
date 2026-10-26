@@ -464,7 +464,7 @@ export function SpecimenWorkflowCard({
             )}
           </CardHeader>
         </CollapsibleTrigger>
-        <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+        <CollapsibleContent className="data-open:animate-collapsible-down data-closed:animate-collapsible-up overflow-hidden">
           {/* === Accordion for Instructions, Collection Details, Processing, Discard === */}
           <CardContent className="p-2 bg-gray-100">
             {hasCollected && collectedSpecimen && (
@@ -488,7 +488,7 @@ export function SpecimenWorkflowCard({
               <AccordionItem value="instructions" className="border-none">
                 <AccordionTrigger
                   className={cn(
-                    "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+                    "px-4 py-2 text-sm hover:bg-gray-50/50 aria-[expanded=false]:bg-white aria-expanded:bg-gray-50 aria-expanded:rounded-b-none",
                   )}
                 >
                   <div className="flex items-center gap-2 flex-1 mr-4">
@@ -657,7 +657,7 @@ export function SpecimenWorkflowCard({
                 >
                   <AccordionTrigger
                     className={cn(
-                      "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-white data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+                      "px-4 py-2 text-sm hover:bg-gray-50/50 aria-[expanded=false]:bg-white aria-expanded:bg-gray-50 aria-expanded:rounded-b-none",
                     )}
                   >
                     <div className="flex items-center gap-2 flex-1 mr-4">

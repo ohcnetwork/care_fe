@@ -53,7 +53,7 @@ export function FacilityNavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-950"
+              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-open:bg-neutral-200 data-open:text-neutral-950"
               tooltip={formatName(user)}
               aria-label={formatName(user)}
             >
@@ -77,7 +77,7 @@ export function FacilityNavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}
@@ -163,7 +163,7 @@ export function PatientNavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-950"
+              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-open:bg-neutral-200 data-open:text-neutral-950"
               tooltip={patient?.name || phoneNumber}
               aria-label={patient?.name || phoneNumber}
             >
@@ -191,7 +191,7 @@ export function PatientNavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}

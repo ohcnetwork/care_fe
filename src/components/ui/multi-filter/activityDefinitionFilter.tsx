@@ -316,7 +316,7 @@ function ActivityDefinitionFilterDropdown({
               >
                 <Checkbox
                   checked={true}
-                  className="data-[state=checked]:border-primary-700 text-white"
+                  className="data-checked:border-primary-700 text-white"
                 />
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm truncate">{def.title}</span>

@@ -63,11 +63,11 @@ export default function EncounterNavigation({
               key={key}
               value={key}
               onClick={() => onTabChange(key)}
-              className="group relative h-auto min-h-11 shrink-0 justify-start gap-2 overflow-hidden rounded-[10px] border border-transparent px-3 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-200/40 hover:text-gray-950 data-[state=active]:border-gray-300 data-[state=active]:bg-gray-200/50 data-[state=active]:font-semibold data-[state=active]:text-gray-950 data-[state=active]:shadow-none data-[state=active]:hover:bg-gray-200/50 lg:min-h-9 lg:w-full lg:py-1.5 lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-gray-500 lg:after:opacity-0 lg:data-[state=active]:after:opacity-100"
+              className="group relative h-auto min-h-11 shrink-0 justify-start gap-2 overflow-hidden rounded-[10px] border border-transparent px-3 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-200/40 hover:text-gray-950 data-active:border-gray-300 data-active:bg-gray-200/50 data-active:font-semibold data-active:text-gray-950 data-active:shadow-none data-active:hover:bg-gray-200/50 lg:min-h-9 lg:w-full lg:py-1.5 lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-gray-500 lg:after:opacity-0 lg:data-active:after:opacity-100"
             >
               <Icon
                 aria-hidden="true"
-                className="size-4 text-gray-500 group-data-[state=active]:text-gray-950"
+                className="size-4 text-gray-500 group-data-active:text-gray-950"
                 strokeWidth={1.75}
               />
               {label}

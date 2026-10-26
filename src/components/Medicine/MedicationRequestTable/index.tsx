@@ -78,25 +78,25 @@ export default function MedicationRequestTable() {
           <TabsList>
             <TabsTrigger
               value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-active:bg-white rounded-md px-4 font-semibold"
             >
               {t("prescriptions")}
             </TabsTrigger>
             <TabsTrigger
               value="ongoing"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-active:bg-white rounded-md px-4 font-semibold"
             >
               {t("medication_statements")}
             </TabsTrigger>
             <TabsTrigger
               value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-active:bg-white rounded-md px-4 font-semibold"
             >
               {t("medicine_administration")}
             </TabsTrigger>
             <TabsTrigger
               value="dispense_history"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+              className="data-active:bg-white rounded-md px-4 font-semibold"
             >
               {t("dispense_history")}
             </TabsTrigger>

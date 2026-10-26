@@ -272,7 +272,7 @@ export default function PrescriptionQueue({
               <TabsTrigger
                 key={key}
                 value={key}
-                className="relative px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none font-semibold transition-colors whitespace-nowrap ease-in-out"
+                className="relative px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900  data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none font-semibold transition-colors whitespace-nowrap ease-in-out"
               >
                 {t(`prescription_status__${key}`)}
                 <div

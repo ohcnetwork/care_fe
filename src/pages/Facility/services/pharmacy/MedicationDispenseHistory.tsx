@@ -234,7 +234,7 @@ export default function MedicationDispenseHistory({
               <TabsTrigger
                 key={key}
                 value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-active:border-b-primary-700  data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none"
               >
                 {t(label)}
               </TabsTrigger>

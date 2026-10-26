@@ -137,7 +137,7 @@ export function ExternalPurchasesList({
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+                className="border-b-3 px-2.5 py-1 font-semibold text-gray-600 hover:text-gray-900 data-active:border-b-primary-700  data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none"
               >
                 {t(tab.label)}
               </TabsTrigger>

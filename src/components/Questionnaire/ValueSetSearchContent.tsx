@@ -1,4 +1,4 @@
-import { StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
+import { Star as StarFilledIcon, Star as StarIcon } from "lucide-react";
 import { useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -151,7 +151,7 @@ const Item = ({
           }}
           className="hover:text-primary-500 transition-colors text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isFavourite ? <StarFilledIcon /> : <StarIcon />}
+          {isFavourite ? <StarFilledIcon fill="currentColor" /> : <StarIcon />}
         </button>
       </div>
     </CommandItem>

@@ -1,4 +1,4 @@
-import { DialogDescription } from "@radix-ui/react-dialog";
+import { DialogDescription } from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, Info, MoreVertical } from "lucide-react";

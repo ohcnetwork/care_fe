@@ -1,4 +1,3 @@
-import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -6,6 +5,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CopyPlus,
+  CircleMinus as MinusCircledIcon,
   MoreVerticalIcon,
   Pipette,
   PlusIcon,

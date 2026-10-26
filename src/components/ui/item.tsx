@@ -1,5 +1,3 @@
-// CareUI registry source: ohcnetwork/careui (d5cff874). Semantic color utilities
-// are namespaced cui-* to coexist with CARE 3.1's existing theme.
 /**
  * @name item
  * @description A generic item component used within lists or menus.
@@ -43,13 +41,13 @@ function ItemSeparator({
 }
 
 const itemVariants = cva(
-  "group/item flex w-full flex-wrap items-center rounded-md border text-sm transition-colors duration-100 outline-none focus-visible:border-cui-ring focus-visible:ring-[3px] focus-visible:ring-cui-ring/50 [a]:transition-colors [a]:hover:bg-cui-muted",
+  "group/item flex w-full flex-wrap items-center rounded-md border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted",
   {
     variants: {
       variant: {
         default: "border-transparent",
-        outline: "border-cui-border",
-        muted: "border-transparent bg-cui-muted/50",
+        outline: "border-border",
+        muted: "border-transparent bg-muted/50",
       },
       size: {
         default: "gap-3.5 px-4 py-3.5",
@@ -183,7 +181,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="item-description"
       className={cn(
-        "text-cui-muted-foreground [&>a:hover]:text-cui-primary line-clamp-2 text-left text-sm leading-normal font-normal group-data-[size=xs]/item:text-xs [&>a]:underline [&>a]:underline-offset-4",
+        "text-muted-foreground [&>a:hover]:text-primary line-clamp-2 text-left text-sm leading-normal font-normal group-data-[size=xs]/item:text-xs [&>a]:underline [&>a]:underline-offset-4",
         className,
       )}
       {...props}

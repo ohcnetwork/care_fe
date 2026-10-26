@@ -11,28 +11,28 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/careui/badge";
-import { Button } from "@/components/careui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/careui/empty";
-import { FieldError } from "@/components/careui/field";
+} from "@/components/ui/empty";
+import { FieldError } from "@/components/ui/field";
 import {
   Frame,
   FrameFooter,
   FrameHeader,
   FramePanel,
   FrameTitle,
-} from "@/components/careui/frame";
+} from "@/components/ui/frame";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/careui/input-group";
+} from "@/components/ui/input-group";
 import {
   Item,
   ItemActions,
@@ -40,12 +40,7 @@ import {
   ItemDescription,
   ItemGroup,
   ItemTitle,
-} from "@/components/careui/item";
-import {
-  Muted,
-  CareUIPageTitle as PageTitle,
-  SubsectionTitle,
-} from "@/components/careui/typography";
+} from "@/components/ui/item";
 import {
   Sheet,
   SheetContent,
@@ -53,6 +48,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Muted,
+  CareUIPageTitle as PageTitle,
+  SubsectionTitle,
+} from "@/components/ui/typography";
 
 import Page from "@/components/Common/Page";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -198,7 +198,7 @@ export default function ReferralAvailabilitySettings({
   const Title = embedded ? SubsectionTitle : PageTitle;
   const content = (
     <>
-      <div className="careui container mx-auto space-y-6 text-cui-foreground">
+      <div className="container mx-auto space-y-6 text-foreground">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
             <Title>{t("referral_availability_settings")}</Title>
@@ -273,7 +273,7 @@ export default function ReferralAvailabilitySettings({
             </Button>
           </div>
         ) : !canManage ? (
-          <Empty className="border border-cui-border">
+          <Empty className="border border-border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <Building2 />
@@ -297,7 +297,7 @@ export default function ReferralAvailabilitySettings({
         ) : (
           <Frame stacked>
             <FrameHeader className="flex-col gap-3 sm:flex-row">
-              <InputGroup className="min-w-0 flex-1 sm:max-w-md bg-cui-background">
+              <InputGroup className="min-w-0 flex-1 sm:max-w-md bg-background">
                 <InputGroupInput
                   aria-label={t("referral_search_availability")}
                   placeholder={t("referral_search_availability")}
@@ -349,7 +349,7 @@ export default function ReferralAvailabilitySettings({
                     <Item
                       key={availability.id}
                       role="listitem"
-                      className="rounded-none border-0 border-cui-border [&:not(:last-child)]:border-b"
+                      className="rounded-none border-0 border-border [&:not(:last-child)]:border-b"
                     >
                       <ItemContent className="min-w-0">
                         <ItemTitle className="flex-wrap line-clamp-none">
@@ -365,7 +365,7 @@ export default function ReferralAvailabilitySettings({
                             {availability.description}
                           </ItemDescription>
                         )}
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cui-muted-foreground">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           <span>
                             {t(
                               availability.referral_type === "consultation"
@@ -416,7 +416,7 @@ export default function ReferralAvailabilitySettings({
             </FramePanel>
             {!!availabilityQuery.data?.count &&
               availabilityQuery.data.count > PAGE_SIZE && (
-                <FrameFooter className="flex-row items-center justify-between gap-3 text-sm text-cui-muted-foreground">
+                <FrameFooter className="flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
                   <span>
                     {t("referral_availability_page", {
                       page,
@@ -454,16 +454,16 @@ export default function ReferralAvailabilitySettings({
           if (!open) setEditingId(null);
         }}
       >
-        <SheetContent className="careui w-full overflow-y-auto bg-cui-background text-cui-foreground sm:max-w-2xl">
+        <SheetContent className="w-full overflow-y-auto bg-background text-foreground sm:max-w-2xl">
           <SheetHeader className="mb-6">
-            <SheetTitle className="text-cui-foreground">
+            <SheetTitle className="text-foreground">
               {t(
                 editingId === "new"
                   ? "referral_create_availability"
                   : "referral_edit_availability",
               )}
             </SheetTitle>
-            <SheetDescription className="text-cui-muted-foreground">
+            <SheetDescription className="text-muted-foreground">
               {scopeName}
             </SheetDescription>
           </SheetHeader>

@@ -75,7 +75,7 @@ function TreeViewItem({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Checkbox
             checked={isSelected}
-            className="data-[state=checked]:border-primary-700 text-white shrink-0"
+            className="data-checked:border-primary-700 text-white shrink-0"
           />
           <div
             className={cn("size-3 rounded-full border", getColorForOrg(org.id))}
@@ -207,7 +207,7 @@ function DepartmentFilterDropdown({
                   >
                     <Checkbox
                       checked={true}
-                      className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                      className="data-checked:border-primary-700 text-white shrink-0"
                     />
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div
@@ -261,7 +261,7 @@ function DepartmentFilterDropdown({
                 >
                   <Checkbox
                     checked={selectedOrgs.some((o) => o.id === org.id)}
-                    className="data-[state=checked]:border-primary-700 text-white shrink-0"
+                    className="data-checked:border-primary-700 text-white shrink-0"
                   />
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div

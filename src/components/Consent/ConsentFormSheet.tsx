@@ -428,7 +428,7 @@ export default function ConsentFormSheet({
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="max-w-[var(--radix-select-trigger-width)] w-full">
+                        <SelectContent className="max-w-[var(--anchor-width)] w-full">
                           {CONSENT_CATEGORIES.map((category) => (
                             <SelectItem key={category} value={category}>
                               <div className="flex flex-col gap-1">

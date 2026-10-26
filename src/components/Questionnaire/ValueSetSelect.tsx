@@ -1,4 +1,4 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";

@@ -182,7 +182,7 @@ export const QuickActions = ({
             </CreateReferralDialog>
           )}
           {canWriteClinicalData && (
-            <CollapsibleContent className="col-span-full grid grid-cols-2 gap-1.5 data-[state=closed]:hidden">
+            <CollapsibleContent className="col-span-full grid grid-cols-2 gap-1.5 data-closed:hidden">
               <QuickAction
                 compact
                 icon={

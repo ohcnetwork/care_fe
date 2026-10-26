@@ -2,7 +2,7 @@ import { TFunction } from "i18next";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Small } from "@/components/careui/typography";
+import { Small } from "@/components/ui/typography";
 import { ReferralQuestionnaireResult } from "@/types/emr/referral/referral";
 import { Question } from "@/types/questionnaire/question";
 
@@ -43,23 +43,23 @@ function renderAnswers(
 
     return (
       <div key={`${result.question_id}-${index}`} className="space-y-2">
-        <Small className="block leading-5 text-cui-muted-foreground">
+        <Small className="block leading-5 text-muted-foreground">
           {question?.text || t("referral_form_answer")}
         </Small>
         {values.length > 0 && (
-          <p className="whitespace-pre-wrap break-words text-sm text-cui-foreground">
+          <p className="whitespace-pre-wrap break-words text-sm text-foreground">
             {values.join(", ")}
           </p>
         )}
         {result.note && (
-          <p className="whitespace-pre-wrap break-words text-sm text-cui-muted-foreground">
+          <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">
             {result.note}
           </p>
         )}
         {result.sub_results?.map((group, groupIndex) => (
           <div
             key={groupIndex}
-            className="space-y-4 border-l-2 border-cui-border pl-4"
+            className="space-y-4 border-l-2 border-border pl-4"
           >
             {renderAnswers(group, questions, t)}
           </div>

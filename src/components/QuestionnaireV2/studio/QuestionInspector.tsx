@@ -57,7 +57,7 @@ const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
 const UNIT_BEARING_TYPES: Question["type"][] = [...UNIT_ROW_TYPES, "quantity"];
 
 const TAB_TRIGGER_CLASSES =
-  "rounded-none border-b-3 border-transparent bg-transparent px-2.5 py-2 text-sm font-semibold text-gray-600 shadow-none data-[state=active]:border-b-primary-700 data-[state=active]:bg-transparent data-[state=active]:text-primary-800 data-[state=active]:shadow-none";
+  "rounded-none border-b-3 border-transparent bg-transparent px-2.5 py-2 text-sm font-semibold text-gray-600 shadow-none data-active:border-b-primary-700 data-active:bg-transparent data-active:text-primary-800 data-active:shadow-none";
 
 interface QuestionInspectorProps {
   question: Question;

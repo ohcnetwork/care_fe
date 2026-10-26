@@ -12,7 +12,7 @@ import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
 import { FillShell } from "./FillShell";
 
 const FILL_TAB_TRIGGER_CLASSES =
-  "h-11 shrink-0 rounded-t-lg rounded-b-none border-gray-300 bg-gray-50 px-2.5 py-2 text-xs data-[state=inactive]:text-gray-700! data-[state=inactive]:hover:bg-white data-[state=active]:border-b-white data-[state=active]:bg-white data-[state=active]:text-gray-950 data-[state=active]:shadow-none focus-visible:z-10 focus-visible:ring-inset sm:px-4 sm:text-sm";
+  "h-11 shrink-0 rounded-t-lg rounded-b-none border-gray-300 bg-gray-50 px-2.5 py-2 text-xs not-data-active:text-gray-700! not-data-active:hover:bg-white data-active:border-b-white data-active:bg-white data-active:text-gray-950 data-active:shadow-none focus-visible:z-10 focus-visible:ring-inset sm:px-4 sm:text-sm";
 
 interface FillSessionTabsProps {
   patientId?: string;
@@ -142,7 +142,7 @@ export function FillSessionTabs({
         <TabsContent
           value="questionnaire"
           forceMount
-          className="flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
+          className="flex min-h-0 flex-1 flex-col data-hidden:hidden"
         >
           {children}
         </TabsContent>
@@ -150,7 +150,7 @@ export function FillSessionTabs({
           <TabsContent
             value="history"
             forceMount={historyMounted || undefined}
-            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-[state=inactive]:hidden md:px-6"
+            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-hidden:hidden md:px-6"
           >
             {historyMounted && (
               <ClinicalHistoryTab
@@ -165,7 +165,7 @@ export function FillSessionTabs({
           <TabsContent
             value="reference"
             forceMount={referenceMounted || undefined}
-            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-[state=inactive]:hidden md:px-6"
+            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 data-hidden:hidden md:px-6"
           >
             {referenceMounted && referenceTab.content}
           </TabsContent>

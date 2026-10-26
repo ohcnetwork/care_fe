@@ -2,8 +2,8 @@ import { GitPullRequestArrow, Loader2 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Button, buttonVariants } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import {
   Item,
   ItemActions,
@@ -11,7 +11,7 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@/components/careui/item";
+} from "@/components/ui/item";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 
 import { referralNativeQueryParams } from "./referralNativeNavigation";
@@ -61,11 +61,8 @@ export function ReferralEncounterContext({
   };
 
   return (
-    <section
-      className="careui mt-2"
-      aria-label={t("referral_encounter_context")}
-    >
-      <Item variant="outline" className="bg-cui-background text-cui-foreground">
+    <section className="mt-2" aria-label={t("referral_encounter_context")}>
+      <Item variant="outline" className="bg-background text-foreground">
         <ItemMedia variant="icon">
           {context.isLoading ? (
             <Loader2 aria-hidden="true" className="animate-spin" />

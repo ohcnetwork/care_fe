@@ -209,9 +209,9 @@ export const GenericSelectedBadge = ({
         </span>
       </Badge>
       {selectedLength > 1 && (
-        <span className="shrink-0 text-xs bg-gray-100 text-gray-500 px-1 rounded-md whitespace-nowrap">
+        <Badge variant="neutral" size="sm" counter className="shrink-0">
           +{selectedLength - 1}
-        </span>
+        </Badge>
       )}
     </div>
   );

@@ -62,7 +62,7 @@ export function ResponsibilitySwitcher({ selectedResponsibilityId }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
+        className="w-(--anchor-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
         align="start"
         side="bottom"
         sideOffset={4}

@@ -4,8 +4,6 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Button } from "@/components/careui/button";
-import { FieldError } from "@/components/careui/field";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -15,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FieldError } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import {
   REFERRAL_STATUSES,
@@ -52,7 +52,7 @@ export function ReferralProgress({ referral }: { referral: ReferralRetrieve }) {
           aria-current={current === index ? "step" : undefined}
           className={cn(
             "flex items-center gap-1.5",
-            index <= current ? "text-cui-primary" : "text-cui-muted-foreground",
+            index <= current ? "text-primary" : "text-muted-foreground",
           )}
         >
           {index < current || referral.status === "completed" ? (
@@ -62,7 +62,7 @@ export function ReferralProgress({ referral }: { referral: ReferralRetrieve }) {
           )}
           {t(`referral_status_${stage}`)}
           {index < stages.length - 1 && (
-            <span aria-hidden className="ml-1 text-cui-muted-foreground">
+            <span aria-hidden className="ml-1 text-muted-foreground">
               →
             </span>
           )}
@@ -198,7 +198,7 @@ export function ReferralWorkflowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="careui min-w-52"
+          className="min-w-52"
           align="end"
           onCloseAutoFocus={(event) => {
             if (editOpen || confirmation) event.preventDefault();
@@ -269,7 +269,7 @@ export function ReferralWorkflowActions({
           if (!update.isPending && !open) setConfirmation(null);
         }}
       >
-        <AlertDialogContent className="careui" onCloseAutoFocus={restoreFocus}>
+        <AlertDialogContent onCloseAutoFocus={restoreFocus}>
           <AlertDialogHeader>
             <AlertDialogTitle>
               {confirmation && statusLabel(confirmation.status)}

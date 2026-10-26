@@ -133,14 +133,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsList className="inline-flex bg-transparent p-0 h-8 w-full">
                       <TabsTrigger
                         value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        className="data-active:bg-primary/10 data-active:text-primary w-full"
                         onClick={() => updateQuery({ incoming: false })}
                       >
                         {t("outgoing")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        className="data-active:bg-primary/10 data-active:text-primary w-full"
                         onClick={() => updateQuery({ incoming: true })}
                       >
                         {t("incoming")}
@@ -153,7 +153,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsList className="bg-transparent p-0 h-8 w-full">
                       <TabsTrigger
                         value="active"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        className="data-active:bg-primary/10 data-active:text-primary w-full"
                         onClick={() =>
                           updateQuery({ status: ResourceRequestStatus.PENDING })
                         }
@@ -162,7 +162,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                       <TabsTrigger
                         value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
+                        className="data-active:bg-primary/10 data-active:text-primary w-full"
                         onClick={() =>
                           updateQuery({
                             status: ResourceRequestStatus.COMPLETED,
@@ -180,7 +180,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   <TabsList className="bg-transparent p-0 h-8">
                     <TabsTrigger
                       value="active"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      className="data-active:bg-primary/10 data-active:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.PENDING })
                       }
@@ -189,7 +189,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      className="data-active:bg-primary/10 data-active:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.COMPLETED })
                       }
@@ -229,7 +229,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsTrigger
                       key={statusOption}
                       value={statusOption}
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                      className="data-active:bg-primary/10 data-active:text-primary"
                       onClick={() => updateQuery({ status: statusOption })}
                     >
                       <CareIcon

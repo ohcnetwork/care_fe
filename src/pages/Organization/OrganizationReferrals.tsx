@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
 
+import { ReferralList } from "@/components/Referral/ReferralList";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@/components/careui/empty";
-import { Muted, SubsectionTitle } from "@/components/careui/typography";
-import { ReferralList } from "@/components/Referral/ReferralList";
+} from "@/components/ui/empty";
+import { Muted, SubsectionTitle } from "@/components/ui/typography";
 
 import { usePermissions } from "@/context/PermissionContext";
 
@@ -29,7 +29,7 @@ export default function OrganizationReferrals(
   return (
     <OrganizationLayout {...props}>
       {({ orgPermissions }) => (
-        <div className="careui space-y-5 text-cui-foreground">
+        <div className="space-y-5 text-foreground">
           <header className="space-y-2">
             <SubsectionTitle>
               {t("referral_organization_incoming")}
@@ -44,7 +44,7 @@ export default function OrganizationReferrals(
               }}
             />
           ) : (
-            <Empty className="border border-cui-border">
+            <Empty className="border border-border">
               <EmptyHeader>
                 <EmptyTitle>{t("referral_list_access_denied")}</EmptyTitle>
                 <EmptyDescription>

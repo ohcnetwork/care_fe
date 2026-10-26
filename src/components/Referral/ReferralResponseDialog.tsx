@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { ComponentProps, ReactNode, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/careui/button";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { ReferralResponseEditor } from "./ReferralResponseEditor";

@@ -106,7 +106,7 @@ function ListContent({
               <Checkbox
                 checked={selectedValues.length === options.length}
                 aria-label="Select all options"
-                className="data-[state=checked]:text-white"
+                className="data-checked:text-white"
               />
               <span className="font-medium">{t("select_all")}</span>
             </CommandItem>
@@ -128,7 +128,7 @@ function ListContent({
                     >
                       <Checkbox
                         checked={selectedValues.includes(option.value)}
-                        className="data-[state=checked]:text-white"
+                        className="data-checked:text-white"
                       />
 
                       <div className="flex items-center gap-1">
@@ -158,7 +158,7 @@ function ListContent({
                   >
                     <Checkbox
                       checked={selectedValues.includes(option.value)}
-                      className="data-[state=checked]:text-white"
+                      className="data-checked:text-white"
                     />
 
                     <div className="flex items-center gap-1">
@@ -313,7 +313,7 @@ export function MultiSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 w-(--radix-popover-trigger-width) max-h-[35vh] flex flex-col overflow-hidden"
+          className="p-0 w-(--anchor-width) max-h-[35vh] flex flex-col overflow-hidden"
           align="center"
         >
           <ListContent

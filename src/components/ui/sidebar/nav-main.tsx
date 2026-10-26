@@ -38,7 +38,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 const CAREUI_NAV_CLASSES =
-  "relative h-10 rounded-md px-2.5 py-2 text-base font-normal text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400 data-[state=open]:hover:bg-neutral-200 data-[state=open]:hover:text-neutral-950 data-[active=true]:bg-white data-[active=true]:font-medium data-[active=true]:text-emerald-800 data-[active=true]:shadow data-[active=true]:ring-1 data-[active=true]:ring-emerald-800/20 data-[active=true]:hover:bg-white data-[active=true]:hover:text-emerald-800 data-[active=true]:focus-visible:ring-2 data-[active=true]:focus-visible:ring-indigo-400 data-[active=true]:after:absolute data-[active=true]:after:right-0 data-[active=true]:after:top-1/2 data-[active=true]:after:h-6 data-[active=true]:after:w-1 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-l-full data-[active=true]:after:bg-emerald-600 data-[active=true]:after:content-[''] [&_svg]:size-4 [&_svg]:shrink-0 md:text-sm";
+  "relative h-10 rounded-md px-2.5 py-2 text-base font-normal text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400 data-open:hover:bg-neutral-200 data-open:hover:text-neutral-950 data-[active=true]:bg-white data-[active=true]:font-medium data-[active=true]:text-emerald-800 data-[active=true]:shadow data-[active=true]:ring-1 data-[active=true]:ring-emerald-800/20 data-[active=true]:hover:bg-white data-[active=true]:hover:text-emerald-800 data-[active=true]:focus-visible:ring-2 data-[active=true]:focus-visible:ring-indigo-400 data-[active=true]:after:absolute data-[active=true]:after:right-0 data-[active=true]:after:top-1/2 data-[active=true]:after:h-6 data-[active=true]:after:w-1 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-l-full data-[active=true]:after:bg-emerald-600 data-[active=true]:after:content-[''] [&_svg]:size-4 [&_svg]:shrink-0 md:text-sm";
 
 const normalizeNavigationPath = (url: string) =>
   url.split(/[?#]/)[0].replace(/\/+$/, "");
@@ -274,7 +274,7 @@ function CollapsibleNavItem({ link, path }: NavGroupProps) {
             <span className="truncate" title={link.name}>
               {link.name}
             </span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 motion-reduce:transition-none" />
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90 motion-reduce:transition-none" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -341,7 +341,7 @@ function PopoverMenu({ link, path }: NavGroupProps) {
       <PopoverContent
         side="right"
         align="start"
-        className="w-60 max-h-(--radix-popover-content-available-height) overflow-y-auto rounded-xl border-neutral-200 bg-white p-1 text-neutral-950 shadow-md"
+        className="w-60 max-h-(--available-height) overflow-y-auto rounded-xl border-neutral-200 bg-white p-1 text-neutral-950 shadow-md"
         aria-label={link.name}
       >
         <div className="flex flex-col gap-0.5">
