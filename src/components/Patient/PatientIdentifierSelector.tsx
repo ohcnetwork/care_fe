@@ -317,12 +317,12 @@ export function PatientIdentifierSelector({
                 }}
                 className="w-full"
               >
-                <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
+                <TabsList className="w-full">
                   {allIdentifierConfigs.map((config: IdentifierConfig) => (
                     <TabsTrigger
                       key={config.id}
                       value={config.id}
-                      className="flex-1 rounded-sm truncate"
+                      className="min-w-0 flex-1"
                     >
                       <span className="truncate">{config.config.display}</span>
                     </TabsTrigger>

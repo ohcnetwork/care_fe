@@ -1,0 +1,1125 @@
+/* CareUI theme: ohcnetwork/careui @ 4e143863698da01881d522361ff68b626d4e7db1. */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --font-figtree: "Figtree Variable", sans-serif;
+  --font-geist-mono: "Geist Mono Variable", monospace;
+  --font-size-scale: 1;
+
+  /* Emil's custom easing curves for punchy & natural UI */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Primary palette */
+  --primary-50: var(--color-emerald-50);
+  --primary-100: var(--color-emerald-100);
+  --primary-200: var(--color-emerald-200);
+  --primary-300: var(--color-emerald-300);
+  --primary-400: var(--color-emerald-400);
+  --primary-500: var(--color-emerald-500);
+  --primary-600: var(--color-emerald-600);
+  --primary-700: var(--color-emerald-700);
+  --primary-800: var(--color-emerald-800);
+  --primary-900: var(--color-emerald-900);
+  --primary-950: var(--color-emerald-950);
+
+  --radius: 0.625rem;
+
+  --background: var(--color-white);
+  --soft-background: var(--color-neutral-50);
+  --muted-background: var(--color-neutral-100);
+  --strong-background: var(--color-neutral-200);
+
+  --muted: var(--color-neutral-100);
+
+  --foreground: var(--color-neutral-950);
+  --muted-foreground: var(--color-neutral-700);
+  --soft-foreground: var(--color-neutral-600);
+  --disabled-foreground: var(--color-neutral-300);
+  --placeholder-foreground: var(--color-neutral-500);
+  --inverse-foreground: var(--color-white);
+
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-950);
+
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-950);
+
+  --primary: var(--color-primary-800);
+  --primary-foreground: var(--color-primary-50);
+
+  --secondary: var(--color-neutral-100);
+  --secondary-foreground: var(--color-neutral-900);
+
+  --accent: var(--color-neutral-100);
+  --accent-foreground: var(--color-neutral-900);
+
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-red-50);
+
+  --soft-border: var(--color-neutral-100);
+  --border: var(--color-neutral-200);
+  --strong-border: var(--color-neutral-300);
+  --stronger-border: var(--color-neutral-400);
+  --inverse-border: var(--color-white);
+
+  --input: var(--color-neutral-300);
+  --ring: --alpha(var(--color-indigo-500) / 75%);
+
+  --chart-1: var(--color-orange-600);
+  --chart-2: var(--color-primary-600);
+  --chart-3: var(--color-cyan-900);
+  --chart-4: var(--color-amber-400);
+  --chart-5: var(--color-yellow-500);
+
+  --sidebar: var(--color-neutral-100);
+  --sidebar-foreground: var(--color-neutral-950);
+  --sidebar-primary: var(--color-primary-800);
+  --sidebar-primary-foreground: var(--color-primary-50);
+  --sidebar-accent: var(--color-neutral-200);
+  --sidebar-accent-foreground: var(--color-neutral-950);
+  --sidebar-border: var(--color-neutral-200);
+  --sidebar-ring: var(--color-indigo-400);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: var(--color-neutral-950);
+  --soft-background: var(--color-neutral-900);
+  --muted-background: var(--color-neutral-800);
+  --strong-background: var(--color-neutral-700);
+
+  --muted: var(--color-neutral-800);
+
+  --foreground: var(--color-neutral-50);
+  --muted-foreground: var(--color-neutral-200);
+  --soft-foreground: var(--color-neutral-300);
+  --disabled-foreground: var(--color-neutral-700);
+  --placeholder-foreground: var(--color-neutral-600);
+  --inverse-foreground: var(--color-black);
+
+  --card: var(--color-neutral-900);
+  --card-foreground: var(--color-white);
+
+  --popover: var(--color-neutral-950);
+  --popover-foreground: var(--color-neutral-50);
+
+  --primary: var(--color-primary-400);
+  --primary-foreground: var(--color-primary-950);
+
+  --secondary: var(--color-neutral-800);
+  --secondary-foreground: var(--color-neutral-50);
+
+  --accent: var(--color-neutral-700);
+  --accent-foreground: var(--color-neutral-50);
+
+  --destructive: var(--color-red-400);
+  --destructive-foreground: var(--color-red-50);
+
+  --soft-border: --alpha(var(--color-white) / 5%);
+  --border: --alpha(var(--color-white) / 9%);
+  --strong-border: --alpha(var(--color-white) / 15%);
+  --stronger-border: --alpha(var(--color-white) / 22%);
+  --inverse-border: var(--color-neutral-50);
+
+  --input: --alpha(var(--color-white) / 15%);
+  --ring: --alpha(var(--color-indigo-500) / 75%);
+
+  --chart-1: var(--color-blue-700);
+  --chart-2: var(--color-green-500);
+  --chart-3: var(--color-amber-500);
+  --chart-4: var(--color-purple-500);
+  --chart-5: var(--color-rose-500);
+
+  --sidebar: var(--color-neutral-900);
+  --sidebar-foreground: var(--color-neutral-50);
+  --sidebar-primary: var(--color-primary-400);
+  --sidebar-primary-foreground: var(--color-primary-950);
+  --sidebar-accent: var(--color-neutral-800);
+  --sidebar-accent-foreground: var(--color-neutral-50);
+  --sidebar-border: --alpha(var(--color-white) / 12%);
+  --sidebar-ring: var(--color-indigo-400);
+}
+
+/* ── Protanopia & Deuteranopia ────────────────────────────────────────────
+   Shared blue scale. Semantic tokens differ by color scheme.
+*/
+[data-theme="protanopia"] {
+  --primary-50: var(--color-blue-50);
+  --primary-100: var(--color-blue-100);
+  --primary-200: var(--color-blue-200);
+  --primary-300: var(--color-blue-300);
+  --primary-400: var(--color-blue-400);
+  --primary-500: var(--color-blue-500);
+  --primary-600: var(--color-blue-600);
+  --primary-700: var(--color-blue-700);
+  --primary-800: var(--color-blue-800);
+  --primary-900: var(--color-blue-900);
+  --primary-950: var(--color-blue-950);
+
+  --color-red-50: var(--color-yellow-50);
+  --color-red-100: var(--color-yellow-100);
+  --color-red-200: var(--color-yellow-200);
+  --color-red-300: var(--color-yellow-300);
+  --color-red-400: var(--color-yellow-400);
+  --color-red-500: var(--color-yellow-500);
+  --color-red-600: var(--color-yellow-600);
+  --color-red-700: var(--color-yellow-700);
+  --color-red-800: var(--color-yellow-800);
+  --color-red-900: var(--color-yellow-900);
+  --color-red-950: var(--color-yellow-950);
+
+  --color-green-50: var(--color-teal-50);
+  --color-green-100: var(--color-teal-100);
+  --color-green-200: var(--color-teal-200);
+  --color-green-300: var(--color-teal-300);
+  --color-green-400: var(--color-teal-400);
+  --color-green-500: var(--color-teal-500);
+  --color-green-600: var(--color-teal-600);
+  --color-green-700: var(--color-teal-700);
+  --color-green-800: var(--color-teal-800);
+  --color-green-900: var(--color-teal-900);
+  --color-green-950: var(--color-teal-950);
+
+  --color-emerald-50: var(--color-cyan-50);
+  --color-emerald-100: var(--color-cyan-100);
+  --color-emerald-200: var(--color-cyan-200);
+  --color-emerald-300: var(--color-cyan-300);
+  --color-emerald-400: var(--color-cyan-400);
+  --color-emerald-500: var(--color-cyan-500);
+  --color-emerald-600: var(--color-cyan-600);
+  --color-emerald-700: var(--color-cyan-700);
+  --color-emerald-800: var(--color-cyan-800);
+  --color-emerald-900: var(--color-cyan-900);
+  --color-emerald-950: var(--color-cyan-950);
+}
+
+[data-theme="protanopia"]:not(.dark) {
+  --primary: var(--color-blue-800);
+  --primary-foreground: var(--color-blue-50);
+
+  --destructive: var(--color-yellow-800);
+  --destructive-foreground: var(--color-yellow-50);
+
+  --ring: --alpha(var(--color-blue-500) / 75%);
+
+  --sidebar-primary: var(--color-blue-800);
+  --sidebar-primary-foreground: var(--color-blue-50);
+  --sidebar-ring: var(--color-blue-400);
+}
+
+[data-theme="protanopia"].dark {
+  --primary: var(--color-blue-400);
+  --primary-foreground: var(--color-blue-950);
+
+  --destructive: var(--color-yellow-300);
+  --destructive-foreground: var(--color-yellow-950);
+
+  --ring: --alpha(var(--color-blue-500) / 75%);
+
+  --sidebar-primary: var(--color-blue-400);
+  --sidebar-primary-foreground: var(--color-blue-950);
+  --sidebar-ring: var(--color-blue-400);
+}
+
+/* ── Tritanopia ────────────────────────────────────────────────────────────
+   Shared rose scale. Red destructive kept as-is (distinguishable for tritanopes).
+*/
+[data-theme="tritanopia"] {
+  --primary-50: var(--color-rose-50);
+  --primary-100: var(--color-rose-100);
+  --primary-200: var(--color-rose-200);
+  --primary-300: var(--color-rose-300);
+  --primary-400: var(--color-rose-400);
+  --primary-500: var(--color-rose-500);
+  --primary-600: var(--color-rose-600);
+  --primary-700: var(--color-rose-700);
+  --primary-800: var(--color-rose-800);
+  --primary-900: var(--color-rose-900);
+  --primary-950: var(--color-rose-950);
+
+  --color-green-50: var(--color-amber-50);
+  --color-green-100: var(--color-amber-100);
+  --color-green-200: var(--color-amber-200);
+  --color-green-300: var(--color-amber-300);
+  --color-green-400: var(--color-amber-400);
+  --color-green-500: var(--color-amber-500);
+  --color-green-600: var(--color-amber-600);
+  --color-green-700: var(--color-amber-700);
+  --color-green-800: var(--color-amber-800);
+  --color-green-900: var(--color-amber-900);
+  --color-green-950: var(--color-amber-950);
+
+  --color-emerald-50: var(--color-orange-50);
+  --color-emerald-100: var(--color-orange-100);
+  --color-emerald-200: var(--color-orange-200);
+  --color-emerald-300: var(--color-orange-300);
+  --color-emerald-400: var(--color-orange-400);
+  --color-emerald-500: var(--color-orange-500);
+  --color-emerald-600: var(--color-orange-600);
+  --color-emerald-700: var(--color-orange-700);
+  --color-emerald-800: var(--color-orange-800);
+  --color-emerald-900: var(--color-orange-900);
+  --color-emerald-950: var(--color-orange-950);
+}
+
+[data-theme="tritanopia"]:not(.dark) {
+  --primary: var(--color-rose-700);
+  --primary-foreground: var(--color-rose-50);
+
+  --ring: --alpha(var(--color-rose-500) / 75%);
+
+  --sidebar-primary: var(--color-rose-700);
+  --sidebar-primary-foreground: var(--color-rose-50);
+  --sidebar-ring: var(--color-rose-400);
+}
+
+[data-theme="tritanopia"].dark {
+  --primary: var(--color-rose-400);
+  --primary-foreground: var(--color-rose-950);
+
+  --ring: --alpha(var(--color-rose-500) / 75%);
+
+  --sidebar-primary: var(--color-rose-400);
+  --sidebar-primary-foreground: var(--color-rose-950);
+  --sidebar-ring: var(--color-rose-400);
+}
+
+/* ── High Contrast — Light ─────────────────────────────────────────────────
+   Applied when .high-contrast is on <html> without .dark.
+   Strengthens foreground, border, and muted-foreground tokens only.
+*/
+.high-contrast:not(.dark) {
+  --foreground: var(--color-neutral-950);
+  --muted-foreground: var(--color-neutral-800);
+  --soft-foreground: var(--color-neutral-700);
+  --placeholder-foreground: var(--color-neutral-600);
+
+  --border: var(--color-neutral-400);
+  --strong-border: var(--color-neutral-600);
+  --stronger-border: var(--color-neutral-700);
+  --soft-border: var(--color-neutral-200);
+
+  --input: var(--color-neutral-500);
+}
+
+/* ── High Contrast — Dark ──────────────────────────────────────────────────
+   Applied when both .dark and .high-contrast are on <html>.
+*/
+.dark.high-contrast {
+  --foreground: var(--color-white);
+  --muted-foreground: var(--color-neutral-100);
+  --soft-foreground: var(--color-neutral-200);
+  --placeholder-foreground: var(--color-neutral-400);
+
+  --border: --alpha(var(--color-white) / 25%);
+  --strong-border: --alpha(var(--color-white) / 40%);
+  --stronger-border: --alpha(var(--color-white) / 55%);
+  --soft-border: --alpha(var(--color-white) / 12%);
+
+  --input: --alpha(var(--color-white) / 30%);
+}
+
+@theme inline {
+  --font-sans: "Figtree Variable", sans-serif;
+  --font-mono:
+    "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-background: var(--background);
+  --color-soft-background: var(--soft-background);
+  --color-muted-background: var(--muted-background);
+  --color-strong-background: var(--strong-background);
+  --color-muted: var(--muted);
+
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-soft-foreground: var(--soft-foreground);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-placeholder-foreground: var(--placeholder-foreground);
+  --color-inverse-foreground: var(--inverse-foreground);
+
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+
+  --color-border: var(--border);
+  --color-strong-border: var(--strong-border);
+  --color-stronger-border: var(--stronger-border);
+  --color-soft-border: var(--soft-border);
+  --color-inverse-border: var(--inverse-border);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Primary color scale */
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+  --color-primary-950: var(--primary-950);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  html {
+    @apply font-sans;
+    font-size: calc(100% * var(--font-size-scale));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-balance;
+  }
+  p {
+    @apply text-pretty;
+  }
+}
+
+@layer components {
+  .sidebar-content-scroll,
+  [data-slot="command-list"] {
+    scrollbar-color: color-mix(
+        in oklch,
+        var(--sidebar-foreground) 32%,
+        transparent
+      )
+      transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-content-scroll {
+    --sidebar-content-mask-start: rgb(0 0 0 / 1);
+    --sidebar-content-mask-end: rgb(0 0 0 / 1);
+    --sidebar-content-fade-size: --spacing(7);
+
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      var(--sidebar-content-mask-start) 0,
+      rgb(0 0 0 / 1) var(--sidebar-content-fade-size),
+      rgb(0 0 0 / 1) calc(100% - var(--sidebar-content-fade-size)),
+      var(--sidebar-content-mask-end) 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      var(--sidebar-content-mask-start) 0,
+      rgb(0 0 0 / 1) var(--sidebar-content-fade-size),
+      rgb(0 0 0 / 1) calc(100% - var(--sidebar-content-fade-size)),
+      var(--sidebar-content-mask-end) 100%
+    );
+  }
+
+  .sidebar-content-scroll[data-scroll-up] {
+    --sidebar-content-mask-start: rgb(0 0 0 / 0);
+  }
+
+  .sidebar-content-scroll[data-scroll-down] {
+    --sidebar-content-mask-end: rgb(0 0 0 / 0);
+  }
+
+  .sidebar-content-scroll::-webkit-scrollbar,
+  [data-slot="command-list"]::-webkit-scrollbar {
+    width: --spacing(2);
+  }
+
+  .sidebar-content-scroll::-webkit-scrollbar-track,
+  [data-slot="command-list"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-content-scroll::-webkit-scrollbar-thumb,
+  [data-slot="command-list"]::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: color-mix(
+      in oklch,
+      var(--sidebar-foreground) 32%,
+      transparent
+    );
+    border: --spacing(0.5) solid transparent;
+    border-radius: 999px;
+  }
+}
+
+.sidebar-content-scroll [data-slot="sidebar-scroll-cue"] {
+  visibility: hidden;
+}
+
+.sidebar-content-scroll[data-scroll-down] [data-slot="sidebar-scroll-cue"] {
+  visibility: visible;
+}
+
+/* Squircle utilities */
+
+@utility rounded-squircle-sm {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-sm!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-md {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-lg!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-lg {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-lg!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-2xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-3xl {
+  @supports (corner-shape: superellipse(1.6)) {
+    @apply rounded-3xl!;
+    corner-shape: superellipse(1.6);
+  }
+}
+
+@utility rounded-squircle-full {
+  @supports (corner-shape: superellipse(1)) {
+    @apply rounded-full!;
+    corner-shape: superellipse(1);
+  }
+}
+
+@theme {
+  --animate-sheet-shake: sheet-shake 0.4s ease;
+  --animate-blink: blink 1.5s infinite;
+  --animate-blossom: blossom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @keyframes sheet-shake {
+    0%,
+    100% {
+      transform: translateX(0) rotate(0deg);
+    }
+    15% {
+      transform: translateX(-4px) rotate(-6deg);
+    }
+    30% {
+      transform: translateX(4px) rotate(6deg);
+    }
+    45% {
+      transform: translateX(-3px) rotate(-4deg);
+    }
+    60% {
+      transform: translateX(3px) rotate(4deg);
+    }
+    75% {
+      transform: translateX(-2px) rotate(-2deg);
+    }
+    90% {
+      transform: translateX(2px) rotate(2deg);
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes blossom {
+    0% {
+      transform: scale(0.05) rotate(-120deg);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.18) rotate(8deg);
+      opacity: 1;
+    }
+    80% {
+      transform: scale(0.94) rotate(-3deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+}
+
+/* ── Reduced Motion System ──────────────────────────────────────────────────
+   Comprehensive reduced-motion rules across the component library.
+   Replaces high-displacement motion, bouncy springs, transforms, parallax,
+   and smooth scrolling with subtle in-place opacity crossfades.
+   Active when:
+   1. The user explicitly sets Reduce Motion in Settings ([data-reduced-motion="true"]), OR
+   2. The OS prefers reduced motion and user has not explicitly forced Allow Motion.
+*/
+@layer base {
+  :root[data-reduced-motion="true"],
+  :root:not([data-motion="allow"]) {
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto !important;
+      }
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+      }
+
+      /* Base UI Sheet: remove positional slide; keep subtle opacity fade */
+      [data-slot="sheet-content"] {
+        --tw-enter-translate-x: 0px !important;
+        --tw-enter-translate-y: 0px !important;
+        --tw-exit-translate-x: 0px !important;
+        --tw-exit-translate-y: 0px !important;
+        transition-duration: 150ms !important;
+      }
+
+      /* Base UI Drawer: remove viewport sweep & stack scale; use clean 150ms fade */
+      [data-slot="drawer-popup"] {
+        --closed-transform: none !important;
+        --translate-x: 0px !important;
+        --translate-y: 0px !important;
+        --stack-scale: 1 !important;
+        transition-property: opacity !important;
+        transition-duration: 150ms !important;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      [data-slot="drawer-popup"][data-starting-style],
+      [data-slot="drawer-popup"][data-ending-style] {
+        opacity: 0 !important;
+        transition-duration: 150ms !important;
+      }
+      [data-slot="drawer-overlay"] {
+        transition-property: opacity !important;
+        transition-duration: 150ms !important;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      [data-slot="drawer-overlay"][data-starting-style],
+      [data-slot="drawer-overlay"][data-ending-style] {
+        opacity: 0 !important;
+        transition-duration: 150ms !important;
+      }
+
+      /* Dialogs, Alert Dialogs, Popovers, Menus & Tooltips: remove scale & translation */
+      [data-slot="dialog-content"],
+      [data-slot="alert-dialog-content"],
+      [data-slot="popover-content"],
+      [data-slot="dropdown-menu-content"],
+      [data-slot="context-menu-content"],
+      [data-slot="menubar-content"],
+      [data-slot="tooltip-content"],
+      [data-slot="hover-card-content"],
+      [data-slot="combobox-content"] {
+        --tw-enter-scale: 1 !important;
+        --tw-exit-scale: 1 !important;
+        --tw-enter-translate-x: 0px !important;
+        --tw-enter-translate-y: 0px !important;
+        --tw-exit-translate-x: 0px !important;
+        --tw-exit-translate-y: 0px !important;
+        transition-duration: 150ms !important;
+      }
+
+      /* Accordion & Collapsible content */
+      [data-slot="accordion-content"],
+      [data-slot="collapsible-content"] {
+        animation-duration: 150ms !important;
+      }
+
+      /* Decorative keyframe animations & Shimmer */
+      [data-slot="spinner-track"] {
+        animation: none !important;
+      }
+      .animate-sheet-shake,
+      .animate-blossom,
+      .animate-ripple-slow,
+      .animate-ripple-medium,
+      .animate-ripple-fast,
+      .animate-breath {
+        animation: none !important;
+      }
+      .shimmer {
+        animation: none !important;
+        background-image: none !important;
+        -webkit-text-fill-color: currentColor !important;
+      }
+    }
+  }
+
+  /* User manual override (data-reduced-motion="true") */
+  :root[data-reduced-motion="true"] {
+    html {
+      scroll-behavior: auto !important;
+    }
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+    }
+
+    /* Base UI Sheet: remove positional slide; keep subtle opacity fade */
+    [data-slot="sheet-content"] {
+      --tw-enter-translate-x: 0px !important;
+      --tw-enter-translate-y: 0px !important;
+      --tw-exit-translate-x: 0px !important;
+      --tw-exit-translate-y: 0px !important;
+      transition-duration: 150ms !important;
+    }
+
+    /* Base UI Drawer: remove viewport sweep & stack scale; use clean 150ms fade */
+    [data-slot="drawer-popup"] {
+      --closed-transform: none !important;
+      --translate-x: 0px !important;
+      --translate-y: 0px !important;
+      --stack-scale: 1 !important;
+      transition-property: opacity !important;
+      transition-duration: 150ms !important;
+      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    [data-slot="drawer-popup"][data-starting-style],
+    [data-slot="drawer-popup"][data-ending-style] {
+      opacity: 0 !important;
+      transition-duration: 150ms !important;
+    }
+    [data-slot="drawer-overlay"] {
+      transition-property: opacity !important;
+      transition-duration: 150ms !important;
+      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    [data-slot="drawer-overlay"][data-starting-style],
+    [data-slot="drawer-overlay"][data-ending-style] {
+      opacity: 0 !important;
+      transition-duration: 150ms !important;
+    }
+
+    /* Dialogs, Alert Dialogs, Popovers, Menus & Tooltips: remove scale & translation */
+    [data-slot="dialog-content"],
+    [data-slot="alert-dialog-content"],
+    [data-slot="popover-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="context-menu-content"],
+    [data-slot="menubar-content"],
+    [data-slot="tooltip-content"],
+    [data-slot="hover-card-content"],
+    [data-slot="combobox-content"] {
+      --tw-enter-scale: 1 !important;
+      --tw-exit-scale: 1 !important;
+      --tw-enter-translate-x: 0px !important;
+      --tw-enter-translate-y: 0px !important;
+      --tw-exit-translate-x: 0px !important;
+      --tw-exit-translate-y: 0px !important;
+      transition-duration: 150ms !important;
+    }
+
+    /* Accordion & Collapsible content */
+    [data-slot="accordion-content"],
+    [data-slot="collapsible-content"] {
+      animation-duration: 150ms !important;
+    }
+
+    /* Decorative keyframe animations & Shimmer */
+    [data-slot="spinner-track"] {
+      animation: none !important;
+    }
+    .animate-sheet-shake,
+    .animate-blossom,
+    .animate-ripple-slow,
+    .animate-ripple-medium,
+    .animate-ripple-fast,
+    .animate-breath {
+      animation: none !important;
+    }
+    .shimmer {
+      animation: none !important;
+      background-image: none !important;
+      -webkit-text-fill-color: currentColor !important;
+    }
+  }
+}
+
+@utility hit-area-debug {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+    @apply border border-dashed border-blue-500 bg-blue-500/10;
+  }
+  &:hover::before {
+    @apply border border-dashed border-green-500 bg-green-500/10;
+  }
+}
+
+@utility hit-area {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-* {
+  position: relative;
+  --hit-area-t: --spacing(--value(number) * -1);
+  --hit-area-t: calc(--value([*]) * -1);
+  --hit-area-b: --spacing(--value(number) * -1);
+  --hit-area-b: calc(--value([*]) * -1);
+  --hit-area-l: --spacing(--value(number) * -1);
+  --hit-area-l: calc(--value([*]) * -1);
+  --hit-area-r: --spacing(--value(number) * -1);
+  --hit-area-r: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-l-* {
+  position: relative;
+  --hit-area-l: --spacing(--value(number) * -1);
+  --hit-area-l: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-r-* {
+  position: relative;
+  --hit-area-r: --spacing(--value(number) * -1);
+  --hit-area-r: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-t-* {
+  position: relative;
+  --hit-area-t: --spacing(--value(number) * -1);
+  --hit-area-t: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-b-* {
+  position: relative;
+  --hit-area-b: --spacing(--value(number) * -1);
+  --hit-area-b: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-x-* {
+  position: relative;
+  --hit-area-l: --spacing(--value(number) * -1);
+  --hit-area-l: calc(--value([*]) * -1);
+  --hit-area-r: --spacing(--value(number) * -1);
+  --hit-area-r: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+@utility hit-area-y-* {
+  position: relative;
+  --hit-area-t: --spacing(--value(number) * -1);
+  --hit-area-t: calc(--value([*]) * -1);
+  --hit-area-b: --spacing(--value(number) * -1);
+  --hit-area-b: calc(--value([*]) * -1);
+  &::before {
+    content: "";
+    position: absolute;
+    top: var(--hit-area-t, 0px);
+    right: var(--hit-area-r, 0px);
+    bottom: var(--hit-area-b, 0px);
+    left: var(--hit-area-l, 0px);
+    pointer-events: inherit;
+  }
+}
+
+/* ── Shimmer utilities ──────────────────────────────────────────────────────
+   Animated highlight sweep for text, built on `background-clip: text` with
+   `currentColor` as the base — no configuration needed to match any brand
+   or muted color, light or dark mode. */
+
+@keyframes tw-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@utility shimmer {
+  --shimmer-color: currentColor;
+  --shimmer-duration: 2s;
+  --shimmer-spread: calc(3ch + 40px);
+  --shimmer-angle: 20deg;
+  --shimmer-image: linear-gradient(
+    var(--shimmer-angle),
+    transparent calc(50% - var(--shimmer-spread) / 2),
+    color-mix(in oklch, var(--shimmer-color) 92%, transparent) 50%,
+    transparent calc(50% + var(--shimmer-spread) / 2)
+  );
+  --shimmer-text-fill: color-mix(in oklch, currentColor 40%, transparent);
+
+  background-repeat: no-repeat;
+  background-image:
+    var(--shimmer-image),
+    linear-gradient(var(--shimmer-text-fill), var(--shimmer-text-fill));
+  background-size:
+    200% 100%,
+    100% 100%;
+  background-position:
+    200% 0,
+    0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* A separate property (not `color`) so it can't lose the cascade to a
+     companion text-color utility like `text-muted-foreground`. */
+  -webkit-text-fill-color: transparent;
+  animation: tw-shimmer var(--shimmer-duration, 2s) linear infinite;
+
+  &:dir(rtl) {
+    animation-direction: reverse;
+  }
+}
+
+@utility shimmer-once {
+  animation-iteration-count: 1;
+}
+
+@utility shimmer-reverse {
+  animation-direction: reverse;
+}
+
+@utility shimmer-none {
+  background-image: none;
+  -webkit-text-fill-color: currentColor;
+  animation: none;
+}
+
+@utility shimmer-color-* {
+  --shimmer-color: --value(--color, [color]);
+  --shimmer-color: color-mix(
+    in oklch,
+    --value(--color, [color]) --modifier(percentage),
+    transparent
+  );
+}
+
+@utility shimmer-duration-* {
+  --shimmer-duration: calc(--value(integer) * 1ms);
+}
+
+@utility shimmer-spread-* {
+  --shimmer-spread: calc(var(--spacing) * --value(integer));
+  --shimmer-spread: --value([length], [percentage]);
+}
+
+@utility shimmer-angle-* {
+  --shimmer-angle: calc(--value(integer) * 1deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* ── Session Timeout Animations ──────────────────────────────────────────── */
+@keyframes ripple-pulse-slow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+}
+
+@keyframes ripple-pulse-medium {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+}
+
+@keyframes ripple-pulse-fast {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+}
+
+@keyframes fade-breath {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-ripple-slow {
+  animation: ripple-pulse-slow 8s ease-in-out infinite;
+}
+
+.animate-ripple-medium {
+  animation: ripple-pulse-medium 8s ease-in-out infinite;
+}
+
+.animate-ripple-fast {
+  animation: ripple-pulse-fast 8s ease-in-out infinite;
+}
+
+.animate-breath {
+  animation: fade-breath 4s ease-in-out infinite;
+}
+
+.typeset-docs {
+  --typeset-font-body: var(--font-figtree);
+  --typeset-font-heading: var(--font-figtree);
+  --typeset-font-mono: var(--font-geist-mono);
+  --typeset-size: 16px;
+  --typeset-leading: 1.6;
+  --typeset-flow: 1.25em;
+}

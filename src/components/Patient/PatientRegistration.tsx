@@ -452,6 +452,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             <div className="w-full border-t border-gray-200 py-6 mt-6">
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
+                  type="submit"
                   variant="primary_gradient"
                   disabled={
                     !form.formState.isDirty || isPending || isExtensionsLoading

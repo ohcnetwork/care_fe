@@ -368,22 +368,20 @@ function ManageServicePointsDialog({
           {allServicePoints.map((subQueue) => {
             const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
-              <div
+              <Label
                 key={subQueue.id}
                 className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  toggleServicePoint(subQueue.id, !isSelected);
-                }}
               >
                 <div className="flex items-center space-x-3">
                   <Checkbox
                     checked={isSelected}
-                    className="pointer-events-none"
-                    tabIndex={-1}
+                    onCheckedChange={(checked) =>
+                      toggleServicePoint(subQueue.id, checked)
+                    }
                   />
                   <span className="text-sm font-medium">{subQueue.name}</span>
                 </div>
-              </div>
+              </Label>
             );
           })}
         </div>

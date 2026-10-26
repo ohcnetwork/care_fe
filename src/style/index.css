@@ -1,16 +1,14 @@
-@import "@fontsource/figtree/300.css" layer(base);
-@import "@fontsource/figtree/400.css" layer(base);
-@import "@fontsource/figtree/500.css" layer(base);
-@import "@fontsource/figtree/600.css" layer(base);
-@import "@fontsource/figtree/700.css" layer(base);
-@import "@fontsource/figtree/800.css" layer(base);
-@import "@fontsource/figtree/900.css" layer(base);
-
 @import "tailwindcss";
 
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/figtree";
+@import "@fontsource-variable/geist-mono";
+@import "./typeset.css";
 
 @config "../../tailwind.config.js";
+
+@import "./careui.css";
 
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {
@@ -106,7 +104,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--border);
   }
 
   button:not(:disabled),
@@ -120,6 +118,19 @@
 }
 
 @theme {
+  /* Compatibility names for existing CARE consumers; CareUI neutral palette. */
+  --color-secondary-50: var(--color-neutral-50);
+  --color-secondary-100: var(--color-neutral-100);
+  --color-secondary-200: var(--color-neutral-200);
+  --color-secondary-300: var(--color-neutral-300);
+  --color-secondary-400: var(--color-neutral-400);
+  --color-secondary-500: var(--color-neutral-500);
+  --color-secondary-600: var(--color-neutral-600);
+  --color-secondary-700: var(--color-neutral-700);
+  --color-secondary-800: var(--color-neutral-800);
+  --color-secondary-900: var(--color-neutral-900);
+  --color-secondary-950: var(--color-neutral-950);
+
   --color-warning-50: var(--color-amber-50);
   --color-warning-100: var(--color-amber-100);
   --color-warning-200: var(--color-amber-200);
@@ -162,9 +173,7 @@
   }
 
   body {
-    font-family: "Figtree", sans-serif;
-    color: #453c52;
-    @apply text-secondary-900 size-full font-sans antialiased;
+    @apply bg-background text-foreground size-full font-sans antialiased;
   }
 
   h1,
@@ -675,19 +684,9 @@
     @apply -ml-1 text-red-500 content-['*'];
   }
 
-  /* Style for tabs */
-  [data-slot="tabs-trigger"] {
-    @apply not-data-[state=active]:text-gray-500;
-  }
-
   /* Styling for input otp */
   [data-slot="input-otp-slot"] {
     @apply data-[active=true]:ring-primary-500 data-[active=true]:border-primary-500 data-[active=true]:ring-1 not-first:data-[active=true]:border-x;
-  }
-
-  /* Styling for radio group */
-  button[role="radio"] {
-    @apply data-[state=checked]:border-primary-500 data-[state=checked]:text-primary-500 border-gray-300 shadow-sm;
   }
 
   /* Styling fix for Select for backwards compatibility */
@@ -698,24 +697,5 @@
   /* Styling for command input */
   [data-slot="command-input-wrapper"] {
     @apply border-b-0;
-  }
-
-  /* Styling for command dialog */
-  [data-slot="dialog-overlay"] {
-    @apply bg-white/50 backdrop-blur-xs;
-  }
-}
-
-@layer base {
-  :root {
-    --radius: 0.5rem;
-    --sidebar-background: 220 14.3% 95.9%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: transparent;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }

@@ -26,6 +26,7 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +61,7 @@ import {
   processExtensions,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
 import { SmartExternalDeliveryRow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/SmartExternalDeliveryRow";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
@@ -149,8 +151,7 @@ export const createFormSchema = z
     supplied_item_type: z.enum(SupplyDeliveryType),
     items: z
       .array(supplyDeliveryItemSchema)
-      .min(1, translate("at_least_one_item_required"))
-      .max(1, translate("save_or_discard_delivery_changes")),
+      .min(1, translate("at_least_one_item_required")),
   })
   .superRefine(({ items }, context) => {
     items.forEach((item, index) => {
@@ -234,6 +235,7 @@ export function AddSupplyDeliveryForm({
   const queryClient = useQueryClient();
   const [qParams, setQueryParams] = useQueryParams();
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [selectedRequestIds, setSelectedRequestIds] = useState<string[]>([]);
   const [requestOrderSearch, setRequestOrderSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [saveError, setSaveError] = useState<string>();
@@ -350,6 +352,9 @@ export function AddSupplyDeliveryForm({
 
   const newItemsCount = fields.filter((item) => !item.replaces_delivery).length;
   const hasReplacementItems = fields.some((item) => item.replaces_delivery);
+  const hasExceedLoad =
+    selectedRequestIds.length + supplyDeliveriesCount + newItemsCount >
+    careConfig.maxDatapointsPerUpsert;
   const isAtItemLimit =
     supplyDeliveriesCount + newItemsCount >= careConfig.maxDatapointsPerUpsert;
   const disableAddItem =
@@ -485,11 +490,9 @@ export function AddSupplyDeliveryForm({
 
   const loadFromSupplyRequests = () => {
     if (disableAddItem) return;
-    setSelectedRequestId(undefined);
+    handleSelectAll(true);
     setIsSelectDialogOpen(true);
   };
-
-  const [selectedRequestId, setSelectedRequestId] = useState<string>();
 
   // Render the request order selector dropdown
   const renderRequestOrderSelector = () => (
@@ -520,20 +523,39 @@ export function AddSupplyDeliveryForm({
     />
   );
 
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedRequestIds(
+      checked ? supplyRequests?.results.map((request) => request.id) || [] : [],
+    );
+  };
+
+  const handleSelectItem = (id: string, checked: boolean) => {
+    setSelectedRequestIds((previous) =>
+      checked
+        ? previous.includes(id)
+          ? previous
+          : [...previous, id]
+        : previous.filter((requestId) => requestId !== id),
+    );
+  };
+
   const handleSelectRequests = () => {
     if (disableAddItem) return;
-    const request = supplyRequests?.results.find(
-      (request) => request.id === selectedRequestId,
+    const selectedRequests = supplyRequests?.results.filter((request) =>
+      selectedRequestIds.includes(request.id),
     );
-    if (!request) return;
-    append({
-      ...createEmptyItem(),
-      supplied_item_quantity: origin ? request.quantity : "",
-      product_knowledge: request.item,
-      supply_request: request,
-    });
+    if (!selectedRequests?.length) return;
+    append(
+      selectedRequests.map((request) => ({
+        ...createEmptyItem(),
+        supplied_item_quantity: origin ? request.quantity : "",
+        supplied_item_pack_quantity: origin ? undefined : 1,
+        product_knowledge: request.item,
+        supply_request: request,
+      })),
+    );
     setIsSelectDialogOpen(false);
-    setSelectedRequestId(undefined);
+    setSelectedRequestIds([]);
   };
 
   const handleAddAnotherItem = () => {
@@ -753,7 +775,7 @@ export function AddSupplyDeliveryForm({
           price_components: priceComponents,
           discount_configuration:
             sourceChargeItem?.discount_configuration ?? null,
-          tags: sourceChargeItem?.tags?.map((tag) => tag.id),
+          tags: sourceChargeItem?.tags?.map(({ id }) => ({ tag: id })),
         };
 
         const newChargeItem =
@@ -861,14 +883,16 @@ export function AddSupplyDeliveryForm({
     setSaveError(undefined);
     if (!validateFormWithToasts(data)) return;
 
-    const item = data.items[0];
     if (
-      item.replaces_delivery &&
       currentSupplyDeliveries &&
-      !currentSupplyDeliveries.some(
-        (delivery) =>
-          delivery.id === item.replaces_delivery?.id &&
-          delivery.status === SupplyDeliveryStatus.in_progress,
+      data.items.some(
+        (item) =>
+          item.replaces_delivery &&
+          !currentSupplyDeliveries.some(
+            (delivery) =>
+              delivery.id === item.replaces_delivery?.id &&
+              delivery.status === SupplyDeliveryStatus.in_progress,
+          ),
       )
     ) {
       const message = t("delivery_item_changed_before_save");
@@ -879,25 +903,48 @@ export function AddSupplyDeliveryForm({
 
     setIsProcessing(true);
     try {
-      await processRowItem(item, 0, data.supplied_item_type);
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-      queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
-      queryClient.invalidateQueries({ queryKey: ["products", facilityId] });
-      queryClient.invalidateQueries({
-        queryKey: ["chargeItemDefinitions", facilityId],
-      });
-      toast.success(
-        t(
-          item.replaces_delivery
-            ? "items_saved_successfully"
-            : "items_created_successfully",
-          { count: 1 },
-        ),
-      );
-      onSuccess();
-      form.reset();
-    } catch {
-      setSaveError(t("delivery_items_save_failed", { count: 1 }));
+      const successfulIndices: number[] = [];
+      let failedCount = 0;
+
+      // Delivery creation locks the order, so rows must not save concurrently.
+      for (const [index, item] of data.items.entries()) {
+        try {
+          await processRowItem(item, index, data.supplied_item_type);
+          successfulIndices.push(index);
+        } catch {
+          failedCount++;
+        }
+      }
+
+      if (successfulIndices.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+        queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
+        queryClient.invalidateQueries({ queryKey: ["products", facilityId] });
+        queryClient.invalidateQueries({
+          queryKey: ["chargeItemDefinitions", facilityId],
+        });
+        toast.success(
+          t(
+            data.items.some((item) => item.replaces_delivery)
+              ? "items_saved_successfully"
+              : "items_created_successfully",
+            { count: successfulIndices.length },
+          ),
+        );
+        onSuccess();
+      }
+
+      if (failedCount > 0) {
+        setSaveError(t("delivery_items_save_failed", { count: failedCount }));
+      }
+
+      if (failedCount === 0) {
+        form.reset();
+      } else {
+        successfulIndices
+          .sort((a, b) => b - a)
+          .forEach((index) => remove(index));
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -1325,20 +1372,40 @@ export function AddSupplyDeliveryForm({
         <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>{t("select_item")}</DialogTitle>
+              <DialogTitle>{t("select_items_to_add")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <RadioGroup
-                value={selectedRequestId ?? ""}
-                onValueChange={setSelectedRequestId}
-                className="border rounded-md divide-y max-h-[50vh] overflow-y-auto gap-0"
-              >
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all"
+                  checked={
+                    selectedRequestIds.length === supplyRequests.results.length
+                  }
+                  onCheckedChange={(checked) =>
+                    handleSelectAll(checked === true)
+                  }
+                  data-shortcut-id="select-all"
+                />
+                <Label
+                  htmlFor="select-all"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {t("select_all")}
+                </Label>
+              </div>
+              <div className="border rounded-md divide-y max-h-[50vh] overflow-y-auto">
                 {supplyRequests.results.map((request) => (
                   <div
                     key={request.id}
                     className="flex items-center space-x-4 p-2 hover:bg-gray-50"
                   >
-                    <RadioGroupItem id={request.id} value={request.id} />
+                    <Checkbox
+                      id={request.id}
+                      checked={selectedRequestIds.includes(request.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectItem(request.id, checked === true)
+                      }
+                    />
                     <div className="flex-1">
                       <label
                         htmlFor={request.id}
@@ -1352,7 +1419,14 @@ export function AddSupplyDeliveryForm({
                     </div>
                   </div>
                 ))}
-              </RadioGroup>
+              </div>
+              {hasExceedLoad && (
+                <UpsertLimitCallout>
+                  {t("max_items_selected_limit_warning", {
+                    count: careConfig.maxDatapointsPerUpsert,
+                  })}
+                </UpsertLimitCallout>
+              )}
             </div>
             <DialogFooter>
               <Button
@@ -1363,7 +1437,7 @@ export function AddSupplyDeliveryForm({
               </Button>
               <Button
                 onClick={handleSelectRequests}
-                disabled={!selectedRequestId}
+                disabled={selectedRequestIds.length === 0 || hasExceedLoad}
               >
                 {t("done")}
                 <ShortcutBadge actionId="enter-action" />

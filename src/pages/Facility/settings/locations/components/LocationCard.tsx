@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Bed,
   ChevronRight,
   Folder,
   FolderOpen,
@@ -130,13 +131,22 @@ export function SettingsLocationCard({
                     ? t("unavailable")
                     : t("available")}
                 </Badge>
-                {location.has_children && (
+                {location.has_sub_locations && (
                   <Badge
                     variant="outline"
                     className="flex items-center gap-1 whitespace-nowrap"
                   >
                     <FolderOpen className="size-3" />
-                    {t("has_child_locations")}
+                    {t("has_sub_locations")}
+                  </Badge>
+                )}
+                {location.has_beds && (
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 whitespace-nowrap"
+                  >
+                    <Bed className="size-3" />
+                    {t("has_beds")}
                   </Badge>
                 )}
                 <TagAssignmentSheet

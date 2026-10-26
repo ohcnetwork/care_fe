@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -28,12 +28,27 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
+import { ReferralPatientAppointments } from "@/pages/Appointments/ReferralPatientAppointments";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-export const PatientProfile = (props: {
+interface PatientProfileProps {
   facilityId?: string;
   id: string;
   page: (typeof tabs)[0]["route"];
-}) => {
+}
+
+export const PatientProfile = (props: PatientProfileProps) => {
+  const [params] = useQueryParams<{ referralId?: string }>();
+  if (
+    props.facilityId &&
+    props.page === "appointments" &&
+    params.referralId !== undefined
+  ) {
+    return <ReferralPatientAppointments patientId={props.id} />;
+  }
+  return <PatientProfileContent {...props} />;
+};
+
+const PatientProfileContent = (props: PatientProfileProps) => {
   const { facilityId, id, page } = props;
   const { open: isSidebarOpen } = useSidebar();
 

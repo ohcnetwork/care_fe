@@ -18,13 +18,20 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Kbd } from "@/components/ui/kbd";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -55,19 +62,10 @@ interface SearchInputProps extends Omit<
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
   const { t } = useTranslation();
-  return (
-    <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
-      {open ? (
-        <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-          <kbd>{t("esc")}</kbd>
-        </span>
-      ) : (
-        <ShortcutBadge
-          actionId="search-input-shortcut"
-          className="text-gray-500"
-        />
-      )}
-    </div>
+  return open ? (
+    <Kbd>{t("esc")}</Kbd>
+  ) : (
+    <ShortcutBadge actionId="search-input-shortcut" />
   );
 };
 const SearchInputFieldRenderer = ({
@@ -80,6 +78,7 @@ const SearchInputFieldRenderer = ({
   isSingleOption,
   open,
   onSearch,
+  searchTrigger,
   ...prop
 }: {
   selectedOption: SearchOption;
@@ -91,6 +90,7 @@ const SearchInputFieldRenderer = ({
   isSingleOption: boolean;
   open: boolean;
   onSearch: (key: string, value: string) => void;
+  searchTrigger?: React.ReactNode;
 }) => {
   const handlePhoneChange = useCallback(
     (value: string | undefined) => {
@@ -121,44 +121,48 @@ const SearchInputFieldRenderer = ({
     [selectedOption.key, onSearch, setSearchValue],
   );
 
-  switch (selectedOption.type) {
-    case "phone":
-      return (
-        <div className="relative">
-          <PhoneInput
-            name={selectedOption.key}
-            placeholder={selectedOption.placeholder}
-            value={searchValue}
-            onChange={handlePhoneChange}
-            className={inputClassName}
-            autoFocus={autoFocus}
-            ref={inputRef}
-            {...prop}
-          />
-          {!isSingleOption && <KeyboardShortcutHint open={open} />}
-        </div>
-      );
-    default:
-      return (
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder={selectedOption.placeholder}
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            value={searchValue}
-            onChange={handleTextChange}
-            className={cn(
-              !isSingleOption &&
-                "grow border-none shadow-none focus-visible:ring-0",
-              inputClassName,
-            )}
-            {...prop}
-          />
-          {!isSingleOption && <KeyboardShortcutHint open={open} />}
-        </div>
-      );
+  if (selectedOption.type === "phone") {
+    return (
+      <div className="flex w-full min-w-0 items-center gap-2">
+        {searchTrigger}
+        <PhoneInput
+          name={selectedOption.key}
+          placeholder={selectedOption.placeholder}
+          value={searchValue}
+          onChange={handlePhoneChange}
+          className={cn("min-w-0 flex-1", inputClassName)}
+          autoFocus={autoFocus}
+          ref={inputRef}
+          {...prop}
+        />
+        {!isSingleOption && <KeyboardShortcutHint open={open} />}
+      </div>
+    );
   }
+  return (
+    <InputGroup>
+      <InputGroupInput
+        type="text"
+        placeholder={selectedOption.placeholder}
+        ref={inputRef}
+        value={searchValue}
+        onChange={handleTextChange}
+        className={inputClassName}
+        autoFocus={autoFocus}
+        {...prop}
+      />
+      {searchTrigger && (
+        <InputGroupAddon align="inline-start">{searchTrigger}</InputGroupAddon>
+      )}
+      {!isSingleOption && (
+        <InputGroupAddon align="inline-end">
+          <KeyboardShortcutHint open={open} />
+        </InputGroupAddon>
+      )}
+    </InputGroup>
+  );
 };
+
 export default function SearchInput({
   options,
   onSearch,
@@ -283,164 +287,105 @@ export default function SearchInput({
     }
   }, [autoFocus, open, selectedOptionIndex]);
 
-  // Handle empty options case after all hooks
   if (!hasOptions) {
     return (
-      <div
-        className={cn(
-          "border rounded-lg border-gray-200 bg-white shadow-sm",
-          className,
-        )}
-      >
-        <div className="flex items-center rounded-lg p-3">
-          <div className="text-gray-500 text-sm">
-            {t("no_search_options_available")}
-          </div>
-        </div>
-      </div>
+      <p className={cn("text-sm text-muted-foreground", className)}>
+        {t("no_search_options_available")}
+      </p>
     );
   }
 
-  return (
-    <div
-      className={cn(
-        !isSingleOption &&
-          "border rounded-lg border-gray-200 bg-white shadow-sm",
-        className,
-      )}
-    >
-      <div
-        role="searchbox"
-        aria-expanded={open}
-        aria-controls="search-options"
-        aria-haspopup="listbox"
-        className="flex items-center rounded-t-lg gap-1"
+  const searchTrigger = !isSingleOption && !hideSearchButton && (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <InputGroupButton
+          size="icon-xs"
+          aria-label={t("search_by")}
+          onClick={() => setOpen(true)}
+        >
+          <CareIcon icon="l-search" />
+        </InputGroupButton>
+      </PopoverTrigger>
+      <PopoverContent
+        className="p-0"
+        onEscapeKeyDown={(event) => event.preventDefault()}
       >
-        {!isSingleOption && !hideSearchButton && (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                className="focus:ring-0  ml-1"
-                size="sm"
-                onClick={() => setOpen(true)}
-              >
-                <CareIcon icon="l-search" className="mr-2 text-base" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="absolute p-0"
-              onEscapeKeyDown={(event) => event.preventDefault()}
-            >
-              <Command>
-                <CommandList>
-                  <CommandGroup>
-                    <div className="p-4">
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-600">
-                          {t("search_by")}
-                        </p>
-                        <div className="flex mt-2">
-                          <Button
-                            onClick={() => {
-                              setOpen(false);
-                              if (inputRef.current) {
-                                inputRef.current.focus();
-                              }
-                            }}
-                            variant="outline"
-                            size="xs"
-                            className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                          >
-                            <CareIcon icon="l-check" className="mr-1" />
-                            {t(safeOptions[selectedOptionIndex]?.display || "")}
-                          </Button>
-                        </div>
-                      </div>
-                      <hr className="border-gray-200 mb-3" />
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2">
-                          {t("choose_other_search_type")}
-                        </p>
-                        <div className="space-y-2">
-                          {unselectedOptions.map((option, index) => {
-                            if (selectedOption.key === option.key) return null;
+        <Command>
+          <CommandList>
+            <CommandGroup heading={t("search_by")}>
+              <div className="px-2 pb-2">
+                <Button
+                  onClick={() => {
+                    setOpen(false);
+                    inputRef.current?.focus();
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <CareIcon icon="l-check" />
+                  {t(selectedOption.display)}
+                </Button>
+              </div>
+            </CommandGroup>
+            <Separator />
+            <CommandGroup heading={t("choose_other_search_type")}>
+              {unselectedOptions.map((option, index) => (
+                <CommandItem
+                  key={option.key}
+                  onSelect={() =>
+                    handleOptionChange(
+                      safeOptions.findIndex(
+                        (candidate) => candidate.key === option.key,
+                      ),
+                    )
+                  }
+                  className={cn(
+                    focusedIndex === index &&
+                      "bg-accent text-accent-foreground",
+                  )}
+                  onMouseEnter={() => setFocusedIndex(index)}
+                  onMouseLeave={() => setFocusedIndex(-1)}
+                >
+                  <span className="flex-1">{t(option.display)}</span>
+                  {focusedIndex === index && (
+                    <Kbd title={t("press_enter_to_select")}>↵</Kbd>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 
-                            return (
-                              <CommandItem
-                                key={option.key}
-                                onSelect={() =>
-                                  handleOptionChange(
-                                    safeOptions.findIndex(
-                                      (option) =>
-                                        option.key ===
-                                        unselectedOptions[index].key,
-                                    ),
-                                  )
-                                }
-                                className={cn(
-                                  "flex items-center p-2 rounded-md cursor-pointer",
-                                  {
-                                    "bg-gray-100": focusedIndex === index,
-                                    "hover:bg-secondary-100": true,
-                                  },
-                                )}
-                                onMouseEnter={() => setFocusedIndex(index)}
-                                onMouseLeave={() => setFocusedIndex(-1)}
-                              >
-                                <span className="flex-1 text-sm">
-                                  {t(option.display)}
-                                </span>
-                                {focusedIndex === index && (
-                                  <kbd
-                                    className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
-                                    title={t("press_enter_to_select")}
-                                  >
-                                    ⏎ Enter
-                                  </kbd>
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        )}
-        <div className="w-full">
-          <SearchInputFieldRenderer
-            selectedOption={selectedOption}
-            searchValue={searchValue}
-            setSearchValue={setSearchValue}
-            inputRef={inputRef}
-            inputClassName={inputClassName}
-            autoFocus={autoFocus}
-            isSingleOption={isSingleOption}
-            open={open}
-            onSearch={onSearch}
-            {...props}
-          />
-        </div>
-      </div>
-
+  return (
+    <div className={cn("space-y-2", className)}>
+      <SearchInputFieldRenderer
+        selectedOption={selectedOption}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        inputRef={inputRef}
+        inputClassName={inputClassName}
+        autoFocus={autoFocus}
+        isSingleOption={isSingleOption}
+        open={open}
+        onSearch={onSearch}
+        searchTrigger={searchTrigger}
+        {...props}
+      />
       {enableOptionButtons && !isSingleOption && (
-        <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
-          {safeOptions.map((option, i) => (
+        <div className="flex flex-wrap gap-2">
+          {safeOptions.map((option, index) => (
             <Button
               key={option.key}
-              onClick={() => handleOptionChange(i)}
-              variant="outline"
+              onClick={() => handleOptionChange(index)}
+              variant={
+                selectedOption.key === option.key ? "secondary" : "outline"
+              }
+              aria-pressed={selectedOption.key === option.key}
               size="xs"
-              className={cn(
-                selectedOption?.key === option.key
-                  ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                buttonClassName,
-              )}
+              className={buttonClassName}
             >
               {t(option.display)}
             </Button>
@@ -451,13 +396,12 @@ export default function SearchInput({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
             inputRef.current?.focus();
           }}
         >
-          <CareIcon icon="l-times" className="mr-2 size-4" />
+          <CareIcon icon="l-times" />
           {t("clear_search")}
         </Button>
       )}

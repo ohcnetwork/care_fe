@@ -57,11 +57,24 @@ interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   buttonLabel?: string;
   title?: string;
   disableAPI?: boolean;
+  disabled?: boolean;
 }
 
 interface DateGroupedRecords<T extends BaseRecord> {
   date: string;
+  /** ISO `created_date` (`""` for the undated group); sorted on this, not the formatted heading. */
+  sortKey: string;
   records: T[];
+}
+
+/** Newest first, with the undated group last. */
+function byDateDescending<T extends BaseRecord>(
+  a: DateGroupedRecords<T>,
+  b: DateGroupedRecords<T>,
+): number {
+  if (!a.sortKey) return 1;
+  if (!b.sortKey) return -1;
+  return b.sortKey.localeCompare(a.sortKey);
 }
 
 interface RecordState<T extends BaseRecord> {
@@ -150,6 +163,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   buttonLabel,
   title,
   disableAPI = false,
+  disabled = false,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -191,7 +205,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         count: response.count,
       };
     },
-    enabled: isOpen && !disableAPI,
+    enabled: isOpen && !disableAPI && !disabled,
     staleTime: 0,
   });
 
@@ -201,27 +215,22 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
 
     // Group records by date
     const groupedByDate = recordsData.results.reduce(
-      (acc: Record<string, T[]>, record: T) => {
+      (acc: Record<string, DateGroupedRecords<T>>, record: T) => {
         const date = record.created_date
           ? format(new Date(record.created_date), "dd MMM, yyyy")
           : "No date";
         if (!acc[date]) {
-          acc[date] = [];
+          acc[date] = { date, sortKey: record.created_date ?? "", records: [] };
         }
-        acc[date].push(record);
+        acc[date].records.push(record);
         return acc;
       },
-      {} as Record<string, T[]>,
+      {} as Record<string, DateGroupedRecords<T>>,
     );
 
     // Convert to array and sort by date
-    const sortedGroups: DateGroupedRecords<T>[] = Object.entries(groupedByDate)
-      .map(([date, records]) => ({ date, records }))
-      .sort((a, b) => {
-        if (a.date === "No date") return 1;
-        if (b.date === "No date") return -1;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
+    const sortedGroups: DateGroupedRecords<T>[] =
+      Object.values(groupedByDate).sort(byDateDescending);
 
     // Merge with existing records
     updateState({
@@ -251,11 +260,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           }
           return acc;
         }, [])
-        .sort((a, b) => {
-          if (a.date === "No date") return 1;
-          if (b.date === "No date") return -1;
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }),
+        .sort(byDateDescending),
     });
     // Expand the first 5 date groups on initial load
     if (
@@ -285,6 +290,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   }, [state.currentOffset, activeType, updateState]);
 
   const handleAddSelected = useCallback(() => {
+    if (disabled) return;
     onAddSelected(state.selectedRecords[activeType] || []);
     updateState({
       selectedRecords: {
@@ -296,6 +302,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
     setActiveType(structuredTypes[0]?.type || "");
     resetState();
   }, [
+    disabled,
     state.selectedRecords,
     activeType,
     onAddSelected,
@@ -345,9 +352,18 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   );
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen && !disabled}
+      onOpenChange={(open) => {
+        if (!open || !disabled) setIsOpen(open);
+      }}
+    >
       <SheetTrigger asChild>
-        <Button variant="outline" className="h-8 rounded-md px-3 text-xs gap-2">
+        <Button
+          variant="outline"
+          className="h-8 rounded-md px-3 text-xs gap-2"
+          disabled={disabled}
+        >
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}
@@ -370,17 +386,15 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-                {structuredTypes.map(({ type }) => (
-                  <TabsTrigger
-                    key={type}
-                    value={type}
-                    className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                  >
-                    {type}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              <div className="max-w-full overflow-x-auto pb-1">
+                <TabsList variant="line">
+                  {structuredTypes.map(({ type }) => (
+                    <TabsTrigger key={type} value={type}>
+                      {type}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
             </Tabs>
           )}
         </div>
@@ -530,6 +544,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               <Button
                 onClick={handleAddSelected}
                 disabled={
+                  disabled ||
                   (state.selectedRecords[activeType] || []).length === 0
                 }
                 className="bg-emerald-600 hover:bg-emerald-700"

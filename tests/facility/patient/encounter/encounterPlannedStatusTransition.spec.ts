@@ -5,6 +5,7 @@ import {
   openCreateEncounterDialog,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { expectToast } from "tests/helper/ui";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -81,7 +82,7 @@ async function selectClosingStatus(page: Page, status: string) {
 }
 
 async function submitQuestionnaire(page: Page) {
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
 async function expectSubmissionSuccess(page: Page) {
@@ -251,10 +252,10 @@ test.describe("Planned Encounter Status Transition", () => {
         await openEncounterUpdateForm(page);
         await selectClosingStatus(page, status);
         await submitQuestionnaire(page);
+        await expectToast(page, "Failed to submit questionnaire");
         await expect(
-          page.getByText("Failed to submit questionnaire"),
+          page.locator('[data-slot="alert"]').getByText(VALIDATION_ERROR_TEXT),
         ).toBeVisible();
-        await expect(page.getByText(VALIDATION_ERROR_TEXT)).toBeVisible();
       });
 
       await test.step("Cleanup: cancel the unchanged planned encounter", async () => {

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -38,12 +39,14 @@ const IconIndex: React.FC = () => {
           >
             <CareIcon icon={iconName as IconName} className="mb-2 text-3xl" />
             <span className="mb-2 text-sm font-medium">{iconName}</span>
-            <button
+            <Button
+              variant="ghost"
+              type="button"
               onClick={() => copyToClipboard(`<CareIcon icon="${iconName}" />`)}
-              className="rounded bg-gray-100 px-2 py-1 text-xs transition duration-150 ease-in-out hover:bg-gray-200"
+              className="h-auto rounded bg-gray-100 px-2 py-1 text-xs transition duration-150 ease-in-out hover:bg-gray-200"
             >
-              Copy JSX
-            </button>
+              {t("copy_jsx")}
+            </Button>
           </div>
         ))}
       </div>

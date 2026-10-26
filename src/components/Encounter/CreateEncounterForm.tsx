@@ -63,6 +63,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: (encounter: EncounterRead) => void;
   disableRedirectOnSuccess?: boolean;
+  redirectQueryParams?: Record<string, string | undefined>;
   defaultOpen?: boolean;
   defaultStatus?:
     | EncounterStatus.PLANNED
@@ -78,6 +79,7 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  redirectQueryParams,
   defaultOpen = false,
   defaultStatus = EncounterStatus.PLANNED,
 }: Props) {
@@ -146,8 +148,13 @@ export default function CreateEncounterForm({
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
+        const params = new URLSearchParams(
+          Object.entries(redirectQueryParams ?? {}).filter(
+            (entry): entry is [string, string] => entry[1] !== undefined,
+          ),
+        );
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates${params.size ? `?${params}` : ""}`,
         );
       }
     },

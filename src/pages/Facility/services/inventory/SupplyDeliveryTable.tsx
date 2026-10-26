@@ -610,39 +610,31 @@ export function SupplyDeliveryTable({
                             {isEditing ? t("continue_editing") : t("edit")}
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem asChild disabled={isEditing}>
-                          <Button
-                            variant="ghost"
-                            disabled={isEditing}
-                            onClick={() =>
-                              updateDeliveryStatus({
-                                deliveryId: delivery.id,
-                                status: SupplyDeliveryStatus.entered_in_error,
-                                extensions: delivery.extensions,
-                              })
-                            }
-                            className="w-full flex justify-stretch"
-                          >
-                            <CareIcon icon="l-exclamation-circle" />
-                            <span>{t("mark_as_entered_in_error")}</span>
-                          </Button>
+                        <DropdownMenuItem
+                          disabled={isEditing}
+                          onClick={() =>
+                            updateDeliveryStatus({
+                              deliveryId: delivery.id,
+                              status: SupplyDeliveryStatus.entered_in_error,
+                              extensions: delivery.extensions,
+                            })
+                          }
+                        >
+                          <CareIcon icon="l-exclamation-circle" />
+                          <span>{t("mark_as_entered_in_error")}</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild disabled={isEditing}>
-                          <Button
-                            variant="ghost"
-                            disabled={isEditing}
-                            onClick={() =>
-                              updateDeliveryStatus({
-                                deliveryId: delivery.id,
-                                status: SupplyDeliveryStatus.abandoned,
-                                extensions: delivery.extensions,
-                              })
-                            }
-                            className="w-full flex justify-stretch"
-                          >
-                            <CareIcon icon="l-ban" />
-                            <span>{t("mark_as_abandoned")}</span>
-                          </Button>
+                        <DropdownMenuItem
+                          disabled={isEditing}
+                          onClick={() =>
+                            updateDeliveryStatus({
+                              deliveryId: delivery.id,
+                              status: SupplyDeliveryStatus.abandoned,
+                              extensions: delivery.extensions,
+                            })
+                          }
+                        >
+                          <CareIcon icon="l-ban" />
+                          <span>{t("mark_as_abandoned")}</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,10 +1,8 @@
 import { TFunction } from "i18next";
+import { CalendarDays, Hospital } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
-import { PatientSwitcher } from "@/components/ui/sidebar/patient-switcher";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
@@ -35,12 +33,12 @@ function generatePatientLinks(
     {
       name: t("appointments"),
       url: "/patient/home",
-      icon: <CareIcon icon="d-calendar" />,
+      icon: <CalendarDays />,
     },
     {
       name: t("nearby_facilities"),
       url: `/nearby_facilities/?${queryParams.toString()}`,
-      icon: <CareIcon icon="d-hospital" />,
+      icon: <Hospital />,
     },
   ];
 }
@@ -51,9 +49,9 @@ export function PatientNav() {
   const selectedPatient = patientUserContext?.selectedPatient;
 
   return (
-    <>
-      <PatientSwitcher />
-      <NavMain links={generatePatientLinks(selectedPatient, t)} />
-    </>
+    <NavMain
+      label={t("patient_care")}
+      links={generatePatientLinks(selectedPatient, t)}
+    />
   );
 }

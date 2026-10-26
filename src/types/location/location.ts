@@ -51,6 +51,8 @@ export interface LocationBase {
 export interface LocationDetail extends LocationBase {
   id: string;
   has_children: boolean;
+  has_sub_locations: boolean;
+  has_beds: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
@@ -60,6 +62,8 @@ export interface LocationDetail extends LocationBase {
 export interface LocationRead extends LocationBase {
   id: string;
   has_children: boolean;
+  has_sub_locations: boolean;
+  has_beds: boolean;
   parent?: LocationRead;
   current_encounter?: EncounterRead;
   sort_index: number;

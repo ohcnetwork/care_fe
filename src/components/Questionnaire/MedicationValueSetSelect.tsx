@@ -1,6 +1,11 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, FolderOpen, Home, Loader2 } from "lucide-react";
+import {
+  ChevronsUpDown as CaretSortIcon,
+  ChevronRight,
+  FolderOpen,
+  Home,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -516,7 +521,7 @@ export function MedicationValueSetSelectTabContent({
                   </p>
                 ) : isProductLoading || isCategoriesLoading ? (
                   <p className="flex items-center justify-center p-4 text-sm text-gray-500">
-                    <Loader2 className="size-5 animate-spin mr-2" />
+                    <Spinner className="size-5 animate-spin mr-2" />
                     {t("searching")}
                   </p>
                 ) : (
