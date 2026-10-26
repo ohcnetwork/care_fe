@@ -109,7 +109,10 @@ function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
     return lastInOverlay;
   }
 
-  if (document.querySelector(MOUNTED_OVERLAY_SELECTOR)) {
+  const hasBlockingOverlay = [
+    ...document.querySelectorAll(MOUNTED_OVERLAY_SELECTOR),
+  ].some((overlay) => !overlay.querySelector("[cmdk-root]"));
+  if (hasBlockingOverlay) {
     return undefined;
   }
 
