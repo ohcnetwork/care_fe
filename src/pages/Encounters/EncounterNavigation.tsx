@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import PageTitle from "@/components/Common/PageHeadTitle";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
+import { EncounterSectionPicker } from "@/pages/Encounters/EncounterSectionPicker";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 export interface EncounterTab {
@@ -31,10 +31,6 @@ export default function EncounterNavigation({
   onTabChange,
 }: Props) {
   const { t } = useTranslation();
-  const orientation = useBreakpoints<"horizontal" | "vertical">({
-    default: "horizontal",
-    lg: "vertical",
-  });
   const visibleTabs = Object.entries(tabs).filter(
     ([, tab]) => tab.visible !== false,
   );
@@ -49,28 +45,32 @@ export default function EncounterNavigation({
     <Tabs
       value={currentTab}
       onValueChange={onTabChange}
-      orientation={orientation}
-      className="min-w-0 gap-3 lg:flex-row"
+      orientation="vertical"
+      className="min-w-0 flex-col gap-3 lg:flex-row"
     >
       <div className="min-w-0 shrink-0 space-y-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-56 lg:self-start lg:overflow-y-auto">
         <EncounterHistorySelector />
+        <EncounterSectionPicker
+          visibleTabs={visibleTabs}
+          currentTab={currentTab}
+          onTabChange={onTabChange}
+        />
         <TabsList
           aria-label={t("encounter_navigation")}
-          className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-0 lg:flex-col lg:items-stretch lg:overflow-x-hidden"
+          className="hidden h-auto w-full flex-col items-stretch justify-start gap-1 rounded-none bg-transparent p-0 lg:flex"
         >
           {visibleTabs.map(([key, { label, icon: Icon, shortcutId }]) => (
             <TabsTrigger
               key={key}
               value={key}
-              onClick={() => onTabChange(key)}
-              className="group relative h-auto min-h-11 shrink-0 justify-start gap-2 overflow-hidden rounded-[10px] border border-transparent px-3 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-200/40 hover:text-gray-950 data-active:border-gray-300 data-active:bg-gray-200/50 data-active:font-semibold data-active:text-gray-950 data-active:shadow-none data-active:hover:bg-gray-200/50 lg:min-h-9 lg:w-full lg:py-1.5 lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-gray-500 lg:after:opacity-0 lg:data-active:after:opacity-100"
+              className="group relative h-auto min-h-9 w-full flex-none justify-start gap-2 overflow-hidden rounded-[10px] border border-transparent px-3 py-1.5 text-left text-[15px] font-medium whitespace-normal text-muted-foreground hover:bg-muted hover:text-foreground data-active:border-border data-active:bg-muted data-active:font-semibold data-active:text-foreground data-active:shadow-none data-active:hover:bg-muted lg:after:pointer-events-none lg:after:absolute lg:after:inset-y-2 lg:after:right-0 lg:after:w-1 lg:after:rounded-l-full lg:after:bg-muted-foreground lg:after:opacity-0 lg:data-active:after:opacity-100"
             >
               <Icon
                 aria-hidden="true"
-                className="size-4 text-gray-500 group-data-active:text-gray-950"
+                className="size-4 text-muted-foreground group-data-active:text-foreground"
                 strokeWidth={1.75}
               />
-              {label}
+              <span className="min-w-0 flex-1 break-words">{label}</span>
               {shortcutId && (
                 <ShortcutBadge
                   actionId={shortcutId}
@@ -86,7 +86,7 @@ export default function EncounterNavigation({
         <TabsContent key={key} value={key} className="@container min-w-0">
           <PageTitle title={tab.label} />
           {!tab.hideTitle && (
-            <h1 className="mb-3 text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">
+            <h1 className="mb-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               {tab.label}
             </h1>
           )}

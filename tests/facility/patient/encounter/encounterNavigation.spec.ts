@@ -56,6 +56,38 @@ test.describe("Encounter navigation", () => {
       test("keeps the chosen encounter across sections and returns to the current encounter", async ({
         page,
       }) => {
+        const sectionTrigger = page.getByRole("button", {
+          name: /^Encounter section:/,
+        });
+        const sectionPicker = page.getByRole("dialog", {
+          name: "Encounter sections",
+          exact: true,
+        });
+        const chooseSection = async (name: string) => {
+          if (layout === "mobile") {
+            await sectionTrigger.click();
+            await sectionPicker
+              .getByRole("button", { name, exact: true })
+              .click();
+            await expect(sectionPicker).not.toBeVisible();
+            await expect(sectionTrigger).toHaveAccessibleName(
+              `Encounter section: ${name}`,
+            );
+          } else {
+            await page.getByRole("tab", { name, exact: true }).click();
+          }
+        };
+        const expectSelectedSection = async (name: string) => {
+          if (layout === "mobile") {
+            await expect(sectionTrigger).toHaveAccessibleName(
+              `Encounter section: ${name}`,
+            );
+          } else {
+            await expect(
+              page.getByRole("tab", { name, exact: true }),
+            ).toHaveAttribute("aria-selected", "true");
+          }
+        };
         const encounterContext = page.getByRole("region", {
           name: "Encounter",
           exact: true,
@@ -110,6 +142,59 @@ test.describe("Encounter navigation", () => {
         await expect(
           encounterContext.getByRole("button", { name: /^Encounter dates:/ }),
         ).toHaveText(/\d{1,2} [A-Za-z]{3}.*Ongoing/);
+
+        if (layout === "mobile") {
+          await test.step("Find labeled sections at phone widths and dismiss the picker with the keyboard", async () => {
+            for (const mobileWidth of [320, 390]) {
+              await page.setViewportSize({ width: mobileWidth, height: 900 });
+              await expect(sectionTrigger).toHaveAccessibleName(
+                "Encounter section: Overview",
+              );
+              await expect(sectionTrigger).toContainText("Overview");
+              await expect(sectionTrigger).toBeInViewport({ ratio: 1 });
+              expect(
+                (await sectionTrigger.boundingBox())?.height,
+              ).toBeGreaterThanOrEqual(48);
+              await expect
+                .poll(() =>
+                  page.evaluate(
+                    () =>
+                      document.documentElement.scrollWidth - window.innerWidth,
+                  ),
+                )
+                .toBeLessThanOrEqual(0);
+
+              await sectionTrigger.focus();
+              await page.keyboard.press("Enter");
+              await expect(sectionPicker).toBeVisible();
+              await expect(
+                sectionPicker.getByRole("button", {
+                  name: "Overview",
+                  exact: true,
+                }),
+              ).toHaveAttribute("aria-current", "page");
+              for (const label of [
+                "Overview",
+                "Diagnostic Reports",
+                "Consents",
+              ]) {
+                const option = sectionPicker.getByRole("button", {
+                  name: label,
+                  exact: true,
+                });
+                await option.scrollIntoViewIfNeeded();
+                await expect(option).toBeInViewport({ ratio: 1 });
+                await expect(option).toContainText(label);
+                expect(
+                  (await option.boundingBox())?.height,
+                ).toBeGreaterThanOrEqual(48);
+              }
+              await page.keyboard.press("Escape");
+              await expect(sectionPicker).not.toBeVisible();
+              await expect(sectionTrigger).toBeFocused();
+            }
+          });
+        }
 
         await test.step("Read encounter status and dates using the keyboard", async () => {
           await encounterContext
@@ -183,15 +268,27 @@ test.describe("Encounter navigation", () => {
         });
 
         await test.step("Open Notes and retain the historical encounter", async () => {
-          await page.getByRole("tab", { name: "Notes" }).click();
+          await chooseSection("Notes");
           await expect(page).toHaveURL(
             (url) =>
               url.pathname.endsWith("/notes") &&
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
-          await expect(
-            page.getByRole("tab", { name: "Notes" }),
-          ).toHaveAttribute("aria-selected", "true");
+          await expectSelectedSection("Notes");
+          if (layout === "mobile") {
+            await sectionTrigger.click();
+            await expect(
+              sectionPicker.getByRole("button", { name: "Notes", exact: true }),
+            ).toHaveAttribute("aria-current", "page");
+            await expect(
+              sectionPicker.getByRole("button", {
+                name: "Overview",
+                exact: true,
+              }),
+            ).not.toHaveAttribute("aria-current", "page");
+            await page.keyboard.press("Escape");
+            await expect(sectionPicker).not.toBeVisible();
+          }
           await expect(
             page.getByRole(layout === "mobile" ? "button" : "heading", {
               name: layout === "mobile" ? /^Threads/ : "Discussions",
@@ -208,21 +305,34 @@ test.describe("Encounter navigation", () => {
           await expect(
             header.getByRole("navigation", { name: "breadcrumb" }),
           ).toHaveCount(0);
-          await page
-            .getByRole("tab", { name: "Overview", exact: true })
-            .click();
+          await chooseSection("Overview");
           await expect(page).toHaveURL(
             (url) =>
               url.pathname.endsWith("/updates") &&
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
-          await page.getByRole("tab", { name: "Notes", exact: true }).click();
+          await chooseSection("Notes");
           await expect(page).toHaveURL(
             (url) =>
               url.pathname.endsWith("/notes") &&
               url.searchParams.get("selectedEncounter") === pastEncounterId,
           );
           await expect(historicalContext).toBeVisible();
+          if (layout === "mobile") {
+            await page.goBack();
+            await expect(page).toHaveURL(
+              (url) =>
+                url.pathname.endsWith("/updates") &&
+                url.searchParams.get("selectedEncounter") === pastEncounterId,
+            );
+            await expectSelectedSection("Overview");
+            await chooseSection("Notes");
+            await expect(page).toHaveURL(
+              (url) =>
+                url.pathname.endsWith("/notes") &&
+                url.searchParams.get("selectedEncounter") === pastEncounterId,
+            );
+          }
         });
 
         await test.step("Return to the current encounter while staying on Notes", async () => {
@@ -232,9 +342,7 @@ test.describe("Encounter navigation", () => {
               url.pathname.endsWith(`/encounter/${primaryEncounterId}/notes`) &&
               !url.searchParams.has("selectedEncounter"),
           );
-          await expect(
-            page.getByRole("tab", { name: "Notes" }),
-          ).toHaveAttribute("aria-selected", "true");
+          await expectSelectedSection("Notes");
           await expect(historicalContext).not.toBeVisible();
           await expect(returnToCurrent).not.toBeVisible();
           await expect(updateEncounter).toBeVisible();

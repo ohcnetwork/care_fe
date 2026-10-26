@@ -904,8 +904,49 @@ test.describe("Encounter workspace rendering", () => {
       ).toBeVisible();
     });
 
-    await test.step("Keep clinical cards usable at a narrow width", async () => {
+    await test.step("Keep configured sections and clinical cards usable at a narrow width", async () => {
       await page.setViewportSize({ width: 390, height: 844 });
+      const sectionPicker = page.getByRole("dialog", {
+        name: "Encounter sections",
+        exact: true,
+      });
+      const queryContext = new URL(page.url()).search;
+      await page
+        .getByRole("button", {
+          name: "Encounter section: Ward rounds",
+          exact: true,
+        })
+        .click();
+      await expect(
+        sectionPicker.getByRole("button", { name: "Ward rounds", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+      await expect(
+        sectionPicker.getByRole("button", { name: "Devices", exact: true }),
+      ).toHaveCount(0);
+      await sectionPicker
+        .getByRole("button", { name: "Overview", exact: true })
+        .click();
+      await expect(sectionPicker).not.toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `${fixture.basePath}/updates` &&
+          url.search === queryContext,
+      );
+      await page
+        .getByRole("button", {
+          name: "Encounter section: Overview",
+          exact: true,
+        })
+        .click();
+      await sectionPicker
+        .getByRole("button", { name: "Ward rounds", exact: true })
+        .click();
+      await expect(sectionPicker).not.toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `${fixture.basePath}/rounds` &&
+          url.search === queryContext,
+      );
       await expect(
         page
           .getByRole("region", { name: "Symptoms today", exact: true })
