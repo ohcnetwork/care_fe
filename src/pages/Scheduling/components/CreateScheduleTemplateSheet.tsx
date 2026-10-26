@@ -639,6 +639,16 @@ export default function CreateScheduleTemplateSheet({
                                             {...field}
                                             value={field.value ?? ""}
                                             className="shadow-none"
+                                            onBeforeInput={(e) => {
+                                              if (
+                                                /[eE+]/.test(
+                                                  (e.nativeEvent as InputEvent)
+                                                    .data ?? "",
+                                                )
+                                              ) {
+                                                e.preventDefault();
+                                              }
+                                            }}
                                             onChange={(e) => {
                                               const value =
                                                 e.target.valueAsNumber;
