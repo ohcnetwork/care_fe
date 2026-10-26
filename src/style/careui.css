@@ -430,11 +430,8 @@
 }
 
 @layer components {
-  .sidebar-content-scroll {
-    --sidebar-content-mask-start: rgb(0 0 0 / 1);
-    --sidebar-content-mask-end: rgb(0 0 0 / 1);
-    --sidebar-content-fade-size: --spacing(7);
-
+  .sidebar-content-scroll,
+  [data-slot="command-list"] {
     scrollbar-color: color-mix(
         in oklch,
         var(--sidebar-foreground) 32%,
@@ -443,6 +440,13 @@
       transparent;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
+  }
+
+  .sidebar-content-scroll {
+    --sidebar-content-mask-start: rgb(0 0 0 / 1);
+    --sidebar-content-mask-end: rgb(0 0 0 / 1);
+    --sidebar-content-fade-size: --spacing(7);
+
     -webkit-mask-image: linear-gradient(
       to bottom,
       var(--sidebar-content-mask-start) 0,
@@ -467,15 +471,18 @@
     --sidebar-content-mask-end: rgb(0 0 0 / 0);
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar {
+  .sidebar-content-scroll::-webkit-scrollbar,
+  [data-slot="command-list"]::-webkit-scrollbar {
     width: --spacing(2);
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar-track {
+  .sidebar-content-scroll::-webkit-scrollbar-track,
+  [data-slot="command-list"]::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar-thumb {
+  .sidebar-content-scroll::-webkit-scrollbar-thumb,
+  [data-slot="command-list"]::-webkit-scrollbar-thumb {
     background-clip: content-box;
     background-color: color-mix(
       in oklch,

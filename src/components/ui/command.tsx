@@ -79,7 +79,7 @@ function CommandDialog({
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent
           className={cn(
-            "bg-foreground/10 top-1/3 translate-y-0 overflow-hidden rounded-xl! p-1.5",
+            "bg-foreground/10 top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
             className,
           )}
           innerClassName="p-1 md:p-1"
@@ -153,7 +153,7 @@ function CommandInput({
           />
         </CommandPrimitive.Input>
         <InputGroupAddon>
-          <SearchIcon className="size-4 shrink-0 opacity-50" />
+          <SearchIcon className="opacity-50 size-4 shrink-0" />
         </InputGroupAddon>
       </InputGroup>
     </div>
@@ -168,7 +168,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+        "max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
         "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
         className,
       )}

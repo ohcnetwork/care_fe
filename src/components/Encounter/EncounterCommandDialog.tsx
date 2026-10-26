@@ -10,6 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { Kbd } from "@/components/ui/kbd";
 import { useShortcutDisplay } from "@/context/ShortcutContext";
 import {
   ArrowBigRight,
@@ -516,16 +517,16 @@ export function EncounterCommandDialog({
       <CommandDialog
         open={open}
         onOpenChange={handleOpenChange}
-        className="md:max-w-2xl"
+        className="md:top-1/2 md:max-w-2xl md:-translate-y-1/2"
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
             placeholder={t("search_encounter_command")}
-            className="border-none focus:ring-0 text-base sm:text-sm"
+            className="text-base border-none focus:ring-0 sm:text-sm"
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="h-[80vh] max-h-[80vh] w-full">
+        <CommandList className="w-full md:max-h-[min(32rem,calc(100dvh-8rem))]">
           <CommandEmpty>
             {isLoading && search.length > 0 ? (
               <div className="space-y-2">
@@ -543,15 +544,15 @@ export function EncounterCommandDialog({
                     key={`${group.group}-${action.id}`}
                     value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"
                     autoFocus={false}
                     disabled={action.disabled}
                   >
                     {action.icon}
                     <span className="flex-1">{action.label}</span>
                     {action.shortcut && (
-                      <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
-                        {action.shortcut}
+                      <CommandShortcut className="ml-2 tracking-normal">
+                        <Kbd>{action.shortcut}</Kbd>
                       </CommandShortcut>
                     )}
                   </CommandItem>
@@ -568,7 +569,7 @@ export function EncounterCommandDialog({
               <PLUGIN_Component
                 __name="EncounterActions"
                 encounter={encounter}
-                className="rounded-md cursor-pointer text-gray-600 hover:bg-gray-100 flex justify-baseline aria-selected:bg-gray-100 w-full p-2"
+                className="flex w-full p-2 text-gray-600 rounded-md cursor-pointer hover:bg-gray-100 justify-baseline aria-selected:bg-gray-100"
               />
             </CommandGroup>
           )}
