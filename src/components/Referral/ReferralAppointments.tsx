@@ -1,12 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, CalendarPlus, Loader2 } from "lucide-react";
-import { Link, useQueryParams } from "raviger";
+import { CalendarDays, CalendarPlus, Loader2, Stethoscope } from "lucide-react";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { getPermissions } from "@/common/Permissions";
 import { Badge } from "@/components/careui/badge";
 import { Button, buttonVariants } from "@/components/careui/button";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/components/careui/item";
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { usePermissions } from "@/context/PermissionContext";
+import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import { ReferralResource } from "@/types/emr/referral/referralResource";
 import referralResourceApi from "@/types/emr/referral/referralResourceApi";
@@ -14,6 +23,7 @@ import { CancelledAppointmentStatuses } from "@/types/scheduling/schedule";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { appendReferralNativeContext } from "./referralNativeNavigation";
 import { getReferralResponseUrl } from "./referralNavigation";
 import { ReferralResourceContent } from "./ReferralResourceContent";
 import { useReferralPermissions } from "./useReferralPermissions";
@@ -171,20 +181,62 @@ export function ReferralAppointments({
   referral: ReferralRetrieve;
 }) {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
-  const { canWriteAtDestination, destinationFacility, sourceFacilityId } =
-    useReferralPermissions(referral);
+  const [
+    {
+      sourceUrl,
+      referralAppointmentId,
+      referralEncounterId,
+      referralFacilityId,
+    },
+  ] = useQueryParams<{
+    sourceUrl?: string;
+    referralAppointmentId?: string;
+    referralEncounterId?: string;
+    referralFacilityId?: string;
+  }>();
+  const {
+    canWrite,
+    canWriteAtDestination,
+    destinationFacility,
+    sourceFacilityId,
+  } = useReferralPermissions(referral);
   const { hasPermission } = usePermissions();
-  const { canWriteAppointment } = getPermissions(
+  const { canWriteAppointment, canCreateEncounter } = getPermissions(
     hasPermission,
     destinationFacility?.permissions ?? [],
   );
-  const canBook =
+  const canStartReceivingVisit =
     ["pending", "in_progress"].includes(referral.status) &&
     canWriteAtDestination &&
-    canWriteAppointment &&
     !!destinationFacility &&
     sourceFacilityId !== destinationFacility.id;
+  const canBook = canStartReceivingVisit && canWriteAppointment;
+  const canStartConsultation = canStartReceivingVisit && canCreateEncounter;
+  const hasVisitContext =
+    referralAppointmentId !== undefined ||
+    referralEncounterId !== undefined ||
+    referralFacilityId !== undefined;
+  const selectedVisit = useReferralReceivingEncounter({
+    referralId: hasVisitContext ? referral.id : undefined,
+    appointmentId: referralAppointmentId,
+    encounterId: referralEncounterId,
+    facilityId: referralFacilityId,
+    patientId: referral.patient,
+  });
+  const directEncounter =
+    referralAppointmentId === undefined ? selectedVisit.encounter : undefined;
+  const directEncounterUrl = directEncounter
+    ? appendReferralNativeContext(
+        `/facility/${directEncounter.facility.id}/patient/${referral.patient}/encounter/${directEncounter.id}/updates`,
+        new URLSearchParams({
+          referralId: referral.id,
+          referralEncounterId: directEncounter.id,
+          ...(typeof sourceUrl === "string"
+            ? { referralSourceUrl: sourceUrl }
+            : {}),
+        }).toString(),
+      )
+    : undefined;
   const bookingParams = new URLSearchParams({
     open_schedule: "true",
     referralId: referral.id,
@@ -220,7 +272,16 @@ export function ReferralAppointments({
       !appointment || !CancelledAppointmentStatuses.includes(appointment.status)
     );
   });
-  if (records.isSuccess && !attachments.length && !canBook) return null;
+  const canOfferNewVisit =
+    records.isSuccess && !hasCurrentAppointment && !hasVisitContext;
+  if (
+    records.isSuccess &&
+    !attachments.length &&
+    !canBook &&
+    !canStartConsultation &&
+    !hasVisitContext
+  )
+    return null;
   return (
     <section
       aria-label={t("referral_appointment_visit")}
@@ -230,22 +291,110 @@ export function ReferralAppointments({
         <h2 className="text-sm font-semibold">
           {t("referral_appointment_visit")}
         </h2>
-        {records.isSuccess && canBook && !hasCurrentAppointment && (
-          <Link
-            href={`/facility/${destinationFacility.id}/patient/${referral.patient}/appointments?${bookingParams}`}
-            className={buttonVariants({ size: "sm", variant: "outline" })}
-          >
-            <CalendarPlus aria-hidden="true" className="size-4" />
-            {t("referral_book_appointment")}
-          </Link>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {canOfferNewVisit && canStartConsultation && destinationFacility && (
+            <CreateEncounterForm
+              patientId={referral.patient}
+              patientName={referral.patient_name}
+              facilityId={destinationFacility.id}
+              defaultStatus={EncounterStatus.IN_PROGRESS}
+              disableRedirectOnSuccess
+              trigger={
+                <Button size="sm">
+                  <Stethoscope aria-hidden="true" className="size-4" />
+                  {t("start_consultation")}
+                </Button>
+              }
+              onSuccess={(encounter) => {
+                navigate(
+                  appendReferralNativeContext(
+                    `/facility/${encounter.facility.id}/patient/${referral.patient}/encounter/${encounter.id}/updates`,
+                    new URLSearchParams({
+                      referralId: referral.id,
+                      referralEncounterId: encounter.id,
+                      ...(typeof sourceUrl === "string"
+                        ? { referralSourceUrl: sourceUrl }
+                        : {}),
+                    }).toString(),
+                  ),
+                );
+              }}
+            />
+          )}
+          {canOfferNewVisit && canBook && destinationFacility && (
+            <Link
+              href={`/facility/${destinationFacility.id}/patient/${referral.patient}/appointments?${bookingParams}`}
+              className={buttonVariants({ size: "sm", variant: "outline" })}
+            >
+              <CalendarPlus aria-hidden="true" className="size-4" />
+              {t("referral_book_appointment")}
+            </Link>
+          )}
+        </div>
       </div>
-      {records.isSuccess && !attachments.length && canBook && (
-        <p className="text-sm text-cui-muted-foreground">
-          {t("referral_receiving_visit_help", {
-            facility: destinationFacility.name,
-          })}
+      {canOfferNewVisit &&
+        (canBook || canStartConsultation) &&
+        destinationFacility && (
+          <p className="text-sm text-cui-muted-foreground">
+            {t("referral_receiving_visit_help", {
+              facility: destinationFacility.name,
+            })}
+          </p>
+        )}
+      {hasVisitContext && selectedVisit.isLoading && (
+        <p
+          role="status"
+          className="flex items-center gap-2 text-sm text-cui-muted-foreground"
+        >
+          <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+          {t("referral_appointment_context_loading")}
         </p>
+      )}
+      {hasVisitContext && selectedVisit.error && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-sm">
+          <p>{t("referral_encounter_context_unavailable")}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={selectedVisit.isFetching}
+            onClick={() => void selectedVisit.refetch()}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      )}
+      {directEncounter && directEncounterUrl && (
+        <Item variant="outline" className="bg-cui-muted/30">
+          <ItemContent className="min-w-0">
+            <ItemTitle>{t("referral_receiving_encounter")}</ItemTitle>
+            <ItemDescription>
+              {t("referral_receiving_encounter_summary", {
+                facility: directEncounter.facility.name,
+                status: t(`encounter_status__${directEncounter.status}`),
+              })}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions className="flex-wrap">
+            <Link
+              href={directEncounterUrl}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("view_encounter")}
+            </Link>
+            {canWrite &&
+              ["pending", "in_progress"].includes(referral.status) && (
+                <Link
+                  href={getReferralResponseUrl(referral.id, sourceUrl, {
+                    encounterId: directEncounter.id,
+                    facilityId: directEncounter.facility.id,
+                  })}
+                  className={buttonVariants({ size: "sm" })}
+                >
+                  {t("referral_respond")}
+                </Link>
+              )}
+          </ItemActions>
+        </Item>
       )}
       {records.isPending ? (
         <p

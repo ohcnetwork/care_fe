@@ -25,16 +25,28 @@ import { HTTPError } from "@/Utils/request/types";
 
 export function ReferralResponsePage({ referralId }: { referralId: string }) {
   const { t } = useTranslation();
-  const [{ sourceUrl, referralAppointmentId, referralFacilityId }] =
-    useQueryParams<{
-      sourceUrl?: string;
-      referralAppointmentId?: string;
-      referralFacilityId?: string;
-    }>();
-  const hasVisitContext = !!referralAppointmentId || !!referralFacilityId;
+  const [
+    {
+      sourceUrl,
+      referralAppointmentId,
+      referralEncounterId,
+      referralFacilityId,
+    },
+  ] = useQueryParams<{
+    sourceUrl?: string;
+    referralAppointmentId?: string;
+    referralEncounterId?: string;
+    referralFacilityId?: string;
+  }>();
+  const hasVisitContext = [
+    referralAppointmentId,
+    referralEncounterId,
+    referralFacilityId,
+  ].some((value) => value !== undefined);
   const visit = useReferralReceivingEncounter({
     referralId,
     appointmentId: referralAppointmentId,
+    encounterId: referralEncounterId,
     facilityId: referralFacilityId,
   });
   const receivingEncounter = visit.encounter ?? visit.previousEncounter;
@@ -43,7 +55,11 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
   const detailUrl = getReferralDetailUrl(
     referralId,
     typeof sourceUrl === "string" ? sourceUrl : undefined,
-    { appointmentId: referralAppointmentId, facilityId: referralFacilityId },
+    {
+      appointmentId: referralAppointmentId,
+      encounterId: referralEncounterId,
+      facilityId: referralFacilityId,
+    },
   );
   const { data, error, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["referrals", "detail", referralId],

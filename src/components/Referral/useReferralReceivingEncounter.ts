@@ -21,18 +21,28 @@ interface ReferralVisitContext {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** A receiving encounter is linked through the existing appointment, never by
- * replacing the referral's originating encounter or trusting a URL alone. */
+/** Verify an authorized receiving visit against the actual referral destination.
+ * Appointment visits require the persisted referral link. Direct encounter
+ * context selects a readable clinical visit; it does not establish a stored link.
+ */
 export function useReferralReceivingEncounter(context: ReferralVisitContext) {
   const user = useAuthUser();
   const { referralId, appointmentId, facilityId, patientId, encounterId } =
     context;
-  const requested = !!referralId && !!appointmentId && !!facilityId;
+  const hasAppointment = appointmentId !== undefined;
+  const requested =
+    !!referralId &&
+    (hasAppointment || encounterId !== undefined || facilityId !== undefined);
   const valid =
     requested &&
-    [referralId, appointmentId, facilityId, patientId, encounterId]
-      .filter((value) => value !== undefined)
-      .every((value) => UUID.test(value));
+    [
+      referralId,
+      facilityId,
+      hasAppointment ? appointmentId : encounterId,
+    ].every((value) => typeof value === "string" && UUID.test(value)) &&
+    [patientId, encounterId].every(
+      (value) => value === undefined || UUID.test(value),
+    );
   const visit = useQuery({
     queryKey: [
       "referrals",
@@ -45,28 +55,50 @@ export function useReferralReceivingEncounter(context: ReferralVisitContext) {
       user.id,
     ],
     queryFn: async ({ signal }) => {
-      const [referral, attachment, appointment] = await Promise.all([
-        callApi(referralApi.get, {
-          pathParams: { referralId: referralId! },
-          signal,
-          silent: true,
-        }),
-        findAppointmentReferralAttachment(referralId!, appointmentId!, signal),
-        callApi(scheduleApis.appointments.retrieve, {
-          pathParams: { facilityId: facilityId!, id: appointmentId! },
-          signal,
-          silent: true,
-        }),
-      ]);
+      const [referral, attachment, appointment, directEncounter] =
+        await Promise.all([
+          callApi(referralApi.get, {
+            pathParams: { referralId: referralId! },
+            signal,
+            silent: true,
+          }),
+          hasAppointment
+            ? findAppointmentReferralAttachment(
+                referralId!,
+                appointmentId!,
+                signal,
+              )
+            : undefined,
+          hasAppointment
+            ? callApi(scheduleApis.appointments.retrieve, {
+                pathParams: { facilityId: facilityId!, id: appointmentId! },
+                signal,
+                silent: true,
+              })
+            : undefined,
+          !hasAppointment
+            ? callApi(encounterApi.get, {
+                pathParams: { id: encounterId! },
+                signal,
+                silent: true,
+              })
+            : undefined,
+        ]);
       if (
         referral.id !== referralId ||
-        !attachment ||
-        attachment.referral !== referralId ||
-        appointment.id !== appointmentId ||
-        appointment.facility.id !== facilityId ||
-        appointment.patient.id !== referral.patient ||
-        (patientId && patientId !== referral.patient) ||
-        (encounterId && appointment.associated_encounter?.id !== encounterId)
+        (patientId && patientId !== referral.patient)
+      )
+        throw new Error("Referral patient context does not match");
+      if (
+        hasAppointment &&
+        (!attachment ||
+          attachment.referral !== referralId ||
+          attachment.attachment_type !== "response" ||
+          !appointment ||
+          appointment.id !== appointmentId ||
+          appointment.facility.id !== facilityId ||
+          appointment.patient.id !== referral.patient ||
+          (encounterId && appointment.associated_encounter?.id !== encounterId))
       )
         throw new Error("Referral appointment context does not match");
 
@@ -76,29 +108,31 @@ export function useReferralReceivingEncounter(context: ReferralVisitContext) {
         silent: true,
       });
       if (
-        attachment.attachment_type !== "response" ||
+        availability.id !== referral.availability ||
         !["facility", "internal_organization"].includes(
           availability.entity_type,
         ) ||
         availability.facility !== facilityId
       )
-        throw new Error(
-          "Appointment is not a receiving visit for this referral",
-        );
-      const localEncounterId = appointment.associated_encounter?.id;
-      const encounter = localEncounterId
-        ? await callApi(encounterApi.get, {
-            pathParams: { id: localEncounterId },
-            signal,
-            silent: true,
-          })
-        : undefined;
+        throw new Error("Visit is not at this referral's destination");
+      const localEncounterId = hasAppointment
+        ? appointment?.associated_encounter?.id
+        : encounterId;
+      const encounter =
+        directEncounter ??
+        (localEncounterId
+          ? await callApi(encounterApi.get, {
+              pathParams: { id: localEncounterId },
+              signal,
+              silent: true,
+            })
+          : undefined);
       if (
         encounter &&
         (encounter.id !== localEncounterId ||
           encounter.patient.id !== referral.patient ||
           encounter.facility.id !== facilityId ||
-          encounter.appointment?.id !== appointment.id)
+          (appointment && encounter.appointment?.id !== appointment.id))
       )
         throw new Error("Referral encounter context does not match");
       return { referral, appointment, encounter };

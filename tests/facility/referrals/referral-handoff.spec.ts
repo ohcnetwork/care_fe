@@ -7,6 +7,7 @@ import {
   type APIRequestContext,
   type Browser,
   type Page,
+  type TestInfo,
 } from "@playwright/test";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import {
@@ -100,11 +101,19 @@ async function signInDoctor(
   };
 }
 
-test("completes a cross-facility referral through a receiving doctor appointment and encounter", async ({
-  browser,
-  request,
-  baseURL,
-}, testInfo) => {
+async function completeReferralHandoff(
+  {
+    browser,
+    request,
+    baseURL,
+  }: {
+    browser: Browser;
+    request: APIRequestContext;
+    baseURL: string | undefined;
+  },
+  testInfo: TestInfo,
+  walkIn: boolean,
+) {
   test.slow();
   expect(baseURL, "The browser base URL is required").toBeTruthy();
   const suffix = faker.string.alphanumeric(10).toLowerCase();
@@ -205,35 +214,37 @@ test("completes a cross-facility referral through a receiving doctor appointment
     timeZone: "Asia/Kolkata",
   }).format(new Date(originEncounter.period.start));
 
-  const scheduleName = `Receiving clinic ${suffix}`;
-  const scheduleStart = new Date();
-  const scheduleStartDay = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(scheduleStart);
-  await api(request, `/api/v1/facility/${destination.id}/schedule/`, {
-    name: scheduleName,
-    valid_from: `${scheduleStartDay}T00:00:00+05:30`,
-    valid_to: new Date(scheduleStart.getTime() + 7 * 86400000).toISOString(),
-    is_public: false,
-    resource_type: "practitioner",
-    resource_id: recipient.id,
-    availabilities: [
-      {
-        name: `Consultations ${suffix}`,
-        slot_type: "appointment",
-        slot_size_in_minutes: 60,
-        tokens_per_slot: 3,
-        availability: Array.from({ length: 7 }, (_, day_of_week) => ({
-          day_of_week,
-          start_time: "00:00:00",
-          end_time: "23:00:00",
-        })),
-      },
-    ],
-  });
+  if (!walkIn) {
+    const scheduleName = `Receiving clinic ${suffix}`;
+    const scheduleStart = new Date();
+    const scheduleStartDay = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(scheduleStart);
+    await api(request, `/api/v1/facility/${destination.id}/schedule/`, {
+      name: scheduleName,
+      valid_from: `${scheduleStartDay}T00:00:00+05:30`,
+      valid_to: new Date(scheduleStart.getTime() + 7 * 86400000).toISOString(),
+      is_public: false,
+      resource_type: "practitioner",
+      resource_id: recipient.id,
+      availabilities: [
+        {
+          name: `Consultations ${suffix}`,
+          slot_type: "appointment",
+          slot_size_in_minutes: 60,
+          tokens_per_slot: 3,
+          availability: Array.from({ length: 7 }, (_, day_of_week) => ({
+            day_of_week,
+            start_time: "00:00:00",
+            end_time: "23:00:00",
+          })),
+        },
+      ],
+    });
+  }
   const localFormTitle = `Receiving consultation ${suffix}`;
   const localQuestionLabel = `Receiving assessment ${suffix}`;
   const localForm = await api<Entity>(request, "/api/v1/questionnaire/", {
@@ -259,6 +270,14 @@ test("completes a cross-facility referral through a receiving doctor appointment
   const recipientContext = await doctorContext(browser, baseURL!);
   const senderPage = await senderContext.newPage();
   const recipientPage = await recipientContext.newPage();
+  let appointmentCreations = 0;
+  recipientPage.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname.endsWith("/create_appointment/")
+    )
+      appointmentCreations += 1;
+  });
   try {
     const senderSession = await signInDoctor(
       senderPage,
@@ -326,7 +345,10 @@ test("completes a cross-facility referral through a receiving doctor appointment
           .getByRole("combobox", { name: "Referral unit", exact: true })
           .click();
         await senderPage
-          .getByRole("combobox", { name: "Search referral units", exact: true })
+          .getByRole("combobox", {
+            name: "Search referral units",
+            exact: true,
+          })
           .fill(configuration.availabilityName);
         await senderPage
           .getByRole("option")
@@ -348,7 +370,10 @@ test("completes a cross-facility referral through a receiving doctor appointment
           .getByRole("button", { name: "Review referral", exact: true })
           .click();
         await expect(
-          creation.getByRole("button", { name: "Send referral", exact: true }),
+          creation.getByRole("button", {
+            name: "Send referral",
+            exact: true,
+          }),
         ).toBeEnabled();
         await expect(
           creation
@@ -616,122 +641,146 @@ test("completes a cross-facility referral through a receiving doctor appointment
       ).toHaveAttribute("aria-current", "step");
     });
 
-    let appointmentId: string;
+    let appointmentId: string | undefined;
     let receivingEncounterId: string;
     let localResponseId: string;
     let sourceEncounterAccessAfterConsultation: number;
     const localFinding = `Local clinical assessment ${suffix}`;
     const recommendation = `Specialist follow-up recommendation ${suffix}`;
-    await test.step("The receiving doctor books through the native appointment page", async () => {
-      await recipientPage
-        .getByRole("link", { name: "Book appointment", exact: true })
-        .click();
-      const appointmentsPath = `/facility/${destination.id}/patient/${patientId}/appointments`;
-      await expect(recipientPage).toHaveURL(
-        (url) =>
-          url.pathname === appointmentsPath &&
-          url.searchParams.get("referralId") === fixture.referralId,
-      );
-      const booking = recipientPage.getByRole("dialog", {
-        name: "Book Appointment",
-        exact: true,
-      });
-      await expect(
-        booking.getByPlaceholder("Type the reason for visit"),
-      ).toHaveValue(fixture.title);
-      await booking
-        .getByRole("radio", { name: "Practitioner", exact: true })
-        .click();
-      await booking
-        .getByRole("combobox", { name: "Select Practitioner", exact: true })
-        .click();
-      await recipientPage
-        .getByPlaceholder("Search departments and practitioners")
-        .fill(`recipient ${suffix}`);
-      const dateInFacility = (date: Date) =>
-        new Intl.DateTimeFormat("en-CA", {
-          timeZone: "Asia/Kolkata",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).format(date);
-      const todayInFacility = dateInFacility(new Date());
-      // Near midnight, use tomorrow's earliest slot; it remains within the
-      // native consultation window and avoids the end of today's schedule.
-      const appointmentDay = dateInFacility(new Date(Date.now() + 2 * 3600000));
-      const slotsLoaded = recipientPage.waitForResponse(
-        (result) =>
-          new URL(result.url()).pathname.endsWith(
-            "/slots/get_slots_for_day/",
-          ) &&
-          result.request().method() === "POST" &&
-          result.request().postDataJSON().day === appointmentDay,
-      );
-      await recipientPage
-        .getByRole("option")
-        .filter({ hasText: `recipient ${suffix}` })
-        .click();
-      if (appointmentDay !== todayInFacility) {
-        if (appointmentDay.slice(0, 7) !== todayInFacility.slice(0, 7))
-          await booking
-            .getByRole("button", { name: "Next Month", exact: true })
-            .click();
-        await booking
-          .getByRole("button", {
-            name: new RegExp(
-              `^${Number(appointmentDay.slice(-2))}\\s+\\d+ left$`,
-            ),
-          })
+    if (!walkIn) {
+      await test.step("The receiving doctor books through the native appointment page", async () => {
+        await recipientPage
+          .getByRole("link", { name: "Book appointment", exact: true })
           .click();
-      }
-      expect((await slotsLoaded).ok()).toBeTruthy();
-      const confirm = booking.getByRole("button", {
-        name: "Confirm Appointment",
-        exact: true,
-      });
-      await expect(confirm).toBeEnabled();
-      const created = recipientPage.waitForResponse(
-        (result) =>
-          new URL(result.url()).pathname.endsWith("/create_appointment/") &&
-          result.request().method() === "POST",
-      );
-      await confirm.click();
-      const response = await created;
-      expect(response.ok(), await response.text()).toBeTruthy();
-      const appointment = await response.json();
-      appointmentId = appointment.id;
-      expect(appointment).toMatchObject({
-        patient: { id: patientId },
-        note: fixture.title,
-        booked_by: { id: recipient.id },
-      });
-      await expect(recipientPage).toHaveURL(
-        (url) =>
-          url.pathname === `${appointmentsPath}/${appointmentId}` &&
-          url.searchParams.get("referralId") === fixture.referralId,
-      );
-      await expect(
-        recipientPage.getByRole("region", {
-          name: "Referral appointment",
+        const appointmentsPath = `/facility/${destination.id}/patient/${patientId}/appointments`;
+        await expect(recipientPage).toHaveURL(
+          (url) =>
+            url.pathname === appointmentsPath &&
+            url.searchParams.get("referralId") === fixture.referralId,
+        );
+        const booking = recipientPage.getByRole("dialog", {
+          name: "Book Appointment",
           exact: true,
-        }),
-      ).toContainText(`This appointment is linked to ${fixture.title}.`);
-      const origin = await request.get(
-        `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
-        { headers: recipientSession.headers },
-      );
-      expect(origin.status()).toBe(403);
-      const patientBeforeConsultation = await request.get(
-        `${apiBaseUrl()}/api/v1/patient/${patientId}/`,
-        { headers: recipientSession.headers },
-      );
-      expect(patientBeforeConsultation.status()).toBe(404);
-    });
+        });
+        await expect(
+          booking.getByPlaceholder("Type the reason for visit"),
+        ).toHaveValue(fixture.title);
+        await booking
+          .getByRole("radio", { name: "Practitioner", exact: true })
+          .click();
+        await booking
+          .getByRole("combobox", { name: "Select Practitioner", exact: true })
+          .click();
+        await recipientPage
+          .getByPlaceholder("Search departments and practitioners")
+          .fill(`recipient ${suffix}`);
+        const dateInFacility = (date: Date) =>
+          new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Kolkata",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).format(date);
+        const todayInFacility = dateInFacility(new Date());
+        // Near midnight, use tomorrow's earliest slot; it remains within the
+        // native consultation window and avoids the end of today's schedule.
+        const appointmentDay = dateInFacility(
+          new Date(Date.now() + 2 * 3600000),
+        );
+        const slotsLoaded = recipientPage.waitForResponse(
+          (result) =>
+            new URL(result.url()).pathname.endsWith(
+              "/slots/get_slots_for_day/",
+            ) &&
+            result.request().method() === "POST" &&
+            result.request().postDataJSON().day === appointmentDay,
+        );
+        await recipientPage
+          .getByRole("option")
+          .filter({ hasText: `recipient ${suffix}` })
+          .click();
+        if (appointmentDay !== todayInFacility) {
+          if (appointmentDay.slice(0, 7) !== todayInFacility.slice(0, 7))
+            await booking
+              .getByRole("button", { name: "Next Month", exact: true })
+              .click();
+          await booking
+            .getByRole("button", {
+              name: new RegExp(
+                `^${Number(appointmentDay.slice(-2))}\\s+\\d+ left$`,
+              ),
+            })
+            .click();
+        }
+        expect((await slotsLoaded).ok()).toBeTruthy();
+        const confirm = booking.getByRole("button", {
+          name: "Confirm Appointment",
+          exact: true,
+        });
+        await expect(confirm).toBeEnabled();
+        const created = recipientPage.waitForResponse(
+          (result) =>
+            new URL(result.url()).pathname.endsWith("/create_appointment/") &&
+            result.request().method() === "POST",
+        );
+        await confirm.click();
+        const response = await created;
+        expect(response.ok(), await response.text()).toBeTruthy();
+        const appointment = await response.json();
+        appointmentId = appointment.id;
+        expect(appointment).toMatchObject({
+          patient: { id: patientId },
+          note: fixture.title,
+          booked_by: { id: recipient.id },
+        });
+        await expect(recipientPage).toHaveURL(
+          (url) =>
+            url.pathname === `${appointmentsPath}/${appointmentId}` &&
+            url.searchParams.get("referralId") === fixture.referralId,
+        );
+        await expect(
+          recipientPage.getByRole("region", {
+            name: "Referral appointment",
+            exact: true,
+          }),
+        ).toContainText(`This appointment is linked to ${fixture.title}.`);
+        const origin = await request.get(
+          `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
+          { headers: recipientSession.headers },
+        );
+        expect(origin.status()).toBe(403);
+        const patientBeforeConsultation = await request.get(
+          `${apiBaseUrl()}/api/v1/patient/${patientId}/`,
+          { headers: recipientSession.headers },
+        );
+        expect(patientBeforeConsultation.status()).toBe(404);
+      });
+    }
 
     await test.step("Start consultation and document the receiving encounter through its native form", async () => {
-      await recipientPage
-        .getByRole("button", { name: /\bStart Consultation$/ })
-        .click();
+      if (walkIn) {
+        const origin = await request.get(
+          `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
+          {
+            headers: recipientSession.headers,
+          },
+        );
+        expect(origin.status()).toBe(403);
+        const inaccessiblePatient = await request.get(
+          `${apiBaseUrl()}/api/v1/patient/${patientId}/`,
+          {
+            headers: recipientSession.headers,
+          },
+        );
+        expect(inaccessiblePatient.status()).toBe(404);
+        await recipientPage
+          .getByRole("button", { name: /^Start consultation$/i })
+          .click();
+      } else {
+        await recipientPage
+          .getByRole("button", { name: /\bStart Consultation$/ })
+          .click();
+      }
       const encounterForm = recipientPage.getByRole("dialog", {
         name: "Initiate Patient Encounter",
         exact: true,
@@ -774,14 +823,25 @@ test("completes a cross-facility referral through a receiving doctor appointment
         created_by: { id: recipient.id },
         status: "in_progress",
         encounter_class: "amb",
-        appointment: { id: appointmentId },
       });
+      if (walkIn) {
+        expect(
+          response.request().postDataJSON().appointment ?? null,
+        ).toBeNull();
+        expect(encounter.appointment?.id ?? null).toBeNull();
+      } else {
+        expect(encounter.appointment).toMatchObject({ id: appointmentId });
+      }
       await expect(recipientPage).toHaveURL(
         (url) =>
           url.pathname ===
             `/facility/${destination.id}/patient/${patientId}/encounter/${receivingEncounterId}/updates` &&
           url.searchParams.get("referralId") === fixture.referralId &&
-          url.searchParams.get("referralAppointmentId") === appointmentId,
+          (walkIn
+            ? url.searchParams.get("referralEncounterId") ===
+                receivingEncounterId &&
+              !url.searchParams.has("referralAppointmentId")
+            : url.searchParams.get("referralAppointmentId") === appointmentId),
       );
       const receivingEncounterUrl = recipientPage.url();
       const review = recipientPage.getByRole("region", {
@@ -846,7 +906,12 @@ test("completes a cross-facility referral through a receiving doctor appointment
       await expect(recipientPage).toHaveURL(
         (url) =>
           url.pathname === encounterContext.pathname &&
-          ["referralId", "referralSourceUrl", "referralAppointmentId"].every(
+          [
+            "referralId",
+            "referralSourceUrl",
+            "referralAppointmentId",
+            "referralEncounterId",
+          ].every(
             (key) =>
               url.searchParams.get(key) ===
               encounterContext.searchParams.get(key),
@@ -882,18 +947,51 @@ test("completes a cross-facility referral through a receiving doctor appointment
       await expect(recipientPage).toHaveURL(
         (url) =>
           url.pathname === `${fixture.path}/respond` &&
-          url.searchParams.get("referralAppointmentId") === appointmentId,
+          url.searchParams.get("referralFacilityId") === destination.id &&
+          (walkIn
+            ? url.searchParams.get("referralEncounterId") ===
+                receivingEncounterId &&
+              !url.searchParams.has("referralAppointmentId")
+            : url.searchParams.get("referralAppointmentId") === appointmentId),
       );
+      if (walkIn) {
+        // The source encounter is readable under native post-consultation policy,
+        // so rejection here must be the receiving-facility mismatch, not a 403.
+        expect(sourceEncounterAccessAfterConsultation).toBe(200);
+        const validResponseUrl = recipientPage.url();
+        const wrongFacilityUrl = new URL(validResponseUrl);
+        wrongFacilityUrl.searchParams.set("referralEncounterId", encounterId);
+        wrongFacilityUrl.searchParams.set(
+          "referralFacilityId",
+          sourceFacilityId,
+        );
+        await recipientPage.goto(wrongFacilityUrl.toString());
+        await expect(recipientPage.getByRole("alert")).toContainText(
+          "The referral link could not be verified. Retry to return to the referral.",
+        );
+        await expect(
+          recipientPage.getByRole("button", {
+            name: "Save response and complete",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+        await expect(
+          questionBlock(recipientPage, fixture.responseLabel),
+        ).toHaveCount(0);
+        await recipientPage.goto(validResponseUrl);
+      }
     });
 
     await test.step("Share the local clinical record and save a response that completes the referral", async () => {
       await questionBlock(recipientPage, fixture.responseLabel)
         .getByRole("textbox")
         .fill(recommendation);
-      const appointmentUrl = (url: URL) =>
+      const visitResourceUrl = (url: URL) =>
         url.pathname ===
-        `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`;
-      await recipientPage.route(appointmentUrl, async (route) => {
+        (walkIn
+          ? `/api/v1/encounter/${receivingEncounterId}/`
+          : `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`);
+      await recipientPage.route(visitResourceUrl, async (route) => {
         await route.fulfill({
           status: 503,
           json: { detail: "Receiving visit temporarily unavailable" },
@@ -901,7 +999,7 @@ test("completes a cross-facility referral through a receiving doctor appointment
       });
       const failedRefresh = recipientPage.waitForResponse(
         (result) =>
-          appointmentUrl(new URL(result.url())) &&
+          visitResourceUrl(new URL(result.url())) &&
           result.request().method() === "GET" &&
           result.status() === 503,
       );
@@ -927,7 +1025,7 @@ test("completes a cross-facility referral through a receiving doctor appointment
         exact: true,
       });
       await expect(saveResponse).toBeDisabled();
-      await recipientPage.unroute(appointmentUrl);
+      await recipientPage.unroute(visitResourceUrl);
       await visitWarning
         .getByRole("button", { name: "Retry", exact: true })
         .click();
@@ -956,7 +1054,10 @@ test("completes a cross-facility referral through a receiving doctor appointment
         .getByRole("option", { name: "Response", exact: true })
         .click();
       await picker
-        .getByRole("button", { name: `Select ${localFormTitle}`, exact: true })
+        .getByRole("button", {
+          name: `Select ${localFormTitle}`,
+          exact: true,
+        })
         .click();
       await picker
         .getByRole("button", { name: "Add record", exact: true })
@@ -1012,12 +1113,12 @@ test("completes a cross-facility referral through a receiving doctor appointment
         name: "Appointment and visit",
         exact: true,
       });
-      await expect(
-        appointmentVisit.getByRole("link", {
-          name: "Manage appointment",
-          exact: true,
-        }),
-      ).toBeVisible();
+      const manageAppointment = appointmentVisit.getByRole("link", {
+        name: "Manage appointment",
+        exact: true,
+      });
+      if (walkIn) await expect(manageAppointment).toHaveCount(0);
+      else await expect(manageAppointment).toBeVisible();
       await expect(
         appointmentVisit.getByRole("link", { name: "Respond", exact: true }),
       ).toHaveCount(0);
@@ -1091,7 +1192,7 @@ test("completes a cross-facility referral through a receiving doctor appointment
       });
     });
 
-    await test.step("Retain one appointment, a distinct receiving encounter, and each doctor’s authored records", async () => {
+    await test.step("Retain the native visit and each doctor’s authored records without creating duplicate appointments", async () => {
       const saved = await api<{
         status: string;
         created_by: { id: string };
@@ -1116,34 +1217,56 @@ test("completes a cross-facility referral through a receiving doctor appointment
           (item) => item.questionnaire_type === "response",
         ),
       ).toMatchObject({ created_by: { id: recipient.id } });
-      const bookings = await api<{ count: number; results: { id: string }[] }>(
+      const bookings = await api<{
+        count: number;
+        results: { id: string }[];
+      }>(
         request,
         `/api/v1/patient/${patientId}/get_appointments/?facility=${destination.id}`,
         undefined,
         recipientSession.headers,
       );
-      expect(bookings).toMatchObject({
-        count: 1,
-        results: [{ id: appointmentId }],
-      });
-      const booking = await api<unknown>(
-        request,
-        `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`,
-        undefined,
-        recipientSession.headers,
-      );
-      expect(booking).toMatchObject({
-        status: "in_consultation",
-        associated_encounter: { id: receivingEncounterId },
-      });
-      const resources = await api<unknown>(
+      expect(appointmentCreations).toBe(walkIn ? 0 : 1);
+      if (walkIn) {
+        expect(bookings).toMatchObject({ count: 0, results: [] });
+        const localEncounter = await api<{ appointment?: { id?: string } }>(
+          request,
+          `/api/v1/encounter/${receivingEncounterId}/`,
+          undefined,
+          recipientSession.headers,
+        );
+        expect(localEncounter.appointment?.id ?? null).toBeNull();
+      } else {
+        expect(bookings).toMatchObject({
+          count: 1,
+          results: [{ id: appointmentId }],
+        });
+        const booking = await api<unknown>(
+          request,
+          `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`,
+          undefined,
+          recipientSession.headers,
+        );
+        expect(booking).toMatchObject({
+          status: "in_consultation",
+          associated_encounter: { id: receivingEncounterId },
+        });
+      }
+      const resources = await api<{
+        count: number;
+        results: {
+          resource_type: string;
+          attachment_type: string;
+          metadata?: Record<string, unknown>;
+        }[];
+      }>(
         request,
         `/api/v1/referral/${fixture.referralId}/resources/`,
         undefined,
         senderSession.headers,
       );
       expect(resources).toMatchObject({
-        count: 3,
+        count: walkIn ? 2 : 3,
         results: expect.arrayContaining([
           expect.objectContaining({
             resource_type: "questionnaire_response",
@@ -1155,14 +1278,40 @@ test("completes a cross-facility referral through a receiving doctor appointment
             resource_id: localResponseId,
             attachment_type: "response",
           }),
-          expect.objectContaining({
-            resource_type: "appointment",
-            resource_id: appointmentId,
-            attachment_type: "response",
-          }),
+          ...(!walkIn
+            ? [
+                expect.objectContaining({
+                  resource_type: "appointment",
+                  resource_id: appointmentId,
+                  attachment_type: "response",
+                }),
+              ]
+            : []),
         ]),
       });
-      const referrals = await api<{ count: number; results: { id: string }[] }>(
+      if (walkIn) {
+        expect(
+          resources.results.every(
+            (record) => record.resource_type === "questionnaire_response",
+          ),
+        ).toBe(true);
+        expect(
+          resources.results.some(
+            (record) => record.attachment_type === "metadata",
+          ),
+        ).toBe(false);
+        expect(
+          resources.results.some((record) =>
+            JSON.stringify(record.metadata ?? {}).includes(
+              receivingEncounterId,
+            ),
+          ),
+        ).toBe(false);
+      }
+      const referrals = await api<{
+        count: number;
+        results: { id: string }[];
+      }>(
         request,
         `/api/v1/referral/?patient=${patientId}&availability=${fixture.availabilityId}`,
         undefined,
@@ -1216,7 +1365,8 @@ test("completes a cross-facility referral through a receiving doctor appointment
               role: "Doctor",
             },
             referralId: fixture.referralId,
-            appointmentId,
+            appointmentId: appointmentId ?? null,
+            visitType: walkIn ? "walk-in" : "booked",
             sourceEncounterId: encounterId,
             receivingEncounterId,
             sourceEncounterAccessBeforeConsultation: 403,
@@ -1264,4 +1414,23 @@ test("completes a cross-facility referral through a receiving doctor appointment
     await senderContext.close();
     await recipientContext.close();
   }
-});
+}
+
+for (const { walkIn, name } of [
+  {
+    walkIn: false,
+    name: "completes a cross-facility referral through a receiving doctor appointment and encounter",
+  },
+  {
+    walkIn: true,
+    name: "completes a cross-facility walk-in referral through a receiving doctor encounter",
+  },
+]) {
+  test(name, async ({ browser, request, baseURL }, testInfo) => {
+    await completeReferralHandoff(
+      { browser, request, baseURL },
+      testInfo,
+      walkIn,
+    );
+  });
+}

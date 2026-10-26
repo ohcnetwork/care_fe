@@ -36,7 +36,10 @@ export function ReferralPatientHeader({
   receivingEncounter,
 }: ReferralPatientHeaderProps) {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
+  const [{ sourceUrl, referralAppointmentId }] = useQueryParams<{
+    sourceUrl?: string;
+    referralAppointmentId?: string;
+  }>();
   const encounterQuery = useQuery({
     queryKey: [
       "referrals",
@@ -91,12 +94,16 @@ export function ReferralPatientHeader({
     ? `/facility/${encounter.facility.id}/patient/${referral.patient}/encounter/${encounter.id}/updates`
     : "";
   const encounterUrl =
-    receivingEncounter && encounter?.appointment
+    receivingEncounter && encounter
       ? appendReferralNativeContext(
           encounterPath,
           new URLSearchParams({
             referralId: referral.id,
-            referralAppointmentId: encounter.appointment.id,
+            referralEncounterId: encounter.id,
+            ...(referralAppointmentId &&
+            encounter.appointment?.id === referralAppointmentId
+              ? { referralAppointmentId }
+              : {}),
             ...(typeof sourceUrl === "string"
               ? { referralSourceUrl: sourceUrl }
               : {}),

@@ -5481,7 +5481,7 @@
   "referral_encounter_context_unavailable": "The referral link could not be verified. Retry to return to the referral.",
   "referral_receiving_encounter": "Receiving encounter",
   "referral_receiving_encounter_summary": "{{facility}} · {{status}}",
-  "referral_receiving_visit_help": "Book an appointment at {{facility}}, then start the consultation from the appointment to create the receiving encounter.",
+  "referral_receiving_visit_help": "Start a walk-in consultation at {{facility}}, or book an appointment for a scheduled visit.",
   "referral_record_scope": "Records from",
   "referral_all_patient_records": "All patient records",
   "referral_receiving_visit_refresh_failed": "The receiving visit could not be refreshed. Your answers are kept here. Retry before saving the response.",

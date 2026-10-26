@@ -55,12 +55,19 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
   const { t } = useTranslation();
   const requestId = useId();
   const [requestHidden, setRequestHidden] = useState(false);
-  const [{ sourceUrl, referralAppointmentId, referralFacilityId }] =
-    useQueryParams<{
-      sourceUrl?: string;
-      referralAppointmentId?: string;
-      referralFacilityId?: string;
-    }>();
+  const [
+    {
+      sourceUrl,
+      referralAppointmentId,
+      referralEncounterId,
+      referralFacilityId,
+    },
+  ] = useQueryParams<{
+    sourceUrl?: string;
+    referralAppointmentId?: string;
+    referralEncounterId?: string;
+    referralFacilityId?: string;
+  }>();
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["referrals", "detail", referralId],
     queryFn: query(referralApi.get, {
@@ -334,6 +341,7 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                   canWrite={canWrite}
                   responseUrl={getReferralResponseUrl(data.id, sourceUrl, {
                     appointmentId: referralAppointmentId,
+                    encounterId: referralEncounterId,
                     facilityId: referralFacilityId,
                   })}
                 />

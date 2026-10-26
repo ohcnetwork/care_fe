@@ -28,12 +28,23 @@ export function ReferralEncounterContext({
   encounter: EncounterRead;
 }) {
   const { t } = useTranslation();
-  // Subscribe to query changes while retaining only the supported native context.
-  useQueryParams();
+  const [requested] = useQueryParams<{
+    referralAppointmentId?: string;
+    referralEncounterId?: string;
+  }>();
   const params = referralNativeQueryParams(window.location.search);
+  const appointmentContext = requested.referralAppointmentId !== undefined;
+  const contextMatches = appointmentContext
+    ? !!params.referralAppointmentId &&
+      params.referralAppointmentId === encounter.appointment?.id &&
+      (requested.referralEncounterId === undefined ||
+        params.referralEncounterId === encounter.id)
+    : params.referralEncounterId === encounter.id;
   const context = useReferralReceivingEncounter({
-    referralId: params.referralId,
-    appointmentId: encounter.appointment?.id,
+    referralId: contextMatches ? params.referralId : undefined,
+    appointmentId: appointmentContext
+      ? params.referralAppointmentId
+      : undefined,
     facilityId: encounter.facility.id,
     patientId: encounter.patient.id,
     encounterId: encounter.id,
@@ -42,9 +53,10 @@ export function ReferralEncounterContext({
     context.encounter?.id === encounter.id ? context.referral : undefined;
   const { canWrite } = useReferralPermissions(verified);
 
-  if (!params.referralId || !encounter.appointment?.id) return null;
+  if (!params.referralId || !contextMatches) return null;
   const visit = {
     appointmentId: context.appointment?.id,
+    encounterId: context.encounter?.id,
     facilityId: encounter.facility.id,
   };
 

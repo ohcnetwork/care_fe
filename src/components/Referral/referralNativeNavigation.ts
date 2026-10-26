@@ -1,7 +1,7 @@
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LOCAL_ORIGIN = "https://care.invalid";
 
-/** Carry navigation context only; the receiving view verifies the persisted link. */
+/** Carry navigation context only; the receiving view verifies the referral and clinical visit through their existing APIs. */
 export function referralNativeQueryParams(search: string) {
   const params = new URLSearchParams(search);
   const referralId = params.get("referralId");
@@ -10,9 +10,17 @@ export function referralNativeQueryParams(search: string) {
   result.referralId = referralId;
 
   const appointmentId = params.get("referralAppointmentId");
-  if (appointmentId && UUID.test(appointmentId)) {
-    result.referralAppointmentId = appointmentId;
-  }
+  const encounterId = params.get("referralEncounterId");
+  // A malformed supplied ID must not turn an appointment context into a direct
+  // visit, or silently discard an expected encounter during native navigation.
+  if (
+    [appointmentId, encounterId].some(
+      (value) => value !== null && !UUID.test(value),
+    )
+  )
+    return result;
+  if (appointmentId) result.referralAppointmentId = appointmentId;
+  if (encounterId) result.referralEncounterId = encounterId;
   const source = params.get("referralSourceUrl");
   if (source?.startsWith("/") && !source.startsWith("//")) {
     try {
