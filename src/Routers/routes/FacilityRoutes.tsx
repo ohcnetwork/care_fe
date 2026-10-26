@@ -1,33 +1,95 @@
 import { Redirect } from "raviger";
+import { lazy } from "react";
 
-import FacilityUsers from "@/components/Facility/FacilityUsers";
-import ResourceCreate from "@/components/Resource/ResourceForm";
-import MedicationDispenseRedirect from "@/pages/Facility/billing/account/components/MedicationDispenseRedirect";
+import type { AppRoutes } from "@/Routers/AppRouter";
 
-import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
-
-import { AppRoutes } from "@/Routers/AppRouter";
-import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
-import TemplatePage from "@/pages/Encounters/TemplateBuilder/TemplatePage";
-import AccountList from "@/pages/Facility/billing/account/AccountList";
-import AccountShow from "@/pages/Facility/billing/account/AccountShow";
-import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
-import { PrintChargeItems } from "@/pages/Facility/billing/account/components/PrintChargeItems";
-import InvoiceList from "@/pages/Facility/billing/invoice/InvoiceList";
-import InvoiceShow from "@/pages/Facility/billing/invoice/InvoiceShow";
-import PrintInvoice from "@/pages/Facility/billing/invoice/PrintInvoice";
-import PrintInvoices from "@/pages/Facility/billing/invoice/PrintInvoices";
-import PaymentReconciliationList from "@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationList";
-import PaymentReconciliationShow from "@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationShow";
-import PrintPaymentReconciliation from "@/pages/Facility/billing/paymentReconciliation/PrintPaymentReconciliation";
-import { LocationLayout } from "@/pages/Facility/locations/LocationLayout";
-import { FacilityOverview } from "@/pages/Facility/overview";
-import FacilityServices from "@/pages/Facility/services/FacilityServices";
-import { ServiceLayout } from "@/pages/Facility/services/ServiceLayout";
-import DiagnosticReportPrint from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrint";
-import DiagnosticReportView from "@/pages/Facility/services/diagnosticReports/DiagnosticReportView";
-import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
-import { SettingsLayout } from "@/pages/Facility/settings/layout";
+const FacilityUsers = lazy(() => import("@/components/Facility/FacilityUsers"));
+const ResourceCreate = lazy(() => import("@/components/Resource/ResourceForm"));
+const MedicationDispenseRedirect = lazy(
+  () =>
+    import("@/pages/Facility/billing/account/components/MedicationDispenseRedirect"),
+);
+const BedAvailabilityDashboard = lazy(
+  () => import("@/pages/Facility/BedAvailabilityDashboard"),
+);
+const TemplateBuilder = lazy(
+  () => import("@/pages/Encounters/TemplateBuilder/TemplateBuilder"),
+);
+const TemplatePage = lazy(
+  () => import("@/pages/Encounters/TemplateBuilder/TemplatePage"),
+);
+const AccountList = lazy(
+  () => import("@/pages/Facility/billing/account/AccountList"),
+);
+const AccountShow = lazy(
+  () => import("@/pages/Facility/billing/account/AccountShow"),
+);
+const CreateInvoicePage = lazy(
+  () => import("@/pages/Facility/billing/account/CreateInvoice"),
+);
+const PrintChargeItems = lazy(() =>
+  import("@/pages/Facility/billing/account/components/PrintChargeItems").then(
+    (module) => ({ default: module.PrintChargeItems }),
+  ),
+);
+const InvoiceList = lazy(
+  () => import("@/pages/Facility/billing/invoice/InvoiceList"),
+);
+const InvoiceShow = lazy(
+  () => import("@/pages/Facility/billing/invoice/InvoiceShow"),
+);
+const PrintInvoice = lazy(
+  () => import("@/pages/Facility/billing/invoice/PrintInvoice"),
+);
+const PrintInvoices = lazy(
+  () => import("@/pages/Facility/billing/invoice/PrintInvoices"),
+);
+const PaymentReconciliationList = lazy(
+  () =>
+    import("@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationList"),
+);
+const PaymentReconciliationShow = lazy(
+  () =>
+    import("@/pages/Facility/billing/paymentReconciliation/PaymentReconciliationShow"),
+);
+const PrintPaymentReconciliation = lazy(
+  () =>
+    import("@/pages/Facility/billing/paymentReconciliation/PrintPaymentReconciliation"),
+);
+const LocationLayout = lazy(() =>
+  import("@/pages/Facility/locations/LocationLayout").then((module) => ({
+    default: module.LocationLayout,
+  })),
+);
+const FacilityOverview = lazy(() =>
+  import("@/pages/Facility/overview").then((module) => ({
+    default: module.FacilityOverview,
+  })),
+);
+const FacilityServices = lazy(
+  () => import("@/pages/Facility/services/FacilityServices"),
+);
+const ServiceLayout = lazy(() =>
+  import("@/pages/Facility/services/ServiceLayout").then((module) => ({
+    default: module.ServiceLayout,
+  })),
+);
+const DiagnosticReportPrint = lazy(
+  () =>
+    import("@/pages/Facility/services/diagnosticReports/DiagnosticReportPrint"),
+);
+const DiagnosticReportView = lazy(
+  () =>
+    import("@/pages/Facility/services/diagnosticReports/DiagnosticReportView"),
+);
+const ServiceRequestShow = lazy(
+  () => import("@/pages/Facility/services/serviceRequests/ServiceRequestShow"),
+);
+const SettingsLayout = lazy(() =>
+  import("@/pages/Facility/settings/layout").then((module) => ({
+    default: module.SettingsLayout,
+  })),
+);
 
 const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
