@@ -480,7 +480,7 @@ export function SelectedActivityDefinitionBadge({
         </Tooltip>
       ) : (
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <span className="text-sm whitespace-nowrap">
               {selected.length} {t("activity_definitions")}
             </span>

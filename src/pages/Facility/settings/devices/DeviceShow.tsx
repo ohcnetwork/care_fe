@@ -56,8 +56,6 @@ const buttonClassName =
   "h-12 shrink-0 border-neutral-400 text-sm text-neutral-950 shadow-md hover:bg-neutral-200/75 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 md:h-10 [&_svg]:size-5";
 const linkClassName =
   "inline-flex min-w-0 items-center gap-1.5 rounded-sm text-sm text-neutral-950 underline underline-offset-4 hover:text-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
-const tabClassName =
-  "-mb-px h-12 rounded-t-lg rounded-b-none border-neutral-200 bg-neutral-100 px-4 text-neutral-700 shadow-[inset_0_-1px_4px_rgba(0,0,0,0.06)] hover:text-neutral-950 focus-visible:border-indigo-500 focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 data-active:border-neutral-200 data-active:border-b-white data-active:bg-white data-active:text-neutral-950 data-active:shadow-none md:h-10";
 
 export default function DeviceShow({
   facilityId,
@@ -267,8 +265,9 @@ export default function DeviceShow({
 
       <Tabs value={tab} activationMode="manual" className="gap-0">
         <TabsList
+          variant="browser"
           aria-label={t("device")}
-          className="h-auto w-full justify-start gap-1 rounded-none border-b border-neutral-200 bg-transparent p-0"
+          className="overflow-x-auto"
         >
           {(["overview", "responses"] as const).map((value) => {
             const href =
@@ -278,7 +277,6 @@ export default function DeviceShow({
                 key={value}
                 value={value}
                 asChild
-                className={tabClassName}
                 onKeyDown={(event) => {
                   if (event.key === " ") {
                     event.preventDefault();

@@ -636,56 +636,101 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const renderDefinitions = () =>
     (searchQuery || currentParent) &&
-    definitions.map((definition) => (
-      <CommandItem
-        key={definition.id}
-        value={`${definition.title}-${definition.id}`}
-        onSelect={() => handleDefinitionSelect(definition)}
-        className={cn(
-          "flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0",
-          searchQuery && definition.category && "py-1",
-        )}
-      >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="min-w-0 flex-1">
-            <div className="font-medium text-sm break flex items-center justify-between gap-2">
-              <span className="break-all">{definition.title}</span>
-            </div>
-            {searchQuery && definition.category && (
-              <div className="text-xs text-gray-500 truncate mt-0.5">
-                {getDisplayPath(definition)}
-              </div>
+    definitions.map((definition) => {
+      const favorite = favorites.some(
+        (f: BaseCategoryPickerDefinition) => f.slug === definition.slug,
+      );
+      return (
+        <div
+          key={definition.id}
+          className="hidden items-center border-b border-gray-200 last:border-b-0 has-[[data-slot=command-item]]:flex"
+        >
+          <CommandItem
+            value={`${definition.title}-${definition.id}`}
+            onSelect={() => handleDefinitionSelect(definition)}
+            className={cn(
+              "min-w-0 flex-1 cursor-pointer p-3 transition-colors duration-150 hover:bg-gray-50 hover:text-gray-900",
+              searchQuery && definition.category && "py-1",
             )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+          >
+            <div className="min-w-0 flex-1">
+              <span className="break-all text-sm font-medium">
+                {definition.title}
+              </span>
+              {searchQuery && definition.category && (
+                <div className="mt-0.5 truncate text-xs text-gray-500">
+                  {getDisplayPath(definition)}
+                </div>
+              )}
+            </div>
+            {value &&
+              (Array.isArray(value)
+                ? value.some((v: T) => mapper!(v).slug === definition.slug)
+                : mapper!(value).slug === definition.slug) && (
+                <Check className="size-4 text-gray-700" />
+              )}
+          </CommandItem>
           {enableFavorites && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="mr-2 shrink-0"
+              aria-label={t(
+                favorite ? "remove_from_favorites" : "add_to_favorites",
+              )}
+              aria-pressed={favorite}
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggleFavorite(definition);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") e.stopPropagation();
+              }}
             >
-              <Star
-                className={cn(
-                  "size-4",
-                  favorites.some(
-                    (f: BaseCategoryPickerDefinition) =>
-                      f.slug === definition.slug,
-                  ) && "fill-current",
-                )}
-              />
-            </button>
+              <Star className={cn("size-4", favorite && "fill-current")} />
+            </Button>
           )}
-          {value &&
-            (Array.isArray(value)
-              ? value.some((v: T) => mapper!(v).slug === definition.slug)
-              : mapper!(value).slug === definition.slug) && (
-              <Check className="size-4 text-gray-700" />
-            )}
         </div>
-      </CommandItem>
-    ));
+      );
+    });
+
+  const renderSavedDefinition = (
+    definition: BaseCategoryPickerDefinition,
+    favorite = false,
+  ) => (
+    <div
+      key={definition.id}
+      className="flex items-center gap-1 border-b border-border last:border-b-0"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        className="h-auto min-w-0 flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left whitespace-normal"
+        onClick={() => handleDefinitionSelect(definition)}
+      >
+        <span className="w-full break-all text-sm font-medium">
+          {definition.title}
+        </span>
+        {definition.category && (
+          <span className="w-full truncate text-xs font-normal text-muted-foreground">
+            {getDisplayPath(definition)}
+          </span>
+        )}
+      </Button>
+      {favorite && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t("remove_from_favorites")}
+          onClick={() => handleToggleFavorite(definition)}
+        >
+          <Star className="size-4 fill-current" />
+        </Button>
+      )}
+    </div>
+  );
 
   const renderRecentItems = () => (
     <div
@@ -702,24 +747,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         </div>
       ) : (
         <div className="p-2">
-          {recentlyUsed.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between px-3 py-1 border-b rounded-md hover:bg-gray-50  cursor-pointer last:border-b-0"
-              onClick={() => handleDefinitionSelect(item)}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm break flex items-center justify-between gap-2">
-                  <span className="break-all">{item.title}</span>
-                </div>
-                {item.category && (
-                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getDisplayPath(item)}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+          {recentlyUsed.map((item) => renderSavedDefinition(item))}
         </div>
       )}
     </div>
@@ -740,33 +768,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         </div>
       ) : (
         <div className="p-2">
-          {favorites.map((favorite) => (
-            <div
-              key={favorite.id}
-              className="flex items-center justify-between px-3 py-1 rounded-md border-b hover:bg-gray-50 cursor-pointer last:border-b-0"
-              onClick={() => handleDefinitionSelect(favorite)}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm truncate">
-                  {favorite.title}
-                </div>
-                {favorite.category && (
-                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getDisplayPath(favorite)}
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleFavorite(favorite);
-                }}
-                className="text-gray-500"
-              >
-                <Star className="size-4 fill-current" />
-              </button>
-            </div>
-          ))}
+          {favorites.map((item) => renderSavedDefinition(item, true))}
         </div>
       )}
     </div>
@@ -1047,27 +1049,8 @@ export function ResourceDefinitionCategoryPicker<T>({
                         </div>
                       ) : (
                         <div className="p-2">
-                          {recentlyUsed.map(
-                            (item: BaseCategoryPickerDefinition) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
-                                onClick={() => handleDefinitionSelect(item)}
-                              >
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-medium text-sm flex items-center justify-between gap-2">
-                                    <span className="break-all">
-                                      {item.title}
-                                    </span>
-                                  </div>
-                                  {item.category && (
-                                    <div className="text-xs text-gray-500 truncate mt-0.5">
-                                      {getDisplayPath(item)}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ),
+                          {recentlyUsed.map((item) =>
+                            renderSavedDefinition(item),
                           )}
                         </div>
                       )
@@ -1081,34 +1064,8 @@ export function ResourceDefinitionCategoryPicker<T>({
                       </div>
                     ) : (
                       <div className="p-2">
-                        {favorites.map(
-                          (favorite: BaseCategoryPickerDefinition) => (
-                            <div
-                              key={favorite.id}
-                              className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
-                              onClick={() => handleDefinitionSelect(favorite)}
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="font-medium text-sm truncate">
-                                  {favorite.title}
-                                </div>
-                                {favorite.category && (
-                                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                                    {getDisplayPath(favorite)}
-                                  </div>
-                                )}
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleFavorite(favorite);
-                                }}
-                                className="text-gray-500"
-                              >
-                                <Star className="size-4 fill-current" />
-                              </button>
-                            </div>
-                          ),
+                        {favorites.map((item) =>
+                          renderSavedDefinition(item, true),
                         )}
                       </div>
                     )}

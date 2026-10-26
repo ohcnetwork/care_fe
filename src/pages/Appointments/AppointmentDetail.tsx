@@ -30,6 +30,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -66,7 +67,6 @@ import {
   LogIn as EnterIcon,
   EyeIcon,
   EyeOff as EyeNoneIcon,
-  Loader2,
   Smartphone as MobileIcon,
   UserRound as PersonIcon,
   CirclePlus as PlusCircledIcon,
@@ -300,7 +300,7 @@ export default function AppointmentDetail(props: Props) {
             tagEntityId={appointment.id}
             children={
               canWriteAppointment && (
-                <div className="md:mx-4">
+                <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
@@ -973,9 +973,9 @@ const AppointmentActions = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
+    <div className="w-full min-w-0 sm:w-auto">
       {/* Primary Actions */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center justify-end gap-2">
         {/* Check In - Only for booked appointments */}
         {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
@@ -987,11 +987,10 @@ const AppointmentActions = ({
                 note: appointment.note,
               })
             }
-            size="lg"
-            className="w-full justify-start"
+            className="min-w-0 flex-1 sm:flex-none"
           >
             <EnterIcon className="size-4" />
-            {t("check_in")}
+            <span className="truncate">{t("check_in")}</span>
             <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
@@ -999,7 +998,7 @@ const AppointmentActions = ({
         {/* Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={t("actions")}>
               <DotsVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -1229,7 +1228,7 @@ const AppointmentActions = ({
                       disabled={!note.trim()}
                     >
                       {isUpdating ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
+                        <Spinner className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
                       )}
@@ -1275,7 +1274,7 @@ const AppointmentActions = ({
                       disabled={!note.trim()}
                     >
                       {isPending ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
+                        <Spinner className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
                       )}
@@ -1316,7 +1315,7 @@ const AppointmentActions = ({
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
                     {isPending ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
+                      <Spinner className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
                     )}

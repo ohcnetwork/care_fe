@@ -313,9 +313,14 @@ export const Demography = (props: PatientProps) => {
           {data
             .filter((s) => !s.hidden)
             .map((subtab, i) => (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 key={i}
-                className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
+                aria-current={
+                  activeSection === subtab.id ? "location" : undefined
+                }
+                className={`h-auto justify-start whitespace-normal cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
                   activeSection === subtab.id
                     ? "bg-white text-green-800"
                     : "hover:bg-white hover:text-green-800"
@@ -323,7 +328,7 @@ export const Demography = (props: PatientProps) => {
                 onClick={() => scrollToSection(subtab.id)}
               >
                 {t(`patient__${subtab.id}`)}
-              </button>
+              </Button>
             ))}
         </div>
 

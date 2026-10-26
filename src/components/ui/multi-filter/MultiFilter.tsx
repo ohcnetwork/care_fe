@@ -1,22 +1,22 @@
-import { ChevronRight, ListFilter, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ListFilter } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Filters,
+  type Filter,
+  type FilterFieldConfig,
+} from "@/components/ui/filters";
+import { cn } from "@/lib/utils";
 
-import FilterRenderer from "./filterRenderer";
-import { SelectedFilterBar } from "./selectedFilterBar";
-import NavigationHelper from "./utils/navigation-helper";
-import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
+import {
+  toCareValues,
+  toDomainValues,
+  type CareFilterValue,
+} from "./careuiAdapter";
+import { DomainFilterValue } from "./domainFilterValue";
+import { useFilterI18n } from "./useFilterI18n";
 import { FilterState, FilterValues } from "./utils/Utils";
 
 interface MultiFilterProps {
@@ -35,13 +35,15 @@ interface MultiFilterProps {
   disabled?: boolean;
   align?: "start" | "end";
 }
+
+/** Adapts CARE query filters and clinical pickers to the CareUI filter framework. */
 export default function MultiFilter({
   selectedFilters,
   onFilterChange,
   onOperationChange,
   onClearAll,
   onClearFilter,
-  placeholder = "Filter",
+  placeholder,
   className,
   triggerButtonClassName,
   clearAllButtonClassName,
@@ -51,212 +53,170 @@ export default function MultiFilter({
   disabled = false,
   align = "start",
 }: MultiFilterProps) {
-  const [open, setOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
-
-  const activeFiltersCount = Object.values(selectedFilters).reduce(
-    (sum, filterState) => {
-      if (Array.isArray(filterState.selected)) {
-        if (filterState.selected.length === 0) {
-          return sum;
-        }
-      }
-      return sum + 1;
-    },
-    0,
+  const i18n = useFilterI18n();
+  const [draftFilters, setDraftFilters] = useState<Filter<CareFilterValue>[]>(
+    [],
   );
+  const [filterIds, setFilterIds] = useState<Record<string, string>>({});
 
-  const handleFilterSelect = (filterKey: string) => {
-    setActiveFilter(filterKey);
-    setOpen(true);
-  };
+  const activeFilters = Object.entries(selectedFilters).flatMap(
+    ([key, state]) => {
+      const values = toCareValues(state.selected);
+      return values.length
+        ? [
+            {
+              id: filterIds[key] ?? key,
+              field: key,
+              operator:
+                state.operation.selectedOperation?.value ??
+                state.operation.selectedOperation?.label ??
+                "is",
+              values,
+            },
+          ]
+        : [];
+    },
+  );
+  const activeKeys = new Set(activeFilters.map((filter) => filter.field));
+  const filters = [
+    ...activeFilters,
+    ...draftFilters.filter((filter) => !activeKeys.has(filter.field)),
+  ];
 
-  const handleSelectedFilterClick = (filterKey: string) => {
-    setActiveFilter(filterKey);
-    setOpenStates((prev) => ({ ...prev, [filterKey]: true }));
-  };
+  const fields: FilterFieldConfig<CareFilterValue>[] = Object.entries(
+    selectedFilters,
+  ).map(([key, state]) => {
+    const { filter, selected, operation } = state;
+    const operations =
+      filter.getOperations?.(selected) ?? operation.availableOperations;
+    const field: FilterFieldConfig<CareFilterValue> = {
+      key,
+      label: t(filter.label),
+      icon: filter.icon,
+      type:
+        filter.type === "command"
+          ? filter.mode === "single"
+            ? "select"
+            : "multiselect"
+          : "custom",
+      operators: operations.length
+        ? operations.map((operation) => ({
+            value: operation.value ?? operation.label,
+            label: t(operation.label),
+            supportsMultiple: filter.mode !== "single",
+          }))
+        : [{ value: "is", label: t("is") }],
+      defaultOperator:
+        operation.selectedOperation?.value ??
+        operation.selectedOperation?.label ??
+        operations[0]?.value ??
+        operations[0]?.label ??
+        "is",
+      options: filter.options.map((option) => ({
+        ...option,
+        label: t(option.label),
+        icon:
+          filter.showColorIndicators === false ? undefined : (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-3 shrink-0 rounded-full border",
+                option.color,
+              )}
+            />
+          ),
+      })),
+      disableClear: filter.disableClear,
+      disableOperatorUntilSelected: true,
+      chipClassName: selectedBarClassName,
+      valueClassName: cn(
+        "md:max-w-64 lg:max-w-80 xl:max-w-96",
+        selectedValueClassName,
+      ),
+      customValueRenderer: (values) =>
+        values.length
+          ? filter.renderSelected?.(
+              toDomainValues(state, values),
+              filter,
+              onFilterChange,
+            )
+          : t("select"),
+    };
 
-  const handleBack = () => {
-    setActiveFilter(null);
-  };
-
-  const handleClearAll = () => {
-    onClearAll();
-    setOpen(false);
-  };
-
-  useEffect(() => {
-    if (!open) {
-      setActiveFilter(null);
+    if (filter.type !== "command") {
+      field.customRenderer = ({ values, onChange, open, onOpenChange }) => (
+        <DomainFilterValue
+          state={state}
+          values={values}
+          selectedFilters={selectedFilters}
+          onChange={onChange}
+          open={open}
+          onOpenChange={onOpenChange}
+          facilityId={facilityId}
+          className={field.valueClassName}
+        />
+      );
     }
-  }, [open]);
+    return field;
+  });
 
-  useKeyboardShortcut(
-    ["ArrowLeft"],
-    () => {
-      if (!activeFilter) {
-        setOpen(false);
+  const handleChange = (nextFilters: Filter<CareFilterValue>[]) => {
+    setFilterIds(
+      Object.fromEntries(
+        nextFilters.map((filter) => [filter.field, filter.id]),
+      ),
+    );
+    setDraftFilters(nextFilters.filter((filter) => filter.values.length === 0));
+
+    for (const next of nextFilters) {
+      const state = selectedFilters[next.field];
+      if (!state) continue;
+      const previous = filters.find((filter) => filter.field === next.field);
+      if (
+        JSON.stringify(previous?.values ?? []) !== JSON.stringify(next.values)
+      ) {
+        onFilterChange(next.field, toDomainValues(state, next.values));
+      } else if (previous && previous.operator !== next.operator) {
+        onOperationChange(next.field, next.operator);
       }
-    },
-    {
-      overrideSystem: true,
-    },
-  );
+    }
+    for (const previous of activeFilters) {
+      if (
+        !nextFilters.some((filter) => filter.field === previous.field) &&
+        !selectedFilters[previous.field].filter.disableClear
+      ) {
+        onClearFilter(previous.field);
+      }
+    }
+  };
 
   return (
-    <div
-      data-slot="filters"
-      className={cn("flex flex-wrap items-center gap-2.5", className)}
-    >
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
+    <fieldset disabled={disabled} className="min-w-0 border-0 p-0">
+      <Filters
+        filters={filters}
+        fields={fields}
+        onChange={handleChange}
+        onClearAll={() => {
+          setDraftFilters([]);
+          onClearAll();
+        }}
+        i18n={i18n}
+        align={align}
+        className={className}
+        clearAllButtonClassName={clearAllButtonClassName}
+        trigger={
           <Button
+            type="button"
             variant="outline"
             className={cn("shadow-sm", triggerButtonClassName)}
             disabled={disabled}
           >
             <ListFilter aria-hidden="true" />
-            <span className="truncate">{placeholder}</span>
+            {placeholder ?? t("filter")}
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
-          align={align}
-        >
-          {activeFilter ? (
-            <FilterRenderer
-              activeFilter={activeFilter}
-              selectedFilters={selectedFilters}
-              handleBack={handleBack}
-              onFilterChange={onFilterChange}
-              facilityId={facilityId}
-            />
-          ) : (
-            <FilterList
-              handleFilterSelect={handleFilterSelect}
-              selectedFilters={selectedFilters}
-              setActiveFilter={setActiveFilter}
-            />
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      {Object.entries(selectedFilters).map(([key, _]) => {
-        const filterState = selectedFilters[key];
-        if (
-          (Array.isArray(filterState.selected) &&
-            filterState.selected.length === 0) ||
-          (!Array.isArray(filterState.selected) &&
-            !("from" in filterState.selected) &&
-            !("to" in filterState.selected)) ||
-          !filterState
-        ) {
-          return null;
         }
-        return (
-          <SelectedFilterBar
-            key={key}
-            selectedFilterKey={key}
-            selectedFilters={selectedFilters}
-            onClick={() => handleSelectedFilterClick(key)}
-            clearFilter={() => onClearFilter(key)}
-            openState={openStates[key] || false}
-            setOpenState={(isOpen) =>
-              setOpenStates((prev) => ({ ...prev, [key]: isOpen }))
-            }
-            onFilterChange={onFilterChange}
-            onOperationChange={onOperationChange}
-            selectedBarClassName={selectedBarClassName}
-            selectedValueClassName={selectedValueClassName}
-            facilityId={facilityId}
-          />
-        );
-      })}
-      {activeFiltersCount > 1 && (
-        <Button
-          variant="ghost"
-          onClick={handleClearAll}
-          className={cn(
-            "text-muted-foreground hover:text-foreground gap-1.5 underline underline-offset-4 w-auto self-start",
-            clearAllButtonClassName,
-          )}
-        >
-          <X strokeWidth={1.5} />
-          {t("clear_all")}
-        </Button>
-      )}
-    </div>
-  );
-}
-function FilterList({
-  handleFilterSelect,
-  selectedFilters,
-  setActiveFilter,
-}: {
-  handleFilterSelect: (filterKey: string) => void;
-  selectedFilters: Record<string, FilterState>;
-  setActiveFilter: (filterKey: string | null) => void;
-}) {
-  const { t } = useTranslation();
-  const [focusItemRef, setFocusItemRef] = useState<HTMLDivElement | null>(null);
-
-  const { focusItemIndex, setFocusItemIndex } =
-    useMultiFilterNavigationShortcuts(Object.keys(selectedFilters).length, () =>
-      setActiveFilter(null),
-    );
-
-  useKeyboardShortcut(
-    ["ArrowRight"],
-    () => {
-      if (focusItemIndex !== null) {
-        handleFilterSelect(Object.keys(selectedFilters)[focusItemIndex]);
-      }
-    },
-    {
-      overrideSystem: true,
-    },
-  );
-
-  useEffect(() => {
-    if (focusItemRef) {
-      focusItemRef.focus();
-    }
-  }, [focusItemRef]);
-
-  return (
-    <div className="px-2 pt-2">
-      {Object.values(selectedFilters).map(({ filter }, index) => {
-        const selected = selectedFilters[filter.key]?.selected as string[];
-        return (
-          <DropdownMenuItem
-            key={filter.key}
-            ref={index === focusItemIndex ? setFocusItemRef : null}
-            onSelect={(e) => {
-              e.preventDefault();
-              handleFilterSelect(filter.key);
-            }}
-            className={cn(
-              "flex items-center justify-between px-3 py-2 cursor-pointer",
-            )}
-            onFocus={() => setFocusItemIndex(index)}
-          >
-            <div className="flex items-center gap-2">
-              <span className="border border-dotted border-muted-foreground rounded w-3 h-3 mb-0.5"></span>
-              <span className="text-sm">{t(filter.label)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {selected.length > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {selected.length}
-                </span>
-              )}
-              <ChevronRight className="h-4 w-4" />
-            </div>
-          </DropdownMenuItem>
-        );
-      })}
-      <NavigationHelper isActiveFilter={false} />
-    </div>
+      />
+    </fieldset>
   );
 }

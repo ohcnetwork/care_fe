@@ -122,15 +122,14 @@ export function ComboboxInput({
           {mobileTrigger ?? (
             <Button
               type="button"
-              variant="white"
+              variant="outline"
               role="combobox"
               disabled={disabled}
               aria-label={inputProps["aria-label"]}
               aria-invalid={inputProps["aria-invalid"]}
               className={cn(
-                "flex h-9 w-full items-center justify-between gap-2 border-gray-300 font-normal shadow-xs",
+                "w-full min-w-0 justify-between font-normal",
                 !value && "text-muted-foreground",
-                inputProps["aria-invalid"] && "border-red-500",
                 className,
               )}
             >

@@ -1,4 +1,5 @@
-import { GitPullRequestArrow, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { GitPullRequestArrow } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -65,7 +66,7 @@ export function ReferralEncounterContext({
       <Item variant="outline" className="bg-background text-foreground">
         <ItemMedia variant="icon">
           {context.isLoading ? (
-            <Loader2 aria-hidden="true" className="animate-spin" />
+            <Spinner aria-hidden="true" className="animate-spin" />
           ) : (
             <GitPullRequestArrow aria-hidden="true" />
           )}

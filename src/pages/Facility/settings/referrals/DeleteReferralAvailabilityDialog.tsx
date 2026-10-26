@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -105,7 +106,7 @@ export function DeleteReferralAvailabilityDialog({
             disabled={!canManage || deletion.isPending}
           >
             {deletion.isPending ? (
-              <Loader2 className="animate-spin" />
+              <Spinner className="animate-spin" />
             ) : (
               <Trash2 />
             )}

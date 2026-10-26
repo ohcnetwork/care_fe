@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useInfiniteQuery, type QueryKey } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useId, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -150,7 +151,7 @@ function DestinationCombobox<T extends DestinationOption>({
             role="status"
             className="flex items-center justify-center gap-2 p-4 text-sm text-muted-foreground"
           >
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            <Spinner className="size-4 animate-spin" aria-hidden="true" />
             {t("loading")}
           </div>
         ) : hasPageError ? (
@@ -219,7 +220,7 @@ function DestinationCombobox<T extends DestinationOption>({
               onClick={() => optionsQuery.fetchNextPage()}
             >
               {optionsQuery.isFetchingNextPage && (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                <Spinner className="size-4 animate-spin" aria-hidden="true" />
               )}
               {t(
                 optionsQuery.isFetchNextPageError

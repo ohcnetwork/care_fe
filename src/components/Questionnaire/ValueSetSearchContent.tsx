@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { Star as StarFilledIcon, Star as StarIcon } from "lucide-react";
 import { useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,7 +22,6 @@ import { ValueSetVariantChooser } from "@/components/Questionnaire/ValueSetVaria
 
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
-import { Loader2 } from "lucide-react";
 
 import { useValueSetPreferences } from "./useValueSetPreferences";
 import { useValueSetSearchResults } from "./useValueSetSearchResults";
@@ -122,13 +122,12 @@ const Item = ({
   const { primary, secondary } = getBestMatchDisplay(option, search);
 
   return (
-    <CommandItem
-      key={option.code}
-      value={`${option.display} ${option.code}`}
-      onSelect={onSelect}
-      className="cursor-pointer"
-    >
-      <div className="flex items-center justify-between w-full gap-4">
+    <div className="hidden items-center gap-2 has-[[data-slot=command-item]]:flex">
+      <CommandItem
+        value={`${option.display} ${option.code}`}
+        onSelect={onSelect}
+        className="min-w-0 flex-1 cursor-pointer"
+      >
         <div className="flex flex-col">
           <span>
             {primary} {showCode && `(${option.code})`}
@@ -137,24 +136,29 @@ const Item = ({
             <span className="text-xs text-gray-500">{secondary}</span>
           )}
         </div>
-
-        <button
-          type="button"
-          aria-label={t(
-            isFavourite ? "remove_from_favorites" : "add_to_favorites",
-          )}
-          disabled={disableFavourite}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onFavourite();
-          }}
-          className="hover:text-primary-500 transition-colors text-secondary-900 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isFavourite ? <StarFilledIcon fill="currentColor" /> : <StarIcon />}
-        </button>
-      </div>
-    </CommandItem>
+      </CommandItem>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t(
+          isFavourite ? "remove_from_favorites" : "add_to_favorites",
+        )}
+        aria-pressed={isFavourite}
+        disabled={disableFavourite}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onFavourite();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") e.stopPropagation();
+        }}
+        className="shrink-0 text-secondary-900 hover:text-primary-500"
+      >
+        {isFavourite ? <StarFilledIcon fill="currentColor" /> : <StarIcon />}
+      </Button>
+    </div>
   );
 };
 
@@ -300,7 +304,7 @@ export default function ValueSetSearchContent({
           >
             {searchQuery.isFetching ? (
               <div className="h-72 flex justify-center items-center py-6 text-gray-500">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                <Spinner className="h-5 w-5 animate-spin mr-2" />
                 {t("searching")}
               </div>
             ) : (

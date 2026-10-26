@@ -1,4 +1,5 @@
-import { FileUp, Loader2, Paperclip, Trash2, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { FileUp, Paperclip, Trash2, X } from "lucide-react";
 import { ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -125,7 +126,7 @@ export default function FileUploadDialog({
             <div className="space-y-3 rounded-md border border-border p-4">
               <p role="status" className="flex items-start gap-2 text-sm">
                 {completion.pending && (
-                  <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin" />
+                  <Spinner className="mt-0.5 size-4 shrink-0 animate-spin" />
                 )}
                 {completion.message}
               </p>
@@ -216,7 +217,7 @@ export default function FileUploadDialog({
           {fileUpload.uploading && !completion && (
             <div className="space-y-2">
               <p role="status" className="flex items-center gap-2 text-sm">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
                 {t("file_upload_progress", {
                   progress: fileUpload.progress ?? 0,
                 })}
@@ -248,7 +249,7 @@ export default function FileUploadDialog({
             disabled={pending || (!completion && !hasFiles)}
             id="upload_file_button"
           >
-            {pending && <Loader2 className="size-4 animate-spin" />}
+            {pending && <Spinner className="size-4 animate-spin" />}
             {completion ? completion.retryLabel : (uploadLabel ?? t("upload"))}
           </Button>
         </DialogFooter>

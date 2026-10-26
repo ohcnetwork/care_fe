@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import {
   useInfiniteQuery,
   useMutation,
@@ -18,7 +19,6 @@ import {
   Files,
   FlaskConical,
   Link2,
-  Loader2,
   type LucideIcon,
   Plus,
   ShieldAlert,
@@ -257,7 +257,7 @@ function SharedRecordRow({
         <div className="min-w-0">
           {resolved.isLoading ? (
             <p role="status" className="flex items-center gap-2 text-sm">
-              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              <Spinner aria-hidden="true" className="size-4 animate-spin" />
               {t("loading")}
             </p>
           ) : unavailable ? (
@@ -487,7 +487,7 @@ export function ReferralSharedRecords({
       </div>
       {isLoading && (
         <p role="status" className="flex items-center gap-2 py-6 text-sm">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner className="size-4 animate-spin" />
           {t("loading")}
         </p>
       )}
@@ -597,7 +597,7 @@ export function ReferralSharedRecords({
             );
           }}
         >
-          {isFetchingNextPage && <Loader2 className="size-4 animate-spin" />}
+          {isFetchingNextPage && <Spinner className="size-4 animate-spin" />}
           {t("load_more")}
         </Button>
       )}
@@ -651,7 +651,7 @@ export function ReferralSharedRecords({
                 if (removing) remove.mutate(removing);
               }}
             >
-              {remove.isPending && <Loader2 className="size-4 animate-spin" />}
+              {remove.isPending && <Spinner className="size-4 animate-spin" />}
               {t("remove")}
             </Button>
           </AlertDialogFooter>

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import {
   CSSProperties,
   ReactNode,
@@ -389,7 +390,7 @@ function CreateReferralContent({
                     onClick={send}
                   >
                     {createMutation.isPending && (
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                     )}
                     {t(
                       createMutation.isPending
@@ -522,7 +523,7 @@ function CreateReferralContent({
                       role="status"
                       className="flex items-center gap-2 py-6 text-sm"
                     >
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                       {t("loading")}
                     </p>
                   ) : questionnairesQuery.isError ? (

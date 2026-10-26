@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 // CareUI registry source: ohcnetwork/careui (4e143863).
 /**
  * @name sonner
@@ -8,7 +9,6 @@
 import {
   CircleCheckIcon,
   InfoIcon,
-  Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
@@ -27,7 +27,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         info: <InfoIcon className="size-4" />,
         warning: <TriangleAlertIcon className="size-4" />,
         error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        loading: <Spinner className="size-4 animate-spin" />,
       }}
       style={
         {

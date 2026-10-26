@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -196,7 +197,7 @@ function AssignmentContent({
             {t("cancel")}
           </Button>
           <Button type="submit" disabled={!changed || update.isPending}>
-            {update.isPending && <Loader2 className="size-4 animate-spin" />}
+            {update.isPending && <Spinner className="size-4 animate-spin" />}
             {t("save_changes")}
           </Button>
         </DialogFooter>

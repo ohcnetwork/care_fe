@@ -1512,9 +1512,11 @@ test("the combined facility list uses server pagination and retains personal cre
     expect(firstList?.searchParams.get("offset")).toBe("0");
     expect(firstList?.searchParams.get("limit")).toBe("15");
     await expect(
-      page.getByRole("button", { name: "3", exact: true }),
+      page.getByRole("button", { name: "Go to page 3", exact: true }),
     ).toHaveCount(0);
-    await page.getByRole("button", { name: "2", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Go to page 2", exact: true })
+      .click();
     await expect(
       page.getByRole("link", { name: localRecords[15].data.name, exact: true }),
     ).toBeVisible();
@@ -1529,7 +1531,9 @@ test("the combined facility list uses server pagination and retains personal cre
           url.searchParams.get("limit") === "15",
       ),
     ).toBe(true);
-    await page.getByRole("button", { name: "1", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Go to page 1", exact: true })
+      .click();
     await expect(
       page.getByRole("link", { name: localRecords[0].data.name, exact: true }),
     ).toBeVisible();

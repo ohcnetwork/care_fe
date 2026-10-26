@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -21,8 +22,13 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { CheckIcon, SearchIcon } from "lucide-react";
@@ -48,6 +54,7 @@ function Command({
 function CommandDialog({
   title,
   description,
+  trigger,
   children,
   className,
   open,
@@ -56,6 +63,7 @@ function CommandDialog({
 }: Omit<React.ComponentProps<typeof Dialog>, "children" | "onOpenChange"> & {
   title?: string;
   description?: string;
+  trigger?: React.ReactNode;
   className?: string;
   children?: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
@@ -68,6 +76,7 @@ function CommandDialog({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange} {...props}>
+        {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent
           className={cn(
             "bg-foreground/10 top-1/3 translate-y-0 overflow-hidden rounded-xl! p-1.5",
@@ -87,6 +96,7 @@ function CommandDialog({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
+      {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         className={cn(
           "inset-x-0 top-0 bottom-0 mt-0! flex h-dvh! max-h-dvh! flex-col rounded-none! p-1.5",
@@ -105,10 +115,13 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  wrapperClassName,
   autoFocus,
   ref,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  wrapperClassName?: string;
+}) {
   const innerRef = React.useRef<HTMLInputElement>(null);
 
   React.useImperativeHandle(
@@ -128,17 +141,17 @@ function CommandInput({
   }, [autoFocus]);
 
   return (
-    <div data-slot="command-input-wrapper" className="px-1 pt-4 pb-0 md:pt-1">
-      <InputGroup className="border-input/30 bg-input/30 h-12 rounded-lg shadow-none! *:data-[slot=input-group-addon]:pl-2! md:h-10">
-        <CommandPrimitive.Input
-          ref={innerRef}
-          data-slot="command-input"
-          className={cn(
-            "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-            className,
-          )}
-          {...props}
-        />
+    <div
+      data-slot="command-input-wrapper"
+      className={cn("w-full shrink-0 px-1 pt-4 pb-0 md:pt-1", wrapperClassName)}
+    >
+      <InputGroup className="border-input/30 bg-input/30 rounded-lg shadow-none has-[[data-slot=command-input]:focus-visible]:border-ring has-[[data-slot=command-input]:focus-visible]:ring-3 has-[[data-slot=command-input]:focus-visible]:ring-ring/50">
+        <CommandPrimitive.Input ref={innerRef} {...props} asChild>
+          <InputGroupInput
+            data-slot="command-input"
+            className={cn("h-full focus:ring-0", className)}
+          />
+        </CommandPrimitive.Input>
         <InputGroupAddon>
           <SearchIcon className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>

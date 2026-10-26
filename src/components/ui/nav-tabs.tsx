@@ -1,8 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -99,58 +97,53 @@ export const NavTabs = <TabKey extends string>({
       value={currentTab ?? allTabKeys[0]}
       onValueChange={(tab) => onTabChange(tab as TabKey)}
     >
-      <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-        {visibleTabs.map((option, index) => (
-          <TabsTrigger
-            key={option}
-            value={option}
-            className={cn(
-              "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-active:border-b-primary-700 data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none",
-              tabTriggerClassName,
-            )}
-            onClick={() => onTabChange(option)}
-          >
-            {tabs[option].label}
-            {tabs[option].labelSuffix}
-            {tabs[option].shortcutId && !enableIndexShortcut && (
-              <ShortcutBadge
-                actionId={tabs[option].shortcutId}
-                alwaysShow={alwaysShowShortcut}
-              ></ShortcutBadge>
-            )}
-            {enableIndexShortcut && (
-              <ShortcutBadge
-                actionId={`tab-index-${index + 1}`}
-                alwaysShow={alwaysShowShortcut}
-              ></ShortcutBadge>
-            )}
-          </TabsTrigger>
-        ))}
-        {showMoreTabs.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none"
-              >
-                {t("count_more", { count: showMoreTabs.length })}
-                <ChevronDown className="ml-1 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {showMoreTabs.map((option) => (
-                <DropdownMenuItem
-                  key={option}
-                  onClick={() => onTabChange(option)}
-                  className="text-gray-950 font-medium text-sm"
-                >
-                  {tabs[option].label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </TabsList>
+      <div className="min-w-0 max-w-full overflow-x-auto pb-1">
+        <TabsList variant="line" className="w-full justify-start">
+          {visibleTabs.map((option, index) => (
+            <TabsTrigger
+              key={option}
+              value={option}
+              className={tabTriggerClassName}
+              onClick={() => onTabChange(option)}
+            >
+              {tabs[option].label}
+              {tabs[option].labelSuffix}
+              {tabs[option].shortcutId && !enableIndexShortcut && (
+                <ShortcutBadge
+                  actionId={tabs[option].shortcutId}
+                  alwaysShow={alwaysShowShortcut}
+                ></ShortcutBadge>
+              )}
+              {enableIndexShortcut && (
+                <ShortcutBadge
+                  actionId={`tab-index-${index + 1}`}
+                  alwaysShow={alwaysShowShortcut}
+                ></ShortcutBadge>
+              )}
+            </TabsTrigger>
+          ))}
+          {showMoreTabs.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-full">
+                  {t("count_more", { count: showMoreTabs.length })}
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {showMoreTabs.map((option) => (
+                  <DropdownMenuItem
+                    key={option}
+                    onSelect={() => onTabChange(option)}
+                  >
+                    {tabs[option].label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </TabsList>
+      </div>
 
       {entriesOf(tabs).map(
         ([key, tab]) =>

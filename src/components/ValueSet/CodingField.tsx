@@ -1,4 +1,5 @@
-import { CheckCircle2, LoaderCircle, SearchCheck, Trash2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { CheckCircle2, SearchCheck, Trash2 } from "lucide-react";
 import { useId } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -138,7 +139,7 @@ export const CodingField = ({
           ) : (
             <>
               {isLookupPending ? (
-                <LoaderCircle className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
               ) : (
                 <SearchCheck className="size-4" />
               )}

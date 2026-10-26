@@ -5,7 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { CollapsibleSettingsCard } from "@/components/QuestionnaireV2/shared/CollapsibleSettingsCard";
 
 import { collectIds } from "@/components/QuestionnaireV2/builder/builderReducer";
@@ -81,8 +84,7 @@ export function VisibilityConditionsCard({
           <p className="text-xs font-medium text-gray-500">
             {t("show_question_when")}
           </p>
-          <div
-            role="radiogroup"
+          <ChoiceChipGroup
             aria-label={t("show_question_when")}
             className="flex flex-wrap gap-2"
           >
@@ -100,7 +102,7 @@ export function VisibilityConditionsCard({
               checked={enableBehavior === "any"}
               onCheckedChange={() => onChange({ enable_behavior: "any" })}
             />
-          </div>
+          </ChoiceChipGroup>
         </div>
       )}
 

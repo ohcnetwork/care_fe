@@ -404,9 +404,10 @@ function GroupCard({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <button
+        <Button
+          variant="ghost"
           type="button"
-          className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="h-auto justify-start whitespace-normal w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
         >
           <div className="p-1.5 rounded-md bg-gray-100">
             <FolderOpen className="h-4 w-4 text-gray-600" />
@@ -432,7 +433,7 @@ function GroupCard({
           ) : (
             <ChevronRight className="h-4 w-4 text-gray-400" />
           )}
-        </button>
+        </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="pl-4 pt-2 space-y-2">
@@ -522,11 +523,12 @@ function PackageCard({
         (disabled || items.length === 0) && "opacity-50 cursor-not-allowed",
       )}
     >
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={handleClick}
         disabled={disabled || isLoading || items.length === 0}
-        className="w-full p-3 text-left"
+        className="h-auto block whitespace-normal w-full p-3 text-left"
       >
         <div className="flex items-center gap-3">
           {/* Selection indicator */}
@@ -579,18 +581,19 @@ function PackageCard({
             />
           </div>
         </div>
-      </button>
+      </Button>
 
       {/* Expandable items preview */}
       {items.length > 0 && (
         <div className="border-t border-gray-100">
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
+            className="h-auto w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
           >
             {isExpanded ? (
               <>
@@ -603,7 +606,7 @@ function PackageCard({
                 {t("view_items")}
               </>
             )}
-          </button>
+          </Button>
 
           {isExpanded && (
             <div className="px-3 pb-2 space-y-1 bg-gray-50/50">
@@ -643,6 +646,7 @@ function CartItemRow({
   onRemove,
   disabled,
 }: CartItemRowProps) {
+  const { t } = useTranslation();
   const unitPrice = calculateTotalPrice(
     item.definition.price_components ?? [],
   ).toString();
@@ -665,14 +669,16 @@ function CartItemRow({
 
       {/* Quantity controls */}
       <div className="flex items-center gap-1">
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) - 1)}
+          aria-label={t("decrease_quantity")}
           disabled={disabled || Number(item.quantity) <= 1}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="h-auto w-auto p-1 p-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           <Minus className="h-3 w-3" />
-        </button>
+        </Button>
         <Input
           type="number"
           min={1}
@@ -681,14 +687,16 @@ function CartItemRow({
           className="w-12 h-7 text-center text-sm px-1"
           disabled={disabled}
         />
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) + 1)}
+          aria-label={t("increase_quantity")}
           disabled={disabled}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="h-auto w-auto p-1 p-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           <Plus className="h-3 w-3" />
-        </button>
+        </Button>
       </div>
 
       {/* Line total */}
@@ -699,14 +707,16 @@ function CartItemRow({
       </div>
 
       {/* Remove button */}
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={onRemove}
+        aria-label={t("remove")}
         disabled={disabled}
-        className="p-1 text-gray-400 hover:text-destructive rounded"
+        className="h-auto w-auto p-1 p-1 text-gray-400 hover:text-destructive rounded"
       >
         <Trash2 className="h-4 w-4" />
-      </button>
+      </Button>
     </div>
   );
 }

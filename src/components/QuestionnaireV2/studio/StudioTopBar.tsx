@@ -73,11 +73,12 @@ function IssuesList({
       </p>
       <div className="max-h-72 overflow-y-auto">
         {issues.map(({ question, messageKey }) => (
-          <button
+          <Button
+            variant="ghost"
             key={question.id}
             type="button"
             onClick={() => onSelect(question.id)}
-            className="flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
+            className="h-auto justify-start whitespace-normal flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
           >
             <TriangleAlert
               aria-hidden
@@ -92,14 +93,15 @@ function IssuesList({
                 {question.text || t("untitled_question")}
               </span>
             </span>
-          </button>
+          </Button>
         ))}
         {actionIssues.map(({ index, messageKey }) => (
-          <button
+          <Button
+            variant="ghost"
             key={`action-${index}`}
             type="button"
             onClick={() => onSelectAction(index)}
-            className="flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
+            className="h-auto justify-start whitespace-normal flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-gray-50"
           >
             <TriangleAlert
               aria-hidden
@@ -113,7 +115,7 @@ function IssuesList({
                 {t("action_n", { n: index + 1 })}
               </span>
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </>

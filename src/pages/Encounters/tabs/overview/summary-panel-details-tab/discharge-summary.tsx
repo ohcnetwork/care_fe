@@ -82,9 +82,10 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <button
+                <Button
+                  variant="outline"
                   type="button"
-                  className="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-sm p-2 gap-1 cursor-pointer"
+                  className="h-auto whitespace-normal flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-sm p-2 gap-1 cursor-pointer"
                 >
                   <div className="bg-white border border-gray-200 rounded-md size-8 flex items-center justify-center">
                     <NotepadText className="text-gray-500 size-4" />
@@ -92,7 +93,7 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
                   <span className="max-w-full font-semibold text-sm text-gray-950 underline [overflow-wrap:anywhere]">
                     {t("discharge_summary_advice")}
                   </span>
-                </button>
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>

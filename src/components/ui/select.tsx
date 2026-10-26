@@ -108,6 +108,8 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
+        // The SVG supplies its paths; suppress Base UI's default text glyph.
+        children={null}
         render={
           <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
         }

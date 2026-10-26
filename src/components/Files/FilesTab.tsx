@@ -71,24 +71,10 @@ export const FilesTab = ({
         }
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
-          <TabsTrigger
-            value="all"
-            className="data-active:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("files")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="reports"
-            className="data-active:bg-white rounded-md px-4 font-semibold"
-          >
-            {t("reports")}
-          </TabsTrigger>
+          <TabsTrigger value="all">{t("files")}</TabsTrigger>
+          <TabsTrigger value="reports">{t("reports")}</TabsTrigger>
           {Object.keys(pluginTabs).map((tab) => (
-            <TabsTrigger
-              key={tab}
-              value={tab}
-              className="data-active:bg-white rounded-md px-4 font-semibold capitalize"
-            >
+            <TabsTrigger key={tab} value={tab} className="capitalize">
               {t(tab)}
             </TabsTrigger>
           ))}

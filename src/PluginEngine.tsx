@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import {
   PluginManifest,
@@ -23,7 +24,7 @@ import { mergePlugConfigs } from "@/Utils/plugConfig";
 import query from "@/Utils/request/query";
 import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
-import { Loader2Icon } from "lucide-react";
+
 import { localDevPluginManifests } from "virtual:care-local-plugins";
 import { z } from "zod";
 
@@ -215,7 +216,7 @@ export function PLUGIN_Component(props: PluginComponentProps) {
             <React.Suspense
               fallback={
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2Icon
+                  <Spinner
                     role="status"
                     aria-label="Loading"
                     className="size-4 animate-spin"

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   createContext,
   useCallback,
@@ -264,7 +265,8 @@ export function FillOutlineOverlay({
       {/* The button comes FIRST in DOM so forward Tab from the rail
           enters the open panel's rows; z-10 keeps the ticks painted on
           top of the panel, per the reference. */}
-      <button
+      <Button
+        variant="ghost"
         ref={toggleRef}
         type="button"
         aria-expanded={open}
@@ -300,8 +302,11 @@ export function FillOutlineOverlay({
           openPanel();
         }}
         className={cn(
-          "absolute top-1/2 left-0 z-10 flex max-h-[calc(100%-2rem)] min-h-8 w-6 -translate-y-1/2 flex-col rounded-r-lg py-2 transition-colors",
-          "hover:bg-gray-200/50 focus-visible:bg-gray-200/50 focus-visible:outline-none",
+          "h-auto px-0",
+          cn(
+            "absolute top-1/2 left-0 z-10 flex max-h-[calc(100%-2rem)] min-h-8 w-6 -translate-y-1/2 flex-col rounded-r-lg py-2 transition-colors",
+            "hover:bg-gray-200/50 focus-visible:bg-gray-200/50 focus-visible:outline-none",
+          ),
         )}
       >
         {/* Tick marks are decorative — the button itself carries the
@@ -313,7 +318,7 @@ export function FillOutlineOverlay({
           aria-hidden="true"
           className="flex min-h-0 w-full flex-col gap-3"
         />
-      </button>
+      </Button>
       <aside
         id={PANEL_ID}
         aria-label={t("questions_outline")}

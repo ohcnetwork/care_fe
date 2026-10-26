@@ -105,30 +105,38 @@ export function StudioOutline({
       )}
 
       {editing && (
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={onSelectForm}
           className={cn(
-            "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium",
-            formSelected
-              ? "bg-gray-100 text-gray-900"
-              : "text-gray-700 hover:bg-gray-50",
+            "h-auto justify-start whitespace-normal",
+            cn(
+              "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium",
+              formSelected
+                ? "bg-gray-100 text-gray-900"
+                : "text-gray-700 hover:bg-gray-50",
+            ),
           )}
         >
           <Settings2 aria-hidden className="size-4 text-gray-500" />
           {t("form_settings")}
-        </button>
+        </Button>
       )}
 
       {editing && actionsRow && (
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={onSelectActions}
           className={cn(
-            "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium",
-            actionsSelected
-              ? "bg-gray-100 text-gray-900"
-              : "text-gray-700 hover:bg-gray-50",
+            "h-auto justify-start whitespace-normal",
+            cn(
+              "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium",
+              actionsSelected
+                ? "bg-gray-100 text-gray-900"
+                : "text-gray-700 hover:bg-gray-50",
+            ),
           )}
         >
           <Zap aria-hidden className="size-4 text-gray-500" />
@@ -147,7 +155,7 @@ export function StudioOutline({
               )}
             />
           )}
-        </button>
+        </Button>
       )}
 
       {questions.length > 0 && (
@@ -193,7 +201,8 @@ export function StudioOutline({
           // would land somewhere else in the real tree.
           editing && !filtering
             ? (afterIndex) => (
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() =>
                     dispatch({
@@ -203,10 +212,10 @@ export function StudioOutline({
                     })
                   }
                   aria-label={t("add_new_question")}
-                  className="absolute left-1/2 top-1/2 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 shadow-sm hover:border-primary-300 hover:text-primary-700"
+                  className="p-0 absolute left-1/2 top-1/2 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 shadow-sm hover:border-primary-300 hover:text-primary-700"
                 >
                   <Plus className="size-3.5" />
-                </button>
+                </Button>
               )
             : undefined
         }

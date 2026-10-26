@@ -66,7 +66,7 @@ async function signInDoctor(
 ) {
   await page.goto("/login");
   await page.getByRole("textbox", { name: /username/i }).fill(account.username);
-  await page.getByLabel(/password/i).fill(account.password);
+  await page.getByLabel(/^password$/i).fill(account.password);
   const loginResponse = page.waitForResponse(
     (response) =>
       new URL(response.url()).pathname === "/api/v1/auth/login/" &&

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -96,7 +97,7 @@ function CustomDateRange({
               value={dateFrom ? format(dateFrom, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateFrom(new Date(e.target.value));
+                  setDateFrom(parseLocalDate(e.target.value));
                 } else {
                   setDateFrom(undefined);
                 }
@@ -114,7 +115,7 @@ function CustomDateRange({
               value={dateTo ? format(dateTo, "yyyy-MM-dd") : ""}
               onChange={(e) => {
                 if (e.target.value) {
-                  setDateTo(new Date(e.target.value));
+                  setDateTo(parseLocalDate(e.target.value));
                 } else {
                   setDateTo(undefined);
                 }
@@ -317,10 +318,12 @@ export const SelectedDateBadge = ({
   selected,
   filter,
   onFilterChange,
+  interactive = true,
 }: {
   selected: FilterDateRange;
   filter: FilterConfig;
-  onFilterChange: (filterKey: string, values: FilterValues) => void;
+  onFilterChange?: (filterKey: string, values: FilterValues) => void;
+  interactive?: boolean;
 }) => {
   const { t } = useTranslation();
   const hasValidFrom = !!selected.from && isValid(selected.from);
@@ -350,6 +353,14 @@ export const SelectedDateBadge = ({
       : presentDate
         ? format(presentDate, "d MMM yyyy")
         : "";
+
+  if (!interactive || !onFilterChange) {
+    return (
+      <span className="block min-w-0 truncate whitespace-nowrap">
+        {selectedDateLabel}
+      </span>
+    );
+  }
 
   return (
     <DropdownMenu>

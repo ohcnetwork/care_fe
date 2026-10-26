@@ -1,30 +1,32 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Label } from "@/components/ui/label";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import { isIOSDevice } from "@/Utils/utils";
 
 type ButtonProps = Omit<
@@ -32,169 +34,13 @@ type ButtonProps = Omit<
   keyof MultiSelectProps
 >;
 interface MultiSelectProps {
-  options: {
-    label: string;
-    value: string;
-    icon?: IconName;
-  }[];
+  options: { label: string; value: string; icon?: IconName }[];
   onValueChange: (value: string[]) => void;
   value: string[];
   placeholder: string;
   className?: string;
   selectionSummary?: string;
   translationBasekey?: string;
-}
-
-function ListContent({
-  translationBasekey,
-  options,
-  value,
-  selectedValues,
-  setSelectedValues,
-  onValueChange,
-  setOpen,
-}: {
-  translationBasekey?: string;
-  options: {
-    label: string;
-    value: string;
-    icon?: IconName;
-  }[];
-  value: string[];
-  selectedValues: string[];
-  setSelectedValues: React.Dispatch<React.SetStateAction<string[]>>;
-  onValueChange: (value: string[]) => void;
-  setOpen: (open: boolean) => void;
-}) {
-  const { t } = useTranslation();
-
-  const handleToggleOption = (option: string) => {
-    setSelectedValues((prevSelectedValues) =>
-      prevSelectedValues.includes(option)
-        ? prevSelectedValues.filter((v) => v !== option)
-        : [...prevSelectedValues, option],
-    );
-  };
-  const handleSelectAll = () => {
-    setSelectedValues((prevSelectedValues) => {
-      if (prevSelectedValues.length === options.length) return [];
-      return options.map((o) => o.value);
-    });
-  };
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <Command className="flex-1 overflow-hidden min-h-0">
-        <div className="border border-gray-200 rounded-md m-1 mb-2">
-          <CommandInput
-            placeholder={
-              translationBasekey
-                ? t(`search_${translationBasekey}`)
-                : t("search_options")
-            }
-            className="outline-hidden text-base sm:text-sm border-none ring-0 shadow-none -ml-3"
-            autoFocus={!isIOSDevice}
-          />
-        </div>
-        <CommandList className="max-h-none">
-          <CommandEmpty>{t("no_results_found")}</CommandEmpty>
-          <CommandGroup>
-            <CommandItem
-              key="all"
-              onSelect={handleSelectAll}
-              className="cursor-pointer h-10"
-            >
-              <Checkbox
-                checked={selectedValues.length === options.length}
-                aria-label="Select all options"
-                className="data-checked:text-white"
-              />
-              <span className="font-medium">{t("select_all")}</span>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator className="mx-auto w-[95%]" />
-
-          {value.length > 0 && (
-            <>
-              <CommandGroup heading={t("selected")}>
-                {options
-                  .filter((option) => value.includes(option.value))
-                  .map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      onSelect={() => handleToggleOption(option.value)}
-                      aria-label={`Select ${option.label}`}
-                      className="cursor-pointer h-10 flex gap-3"
-                    >
-                      <Checkbox
-                        checked={selectedValues.includes(option.value)}
-                        className="data-checked:text-white"
-                      />
-
-                      <div className="flex items-center gap-1">
-                        {option?.icon && (
-                          <CareIcon icon={option.icon} className="size-4" />
-                        )}
-                        <span>{option.label}</span>
-                      </div>
-                    </CommandItem>
-                  ))}
-              </CommandGroup>
-
-              <CommandSeparator className="mx-auto w-[95%]" />
-            </>
-          )}
-
-          {value.length < options.length && (
-            <CommandGroup>
-              {options
-                .filter((option) => !value.includes(option.value))
-                .map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => handleToggleOption(option.value)}
-                    aria-label={`Select ${option.label}`}
-                    className="cursor-pointer h-10 flex gap-3"
-                  >
-                    <Checkbox
-                      checked={selectedValues.includes(option.value)}
-                      className="data-checked:text-white"
-                    />
-
-                    <div className="flex items-center gap-1">
-                      {option?.icon && (
-                        <CareIcon icon={option.icon} className="size-4" />
-                      )}
-                      <span>{option.label}</span>
-                    </div>
-                  </CommandItem>
-                ))}
-            </CommandGroup>
-          )}
-        </CommandList>
-      </Command>
-      <div className="flex justify-end space-x-2 p-3 border-t border-t-gray-200 shrink-0">
-        <Button
-          variant="link"
-          size="md"
-          className="underline"
-          onClick={() => setOpen(false)}
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          variant="primary_gradient"
-          size="md"
-          onClick={() => {
-            onValueChange(selectedValues);
-            setOpen(false);
-          }}
-        >
-          {t("done")}
-        </Button>
-      </div>
-    </div>
-  );
 }
 
 export function MultiSelect({
@@ -208,127 +54,165 @@ export function MultiSelect({
   translationBasekey,
   ...props
 }: ButtonProps & MultiSelectProps) {
+  const { t } = useTranslation();
   const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const selectAllId = React.useId();
 
   React.useEffect(() => {
     setSelectedValues(value);
-  }, [value, open]);
-  React.useEffect(() => {
-    if (open == false) onValueChange(selectedValues);
-  }, [open]);
+  }, [value]);
 
-  const { t } = useTranslation();
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setSelectedValues(value);
+    } else if (open) {
+      // Existing callers commit the draft when the panel closes, including Cancel.
+      onValueChange(selectedValues);
+    }
+    setOpen(nextOpen);
+  };
 
-  if (isMobile) {
-    return (
-      <div className="w-full">
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              ref={ref}
-              role="combobox"
-              onClick={() => setOpen((open) => !open)}
-              className={cn(
-                "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-                open && "ring-2 ring-blue-500 border-0",
-                className,
-              )}
-              {...props}
-            >
-              <div className="flex justify-between items-center w-full">
-                {value.length == 0 ? (
-                  <span className="text-sm text-gray-500 mx-3">
-                    {placeholder}
-                  </span>
-                ) : (
-                  <Badge className="m-1" variant="secondary">
-                    {selectionSummary
-                      ? selectionSummary
-                      : t("options_selected", { count: value.length })}
-                  </Badge>
-                )}
-                {open ? (
-                  <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
-                ) : (
-                  <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
-                )}
-              </div>
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 flex flex-col min-h-[50vh] max-h-[85vh]">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
-              <ListContent
-                translationBasekey={translationBasekey}
-                options={options}
-                value={value}
-                setSelectedValues={setSelectedValues}
-                selectedValues={selectedValues}
-                onValueChange={onValueChange}
-                setOpen={setOpen}
-              />
+  const groups = [
+    {
+      value: "selected",
+      items: options
+        .filter((option) => value.includes(option.value))
+        .map((option) => option.value),
+    },
+    {
+      value: "available",
+      items: options
+        .filter((option) => !value.includes(option.value))
+        .map((option) => option.value),
+    },
+  ].filter((group) => group.items.length > 0);
+  const allSelected =
+    options.length > 0 &&
+    options.every((option) => selectedValues.includes(option.value));
+
+  const trigger = (
+    <Button
+      variant="outline"
+      ref={ref}
+      role="combobox"
+      aria-expanded={open}
+      className={cn("w-full min-w-0 justify-between font-normal", className)}
+      {...props}
+    >
+      {value.length === 0 ? (
+        <span className="truncate text-muted-foreground">{placeholder}</span>
+      ) : (
+        <Badge variant="neutral" className="max-w-full truncate">
+          {selectionSummary || t("options_selected", { count: value.length })}
+        </Badge>
+      )}
+      <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+    </Button>
+  );
+
+  const content = (
+    <>
+      <ComboboxInput
+        showTrigger={false}
+        placeholder={
+          translationBasekey
+            ? t(`search_${translationBasekey}`)
+            : t("search_options")
+        }
+        aria-label={
+          translationBasekey
+            ? t(`search_${translationBasekey}`)
+            : t("search_options")
+        }
+        autoFocus={!isIOSDevice}
+      />
+      <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+        <Checkbox
+          id={selectAllId}
+          checked={allSelected}
+          onCheckedChange={() =>
+            setSelectedValues(
+              allSelected ? [] : options.map((option) => option.value),
+            )
+          }
+        />
+        <Label htmlFor={selectAllId}>{t("select_all")}</Label>
+      </div>
+      <ComboboxEmpty>{t("no_results_found")}</ComboboxEmpty>
+      <ComboboxList showScrollbar className="min-h-0 flex-1">
+        {(group: { value: string; items: string[] }) => (
+          <ComboboxGroup key={group.value} items={group.items}>
+            {group.value === "selected" && (
+              <ComboboxLabel>{t("selected")}</ComboboxLabel>
+            )}
+            <ComboboxCollection>
+              {(optionValue: string) => {
+                const option = options.find(
+                  (option) => option.value === optionValue,
+                );
+                return (
+                  <ComboboxItem key={optionValue} value={optionValue}>
+                    {option?.icon && (
+                      <CareIcon icon={option.icon} className="size-4" />
+                    )}
+                    {option?.label ?? optionValue}
+                  </ComboboxItem>
+                );
+              }}
+            </ComboboxCollection>
+          </ComboboxGroup>
+        )}
+      </ComboboxList>
+      <div className="flex shrink-0 justify-end gap-2 border-t border-border p-3">
+        <Button variant="ghost" onClick={() => handleOpenChange(false)}>
+          {t("cancel")}
+        </Button>
+        <Button onClick={() => handleOpenChange(false)}>{t("done")}</Button>
+      </div>
+    </>
+  );
+
+  return (
+    <Combobox<string, true>
+      multiple
+      items={groups}
+      value={selectedValues}
+      onValueChange={setSelectedValues}
+      itemToStringLabel={(optionValue) =>
+        options.find((option) => option.value === optionValue)?.label ??
+        optionValue
+      }
+      open={open}
+      inline={isMobile}
+      disabled={props.disabled}
+      onOpenChange={(nextOpen, details) => {
+        if (!nextOpen && details.reason === "item-press") {
+          details.cancel();
+          return;
+        }
+        handleOpenChange(nextOpen);
+      }}
+    >
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={handleOpenChange}>
+          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+          <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+            <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
+              {content}
             </div>
           </DrawerContent>
         </Drawer>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <Popover open={open} onOpenChange={setOpen} modal>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            ref={ref}
-            role="combobox"
-            onClick={() => setOpen((open) => !open)}
-            className={cn(
-              "flex w-full p-1 rounded-md border items-center justify-between border-gray-300 shadow-xs font-normal",
-              open && "ring-2 ring-blue-500 border-0",
-              className,
-            )}
-            {...props}
-          >
-            <div className="flex justify-between items-center w-full">
-              {value.length == 0 ? (
-                <span className="text-sm text-gray-500 mx-3">
-                  {placeholder}
-                </span>
-              ) : (
-                <Badge className="m-1" variant="secondary">
-                  {selectionSummary
-                    ? selectionSummary
-                    : t("options_selected", { count: value.length })}
-                </Badge>
-              )}
-              {open ? (
-                <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
-              ) : (
-                <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
-              )}
-            </div>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="p-0 w-(--anchor-width) max-h-[35vh] flex flex-col overflow-hidden"
-          align="center"
-        >
-          <ListContent
-            translationBasekey={translationBasekey}
-            options={options}
-            value={value}
-            setSelectedValues={setSelectedValues}
-            selectedValues={selectedValues}
-            onValueChange={onValueChange}
-            setOpen={setOpen}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
+      ) : (
+        <>
+          <ComboboxTrigger render={trigger} showChevron={false} />
+          <ComboboxContent className="flex w-(--anchor-width) flex-col">
+            {content}
+          </ComboboxContent>
+        </>
+      )}
+    </Combobox>
   );
 }
-
-MultiSelect.displayName = "MultiSelect";

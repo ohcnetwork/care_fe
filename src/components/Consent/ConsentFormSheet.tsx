@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
@@ -495,11 +496,7 @@ export default function ConsentFormSheet({
                 <FormItem>
                   <FormLabel>{t("note")}</FormLabel>
                   <FormControl>
-                    <textarea
-                      className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-md"
-                      rows={3}
-                      {...field}
-                    />
+                    <Textarea rows={3} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

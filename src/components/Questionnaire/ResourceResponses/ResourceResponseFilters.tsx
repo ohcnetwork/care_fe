@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Check, ChevronDown, Loader2, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -180,7 +181,7 @@ export default function ResourceResponseFilters({
                     role="status"
                     className="flex items-center justify-center gap-2 p-6 text-sm text-neutral-500"
                   >
-                    <Loader2 className="size-4 animate-spin" />
+                    <Spinner className="size-4 animate-spin" />
                     {t("loading")}
                   </div>
                 ) : questionnairesQuery.isError ? (

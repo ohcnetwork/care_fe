@@ -1,13 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Loader2,
-  Settings2,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, Settings2, Trash2 } from "lucide-react";
 import { Link, navigate, useNavigationPrompt } from "raviger";
 import { useCallback, useId, useState } from "react";
 import { flushSync } from "react-dom";
@@ -380,7 +374,7 @@ export function WorkspaceForm({
               }
               className="h-10 w-full rounded-lg px-5 shadow-none sm:w-auto"
             >
-              {save.isPending && <Loader2 className="size-4 animate-spin" />}
+              {save.isPending && <Spinner className="size-4 animate-spin" />}
               {t(existing ? "save_changes" : "create_workspace")}
             </Button>
           </div>
@@ -689,7 +683,7 @@ export function WorkspaceForm({
                     }}
                   >
                     {remove.isPending && (
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner className="size-4 animate-spin" />
                     )}
                     {t("delete")}
                   </AlertDialogAction>

@@ -169,9 +169,6 @@ export function QuestionnaireDetailPage({
     );
   }
 
-  const tabTriggerClasses =
-    "-mb-px h-auto rounded-none border-0 border-b-2 border-transparent bg-transparent px-1 pb-2 pt-0 text-gray-500 shadow-none data-active:border-gray-900 data-active:bg-transparent data-active:text-gray-900 data-active:shadow-none";
-
   return (
     <div className="space-y-4">
       <Form {...form}>
@@ -180,7 +177,7 @@ export function QuestionnaireDetailPage({
             {/* Sticky header band: back + breadcrumb, title row and the tab
                 strip stay pinned while the body scrolls beneath, keeping the
                 primary Save Form action reachable on long questionnaires. */}
-            <div className="sticky top-0 z-20 -mx-4 space-y-3 bg-white px-4 py-3">
+            <div className="sticky top-0 z-20 space-y-3 bg-white py-3">
               <div className="flex flex-wrap items-center gap-3">
                 <Button
                   type="button"
@@ -250,14 +247,12 @@ export function QuestionnaireDetailPage({
                 </div>
               </div>
 
-              <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent p-0">
-                <TabsTrigger value="questions" className={tabTriggerClasses}>
-                  {t("questions")}
-                </TabsTrigger>
-                <TabsTrigger value="versions" className={tabTriggerClasses}>
-                  {t("versions")}
-                </TabsTrigger>
-              </TabsList>
+              <div className="max-w-full overflow-x-auto pb-1">
+                <TabsList variant="line">
+                  <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
+                  <TabsTrigger value="versions">{t("versions")}</TabsTrigger>
+                </TabsList>
+              </div>
             </div>
             <TabsContent value="questions" className="mt-4">
               <div className="grid gap-4 md:grid-cols-[1fr_280px] md:gap-6">

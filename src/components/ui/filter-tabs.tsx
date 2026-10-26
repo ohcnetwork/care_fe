@@ -106,27 +106,6 @@ export function FilterTabs({
     onValueChange(selectedOption);
   };
 
-  // Styling variants
-  const getTabsClassName = () => {
-    if (variant === "underline") {
-      return "w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto";
-    }
-  };
-
-  const getTriggerClassName = () => {
-    if (variant === "underline") {
-      return "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-active:border-b-primary-700 data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none";
-    }
-    return "data-active:bg-white data-active:text-gray-950 px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 data-active:shadow-sm";
-  };
-
-  const getMoreButtonClassName = () => {
-    if (variant === "underline") {
-      return "text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none";
-    }
-    return "text-gray-500 font-medium text-sm px-3 flex items-center";
-  };
-
   const tabsToShow = showMoreDropdown ? visibleOptions : options;
 
   return (
@@ -134,44 +113,54 @@ export function FilterTabs({
       {label && (
         <span className="text-sm font-medium text-gray-700">{t(label)}:</span>
       )}
-      <Tabs value={value || "all"} onValueChange={handleValueChange}>
-        <TabsList className={getTabsClassName()}>
-          {showAllOption && (
-            <TabsTrigger value="all" className={getTriggerClassName()}>
-              {t(allOptionLabel)}
-            </TabsTrigger>
-          )}
-          {tabsToShow.map((option) => (
-            <TabsTrigger
-              key={option}
-              value={option}
-              className={getTriggerClassName()}
-            >
-              {t(option)}
-            </TabsTrigger>
-          ))}
-          {showMoreDropdown && dropdownOptions.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className={getMoreButtonClassName()}>
-                  {t("more")}
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {dropdownOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option}
-                    onClick={() => handleDropdownSelect(option)}
-                    className="text-gray-950 font-medium text-sm"
-                  >
-                    {t(option)}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </TabsList>
+      <Tabs
+        value={value || "all"}
+        onValueChange={handleValueChange}
+        className="min-w-0"
+      >
+        <div
+          className={
+            variant === "underline"
+              ? "max-w-full overflow-x-auto pb-1"
+              : undefined
+          }
+        >
+          <TabsList
+            variant={variant === "underline" ? "line" : "default"}
+            className={
+              variant === "underline" ? "w-full justify-start" : undefined
+            }
+          >
+            {showAllOption && (
+              <TabsTrigger value="all">{t(allOptionLabel)}</TabsTrigger>
+            )}
+            {tabsToShow.map((option) => (
+              <TabsTrigger key={option} value={option}>
+                {t(option)}
+              </TabsTrigger>
+            ))}
+            {showMoreDropdown && dropdownOptions.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-full">
+                    {t("more")}
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {dropdownOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      onSelect={() => handleDropdownSelect(option)}
+                    >
+                      {t(option)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </TabsList>
+        </div>
       </Tabs>
     </div>
   );

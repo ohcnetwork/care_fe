@@ -301,14 +301,9 @@ export function ValueSetList({ scope }: { scope: ValueSetScope }) {
                 })
               }
             >
-              <TabsList
-                aria-label={t("source")}
-                className="h-10 w-full sm:w-fit"
-              >
-                <TabsTrigger value="facility" className="flex-1 px-4">
-                  {t("this_facility")}
-                </TabsTrigger>
-                <TabsTrigger value="instance" className="flex-1 px-4">
+              <TabsList aria-label={t("source")} className="w-full sm:w-fit">
+                <TabsTrigger value="facility">{t("this_facility")}</TabsTrigger>
+                <TabsTrigger value="instance">
                   {t("valueset_shared_catalogue")}
                 </TabsTrigger>
               </TabsList>

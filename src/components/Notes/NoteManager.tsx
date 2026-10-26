@@ -1,11 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Info,
-  Loader2,
-  MessageCircle,
-  MessageSquarePlus,
-  Plus,
-} from "lucide-react";
+import { Info, MessageCircle, MessageSquarePlus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -60,12 +55,17 @@ const ThreadItem = ({
   isSelected: boolean;
   onClick: () => void;
 }) => (
-  <button
+  <Button
+    variant="outline"
+    type="button"
     className={cn(
-      "group relative w-full p-4 text-left rounded-lg transition-colors border",
-      isSelected
-        ? "bg-primary-100 hover:bg-primary/15 border-primary"
-        : "hover:bg-gray-100 hover:border-gray-200",
+      "h-auto block whitespace-normal",
+      cn(
+        "group relative w-full p-4 text-left rounded-lg transition-colors border",
+        isSelected
+          ? "bg-primary-100 hover:bg-primary/15 border-primary"
+          : "hover:bg-gray-100 hover:border-gray-200",
+      ),
     )}
     onClick={onClick}
   >
@@ -77,7 +77,7 @@ const ThreadItem = ({
         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mt-1.5" />
       )}
     </div>
-  </button>
+  </Button>
 );
 
 // New thread dialog component
@@ -153,7 +153,7 @@ const NewThreadDialog = ({
             disabled={!title.trim() || isCreating}
           >
             {isCreating ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
+              <Spinner className="size-4 animate-spin mr-2" />
             ) : (
               <MessageSquarePlus className="size-4 mr-2" />
             )}

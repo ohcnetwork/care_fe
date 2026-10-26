@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isWithinInterval } from "date-fns";
-import { Loader2 } from "lucide-react";
+
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -206,15 +207,20 @@ export function ScheduleAppointment(props: AppointmentsProps) {
     const isSelected = date.toDateString() === selectedDate?.toDateString();
 
     return (
-      <button
+      <Button
+        variant="ghost"
+        type="button"
         onClick={() => setSelectedDate(date)}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg",
-          isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
+          "p-0",
+          cn(
+            "h-full w-full hover:bg-gray-50 rounded-lg",
+            isSelected ? "bg-white ring-2 ring-primary-500" : "bg-gray-100",
+          ),
         )}
       >
         <span>{date.getDate()}</span>
-      </button>
+      </Button>
     );
   };
 
@@ -329,7 +335,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
         {selectedSlot?.id && (
           <div className="container mx-auto flex flex-row justify-end mt-6">
             {(isCreatingAppointment || isCancellingAppointment) && (
-              <Loader2 className="size-4 animate-spin self-center mr-2" />
+              <Spinner className="size-4 animate-spin self-center mr-2" />
             )}
             {appointment?.status !== "in_consultation" && (
               <Button

@@ -11,9 +11,6 @@ import { ClinicalHistoryAccess } from "@/pages/Patient/History/clinicalHistoryTa
 import { ClinicalHistoryTab } from "./ClinicalHistoryTab";
 import { FillShell } from "./FillShell";
 
-const FILL_TAB_TRIGGER_CLASSES =
-  "h-11 shrink-0 rounded-t-lg rounded-b-none border-gray-300 bg-gray-50 px-2.5 py-2 text-xs not-data-active:text-gray-700! not-data-active:hover:bg-white data-active:border-b-white data-active:bg-white data-active:text-gray-950 data-active:shadow-none focus-visible:z-10 focus-visible:ring-inset sm:px-4 sm:text-sm";
-
 interface FillSessionTabsProps {
   patientId?: string;
   facilityId?: string;
@@ -106,17 +103,17 @@ export function FillSessionTabs({
         minimizeDisabled={minimizeDisabled}
         tabs={
           patientId || referenceTab ? (
-            <TabsList className="flex h-auto items-end justify-start gap-1 rounded-none bg-transparent p-0 sm:gap-1.5">
+            <TabsList variant="browser">
               <TabsTrigger
                 value="questionnaire"
-                className={FILL_TAB_TRIGGER_CLASSES}
+                className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
               >
                 {title}
               </TabsTrigger>
               {historyAvailable && (
                 <TabsTrigger
                   value="history"
-                  className={FILL_TAB_TRIGGER_CLASSES}
+                  className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
                   disabled={exitDisabled}
                 >
                   {t("patient_clinical_history")}
@@ -125,7 +122,7 @@ export function FillSessionTabs({
               {referenceTab && (
                 <TabsTrigger
                   value="reference"
-                  className={FILL_TAB_TRIGGER_CLASSES}
+                  className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
                   disabled={exitDisabled}
                 >
                   {referenceTab.title}

@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useAtomValue, useStore } from "jotai";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -144,7 +145,7 @@ export function ReferralQuestionnaireForm({
                 }
               >
                 {resolution.isFetching && (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Spinner className="size-4 animate-spin" />
                 )}
                 {t("try_again")}
               </Button>
@@ -155,7 +156,7 @@ export function ReferralQuestionnaireForm({
             className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"
             role="status"
           >
-            <Loader2 className="size-4 animate-spin" />
+            <Spinner className="size-4 animate-spin" />
             {t("referral_loading_form_choices")}
           </div>
         )}

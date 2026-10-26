@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { navigate, useNavigationPrompt } from "raviger";
 import {
   type CSSProperties,
@@ -385,7 +386,7 @@ export function FillPageBody({
           disabled={frozen || contextRefreshFailed}
         >
           {serverDraftSave.isSavingDraft && (
-            <Loader2 className="size-4 animate-spin" />
+            <Spinner className="size-4 animate-spin" />
           )}
           {t("save_as_draft")}
         </Button>
@@ -399,7 +400,7 @@ export function FillPageBody({
         className="border border-primary-900/80 bg-linear-to-b from-primary-700 to-primary-800 text-white shadow-sm hover:from-primary-800 hover:to-primary-900"
       >
         {isPending ? (
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner className="size-4 animate-spin" />
         ) : (
           <Check className="size-4" />
         )}

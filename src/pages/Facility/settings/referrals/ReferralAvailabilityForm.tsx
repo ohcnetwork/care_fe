@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -337,7 +338,7 @@ export function ReferralAvailabilityForm({
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="size-4 animate-spin" />}
+                {isPending && <Spinner className="size-4 animate-spin" />}
                 {t(
                   availability
                     ? "save_changes"

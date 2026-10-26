@@ -1,10 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  GitPullRequestArrow,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, GitPullRequestArrow } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -61,7 +57,7 @@ export function ReferralAppointmentContext({
       <Item variant="outline" className="bg-background text-foreground">
         <ItemMedia variant="icon">
           {checking ? (
-            <Loader2 className="animate-spin" />
+            <Spinner className="animate-spin" />
           ) : linked ? (
             <CheckCircle2 />
           ) : (
@@ -117,7 +113,7 @@ export function ReferralAppointmentContext({
               disabled={attach.isPending}
               onClick={() => attach.mutate()}
             >
-              {attach.isPending && <Loader2 className="size-4 animate-spin" />}
+              {attach.isPending && <Spinner className="size-4 animate-spin" />}
               {t("referral_appointment_link")}
             </Button>
           )}

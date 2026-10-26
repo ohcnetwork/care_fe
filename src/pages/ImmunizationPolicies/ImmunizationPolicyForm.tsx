@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, navigate, useNavigationPrompt } from "raviger";
 import { useMemo } from "react";
 import { flushSync } from "react-dom";
@@ -241,7 +242,7 @@ function ImmunizationPolicyEditor({
                     className="ml-auto h-10 sm:ml-0"
                   >
                     {isPending && (
-                      <Loader2
+                      <Spinner
                         className="size-4 animate-spin"
                         aria-hidden="true"
                       />

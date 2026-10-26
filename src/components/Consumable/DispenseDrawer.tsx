@@ -1,8 +1,9 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, Loader2, LocateFixed, Trash2, XIcon } from "lucide-react";
+import { Check, LocateFixed, Trash2, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -654,7 +655,7 @@ export default function DispenseDrawer({
                                     className="text-center"
                                   >
                                     <div className="flex items-center justify-center py-3 gap-2">
-                                      <Loader2 className="size-4 animate-spin" />
+                                      <Spinner className="size-4 animate-spin" />
                                       <span className="text-sm text-gray-500">
                                         {t("loading_stock")}
                                       </span>

@@ -1,4 +1,4 @@
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Badge } from "@/components/ui/badge";
 
 export interface FilterBadgeProps {
   name: string;
@@ -11,20 +11,11 @@ export interface FilterBadgeProps {
  * wrapped `FilterBadge` from `useFilters` hook instead.**
  */
 const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
+  if (!value) return null;
   return (
-    <span
-      className={`${
-        !value && "hidden"
-      } flex flex-row items-center rounded-full border border-secondary-300 bg-white px-3 py-1 text-xs font-medium leading-4 text-secondary-600`}
-    >
+    <Badge variant="outline" onClose={onRemove}>
       {`${name}: ${value}`}
-      <CareIcon
-        id="removeicon"
-        icon="l-times"
-        className="ml-2 box-content cursor-pointer rounded-full text-base hover:bg-secondary-500"
-        onClick={onRemove}
-      />
-    </span>
+    </Badge>
   );
 };
 

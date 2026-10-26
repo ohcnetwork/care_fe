@@ -1,3 +1,4 @@
+import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Camera,
@@ -1104,9 +1105,8 @@ export function DiagnosticReportForm({
                       >
                         {t("conclusion")}
                       </Label>
-                      <textarea
+                      <Textarea
                         id="conclusion"
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg border border-gray-300 p-2"
                         placeholder={t("enter_conclusion")}
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}

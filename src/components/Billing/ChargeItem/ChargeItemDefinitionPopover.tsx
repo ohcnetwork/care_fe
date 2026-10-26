@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
@@ -39,15 +40,20 @@ export default function ChargeItemDefinitionPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
+        <Button
+          variant="link"
+          type="button"
           className={cn(
-            "text-sm font-medium underline decoration-dotted underline-offset-4 cursor-pointer hover:text-primary-700 transition-colors",
-            className,
+            "h-auto p-0",
+            cn(
+              "text-sm font-medium underline decoration-dotted underline-offset-4 cursor-pointer hover:text-primary-700 transition-colors",
+              className,
+            ),
           )}
           aria-label={t("view_details")}
         >
           <MonetaryDisplay amount={totalPrice.toString()} />
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         side="right"

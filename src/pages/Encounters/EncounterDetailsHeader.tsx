@@ -57,18 +57,6 @@ export default function EncounterDetailsHeader({
   return (
     <section
       aria-label={t("encounter")}
-      onKeyDown={(event) => {
-        if (
-          event.key === "Enter" &&
-          !event.shiftKey &&
-          !event.ctrlKey &&
-          !event.metaKey &&
-          !event.altKey
-        ) {
-          // Preserve native activation despite the global Enter shortcut.
-          event.stopPropagation();
-        }
-      }}
       className={cn(
         "rounded-xl border px-3 py-2",
         isHistorical
@@ -126,13 +114,14 @@ export default function EncounterDetailsHeader({
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   aria-label={`${t("encounter_dates")}: ${periodLabel}`}
-                  className="rounded-sm text-left underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                  className="h-auto p-0 rounded-sm text-left underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
                 >
                   {periodLabel}
-                </button>
+                </Button>
               </PopoverTrigger>
               <PopoverContent
                 align="start"

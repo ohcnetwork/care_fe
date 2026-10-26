@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+
 import { useNavigationPrompt } from "raviger";
 import {
   ComponentProps,
@@ -599,7 +600,7 @@ export function ReferralResponseEditor({
             onClick={() => checkDelivery.mutate(uncertainAttempt)}
           >
             {checkDelivery.isPending && (
-              <Loader2 className="size-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
             )}
             {t("referral_response_check_saved")}
           </Button>
@@ -636,7 +637,7 @@ export function ReferralResponseEditor({
             }
             onClick={() => complete.mutate({ status: "completed" })}
           >
-            {complete.isPending && <Loader2 className="size-4 animate-spin" />}
+            {complete.isPending && <Spinner className="size-4 animate-spin" />}
             {t("referral_complete")}
           </Button>
         ) : (
@@ -653,7 +654,7 @@ export function ReferralResponseEditor({
                 setTab("response");
               }}
             >
-              {create.isPending && <Loader2 className="size-4 animate-spin" />}
+              {create.isPending && <Spinner className="size-4 animate-spin" />}
               {t(
                 responseOnly
                   ? "referral_save_response"

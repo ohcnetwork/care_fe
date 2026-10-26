@@ -1,7 +1,10 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
@@ -38,8 +41,7 @@ export function BooleanInput({
   };
 
   return (
-    <div
-      role="radiogroup"
+    <ChoiceChipGroup
       aria-labelledby={labelId}
       aria-required={question.required || undefined}
       aria-describedby={errorId}
@@ -62,6 +64,6 @@ export function BooleanInput({
         disabled={disabled}
         onCheckedChange={() => handleChange(false)}
       />
-    </div>
+    </ChoiceChipGroup>
   );
 }

@@ -178,10 +178,11 @@ export function LocationOverview({
               locationId={locationId}
               disabled={!location || isError}
               trigger={
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   disabled={!location || isError}
-                  className="group flex items-center gap-4 rounded-[10px] border border-neutral-200 bg-white p-4 shadow-xs text-left transition-colors hover:bg-neutral-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:pointer-events-none disabled:opacity-50"
+                  className="h-auto justify-start whitespace-normal group flex items-center gap-4 rounded-[10px] border border-neutral-200 bg-white p-4 shadow-xs text-left transition-colors hover:bg-neutral-100/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:pointer-events-none disabled:opacity-50"
                 >
                   <FilePlus2
                     className="size-5 shrink-0 text-neutral-700"
@@ -199,7 +200,7 @@ export function LocationOverview({
                     className="size-4 shrink-0 text-neutral-400 group-hover:text-neutral-700"
                     aria-hidden="true"
                   />
-                </button>
+                </Button>
               }
             />
             <Link

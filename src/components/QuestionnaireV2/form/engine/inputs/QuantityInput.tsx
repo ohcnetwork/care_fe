@@ -10,7 +10,10 @@ import { ResponseValue } from "@/types/questionnaire/form";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 
 import { isEmptyQuantityEntry, nextQuantityEntry } from "./numericEntry";
@@ -91,8 +94,7 @@ export function QuantityInput({
           disabled={disabled}
           className="rounded-none border-x-0 border-t-0"
         />
-        <div
-          role="radiogroup"
+        <ChoiceChipGroup
           aria-label={t("unit")}
           aria-describedby={errorId}
           aria-invalid={!!errorId || undefined}
@@ -109,7 +111,7 @@ export function QuantityInput({
               onCheckedChange={() => handleUnitChange(code)}
             />
           ))}
-        </div>
+        </ChoiceChipGroup>
       </div>
     );
   }

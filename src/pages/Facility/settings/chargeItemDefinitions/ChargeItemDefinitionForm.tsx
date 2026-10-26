@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -830,7 +831,7 @@ export function ChargeItemDefinitionForm({
           >
             {isPending ? (
               <>
-                <Loader2
+                <Spinner
                   className={`${minimal ? "mr-1" : "mr-2"} size-4 animate-spin`}
                 />
                 {t("saving")}

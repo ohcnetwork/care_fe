@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -379,7 +380,7 @@ export function ReferralResourcePicker({
         <div className="space-y-2" aria-busy={candidates.isFetching}>
           {candidates.isLoading ? (
             <p role="status" className="flex items-center gap-2 py-6 text-sm">
-              <Loader2 className="size-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
               {t("loading")}
             </p>
           ) : candidates.isError ? (
@@ -515,7 +516,7 @@ export function ReferralResourcePicker({
               add.mutate(resource);
             }}
           >
-            {add.isPending && <Loader2 className="size-4 animate-spin" />}
+            {add.isPending && <Spinner className="size-4 animate-spin" />}
             {t("referral_add_record")}
           </Button>
         </DialogFooter>

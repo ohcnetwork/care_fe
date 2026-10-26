@@ -9,7 +9,7 @@ import {
   Search,
   Upload,
 } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Table,
   TableBody,
@@ -99,30 +101,28 @@ export function QuestionnaireListPage({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div
-          role="radiogroup"
+        <RadioGroup
+          value={qParams.status}
+          onValueChange={(status) => updateQuery({ status })}
           aria-label={t("status")}
-          className="flex rounded-md border border-gray-200 bg-gray-50 p-0.5"
+          className="flex w-auto gap-0 rounded-md border border-gray-200 bg-gray-50 p-0.5"
         >
           {STATUS_TABS.map((tab) => (
-            <button
+            <Label
               key={tab.value}
-              type="button"
-              role="radio"
-              aria-checked={qParams.status === tab.value}
-              onClick={() => updateQuery({ status: tab.value })}
               className={cn(
-                "flex items-center gap-1.5 rounded px-3 py-1.5 text-sm",
+                "flex cursor-pointer items-center gap-1.5 rounded px-3 py-1.5 text-sm has-focus-visible:outline-2 has-focus-visible:outline-ring",
                 qParams.status === tab.value
                   ? "border border-gray-200 bg-white font-medium text-gray-900 shadow-sm"
                   : "text-gray-500 hover:text-gray-700",
               )}
             >
+              <RadioGroupItem value={tab.value} className="sr-only" />
               {tab.icon}
               {t(tab.value)}
-            </button>
+            </Label>
           ))}
-        </div>
+        </RadioGroup>
 
         <div className="relative w-full md:w-[300px]">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -240,20 +240,22 @@ export function QuestionnaireListPage({
       {!isLoading && !isPermissionLoading && questionnaires.length > 0 && (
         <div className="grid gap-3 md:hidden">
           {questionnaires.map((questionnaire) => (
-            <button
+            <Button
               key={questionnaire.id}
-              type="button"
-              className="rounded-lg border p-4 text-left"
-              onClick={() => navigate(`${scope.basePath}/${questionnaire.id}`)}
+              variant="outline"
+              asChild
+              className="h-auto block rounded-lg p-4 text-left whitespace-normal"
             >
-              <p className="font-medium">{questionnaire.title}</p>
-              <p className="mt-1 line-clamp-2 text-sm text-gray-500">
-                {questionnaire.description}
-              </p>
-              <Badge variant="secondary" className="mt-2 font-normal">
-                {questionnaire.slug}
-              </Badge>
-            </button>
+              <Link href={`${scope.basePath}/${questionnaire.id}`}>
+                <p className="font-medium">{questionnaire.title}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+                  {questionnaire.description}
+                </p>
+                <Badge variant="secondary" className="mt-2 font-normal">
+                  {questionnaire.slug}
+                </Badge>
+              </Link>
+            </Button>
           ))}
         </div>
       )}

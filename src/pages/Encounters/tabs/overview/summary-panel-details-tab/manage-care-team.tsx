@@ -89,24 +89,26 @@ export const ManageCareTeam = ({ title }: ManageCareTeamProps = {}) => {
               </div>
             ))}
             {encounter.care_team.length > 3 && !showAllMembers && (
-              <button
+              <Button
+                variant="link"
                 type="button"
                 onClick={() => setShowAllMembers(true)}
-                className="text-left text-sm font-medium text-black underline cursor-pointer p-1"
+                className="h-auto p-0 text-left text-sm font-medium text-black underline cursor-pointer p-1"
               >
                 <span>
                   +{encounter.care_team.length - 3} {t("members")}
                 </span>
-              </button>
+              </Button>
             )}
             {encounter.care_team.length > 3 && showAllMembers && (
-              <button
+              <Button
+                variant="link"
                 type="button"
                 onClick={() => setShowAllMembers(false)}
-                className="text-left text-sm font-medium text-black underline cursor-pointer p-1"
+                className="h-auto p-0 text-left text-sm font-medium text-black underline cursor-pointer p-1"
               >
                 <span>{t("show_less")}</span>
-              </button>
+              </Button>
             )}
           </div>
         ) : (

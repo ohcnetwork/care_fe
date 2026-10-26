@@ -97,17 +97,18 @@ export default function MedicationReturnList({
             onValueChange={(value) => updateQuery({ status: value, page: 1 })}
             className="w-full"
           >
-            <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-              {STATUS_TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-active:border-b-primary-700 data-active:text-primary-800 data-active:bg-transparent data-active:shadow-none rounded-none"
-                >
-                  {t(tab.label)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="w-full overflow-x-auto pb-1">
+              <TabsList
+                variant="line"
+                className="w-full justify-evenly border-b border-border sm:justify-start"
+              >
+                {STATUS_TABS.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {t(tab.label)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
 

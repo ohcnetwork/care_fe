@@ -1,11 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ChevronLeft,
-  ChevronsUpDown,
-  HeartPulse,
-  Loader2,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronsUpDown, HeartPulse, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -251,7 +246,7 @@ export function ServiceSelectorDialog({
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                    <Spinner className="h-4 w-4 animate-spin text-gray-500" />
                     <span className="ml-2 text-sm text-gray-500">
                       {t("loading")}
                     </span>

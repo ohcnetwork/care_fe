@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, CalendarPlus, Loader2, Stethoscope } from "lucide-react";
+import { CalendarDays, CalendarPlus, Stethoscope } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -151,7 +152,7 @@ function AppointmentSummary({
       <div className="border-t border-border p-3">
         {resolved.isLoading ? (
           <p role="status" className="flex items-center gap-2 text-sm">
-            <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+            <Spinner aria-hidden="true" className="size-4 animate-spin" />
             {t("loading")}
           </p>
         ) : resolved.isError ? (
@@ -346,7 +347,7 @@ export function ReferralAppointments({
           role="status"
           className="flex items-center gap-2 text-sm text-muted-foreground"
         >
-          <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+          <Spinner aria-hidden="true" className="size-4 animate-spin" />
           {t("referral_appointment_context_loading")}
         </p>
       )}
@@ -401,7 +402,7 @@ export function ReferralAppointments({
           role="status"
           className="flex items-center gap-2 text-sm text-muted-foreground"
         >
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner className="size-4 animate-spin" />
           {t("loading")}
         </p>
       ) : records.isError ? (

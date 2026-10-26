@@ -563,7 +563,7 @@ export const SelectedTagBadge = ({ selected }: { selected: TagConfig[] }) => {
         </div>
       )}
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <span className="text-sm whitespace-nowrap">
             {selected.length} {t("tags", { count: selected.length })}
           </span>

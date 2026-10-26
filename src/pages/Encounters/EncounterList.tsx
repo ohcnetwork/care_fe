@@ -60,7 +60,11 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import {
+  dateQueryString,
+  dateTimeQueryString,
+  parseLocalDate,
+} from "@/Utils/utils";
 import careConfig from "@careConfig";
 import { subDays } from "date-fns";
 
@@ -75,6 +79,10 @@ const SEARCH_WITH_EXTERNAL_IDENTIFIER = "external_identifier" as const;
 
 type SearchWith =
   typeof SEARCH_WITH_NAME | typeof SEARCH_WITH_EXTERNAL_IDENTIFIER;
+
+// URL calendar dates are local days; timestamps retain their explicit offset.
+const parseDateFilterValue = (value: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseLocalDate(value) : new Date(value);
 
 const buildQueryParams = (
   facilityId: string,
@@ -100,13 +108,13 @@ const buildQueryParams = (
   if (created_date_after) {
     // Convert date string to datetime for API call
     params.created_date_after = dateTimeQueryString(
-      new Date(created_date_after),
+      parseDateFilterValue(created_date_after),
     );
   }
   if (created_date_before) {
     // Convert date string to datetime for API call (end of day)
     params.created_date_before = dateTimeQueryString(
-      new Date(created_date_before),
+      parseDateFilterValue(created_date_before),
       true,
     );
   }
@@ -549,8 +557,12 @@ export function EncounterList({
     created_date:
       created_date_after || created_date_before
         ? {
-            from: created_date_after ? new Date(created_date_after) : undefined,
-            to: created_date_before ? new Date(created_date_before) : undefined,
+            from: created_date_after
+              ? parseDateFilterValue(created_date_after)
+              : undefined,
+            to: created_date_before
+              ? parseDateFilterValue(created_date_before)
+              : undefined,
           }
         : undefined,
   });

@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, Ellipsis, Loader2, Pencil, Play } from "lucide-react";
+import { Check, Copy, Ellipsis, Pencil, Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -178,7 +179,7 @@ export function ReferralWorkflowActions({
           }
         >
           {update.isPending ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Spinner className="size-4 animate-spin" />
           ) : (
             <Play className="size-4" />
           )}
@@ -309,7 +310,7 @@ export function ReferralWorkflowActions({
                 if (confirmation) update.mutate(confirmation);
               }}
             >
-              {update.isPending && <Loader2 className="size-4 animate-spin" />}
+              {update.isPending && <Spinner className="size-4 animate-spin" />}
               {confirmation && statusLabel(confirmation.status)}
             </Button>
           </AlertDialogFooter>

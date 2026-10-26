@@ -1,6 +1,8 @@
-import { Square, SquareCheck } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ChoiceChipProps {
   checked: boolean;
@@ -8,8 +10,48 @@ interface ChoiceChipProps {
   label: string;
   control: "checkbox" | "radio";
   disabled?: boolean;
-  /** Shared by radio chips in one group; native controls provide arrow navigation. */
+  /** Shared by radio chips in one group. */
   name?: string;
+  /** Assigned by ChoiceChipGroup; callers retain the checked/callback contract. */
+  radioValue?: string;
+}
+
+/** Connect existing independently controlled choices to CareUI's radio navigation. */
+export function ChoiceChipGroup({
+  children,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof RadioGroup>,
+  "value" | "defaultValue" | "onValueChange"
+>) {
+  const choices = React.Children.toArray(children);
+  const isChoice = (
+    child: React.ReactNode,
+  ): child is React.ReactElement<ChoiceChipProps> =>
+    React.isValidElement<ChoiceChipProps>(child) && child.type === ChoiceChip;
+  const selectedIndex = choices.findIndex(
+    (child) => isChoice(child) && child.props.checked,
+  );
+  const firstChoice = choices.find(isChoice);
+
+  return (
+    <RadioGroup
+      name={firstChoice?.props.name}
+      value={selectedIndex < 0 ? "" : String(selectedIndex)}
+      onValueChange={(next) => {
+        const child = choices[Number(next)];
+        if (isChoice(child) && !child.props.disabled)
+          child.props.onCheckedChange(true);
+      }}
+      {...props}
+    >
+      {choices.map((child, index) =>
+        isChoice(child)
+          ? React.cloneElement(child, { radioValue: String(index) })
+          : child,
+      )}
+    </RadioGroup>
+  );
 }
 
 export function ChoiceChip({
@@ -18,60 +60,45 @@ export function ChoiceChip({
   label,
   control,
   disabled,
-  name,
+  radioValue,
 }: ChoiceChipProps) {
-  const className = cn(
-    "relative inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 has-focus-visible:ring-2 has-focus-visible:ring-primary-500",
-    checked ? "font-medium text-gray-900" : "text-gray-700 hover:bg-gray-50",
-    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-  );
-
-  if (control === "radio") {
-    return (
-      <label className={className}>
-        <input
-          type="radio"
-          name={name}
-          checked={checked}
-          aria-checked={checked}
-          disabled={disabled}
-          onChange={() => onCheckedChange(true)}
-          // An optional boolean can be cleared by activating its selected
-          // answer again; native radios otherwise emit no change for this.
-          onClick={() => {
-            if (checked) onCheckedChange(true);
-          }}
-          className="absolute inset-0 size-full cursor-inherit opacity-0"
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "flex size-4 items-center justify-center rounded-full border",
-            checked ? "border-primary-700" : "border-gray-300",
-          )}
-        >
-          {checked && <span className="size-2 rounded-full bg-primary-700" />}
-        </span>
-        {label}
-      </label>
-    );
-  }
-
+  const id = React.useId();
   return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={() => onCheckedChange(!checked)}
-      className={className}
+    <Field
+      orientation="horizontal"
+      data-disabled={disabled || undefined}
+      className="w-auto"
     >
-      {checked ? (
-        <SquareCheck className="size-4 text-primary-700" />
+      {control === "radio" ? (
+        <RadioGroupItem
+          id={id}
+          value={radioValue ?? label}
+          disabled={disabled}
+          onClick={() => {
+            // Optional boolean answers clear when the selected answer is activated again.
+            if (checked && !disabled) onCheckedChange(true);
+          }}
+        />
       ) : (
-        <Square className="size-4 text-gray-400" />
+        <Checkbox
+          id={id}
+          checked={checked}
+          disabled={disabled}
+          onCheckedChange={onCheckedChange}
+        />
       )}
-      {label}
-    </button>
+      <FieldLabel
+        htmlFor={id}
+        className="cursor-pointer"
+        onClick={(event) => {
+          if (control === "radio" && checked && !disabled) {
+            event.preventDefault();
+            onCheckedChange(true);
+          }
+        }}
+      >
+        {label}
+      </FieldLabel>
+    </Field>
   );
 }

@@ -78,6 +78,10 @@ CARE retains typed compatibility for existing call sites: button/status variant 
 
 Preserve layout compatibility when importing updates: responsive control defaults use local CSS variables so caller height and padding classes still win; cards leave spacing to their sections; wrapped badges and command rows grow with their content. Tabs read their own orientation rather than an ancestor group, so nested horizontal filters work inside vertical encounter navigation. Ghost buttons keep undecorated labels; the link variant retains link styling.
 
+CareUI composites also supply Combobox, Filters, Pagination, Kbd, Spinner, and Empty. Existing application wrappers compose these components: Autocomplete and MultiSelect retain asynchronous searches and selection callbacks; MultiFilter adapts URL filters and clinical date/tag/location/user pickers; Pagination retains server page state; ShortcutBadge retains shortcut lookup and visibility. Common/Table re-exports the shared table primitives. Extend these adapters for application behavior instead of recreating control styling in feature pages.
+
+The imported Filters component exposes custom-renderer open state so clinical pickers open after adding a filter, plus per-field clear permissions and layout classes. Its select fields use single selection and multiselect fields use multiple selection. Preserve these adaptations when refreshing registry source. Questionnaire ChoiceChipGroup similarly supplies one shared RadioGroup for keyboard navigation while retaining optional-answer clearing.
+
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
 
