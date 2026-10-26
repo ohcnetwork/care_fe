@@ -65,4 +65,6 @@ export enum PrintTemplateType {
   diagnostic_report = "diagnostic_report",
   questionnaire_response_logs = "questionnaire_response_logs",
   resource_letter = "resource_letter",
+  token = "token",
+  qr_codes = "qr_codes",
 }

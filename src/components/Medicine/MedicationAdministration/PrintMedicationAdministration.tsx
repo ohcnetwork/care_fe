@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
@@ -264,21 +263,15 @@ export const PrintMedicationAdministration = (props: {
       disabled={!hasData}
       facility={facility}
       templateSlug={PrintTemplateType.medication_administration}
+      defaultPage={{
+        size: "A4",
+        orientation: "landscape",
+        margin: { top: 6, right: 6, bottom: 6, left: 6 },
+      }}
     >
-      {/* Force landscape with tight margins so the wide drug chart fits on
-          a single A4 sheet per week. The parent print container also adds
-          a chunky p-10 that would otherwise eat into the printable width. */}
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 6mm; }
           html, body { background: white !important; }
-          /* Strip outer padding/shadow that the generic PrintPreview wrapper
-             applies, so the chart can use the full landscape width. */
-          div:has(> #section-to-print) {
-            padding: 0 !important;
-            box-shadow: none !important;
-            max-width: none !important;
-          }
           /* Avoid splitting an individual medication row across pages. */
           .mar-row { break-inside: avoid; page-break-inside: avoid; }
           /* Repeat the table header on each printed page. */
@@ -336,11 +329,6 @@ export const PrintMedicationAdministration = (props: {
                 {encounter?.facility?.name}
               </p>
             </div>
-            <img
-              src={careConfig.mainLogo?.dark}
-              alt="Logo"
-              className="h-12 w-auto object-contain"
-            />
           </div>
 
           {/* Patient Info - Simplified */}
