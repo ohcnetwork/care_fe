@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/Common/Table";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -565,9 +566,7 @@ export function RequestOrderShow({
                     }
                   />
                   {requestOrder.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary" className="text-xs">
-                      {tag.display}
-                    </Badge>
+                    <TagBadge key={tag.id} tag={tag} className="text-xs" />
                   ))}
                 </div>
               </div>

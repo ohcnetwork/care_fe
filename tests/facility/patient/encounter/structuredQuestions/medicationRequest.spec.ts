@@ -236,7 +236,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 
@@ -295,7 +295,7 @@ test.describe("Medication Request Questionnaire", () => {
     const medicationRow = page
       .locator('[data-slot="table-body"] tr')
       .filter({ hasText: medicationName })
-      .filter({ hasText: `${dosageQuantity.toFixed(2)} ${dosageUnit}` })
+      .filter({ hasText: `${dosageQuantity} ${dosageUnit}` })
       .filter({ hasText: frequencyData.display })
       .filter({ hasText: `${duration} ${durationUnit}` });
 

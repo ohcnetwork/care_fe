@@ -42,8 +42,11 @@ test.describe("Facility Device Delete", () => {
     // Click Delete button in the Danger Zone
     await page.getByRole("button", { name: "Delete" }).click();
 
-    // Confirm deletion in the dialog
-    await page.getByRole("button", { name: "Delete", exact: true }).click();
+    // Confirm deletion in the dialog (button name includes its shortcut badge)
+    await page
+      .getByRole("alertdialog", { name: "Delete Device" })
+      .getByRole("button", { name: /^Delete/ })
+      .click();
 
     // Search for the deleted device
     await page
