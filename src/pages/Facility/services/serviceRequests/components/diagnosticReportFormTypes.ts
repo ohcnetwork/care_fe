@@ -17,6 +17,7 @@ export interface DiagnosticReportFormProps {
     diagnostic_report_codes?: Code[];
     classification?: string;
     specimen_requirements?: SpecimenDefinitionRead[];
+    observation_result_requirements?: ObservationDefinitionRead[];
   };
   specimens: SpecimenRead[];
   disableEdit: boolean;

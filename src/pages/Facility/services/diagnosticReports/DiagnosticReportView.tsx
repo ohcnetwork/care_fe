@@ -192,7 +192,6 @@ export default function DiagnosticReportView({
                 type="diagnostic_report"
                 associatingId={report.id}
                 canEdit={true}
-                showHeader={false}
               />
             </CardContent>
           </Card>
