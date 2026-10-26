@@ -55,7 +55,14 @@ test.describe("Encounter navigation", () => {
 
       test("keeps the chosen encounter across sections and returns to the current encounter", async ({
         page,
+        context,
+        baseURL,
       }) => {
+        if (layout === "desktop") {
+          await context.addCookies([
+            { name: "sidebar:state", value: "true", url: baseURL! },
+          ]);
+        }
         const sectionTrigger = page.getByRole("button", {
           name: /^Encounter section:/,
         });
@@ -104,12 +111,14 @@ test.describe("Encounter navigation", () => {
           exact: true,
         });
         let currentFacilityName = "";
+        let patientName = "";
         await page.route(
           (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
           async (route) => {
             const response = await route.fetch();
             const encounter = await response.json();
             currentFacilityName = encounter.facility.name;
+            patientName = encounter.patient.name;
             await route.fulfill({
               response,
               // The backend embeds an empty object for an encounter with
@@ -142,6 +151,46 @@ test.describe("Encounter navigation", () => {
         await expect(
           encounterContext.getByRole("button", { name: /^Encounter dates:/ }),
         ).toHaveText(/\d{1,2} [A-Za-z]{3}.*Ongoing/);
+
+        if (layout === "desktop") {
+          await test.step("Keep patient identity and encounter actions on the same row when there is room", async () => {
+            const patient = page.getByRole("button", {
+              name: patientName,
+              exact: true,
+            });
+            const actions = page.getByRole("button", {
+              name: "Encounter Actions",
+              exact: true,
+            });
+            for (const headerWidth of [900, 1440]) {
+              await page.setViewportSize({ width: headerWidth, height: 900 });
+              await expect(patient).toBeVisible();
+              await expect(actions).toBeVisible();
+              await expect
+                .poll(async () => {
+                  const [patientBox, actionsBox] = await Promise.all([
+                    patient.boundingBox(),
+                    actions.boundingBox(),
+                  ]);
+                  if (!patientBox || !actionsBox) return false;
+                  return (
+                    patientBox.x + patientBox.width <= actionsBox.x &&
+                    patientBox.y < actionsBox.y + actionsBox.height &&
+                    actionsBox.y < patientBox.y + patientBox.height
+                  );
+                })
+                .toBe(true);
+              await expect
+                .poll(() =>
+                  page.evaluate(
+                    () =>
+                      document.documentElement.scrollWidth - window.innerWidth,
+                  ),
+                )
+                .toBeLessThanOrEqual(0);
+            }
+          });
+        }
 
         if (layout === "mobile") {
           await test.step("Find labeled sections at phone widths and dismiss the picker with the keyboard", async () => {

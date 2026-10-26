@@ -27,6 +27,12 @@ interface FillSessionTabsProps {
   children: ReactNode;
 }
 
+const sessionTabClassName = cn(
+  "shrink-0 px-4 py-2.5 text-sm font-medium focus-visible:z-10 focus-visible:ring-inset",
+  "group-data-[variant=browser]/tabs-list:border-gray-300 group-data-[variant=browser]/tabs-list:bg-gray-100 group-data-[variant=browser]/tabs-list:text-gray-600",
+  "group-data-[variant=browser]/tabs-list:data-active:border-gray-300 group-data-[variant=browser]/tabs-list:data-active:border-b-white group-data-[variant=browser]/tabs-list:data-active:bg-white group-data-[variant=browser]/tabs-list:data-active:text-gray-900",
+);
+
 /** Preserve the answer stores across tab switches and load history only on demand. */
 export function FillSessionTabs({
   patientId,
@@ -51,6 +57,9 @@ export function FillSessionTabs({
   const historyAvailable =
     !!patientId &&
     (!historyAccess || historyAccess.responses || historyAccess.clinicalData);
+  const tabClassName = contained
+    ? "shrink-0 focus-visible:z-10 focus-visible:ring-inset"
+    : sessionTabClassName;
   // Drop mounted history immediately if chart access is lost. Restoring
   // access should return to the request until history is selected again.
   if (!historyAvailable && historyMounted) {
@@ -66,8 +75,11 @@ export function FillSessionTabs({
       {formTitle ?? t("questionnaire_one")}
       {dirty && (
         <Badge
-          size="xs"
-          className="ml-1 rounded-sm border-transparent bg-indigo-100 px-1.5 py-0 text-indigo-900"
+          size={contained ? "xs" : "sm"}
+          className={cn(
+            "ml-1 rounded-sm border-transparent bg-indigo-100 px-1.5 text-indigo-900",
+            contained && "py-0",
+          )}
         >
           {t("draft")}
         </Badge>
@@ -103,17 +115,17 @@ export function FillSessionTabs({
         minimizeDisabled={minimizeDisabled}
         tabs={
           patientId || referenceTab ? (
-            <TabsList variant="browser">
-              <TabsTrigger
-                value="questionnaire"
-                className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
-              >
+            <TabsList
+              variant="browser"
+              className={contained ? undefined : "gap-2 border-gray-300"}
+            >
+              <TabsTrigger value="questionnaire" className={tabClassName}>
                 {title}
               </TabsTrigger>
               {historyAvailable && (
                 <TabsTrigger
                   value="history"
-                  className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
+                  className={tabClassName}
                   disabled={exitDisabled}
                 >
                   {t("patient_clinical_history")}
@@ -122,7 +134,7 @@ export function FillSessionTabs({
               {referenceTab && (
                 <TabsTrigger
                   value="reference"
-                  className="shrink-0 focus-visible:z-10 focus-visible:ring-inset"
+                  className={tabClassName}
                   disabled={exitDisabled}
                 >
                   {referenceTab.title}

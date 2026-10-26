@@ -125,7 +125,7 @@ export function FillShell({
     <div
       ref={shellRef}
       className={cn(
-        "flex flex-col bg-gray-100 [--fill-shell-header-height:56px]",
+        "flex flex-col bg-background [--fill-shell-header-height:56px]",
         contained
           ? "h-full min-h-0 overflow-hidden"
           : "-m-2 min-h-dvh md:m-0 md:fixed md:inset-0 md:z-40 md:overflow-hidden",

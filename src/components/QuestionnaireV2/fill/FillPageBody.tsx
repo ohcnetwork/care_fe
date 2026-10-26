@@ -195,6 +195,7 @@ export function FillPageBody({
   );
 
   const { submit, isPending, serverErrors } = useSubmitFillSession({
+    scrollContainer: scrollHost,
     forms,
     getStore,
     subject,

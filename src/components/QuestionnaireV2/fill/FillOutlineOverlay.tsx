@@ -1,3 +1,4 @@
+import { scrollFillQuestionIntoView } from "@/components/QuestionnaireV2/fill/scrollFillQuestionIntoView";
 import { Button } from "@/components/ui/button";
 import {
   createContext,
@@ -133,12 +134,7 @@ export function FillOutlineNavProvider({
         `[data-question-id="${CSS.escape(questionId)}"]`,
       );
       if (!block) return;
-      block.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-        block: "start",
-      });
+      scrollFillQuestionIntoView(block, { container: scrollContainer });
       if (!options?.focus) return;
       // Same landing rule as the submit path's scroll-to-error: the
       // question's own input when it has one, the block itself otherwise.

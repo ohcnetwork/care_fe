@@ -32,7 +32,6 @@ import { appendReferralNativeContext } from "@/components/Referral/referralNativ
 import { Card } from "@/components/ui/card";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
-import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
 import { cn } from "@/lib/utils";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
 import { EncounterTab } from "@/pages/Encounters/EncounterNavigation";
@@ -89,7 +88,6 @@ export const EncounterShow = (props: Props) => {
     selectedEncounterPermissions,
   } = useEncounter();
 
-  useSidebarAutoCollapse();
   const [actionsOpen, setActionsOpen] = useState(false);
   useShortcutSubContext("encounter");
 
@@ -247,8 +245,8 @@ export const EncounterShow = (props: Props) => {
         </div>
       </WorkspaceHeaderContent>
 
-      <div className="flex flex-col gap-2">
-        <Card className="grid gap-2 bg-white shadow-none border-gray-200 rounded-xl px-3 py-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+      <div className="@container/encounter-header flex flex-col gap-2">
+        <Card className="grid gap-2 rounded-xl px-3 py-2 shadow-none @min-[28rem]/encounter-header:grid-cols-[minmax(0,1fr)_auto] @min-[28rem]/encounter-header:items-center">
           <PatientHeader
             patient={patient}
             variant="encounter"
@@ -256,14 +254,14 @@ export const EncounterShow = (props: Props) => {
             className="p-0 bg-transparent shadow-none"
           />
           {selectedEncounter && (
-            <div className="order-3 flex flex-wrap items-center justify-end gap-2 lg:order-2">
-              <div className="w-full md:w-auto">
+            <div className="order-3 flex min-w-0 flex-wrap items-center justify-end gap-2 @min-[28rem]/encounter-header:order-2">
+              <div className="w-full min-w-0 max-w-full empty:hidden @min-[28rem]/encounter-header:w-auto">
                 <PLUGIN_Component
                   __name="PatientInfoCardQuickActions"
                   encounter={selectedEncounter}
                   className={cn(
                     buttonVariants({ variant: "primary_gradient" }),
-                    "text-base font-semibold rounded-md w-full md:w-auto",
+                    "w-full rounded-md text-base font-semibold @min-[28rem]/encounter-header:w-auto",
                   )}
                 />
               </div>
@@ -276,7 +274,7 @@ export const EncounterShow = (props: Props) => {
                   <Button
                     variant="primary_gradient"
                     onClick={() => setActionsOpen(true)}
-                    className="h-9 px-3 text-sm font-medium rounded-lg w-full md:w-auto shadow-none"
+                    className="h-auto min-h-11 w-full rounded-lg px-3 text-sm font-medium whitespace-normal shadow-none @min-[28rem]/encounter-header:min-h-9 @min-[28rem]/encounter-header:w-auto"
                   >
                     {t("encounter_actions")}
                     <ShortcutBadge
@@ -291,7 +289,7 @@ export const EncounterShow = (props: Props) => {
           )}
           <PatientTagsDisplay
             patient={patient}
-            className="order-2 min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 lg:order-3 lg:col-span-2 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
+            className="order-2 min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 @min-[28rem]/encounter-header:order-3 @min-[28rem]/encounter-header:col-span-2 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
           />
         </Card>
         <PatientDeceasedInfo patient={patient} />

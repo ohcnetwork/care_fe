@@ -15,7 +15,10 @@ test.describe("Fill page shell", () => {
   let fillUrl: string;
   let patientName: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context, baseURL }) => {
+    await context.addCookies([
+      { name: "sidebar:state", value: "true", url: baseURL! },
+    ]);
     const questionnaireId = await getQuestionnaireIdBySlug(
       "respiratory_status-v3",
     );
@@ -32,11 +35,23 @@ test.describe("Fill page shell", () => {
     ).toBeVisible();
   });
 
-  test("fullscreen layout: clinical context and actions stay visible while patient details scroll away", async ({
+  test("fullscreen layout preserves sidebar choices and keeps clinical actions visible while scrolling", async ({
     page,
   }) => {
-    // Fill routes opt out of the app sidebar (fullscreen shell).
-    await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
+    const sidebar = page.locator('[data-sidebar="sidebar"]');
+    const sidebarState = page.locator("[data-app-sidebar-pinned]");
+    const workspaceHeader = page.locator("[data-cui-app-header]");
+    const sidebarToggle = page.getByRole("button", {
+      name: "Toggle Sidebar",
+      exact: true,
+    });
+    // Fullscreen forms hide navigation without changing the user's preference.
+    await expect(sidebar).toHaveCount(0);
+    await expect(workspaceHeader).toHaveCount(0);
+    await expect(sidebarState).toHaveAttribute(
+      "data-app-sidebar-pinned",
+      "true",
+    );
     const patient = page.getByRole("button", {
       name: patientName,
       exact: true,
@@ -94,6 +109,43 @@ test.describe("Fill page shell", () => {
     // Close returns to the encounter updates tab.
     await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.waitForURL(/\/updates$/);
+    await expect(sidebarState).toHaveAttribute(
+      "data-app-sidebar-pinned",
+      "true",
+    );
+    await expect(sidebar).toBeVisible();
+
+    await test.step("Return from fullscreen forms with the user's collapsed or expanded sidebar unchanged", async () => {
+      for (const pinned of [false, true]) {
+        await sidebarToggle.click();
+        await page.mouse.move(1100, 700);
+        await expect(sidebarState).toHaveAttribute(
+          "data-app-sidebar-pinned",
+          String(pinned),
+        );
+        await page
+          .getByRole("link", { name: "Edit encounter", exact: true })
+          .click();
+        await expect(page).toHaveURL(/\/questionnaire\/encounter(?:\?|$)/);
+        await expect(
+          page.getByRole("region", { name: "Form canvas", exact: true }),
+        ).toBeVisible();
+        await expect(sidebar).toHaveCount(0);
+        await expect(workspaceHeader).toHaveCount(0);
+        await expect(sidebarState).toHaveAttribute(
+          "data-app-sidebar-pinned",
+          String(pinned),
+        );
+        await page.getByRole("button", { name: "Close", exact: true }).click();
+        await page.waitForURL(/\/updates$/);
+        await expect(sidebarState).toHaveAttribute(
+          "data-app-sidebar-pinned",
+          String(pinned),
+        );
+        if (pinned) await expect(sidebar).toBeVisible();
+        else await expect(sidebar).not.toBeVisible();
+      }
+    });
   });
 
   test("clinical history tab embeds the patient history sections without leaving the form", async ({

@@ -66,7 +66,7 @@ export function SectionCard({
       <section
         data-question-id={question.id}
         className={cn(
-          "rounded-xl border border-gray-200 bg-gray-50 p-3.5",
+          "rounded-xl border border-border bg-background p-3.5",
           decorationClasses,
         )}
       >
@@ -112,7 +112,7 @@ export function SectionCard({
     <div
       data-question-id={question.id}
       className={cn(
-        "overflow-hidden rounded-md border border-gray-200 bg-gray-200/60",
+        "overflow-hidden rounded-md border border-border bg-background",
         decorationClasses,
       )}
     >
@@ -128,7 +128,7 @@ export function SectionCard({
       <fieldset
         disabled={fieldsetDisabled}
         className={cn(
-          "m-1 gap-4 rounded border-0 bg-gray-50 p-2",
+          "m-1 gap-4 rounded border-0 bg-background p-2",
           containerClasses ??
             cn("grid sm:grid-cols-2", leafChildCount >= 3 && "sm:grid-cols-3"),
         )}
