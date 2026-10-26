@@ -517,16 +517,16 @@ export function EncounterCommandDialog({
       <CommandDialog
         open={open}
         onOpenChange={handleOpenChange}
-        className="md:top-1/2 md:max-w-2xl md:-translate-y-1/2"
+        className="md:max-w-2xl"
       >
-        <div className="border-b border-gray-100 shadow-xs">
+        <div>
           <CommandInput
             placeholder={t("search_encounter_command")}
             className="text-base border-none focus:ring-0 sm:text-sm"
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="w-full md:max-h-[min(32rem,calc(100dvh-8rem))]">
+        <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
           <CommandEmpty>
             {isLoading && search.length > 0 ? (
               <div className="space-y-2">
@@ -544,7 +544,7 @@ export function EncounterCommandDialog({
                     key={`${group.group}-${action.id}`}
                     value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
-                    className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-sm cursor-pointer hover:bg-soft-background aria-selected:bg-gray-100"
                     autoFocus={false}
                     disabled={action.disabled}
                   >
