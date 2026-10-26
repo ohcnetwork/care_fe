@@ -8,12 +8,15 @@ import { Card } from "@/components/ui/card";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import {
+  useIsScopedQueryParams,
+  useScopedQueryParams,
+} from "@/hooks/useScopedQueryParams";
 import { cn } from "@/lib/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
-import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface LeftCardProps {
@@ -164,15 +167,19 @@ interface EncounterResponsesTabProps {
   patientId: string;
   encounterId?: string;
   canAccess?: boolean;
+  readOnly?: boolean;
 }
 
 export const EncounterResponsesTab = ({
   patientId,
   encounterId,
   canAccess = true,
+  readOnly = false,
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
-  const [qParams, setQueryParams] = useQueryParams<{
+  const scoped = useIsScopedQueryParams();
+  const id = useId();
+  const [qParams, setQueryParams] = useScopedQueryParams<{
     questionnaireSlug?: string;
     questionnaireTitle?: string;
     responseId?: string;
@@ -186,7 +193,7 @@ export const EncounterResponsesTab = ({
 
   const handleResponseClick = (response: QuestionnaireResponse) => {
     setQueryParams({ ...qParams, responseId: response.id });
-    window.location.hash = `#response-${response.id}`;
+    if (!scoped) window.location.hash = `#response-${response.id}`;
     if (isMobile) setIsDrawerOpen(false);
   };
 
@@ -209,11 +216,12 @@ export const EncounterResponsesTab = ({
   const handleAuthorRoleChange = (roleId?: string) => {
     const { responseId: _responseId, role: _role, ...rest } = qParams;
     setQueryParams(roleId ? { ...rest, role: roleId } : rest);
-    window.history.replaceState(
-      window.history.state,
-      "",
-      window.location.href.split("#")[0],
-    );
+    if (!scoped)
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.href.split("#")[0],
+      );
   };
 
   return (
@@ -275,13 +283,14 @@ export const EncounterResponsesTab = ({
               encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
+              readOnly={readOnly}
               questionnaireSlug={questionnaireSlug}
               authorRoleId={role}
               renderItem={(response: QuestionnaireResponse) => {
                 return (
                   <div
                     key={response.id}
-                    id={`response-${response.id}`}
+                    id={`${scoped ? id : "response"}-${response.id}`}
                     className="scroll-mt-24 [overflow-anchor:auto]"
                   >
                     <Card
@@ -293,6 +302,8 @@ export const EncounterResponsesTab = ({
                       <ResponseCard
                         item={response}
                         patientId={patientId}
+                        encounterId={encounterId}
+                        readOnly={readOnly}
                         showTitle={!questionnaireSlug}
                         onTitleClick={() => {
                           setQueryParams({

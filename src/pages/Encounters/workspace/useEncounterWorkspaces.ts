@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useWorkspaceList } from "@/hooks/useWorkspaces";
 
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 import workspaceApi from "@/types/workspace/workspaceApi";
@@ -20,17 +21,7 @@ export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
     queryFn: query(workspaceApi.getUserDefaultAttributes, { silent: true }),
     retry: false,
   });
-  const list = useQuery({
-    queryKey: ["workspaces", user.id, "encounter", "active"],
-    queryFn: async ({ signal }) => {
-      const response = await query.paginated(workspaceApi.list, {
-        queryParams: { status: "active" },
-        silent: true,
-      })({ signal });
-      return response.results;
-    },
-    retry: false,
-  });
+  const list = useWorkspaceList("encounter");
   const accessibleWorkspaces = new Map(
     (list.data ?? []).map((workspace) => [workspace.id, workspace]),
   );

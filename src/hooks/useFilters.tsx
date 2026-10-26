@@ -1,4 +1,4 @@
-import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
+import { QueryParam, setQueryParamsOptions } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
 
 import PaginationComponent from "@/components/Common/Pagination";
+import {
+  useIsScopedQueryParams,
+  useScopedQueryParams,
+} from "@/hooks/useScopedQueryParams";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import { QueryParams } from "@/Utils/request/types";
@@ -38,14 +42,15 @@ export default function useFilters({
   const { t } = useTranslation();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useQueryParams();
+  const [qParams, _setQueryParams] = useScopedQueryParams();
+  const scoped = useIsScopedQueryParams();
   const [clearSearch, setClearSearch] = useState<{
     value: boolean;
     params?: string[];
   }>({ value: false });
 
   const updateCache = (query: QueryParam) => {
-    if (disableCache) return;
+    if (disableCache || scoped) return;
     const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
     FiltersCache.set(query, blacklist);
   };
@@ -82,6 +87,11 @@ export default function useFilters({
       ),
     );
 
+    if (scoped) {
+      if (Object.keys(defaults).length > 0)
+        setQueryParams({ ...defaults, ...qParams });
+      return;
+    }
     if (disableCache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();

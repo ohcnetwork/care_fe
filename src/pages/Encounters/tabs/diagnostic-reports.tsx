@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowRight, Menu, MoreVertical, Printer } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -31,6 +31,7 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
@@ -400,7 +401,7 @@ export const DiagnosticReportsTab = ({
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const [qParams, setQueryParams] = useQueryParams<{
+  const [qParams, setQueryParams] = useScopedQueryParams<{
     reportId?: string;
     activityDefinition?: string;
   }>();

@@ -211,6 +211,8 @@ export interface PluginEncounterWidgetDefinition {
   component: PluginEncounterWidgetComponent;
   /** Object schema used by the workspace configuration editor. */
   configSchema: JSONSchema2020;
+  /** The host hides this widget before mounting it in a closed encounter. */
+  requiresActiveEncounter?: boolean;
 }
 
 /**

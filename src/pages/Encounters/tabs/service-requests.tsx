@@ -19,16 +19,18 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
-export const EncounterServiceRequestTab = () => {
+export const EncounterServiceRequestTab = ({
+  returnPage,
+}: { returnPage?: string } = {}) => {
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
     facilityId,
     patientId,
+    canWriteClinicalData,
   } = useEncounter();
   const { t } = useTranslation();
   const {
@@ -124,10 +126,10 @@ export const EncounterServiceRequestTab = () => {
             />
           </div>
 
-          {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
+          {encounter && facilityId && canWriteClinicalData && (
             <Button variant="primary">
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />

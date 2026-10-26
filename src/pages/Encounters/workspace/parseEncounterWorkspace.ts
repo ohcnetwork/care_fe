@@ -1,9 +1,11 @@
 import {
   EncounterWorkspaceWidget,
+  HISTORY_PAGE_KEYS,
   MAX_ENCOUNTER_WORKSPACE_COLUMNS,
   RESERVED_ROUTE_KEYS,
   SYSTEM_PAGE_KEYS,
   encounterPageKeySchema,
+  getWorkspaceSurface,
   titleSchema,
   widgetSchema,
 } from "@/types/workspace/encounterWorkspace";
@@ -57,15 +59,25 @@ export function parseEncounterWorkspace(
   if (!isRecord(template)) return { ...result, invalid: true };
 
   result.unsupportedVersion =
-    Object.hasOwn(template, "schema_version") && template.schema_version !== 1;
+    Object.hasOwn(template, "schema_version") &&
+    template.schema_version !== 1 &&
+    template.schema_version !== 2;
   result.invalid =
     !Object.hasOwn(template, "schema_version") ||
-    hasExtraFields(template, ["schema_version", "pages"]);
+    hasExtraFields(template, ["schema_version", "pages", "surface"]) ||
+    (template.surface !== undefined &&
+      (template.schema_version !== 2 ||
+        !["encounter", "patient_history"].includes(String(template.surface))));
   if (!Array.isArray(template.pages)) return { ...result, invalid: true };
   if (template.pages.length > 50) result.invalid = true;
 
   const availableSystemKeys = new Set(systemPageKeys);
-  const reservedSystemKeys = new Set([...SYSTEM_PAGE_KEYS, ...systemPageKeys]);
+  const reservedSystemKeys = new Set([
+    ...(getWorkspaceSurface(template) === "patient_history"
+      ? HISTORY_PAGE_KEYS
+      : SYSTEM_PAGE_KEYS),
+    ...systemPageKeys,
+  ]);
   const pageKeys = new Set<string>();
   let widgetCount = 0;
 
@@ -126,7 +138,9 @@ export function parseEncounterWorkspace(
     if (
       key === undefined ||
       pageKeys.has(key) ||
-      (value.kind === "custom" && reservedSystemKeys.has(key))
+      (value.kind === "custom" &&
+        template.schema_version !== 2 &&
+        reservedSystemKeys.has(key))
     ) {
       result.invalid = true;
       continue;

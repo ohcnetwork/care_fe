@@ -77,26 +77,47 @@ change to a clinical list, form action, or details card applies to both layouts.
 System pages use their encounter route keys, such as `medicines`. All keys below
 are exact: the editor and renderer do not translate aliases.
 
-| Widget type               | Content                                                                     |
-| ------------------------- | --------------------------------------------------------------------------- |
-| `allergies`               | Patient allergies, filtered by encounter for completed encounters           |
-| `symptoms`                | Selected encounter's symptoms                                               |
-| `diagnosis`               | Selected encounter's diagnoses                                              |
-| `vitals`                  | Selected encounter's observations using the configured primary vital groups |
-| `questionnaire_responses` | Selected encounter's submitted forms                                        |
-| `service_requests`        | Selected encounter's service requests, optionally filtered by status        |
-| `quick_actions`           | Allergy, order, medication, form, symptom, and diagnosis entry shortcuts    |
-| `favorite_forms`          | The user's favorite form shortcuts                                          |
-| `draft_forms`             | Local and server drafts for the current encounter                           |
-| `encounter_tags`          | Encounter tags                                                              |
-| `locations`               | Current location and location history                                       |
-| `care_team`               | Assigned care team                                                          |
-| `departments`             | Departments and teams                                                       |
-| `hospitalization`         | Admission details                                                           |
-| `discharge`               | Discharge details                                                           |
-| `audit_logs`              | Encounter creation and update details                                       |
-| `encounter_actions`       | Encounter management and completion actions                                 |
-| `reports`                 | Available discharge summary report templates                                |
+| Widget type                  | Content                                                                                                                                                                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `allergies`                  | Patient allergies, filtered by encounter for completed encounters                                                                                                                                                          |
+| `symptoms`                   | Selected encounter's symptoms                                                                                                                                                                                              |
+| `diagnosis`                  | Selected encounter's diagnoses                                                                                                                                                                                             |
+| `vitals`                     | Selected encounter's observations using the configured primary vital groups, or the latest reading per configured `codes` entry with its change from the previous reading                                                  |
+| `questionnaire_responses`    | Selected encounter's submitted forms                                                                                                                                                                                       |
+| `service_requests`           | Selected encounter's service requests, optionally filtered by status                                                                                                                                                       |
+| `outstanding_orders`         | Selected encounter's orders with report-received state, category, report and status links; `category`, `include_completed`, `include_on_hold`, `limit`                                                                     |
+| `current_medications`        | Patient-wide active prescriptions and outside medication statements with dosage, duration, and prescriber; `sources` picks either; renders without an encounter                                                            |
+| `recent_encounters`          | Patient's latest encounters with care team, location, and status; `care_team: "mine"` or `care_team_user` limit by care team membership, plus `encounter_class`, `status`, `exclude_current`; renders without an encounter |
+| `quick_actions`              | Allergy, order, medication, form, symptom, and diagnosis entry shortcuts                                                                                                                                                   |
+| `favorite_forms`             | The user's favorite form shortcuts                                                                                                                                                                                         |
+| `draft_forms`                | Local and server drafts for the current encounter                                                                                                                                                                          |
+| `encounter_tags`             | Encounter tags                                                                                                                                                                                                             |
+| `locations`                  | Current location and location history                                                                                                                                                                                      |
+| `care_team`                  | Assigned care team                                                                                                                                                                                                         |
+| `departments`                | Departments and teams                                                                                                                                                                                                      |
+| `hospitalization`            | Admission details                                                                                                                                                                                                          |
+| `discharge`                  | Discharge details                                                                                                                                                                                                          |
+| `audit_logs`                 | Encounter creation and update details                                                                                                                                                                                      |
+| `encounter_actions`          | Encounter management and completion actions                                                                                                                                                                                |
+| `reports`                    | Available discharge summary report templates                                                                                                                                                                               |
+| `responses`                  | Full response browser with independent form and author filters                                                                                                                                                             |
+| `observations`               | Full observation timeline; `limit` shows only the latest readings                                                                                                                                                          |
+| `medications`                | Prescriptions, statements, administration, and dispense history; `tabs` and `default_tab` pick a subset (one tab hides the tab bar)                                                                                        |
+| `service_request_management` | Full service-request browser with independent search and filters                                                                                                                                                           |
+| `diagnostic_reports`         | Diagnostic reports and their clinical results (not discharge templates)                                                                                                                                                    |
+| `plots`                      | Configured observation charts; `plot` opens a chart set first                                                                                                                                                              |
+| `observation_chart`          | One chart set, or selected `groups` from it, without chart-set tabs; `height` and `columns`                                                                                                                                |
+| `consents`                   | Encounter consent search, review, and permitted creation                                                                                                                                                                   |
+| `account`                    | Encounter billing account                                                                                                                                                                                                  |
+| `encounter_summary`          | Standard details, actions, and discharge-template tabs; `tabs` and `default_tab` pick a subset                                                                                                                             |
+| `encounter_extensions`       | The existing `EncounterOverviewTop` app contribution slot; hidden when no app contributes                                                                                                                                  |
+| `clinical_history`           | Read-only patient history tabs, excluding immunizations; `tabs` and `default_tab` pick a subset                                                                                                                            |
+| `history_responses`          | Patient-wide response history                                                                                                                                                                                              |
+| `history_diagnostic_reports` | Patient-wide diagnostic reports                                                                                                                                                                                            |
+| `history_symptoms`           | Patient symptom history                                                                                                                                                                                                    |
+| `history_diagnoses`          | Patient diagnosis history                                                                                                                                                                                                  |
+| `history_allergies`          | Patient allergy history                                                                                                                                                                                                    |
+| `history_medications`        | Patient prescriptions, statements, and administration history                                                                                                                                                              |
 
 Every widget accepts an optional `title`. `questionnaire_responses` also accepts
 `config.questionnaire_slug` (an exact, nonempty slug), `config.only_unstructured`
@@ -166,7 +187,126 @@ editable encounter with facility and clinical access. Form links return to the
 custom page they were opened from. Reports retain template permissions and only
 load in a matching facility context. Selecting a historical encounter updates
 widget data and removes write actions. Existing full tabs with navigation or
-shared URL filters remain system pages.
+shared URL filters can be composed using the browser widgets above. Each widget
+has an isolated query-parameter scope, so its filters and pagination cannot
+overwrite another widget's state, the selected encounter, or a questionnaire's
+URL. Responses and Location history preserve the selected encounter's read-only
+state through their cards and dialogs.
+
+Notes, devices, immunizations, and files remain built-in system pages. They have
+not been added as composable widgets.
+
+### The workspace studio
+
+The studio (`src/components/Workspace/WorkspaceStudio.tsx`) is the authoring
+UI for these templates. It deliberately uses everyday words instead of the JSON
+vocabulary:
+
+| Studio term                | Template field                                                          |
+| -------------------------- | ----------------------------------------------------------------------- |
+| Tab                        | a `pages[]` entry; built-in tabs are `kind: "system"`                   |
+| Section                    | a `widgets[]` entry                                                     |
+| Layout preset              | the column `span` values (`[12]`, `[8,4]`, `[4,8]`, `[6,6]`, `[4,4,4]`) |
+| "Show this section"        | `visible_when["encounter.status"]`                                      |
+| Encounter / history screen | `surface`                                                               |
+
+Creating a workspace starts from a **starting point** (`workspacePresets.ts`:
+standard encounter, ward rounds, outpatient visit, standard history, or blank)
+rather than an empty grid. The surface is fixed by that choice. The single design
+canvas renders every section as a sample card using the runtime column grid, so
+there is no separate preview mode: **Preview as Active / Closed encounter** dims
+sections that would auto-hide and explains why, and a column whose sections are
+all hidden is labelled rather than silently collapsed. Section options open in a
+drawer with a title, the section's few settings, a plain-language visibility
+choice (always / only while active / only after closed / specific statuses), and
+an advanced JSON view. JSON editing of the whole template lives under **More
+options → Edit as JSON**; unrecognised templates open there automatically.
+
+Widths that match no preset are shown as a custom layout; picking a preset
+reflows the sections and merges any surplus columns into the last one. Built-in
+tabs can be shown, hidden, and reordered; supported ones offer **Customise this
+tab**, which converts them to an editable tab with the same key. Notes, devices,
+immunizations, and files remain built-in only.
+
+### Surfaces and clinical history
+
+Existing version-1 templates remain supported. Version 2 adds an optional
+`surface`, either `encounter` (the default) or `patient_history`, and allows custom
+pages to use built-in page keys so presets can rebuild the supported pages without
+changing their URLs.
+
+The clinical-history preset composes the six history widgets into pages and
+retains the existing immunizations system page. A patient-history workspace
+cannot publish known encounter-dependent widgets; the section picker disables
+them with an explanation. Individual history widgets can also be added to
+encounter layouts; they read the patient-wide history, not just the selected
+encounter. Patient-history access requires the patient's clinical-data
+permission, rather than an encounter-only clinical read grant.
+
+The standalone clinical-history page and the questionnaire's embedded history
+tab use the same workspace renderer. With no chosen layout they retain the
+standard history tabs. History layout selection is **browser-local and scoped
+to the signed-in user**, with cross-tab synchronization and visible storage/load
+errors. Workspace content still uses the existing server APIs. This deliberately
+does not introduce a new backend default-attribute contract; encounter-class
+preferences continue to use their existing server-side contract.
+
+```json
+{
+  "schema_version": 2,
+  "surface": "patient_history",
+  "pages": [
+    {
+      "kind": "custom",
+      "key": "background",
+      "title": "Medical background",
+      "columns": [
+        {
+          "span": 6,
+          "widgets": [{ "type": "history_diagnoses" }]
+        },
+        {
+          "span": 6,
+          "widgets": [{ "type": "history_medications" }]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Availability and validation
+
+`widgetAvailability.ts` is the shared source of encounter and access requirements.
+The studio labels only the rules an author might not expect: sections that
+require an _active_ encounter (auto-hidden once closed) and patient-level
+sections that work without one. Active-only widgets automatically hide on closed
+encounters, and editing tools also hide in read-only or non-facility contexts.
+These rules run before widgets mount and before grid tracks are allocated, so
+hidden-only columns collapse and an all-hidden page shows its empty state.
+
+`visible_when` adds an optional status filter; it cannot override a widget's
+intrinsic requirements or grant permissions. Patient-wide read-only history does
+not inherently require an active encounter. An author can explicitly add a
+status filter when a particular encounter layout should hide that history.
+
+The studio canvas never loads patient data: clinical and plugin components are
+not mounted, no clinical requests are sent, and sample controls are disabled.
+**More options → Preview with access level** simulates clinical editing,
+read-only access, encounter-only access without patient history, and
+details-only access.
+
+Saving validates every known widget configuration, including JSON edits and
+sections whose drawer was never opened. Unknown widget options remain
+preserved rather than being erased. Safe system-page references also remain
+saveable while a plugin is loading or disabled if they were already saved on the
+same surface. The editor warns about their unavailability instead of requiring
+their removal to rename or archive a layout. Newly introduced system references
+must belong to that surface or an available plugin.
+
+The workspace contract tests run with `npm run test:unit`. Browser regressions
+are in `tests/admin/workspaces/workspaceEditor.spec.ts` and
+`tests/facility/patient/encounter/encounterWorkspace.spec.ts`.
 
 Plugins can provide their own UI inside a custom encounter workspace page through
 the manifest's `encounterWidgets` map. Each key is a local widget name; CARE prefixes
@@ -279,6 +419,12 @@ mounting the plugin component. It isolates each widget with Suspense and a plugi
 error boundary. A loading app shows a loading state; a missing app or widget shows
 an unavailable state without removing the saved configuration. Namespaced types
 remain valid in saved workspace JSON while an app is disabled or unavailable.
+
+A widget definition may set `requiresActiveEncounter: true` alongside
+`component` and `configSchema`. CARE then labels it as active-encounter-only in
+the studio and hides it before mounting on closed encounters. This does not
+replace `readOnly` or API authorization: plugins must still disable editing
+whenever `readOnly` is true.
 
 `useCareAppEncounterWidgets` derives available widgets directly from
 `CareAppsContext`, following app loading and removal without a separate mutable

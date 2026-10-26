@@ -1,0 +1,218 @@
+import { useQuery } from "@tanstack/react-query";
+import { ShieldAlert } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+
+import { getPermissions } from "@/common/Permissions";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePermissions } from "@/context/PermissionContext";
+import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
+import { useHistoryWorkspace } from "@/hooks/useWorkspaces";
+import { WorkspacePage } from "@/pages/Encounters/workspace/EncounterWorkspacePage";
+import { EncounterWorkspacePicker } from "@/pages/Encounters/workspace/EncounterWorkspacePicker";
+import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
+import { useClinicalHistoryTabs } from "@/pages/Patient/History/clinicalHistoryTabs";
+import patientApi from "@/types/emr/patient/patientApi";
+import type { WorkspaceWidgetContext } from "@/types/workspace/widgetAvailability";
+import query from "@/Utils/request/query";
+
+export function ClinicalHistoryWorkspace({
+  patientId,
+  facilityId,
+  currentTab,
+  onTabChange,
+  embedded = false,
+}: {
+  patientId: string;
+  facilityId?: string;
+  currentTab: string;
+  onTabChange: (tab: string) => void;
+  embedded?: boolean;
+}) {
+  const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { list, preference, workspace, save } = useHistoryWorkspace();
+  const patient = useQuery({
+    queryKey: ["patient", patientId, facilityId],
+    queryFn: query(patientApi.get, {
+      pathParams: { id: patientId },
+      queryParams: { facility: facilityId },
+      silent: true,
+    }),
+  });
+  const canRead = getPermissions(
+    hasPermission,
+    patient.data?.permissions ?? [],
+  ).canViewClinicalData;
+  const context: WorkspaceWidgetContext = {
+    patientId,
+    facilityId,
+    canReadClinicalData: canRead,
+    canReadPatientHistory: canRead,
+    canReadSelectedEncounter: false,
+    canWriteClinicalData: false,
+  };
+  const systemTabs = useClinicalHistoryTabs({
+    patientId,
+    facilityId,
+    embedded,
+  });
+  const parsed = workspace
+    ? parseEncounterWorkspace(workspace.template, Object.keys(systemTabs))
+    : undefined;
+  const tabs: Record<
+    string,
+    {
+      label: string;
+      component: ReactNode;
+      visible?: boolean;
+    }
+  > = {};
+  if (parsed) {
+    for (const page of parsed.pages) {
+      if (page.kind === "system") {
+        const systemTab = systemTabs[page.key as keyof typeof systemTabs];
+        if (systemTab)
+          tabs[page.key] = {
+            ...systemTab,
+            visible: !page.hidden,
+            component: (
+              <ScopedQueryParamsProvider key={`${workspace?.id}:${page.key}`}>
+                {systemTab.component}
+              </ScopedQueryParamsProvider>
+            ),
+          };
+      } else {
+        tabs[page.key] = {
+          label: page.title,
+          visible: !page.hidden,
+          component:
+            page.kind === "custom" ? (
+              <WorkspacePage
+                key={`${workspace?.id}:${page.key}`}
+                page={page}
+                context={context}
+              />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  {t("encounter_workspace_page_unavailable")}
+                </AlertDescription>
+              </Alert>
+            ),
+        };
+      }
+    }
+  } else {
+    for (const [key, tab] of Object.entries(systemTabs)) {
+      tabs[key] = {
+        ...tab,
+        component: embedded ? (
+          <ScopedQueryParamsProvider key={key}>
+            {tab.component}
+          </ScopedQueryParamsProvider>
+        ) : (
+          tab.component
+        ),
+      };
+    }
+  }
+  const firstTab = Object.keys(tabs).find((key) => tabs[key].visible !== false);
+  const activeTab =
+    Object.hasOwn(tabs, currentTab) && tabs[currentTab].visible !== false
+      ? currentTab
+      : firstTab;
+  const loading = patient.isLoading || list.isLoading || preference.isLoading;
+  useEffect(() => {
+    if (!loading && activeTab && activeTab !== currentTab)
+      onTabChange(activeTab);
+  }, [loading, activeTab, currentTab, onTabChange]);
+
+  if (patient.isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          {t("error")}
+          <Button variant="outline" onClick={() => patient.refetch()}>
+            {t("try_again")}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  if (loading) return <Skeleton className="h-64 w-full" />;
+  if (!canRead)
+    return (
+      <EmptyState
+        icon={<ShieldAlert className="size-8 text-gray-400" />}
+        title={t("workspace_patient_history_access_denied")}
+        description={t("no_permission_to_view_clinical_data_description")}
+      />
+    );
+
+  return (
+    <div className="min-w-0 space-y-3">
+      <div className="flex items-center justify-end gap-2">
+        {workspace && (
+          <span className="text-sm text-gray-600">{workspace.name}</span>
+        )}
+        <EncounterWorkspacePicker
+          surface="patient_history"
+          workspaces={list.data ?? []}
+          workspaceId={workspace?.id}
+          isLoading={loading}
+          isError={list.isError || preference.isError}
+          onRetry={() => {
+            list.refetch();
+            preference.refetch();
+          }}
+          onSelect={(choice) => save.mutate(choice.id)}
+          onUseStandard={() => save.mutate(null)}
+          isSaving={save.isPending}
+          saveError={save.isError}
+        />
+      </div>
+      {(list.isError || preference.isError) && (
+        <Alert>
+          <AlertDescription>
+            {t("workspace_history_load_error")}
+          </AlertDescription>
+        </Alert>
+      )}
+      {preference.data && list.isSuccess && !workspace && (
+        <Alert>
+          <AlertDescription>
+            {t("workspace_history_unavailable")}
+          </AlertDescription>
+        </Alert>
+      )}
+      {parsed && (parsed.invalid || parsed.unsupportedVersion) && (
+        <Alert>
+          <AlertDescription>
+            {t("encounter_workspace_invalid")}
+          </AlertDescription>
+        </Alert>
+      )}
+      {activeTab ? (
+        <NavTabs
+          tabs={tabs}
+          currentTab={activeTab}
+          onTabChange={onTabChange}
+          setPageTitle={false}
+          showMoreAfterIndex={embedded ? 3 : 7}
+          tabContentClassName="mt-4"
+        />
+      ) : (
+        <Alert>
+          <AlertDescription>
+            {t("encounter_workspace_no_pages")}
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
+}

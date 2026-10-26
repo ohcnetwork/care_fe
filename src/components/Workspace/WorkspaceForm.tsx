@@ -56,6 +56,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
@@ -72,9 +73,10 @@ import {
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 
-import { EncounterWorkspaceEditor } from "./EncounterWorkspaceEditor";
 import { WorkspaceOrganizationsField } from "./WorkspaceOrganizationsField";
+import { WorkspaceStudio } from "./WorkspaceStudio";
 import { parseWorkspaceJson } from "./workspaceEditorUtils";
+import { workspaceWidgetIssues } from "./workspaceValidation";
 
 interface WorkspaceFormValues {
   name: string;
@@ -101,8 +103,10 @@ export function WorkspaceForm({
   const queryClient = useQueryClient();
   const user = useAuthUser();
   const pluginTabs = useCareAppTabs("encounterTabs");
+  const { widgets: pluginWidgets } = useCareAppEncounterWidgets();
   const encounterSchema = createEncounterWorkspaceSchema(
     Object.keys(pluginTabs),
+    existing?.template,
   );
   const [isEditorValid, setIsEditorValid] = useState(true);
   const [invalidTemplateSnapshot, setInvalidTemplateSnapshot] = useState<
@@ -130,8 +134,20 @@ export function WorkspaceForm({
             if (!parsed.success) {
               ctx.addIssue({
                 code: "custom",
-                message: t("encounter_workspace_template_invalid"),
+                message: t(
+                  template.schema_version === 1
+                    ? "encounter_workspace_template_invalid"
+                    : "workspace_template_structure_error",
+                ),
               });
+            } else {
+              for (const message of workspaceWidgetIssues(
+                parsed.data,
+                pluginWidgets,
+                t,
+              )) {
+                ctx.addIssue({ code: "custom", message });
+              }
             }
           }
         } catch {
@@ -622,7 +638,8 @@ export function WorkspaceForm({
               name="template"
               render={({ field }) => (
                 <FormItem className="min-w-0">
-                  <EncounterWorkspaceEditor
+                  <WorkspaceStudio
+                    savedTemplate={existing?.template}
                     value={field.value}
                     onChange={field.onChange}
                     disabled={busy}

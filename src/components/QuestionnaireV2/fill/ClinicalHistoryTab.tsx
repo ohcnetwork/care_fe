@@ -1,11 +1,6 @@
 import { useState } from "react";
 
-import { NavTabs } from "@/components/ui/nav-tabs";
-
-import useBreakpoints from "@/hooks/useBreakpoints";
-
-import type { ClinicalHistoryTabKey } from "@/pages/Patient/History/clinicalHistoryTabs";
-import { useClinicalHistoryTabs } from "@/pages/Patient/History/clinicalHistoryTabs";
+import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
 /**
  * Tab 2 of the fill page: the patient's clinical history, embedded. Same
@@ -20,25 +15,15 @@ export function ClinicalHistoryTab({
   patientId: string;
   facilityId?: string;
 }) {
-  const [tab, setTab] = useState<ClinicalHistoryTabKey>("responses");
-  const tabs = useClinicalHistoryTabs({ patientId, facilityId });
-  const showMoreAfterIndex = useBreakpoints({
-    default: 1,
-    xs: 2,
-    sm: 6,
-    xl: 9,
-    "2xl": 12,
-  });
+  const [tab, setTab] = useState("responses");
 
   return (
-    <NavTabs
-      className="w-full"
-      tabContentClassName="mt-6"
-      tabs={tabs}
+    <ClinicalHistoryWorkspace
+      patientId={patientId}
+      facilityId={facilityId}
       currentTab={tab}
       onTabChange={setTab}
-      setPageTitle={false}
-      showMoreAfterIndex={showMoreAfterIndex}
+      embedded
     />
   );
 }

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { EncounterClass } from "@/types/emr/encounter/encounter";
+import type { WorkspaceSurface } from "@/types/workspace/encounterWorkspace";
 import { WorkspaceRead } from "@/types/workspace/workspace";
 
 interface EncounterWorkspacePickerProps {
@@ -37,6 +38,8 @@ interface EncounterWorkspacePickerProps {
   isSaving: boolean;
   saveError: boolean;
   encounterClass?: EncounterClass;
+  surface?: WorkspaceSurface;
+  onUseStandard?: () => void;
 }
 
 export function EncounterWorkspacePicker({
@@ -49,14 +52,26 @@ export function EncounterWorkspacePicker({
   isSaving,
   saveError,
   encounterClass,
+  surface = "encounter",
+  onUseStandard,
 }: EncounterWorkspacePickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const wasSaving = useRef(false);
   const currentWorkspace = workspaces.find(({ id }) => id === workspaceId);
+  const label = t(
+    surface === "patient_history"
+      ? "workspace_history_layout"
+      : "encounter_workspace",
+  );
+  const standardLabel = t(
+    surface === "patient_history"
+      ? "workspace_history_standard"
+      : "encounter_workspace_standard",
+  );
   const currentName = workspaceId
     ? (currentWorkspace?.name ?? t("encounter_workspace_unavailable"))
-    : t("encounter_workspace_standard");
+    : standardLabel;
   const busy = isLoading || isError || isSaving;
   useEffect(() => {
     if (wasSaving.current && !isSaving && !saveError) setOpen(false);
@@ -72,7 +87,7 @@ export function EncounterWorkspacePicker({
               type="button"
               variant="outline"
               size="icon"
-              aria-label={t("encounter_workspace")}
+              aria-label={label}
               className="size-9 shrink-0 rounded-lg border-gray-200 bg-white text-sm font-bold text-gray-700 shadow-none"
             >
               {isSaving ? (
@@ -92,19 +107,21 @@ export function EncounterWorkspacePicker({
       <PopoverContent
         align="end"
         className="w-80 max-w-[calc(100vw-2rem)] p-0"
-        aria-label={t("encounter_workspace")}
+        aria-label={label}
       >
         <div className="border-b px-3 py-2.5">
-          <h2 className="text-sm font-semibold">{t("encounter_workspace")}</h2>
+          <h2 className="text-sm font-semibold">{label}</h2>
           <p className="mt-1 truncate text-xs text-gray-700">
             {t("encounter_workspace_current", { name: currentName })}
           </p>
           <p className="mt-0.5 text-xs text-gray-500">
-            {t("encounter_workspace_picker_hint", {
-              encounterClass: encounterClass
-                ? t(`encounter_class__${encounterClass}`)
-                : t("encounter"),
-            })}
+            {surface === "patient_history"
+              ? t("workspace_history_browser_preference")
+              : t("encounter_workspace_picker_hint", {
+                  encounterClass: encounterClass
+                    ? t(`encounter_class__${encounterClass}`)
+                    : t("encounter"),
+                })}
           </p>
         </div>
         {isError && (
@@ -153,6 +170,20 @@ export function EncounterWorkspacePicker({
               <>
                 <CommandEmpty>{t("no_workspaces_found")}</CommandEmpty>
                 <CommandGroup>
+                  {onUseStandard && (
+                    <CommandItem
+                      value="standard"
+                      keywords={[standardLabel]}
+                      disabled={busy}
+                      onSelect={() => {
+                        if (busy) return;
+                        onUseStandard();
+                      }}
+                    >
+                      {standardLabel}
+                      {!workspaceId && <Check className="ml-auto size-4" />}
+                    </CommandItem>
+                  )}
                   {workspaces.map((workspace) => (
                     <CommandItem
                       key={workspace.id}

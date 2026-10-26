@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { FormProvider, useForm, type Path } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { z } from "zod";
 
 import { SchemaField } from "@/components/Extensions/SchemaField";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import type { ExtensionFieldMetadata } from "@/Utils/schema/types";
 
 interface ConfigFormValues {
@@ -118,11 +120,30 @@ export function WorkspaceSchemaFields({
       <fieldset disabled={disabled} className="min-w-0 space-y-4">
         {fields.map((field) => (
           <div key={field.name} className="min-w-0 space-y-1">
-            <SchemaField
-              metadata={{ ...field, readOnly: disabled || field.readOnly }}
-              control={form.control}
-              basePath="config"
-            />
+            {field.type === "array" && field.itemMetadata?.options?.length ? (
+              <EnumArrayField
+                field={field}
+                options={field.itemMetadata.options}
+                value={
+                  Array.isArray(config[field.name])
+                    ? (config[field.name] as unknown[])
+                    : []
+                }
+                disabled={disabled}
+                onChange={(next) =>
+                  form.setValue(
+                    `config.${field.name}`,
+                    next.length ? next : undefined,
+                  )
+                }
+              />
+            ) : (
+              <SchemaField
+                metadata={{ ...field, readOnly: disabled || field.readOnly }}
+                control={form.control}
+                basePath="config"
+              />
+            )}
             {!field.required && !field.isConst && !field.readOnly && (
               <Button
                 type="button"
@@ -142,5 +163,64 @@ export function WorkspaceSchemaFields({
         ))}
       </fieldset>
     </FormProvider>
+  );
+}
+
+/** A fixed set of choices reads better as checkboxes than as an add/remove list. */
+function EnumArrayField({
+  field,
+  options,
+  value,
+  disabled,
+  onChange,
+}: {
+  field: ExtensionFieldMetadata;
+  options: NonNullable<ExtensionFieldMetadata["options"]>;
+  value: unknown[];
+  disabled: boolean;
+  onChange: (value: unknown[]) => void;
+}) {
+  const id = useId();
+  return (
+    <fieldset disabled={disabled} className="space-y-2">
+      <legend className="text-sm font-medium">{field.label}</legend>
+      <div className="space-y-2 rounded-lg border border-gray-200 p-3">
+        {options.map((option) => {
+          const key = String(option.value);
+          const checked = value.includes(option.value);
+          return (
+            <div key={key} className="flex items-center gap-2.5">
+              <Checkbox
+                id={`${id}-${key}`}
+                checked={checked}
+                disabled={disabled}
+                onCheckedChange={(state) =>
+                  onChange(
+                    state
+                      ? // Keep the schema's option order rather than click order.
+                        options
+                          .map((item) => item.value)
+                          .filter(
+                            (item) =>
+                              item === option.value || value.includes(item),
+                          )
+                      : value.filter((item) => item !== option.value),
+                  )
+                }
+              />
+              <Label
+                htmlFor={`${id}-${key}`}
+                className="text-sm leading-5 font-normal"
+              >
+                {option.label}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+      {field.description && (
+        <p className="text-xs leading-5 text-gray-500">{field.description}</p>
+      )}
+    </fieldset>
   );
 }
