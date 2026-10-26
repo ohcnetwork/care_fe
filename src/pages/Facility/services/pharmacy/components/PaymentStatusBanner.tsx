@@ -17,8 +17,8 @@ import {
   SendIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { Link } from "raviger";
-import { useState } from "react";
+import { Link, useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -44,7 +44,11 @@ import {
   ChargeItemRead,
   ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceRead, InvoiceStatus } from "@/types/billing/invoice/invoice";
+import {
+  InvoiceCreate,
+  InvoiceRead,
+  InvoiceStatus,
+} from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { PaymentReconciliationStatus } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 
@@ -167,6 +171,9 @@ export function PaymentStatusBanner({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [{ collectPayment }, setQParams] = useQueryParams<{
+    collectPayment?: string;
+  }>();
 
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [markBalancedDialogOpen, setMarkBalancedDialogOpen] = useState(false);
@@ -190,13 +197,20 @@ export function PaymentStatusBanner({
   };
 
   const { mutate: issueInvoice, isPending: isIssuingInvoice } = useMutation({
-    mutationFn: invoiceId
-      ? mutate(invoiceApi.updateInvoice, {
-          pathParams: { facilityId, invoiceId },
-        })
-      : async () => undefined,
-    onSuccess: () => {
+    mutationFn: async (data: InvoiceCreate) => {
+      if (!invoiceId) return;
+      return mutate(invoiceApi.updateInvoice, {
+        pathParams: { facilityId, invoiceId },
+      })(data);
+    },
+    onSuccess: (issuedInvoice) => {
       toast.success(t("invoice_issued_successfully"));
+      if (issuedInvoice) {
+        setQParams(
+          { collectPayment: issuedInvoice.id },
+          { overwrite: false, replace: true },
+        );
+      }
       invalidateQueries();
       onPaymentSuccess();
     },
@@ -233,6 +247,29 @@ export function PaymentStatusBanner({
   const isBalanced = invoice?.status === InvoiceStatus.balanced;
   // Positive/settled state: either fully paid or manually balanced.
   const isSettled = isFullyPaid || isBalanced;
+
+  useEffect(() => {
+    if (
+      !collectPayment ||
+      collectPayment !== invoiceId ||
+      !invoice ||
+      invoice.status === InvoiceStatus.draft
+    ) {
+      return;
+    }
+
+    if (invoice.status === InvoiceStatus.issued && !isSettled) {
+      // Consume the navigation request once the asynchronous invoice is ready.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPaymentSheetOpen(true);
+    }
+    // Read the current URL so consuming this request cannot restore another
+    // parameter removed by the order's auto-advance effect in the same render.
+    const params = new URLSearchParams(window.location.search);
+    params.delete("collectPayment");
+    setQParams(Object.fromEntries(params), { replace: true });
+  }, [collectPayment, invoiceId, invoice, isSettled, setQParams]);
+
   const hasPayments = invoice?.payments && invoice.payments.length > 0;
   const hasNonMedicationItems = invoice?.charge_items?.some(
     (item) =>
@@ -271,7 +308,7 @@ export function PaymentStatusBanner({
     return <PaymentStatusBannerSkeleton />;
   }
 
-  // No invoice exists yet — show "Create Invoice" CTA if there are billable items
+  // No invoice exists yet — create and issue the billable items in one step.
   if (!invoice) {
     if (unbilledItems.length === 0) return null;
     if (readOnly) return null;
@@ -305,7 +342,7 @@ export function PaymentStatusBanner({
               onClick={() => onCreateInvoice(unbilledItems)}
               disabled={isCreatingInvoice}
             >
-              {t("create_invoice")}
+              {t("issue_invoice")}
               <ShortcutBadge actionId="enter-action" />
             </Button>
           )}
