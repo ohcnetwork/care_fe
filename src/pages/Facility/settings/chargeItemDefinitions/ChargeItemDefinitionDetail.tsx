@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -134,16 +134,12 @@ export function ChargeItemDefinitionDetail({
             <div className="text-center">
               <CareIcon icon="l-folder-open" className="mx-auto mb-2 size-8" />
               <p>{t("charge_item_definition_not_found")}</p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/charge_item_definitions`,
-                  )
-                }
-              >
-                {t("back_to_list")}
+              <Button variant="outline" className="mt-4" asChild>
+                <Link
+                  href={`/facility/${facilityId}/settings/charge_item_definitions`}
+                >
+                  {t("back_to_list")}
+                </Link>
               </Button>
             </div>
           </div>
@@ -193,15 +189,13 @@ export function ChargeItemDefinitionDetail({
                   {t("delete")}
                 </Button>
               )}
-              <Button
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/charge_item_definitions/${slug}/edit`,
-                  )
-                }
-              >
-                <CareIcon icon="l-pen" className="mr-2" />
-                {t("edit")}
+              <Button asChild>
+                <Link
+                  href={`/facility/${facilityId}/settings/charge_item_definitions/${slug}/edit`}
+                >
+                  <CareIcon icon="l-pen" className="mr-2" />
+                  {t("edit")}
+                </Link>
               </Button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Link, navigate, usePathParams } from "raviger";
+import { Link, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
@@ -125,17 +125,17 @@ export function UserCard(props: UserCardProps) {
           {!user.deleted ? (
             <>
               {actions}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigate(
-                    `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`,
-                  );
-                }}
-              >
-                <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
-                <span>{t("see_details")}</span>
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={
+                    facility
+                      ? `/facility/${facility}/users/${user.username}`
+                      : `/users/${user.username}`
+                  }
+                >
+                  <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+                  <span>{t("see_details")}</span>
+                </Link>
               </Button>
             </>
           ) : (

@@ -23,7 +23,7 @@ import {
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import { isGreaterThan, round } from "@/Utils/decimal";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
   sourceUrl?: string;
@@ -75,13 +75,11 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
             )}
           </div>
           {invoiceUrl ? (
-            <Button
-              variant="outline"
-              size="xs"
-              onClick={() => navigate(invoiceUrl)}
-            >
-              {t("invoice")}
-              <CareIcon icon="l-external-link-alt" className="size-6" />
+            <Button variant="outline" size="xs" asChild>
+              <Link href={invoiceUrl}>
+                {t("invoice")}
+                <CareIcon icon="l-external-link-alt" className="size-6" />
+              </Link>
             </Button>
           ) : (
             <Badge variant={CHARGE_ITEM_STATUS_COLORS[chargeItem.status]}>

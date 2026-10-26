@@ -60,7 +60,7 @@ test.describe("Product Knowledge Creation", () => {
   });
 
   test("validate the basic fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("link", { name: /add product/i }).click();
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(page.getByText(/name.*required/i)).toBeVisible();
@@ -70,7 +70,7 @@ test.describe("Product Knowledge Creation", () => {
   });
 
   test("validate all fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("link", { name: /add product/i }).click();
     await page.getByRole("button", { name: "Add Guideline" }).click();
     await page.getByRole("button", { name: "Add Name" }).click();
 
@@ -87,7 +87,7 @@ test.describe("Product Knowledge Creation", () => {
   test("create a product knowledge with required fields only", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("link", { name: /add product/i }).click();
 
     // Basic details
     await page.getByRole("textbox", { name: /name/i }).fill(name);
@@ -126,7 +126,7 @@ test.describe("Product Knowledge Creation", () => {
       .click();
     await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
-    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.getByRole("link", { name: "Edit" }).first().click();
     await expect(
       page.getByRole("textbox", { name: /name/i }).first(),
     ).toHaveValue(name);
@@ -137,7 +137,7 @@ test.describe("Product Knowledge Creation", () => {
   });
 
   test("create a product knowledge with all fields", async ({ page }) => {
-    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("link", { name: /add product/i }).click();
 
     // Basic details
     await page.getByRole("textbox", { name: /name/i }).fill(name);

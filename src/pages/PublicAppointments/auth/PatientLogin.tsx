@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -237,20 +237,25 @@ export default function PatientLogin({
 
   return (
     <div className="container max-w-3xl mx-auto p-10">
-      <Button
-        variant="outline"
-        className="border border-secondary-400"
-        onClick={() =>
-          page === "send"
-            ? goBack(`/facility/${facilityId}`)
-            : navigate(
-                `/facility/${facilityId}/appointments/${staffId}/otp/send`,
-              )
-        }
-      >
-        <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
-        <span className="text-sm underline">{t("back")}</span>
-      </Button>
+      {page === "send" ? (
+        <Button
+          variant="outline"
+          className="border border-secondary-400"
+          onClick={() => goBack(`/facility/${facilityId}`)}
+        >
+          <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
+          <span className="text-sm underline">{t("back")}</span>
+        </Button>
+      ) : (
+        <Button variant="outline" className="border border-secondary-400" asChild>
+          <Link
+            href={`/facility/${facilityId}/appointments/${staffId}/otp/send`}
+          >
+            <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
+            <span className="text-sm underline">{t("back")}</span>
+          </Link>
+        </Button>
+      )}
       {page === "send" ? renderPhoneNumberForm() : renderVerifyForm()}
     </div>
   );

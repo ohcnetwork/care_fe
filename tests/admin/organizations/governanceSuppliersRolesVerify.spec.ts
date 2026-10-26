@@ -260,7 +260,7 @@ test.describe("Admin organization lists", () => {
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
     await expect(breadcrumb).toBeVisible();
 
-    const organizationsLink = breadcrumb.getByRole("button", {
+    const organizationsLink = breadcrumb.getByRole("link", {
       name: /organizations/i,
     });
     await expect(organizationsLink).toBeVisible();

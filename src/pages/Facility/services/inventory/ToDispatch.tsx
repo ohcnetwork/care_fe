@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -386,24 +386,21 @@ function OutgoingDeliveriesTab({
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="primary"
-            onClick={() =>
-              navigate(
-                getInventoryBasePath(
-                  facilityId,
-                  locationId,
-                  internal,
-                  false,
-                  false,
-                  "new",
-                ),
-              )
-            }
-          >
-            <CareIcon icon="l-plus" />
-            {t("create_delivery")}
-            <ShortcutBadge actionId="create-order" />
+          <Button variant="primary" asChild>
+            <Link
+              href={getInventoryBasePath(
+                facilityId,
+                locationId,
+                internal,
+                false,
+                false,
+                "new",
+              )}
+            >
+              <CareIcon icon="l-plus" />
+              {t("create_delivery")}
+              <ShortcutBadge actionId="create-order" />
+            </Link>
           </Button>
         </div>
       </div>

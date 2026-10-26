@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckIcon, MoreVertical, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -352,14 +352,14 @@ export default function ServiceRequestShow({
                       <Button
                         variant="primary"
                         className="font-semibold"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`,
-                          )
-                        }
+                        asChild
                       >
-                        {t("view_report")}
-                        <ShortcutBadge actionId="view-report" />
+                        <Link
+                          href={`/facility/${facilityId}/patient/${request.encounter.patient.id}/diagnostic_reports/${request.diagnostic_reports[0].id}`}
+                        >
+                          {t("view_report")}
+                          <ShortcutBadge actionId="view-report" />
+                        </Link>
                       </Button>
                     )}
                   </>

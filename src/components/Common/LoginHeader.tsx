@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -40,9 +40,9 @@ export const LoginHeader = () => {
           <Button
             variant="ghost"
             className="text-sm font-medium hover:bg-gray-100 px-6"
-            onClick={() => navigate("/patient/home")}
+            asChild
           >
-            {t("home")}
+            <Link href="/patient/home">{t("home")}</Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -74,16 +74,16 @@ export const LoginHeader = () => {
         <Button
           variant="ghost"
           className="text-sm font-medium hover:bg-gray-100 rounded-full px-6"
-          onClick={() =>
-            navigate(
-              `/login?mode=${
-                localStorage.getItem(LocalStorageKeys.loginPreference) ??
-                "patient"
-              }`,
-            )
-          }
+          asChild
         >
-          {t("sign_in")}
+          <Link
+            href={`/login?mode=${
+              localStorage.getItem(LocalStorageKeys.loginPreference) ??
+              "patient"
+            }`}
+          >
+            {t("sign_in")}
+          </Link>
         </Button>
       </div>
     </header>
