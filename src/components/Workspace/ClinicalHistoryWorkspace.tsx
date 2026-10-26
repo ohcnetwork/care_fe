@@ -147,15 +147,16 @@ export function ClinicalHistoryWorkspace({
   // Switching layouts can drop the current tab, so move to the first tab of
   // the chosen layout as part of the same selection instead of afterwards.
   const visibleTabKeys = (template?: WorkspaceTemplate) => {
-    const systemKeys = Object.keys(systemTabs).filter(
-      (key) => systemTabs[key as keyof typeof systemTabs].visible,
+    const systemKeys = new Set(
+      Object.keys(systemTabs).filter(
+        (key) => systemTabs[key as keyof typeof systemTabs].visible,
+      ),
     );
-    if (!template) return systemKeys;
+    if (!template) return [...systemKeys];
     return parseEncounterWorkspace(template, Object.keys(systemTabs))
       .pages.filter(
         (page) =>
-          !page.hidden &&
-          (page.kind !== "system" || systemKeys.includes(page.key)),
+          !page.hidden && (page.kind !== "system" || systemKeys.has(page.key)),
       )
       .map((page) => page.key);
   };
