@@ -12,7 +12,7 @@ export const ResponsesHistory = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="h-[calc(100vh-12rem)] flex flex-col pb-10">
+    <div className="h-[calc(100vh-15rem)] flex flex-col pb-12">
       <div className="flex items-center gap-2 mb-5">
         <HealthWorkerIcon className="size-8 bg-teal-200 border border-teal-500 text-teal-800 rounded-md p-1" />
         <h4 className="text-xl">{t("responses")}</h4>
