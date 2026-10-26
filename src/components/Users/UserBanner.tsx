@@ -27,11 +27,14 @@ export default function UserBanner({
         <div className="grid grid-cols-1 self-center">
           <div className="flex flex-row items-center gap-3">
             <TooltipComponent content={formatName(userData)} side="top">
-              <h1 className="text-xl font-bold truncate" id="users-name">
+              <h1
+                className="text-xl font-bold truncate text-foreground"
+                id="users-name"
+              >
                 {formatName(userData)}
               </h1>
             </TooltipComponent>
-            <div className="min-width-50 shrink-0 text-sm text-secondary-600">
+            <div className="min-width-50 shrink-0 text-sm text-muted-foreground">
               <UserStatusIndicator
                 user={userData}
                 addPadding
@@ -42,7 +45,7 @@ export default function UserBanner({
           <TooltipComponent content={userData.username} side="bottom">
             <p
               id="username"
-              className="text-sm font-light leading-relaxed text-secondary-600 w-fit"
+              className="text-sm font-light leading-relaxed text-muted-foreground w-fit"
             >
               {userData.username}
             </p>

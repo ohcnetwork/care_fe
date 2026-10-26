@@ -2,6 +2,7 @@ import { AppUpdateNotifier } from "@/components/Common/AppUpdateNotifier";
 import Loading from "@/components/Common/Loading";
 import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner";
 import { Toaster } from "@/components/ui/sonner";
+import { AppearanceProvider } from "@/context/AppearanceContext";
 import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
@@ -37,43 +38,44 @@ const App = () => {
     <>
       <ProductionWarningBanner />
       <QueryClientProvider client={queryClient}>
-        <ScrollToTop />
-        <Suspense fallback={<Loading />}>
-          <PubSubProvider>
-            <ShortcutProvider>
-              <PluginEngine>
-                <OverrideProvider>
-                  <AuthUserProvider
-                    unauthorized={<PublicRouter />}
-                    otpAuthorized={
+        <AppearanceProvider>
+          <ScrollToTop />
+          <Suspense fallback={<Loading />}>
+            <PubSubProvider>
+              <ShortcutProvider>
+                <PluginEngine>
+                  <OverrideProvider>
+                    <AuthUserProvider
+                      unauthorized={<PublicRouter />}
+                      otpAuthorized={
+                        <Suspense fallback={<Loading />}>
+                          <PatientRouter />
+                        </Suspense>
+                      }
+                    >
                       <Suspense fallback={<Loading />}>
-                        <PatientRouter />
+                        <AppRouter />
                       </Suspense>
-                    }
-                  >
-                    <Suspense fallback={<Loading />}>
-                      <AppRouter />
-                    </Suspense>
-                  </AuthUserProvider>
-                </OverrideProvider>
-                <Toaster
-                  position={careConfig.toastPosition}
-                  theme="light"
-                  richColors
-                  expand
-                  // For `richColors` to work, pass at-least an empty object.
-                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                  toastOptions={{}}
-                  closeButton
-                />
-                <AppUpdateNotifier />
-              </PluginEngine>
-            </ShortcutProvider>
-          </PubSubProvider>
-        </Suspense>
+                    </AuthUserProvider>
+                  </OverrideProvider>
+                  <Toaster
+                    position={careConfig.toastPosition}
+                    richColors
+                    expand
+                    // For `richColors` to work, pass at-least an empty object.
+                    // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                    toastOptions={{}}
+                    closeButton
+                  />
+                  <AppUpdateNotifier />
+                </PluginEngine>
+              </ShortcutProvider>
+            </PubSubProvider>
+          </Suspense>
 
-        {/* Devtools are not included in production builds by default */}
-        <ReactQueryDevtools initialIsOpen={false} />
+          {/* Devtools are not included in production builds by default */}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </AppearanceProvider>
       </QueryClientProvider>
       <Integrations.Sentry disabled={!import.meta.env.PROD} />
     </>

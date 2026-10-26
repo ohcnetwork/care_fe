@@ -3,24 +3,24 @@ import { Spinner } from "@/components/ui/spinner";
 /**
  * @name sonner
  * @description An opinionated toast component for React.
- * @dependencies sonner next-themes
+ * @dependencies sonner
  * @type registry:ui
  */
+import { useAppearance } from "@/context/AppearanceContext";
 import {
   CircleCheckIcon,
   InfoIcon,
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { resolvedTheme } = useAppearance();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={resolvedTheme}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
