@@ -53,7 +53,7 @@ export function FacilityNavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-950"
+              className="bg-strong-background/60 shadow-sm data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
               tooltip={formatName(user)}
               aria-label={formatName(user)}
             >
@@ -67,17 +67,17 @@ export function FacilityNavUser({
                     <span className="truncate font-medium">
                       {formatName(user)}
                     </span>
-                    <span className="truncate text-xs text-neutral-600">
+                    <span className="truncate text-xs text-muted-foreground">
                       {user.user_type ? t(user.user_type) : user.username}
                     </span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-neutral-600" />
+                  <ChevronsUpDown className="ml-auto size-4 opacity-60" />
                 </>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}
@@ -92,7 +92,7 @@ export function FacilityNavUser({
                   <span className="truncate font-medium">
                     {formatName(user)}
                   </span>
-                  <span className="truncate text-xs text-neutral-600">
+                  <span className="truncate text-xs text-muted-foreground">
                     {user.username}
                   </span>
                 </div>
@@ -163,7 +163,7 @@ export function PatientNavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="rounded-[10px] bg-neutral-200/60 text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-indigo-400 data-[state=open]:bg-neutral-200 data-[state=open]:text-neutral-950"
+              className="bg-strong-background/60 shadow-sm data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
               tooltip={patient?.name || phoneNumber}
               aria-label={patient?.name || phoneNumber}
             >
@@ -175,12 +175,12 @@ export function PatientNavUser() {
                       {patient?.name || phoneNumber}
                     </span>
                     {patient && (
-                      <span className="truncate text-xs text-neutral-600">
+                      <span className="truncate text-xs text-muted-foreground">
                         {phoneNumber}
                       </span>
                     )}
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-neutral-600" />
+                  <ChevronsUpDown className="ml-auto size-4 opacity-60" />
                 </>
               )}
               {!open && !isMobile && (
@@ -191,7 +191,7 @@ export function PatientNavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}
@@ -204,7 +204,7 @@ export function PatientNavUser() {
                     {patient?.name || phoneNumber}
                   </span>
                   {patient && (
-                    <span className="truncate text-xs text-neutral-600">
+                    <span className="truncate text-xs text-muted-foreground">
                       {phoneNumber}
                     </span>
                   )}

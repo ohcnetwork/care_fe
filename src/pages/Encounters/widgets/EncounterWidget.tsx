@@ -31,6 +31,7 @@ import {
   encounterPageKeySchema,
 } from "@/types/workspace/encounterWorkspace";
 
+import { EncounterReferralsWidget } from "./EncounterReferralsWidget";
 import { EncounterResponsesWidget } from "./EncounterResponsesWidget";
 import { EncounterServiceRequestsWidget } from "./EncounterServiceRequestsWidget";
 import { EncounterVitalsWidget } from "./EncounterVitalsWidget";
@@ -59,6 +60,7 @@ export function EncounterWidget({
     patientId,
     selectedEncounterId,
     selectedEncounter,
+    selectedEncounterPermissions,
     isSelectedEncounterLoading,
     canReadSelectedEncounter,
     canReadClinicalData,
@@ -131,12 +133,24 @@ export function EncounterWidget({
     }
   }
 
+  if (type === "referrals") {
+    return (
+      <EncounterReferralsWidget
+        title={title}
+        showEmpty={showEmpty}
+        config={config}
+      />
+    );
+  }
+
   if (!canReadClinicalData) return noClinicalAccess;
 
   const actionProps = { title, showEmpty, returnPage };
   switch (type) {
     case "quick_actions":
-      return facilityId && canWriteClinicalData ? (
+      return facilityId &&
+        (canWriteClinicalData ||
+          selectedEncounterPermissions.canCreateReferral) ? (
         <QuickActions {...actionProps} />
       ) : null;
     case "favorite_forms":

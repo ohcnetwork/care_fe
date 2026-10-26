@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useFormState, type Control } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -59,13 +60,14 @@ export function ValueSetFormErrors({
             <ul className="space-y-1">
               {issues.map((issue) => (
                 <li key={issue.name}>
-                  <button
+                  <Button
+                    variant="link"
                     type="button"
-                    className="cursor-pointer text-left underline underline-offset-2"
+                    className="h-auto p-0 whitespace-normal text-left cursor-pointer text-left underline underline-offset-2"
                     onClick={() => onFocusIssue(issue)}
                   >
                     {issueLabel(issue)}: {issue.message}
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>

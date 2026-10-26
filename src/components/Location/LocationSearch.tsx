@@ -96,7 +96,7 @@ export function LocationSearch({
           <DrawerTrigger asChild>
             <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
               {stringifyNestedObject(value || { name: "" }) ||
-                "Select location..."}
+                t("select_location")}
             </div>
           </DrawerTrigger>
           <DrawerContent
@@ -117,10 +117,10 @@ export function LocationSearch({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild disabled={disabled}>
         <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
-          {stringifyNestedObject(value || { name: "" }) || "Select location..."}
+          {stringifyNestedObject(value || { name: "" }) || t("select_location")}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--anchor-width)]">
         {commandContent}
       </PopoverContent>
     </Popover>

@@ -1,3 +1,4 @@
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useLayoutEffect, useRef } from "react";
@@ -123,7 +124,12 @@ export function EncounterWorkspaceSwitcher({
             selectedEncounter: selectedEncounterParam,
           }).toString()
         : "";
-      navigate(`${target.pathname}${target.search}`);
+      navigate(
+        appendReferralNativeContext(
+          `${target.pathname}${target.search}`,
+          window.location.search,
+        ),
+      );
     },
   });
 

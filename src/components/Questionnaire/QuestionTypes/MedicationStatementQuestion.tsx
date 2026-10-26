@@ -1,9 +1,12 @@
 import { Avatar } from "@/components/Common/Avatar";
-import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import {
+  ChevronsDownUp,
+  ChevronsUpDown,
+  CircleMinus as MinusCircledIcon,
+} from "lucide-react";
 import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 

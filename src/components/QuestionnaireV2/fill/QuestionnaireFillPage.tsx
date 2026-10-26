@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
+import {
+  appendReferralNativeContext,
+  referralNativeQueryParams,
+} from "@/components/Referral/referralNativeNavigation";
 
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
 import { encounterPageKeySchema } from "@/types/workspace/encounterWorkspace";
@@ -98,7 +102,10 @@ export function QuestionnaireFillPage({
     encounterPageKeySchema.safeParse(requestedReturnPage).data ?? "updates";
   const exitTarget =
     subject.type === "encounter"
-      ? `${defaultExitTarget.slice(0, defaultExitTarget.lastIndexOf("/") + 1)}${returnPage}`
+      ? appendReferralNativeContext(
+          `${defaultExitTarget.slice(0, defaultExitTarget.lastIndexOf("/") + 1)}${returnPage}`,
+          window.location.search,
+        )
       : defaultExitTarget;
 
   if (!questionnaireId) {
@@ -119,6 +126,18 @@ export function QuestionnaireFillPage({
           <QuestionnaireSearch
             subjectType={pickerSubjectType}
             facilityId={subject.facilityId}
+            onSelect={
+              subject.type === "encounter" &&
+              referralNativeQueryParams(window.location.search).referralId
+                ? (selected) =>
+                    navigate(
+                      appendReferralNativeContext(
+                        `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}?return_page=${encodeURIComponent(returnPage)}`,
+                        window.location.search,
+                      ),
+                    )
+                : undefined
+            }
             trigger={
               <Button
                 type="button"

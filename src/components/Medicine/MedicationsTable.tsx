@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -153,8 +154,11 @@ export const MedicationsTable = ({
         </TableBody>
       </Table>
       {!showActiveOnly && !!inactiveMedications.length && (
-        <div
-          className="flex items-center gap-2 p-4 cursor-pointer hover:bg-gray-50 border-t"
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto w-full justify-start rounded-t-none border-t p-4"
+          aria-expanded={showInactive}
           onClick={() => setShowInactive(!showInactive)}
         >
           {showInactive ? (
@@ -167,7 +171,7 @@ export const MedicationsTable = ({
             {`${inactiveMedications.length} ${t("inactive")}`}{" "}
             {t("medications")}
           </span>
-        </div>
+        </Button>
       )}
     </div>
   );

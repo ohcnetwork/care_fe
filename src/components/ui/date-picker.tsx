@@ -65,8 +65,12 @@ export function DatePicker({
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 sm:w-64" align="start">
+      <PopoverContent
+        className="w-auto max-w-[calc(100vw-2rem)] p-0"
+        align="start"
+      >
         <Calendar
+          className="[--cell-size:min(--spacing(10),calc((100vw-4rem)/7))]"
           mode="single"
           selected={date}
           onSelect={(date) => {

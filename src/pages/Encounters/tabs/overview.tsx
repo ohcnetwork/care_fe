@@ -53,6 +53,7 @@ export const EncounterOverviewTab = () => {
                   <EncounterOverviewDevices encounter={encounter} />
                 )}
                 <EncounterWidget type="draft_forms" />
+                <EncounterWidget type="referrals" />
                 {/* Clinical informations */}
                 <EncounterWidget type="allergies" />
                 <EncounterWidget type="symptoms" />

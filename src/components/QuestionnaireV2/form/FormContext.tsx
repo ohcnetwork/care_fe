@@ -17,6 +17,9 @@ import {
 import { findFirstQuestion } from "@/components/QuestionnaireV2/shared/questionTree";
 
 export {
+  errorsAtom,
+  responsesAtom,
+  structuredRenderFailedAtom,
   useAnsweredQuestionIds,
   useHiddenQuestionIds,
 } from "@/components/QuestionnaireV2/form/engine/store";

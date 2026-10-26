@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -11,20 +13,15 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
 
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
 
     // Generate unique titles and messages
     encounterNoteTitle = `Encounter Note ${faker.string.alphanumeric(8)}`;
     encounterNoteMessage = `Encounter message: ${faker.lorem.sentence()}`;
 
-    // Navigate to encounters list page
+    // Open the saved encounter fixture; list navigation is covered separately
     await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+      `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/notes`,
     );
-
-    // Navigate to first patient's encounter
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
   });
 
   test("should create encounter note and verify it does NOT appear in patient notes", async ({
@@ -32,9 +29,6 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
   }) => {
     const threadTitleInput = page.getByPlaceholder("Enter discussion title...");
     const messageInput = page.getByPlaceholder("Type your message...");
-    // Navigate to Notes tab in encounter
-    await page.getByRole("tab", { name: "Notes" }).click();
-
     // Wait for notes section to load
     await expect(
       page.getByRole("button", { name: "New", exact: true }),
@@ -64,13 +58,10 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
     // Verify message appears in encounter notes
     await expect(page.getByText(encounterNoteMessage)).toBeVisible();
 
-    await page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .last()
-      .click();
-
-    await page.getByRole("link", { name: "View Profile" }).click();
-    await page.getByRole("tab", { name: "Notes" }).click();
+    // Open the patient discussion context independently of the encounter.
+    await page.goto(
+      `/facility/${getFacilityId()}/patient/${getPatientId()}/notes`,
+    );
     // Wait for patient notes to load by checking for the "New" button
     await expect(
       page.getByRole("button", { name: "New", exact: true }),

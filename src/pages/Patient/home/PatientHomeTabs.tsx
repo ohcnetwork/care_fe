@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { cn } from "@/lib/utils";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import { FacilityRead } from "@/types/facility/facility";
@@ -57,30 +57,20 @@ export default function PatientHomeTabs({
   }, [isTab, activeTab, tabs, onTabChange]);
 
   return (
-    <div className="w-full">
-      {/* Custom Navigation Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+      <div className="overflow-x-auto border-b border-border">
+        <TabsList variant="line">
           {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={cn(
-                "py-2 px-1 border-b-2 font-medium text-sm transition-colors",
-                activeTab === tab.id
-                  ? "border-primary-600 text-primary-600"
-                  : "border-transparent text-gray-700 hover:text-gray-500 hover:border-gray-300",
-              )}
-            >
+            <TabsTrigger key={tab.id} value={tab.id}>
               {tab.label}
-            </button>
+            </TabsTrigger>
           ))}
-        </nav>
+        </TabsList>
       </div>
 
       {/* Tab Content */}
       <div className="mt-6">
-        {activeTab === "encounters" && (
+        <TabsContent value="encounters">
           <PatientHomeEncounters
             patientId={patientId}
             facilityId={facility.id}
@@ -88,15 +78,19 @@ export default function PatientHomeTabs({
             canListEncounters={canListEncounters}
             actions={actions}
           />
-        )}
-        {activeTab === "appointments" && canWriteAppointment && (
-          <BookingsList patientId={patientId} facilityId={facility.id} />
+        </TabsContent>
+        {canWriteAppointment && (
+          <TabsContent value="appointments">
+            <BookingsList patientId={patientId} facilityId={facility.id} />
+          </TabsContent>
         )}
 
-        {activeTab === "tokens" && canListTokens && isTab && (
-          <PatientTokensList patientId={patientId} facility={facility} />
+        {canListTokens && isTab && (
+          <TabsContent value="tokens">
+            <PatientTokensList patientId={patientId} facility={facility} />
+          </TabsContent>
         )}
       </div>
-    </div>
+    </Tabs>
   );
 }

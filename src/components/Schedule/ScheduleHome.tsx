@@ -142,7 +142,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
               <PopoverTrigger asChild>
                 <div
                   className={cn(
-                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-[state=open]:bg-white",
+                    "grid h-full cursor-pointer grid-rows-[1fr_auto_1fr] rounded-lg transition-all bg-gray-100 hover:bg-white data-popup-open:bg-white",
                     templatesQuery.isLoading &&
                       "opacity-50 pointer-events-none",
                     "transition-all duration-200 ease-in-out",

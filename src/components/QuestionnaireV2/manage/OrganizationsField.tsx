@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useState } from "react";
@@ -168,13 +169,15 @@ function InstanceOrganizationsField({
           <Badge key={org.id} variant="secondary" className="gap-1">
             {org.name}
             {canWrite && (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={() => handleToggle(org.id)}
                 aria-label={t("remove_organization")}
+                className="h-auto w-auto p-0"
               >
                 <X className="size-3" />
-              </button>
+              </Button>
             )}
           </Badge>
         ))}

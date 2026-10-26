@@ -84,7 +84,6 @@ async function mockEncounterWorkspaceApi(
   page: Page,
   options: {
     clinicalRead?: boolean;
-    defaultLoadFailures?: number;
     includeOverview?: boolean;
     symptomCount?: number;
     allowWorkspaceUpdate?: boolean;
@@ -92,7 +91,6 @@ async function mockEncounterWorkspaceApi(
     includeConfigData?: boolean;
   } = {},
 ) {
-  let defaultLoadFailures = options.defaultLoadFailures ?? 0;
   const actor = user();
   const currentCareTeamMember = user();
   const pastCareTeamMember = user();
@@ -194,12 +192,18 @@ async function mockEncounterWorkspaceApi(
   const plugConfigs: PlugConfig[] = [];
   const workspaceUpdates: WorkspaceUpdate[] = [];
   const failures: {
+    defaultLoad: boolean;
     defaultSave: number;
     defaultSaveWorkspaceId?: string;
     defaultSaveValue?: string;
     symptoms: boolean;
     serviceOnHold: boolean;
-  } = { defaultSave: 0, symptoms: false, serviceOnHold: false };
+  } = {
+    defaultLoad: false,
+    defaultSave: 0,
+    symptoms: false,
+    serviceOnHold: false,
+  };
   const defaultWrites: {
     workspaceId: string;
     body: { attribute: string; value: string };
@@ -544,8 +548,7 @@ async function mockEncounterWorkspaceApi(
         return;
       }
       if (path === "/api/v1/workspace/get_user_default_attributes/") {
-        if (defaultLoadFailures > 0) {
-          defaultLoadFailures -= 1;
+        if (failures.defaultLoad) {
           await route.fulfill({
             status: 503,
             json: { detail: "Temporarily unavailable" },
@@ -904,8 +907,49 @@ test.describe("Encounter workspace rendering", () => {
       ).toBeVisible();
     });
 
-    await test.step("Keep clinical cards usable at a narrow width", async () => {
+    await test.step("Keep configured sections and clinical cards usable at a narrow width", async () => {
       await page.setViewportSize({ width: 390, height: 844 });
+      const sectionPicker = page.getByRole("dialog", {
+        name: "Encounter sections",
+        exact: true,
+      });
+      const queryContext = new URL(page.url()).search;
+      await page
+        .getByRole("button", {
+          name: "Encounter section: Ward rounds",
+          exact: true,
+        })
+        .click();
+      await expect(
+        sectionPicker.getByRole("button", { name: "Ward rounds", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+      await expect(
+        sectionPicker.getByRole("button", { name: "Devices", exact: true }),
+      ).toHaveCount(0);
+      await sectionPicker
+        .getByRole("button", { name: "Overview", exact: true })
+        .click();
+      await expect(sectionPicker).not.toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `${fixture.basePath}/updates` &&
+          url.search === queryContext,
+      );
+      await page
+        .getByRole("button", {
+          name: "Encounter section: Overview",
+          exact: true,
+        })
+        .click();
+      await sectionPicker
+        .getByRole("button", { name: "Ward rounds", exact: true })
+        .click();
+      await expect(sectionPicker).not.toBeVisible();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `${fixture.basePath}/rounds` &&
+          url.search === queryContext,
+      );
       await expect(
         page
           .getByRole("region", { name: "Symptoms today", exact: true })
@@ -1478,6 +1522,12 @@ test.describe("Encounter workspace rendering", () => {
     const fixture = await mockEncounterWorkspaceApi(page, {
       includeSectionData: true,
     });
+    // Referral creation remains authorized on this historical encounter while
+    // its clinical actions stay read-only.
+    fixture.pastEncounter.permissions = [
+      ...fixture.pastEncounter.permissions,
+      "can_create_referral",
+    ];
     fixture.workspace.template = {
       schema_version: 1,
       pages: [
@@ -1659,7 +1709,7 @@ test.describe("Encounter workspace rendering", () => {
       await page.goto(`${fixture.basePath}/rounds`);
     });
 
-    await test.step("Overview displays the same records and historical selection removes write actions", async () => {
+    await test.step("Overview retains records and historical referral creation without clinical edits", async () => {
       await page.getByRole("tab", { name: "Overview", exact: true }).click();
       await expect(
         page.getByRole("cell", { name: "82 /min", exact: true }),
@@ -1706,8 +1756,17 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         careTeam.getByRole("button", { name: "Manage Care Team", exact: true }),
       ).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "New referral", exact: true }),
+      ).toBeVisible();
+      await expect(shortcuts.getByRole("link")).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "Forms", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        shortcuts.getByRole("button", { name: "More Actions", exact: true }),
+      ).toHaveCount(0);
       for (const name of [
-        "Ward shortcuts",
         "Favorite ward forms",
         "Pending ward forms",
         "Visit actions",
@@ -2726,9 +2785,8 @@ test.describe("Encounter workspace rendering", () => {
   test("retries workspace and clinical reads without losing the requested page", async ({
     page,
   }) => {
-    const fixture = await mockEncounterWorkspaceApi(page, {
-      defaultLoadFailures: 1,
-    });
+    const fixture = await mockEncounterWorkspaceApi(page);
+    fixture.failures.defaultLoad = true;
     fixture.failures.symptoms = true;
     await page.goto(`${fixture.basePath}/rounds`);
     await expect(
@@ -2749,6 +2807,7 @@ test.describe("Encounter workspace rendering", () => {
         exact: true,
       }),
     ).toHaveCount(0);
+    fixture.failures.defaultLoad = false;
     await page
       .getByRole("alert")
       .filter({

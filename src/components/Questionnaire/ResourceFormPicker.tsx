@@ -33,7 +33,6 @@ export function ResourceFormPicker({
 
   return (
     <QuestionnaireSearch
-      appearance="careui"
       facilityId={facilityId}
       subjectType={subjectType}
       disabled={disabled}

@@ -1,13 +1,14 @@
-import {
-  CheckCircledIcon,
-  CircleBackslashIcon,
-  DotsVerticalIcon,
-  MinusCircledIcon,
-  Pencil2Icon,
-} from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import {
+  CircleCheck as CheckCircledIcon,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Ban as CircleBackslashIcon,
+  EllipsisVertical as DotsVerticalIcon,
+  CircleMinus as MinusCircledIcon,
+  Pencil as Pencil2Icon,
+} from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 

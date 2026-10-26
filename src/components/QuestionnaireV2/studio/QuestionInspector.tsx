@@ -56,9 +56,6 @@ const UNIT_ROW_TYPES: Question["type"][] = ["integer", "decimal", "choice"];
  *  unit must be cleared on a type switch. */
 const UNIT_BEARING_TYPES: Question["type"][] = [...UNIT_ROW_TYPES, "quantity"];
 
-const TAB_TRIGGER_CLASSES =
-  "rounded-none border-b-3 border-transparent bg-transparent px-2.5 py-2 text-sm font-semibold text-gray-600 shadow-none data-[state=active]:border-b-primary-700 data-[state=active]:bg-transparent data-[state=active]:text-primary-800 data-[state=active]:shadow-none";
-
 interface QuestionInspectorProps {
   question: Question;
   number: string;
@@ -220,22 +217,20 @@ export function QuestionInspector({
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="h-auto w-full justify-start gap-1 rounded-none border-b border-gray-200 bg-transparent p-0 px-4">
-            <TabsTrigger value="question" className={TAB_TRIGGER_CLASSES}>
-              {t("question")}
-            </TabsTrigger>
-            <TabsTrigger value="logic" className={TAB_TRIGGER_CLASSES}>
-              {t("logic")}
-              {ruleCount > 0 && (
-                <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600">
-                  {ruleCount}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="coding" className={TAB_TRIGGER_CLASSES}>
-              {t("coding")}
-            </TabsTrigger>
-          </TabsList>
+          <div className="max-w-full overflow-x-auto px-4 pb-1">
+            <TabsList variant="line">
+              <TabsTrigger value="question">{t("question")}</TabsTrigger>
+              <TabsTrigger value="logic">
+                {t("logic")}
+                {ruleCount > 0 && (
+                  <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600">
+                    {ruleCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="coding">{t("coding")}</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="question" className="space-y-4 p-4">
             {/* The visible label keeps "Question Title" as the accessible name. */}

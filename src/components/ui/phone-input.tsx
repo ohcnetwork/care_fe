@@ -1,3 +1,4 @@
+// CareUI phone-input composition with CARE country defaults and digit constraints.
 import careConfig from "@careConfig";
 import {
   CountryCode,
@@ -23,6 +24,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { InputGroup } from "@/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
@@ -75,13 +77,13 @@ function PhoneInput({
     <PhoneInputContext.Provider value={{ country, setCountry }}>
       <RPNInput.default
         className={cn(
-          "flex rounded-md focus-within:ring-1",
+          "PhoneInput",
           className,
-          props.value &&
-            !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
-            ? "ring-red-500"
-            : "ring-primary-700",
+          value && !RPNInput.isValidPhoneNumber(value)
+            ? "ring-destructive"
+            : "ring-ring",
         )}
+        containerComponent={InputGroup}
         flagComponent={FlagComponent}
         countrySelectComponent={CountrySelect}
         inputComponent={InputComponent}
@@ -166,9 +168,10 @@ function InputComponent({
     <>
       <Input
         className={cn(
-          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
+          "PhoneInputInput h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
           className,
         )}
+        data-slot="input-group-control"
         onBeforeInput={handleBeforeInput}
         aria-describedby="phone-input-constraint"
         {...props}
@@ -219,8 +222,8 @@ const CountrySelect = ({
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 border-gray-200 shadow-xs px-3 focus:z-10 h-auto"
+          variant="ghost"
+          className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:ring-3 h-full"
           disabled={disabled}
         >
           <FlagComponent
@@ -236,7 +239,7 @@ const CountrySelect = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-2 sm:p-0 w-[var(--radix-popover-trigger-width)] min-w-64"
+        className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64"
         align="start"
         sideOffset={5}
       >
@@ -248,7 +251,7 @@ const CountrySelect = ({
               setTimeout(() => {
                 if (scrollAreaRef.current) {
                   const viewportElement = scrollAreaRef.current.querySelector(
-                    "[data-radix-scroll-area-viewport]",
+                    '[data-slot="scroll-area-viewport"]',
                   );
                   if (viewportElement) {
                     viewportElement.scrollTop = 0;

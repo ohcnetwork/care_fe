@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { ReactNode, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -12,6 +13,7 @@ import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
 import UserSummaryTab from "@/components/Users/UserSummary";
+import UserThemeTab from "@/components/Users/UserThemeTab";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -31,6 +33,59 @@ export interface UserHomeProps {
 export interface TabChildProp {
   body: (childProps: userChildProps) => React.ReactNode | undefined;
   hidden?: boolean;
+}
+
+function ProfileTabsList({
+  activeTab,
+  children,
+}: {
+  activeTab: string;
+  children: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    const list = listRef.current;
+    if (!viewport || !list) return;
+
+    const revealActiveTab = () => {
+      const active = list.querySelector<HTMLElement>(
+        '[role="tab"][aria-selected="true"]',
+      );
+      if (!active) return;
+      const viewportBounds = viewport.getBoundingClientRect();
+      const tabBounds = active.getBoundingClientRect();
+      const offset =
+        tabBounds.left < viewportBounds.left
+          ? tabBounds.left - viewportBounds.left
+          : Math.max(0, tabBounds.right - viewportBounds.right);
+      // Scroll only this strip; scrollIntoView can also move the page vertically.
+      viewport.scrollLeft += offset;
+    };
+
+    revealActiveTab();
+    const observer = new ResizeObserver(revealActiveTab);
+    observer.observe(viewport);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [activeTab]);
+
+  return (
+    <div ref={viewportRef} className="min-w-0 max-w-full overflow-x-auto pb-1">
+      <TabsList
+        ref={listRef}
+        variant="line"
+        id="usermanagement_tab_nav"
+        aria-label={t("manage_user")}
+        className="w-max min-w-full border-b border-border"
+      >
+        {children}
+      </TabsList>
+    </div>
+  );
 }
 
 export default function UserHome(props: UserHomeProps) {
@@ -77,6 +132,7 @@ export default function UserHome(props: UserHomeProps) {
     return <Loading />;
   }
 
+  const isOwnAccount = authUser.username === userData.username;
   const TABS = {
     PROFILE: {
       body: UserSummaryTab,
@@ -90,6 +146,10 @@ export default function UserHome(props: UserHomeProps) {
       body: UserAvailabilityTab,
       hidden: !props.facilityId || !canViewSchedule,
     },
+    THEME: {
+      body: UserThemeTab,
+      hidden: !isOwnAccount,
+    },
   } satisfies Record<string, TabChildProp>;
 
   const normalizedTab = tab.toUpperCase();
@@ -97,7 +157,7 @@ export default function UserHome(props: UserHomeProps) {
     Object.keys(TABS).includes(tab as keyof typeof TABS);
   const currentTab = isValidTab(normalizedTab) ? normalizedTab : undefined;
 
-  if (!currentTab) {
+  if (!currentTab || (currentTab === "THEME" && !isOwnAccount)) {
     return <ErrorPage />;
   }
 
@@ -107,53 +167,31 @@ export default function UserHome(props: UserHomeProps) {
     : `/users/${username}`;
 
   return (
-    <>
-      <Page
-        title={formatName(userData) || userData.username || t("manage_user")}
-        hideTitleOnPage
-      >
-        {
-          <>
-            <UserBanner userData={userData} />
-            <div className="mt-4 w-full border-b-2 border-secondary-200">
-              <div className="overflow-x-auto sm:flex sm:items-baseline">
-                <div className="mt-4 sm:mt-0">
-                  <nav
-                    className="flex space-x-6 overflow-x-auto"
-                    id="usermanagement_tab_nav"
-                  >
-                    {keysOf(TABS)
-                      .filter((p) => !TABS[p].hidden)
-                      .map((p) => {
-                        return (
-                          <Link
-                            key={p}
-                            className={cn(
-                              "min-w-max-content cursor-pointer whitespace-nowrap text-sm font-semibold capitalize",
-                              currentTab === p
-                                ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
-                                : "text-secondary-700 hover:text-secondary-700",
-                            )}
-                            href={`${userUrl}/${p.toLocaleLowerCase()}`}
-                          >
-                            <div className="px-3 py-1.5" id={p.toLowerCase()}>
-                              {t(`USERMANAGEMENT_TAB__${p}`)}
-                            </div>
-                          </Link>
-                        );
-                      })}
-                  </nav>
-                </div>
-              </div>
-            </div>
-            <SelectedTab
-              userData={userData}
-              username={username}
-              permissions={facilityData?.permissions ?? []}
-            />
-          </>
-        }
-      </Page>
-    </>
+    <Page
+      title={formatName(userData) || userData.username || t("manage_user")}
+      hideTitleOnPage
+    >
+      <UserBanner userData={userData} />
+      <Tabs value={currentTab} activationMode="manual" className="mt-4 w-full">
+        <ProfileTabsList activeTab={currentTab}>
+          {keysOf(TABS)
+            .filter((key) => !TABS[key].hidden)
+            .map((key) => (
+              <TabsTrigger key={key} value={key} id={key.toLowerCase()} asChild>
+                <Link basePath="/" href={`${userUrl}/${key.toLowerCase()}`}>
+                  {t(`USERMANAGEMENT_TAB__${key}`)}
+                </Link>
+              </TabsTrigger>
+            ))}
+        </ProfileTabsList>
+        <TabsContent value={currentTab}>
+          <SelectedTab
+            userData={userData}
+            username={username}
+            permissions={facilityData?.permissions ?? []}
+          />
+        </TabsContent>
+      </Tabs>
+    </Page>
   );
 }

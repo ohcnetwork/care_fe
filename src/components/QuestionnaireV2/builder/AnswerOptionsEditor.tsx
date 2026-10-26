@@ -3,8 +3,10 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Table,
   TableBody,
@@ -16,7 +18,10 @@ import {
 
 import { SelectOrCreateValueset } from "@/components/Questionnaire/SelectOrCreateValueset";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 import { useValueSetExpansion } from "@/components/QuestionnaireV2/shared/useValueSetExpansion";
 import { ValueSetScope } from "@/types/valueSet/valueSet";
 
@@ -34,6 +39,27 @@ interface AnswerOptionsEditorProps {
 }
 
 type Mode = "custom" | "valueset";
+
+function DefaultAnswerGroup({
+  multiple,
+  children,
+  ...props
+}: Omit<React.ComponentProps<typeof RadioGroup>, "className"> & {
+  multiple: boolean;
+  className?: string;
+}) {
+  return multiple ? (
+    <div
+      role="group"
+      aria-label={props["aria-label"]}
+      className={props.className}
+    >
+      {children}
+    </div>
+  ) : (
+    <RadioGroup {...props}>{children}</RadioGroup>
+  );
+}
 
 /**
  * Quantity answer configuration is valueset-only. The valueset is the
@@ -74,8 +100,7 @@ function QuantityUnitsEditor({
       {boundedCodes && (
         <div className="space-y-1.5">
           <p className="text-sm text-gray-500">{t("unit_options_preview")}</p>
-          <div
-            role="radiogroup"
+          <ChoiceChipGroup
             aria-label={t("unit_options_preview")}
             className="flex flex-wrap gap-2"
           >
@@ -90,7 +115,7 @@ function QuantityUnitsEditor({
                 onCheckedChange={() => {}}
               />
             ))}
-          </div>
+          </ChoiceChipGroup>
         </div>
       )}
 
@@ -217,8 +242,7 @@ export function AnswerOptionsEditor({
         <p className="text-sm text-gray-500">{t("answer_options_hint")}</p>
       </div>
 
-      <div
-        role="radiogroup"
+      <ChoiceChipGroup
         aria-label={t("answer_options")}
         className="flex flex-wrap gap-2"
       >
@@ -236,7 +260,7 @@ export function AnswerOptionsEditor({
           checked={mode === "valueset"}
           onCheckedChange={() => handleModeChange("valueset")}
         />
-      </div>
+      </ChoiceChipGroup>
 
       {mode === "custom" ? (
         <div className="space-y-2">
@@ -255,10 +279,15 @@ export function AnswerOptionsEditor({
               {t("clear_default")}
             </Button>
           </div>
-          <div
-            role={question.repeats ? "group" : "radiogroup"}
+          <DefaultAnswerGroup
+            multiple={!!question.repeats}
+            name={defaultGroupName}
+            value={String(
+              options.findIndex((option) => option.initial_selected),
+            )}
+            onValueChange={(index) => handleSetDefault(Number(index))}
             aria-label={t("default")}
-            className="overflow-hidden rounded-md border border-gray-200 bg-white"
+            className="overflow-hidden rounded-md border border-border bg-background"
           >
             <Table className="table-fixed">
               <TableHeader>
@@ -282,26 +311,36 @@ export function AnswerOptionsEditor({
                         }
                       />
                       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-                          <input
-                            type={question.repeats ? "checkbox" : "radio"}
-                            name={
-                              question.repeats ? undefined : defaultGroupName
-                            }
-                            checked={!!option.initial_selected}
-                            aria-checked={!!option.initial_selected}
-                            aria-label={t("questionnaire_default_option", {
-                              option: option.value
-                                ? `${index + 1}. ${option.value}`
-                                : index + 1,
-                            })}
-                            onChange={() => handleSetDefault(index)}
-                            className="size-4 shrink-0 accent-primary-700"
-                          />
-                          {option.initial_selected
-                            ? t("default")
-                            : t("set_as_default")}
-                        </label>
+                        <div className="flex items-center gap-2">
+                          {question.repeats ? (
+                            <Checkbox
+                              id={`${defaultGroupName}-${rowKeys[index]}`}
+                              checked={!!option.initial_selected}
+                              onCheckedChange={() => handleSetDefault(index)}
+                            />
+                          ) : (
+                            <RadioGroupItem
+                              id={`${defaultGroupName}-${rowKeys[index]}`}
+                              value={String(index)}
+                            />
+                          )}
+                          <Label
+                            htmlFor={`${defaultGroupName}-${rowKeys[index]}`}
+                          >
+                            <span className="sr-only">
+                              {t("questionnaire_default_option", {
+                                option: option.value
+                                  ? `${index + 1}. ${option.value}`
+                                  : index + 1,
+                              })}
+                            </span>
+                            <span aria-hidden="true">
+                              {option.initial_selected
+                                ? t("default")
+                                : t("set_as_default")}
+                            </span>
+                          </Label>
+                        </div>
                         <div className="flex shrink-0 items-center gap-0.5">
                           <Button
                             type="button"
@@ -342,7 +381,7 @@ export function AnswerOptionsEditor({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DefaultAnswerGroup>
           <Button
             type="button"
             variant="outline"

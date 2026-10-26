@@ -1,8 +1,12 @@
+// CareUI registry source: ohcnetwork/careui (4e143863).
+/**
+ * @name command
+ * @description Fast, composable, unstyled command menu for React.
+ * @dependencies cmdk
+ * @type registry:ui
+ */
 import { Command as CommandPrimitive } from "cmdk";
-import { SearchIcon } from "lucide-react";
 import * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 import {
   Dialog,
@@ -10,7 +14,25 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { CheckIcon, SearchIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function Command({
   className,
@@ -20,7 +42,8 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "bg-white text-gray-950 flex h-full w-full flex-col overflow-hidden rounded-md dark:bg-gray-950 dark:text-gray-50",
+        "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden rounded-xl!",
+        "in-data-[slot=drawer-content]:h-auto! in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
         className,
       )}
       {...props}
@@ -29,49 +52,110 @@ function Command({
 }
 
 function CommandDialog({
-  title = "Command Palette",
-  description = "Search for a command to run...",
+  title,
+  description,
+  trigger,
   children,
   className,
+  open,
+  onOpenChange,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
+}: Omit<React.ComponentProps<typeof Dialog>, "children" | "onOpenChange"> & {
   title?: string;
   description?: string;
+  trigger?: React.ReactNode;
   className?: string;
+  children?: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
+  const isDesktop = !useIsMobile();
+  const resolvedTitle = title ?? t("search");
+  const resolvedDescription = description ?? t("search_encounter_command");
+
+  if (isDesktop) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange} {...props}>
+        {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+        <DialogContent
+          className={cn(
+            "bg-foreground/10 top-1/3 translate-y-0 overflow-hidden rounded-xl! p-1.5",
+            className,
+          )}
+          innerClassName="p-1 md:p-1"
+        >
+          <DialogHeader className="sr-only" showCloseButton={false}>
+            <DialogTitle>{resolvedTitle}</DialogTitle>
+            <DialogDescription>{resolvedDescription}</DialogDescription>
+          </DialogHeader>
+          <Command>{children}</Command>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog {...props}>
-      <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
-      <DialogContent className={cn("overflow-hidden p-0", className)}>
-        <Command className="[&_[cmdk-group-heading]]:text-gray-500 **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 dark:[&_[cmdk-group-heading]]:text-gray-400">
-          {children}
-        </Command>
-      </DialogContent>
-    </Dialog>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+      <DrawerContent
+        className={cn(
+          "inset-x-0 top-0 bottom-0 mt-0! flex h-dvh! max-h-dvh! flex-col rounded-none! p-1.5",
+          className,
+        )}
+      >
+        <DrawerHeader className="sr-only">
+          <DrawerTitle>{resolvedTitle}</DrawerTitle>
+          <DrawerDescription>{resolvedDescription}</DrawerDescription>
+        </DrawerHeader>
+        <Command>{children}</Command>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
 function CommandInput({
   className,
+  wrapperClassName,
+  autoFocus,
+  ref,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  wrapperClassName?: string;
+}) {
+  const innerRef = React.useRef<HTMLInputElement>(null);
+
+  React.useImperativeHandle(
+    ref,
+    () => innerRef.current as HTMLInputElement,
+    [],
+  );
+
+  // Native `autoFocus` is unreliable inside an animated, portalled drawer:
+  // the element is focused before it's visible (or the drawer moves focus to
+  // its content), so the keyboard never opens on mobile. Focus imperatively
+  // after the element mounts/paints instead.
+  React.useEffect(() => {
+    if (!autoFocus) return;
+    const id = requestAnimationFrame(() => innerRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, [autoFocus]);
+
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-9 items-center gap-2 border-b px-3"
+      className={cn("w-full shrink-0 px-1 pt-4 pb-0 md:pt-1", wrapperClassName)}
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
-      <CommandPrimitive.Input
-        data-slot="command-input"
-        className={cn(
-          "placeholder:text-gray-500 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-gray-400",
-          className,
-        )}
-        {...props}
-      />
+      <InputGroup className="border-input/30 bg-input/30 rounded-lg shadow-none has-[[data-slot=command-input]:focus-visible]:border-ring has-[[data-slot=command-input]:focus-visible]:ring-3 has-[[data-slot=command-input]:focus-visible]:ring-ring/50">
+        <CommandPrimitive.Input ref={innerRef} {...props} asChild>
+          <InputGroupInput
+            data-slot="command-input"
+            className={cn("h-full focus:ring-0", className)}
+          />
+        </CommandPrimitive.Input>
+        <InputGroupAddon>
+          <SearchIcon className="size-4 shrink-0 opacity-50" />
+        </InputGroupAddon>
+      </InputGroup>
     </div>
   );
 }
@@ -84,7 +168,8 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
+        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+        "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
         className,
       )}
       {...props}
@@ -93,12 +178,13 @@ function CommandList({
 }
 
 function CommandEmpty({
+  className,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className="py-6 text-center text-sm"
+      className={cn("py-6 text-center text-sm", className)}
       {...props}
     />
   );
@@ -112,7 +198,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "text-gray-950 [&_[cmdk-group-heading]]:text-gray-500 overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium dark:text-gray-50 dark:[&_[cmdk-group-heading]]:text-gray-400",
+        "text-foreground **:[[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium",
         className,
       )}
       {...props}
@@ -127,7 +213,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("bg-gray-200 -mx-1 h-px dark:bg-gray-800", className)}
+      className={cn("bg-border -mx-1 h-px w-auto", className)}
       {...props}
     />
   );
@@ -135,17 +221,21 @@ function CommandSeparator({
 
 function CommandItem({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Item>) {
   return (
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900 [&_svg:not([class*='text-'])]:text-gray-500 relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:data-[selected=true]:bg-gray-800 dark:data-[selected=true]:text-gray-50 dark:[&_svg:not([class*='text-'])]:text-gray-400",
+        "group/command-item data-[selected=true]:bg-muted data-[selected=true]:text-foreground data-[selected=true]:**:[svg]:text-foreground relative flex min-h-(--command-item-min-height) cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [--command-item-min-height:--spacing(12)] md:[--command-item-min-height:--spacing(10)] in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      <CheckIcon className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
+    </CommandPrimitive.Item>
   );
 }
 
@@ -157,7 +247,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "text-gray-500 ml-auto text-xs tracking-widest dark:text-gray-400",
+        "text-muted-foreground group-data-[selected=true]/command-item:text-foreground ml-auto text-xs tracking-widest",
         className,
       )}
       {...props}

@@ -164,12 +164,14 @@ interface EncounterResponsesTabProps {
   patientId: string;
   encounterId?: string;
   canAccess?: boolean;
+  embedded?: boolean;
 }
 
 export const EncounterResponsesTab = ({
   patientId,
   encounterId,
   canAccess = true,
+  embedded = false,
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{
@@ -274,6 +276,7 @@ export const EncounterResponsesTab = ({
             <QuestionnaireResponsesList
               encounterId={encounterId}
               patientId={patientId}
+              embedded={embedded}
               canAccess={canAccess}
               questionnaireSlug={questionnaireSlug}
               authorRoleId={role}
@@ -293,6 +296,7 @@ export const EncounterResponsesTab = ({
                       <ResponseCard
                         item={response}
                         patientId={patientId}
+                        embedded={embedded}
                         showTitle={!questionnaireSlug}
                         onTitleClick={() => {
                           setQueryParams({

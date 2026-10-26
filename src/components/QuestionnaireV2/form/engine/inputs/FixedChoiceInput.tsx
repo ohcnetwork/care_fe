@@ -4,7 +4,10 @@ import { useTranslation } from "react-i18next";
 import Autocomplete from "@/components/ui/autocomplete";
 import { MultiSelect } from "@/components/ui/multi-select";
 
-import { ChoiceChip } from "@/components/QuestionnaireV2/shared/ChoiceChip";
+import {
+  ChoiceChip,
+  ChoiceChipGroup,
+} from "@/components/QuestionnaireV2/shared/ChoiceChip";
 
 import { RendererInputProps } from "@/components/QuestionnaireV2/form/engine/questionTypeRegistry";
 import { useQuestionResponse } from "@/components/QuestionnaireV2/form/engine/store";
@@ -120,8 +123,7 @@ export function FixedChoiceInput({
   const selectedValue = response?.values[0]?.value;
 
   return (
-    <div
-      role="radiogroup"
+    <ChoiceChipGroup
       aria-labelledby={labelId}
       aria-required={question.required || undefined}
       aria-describedby={errorId}
@@ -143,6 +145,6 @@ export function FixedChoiceInput({
           }
         />
       ))}
-    </div>
+    </ChoiceChipGroup>
   );
 }

@@ -8,7 +8,10 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { AllergyIcon } from "@/CAREUI/icons/CustomIcons";
+import { BLOOD_GROUP_CHOICES } from "@/common/constants";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -30,7 +33,11 @@ interface FillHeaderProps {
   encounter?: EncounterRead;
   facilityId?: string;
   actions: ReactNode;
-  onActionsHeightChange: (height: number) => void;
+  onActionsHeightChange?: (height: number) => void;
+  showPatientDetails?: boolean;
+  allowClinicalData?: boolean;
+  /** Sticky actions sit at the top of a host's own scroll container. */
+  contained?: boolean;
 }
 
 function MetaPair({ label, children }: { label: string; children: ReactNode }) {
@@ -51,13 +58,16 @@ export function FillHeader({
   facilityId,
   actions,
   onActionsHeightChange,
+  showPatientDetails = true,
+  allowClinicalData = true,
+  contained = false,
 }: FillHeaderProps) {
   const { t } = useTranslation();
   const actionsRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const element = actionsRef.current;
-    if (!element) return;
+    if (!element || !onActionsHeightChange) return;
     const measure = () => {
       const height = Math.ceil(element.getBoundingClientRect().height);
       if (height > 0) onActionsHeightChange(height);
@@ -82,27 +92,39 @@ export function FillHeader({
   };
 
   const patientId = patient?.id;
-  const { data: allergies } = useQuery({
+  const canLoadAllergies =
+    allowClinicalData &&
+    !!patientId &&
+    !!encounter &&
+    !completedEncounterStatus.includes(encounter.status);
+  const allergyQuery = useQuery({
     queryKey: ["allergies", patientId, "confirmed"],
     queryFn: query(allergyIntoleranceApi.getAllergy, {
       pathParams: { patientId: patientId ?? "" },
       queryParams: { verification_status: "confirmed" },
+      silent: true,
     }),
     // Same voluntary gate as the encounter overview card — the listing is
     // only reliably permitted alongside an active encounter.
-    enabled:
-      !!patientId &&
-      !!encounter &&
-      !completedEncounterStatus.includes(encounter.status),
+    enabled: canLoadAllergies,
+    retry: false,
   });
+  const allergies =
+    canLoadAllergies && !allergyQuery.isError ? allergyQuery.data : undefined;
 
   const assignedDoctor = encounter?.care_team?.[0];
-  const bloodGroup = patient?.blood_group || "unknown";
+  const bloodGroup =
+    BLOOD_GROUP_CHOICES.find((choice) => choice.id === patient?.blood_group)
+      ?.id ?? "unknown";
 
   return (
     <>
       {(patient || encounter) && (
-        <header className="space-y-3" onKeyDown={handleKeyDown}>
+        <header
+          aria-label={t("patient_details")}
+          className="space-y-3"
+          onKeyDown={handleKeyDown}
+        >
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-6">
             {patient && (
               <PatientHeader
@@ -110,11 +132,18 @@ export function FillHeader({
                 facilityId={facilityId}
                 variant="encounter"
                 showBloodGroup={false}
+                showDetails={showPatientDetails}
                 className="p-0 xl:max-w-3xl"
               />
             )}
             {encounter && (
-              <dl className="flex min-w-0 flex-wrap items-start gap-x-6 gap-y-3">
+              <dl
+                aria-label={t("encounter")}
+                className="flex min-w-0 flex-wrap items-start gap-x-6 gap-y-3"
+              >
+                <MetaPair label={t("facility")}>
+                  {encounter.facility.name}
+                </MetaPair>
                 <MetaPair label={t("start_date")}>
                   {encounter.period.start
                     ? formatDateTime(encounter.period.start)
@@ -157,7 +186,10 @@ export function FillHeader({
       <div
         ref={actionsRef}
         onKeyDown={handleKeyDown}
-        className="sticky top-(--fill-shell-header-height) z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 shadow-sm md:top-0"
+        className={cn(
+          "sticky z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-border bg-background px-3 py-1.5 shadow-sm",
+          contained ? "top-0" : "top-(--fill-shell-header-height) md:top-0",
+        )}
       >
         {patient && (
           <div className="flex min-w-0 basis-full flex-wrap items-center gap-x-4 gap-y-1.5 sm:flex-1">

@@ -193,14 +193,18 @@ export default function TransferPaymentSheet({
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {accounts.map((acc) => (
-                  <button
+                  <Button
+                    variant="outline"
                     key={acc.id}
                     type="button"
                     className={cn(
-                      "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
-                      selectedAccountId === acc.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-gray-200",
+                      "h-auto block whitespace-normal",
+                      cn(
+                        "w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50",
+                        selectedAccountId === acc.id
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-gray-200",
+                      ),
                     )}
                     onClick={() => setSelectedAccountId(acc.id)}
                   >
@@ -219,7 +223,7 @@ export default function TransferPaymentSheet({
                         </Badge>
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}

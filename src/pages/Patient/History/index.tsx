@@ -14,7 +14,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import patientApi from "@/types/emr/patient/patientApi";
 
-import { Separator } from "@radix-ui/react-separator";
+import { Separator } from "@/components/ui/separator";
 import { useClinicalHistoryTabs } from "./clinicalHistoryTabs";
 
 function ClinicalHistoryPage({

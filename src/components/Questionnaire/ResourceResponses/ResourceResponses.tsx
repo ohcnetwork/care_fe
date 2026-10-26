@@ -1,8 +1,8 @@
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertCircle,
   ArrowDownWideNarrow,
   Building2,
-  Loader2,
   MapPin,
   Monitor,
   RefreshCw,
@@ -145,7 +145,7 @@ export function ResourceResponses({
                 </Badge>
               )}
               {isUpdating && (
-                <Loader2
+                <Spinner
                   className="size-3.5 animate-spin text-neutral-500"
                   aria-label={t("updating_results")}
                 />

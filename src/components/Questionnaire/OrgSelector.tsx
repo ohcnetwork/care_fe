@@ -1,4 +1,5 @@
-import { Building, Check, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Building, Check } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -83,7 +84,7 @@ export function OrgSelector({
         <CommandGroup>
           {isLoading ? (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="size-6 animate-spin" />
+              <Spinner className="size-6 animate-spin" />
             </div>
           ) : (
             organizations?.results.map((org) => (
@@ -144,7 +145,7 @@ export function OrgSelector({
     >
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
-        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", className)}
+        className={cn("p-0 w-[var(--anchor-width)]", className)}
         align="start"
       >
         {content}

@@ -1,7 +1,7 @@
 import { Eye, LucideIcon, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface EditPreviewToggleProps {
   view: "edit" | "preview";
@@ -13,26 +13,30 @@ export function EditPreviewToggle({ view, onChange }: EditPreviewToggleProps) {
   const { t } = useTranslation();
 
   const pill = (value: "edit" | "preview", label: string, Icon: LucideIcon) => (
-    <button
-      type="button"
-      onClick={() => onChange(value)}
-      aria-pressed={view === value}
-      className={cn(
-        "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-        view === value
-          ? "bg-white text-gray-900 shadow-sm"
-          : "text-gray-500 hover:text-gray-700",
-      )}
+    <ToggleGroupItem
+      value={value}
+      className="cursor-pointer gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground transition-colors aria-pressed:bg-background data-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
     >
       <Icon className="size-4" />
       {label}
-    </button>
+    </ToggleGroupItem>
   );
 
   return (
-    <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+    <ToggleGroup
+      value={[view]}
+      onValueChange={(values) => {
+        const nextView = values[0];
+        if (nextView === "edit" || nextView === "preview") onChange(nextView);
+      }}
+      multiple={false}
+      aria-label={t("view")}
+      size="sm"
+      spacing={1}
+      className="rounded-full bg-muted p-1"
+    >
       {pill("edit", t("edit"), SquarePen)}
       {pill("preview", t("preview"), Eye)}
-    </div>
+    </ToggleGroup>
   );
 }

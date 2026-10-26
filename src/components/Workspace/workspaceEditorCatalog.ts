@@ -8,6 +8,7 @@ import {
   FileClock,
   FileHeart,
   FileText,
+  GitPullRequestArrow,
   HeartPulse,
   History,
   Hospital,
@@ -73,6 +74,13 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     descriptionKey: "workspace_widget_requests_description",
     icon: ClipboardList,
     group: "clinical",
+  },
+  {
+    type: "referrals",
+    labelKey: "referrals",
+    descriptionKey: "workspace_widget_referrals_description",
+    icon: GitPullRequestArrow,
+    group: "workflow",
   },
   {
     type: "reports",

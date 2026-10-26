@@ -69,6 +69,7 @@ async function createDeviceResponseHistory(
           subject_type: "device",
           auth_context: "facility",
           facility: facilityId,
+          actions: [],
           questions: [
             { id: questionId, link_id: "notes", text: "Notes", type: "string" },
           ],

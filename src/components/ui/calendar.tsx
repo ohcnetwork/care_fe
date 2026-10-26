@@ -1,3 +1,4 @@
+// CareUI calendar styling with CARE's year-grid navigation and date constraints.
 import { differenceInCalendarDays } from "date-fns";
 import { ChevronDownIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
@@ -85,25 +86,28 @@ function Calendar({
 
   const columnsDisplayed = navView === "years" ? 1 : numberOfMonths;
 
-  const _monthsClassName = cn("relative flex", props.monthsClassName);
+  const _monthsClassName = cn(
+    "relative flex flex-col gap-4 md:flex-row",
+    props.monthsClassName,
+  );
   const _monthCaptionClassName = cn(
-    "relative mx-10 flex h-7 items-center justify-center",
+    "relative mx-10 flex h-(--cell-size) items-center justify-center",
     props.monthCaptionClassName,
   );
   const _weekdaysClassName = cn("flex flex-row", props.weekdaysClassName);
   const _weekdayClassName = cn(
-    "w-8 text-sm font-normal text-gray-700",
+    "w-(--cell-size) text-[0.8rem] font-normal text-muted-foreground",
     props.weekdayClassName,
   );
   const _monthClassName = cn("w-full", props.monthClassName);
   const _captionLabelClassName = cn(
-    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-gray-400",
+    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-(--cell-size) [&>svg]:size-3.5 border border-input",
     props.captionLabelClassName,
   );
   const buttonNavClassName = buttonVariants({
     variant: "outline",
     className:
-      "absolute size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+      "absolute size-(--cell-size) bg-transparent p-0 opacity-50 hover:opacity-100",
   });
   const _buttonNextClassName = cn(
     buttonNavClassName,
@@ -119,19 +123,16 @@ function Calendar({
   const _monthGridClassName = cn("mx-auto mt-4", props.monthGridClassName);
   const _weekClassName = cn("mt-2 flex w-max items-start", props.weekClassName);
   const _dayClassName = cn(
-    "flex size-8 flex-1 items-center justify-center p-0 text-sm",
+    "flex size-(--cell-size) flex-1 items-center justify-center p-0 text-sm",
     props.dayClassName,
   );
   const _dayButtonClassName = cn(
     buttonVariants({ variant: "ghost" }),
-    "size-8 rounded-md p-0 font-normal transition-none aria-selected:opacity-100",
+    "size-(--cell-size) rounded-(--cell-radius) p-0 font-normal transition-none no-underline aria-selected:opacity-100",
     props.dayButtonClassName,
   );
-  // Band color for range days. Uses bg-primary-100 (a defined token) rather than
-  // bg-accent — this theme never defines an `accent` color, so bg-accent renders
-  // nothing and the in-range days would be invisible.
   const buttonRangeClassName =
-    "bg-primary-100 [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
+    "bg-muted [&>button]:bg-primary [&>button]:text-primary-foreground hover:[&>button]:bg-primary hover:[&>button]:text-primary-foreground";
   const _rangeStartClassName = cn(
     buttonRangeClassName,
     "day-range-start rounded-s-md",
@@ -143,7 +144,7 @@ function Calendar({
     props.rangeEndClassName,
   );
   const _rangeMiddleClassName = cn(
-    "bg-primary-100 [&>button]:bg-transparent [&>button]:text-primary-900 hover:[&>button]:bg-primary-200",
+    "bg-muted [&>button]:bg-transparent [&>button]:text-foreground hover:[&>button]:bg-accent",
     props.rangeMiddleClassName,
   );
   const _selectedClassName = cn(
@@ -151,15 +152,15 @@ function Calendar({
     props.selectedClassName,
   );
   const _todayClassName = cn(
-    "[&>button]:bg-gray-100 [&>button]:rounded-md",
+    "[&>button]:bg-muted [&>button]:rounded-md",
     props.todayClassName,
   );
   const _outsideClassName = cn(
-    "day-outside text-gray-500 opacity-50 aria-selected:bg-accent/50 aria-selected:text-gray-700 aria-selected:opacity-30",
+    "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
     props.outsideClassName,
   );
   const _disabledClassName = cn(
-    "text-gray-500 opacity-50",
+    "text-muted-foreground opacity-50",
     props.disabledClassName,
   );
   const _hiddenClassName = cn("invisible flex-1", props.hiddenClassName);
@@ -167,10 +168,13 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn(
+        "bg-background group/calendar p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(10)] in-data-[slot=popover-content]:bg-transparent [&_button]:no-underline",
+        className,
+      )}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString(props.locale?.code, { month: "short" }),
       }}
       classNames={{
         months: _monthsClassName,
@@ -304,8 +308,7 @@ function Nav({
     return !nextMonth;
   })();
 
-  const handlePreviousClick = React.useCallback(() => {
-    if (!previousMonth) return;
+  const handlePreviousClick = () => {
     if (navView === "years") {
       setDisplayYears((prev) => ({
         from: prev.from - (prev.to - prev.from + 1),
@@ -320,12 +323,12 @@ function Nav({
       );
       return;
     }
+    if (!previousMonth) return;
     goToMonth(previousMonth);
     onPrevClick?.(previousMonth);
-  }, [previousMonth, goToMonth]);
+  };
 
-  const handleNextClick = React.useCallback(() => {
-    if (!nextMonth) return;
+  const handleNextClick = () => {
     if (navView === "years") {
       setDisplayYears((prev) => ({
         from: prev.from + (prev.to - prev.from + 1),
@@ -340,14 +343,15 @@ function Nav({
       );
       return;
     }
+    if (!nextMonth) return;
     goToMonth(nextMonth);
     onNextClick?.(nextMonth);
-  }, [goToMonth, nextMonth]);
+  };
   return (
     <nav className={cn("flex items-center", className)}>
       <Button
         variant="outline"
-        className="absolute left-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
+        className="absolute left-0 size-(--cell-size) bg-transparent p-0 opacity-80 hover:opacity-100"
         type="button"
         tabIndex={isPreviousDisabled ? undefined : -1}
         disabled={isPreviousDisabled}
@@ -365,7 +369,7 @@ function Nav({
 
       <Button
         variant="outline"
-        className="absolute right-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
+        className="absolute right-0 size-(--cell-size) bg-transparent p-0 opacity-80 hover:opacity-100"
         type="button"
         tabIndex={isNextDisabled ? undefined : -1}
         disabled={isNextDisabled}
