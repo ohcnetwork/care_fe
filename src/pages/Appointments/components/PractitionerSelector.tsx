@@ -256,6 +256,7 @@ export const PractitionerSelector = ({
     <Button
       variant="secondary"
       role="combobox"
+      aria-label={t("select_practitioners")}
       className="size-8! rounded-full"
     >
       {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
@@ -270,6 +271,7 @@ export const PractitionerSelector = ({
     <Button
       variant="outline"
       role="combobox"
+      aria-label={t("select_practitioner")}
       className="min-w-60 w-full justify-start"
     >
       {selected[0] ? (

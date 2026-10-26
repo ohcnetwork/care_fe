@@ -17,6 +17,7 @@ import { FillShell } from "@/components/QuestionnaireV2/fill/FillShell";
 import { getReferralDetailUrl } from "@/components/Referral/referralNavigation";
 import { ReferralResponseEditor } from "@/components/Referral/ReferralResponseEditor";
 import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
+import { useReferralReceivingEncounter } from "@/components/Referral/useReferralReceivingEncounter";
 import { Skeleton } from "@/components/ui/skeleton";
 import referralApi from "@/types/emr/referral/referralApi";
 import query from "@/Utils/request/query";
@@ -24,10 +25,25 @@ import { HTTPError } from "@/Utils/request/types";
 
 export function ReferralResponsePage({ referralId }: { referralId: string }) {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
+  const [{ sourceUrl, referralAppointmentId, referralFacilityId }] =
+    useQueryParams<{
+      sourceUrl?: string;
+      referralAppointmentId?: string;
+      referralFacilityId?: string;
+    }>();
+  const hasVisitContext = !!referralAppointmentId || !!referralFacilityId;
+  const visit = useReferralReceivingEncounter({
+    referralId,
+    appointmentId: referralAppointmentId,
+    facilityId: referralFacilityId,
+  });
+  const receivingEncounter = visit.encounter ?? visit.previousEncounter;
+  const visitReady = !hasVisitContext || !!receivingEncounter;
+  const visitFailed = hasVisitContext && !visit.isLoading && !visitReady;
   const detailUrl = getReferralDetailUrl(
     referralId,
     typeof sourceUrl === "string" ? sourceUrl : undefined,
+    { appointmentId: referralAppointmentId, facilityId: referralFacilityId },
   );
   const { data, error, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["referrals", "detail", referralId],
@@ -49,12 +65,32 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
 
   return (
     <Page title={t("referral_respond")} hideTitleOnPage className="careui">
-      {data && canWrite ? (
+      {data && canShowCached && canWrite && visitReady ? (
         <ReferralResponseEditor
           key={data.id}
           page
           responseOnly
           referral={data}
+          receivingEncounter={receivingEncounter}
+          contextUnavailable={hasVisitContext && !!visit.error}
+          contextWarning={
+            visit.previousEncounter && visit.error ? (
+              <div
+                role="alert"
+                className="mb-5 space-y-3 rounded-lg border border-cui-border bg-cui-muted p-3 text-sm"
+              >
+                <p>{t("referral_receiving_visit_refresh_failed")}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={visit.isFetching}
+                  onClick={() => void visit.refetch()}
+                >
+                  {t("retry")}
+                </Button>
+              </div>
+            ) : undefined
+          }
           onClose={close}
         />
       ) : (
@@ -66,7 +102,7 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
             </div>
           }
         >
-          {isLoading || permissionsLoading ? (
+          {isLoading || permissionsLoading || visit.isLoading ? (
             <div
               role="status"
               aria-label={t("loading")}
@@ -96,13 +132,15 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
                   </EmptyTitle>
                   <EmptyDescription>
                     {t(
-                      readOnly
-                        ? "referral_response_readonly"
-                        : isDenied
-                          ? "referral_detail_access_denied_description"
-                          : isNotFound
-                            ? "referral_not_found_description"
-                            : "referral_load_failed_description",
+                      visitFailed
+                        ? "referral_encounter_context_unavailable"
+                        : readOnly
+                          ? "referral_response_readonly"
+                          : isDenied
+                            ? "referral_detail_access_denied_description"
+                            : isNotFound
+                              ? "referral_not_found_description"
+                              : "referral_load_failed_description",
                     )}
                   </EmptyDescription>
                 </EmptyHeader>
@@ -114,8 +152,11 @@ export function ReferralResponsePage({ referralId }: { referralId: string }) {
                   {!isDenied && !isNotFound && (
                     <Button
                       variant="outline"
-                      disabled={isFetching}
-                      onClick={() => void refetch()}
+                      disabled={isFetching || visit.isLoading}
+                      onClick={() => {
+                        void refetch();
+                        if (hasVisitContext) void visit.refetch();
+                      }}
                     >
                       {t("retry")}
                     </Button>

@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useNavigationPrompt } from "raviger";
 import {
   ComponentProps,
+  ReactNode,
   RefObject,
   useCallback,
   useEffect,
@@ -56,6 +57,7 @@ import { ReferralStatusBadge } from "@/components/Referral/ReferralStatusBadge";
 import { useReferralPermissions } from "@/components/Referral/useReferralPermissions";
 import useAuthUser from "@/hooks/useAuthUser";
 import { Code } from "@/types/base/code/code";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
   ReferralQuestionnaire,
   ReferralQuestionnaireResult,
@@ -114,6 +116,9 @@ function normalizeAnswers(results: ReferralQuestionnaireResult[]): unknown {
 export function ReferralResponseEditor({
   referral,
   responseOnly,
+  receivingEncounter,
+  contextUnavailable = false,
+  contextWarning,
   onClose,
   onPending = () => undefined,
   requestCloseRef,
@@ -122,6 +127,9 @@ export function ReferralResponseEditor({
 }: {
   referral: ReferralRetrieve;
   responseOnly: boolean;
+  receivingEncounter?: EncounterRead;
+  contextUnavailable?: boolean;
+  contextWarning?: ReactNode;
   onClose: (retainAttempt?: boolean) => void;
   onPending?: (value: boolean) => void;
   requestCloseRef?: RefObject<(() => void) | null>;
@@ -132,7 +140,27 @@ export function ReferralResponseEditor({
   const formId = useId();
   const client = useQueryClient();
   const user = useAuthUser();
-  const { canWrite, facilityId } = useReferralPermissions(referral);
+  const {
+    canWrite,
+    sourceFacilityId,
+    canWriteAtDestination,
+    destinationFacility,
+  } = useReferralPermissions(referral);
+  // A receiving doctor may gain read access to the source chart after opening
+  // a local encounter. That must not make the originating encounter the
+  // treatment context for a cross-facility response.
+  const canUseSourceEncounter =
+    !responseOnly ||
+    !canWriteAtDestination ||
+    sourceFacilityId === destinationFacility?.id;
+  const encounterId =
+    receivingEncounter?.id ??
+    (canUseSourceEncounter && sourceFacilityId
+      ? (referral.encounter ?? undefined)
+      : undefined);
+  const facilityId =
+    receivingEncounter?.facility.id ??
+    (canUseSourceEncounter ? sourceFacilityId : destinationFacility?.id);
   const recoveryKey = [
     "referral-response-recovery",
     user.id,
@@ -335,7 +363,12 @@ export function ReferralResponseEditor({
   });
   const busy =
     create.isPending || complete.isPending || checkDelivery.isPending;
-  const frozen = !canWrite || busy || responseSaved || !!uncertainAttempt;
+  const frozen =
+    !canWrite ||
+    contextUnavailable ||
+    busy ||
+    responseSaved ||
+    !!uncertainAttempt;
   useNavigationPrompt(
     page &&
       !leaving &&
@@ -473,7 +506,7 @@ export function ReferralResponseEditor({
               formId={formId}
               questionnaire={selected}
               patientId={referral.patient}
-              encounterId={referral.encounter ?? undefined}
+              encounterId={encounterId}
               facilityId={facilityId}
               disabled={frozen}
               hideHeader
@@ -499,6 +532,7 @@ export function ReferralResponseEditor({
             referral={referral}
             canWrite={canWrite && !frozen && !lockedForm && !formsAccessLost}
             categories={RESPONSE_RECORD_CATEGORIES}
+            receivingEncounter={receivingEncounter}
             title={t("referral_records_response")}
             description={t("referral_response_records_help")}
             onDialogOpenChange={setRecordsDialogOpen}
@@ -566,7 +600,7 @@ export function ReferralResponseEditor({
           )}
           <Button
             variant="outline"
-            disabled={busy}
+            disabled={busy || contextUnavailable}
             onClick={() => checkDelivery.mutate(uncertainAttempt)}
           >
             {checkDelivery.isPending && (
@@ -599,7 +633,12 @@ export function ReferralResponseEditor({
         </Button>
         {responseSaved ? (
           <Button
-            disabled={!canWrite || complete.isPending || recordsDialogOpen}
+            disabled={
+              !canWrite ||
+              contextUnavailable ||
+              complete.isPending ||
+              recordsDialogOpen
+            }
             onClick={() => complete.mutate({ status: "completed" })}
           >
             {complete.isPending && <Loader2 className="size-4 animate-spin" />}
@@ -661,7 +700,10 @@ export function ReferralResponseEditor({
         >
           <div className="careui min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-8">
             <div className="mx-auto max-w-5xl space-y-5">
-              <ReferralPatientHeader referral={referral}>
+              <ReferralPatientHeader
+                referral={referral}
+                receivingEncounter={receivingEncounter}
+              >
                 <span className="text-sm text-cui-muted-foreground">
                   {referral.title}
                 </span>
@@ -673,6 +715,7 @@ export function ReferralResponseEditor({
                 <h1 className="mb-5 text-xl font-semibold">
                   {t("referral_respond")}
                 </h1>
+                {contextWarning}
                 {form}
               </section>
             </div>

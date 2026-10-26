@@ -70,11 +70,13 @@ import { FILE_EXTENSIONS } from "@/types/files/file";
 import { callApi } from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { invalidateReferralResources } from "./invalidateReferralResources";
 import {
   ReferralResourceContent,
   referralResourceTitle,
 } from "./ReferralResourceContent";
+
 import { ReferralResourcePicker } from "./ReferralResourcePicker";
 import { ReferralUploadDialog } from "./ReferralUploadDialog";
 import {
@@ -357,6 +359,7 @@ export function ReferralSharedRecords({
   description,
   hideWhenEmpty = false,
   onDialogOpenChange,
+  receivingEncounter,
 }: {
   referral: ReferralRetrieve;
   canWrite: boolean;
@@ -364,6 +367,7 @@ export function ReferralSharedRecords({
   title?: ReactNode;
   description?: ReactNode;
   hideWhenEmpty?: boolean;
+  receivingEncounter?: EncounterRead;
   onDialogOpenChange?: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
@@ -602,6 +606,7 @@ export function ReferralSharedRecords({
         <ReferralResourcePicker
           referral={referral}
           attachments={knownAttachments}
+          receivingEncounter={receivingEncounter}
           categories={visibleCategories}
           onClose={() => setAction(undefined)}
         />

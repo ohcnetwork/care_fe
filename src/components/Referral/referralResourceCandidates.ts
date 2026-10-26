@@ -32,6 +32,7 @@ export const REFERRAL_CANDIDATE_PAGE_SIZE = 15;
 interface CandidateOptions {
   resourceType: ReferralResourceType | "encounter" | "consent";
   patientId: string;
+  encounterId?: string;
   facilityId: string;
   offset: number;
   parentId?: string;
@@ -49,6 +50,7 @@ function page<T>(
 export async function loadReferralCandidates({
   resourceType,
   patientId,
+  encounterId,
   facilityId,
   offset,
   parentId,
@@ -58,7 +60,18 @@ export async function loadReferralCandidates({
   const opts = {
     signal,
     silent: true,
-    queryParams: { limit: REFERRAL_CANDIDATE_PAGE_SIZE, offset },
+    queryParams: {
+      limit: REFERRAL_CANDIDATE_PAGE_SIZE,
+      offset,
+      // These existing endpoints support encounter filtering; other resources
+      // retain their native patient/facility/parent scope.
+      ...(encounterId &&
+      ["condition", "questionnaire_response", "diagnostic_report"].includes(
+        resourceType,
+      )
+        ? { encounter: encounterId }
+        : {}),
+    },
     pathParams: { patientId },
   };
   switch (resourceType) {

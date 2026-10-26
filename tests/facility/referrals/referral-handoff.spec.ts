@@ -53,6 +53,7 @@ interface DoctorIdentity {
 async function doctorContext(browser: Browser, baseURL: string) {
   return browser.newContext({
     baseURL,
+    timezoneId: "Asia/Kolkata",
     storageState: { cookies: [], origins: [] },
   });
 }
@@ -99,7 +100,7 @@ async function signInDoctor(
   };
 }
 
-test("shares a referral between non-admin facility doctors without granting access to the source chart", async ({
+test("completes a cross-facility referral through a receiving doctor appointment and encounter", async ({
   browser,
   request,
   baseURL,
@@ -201,8 +202,59 @@ test("shares a referral between non-admin facility doctors without granting acce
   const encounterStartDate = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
+    timeZone: "Asia/Kolkata",
   }).format(new Date(originEncounter.period.start));
 
+  const scheduleName = `Receiving clinic ${suffix}`;
+  const scheduleStart = new Date();
+  const scheduleStartDay = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(scheduleStart);
+  await api(request, `/api/v1/facility/${destination.id}/schedule/`, {
+    name: scheduleName,
+    valid_from: `${scheduleStartDay}T00:00:00+05:30`,
+    valid_to: new Date(scheduleStart.getTime() + 7 * 86400000).toISOString(),
+    is_public: false,
+    resource_type: "practitioner",
+    resource_id: recipient.id,
+    availabilities: [
+      {
+        name: `Consultations ${suffix}`,
+        slot_type: "appointment",
+        slot_size_in_minutes: 60,
+        tokens_per_slot: 3,
+        availability: Array.from({ length: 7 }, (_, day_of_week) => ({
+          day_of_week,
+          start_time: "00:00:00",
+          end_time: "23:00:00",
+        })),
+      },
+    ],
+  });
+  const localFormTitle = `Receiving consultation ${suffix}`;
+  const localQuestionLabel = `Receiving assessment ${suffix}`;
+  const localForm = await api<Entity>(request, "/api/v1/questionnaire/", {
+    auth_context: "facility_organization",
+    facility_organization: department.id,
+    slug: `receiving-${suffix}`,
+    title: localFormTitle,
+    description: "Receiving encounter clinical documentation",
+    status: "active",
+    subject_type: "encounter",
+    actions: [],
+    questions: [
+      {
+        id: faker.string.uuid(),
+        link_id: "assessment",
+        text: localQuestionLabel,
+        type: "string",
+        required: true,
+      },
+    ],
+  });
   const senderContext = await doctorContext(browser, baseURL!);
   const recipientContext = await doctorContext(browser, baseURL!);
   const senderPage = await senderContext.newPage();
@@ -546,20 +598,6 @@ test("shares a referral between non-admin facility doctors without granting acce
         path: testInfo.outputPath("recipient-shared-clinical-response.png"),
         animations: "disabled",
       });
-      // The baseline API has no referral-specific write permission response.
-      // Recipient-only access is readable but does not expose mutation controls.
-      for (const name of [
-        "Manage assignees",
-        "Start referral",
-        "Respond",
-        "Add response",
-        "Add record",
-        "Upload file",
-      ]) {
-        await expect(
-          recipientPage.getByRole("button", { name, exact: true }),
-        ).toHaveCount(0);
-      }
       const discussion = recipientPage.getByRole("region", {
         name: "Discussion",
         exact: true,
@@ -567,28 +605,500 @@ test("shares a referral between non-admin facility doctors without granting acce
       await expect(
         discussion.getByText(discussionMessage, { exact: true }),
       ).toBeVisible();
+      await recipientPage
+        .getByRole("button", { name: "Start referral", exact: true })
+        .click();
       await expect(
-        discussion.getByRole("textbox", { name: "Message", exact: true }),
-      ).toHaveCount(0);
+        recipientPage
+          .getByRole("list", { name: "Referral progress", exact: true })
+          .getByRole("listitem")
+          .filter({ hasText: "In progress" }),
+      ).toHaveAttribute("aria-current", "step");
+    });
+
+    let appointmentId: string;
+    let receivingEncounterId: string;
+    let localResponseId: string;
+    let sourceEncounterAccessAfterConsultation: number;
+    const localFinding = `Local clinical assessment ${suffix}`;
+    const recommendation = `Specialist follow-up recommendation ${suffix}`;
+    await test.step("The receiving doctor books through the native appointment page", async () => {
+      await recipientPage
+        .getByRole("link", { name: "Book appointment", exact: true })
+        .click();
+      const appointmentsPath = `/facility/${destination.id}/patient/${patientId}/appointments`;
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname === appointmentsPath &&
+          url.searchParams.get("referralId") === fixture.referralId,
+      );
+      const booking = recipientPage.getByRole("dialog", {
+        name: "Book Appointment",
+        exact: true,
+      });
+      await expect(
+        booking.getByPlaceholder("Type the reason for visit"),
+      ).toHaveValue(fixture.title);
+      await booking
+        .getByRole("radio", { name: "Practitioner", exact: true })
+        .click();
+      await booking
+        .getByRole("combobox", { name: "Select Practitioner", exact: true })
+        .click();
+      await recipientPage
+        .getByPlaceholder("Search departments and practitioners")
+        .fill(`recipient ${suffix}`);
+      const dateInFacility = (date: Date) =>
+        new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(date);
+      const todayInFacility = dateInFacility(new Date());
+      // Near midnight, use tomorrow's earliest slot; it remains within the
+      // native consultation window and avoids the end of today's schedule.
+      const appointmentDay = dateInFacility(new Date(Date.now() + 2 * 3600000));
+      const slotsLoaded = recipientPage.waitForResponse(
+        (result) =>
+          new URL(result.url()).pathname.endsWith(
+            "/slots/get_slots_for_day/",
+          ) &&
+          result.request().method() === "POST" &&
+          result.request().postDataJSON().day === appointmentDay,
+      );
+      await recipientPage
+        .getByRole("option")
+        .filter({ hasText: `recipient ${suffix}` })
+        .click();
+      if (appointmentDay !== todayInFacility) {
+        if (appointmentDay.slice(0, 7) !== todayInFacility.slice(0, 7))
+          await booking
+            .getByRole("button", { name: "Next Month", exact: true })
+            .click();
+        await booking
+          .getByRole("button", {
+            name: new RegExp(
+              `^${Number(appointmentDay.slice(-2))}\\s+\\d+ left$`,
+            ),
+          })
+          .click();
+      }
+      expect((await slotsLoaded).ok()).toBeTruthy();
+      const confirm = booking.getByRole("button", {
+        name: "Confirm Appointment",
+        exact: true,
+      });
+      await expect(confirm).toBeEnabled();
+      const created = recipientPage.waitForResponse(
+        (result) =>
+          new URL(result.url()).pathname.endsWith("/create_appointment/") &&
+          result.request().method() === "POST",
+      );
+      await confirm.click();
+      const response = await created;
+      expect(response.ok(), await response.text()).toBeTruthy();
+      const appointment = await response.json();
+      appointmentId = appointment.id;
+      expect(appointment).toMatchObject({
+        patient: { id: patientId },
+        note: fixture.title,
+        booked_by: { id: recipient.id },
+      });
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname === `${appointmentsPath}/${appointmentId}` &&
+          url.searchParams.get("referralId") === fixture.referralId,
+      );
+      await expect(
+        recipientPage.getByRole("region", {
+          name: "Referral appointment",
+          exact: true,
+        }),
+      ).toContainText(`This appointment is linked to ${fixture.title}.`);
+      const origin = await request.get(
+        `${apiBaseUrl()}/api/v1/encounter/${encounterId}/`,
+        { headers: recipientSession.headers },
+      );
+      expect(origin.status()).toBe(403);
+      const patientBeforeConsultation = await request.get(
+        `${apiBaseUrl()}/api/v1/patient/${patientId}/`,
+        { headers: recipientSession.headers },
+      );
+      expect(patientBeforeConsultation.status()).toBe(404);
+    });
+
+    await test.step("Start consultation and document the receiving encounter through its native form", async () => {
+      await recipientPage
+        .getByRole("button", { name: /\bStart Consultation$/ })
+        .click();
+      const encounterForm = recipientPage.getByRole("dialog", {
+        name: "Initiate Patient Encounter",
+        exact: true,
+      });
+      await expect(encounterForm).toContainText(patient.name);
+      await expect(
+        encounterForm.getByRole("combobox", { name: "Status", exact: true }),
+      ).toContainText("In Progress");
+      await encounterForm
+        .getByRole("button", { name: /^Ambulatory Patient visits/ })
+        .click();
+      await encounterForm
+        .getByRole("combobox", { name: "Select Department", exact: true })
+        .click();
+      await recipientPage
+        .getByRole("option", { name: department.name, exact: true })
+        .click();
+      await expect(
+        encounterForm.getByRole("combobox", {
+          name: "Select Department",
+          exact: true,
+        }),
+      ).toContainText(department.name);
+      const created = recipientPage.waitForResponse(
+        (result) =>
+          new URL(result.url()).pathname === "/api/v1/encounter/" &&
+          result.request().method() === "POST",
+      );
+      await encounterForm
+        .getByRole("button", { name: /^Create Encounter/ })
+        .click();
+      const response = await created;
+      expect(response.ok(), await response.text()).toBeTruthy();
+      const encounter = await response.json();
+      receivingEncounterId = encounter.id;
+      expect(receivingEncounterId).not.toBe(encounterId);
+      expect(encounter).toMatchObject({
+        patient: { id: patientId },
+        facility: { id: destination.id },
+        created_by: { id: recipient.id },
+        status: "in_progress",
+        encounter_class: "amb",
+        appointment: { id: appointmentId },
+      });
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname ===
+            `/facility/${destination.id}/patient/${patientId}/encounter/${receivingEncounterId}/updates` &&
+          url.searchParams.get("referralId") === fixture.referralId &&
+          url.searchParams.get("referralAppointmentId") === appointmentId,
+      );
+      const receivingEncounterUrl = recipientPage.url();
+      const review = recipientPage.getByRole("region", {
+        name: "Referral review",
+        exact: true,
+      });
+      await expect(
+        review.getByRole("link", { name: "View referral", exact: true }),
+      ).toBeVisible();
+      await recipientPage.getByRole("button", { name: /\bForms$/ }).click();
+      await recipientPage
+        .getByPlaceholder("Search Forms", { exact: true })
+        .fill(localFormTitle);
+      await recipientPage
+        .getByRole("option")
+        .filter({ hasText: localFormTitle })
+        .click();
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname.endsWith(`/questionnaire/${localForm.id}`) &&
+          url.searchParams.get("referralId") === fixture.referralId,
+      );
+      await questionBlock(recipientPage, localQuestionLabel)
+        .getByRole("textbox")
+        .fill(localFinding);
+      const submitted = recipientPage.waitForResponse((result) => {
+        if (
+          new URL(result.url()).pathname !== "/api/v1/batch_requests/" ||
+          result.request().method() !== "POST"
+        )
+          return false;
+        const body = result.request().postDataJSON() as {
+          requests: { url: string; method: string }[];
+        };
+        return body.requests.some(
+          (entry) =>
+            entry.method === "POST" &&
+            entry.url === `/api/v1/questionnaire/${localForm.id}/submit/`,
+        );
+      });
+      await recipientPage
+        .getByRole("button", { name: "Save Changes", exact: true })
+        .click();
+      const savedResponse = await submitted;
+      expect(savedResponse.ok(), await savedResponse.text()).toBeTruthy();
+      const batch = (await savedResponse.json()) as {
+        results: {
+          reference_id: string;
+          status_code: number;
+          data?: { id: string };
+        }[];
+      };
+      const clinicalResult = batch.results.find(
+        (entry) => entry.reference_id === localForm.id,
+      );
+      expect(clinicalResult).toMatchObject({
+        status_code: 200,
+        data: { id: expect.any(String) },
+      });
+      localResponseId = clinicalResult!.data!.id;
+      const encounterContext = new URL(receivingEncounterUrl);
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname === encounterContext.pathname &&
+          ["referralId", "referralSourceUrl", "referralAppointmentId"].every(
+            (key) =>
+              url.searchParams.get(key) ===
+              encounterContext.searchParams.get(key),
+          ),
+      );
+      const savedClinical = await api<{
+        encounter: { id: string } | string;
+        created_by: { id: string };
+      }>(
+        request,
+        `/api/v1/patient/${patientId}/questionnaire_response/${localResponseId}/`,
+        undefined,
+        recipientSession.headers,
+      );
+      expect(savedClinical.created_by.id).toBe(recipient.id);
+      expect(
+        typeof savedClinical.encounter === "string"
+          ? savedClinical.encounter
+          : savedClinical.encounter.id,
+      ).toBe(receivingEncounterId);
+      // Baseline patient-wide access can broaden after an active local encounter.
+      // Record it explicitly rather than claiming source isolation still holds.
+      sourceEncounterAccessAfterConsultation = (
+        await request.get(`${apiBaseUrl()}/api/v1/encounter/${encounterId}/`, {
+          headers: recipientSession.headers,
+        })
+      ).status();
+      await recipientPage.screenshot({
+        path: testInfo.outputPath("recipient-local-encounter.png"),
+        fullPage: true,
+      });
+      await review.getByRole("link", { name: "Respond", exact: true }).click();
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname === `${fixture.path}/respond` &&
+          url.searchParams.get("referralAppointmentId") === appointmentId,
+      );
+    });
+
+    await test.step("Share the local clinical record and save a response that completes the referral", async () => {
+      await questionBlock(recipientPage, fixture.responseLabel)
+        .getByRole("textbox")
+        .fill(recommendation);
+      const appointmentUrl = (url: URL) =>
+        url.pathname ===
+        `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`;
+      await recipientPage.route(appointmentUrl, async (route) => {
+        await route.fulfill({
+          status: 503,
+          json: { detail: "Receiving visit temporarily unavailable" },
+        });
+      });
+      const failedRefresh = recipientPage.waitForResponse(
+        (result) =>
+          appointmentUrl(new URL(result.url())) &&
+          result.request().method() === "GET" &&
+          result.status() === 503,
+      );
+      await recipientPage.context().setOffline(true);
+      await expect
+        .poll(() => recipientPage.evaluate(() => navigator.onLine))
+        .toBe(false);
+      await recipientPage.context().setOffline(false);
+      await failedRefresh;
+      const visitWarning = recipientPage.getByRole("alert").filter({
+        hasText: "The receiving visit could not be refreshed.",
+      });
+      await expect(visitWarning).toContainText(
+        "Your answers are kept here. Retry before saving the response.",
+      );
+      await expect(
+        questionBlock(recipientPage, fixture.responseLabel).getByRole(
+          "textbox",
+        ),
+      ).toHaveValue(recommendation);
+      const saveResponse = recipientPage.getByRole("button", {
+        name: "Save response and complete",
+        exact: true,
+      });
+      await expect(saveResponse).toBeDisabled();
+      await recipientPage.unroute(appointmentUrl);
+      await visitWarning
+        .getByRole("button", { name: "Retry", exact: true })
+        .click();
+      await expect(visitWarning).not.toBeVisible();
+      await expect(saveResponse).toBeEnabled();
+      await expect(
+        questionBlock(recipientPage, fixture.responseLabel).getByRole(
+          "textbox",
+        ),
+      ).toHaveValue(recommendation);
+      const records = recipientPage.getByRole("region", {
+        name: "Response records",
+        exact: true,
+      });
+      await records
+        .getByRole("button", { name: "Add record", exact: true })
+        .click();
+      const picker = recipientPage.getByRole("dialog", {
+        name: "Add record",
+        exact: true,
+      });
+      await picker
+        .getByRole("combobox", { name: "Record type", exact: true })
+        .click();
+      await recipientPage
+        .getByRole("option", { name: "Response", exact: true })
+        .click();
+      await picker
+        .getByRole("button", { name: `Select ${localFormTitle}`, exact: true })
+        .click();
+      await picker
+        .getByRole("button", { name: "Add record", exact: true })
+        .click();
+      await expect(picker).not.toBeVisible();
+      await expect(
+        records.getByText(localFinding, { exact: true }),
+      ).toBeVisible();
+      await expect(
+        questionBlock(recipientPage, fixture.responseLabel).getByRole(
+          "textbox",
+        ),
+      ).toHaveValue(recommendation);
+      await recipientPage.screenshot({
+        path: testInfo.outputPath("recipient-response-with-local-record.png"),
+        fullPage: true,
+      });
+      await records
+        .getByText(localFinding, { exact: true })
+        .scrollIntoViewIfNeeded();
+      await recipientPage.screenshot({
+        path: testInfo.outputPath("recipient-response-local-record-detail.png"),
+        animations: "disabled",
+      });
+      await recipientPage
+        .getByRole("button", {
+          name: "Save response and complete",
+          exact: true,
+        })
+        .click();
+      await expect(recipientPage).toHaveURL(
+        (url) => url.pathname === fixture.path,
+      );
       await recipientPage.reload();
       await expect(
-        clinicalPreview.getByText(clinicalFinding, { exact: true }),
+        recipientPage
+          .getByRole("list", { name: "Referral progress", exact: true })
+          .getByRole("listitem")
+          .filter({ hasText: "Completed" }),
+      ).toHaveAttribute("aria-current", "step");
+      const responses = recipientPage.getByRole("region", {
+        name: "Responses",
+        exact: true,
+      });
+      await expect(
+        responses.getByText(recommendation, { exact: true }),
       ).toBeVisible();
       await expect(
-        discussion.getByText(discussionMessage, { exact: true }),
+        responses.getByText(localFinding, { exact: true }),
       ).toBeVisible();
+      const completedReferralUrl = new URL(recipientPage.url());
+      const appointmentVisit = recipientPage.getByRole("region", {
+        name: "Appointment and visit",
+        exact: true,
+      });
+      await expect(
+        appointmentVisit.getByRole("link", {
+          name: "Manage appointment",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        appointmentVisit.getByRole("link", { name: "Respond", exact: true }),
+      ).toHaveCount(0);
+      await appointmentVisit
+        .getByRole("link", { name: "View Encounter", exact: true })
+        .click();
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname ===
+            `/facility/${destination.id}/patient/${patientId}/encounter/${receivingEncounterId}/updates` &&
+          url.searchParams.get("referralId") === fixture.referralId,
+      );
+      const completedReview = recipientPage.getByRole("region", {
+        name: "Referral review",
+        exact: true,
+      });
+      await expect(
+        completedReview.getByRole("link", {
+          name: "View referral",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        completedReview.getByRole("link", { name: "Respond", exact: true }),
+      ).toHaveCount(0);
+      await completedReview
+        .getByRole("link", { name: "View referral", exact: true })
+        .click();
+      await expect(recipientPage).toHaveURL(
+        (url) =>
+          url.pathname === completedReferralUrl.pathname &&
+          url.searchParams.get("sourceUrl") ===
+            completedReferralUrl.searchParams.get("sourceUrl"),
+      );
+      await recipientPage
+        .getByRole("button", { name: "Hide request", exact: true })
+        .click();
+      await expect(
+        recipientPage.getByRole("region", {
+          name: "Referral request",
+          exact: true,
+        }),
+      ).not.toBeVisible();
+      await expect(
+        responses.getByText(recommendation, { exact: true }),
+      ).toBeVisible();
+      await expect(
+        responses.getByText(localFinding, { exact: true }),
+      ).toBeVisible();
+      await recipientPage
+        .getByRole("button", { name: "Show request", exact: true })
+        .click();
       await recipientPage.screenshot({
-        path: testInfo.outputPath("recipient-read-only-referral.png"),
+        path: testInfo.outputPath("recipient-completed-referral.png"),
         fullPage: true,
-        animations: "disabled",
+      });
+      await senderPage.reload();
+      await expect(
+        senderPage
+          .getByRole("region", { name: "Responses", exact: true })
+          .getByText(recommendation, { exact: true }),
+      ).toBeVisible();
+      await expect(
+        senderPage
+          .getByRole("region", { name: "Responses", exact: true })
+          .getByText(localFinding, { exact: true }),
+      ).toBeVisible();
+      await senderPage.screenshot({
+        path: testInfo.outputPath("sender-completed-referral.png"),
+        fullPage: true,
       });
     });
 
-    await test.step("Keep one referral, its source record, and the original author identities", async () => {
+    await test.step("Retain one appointment, a distinct receiving encounter, and each doctor’s authored records", async () => {
       const saved = await api<{
         status: string;
         created_by: { id: string };
-        questionnaire_responses: { questionnaire_type: string }[];
+        questionnaire_responses: {
+          questionnaire_type: string;
+          created_by: { id: string };
+        }[];
       }>(
         request,
         `/api/v1/referral/${fixture.referralId}/`,
@@ -596,13 +1106,62 @@ test("shares a referral between non-admin facility doctors without granting acce
         senderSession.headers,
       );
       expect(saved).toMatchObject({
-        status: "pending",
+        status: "completed",
+        encounter: encounterId,
         created_by: { id: sender.id },
       });
-      expect(saved.questionnaire_responses).toHaveLength(1);
-      expect(saved.questionnaire_responses[0].questionnaire_type).toBe(
-        "request",
+      expect(saved.questionnaire_responses).toHaveLength(2);
+      expect(
+        saved.questionnaire_responses.find(
+          (item) => item.questionnaire_type === "response",
+        ),
+      ).toMatchObject({ created_by: { id: recipient.id } });
+      const bookings = await api<{ count: number; results: { id: string }[] }>(
+        request,
+        `/api/v1/patient/${patientId}/get_appointments/?facility=${destination.id}`,
+        undefined,
+        recipientSession.headers,
       );
+      expect(bookings).toMatchObject({
+        count: 1,
+        results: [{ id: appointmentId }],
+      });
+      const booking = await api<unknown>(
+        request,
+        `/api/v1/facility/${destination.id}/appointments/${appointmentId}/`,
+        undefined,
+        recipientSession.headers,
+      );
+      expect(booking).toMatchObject({
+        status: "in_consultation",
+        associated_encounter: { id: receivingEncounterId },
+      });
+      const resources = await api<unknown>(
+        request,
+        `/api/v1/referral/${fixture.referralId}/resources/`,
+        undefined,
+        senderSession.headers,
+      );
+      expect(resources).toMatchObject({
+        count: 3,
+        results: expect.arrayContaining([
+          expect.objectContaining({
+            resource_type: "questionnaire_response",
+            resource_id: clinical.id,
+            attachment_type: "source",
+          }),
+          expect.objectContaining({
+            resource_type: "questionnaire_response",
+            resource_id: localResponseId,
+            attachment_type: "response",
+          }),
+          expect.objectContaining({
+            resource_type: "appointment",
+            resource_id: appointmentId,
+            attachment_type: "response",
+          }),
+        ]),
+      });
       const referrals = await api<{ count: number; results: { id: string }[] }>(
         request,
         `/api/v1/referral/?patient=${patientId}&availability=${fixture.availabilityId}`,
@@ -657,6 +1216,11 @@ test("shares a referral between non-admin facility doctors without granting acce
               role: "Doctor",
             },
             referralId: fixture.referralId,
+            appointmentId,
+            sourceEncounterId: encounterId,
+            receivingEncounterId,
+            sourceEncounterAccessBeforeConsultation: 403,
+            sourceEncounterAccessAfterConsultation,
             status: saved.status,
           },
           null,
@@ -668,6 +1232,34 @@ test("shares a referral between non-admin facility doctors without granting acce
         contentType: "application/json",
       });
     });
+  } catch (error) {
+    // Capture these independent contexts before closing them. Never capture
+    // the login form, which contains the synthetic account's password.
+    for (const [actor, actorPage] of [
+      ["sender", senderPage],
+      ["recipient", recipientPage],
+    ] as const) {
+      if (
+        actorPage.isClosed() ||
+        !actorPage.url().startsWith(baseURL!) ||
+        new URL(actorPage.url()).pathname === "/login"
+      )
+        continue;
+      await actorPage
+        .screenshot({
+          path: testInfo.outputPath(`${actor}-failure.png`),
+          animations: "disabled",
+        })
+        .catch(() => undefined);
+      await actorPage
+        .locator("body")
+        .ariaSnapshot()
+        .then((snapshot) =>
+          writeFile(testInfo.outputPath(`${actor}-failure.md`), snapshot),
+        )
+        .catch(() => undefined);
+    }
+    throw error;
   } finally {
     await senderContext.close();
     await recipientContext.close();

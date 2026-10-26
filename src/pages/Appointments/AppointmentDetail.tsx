@@ -95,6 +95,7 @@ import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { ReferralAppointmentContext } from "@/components/Referral/ReferralAppointmentContext";
+import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -151,6 +152,15 @@ export default function AppointmentDetail(props: Props) {
     }),
     enabled: canViewAppointments && !!facility,
   });
+  const referralContext = useAppointmentReferral(appointment?.patient.id ?? "");
+  const referralContextLoading =
+    referralContext.requested && referralContext.isLoading;
+  const referralEncounterParams = referralContext.referral
+    ? {
+        ...referralContext.successQueryParams,
+        referralAppointmentId: appointment?.id,
+      }
+    : undefined;
 
   useEffect(() => {
     // Don't redirect while facility is still loading
@@ -193,6 +203,14 @@ export default function AppointmentDetail(props: Props) {
     return <Loading />;
   }
   const currentStatus = appointment.status;
+  const encounterUrl = (encounterId: string) => {
+    const params = new URLSearchParams(
+      Object.entries(referralEncounterParams ?? {}).filter(
+        (entry): entry is [string, string] => entry[1] !== undefined,
+      ),
+    );
+    return `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${encounterId}/updates${params.size ? `?${params}` : ""}`;
+  };
 
   const canCheckIn = isWithinInterval(new Date(), {
     start: subDays(appointment.token_slot.start_datetime, 1),
@@ -441,9 +459,10 @@ export default function AppointmentDetail(props: Props) {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={referralContextLoading}
                       onClick={() =>
                         navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                          encounterUrl(appointment.associated_encounter!.id),
                         )
                       }
                       className="flex items-center gap-2"
@@ -484,13 +503,16 @@ export default function AppointmentDetail(props: Props) {
                           icon={<PlusSquare className="text-primary-500" />}
                           title={t("start_consultation")}
                           actionId="start-consultation"
+                          disabled={referralContextLoading}
                           onClick={() => {
                             updateAppointment({
                               status: AppointmentStatus.IN_CONSULTATION,
                               note: appointment.note,
                             });
                             navigate(
-                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                              encounterUrl(
+                                appointment.associated_encounter!.id,
+                              ),
                             );
                           }}
                         />
@@ -501,6 +523,7 @@ export default function AppointmentDetail(props: Props) {
                           facilityId={facilityId}
                           patientName={appointment.patient.name}
                           appointment={appointment.id}
+                          redirectQueryParams={referralEncounterParams}
                           defaultOpen={from_queue === "true"}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
                           trigger={
@@ -508,6 +531,7 @@ export default function AppointmentDetail(props: Props) {
                               icon={<PlusSquare className="text-primary-500" />}
                               title={t("start_consultation")}
                               actionId="start-consultation"
+                              disabled={referralContextLoading}
                             />
                           }
                           onSuccess={() => {

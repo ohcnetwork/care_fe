@@ -571,6 +571,7 @@ export default function FacilityOrganizationSelector(
                     <Button
                       variant="outline"
                       role="combobox"
+                      aria-label={t("select_department")}
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
                       onClick={() => setOpen(true)}
@@ -596,6 +597,7 @@ export default function FacilityOrganizationSelector(
                     type="button" // Prevents unintended form submission
                     variant="outline"
                     role="combobox"
+                    aria-label={t("select_department")}
                     aria-expanded={open}
                     className="w-full justify-between border-dashed"
                   >

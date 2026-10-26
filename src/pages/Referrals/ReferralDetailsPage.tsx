@@ -55,7 +55,12 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
   const { t } = useTranslation();
   const requestId = useId();
   const [requestHidden, setRequestHidden] = useState(false);
-  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
+  const [{ sourceUrl, referralAppointmentId, referralFacilityId }] =
+    useQueryParams<{
+      sourceUrl?: string;
+      referralAppointmentId?: string;
+      referralFacilityId?: string;
+    }>();
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["referrals", "detail", referralId],
     queryFn: query(referralApi.get, {
@@ -327,7 +332,10 @@ export function ReferralDetailsPage({ referralId }: { referralId: string }) {
                 <ReferralResponsesSection
                   referral={data}
                   canWrite={canWrite}
-                  responseUrl={getReferralResponseUrl(data.id, sourceUrl)}
+                  responseUrl={getReferralResponseUrl(data.id, sourceUrl, {
+                    appointmentId: referralAppointmentId,
+                    facilityId: referralFacilityId,
+                  })}
                 />
                 <details className="group rounded-lg border border-cui-border bg-cui-background">
                   <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-medium focus-visible:outline-cui-ring [&::-webkit-details-marker]:hidden">

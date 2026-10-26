@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuthContext } from "@/hooks/useAuthUser";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import {
   REFERRAL_ATTACHABLE_RESOURCE_TYPES,
@@ -96,6 +97,7 @@ interface ReferralResourcePickerProps {
   attachments: Pick<ReferralResource, "resource_type" | "resource_id">[];
   onClose: () => void;
   categories?: readonly ReferralResourceCategory[];
+  receivingEncounter?: EncounterRead;
 }
 
 export function ReferralResourcePicker({
@@ -103,6 +105,7 @@ export function ReferralResourcePicker({
   attachments,
   onClose,
   categories = REFERRAL_RESOURCE_CATEGORIES,
+  receivingEncounter,
 }: ReferralResourcePickerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -115,7 +118,21 @@ export function ReferralResourcePicker({
   const category = categories.includes(selectedCategory)
     ? selectedCategory
     : categories[0];
-  const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
+  const [facilityId, setFacilityId] = useState(
+    receivingEncounter?.facility.id ?? facilities[0]?.id ?? "",
+  );
+  const [recordScope, setRecordScope] = useState(
+    receivingEncounter ? "encounter" : "patient",
+  );
+  const scopedClinicalType = [
+    "condition",
+    "questionnaire_response",
+    "diagnostic_report",
+  ].includes(resourceType);
+  const encounterId =
+    recordScope === "encounter" && scopedClinicalType
+      ? receivingEncounter?.id
+      : undefined;
   const [offset, setOffset] = useState(0);
   const [fileScope, setFileScope] = useState<FileType>(FileType.PATIENT);
   const [parent, setParent] = useState<ReferralResourceCandidate>();
@@ -158,6 +175,7 @@ export function ReferralResourcePicker({
       referral.patient,
       "candidates",
       listingType,
+      encounterId,
       facilityId,
       offset,
       fileScope,
@@ -167,6 +185,7 @@ export function ReferralResourcePicker({
       loadReferralCandidates({
         resourceType: listingType,
         patientId: referral.patient,
+        encounterId,
         facilityId,
         offset,
         fileType: fileScope,
@@ -250,6 +269,31 @@ export function ReferralResourcePicker({
             categories={categories}
           />
         </div>
+        {receivingEncounter && scopedClinicalType && (
+          <Field>
+            <FieldLabel>{t("referral_record_scope")}</FieldLabel>
+            <Select
+              value={recordScope}
+              disabled={add.isPending}
+              onValueChange={(value) => {
+                setRecordScope(value);
+                resetSelection();
+              }}
+            >
+              <SelectTrigger aria-label={t("referral_record_scope")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="encounter">
+                  {t("referral_receiving_encounter")}
+                </SelectItem>
+                <SelectItem value="patient">
+                  {t("referral_all_patient_records")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
         {resourceType === "file_upload" && (
           <Field>
             <FieldLabel>{t("referral_file_source")}</FieldLabel>
@@ -259,6 +303,12 @@ export function ReferralResourcePicker({
               onValueChange={(value: FileType) => {
                 setFileScope(value);
                 resetSelection();
+                if (value === FileType.ENCOUNTER && receivingEncounter) {
+                  setParent({
+                    id: receivingEncounter.id,
+                    title: receivingEncounter.facility.name,
+                  });
+                }
               }}
             >
               <SelectTrigger aria-label={t("referral_file_source")}>

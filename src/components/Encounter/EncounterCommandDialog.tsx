@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import {
   CommandDialog,
   CommandEmpty,
@@ -140,10 +141,13 @@ export function EncounterCommandDialog({
         selectedEncounterId !== primaryEncounterId
       ) {
         const separator = path.includes("?") ? "&" : "?";
-        return `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`;
+        return appendReferralNativeContext(
+          `${baseUrl}${separator}selectedEncounter=${selectedEncounterId}`,
+          window.location.search,
+        );
       }
 
-      return baseUrl;
+      return appendReferralNativeContext(baseUrl, window.location.search);
     },
     [encounter, selectedEncounterId, primaryEncounterId],
   );

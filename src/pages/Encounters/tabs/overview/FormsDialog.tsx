@@ -1,4 +1,5 @@
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -163,7 +164,10 @@ export const FormDialog = ({
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     onSelect={() => {
                       navigate(
-                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                        appendReferralNativeContext(
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                          window.location.search,
+                        ),
                       );
                       setOpen(false);
                     }}

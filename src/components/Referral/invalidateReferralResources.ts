@@ -19,6 +19,7 @@ export async function invalidateReferralResources(
   if (attachment.resource_type === "appointment") {
     keys.push(
       [...prefix, "appointments"],
+      [...prefix, "receiving-visit"],
       [...prefix, "appointment-link", attachment.resource_id],
       [...prefix, "resource-link"],
     );

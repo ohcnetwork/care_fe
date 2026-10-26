@@ -27,6 +27,8 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+import { ReferralEncounterContext } from "@/components/Referral/ReferralEncounterContext";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Card } from "@/components/ui/card";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareAppTabs } from "@/hooks/useCareApps";
@@ -294,6 +296,9 @@ export const EncounterShow = (props: Props) => {
         </Card>
         <PatientDeceasedInfo patient={patient} />
       </div>
+      {selectedEncounterId === primaryEncounterId && (
+        <ReferralEncounterContext encounter={primaryEncounter} />
+      )}
       <div className="mt-2 flex min-w-0 flex-col gap-2">
         <EncounterDetailsHeader
           encounter={selectedEncounter}
@@ -303,7 +308,10 @@ export const EncounterShow = (props: Props) => {
           onReturnToCurrent={() => setSelectedEncounter(null)}
           editUrl={
             canWriteSelectedEncounter && facilityId
-              ? `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/encounter`
+              ? appendReferralNativeContext(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/encounter`,
+                  window.location.search,
+                )
               : undefined
           }
         />

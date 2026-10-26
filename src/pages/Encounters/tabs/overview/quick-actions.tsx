@@ -9,6 +9,7 @@ import { Link } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Collapsible,
@@ -41,9 +42,12 @@ export const QuickActions = ({
   const { patientId, facilityId, selectedEncounterId } = useEncounter();
   const formLink = (questionnaire: string) => {
     const path = `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`;
-    return returnPage
-      ? `${path}?${new URLSearchParams({ return_page: returnPage })}`
-      : path;
+    return appendReferralNativeContext(
+      returnPage
+        ? `${path}?${new URLSearchParams({ return_page: returnPage })}`
+        : path,
+      window.location.search,
+    );
   };
 
   return (

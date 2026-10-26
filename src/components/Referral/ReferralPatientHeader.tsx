@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
-import { Link } from "raviger";
+import { Link, useQueryParams } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,15 +11,19 @@ import {
 } from "@/components/Patient/PatientHeader";
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import EncounterDetailsHeader from "@/pages/Encounters/EncounterDetailsHeader";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import { ReferralRetrieve } from "@/types/emr/referral/referral";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 
+import { appendReferralNativeContext } from "./referralNativeNavigation";
+
 interface ReferralPatientHeaderProps {
   referral: ReferralRetrieve;
   children: ReactNode;
+  receivingEncounter?: EncounterRead;
 }
 
 function accessUnavailable(error: unknown) {
@@ -29,8 +33,10 @@ function accessUnavailable(error: unknown) {
 export function ReferralPatientHeader({
   referral,
   children,
+  receivingEncounter,
 }: ReferralPatientHeaderProps) {
   const { t } = useTranslation();
+  const [{ sourceUrl }] = useQueryParams<{ sourceUrl?: string }>();
   const encounterQuery = useQuery({
     queryKey: [
       "referrals",
@@ -43,7 +49,7 @@ export function ReferralPatientHeader({
       pathParams: { id: referral.encounter ?? "" },
       silent: true,
     }),
-    enabled: !!referral.encounter,
+    enabled: !!referral.encounter && !receivingEncounter,
     retry: false,
   });
   // Chart access is independent of referral/encounter access. This also
@@ -58,10 +64,12 @@ export function ReferralPatientHeader({
     retry: false,
   });
   const encounter =
-    !encounterQuery.isError &&
-    encounterQuery.data?.patient.id === referral.patient
-      ? encounterQuery.data
-      : undefined;
+    receivingEncounter?.patient.id === referral.patient
+      ? receivingEncounter
+      : !encounterQuery.isError &&
+          encounterQuery.data?.patient.id === referral.patient
+        ? encounterQuery.data
+        : undefined;
   const chartPatient =
     !patientQuery.isError && patientQuery.data?.id === referral.patient
       ? patientQuery.data
@@ -71,10 +79,30 @@ export function ReferralPatientHeader({
   const patient = encounter?.patient ?? chartPatient;
   const loading =
     patientQuery.isPending ||
-    (!!referral.encounter && encounterQuery.isPending);
+    (!!referral.encounter && !receivingEncounter && encounterQuery.isPending);
   const patientError = patientQuery.error;
   const encounterError = encounterQuery.error;
 
+  const encounterLabel = receivingEncounter
+    ? "referral_receiving_encounter"
+    : "referral_source_encounter";
+  const encounterLoading = !receivingEncounter && encounterQuery.isPending;
+  const encounterPath = encounter
+    ? `/facility/${encounter.facility.id}/patient/${referral.patient}/encounter/${encounter.id}/updates`
+    : "";
+  const encounterUrl =
+    receivingEncounter && encounter?.appointment
+      ? appendReferralNativeContext(
+          encounterPath,
+          new URLSearchParams({
+            referralId: referral.id,
+            referralAppointmentId: encounter.appointment.id,
+            ...(typeof sourceUrl === "string"
+              ? { referralSourceUrl: sourceUrl }
+              : {}),
+          }).toString(),
+        )
+      : encounterPath;
   return (
     <div className="space-y-2">
       <section
@@ -126,23 +154,20 @@ export function ReferralPatientHeader({
         )}
       </section>
       {patient && <PatientDeceasedInfo patient={patient} />}
-      {referral.encounter && (
-        <section
-          aria-label={t("referral_source_encounter")}
-          className="space-y-1"
-        >
+      {(referral.encounter || receivingEncounter) && (
+        <section aria-label={t(encounterLabel)} className="space-y-1">
           <h2 className="px-1 text-xs font-medium text-cui-muted-foreground">
-            {t("referral_source_encounter")}
+            {t(encounterLabel)}
           </h2>
-          {encounter || encounterQuery.isPending ? (
+          {encounter || encounterLoading ? (
             <EncounterDetailsHeader
               encounter={encounter}
-              isLoading={encounterQuery.isPending}
+              isLoading={encounterLoading}
               isHistorical={false}
               actions={
                 encounter && (
                   <Link
-                    href={`/facility/${encounter.facility.id}/patient/${referral.patient}/encounter/${encounter.id}/updates`}
+                    href={encounterUrl}
                     className={buttonVariants({
                       variant: "outline",
                       size: "sm",
