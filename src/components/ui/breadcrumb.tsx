@@ -16,7 +16,7 @@ function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   const { t } = useTranslation();
   return (
     <nav
-      aria-label={t("navigation")}
+      aria-label={t("breadcrumb")}
       data-slot="breadcrumb"
       className={cn(className)}
       {...props}

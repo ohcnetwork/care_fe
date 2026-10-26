@@ -68,22 +68,19 @@ export function ServiceSwitcher() {
         setOpen={handleDialogOpenChange}
       />
       <div
-        className={cn(
-          "flex min-w-0 flex-col gap-2 py-2",
-          !isCollapsed && "px-2",
-        )}
+        className={cn("flex min-w-0 flex-col gap-2", !isCollapsed && "px-2")}
       >
         <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size={isCollapsed ? "icon" : "sm"}
+            size={isCollapsed ? "icon-sm" : "sm"}
             onClick={() => {
               if (isMobile) setOpenMobile(false);
               navigate(fallbackUrl);
             }}
             className={cn(
-              "gap-1.5 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
-              isCollapsed ? "size-8" : "-ml-1 h-8 px-2",
+              "gap-1.5 text-muted-foreground",
+              !isCollapsed && "-ml-2 px-2",
             )}
             aria-label={t("home")}
             title={isCollapsed ? t("home") : undefined}
@@ -94,8 +91,7 @@ export function ServiceSwitcher() {
           {isMobile && (
             <Button
               variant="ghost"
-              size="icon"
-              className="size-8 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400"
+              size="icon-sm"
               onClick={() => setOpenMobile(false)}
               aria-label={t("close_sidebar")}
             >
@@ -109,10 +105,11 @@ export function ServiceSwitcher() {
             content={selectedService?.name ?? t("select_healthcare_service")}
           >
             <Button
-              variant="ghost"
+              variant="outline"
+              size={isCollapsed ? "icon-sm" : "sm"}
               className={cn(
-                "flex h-auto w-full items-center justify-between gap-2 overflow-hidden rounded-[10px] border border-neutral-300 bg-white text-neutral-950 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-indigo-400",
-                isCollapsed ? "size-8 justify-center p-0" : "px-3 py-2.5",
+                "w-full min-w-0 gap-2 font-normal shadow-sm",
+                !isCollapsed && "h-auto justify-between py-2",
               )}
               aria-label={
                 selectedService?.name ?? t("select_healthcare_service")
@@ -123,21 +120,21 @@ export function ServiceSwitcher() {
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 {isCollapsed && (
-                  <HeartPulse className="mx-auto size-4 text-neutral-600" />
+                  <HeartPulse className="mx-auto size-4 text-muted-foreground" />
                 )}
                 <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
-                    <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+                    <span className="text-xs text-muted-foreground">
                       {t("current_service")}
                     </span>
-                    <span className="max-w-full truncate text-left text-sm font-semibold text-neutral-950">
+                    <span className="max-w-full truncate text-left text-sm font-medium">
                       {selectedService?.name ?? t("select_healthcare_service")}
                     </span>
                   </div>
                 </div>
               </div>
               {!isCollapsed && (
-                <ChevronsUpDown className="size-4 shrink-0 text-neutral-600" />
+                <ChevronsUpDown className="size-3.5 shrink-0 opacity-60" />
               )}
             </Button>
           </TooltipComponent>

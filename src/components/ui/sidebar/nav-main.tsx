@@ -37,9 +37,6 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-const CAREUI_NAV_CLASSES =
-  "relative h-10 rounded-md px-2.5 py-2 text-base font-normal text-neutral-950 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400 data-open:hover:bg-neutral-200 data-open:hover:text-neutral-950 data-[active=true]:bg-white data-[active=true]:font-medium data-[active=true]:text-emerald-800 data-[active=true]:shadow data-[active=true]:ring-1 data-[active=true]:ring-emerald-800/20 data-[active=true]:hover:bg-white data-[active=true]:hover:text-emerald-800 data-[active=true]:focus-visible:ring-2 data-[active=true]:focus-visible:ring-indigo-400 data-[active=true]:after:absolute data-[active=true]:after:right-0 data-[active=true]:after:top-1/2 data-[active=true]:after:h-6 data-[active=true]:after:w-1 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-l-full data-[active=true]:after:bg-emerald-600 data-[active=true]:after:content-[''] [&_svg]:size-4 [&_svg]:shrink-0 md:text-sm";
-
 const normalizeNavigationPath = (url: string) =>
   url.split(/[?#]/)[0].replace(/\/+$/, "");
 
@@ -175,15 +172,18 @@ export function NavMain({ links, label }: NavMainProps) {
       {sections.map((section, index) => (
         <Fragment key={section.links[0].url}>
           {index > 0 && (
-            <Separator className="mx-3 bg-neutral-200 shadow-[0_1px_0_0_white] data-[orientation=horizontal]:w-auto group-data-[collapsible=icon]:mx-2" />
+            <Separator
+              variant="inset"
+              className="mx-3 data-horizontal:w-auto group-data-[collapsible=icon]:mx-2"
+            />
           )}
-          <SidebarGroup className={cn("gap-0.5 p-2", index > 0 && "pt-0")}>
+          <SidebarGroup className={index > 0 ? "pt-0" : undefined}>
             {section.label && (
-              <SidebarGroupLabel className="h-8 px-2 text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+              <SidebarGroupLabel className="text-[10px] font-semibold tracking-wider uppercase">
                 {section.label}
               </SidebarGroupLabel>
             )}
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu>
               {section.links.map((link) =>
                 link.children ? (
                   isCollapsed ? (
@@ -203,7 +203,6 @@ export function NavMain({ links, label }: NavMainProps) {
                       asChild
                       tooltip={link.name}
                       isActive={isNavigationActive(path, link.url)}
-                      className={CAREUI_NAV_CLASSES}
                     >
                       <NavLink
                         href={link.url}
@@ -263,9 +262,8 @@ function CollapsibleNavItem({ link, path }: NavGroupProps) {
             tooltip={link.name}
             isActive={childActive && !isOpen}
             className={cn(
-              CAREUI_NAV_CLASSES,
               "cursor-pointer",
-              childActive && isOpen && "font-medium text-emerald-800",
+              childActive && isOpen && "font-medium text-primary",
             )}
           >
             {link.icon ?? (
@@ -278,7 +276,7 @@ function CollapsibleNavItem({ link, path }: NavGroupProps) {
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <SidebarMenuSub className="ml-2 mr-0 gap-0.5 border-l border-neutral-300 pl-1 pr-0">
+          <SidebarMenuSub>
             {link.children
               ?.filter((child) => child.visibility !== false)
               .map((subItem) => (
@@ -287,7 +285,6 @@ function CollapsibleNavItem({ link, path }: NavGroupProps) {
                   <SidebarMenuSubButton
                     asChild
                     isActive={isNavigationActive(path, subItem.url)}
-                    className={cn(CAREUI_NAV_CLASSES, "md:h-9 md:py-1.5")}
                   >
                     <NavLink
                       href={subItem.url}
@@ -314,7 +311,7 @@ function NavGroupHeading({ item }: { item: NavigationLink }) {
   return (
     <div className="mt-2 flex min-h-8 items-center gap-2 px-2">
       {item.headerIcon}
-      <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+      <span className="text-sidebar-foreground/70 text-[10px] font-semibold tracking-wider uppercase">
         {item.header}
       </span>
     </div>
@@ -331,7 +328,7 @@ function PopoverMenu({ link, path }: NavGroupProps) {
           aria-label={link.name}
           tooltip={link.name}
           isActive={hasActiveChild(link, path)}
-          className={cn(CAREUI_NAV_CLASSES, "cursor-pointer")}
+          className="cursor-pointer"
         >
           {link.icon ?? (
             <Avatar name={link.name} className="size-6 -m-1 rounded-sm" />
@@ -341,32 +338,33 @@ function PopoverMenu({ link, path }: NavGroupProps) {
       <PopoverContent
         side="right"
         align="start"
-        className="w-60 max-h-(--available-height) overflow-y-auto rounded-xl border-neutral-200 bg-white p-1 text-neutral-950 shadow-md"
+        className="w-60 max-h-(--available-height) overflow-y-auto p-1"
         aria-label={link.name}
       >
-        <div className="flex flex-col gap-0.5">
+        <SidebarMenu>
           {link.children
             ?.filter((item) => item.visibility !== false)
             .map((subItem) => (
-              <Fragment key={subItem.name}>
+              <SidebarMenuItem key={subItem.name}>
                 <NavGroupHeading item={subItem} />
-                <NavLink
-                  href={subItem.url}
-                  ariaLabel={subItem.name}
+                <SidebarMenuButton
+                  asChild
                   isActive={isNavigationActive(path, subItem.url)}
-                  className={cn(
-                    CAREUI_NAV_CLASSES,
-                    "flex w-full shrink-0 items-center outline-hidden",
-                  )}
-                  onClick={() => setOpen(false)}
                 >
-                  <span className="truncate" title={subItem.name}>
-                    {subItem.name}
-                  </span>
-                </NavLink>
-              </Fragment>
+                  <NavLink
+                    href={subItem.url}
+                    ariaLabel={subItem.name}
+                    isActive={isNavigationActive(path, subItem.url)}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="truncate" title={subItem.name}>
+                      {subItem.name}
+                    </span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             ))}
-        </div>
+        </SidebarMenu>
       </PopoverContent>
     </Popover>
   );

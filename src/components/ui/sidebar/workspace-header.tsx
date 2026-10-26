@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { WorkspaceHeaderSlot } from "@/components/Common/WorkspaceHeaderSlot";
 
 import { Button } from "@/components/ui/button";
+import { InputGroup } from "@/components/ui/input-group";
+import { Separator } from "@/components/ui/separator";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { FacilitySwitcher } from "@/components/ui/sidebar/facility/facility-switcher";
 import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
@@ -19,6 +21,8 @@ import { useRouteParams } from "@/hooks/useRouteParams";
 import { useWorkspaceHeader } from "@/context/WorkspaceHeaderContext";
 
 import { CurrentUserRead } from "@/types/user/user";
+
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface WorkspaceHeaderProps {
   user?: CurrentUserRead;
@@ -51,20 +55,15 @@ export function WorkspaceHeader({
     <header
       data-cui-app-header
       className={cn(
-        "sticky top-0 z-10 flex shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 text-neutral-950",
-        innerWorkspace
-          ? "min-h-12 py-1.5"
-          : "min-h-14 py-2 md:rounded-t-[14px]",
+        "sticky top-0 z-10 flex shrink-0 items-center gap-3 rounded-t-[inherit] border-b bg-background px-4",
+        innerWorkspace ? "min-h-12" : "min-h-14",
       )}
     >
       <AppSidebarToggle />
       <WorkspaceHeaderSlot>
         {children ?? (
           <>
-            <span
-              aria-hidden="true"
-              className="h-5 w-px shrink-0 bg-neutral-200"
-            />
+            <Separator orientation="vertical" />
             <div className="min-w-0 max-w-[min(20rem,65vw)]">
               {patient ? (
                 <PatientSwitcher />
@@ -92,27 +91,40 @@ export function WorkspaceHeader({
         )}
       </WorkspaceHeaderSlot>
       {onSearch && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onSearch}
-          aria-label={t("search_page_actions")}
-          className={cn(
-            "ml-auto size-8 shrink-0 gap-2 rounded-lg border-neutral-300 bg-white p-0 text-neutral-500 shadow-sm hover:bg-neutral-100 focus-visible:ring-indigo-400",
-            hasCustomContent
-              ? "2xl:h-9 2xl:w-52 2xl:justify-start 2xl:px-3"
-              : "sm:h-9 sm:w-52 sm:justify-start sm:px-3",
-          )}
-        >
-          <Search className="size-4" aria-hidden="true" />
-          <span
-            className={
-              hasCustomContent ? "hidden 2xl:inline" : "hidden sm:inline"
-            }
+        <div className="ml-auto flex shrink-0 items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onSearch}
+            aria-label={t("search_page_actions")}
+            aria-haspopup="dialog"
+            className={hasCustomContent ? "2xl:hidden" : "md:hidden"}
           >
-            {t("search_page_actions")}
-          </span>
-        </Button>
+            <Search className="size-4" aria-hidden="true" />
+          </Button>
+          <InputGroup
+            className={cn(
+              "hidden h-9 w-52 text-sm",
+              hasCustomContent ? "2xl:flex" : "md:flex",
+            )}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              data-slot="input-group-control"
+              onClick={onSearch}
+              aria-label={t("search_page_actions")}
+              aria-haspopup="dialog"
+              className="h-full min-w-0 w-full justify-start gap-2 rounded-[inherit] border-0 px-2 text-muted-foreground font-normal shadow-none"
+            >
+              <Search className="size-4" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-left">
+                {t("search")}
+              </span>
+              <ShortcutBadge actionId="show-shortcuts" />
+            </Button>
+          </InputGroup>
+        </div>
       )}
     </header>
   );

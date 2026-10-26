@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
 interface InnerPageBreadcrumb {
@@ -31,13 +32,13 @@ export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
     <header
       data-cy={dataCy}
       data-cui-app-header
-      className="sticky top-0 z-10 flex min-h-12 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 py-1.5 text-neutral-950"
+      className="sticky top-0 z-10 flex min-h-12 shrink-0 items-center gap-3 border-b border-border bg-background px-4 py-1.5 text-foreground"
     >
       <AppSidebarToggle />
       <WorkspaceHeaderSlot>
-        <span aria-hidden="true" className="h-5 w-px bg-neutral-200" />
+        <Separator orientation="vertical" />
         <Breadcrumb className="min-w-0">
-          <BreadcrumbList className="flex-nowrap text-neutral-600">
+          <BreadcrumbList className="flex-nowrap">
             {breadcrumbs.map((item, index) => (
               <Fragment key={item.href ?? item.label}>
                 <BreadcrumbItem
@@ -51,13 +52,13 @@ export function InnerPageHeader({ breadcrumbs, dataCy }: InnerPageHeaderProps) {
                       <Link
                         basePath="/"
                         href={item.href}
-                        className="truncate rounded-sm underline underline-offset-4 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                        className="truncate rounded-sm underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                       >
                         {item.label}
                       </Link>
                     </BreadcrumbLink>
                   ) : (
-                    <BreadcrumbPage className="truncate text-neutral-950">
+                    <BreadcrumbPage className="truncate text-foreground">
                       {item.label}
                     </BreadcrumbPage>
                   )}

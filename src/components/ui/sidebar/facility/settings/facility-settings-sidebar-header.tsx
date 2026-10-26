@@ -17,18 +17,16 @@ export function FacilitySettingsSidebarHeader() {
   const isCollapsed = state === "collapsed" && !isMobile;
 
   return (
-    <div
-      className={cn("flex min-w-0 flex-col gap-2 py-2", !isCollapsed && "px-2")}
-    >
+    <div className={cn("flex min-w-0 flex-col gap-2", !isCollapsed && "px-2")}>
       <div className="flex min-h-8 items-center justify-between">
         <TooltipComponent content={t("back_to_facility")} side="right">
           <Button
             asChild
             variant="ghost"
-            size={isCollapsed ? "icon" : "sm"}
+            size={isCollapsed ? "icon-sm" : "sm"}
             className={cn(
-              "gap-1.5 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400",
-              isCollapsed ? "size-8" : "-ml-1 h-8 px-2",
+              "gap-1.5 text-muted-foreground",
+              !isCollapsed && "-ml-2 px-2",
             )}
           >
             <Link
@@ -48,8 +46,7 @@ export function FacilitySettingsSidebarHeader() {
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="size-8 shrink-0 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-indigo-400"
+            size="icon-sm"
             onClick={() => setOpenMobile(false)}
             aria-label={t("close_sidebar")}
           >
@@ -60,22 +57,25 @@ export function FacilitySettingsSidebarHeader() {
 
       <div
         className={cn(
-          "flex min-w-0 items-center rounded-[10px] border border-neutral-300 bg-white text-neutral-950",
-          isCollapsed ? "size-8 justify-center" : "px-3 py-2.5",
+          "flex min-w-0 items-center",
+          isCollapsed ? "size-9 justify-center" : "py-2",
         )}
         title={isCollapsed ? t("settings") : facility?.name}
       >
         {isCollapsed ? (
           <>
-            <Settings className="size-4 text-neutral-600" aria-hidden="true" />
+            <Settings
+              className="size-4 text-muted-foreground"
+              aria-hidden="true"
+            />
             <span className="sr-only">{t("settings")}</span>
           </>
         ) : (
           <div className="flex min-w-0 flex-col">
-            <span className="text-[10px] font-semibold tracking-wider text-neutral-600 uppercase">
+            <span className="text-xs text-muted-foreground">
               {t("settings")}
             </span>
-            <span className="truncate text-sm font-semibold">
+            <span className="truncate text-sm font-medium">
               {facility?.name ??
                 (isFacilityLoading ? t("loading") : t("facility"))}
             </span>

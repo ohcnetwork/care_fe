@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
+import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
 import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
@@ -176,14 +177,11 @@ export default function AppRouter() {
         {shouldShowSidebar && (
           <AppSidebar user={user} sidebarFor={sidebarFor} />
         )}
-        <main
+        <SidebarInset
           id="pages"
-          data-slot="sidebar-inset"
           className={cn(
-            "flex min-w-0 max-w-full flex-1 flex-col bg-gray-50 focus:outline-hidden",
-            isInnerWorkspace
-              ? "min-h-svh"
-              : "min-h-svh md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-[14px] md:shadow-sm md:peer-data-[state=collapsed]:ml-2",
+            "min-h-svh min-w-0 max-w-full focus:outline-hidden",
+            !isInnerWorkspace && "md:min-h-[calc(100svh-1rem)]",
           )}
         >
           <ShortcutCommandDialog
@@ -206,7 +204,7 @@ export default function AppRouter() {
               {pages}
             </ErrorBoundary>
           </div>
-        </main>
+        </SidebarInset>
       </PermissionProvider>
     </AppSidebarProvider>
   );
