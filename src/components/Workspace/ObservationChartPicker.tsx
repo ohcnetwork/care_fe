@@ -46,8 +46,11 @@ export function ObservationChartPicker({
   const groupTitles = (selectedPlot?.groups ?? [])
     .map((group) => group.title)
     .filter((title, index, titles) => titles.indexOf(title) === index);
-  const selectedCount = groups
-    ? groupTitles.filter((title) => groups.includes(title)).length
+  const selectedGroups = groups ? new Set(groups) : undefined;
+  const isSelected = (title: string) =>
+    !selectedGroups || selectedGroups.has(title);
+  const selectedCount = selectedGroups
+    ? groupTitles.filter(isSelected).length
     : groupTitles.length;
 
   return (
@@ -90,7 +93,7 @@ export function ObservationChartPicker({
           </legend>
           <div className="space-y-2 rounded-lg border border-border p-3">
             {groupTitles.map((title) => {
-              const checked = !groups || groups.includes(title);
+              const checked = isSelected(title);
               return (
                 <div key={title} className="flex items-center gap-2.5">
                   <Checkbox
@@ -100,9 +103,7 @@ export function ObservationChartPicker({
                     disabled={disabled || (checked && selectedCount === 1)}
                     onCheckedChange={(state) => {
                       const next = groupTitles.filter((candidate) =>
-                        candidate === title
-                          ? state
-                          : !groups || groups.includes(candidate),
+                        candidate === title ? state : isSelected(candidate),
                       );
                       onChange({
                         plot: selectedPlot?.id,

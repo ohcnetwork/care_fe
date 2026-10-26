@@ -58,6 +58,7 @@ import { OutstandingOrdersWidget } from "@/pages/Encounters/widgets/OutstandingO
 import {
   getWidgetAvailability,
   getWidgetRequirements,
+  patientHistoryAccess,
   type WorkspaceWidgetContext,
 } from "@/types/workspace/widgetAvailability";
 
@@ -82,10 +83,13 @@ export function WorkspaceWidget(props: WorkspaceWidgetProps) {
   );
 }
 
+// A shared default keeps memoised children from seeing a new object each render.
+const EMPTY_CONFIG: Record<string, unknown> = {};
+
 function WorkspaceWidgetContent({
   type,
   title,
-  config = {},
+  config = EMPTY_CONFIG,
   showEmpty = false,
   context,
 }: WorkspaceWidgetProps) {
@@ -180,6 +184,7 @@ function WorkspaceWidgetContent({
         type={type}
         patientId={patientId}
         facilityId={facilityId}
+        access={patientHistoryAccess(context)}
         tabs={historyConfig?.tabs}
         defaultTab={historyConfig?.default_tab}
       />,
@@ -331,9 +336,11 @@ function WorkspaceWidgetContent({
       return <ObservationChartWidget title={title} config={config} />;
     case "encounter_extensions": {
       // An empty frame tells users nothing; wait for apps, then hide if none contribute.
-      const contributes = careApps.some(
-        (app) => app.isLoading || !!app.components?.EncounterOverviewTop,
-      );
+      const contributes =
+        context.hasEncounterExtensions ??
+        careApps.some(
+          (app) => app.isLoading || !!app.components?.EncounterOverviewTop,
+        );
       if (!contributes) return null;
       return frame(
         <PLUGIN_Component

@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { CircleAlert, CircleCheck, CirclePause } from "lucide-react";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,6 +27,9 @@ interface OutstandingOrdersWidgetProps {
   showEmpty?: boolean;
   config?: Record<string, unknown>;
 }
+
+// Bounds the follow-up requests when nearly everything is excluded.
+const MAX_PAGES = 5;
 
 const EXCLUDED_STATUSES: readonly Status[] = [
   Status.draft,
@@ -100,7 +104,21 @@ export function OutstandingOrdersWidget({
     !!facilityId &&
     selectedEncounter?.id === selectedEncounterId &&
     selectedEncounter?.patient.id === patientId;
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const isEligible = (request: ServiceRequestReadSpec) =>
+    !EXCLUDED_STATUSES.includes(request.status) &&
+    (includeCompleted || request.status !== Status.completed) &&
+    (includeOnHold || request.status !== Status.on_hold);
+  // The API filters one status at a time, so exclusions happen here. Keep
+  // paging until enough eligible orders are in hand or the list runs out.
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useInfiniteQuery({
     queryKey: [
       "serviceRequests",
       facilityId,
@@ -108,18 +126,42 @@ export function OutstandingOrdersWidget({
       selectedEncounterId,
       { category, limit },
     ],
-    queryFn: query(serviceRequestApi.listServiceRequest, {
-      pathParams: { facilityId: facilityId ?? "" },
-      queryParams: {
-        encounter: selectedEncounterId,
-        category,
-        limit,
-        ordering: "-created_date",
-      },
-      silent: true,
-    }),
+    queryFn: ({ pageParam, signal }) =>
+      query(serviceRequestApi.listServiceRequest, {
+        pathParams: { facilityId: facilityId ?? "" },
+        queryParams: {
+          encounter: selectedEncounterId,
+          category,
+          limit,
+          offset: pageParam,
+          ordering: "-created_date",
+        },
+        silent: true,
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const offset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      return lastPage.results.length > 0 && offset < lastPage.count
+        ? offset
+        : undefined;
+    },
     enabled: canRead && parsedConfig.success,
   });
+  const fetched = data?.pages.flatMap((page) => page.results) ?? [];
+  const eligible = fetched.filter(isEligible);
+  const pagesLoaded = data?.pages.length ?? 0;
+  const needsMore =
+    eligible.length < limit &&
+    !!hasNextPage &&
+    pagesLoaded < MAX_PAGES &&
+    !isFetching &&
+    !isError;
+  useEffect(() => {
+    if (canRead && parsedConfig.success && needsMore) fetchNextPage();
+  }, [canRead, parsedConfig.success, needsMore, fetchNextPage]);
 
   if (!canRead || !facilityId) return null;
   const heading = title ?? t("workspace_outstanding_orders");
@@ -135,13 +177,9 @@ export function OutstandingOrdersWidget({
     );
   }
 
-  const orders = (data?.results ?? []).filter(
-    (request) =>
-      !EXCLUDED_STATUSES.includes(request.status) &&
-      (includeCompleted || request.status !== Status.completed) &&
-      (includeOnHold || request.status !== Status.on_hold),
-  );
-  if (!isLoading && !isError && !orders.length && !showEmpty) return null;
+  const orders = eligible.slice(0, limit);
+  const settling = isLoading || needsMore;
+  if (!settling && !isError && !orders.length && !showEmpty) return null;
   const ready = orders.filter((order) => orderOutcome(order) === "ready");
   const sameFacility = routeFacilityId === facilityId;
   const reportBase = sameFacility
@@ -156,7 +194,7 @@ export function OutstandingOrdersWidget({
         presentation="panel"
         className="min-w-0 overflow-hidden"
       >
-        {isLoading ? (
+        {settling ? (
           <div role="status" aria-label={t("loading")}>
             <Skeleton className="h-24 w-full" />
           </div>

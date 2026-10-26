@@ -8477,5 +8477,6 @@
   "workspace_widget_chart_columns": "Charts per row",
   "workspace_widget_chart_columns_hint": "1 or 2. Narrow columns always use one.",
   "workspace_studio_full_width": "Full width",
-  "workspace_studio_full_width_hint": "This section has its own filters and panes. It works best in a full-width column."
+  "workspace_studio_full_width_hint": "This section has its own filters and panes. It works best in a full-width column.",
+  "workspace_no_extensions": "Hidden because no installed app adds content here"
 }

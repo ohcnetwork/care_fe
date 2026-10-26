@@ -22,7 +22,7 @@ import {
   WandSparkles,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -88,7 +88,8 @@ import { WorkspaceSectionPicker } from "./WorkspaceSectionPicker";
 import { WorkspaceSectionSettings } from "./WorkspaceSectionSettings";
 import { WorkspaceStarterPicker } from "./WorkspaceStarterPicker";
 import { WorkspaceTabCanvas } from "./WorkspaceTabCanvas";
-import { TAB_ICONS, WorkspaceTabDialog } from "./WorkspaceTabDialog";
+import { WorkspaceTabDialog } from "./WorkspaceTabDialog";
+import { TAB_ICONS } from "./workspaceTabIcons";
 
 interface WorkspaceStudioProps {
   value: string;
@@ -118,6 +119,7 @@ interface PickerTarget extends TabTarget {
 
 type PreviewAccess = "editing" | "readonly" | "encounter_only" | "details";
 
+const CORE_WIDGET_TYPES = new Set(ENCOUNTER_WIDGET_TYPES);
 const LAYOUT_ICONS: Record<WorkspaceLayoutId, LucideIcon> = {
   single: Square,
   main_side: PanelRight,
@@ -172,12 +174,20 @@ export function WorkspaceStudio({
     future: [] as string[],
     lastValue: value,
   });
-  // A server refresh starts a new editing history; local controlled edits retain it.
-  if (history.lastValue !== value)
+  // A server refresh starts a new editing history; local controlled edits
+  // retain it. The settings drawer belongs to the template it was opened for,
+  // so a refresh closes it (its unmount also clears any invalid local draft).
+  if (history.lastValue !== value) {
     setHistory({ past: [], future: [], lastValue: value });
-  useEffect(() => {
-    onValidityChange?.(settingsValid);
-  }, [settingsValid, onValidityChange]);
+    if (settingsTarget) setSettingsTarget(null);
+  }
+  const handleSettingsValidity = useCallback(
+    (valid: boolean) => {
+      setSettingsValid(valid);
+      onValidityChange?.(valid);
+    },
+    [onValidityChange],
+  );
 
   let raw: unknown;
   try {
@@ -213,7 +223,7 @@ export function WorkspaceStudio({
     ),
   ].filter(
     (type) =>
-      !ENCOUNTER_WIDGET_TYPES.includes(type) &&
+      !CORE_WIDGET_TYPES.has(type) &&
       !pluginWidgets.has(type) &&
       !loadingPlugins.has(type.split(".")[0]),
   );
@@ -228,8 +238,9 @@ export function WorkspaceStudio({
           (item) => item.key === tab.key && item.kind === "custom",
         )
       : undefined;
+  const availableSystemKeys = new Set(systemKeys);
   const unavailableTabs = pages.filter(
-    (item) => item.kind === "system" && !systemKeys.includes(item.key),
+    (item) => item.kind === "system" && !availableSystemKeys.has(item.key),
   );
   const totalSections = pages.reduce(
     (sum, page) => sum + pageWidgetCount(page),
@@ -974,7 +985,7 @@ export function WorkspaceStudio({
           key={`${settingsTarget.tabKey}:${settingsTarget.column}:${settingsTarget.widget}:${settingsWidget.type}`}
           widget={settingsWidget}
           disabled={disabled}
-          onValidityChange={setSettingsValid}
+          onValidityChange={handleSettingsValidity}
           onClose={() => setSettingsTarget(null)}
           onRemove={() => {
             if (settingsTab?.kind !== "custom") return;

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ShieldAlert } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { getPermissions } from "@/common/Permissions";
@@ -21,6 +21,7 @@ import {
 } from "@/pages/Patient/History/clinicalHistoryTabs";
 import patientApi from "@/types/emr/patient/patientApi";
 import type { WorkspaceWidgetContext } from "@/types/workspace/widgetAvailability";
+import type { WorkspaceTemplate } from "@/types/workspace/workspace";
 import query from "@/Utils/request/query";
 
 export function ClinicalHistoryWorkspace({
@@ -51,15 +52,23 @@ export function ClinicalHistoryWorkspace({
     }),
     enabled: !access,
   });
-  const canRead = access
-    ? access.clinicalData
-    : getPermissions(hasPermission, patient.data?.permissions ?? [])
-        .canViewClinicalData;
+  const canViewClinicalData = getPermissions(
+    hasPermission,
+    patient.data?.permissions ?? [],
+  ).canViewClinicalData;
+  // Responses and clinical data are granted separately; either opens history
+  // and each section then checks its own grant.
+  const grants = access ?? {
+    clinicalData: canViewClinicalData,
+    responses: canViewClinicalData,
+  };
+  const canRead = grants.clinicalData || grants.responses;
   const context: WorkspaceWidgetContext = {
     patientId,
     facilityId,
-    canReadClinicalData: canRead,
-    canReadPatientHistory: canRead,
+    canReadClinicalData: grants.clinicalData,
+    canReadPatientHistory: grants.clinicalData,
+    canReadPatientResponses: grants.responses,
     canReadSelectedEncounter: false,
     canWriteClinicalData: false,
   };
@@ -67,7 +76,7 @@ export function ClinicalHistoryWorkspace({
     patientId,
     facilityId,
     embedded,
-    access,
+    access: grants,
   });
   const parsed = workspace
     ? parseEncounterWorkspace(workspace.template, Object.keys(systemTabs))
@@ -135,10 +144,28 @@ export function ClinicalHistoryWorkspace({
       ? currentTab
       : firstTab;
   const loading = patient.isLoading || list.isLoading || preference.isLoading;
-  useEffect(() => {
-    if (!loading && activeTab && activeTab !== currentTab)
-      onTabChange(activeTab);
-  }, [loading, activeTab, currentTab, onTabChange]);
+  // Switching layouts can drop the current tab, so move to the first tab of
+  // the chosen layout as part of the same selection instead of afterwards.
+  const visibleTabKeys = (template?: WorkspaceTemplate) => {
+    const systemKeys = Object.keys(systemTabs).filter(
+      (key) => systemTabs[key as keyof typeof systemTabs].visible,
+    );
+    if (!template) return systemKeys;
+    return parseEncounterWorkspace(template, Object.keys(systemTabs))
+      .pages.filter(
+        (page) =>
+          !page.hidden &&
+          (page.kind !== "system" || systemKeys.includes(page.key)),
+      )
+      .map((page) => page.key);
+  };
+  const choose = (id: string | null) => {
+    save.mutate(id);
+    const keys = visibleTabKeys(
+      id ? list.data?.find((item) => item.id === id)?.template : undefined,
+    );
+    if (keys.length && !keys.includes(currentTab)) onTabChange(keys[0]);
+  };
 
   if (patient.isError) {
     return (
@@ -178,8 +205,8 @@ export function ClinicalHistoryWorkspace({
             list.refetch();
             preference.refetch();
           }}
-          onSelect={(choice) => save.mutate(choice.id)}
-          onUseStandard={() => save.mutate(null)}
+          onSelect={(choice) => choose(choice.id)}
+          onUseStandard={() => choose(null)}
           isSaving={save.isPending}
           saveError={save.isError}
         />

@@ -225,6 +225,7 @@ async function mockEncounterWorkspaceApi(
   const workspaceReads: URL[] = [];
   const clinicalReads: URL[] = [];
   const sectionReads: URL[] = [];
+  const analyseRequests: { encounter: string | null; codes: string[] }[] = [];
   const writes: string[] = [];
   const questionId = faker.string.uuid();
   const questionnaire = {
@@ -674,6 +675,10 @@ async function mockEncounterWorkspaceApi(
             codes: { code: string }[];
             page_size?: number;
           };
+          analyseRequests.push({
+            encounter: url.searchParams.get("encounter"),
+            codes: body.codes.map((code) => code.code),
+          });
           await route.fulfill({
             json: {
               results: body.codes.map((code) => ({
@@ -1093,6 +1098,7 @@ async function mockEncounterWorkspaceApi(
     clinicalNames,
     clinicalReads,
     sectionReads,
+    analyseRequests,
     questionnaire,
     questionnaireResponses,
     draft,
@@ -4001,12 +4007,13 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     vitals.getByRole("listitem", { name: "Body temperature", exact: true }),
   ).toContainText("No reading");
   await expect(vitals).toContainText(`by ${actorName}`);
+  // The tiles ask the analysis endpoint for the latest readings per code,
+  // scoped to the current encounter, instead of listing every observation.
   expect(
-    fixture.sectionReads.some(
-      (url) =>
-        url.pathname.endsWith("/observation/") &&
-        url.searchParams.get("encounter") === fixture.currentEncounter.id &&
-        url.searchParams.get("codes") === "8867-4,2708-6,8310-5",
+    fixture.analyseRequests.some(
+      (request) =>
+        request.encounter === fixture.currentEncounter.id &&
+        request.codes.join(",") === "8867-4,2708-6,8310-5",
     ),
   ).toBe(true);
 

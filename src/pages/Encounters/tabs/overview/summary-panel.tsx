@@ -24,9 +24,12 @@ export const SummaryPanel = ({
   defaultTab?: SummaryPanelTab;
 } = {}) => {
   const { t } = useTranslation();
-  const { canWriteClinicalData } = useEncounter();
+  const { canWriteSelectedEncounter } = useEncounter();
+  // Location, department, and care-team updates are encounter management, so
+  // the actions tab follows encounter write access rather than clinical access.
   const visibleTabs = SUMMARY_PANEL_TABS.filter(
-    (tab) => tabs.includes(tab) && (tab !== "actions" || canWriteClinicalData),
+    (tab) =>
+      tabs.includes(tab) && (tab !== "actions" || canWriteSelectedEncounter),
   );
   const fallbackTab = visibleTabs[0] ?? "details";
   const [selectedTab, setActiveTab] = useState<SummaryPanelTab>(

@@ -1705,6 +1705,52 @@ test("open workspace editor controls close when a server refresh replaces their 
     await expect(save).toBeDisabled();
   });
 
+  await test.step("Close section settings when a server refresh changes the template", async () => {
+    await openSectionSettings(page, replacementSectionTitle);
+    const settings = sectionSettings(page);
+    await refreshTemplate({
+      schema_version: 1,
+      pages: [
+        {
+          ...updatedPage,
+          columns: [
+            {
+              span: 1,
+              widgets: [
+                {
+                  type: "diagnosis",
+                  title: replacementSectionTitle,
+                  config: { compact: true },
+                },
+              ],
+            },
+            ...updatedPage.columns.slice(1),
+          ],
+        },
+        ...remainingPages,
+      ],
+    });
+    await expect.soft(settings).not.toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", {
+        name: "Add a section to Column 2",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await expect(save).toBeDisabled();
+    // Reopening shows the refreshed configuration rather than a stale draft.
+    await openSectionSettings(page, replacementSectionTitle);
+    await settings.getByText("Advanced configuration", { exact: true }).click();
+    await expect(
+      settings.getByRole("textbox", {
+        name: "Widget configuration (JSON)",
+        exact: true,
+      }),
+    ).toHaveValue(JSON.stringify({ compact: true }, null, 2));
+    await closeSectionSettings(page);
+  });
+
   await test.step("Close the section picker when its destination column is removed", async () => {
     await page
       .getByRole("button", { name: "Add a section to Column 2", exact: true })

@@ -128,18 +128,19 @@ export function WorkspaceSectionSettings({
   const valid = !jsonError && !issues.length;
   const visibility = sectionVisibilityMode(widget);
   const statuses = widget.visible_when?.["encounter.status"];
+  const selectedStatuses = new Set(statuses);
   // These options get purpose-built pickers instead of the generic schema form.
   const customFields: Partial<Record<string, readonly string[]>> = {
     questionnaire_responses: ["role"],
     vitals: ["codes"],
     observation_chart: ["plot", "groups"],
   };
-  const customFieldNames = customFields[widget.type] ?? [];
+  const customFieldNames = new Set(customFields[widget.type] ?? []);
   const fields =
     preparedSchema?.fieldMetadata.filter(
-      (field) => !customFieldNames.includes(field.name),
+      (field) => !customFieldNames.has(field.name),
     ) ?? [];
-  const hasSettings = fields.length > 0 || customFieldNames.length > 0;
+  const hasSettings = fields.length > 0 || customFieldNames.size > 0;
   const activeConfig = editedConfig ?? config;
   const selectedCodes = Array.isArray(activeConfig.codes)
     ? (activeConfig.codes as Code[])
@@ -149,22 +150,26 @@ export function WorkspaceSectionSettings({
         (group): group is string => typeof group === "string",
       )
     : undefined;
+  // Validity changes only through these handlers, so the parent hears about
+  // it as part of the same event instead of a follow-up effect.
+  const isAcceptable = (nextConfig: Record<string, unknown> | undefined) =>
+    nextConfig !== undefined &&
+    preparedSchema?.validator.safeParse(nextConfig).success !== false;
   const updateConfig = (
     nextConfig: Record<string, unknown>,
     text = JSON.stringify(nextConfig, null, 2),
   ) => {
-    const accepted =
-      preparedSchema?.validator.safeParse(nextConfig).success !== false;
+    const accepted = isAcceptable(nextConfig);
     setConfigDraft({
       text,
       ...(accepted ? { committed: JSON.stringify(nextConfig) } : {}),
     });
+    onValidityChange?.(accepted);
     if (accepted) onChange({ ...widget, config: nextConfig });
   };
 
-  useEffect(() => {
-    onValidityChange?.(valid);
-  }, [onValidityChange, valid]);
+  // Closing (or losing the target to a refresh) discards the draft, so the
+  // template is valid again as far as the parent is concerned.
   useEffect(() => () => onValidityChange?.(true), [onValidityChange]);
 
   return (
@@ -301,8 +306,8 @@ export function WorkspaceSectionSettings({
                   <Alert variant="destructive" className="p-3">
                     <AlertDescription className="space-y-1 text-xs">
                       <p>{t("workspace_widget_config_schema_error")}</p>
-                      {issues.map((issue, index) => (
-                        <p key={index}>
+                      {issues.map((issue) => (
+                        <p key={`${issue.path.join(".")}:${issue.code}`}>
                           {issue.path.length
                             ? `${widgetConfigIssueLabel(issue.path, preparedSchema.fieldMetadata)}: `
                             : ""}
@@ -388,10 +393,10 @@ export function WorkspaceSectionSettings({
                   <div key={status} className="flex items-center gap-2.5">
                     <Checkbox
                       id={`${id}-status-${status}`}
-                      checked={statuses.includes(status)}
+                      checked={selectedStatuses.has(status)}
                       disabled={
                         disabled ||
-                        (statuses.length === 1 && statuses.includes(status))
+                        (statuses.length === 1 && selectedStatuses.has(status))
                       }
                       onCheckedChange={(checked) => {
                         const nextStatuses = checked
@@ -450,9 +455,13 @@ export function WorkspaceSectionSettings({
                 aria-describedby={jsonError ? `${id}-config-error` : undefined}
                 onChange={(event) => {
                   const value = event.target.value;
-                  setConfigDraft({ text: value });
                   const parsed = parseConfig(value);
-                  if (parsed !== undefined) updateConfig(parsed, value);
+                  if (parsed !== undefined) {
+                    updateConfig(parsed, value);
+                    return;
+                  }
+                  setConfigDraft({ text: value });
+                  onValidityChange?.(false);
                 }}
                 className="min-h-32 resize-y font-mono text-xs leading-5 shadow-none"
               />

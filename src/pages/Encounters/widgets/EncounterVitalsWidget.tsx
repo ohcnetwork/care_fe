@@ -16,6 +16,7 @@ import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import type { Code } from "@/types/base/code/code";
 import {
+  ObservationAnalyzeGroup,
   ObservationListRead,
   ObservationPlotConfig,
 } from "@/types/emr/observation/observation";
@@ -102,9 +103,10 @@ export function EncounterVitalsWidget({
   );
 }
 
-// The encounter's latest two readings per code fit comfortably in one page
-// because vital signs are usually charted together.
-const LATEST_VITALS_PAGE_SIZE = 200;
+// The analysis endpoint returns the newest readings per code, so one request
+// resolves every tile regardless of how often other vitals were charted. A
+// few extra rows absorb the difference between entry order and effective time.
+const READINGS_PER_CODE = 3;
 
 interface VitalReading {
   code: Code;
@@ -117,16 +119,16 @@ function observationTime(observation: ObservationListRead) {
 }
 
 function latestVitalReadings(
-  observations: ObservationListRead[],
+  groups: ObservationAnalyzeGroup[],
   codes: Code[],
 ): VitalReading[] {
-  const ordered = [...observations].sort(
-    (a, b) => observationTime(b) - observationTime(a),
-  );
   return codes.map((code) => {
-    const matches = ordered.filter(
-      (observation) => observation.main_code?.code === code.code,
-    );
+    const matches = [
+      ...(groups.find(
+        (group) =>
+          group.code.code === code.code && group.code.system === code.system,
+      )?.results ?? []),
+    ].sort((a, b) => observationTime(b) - observationTime(a));
     return { code, latest: matches[0], previous: matches[1] };
   });
 }
@@ -167,16 +169,18 @@ function LatestVitals({
   showEmpty: boolean;
 }) {
   const { t } = useTranslation();
-  const codeKeys = codes.map((code) => code.code);
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ["observations", patientId, encounterId, "latest", codeKeys],
-    queryFn: query(observationApi.list, {
+    queryKey: [
+      "observations",
+      patientId,
+      encounterId,
+      "latest",
+      codes.map((code) => `${code.system}|${code.code}`),
+    ],
+    queryFn: query(observationApi.analyse, {
       pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        codes: codeKeys.join(","),
-        limit: LATEST_VITALS_PAGE_SIZE,
-      },
+      queryParams: { encounter: encounterId },
+      body: { codes, page_size: READINGS_PER_CODE },
       silent: true,
     }),
   });
@@ -250,8 +254,12 @@ function VitalTile({
   const { code, latest, previous } = reading;
   const value = latest ? readingValue(latest) : undefined;
   const previousValue = previous ? readingValue(previous) : undefined;
+  // Readings may carry their own units (37 Cel vs 98.6 [degF]); only compare
+  // like with like.
   const delta =
-    value?.numeric !== undefined && previousValue?.numeric !== undefined
+    value?.numeric !== undefined &&
+    previousValue?.numeric !== undefined &&
+    value.unit === previousValue.unit
       ? Math.round((value.numeric - previousValue.numeric) * 10) / 10
       : undefined;
   const DeltaIcon =

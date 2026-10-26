@@ -2,7 +2,7 @@ import i18next from "i18next";
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
 
-import { visibleWorkspaceColumns } from "@/components/Workspace/WorkspacePageLayout";
+import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
 import { CORE_WIDGET_CATALOG } from "@/components/Workspace/workspaceEditorCatalog";
 import { standardWorkspaceTemplate } from "@/components/Workspace/workspacePresets";
 import { workspaceWidgetIssues } from "@/components/Workspace/workspaceValidation";
@@ -15,6 +15,7 @@ import {
 } from "./encounterWorkspace";
 import {
   getWidgetAvailability,
+  patientHistoryAccess,
   type WorkspaceAvailabilityContext,
 } from "./widgetAvailability";
 import { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
@@ -367,6 +368,71 @@ test("automatically hidden columns collapse and an all-hidden page has no tracks
     [clinicalColumn],
   );
   assert.deepEqual(visibleWorkspaceColumns([actionColumn], closed), []);
+});
+
+test("questionnaire-response access admits only the history widgets that show responses", () => {
+  const responsesOnly: WorkspaceAvailabilityContext = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+    canReadPatientHistory: false,
+    canReadPatientResponses: true,
+  };
+  for (const type of ["history_responses", "clinical_history"]) {
+    assert.equal(
+      getWidgetAvailability({ type }, responsesOnly).state,
+      "visible",
+      type,
+    );
+  }
+  assert.equal(
+    getWidgetAvailability({ type: "history_diagnoses" }, responsesOnly).state,
+    "denied",
+  );
+  assert.deepEqual(patientHistoryAccess(responsesOnly), {
+    clinicalData: false,
+    responses: true,
+  });
+  // Without the explicit flag, response access follows clinical access.
+  assert.deepEqual(patientHistoryAccess(active), {
+    clinicalData: true,
+    responses: true,
+  });
+  assert.equal(
+    getWidgetAvailability(
+      { type: "clinical_history" },
+      { ...responsesOnly, canReadPatientResponses: false },
+    ).state,
+    "denied",
+  );
+});
+
+test("the extension slot hides and collapses when no installed app adds encounter content", () => {
+  const slot = { type: "encounter_extensions" };
+  assert.deepEqual(
+    getWidgetAvailability(slot, { ...active, hasEncounterExtensions: false }),
+    { state: "hidden", reason: "workspace_no_extensions" },
+  );
+  assert.equal(
+    getWidgetAvailability(slot, { ...active, hasEncounterExtensions: true })
+      .state,
+    "visible",
+  );
+  // Contexts that cannot tell (such as the studio preview) keep the slot.
+  assert.equal(getWidgetAvailability(slot, active).state, "visible");
+  const slotColumn = { span: 1, invalid: false, widgets: [slot] };
+  const vitalsColumn = {
+    span: 1,
+    invalid: false,
+    widgets: [{ type: "vitals" }],
+  };
+  assert.deepEqual(
+    visibleWorkspaceColumns([slotColumn, vitalsColumn], {
+      ...active,
+      hasEncounterExtensions: false,
+    }),
+    [vitalsColumn],
+  );
 });
 
 test("encounter-only widgets cannot be published on the patient-history surface", () => {

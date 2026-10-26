@@ -4,6 +4,7 @@ import { NavTabs } from "@/components/ui/nav-tabs";
 import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
 import {
   useClinicalHistoryTabs,
+  type ClinicalHistoryAccess,
   type ClinicalHistoryTabKey,
 } from "@/pages/Patient/History/clinicalHistoryTabs";
 
@@ -20,12 +21,15 @@ export function ClinicalHistoryWidget({
   type,
   patientId,
   facilityId,
+  access,
   tabs: visibleTabs,
   defaultTab,
 }: {
   type: string;
   patientId: string;
   facilityId?: string;
+  /** Separate grants for response history and clinical history. */
+  access: ClinicalHistoryAccess;
   /** Subset of history tabs to offer; a single tab renders without the tab bar. */
   tabs?: readonly ClinicalHistoryTabKey[];
   defaultTab?: ClinicalHistoryTabKey;
@@ -34,11 +38,14 @@ export function ClinicalHistoryWidget({
     patientId,
     facilityId,
     embedded: true,
+    access,
   });
+  const requested = visibleTabs && new Set<string>(visibleTabs);
   const entries = Object.entries(tabs).filter(
-    ([key]) =>
+    ([key, definition]) =>
       key !== "immunizations" &&
-      (!visibleTabs || visibleTabs.includes(key as ClinicalHistoryTabKey)),
+      definition.visible &&
+      (!requested || requested.has(key)),
   );
   const initialTab =
     defaultTab && entries.some(([key]) => key === defaultTab)
@@ -46,7 +53,8 @@ export function ClinicalHistoryWidget({
       : (entries[0]?.[0] ?? "responses");
   const [tab, setTab] = useState<string>(initialTab);
   const section = HISTORY_WIDGET_SECTIONS[type];
-  if (section) return tabs[section].component;
+  if (section) return tabs[section].visible ? tabs[section].component : null;
+  if (!entries.length) return null;
   if (entries.length === 1) return entries[0][1].component;
 
   return (

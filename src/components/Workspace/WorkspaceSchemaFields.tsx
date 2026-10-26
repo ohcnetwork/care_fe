@@ -129,7 +129,7 @@ export function WorkspaceSchemaFields({
                     ? (config[field.name] as unknown[])
                     : []
                 }
-                disabled={disabled}
+                disabled={disabled || field.readOnly}
                 onChange={(next) =>
                   form.setValue(
                     `config.${field.name}`,
@@ -181,13 +181,14 @@ function EnumArrayField({
   onChange: (value: unknown[]) => void;
 }) {
   const id = useId();
+  const selected = new Set(value);
   return (
     <fieldset disabled={disabled} className="space-y-2">
       <legend className="text-sm font-medium">{field.label}</legend>
       <div className="space-y-2 rounded-lg border border-border p-3">
         {options.map((option) => {
           const key = String(option.value);
-          const checked = value.includes(option.value);
+          const checked = selected.has(option.value);
           return (
             <div key={key} className="flex items-center gap-2.5">
               <Checkbox
@@ -202,7 +203,7 @@ function EnumArrayField({
                           .map((item) => item.value)
                           .filter(
                             (item) =>
-                              item === option.value || value.includes(item),
+                              item === option.value || selected.has(item),
                           )
                       : value.filter((item) => item !== option.value),
                   )

@@ -195,7 +195,15 @@ export const EncounterResponsesTab = ({
 
   const handleResponseClick = (response: QuestionnaireResponse) => {
     setQueryParams({ ...qParams, responseId: response.id });
-    if (!scoped) window.location.hash = `#response-${response.id}`;
+    if (scoped) {
+      // Several browsers can share one page, so scroll this instance's card
+      // instead of changing the URL hash.
+      document
+        .getElementById(`${id}-${response.id}`)
+        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+    } else {
+      window.location.hash = `#response-${response.id}`;
+    }
     if (isMobile) setIsDrawerOpen(false);
   };
 

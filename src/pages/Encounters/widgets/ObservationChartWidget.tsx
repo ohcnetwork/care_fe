@@ -62,8 +62,9 @@ export function ObservationChartWidget({
   const plot = plotId
     ? data?.find((candidate) => candidate.id === plotId)
     : data?.[0];
+  const wantedGroups = groupTitles ? new Set(groupTitles) : undefined;
   const groups = (plot?.groups ?? []).filter(
-    (group) => !groupTitles || groupTitles.includes(group.title),
+    (group) => !wantedGroups || wantedGroups.has(group.title),
   );
 
   return (

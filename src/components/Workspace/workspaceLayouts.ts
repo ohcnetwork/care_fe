@@ -78,11 +78,12 @@ export function layoutColumnLabelKeys(layout: WorkspaceLayoutId | "custom") {
   }
 }
 
+const INACTIVE_ENCOUNTER_STATUSES = new Set<string>(inactiveEncounterStatus);
 export const ACTIVE_ENCOUNTER_STATUSES = Object.values(EncounterStatus).filter(
-  (status) => !inactiveEncounterStatus.includes(status),
+  (status) => !INACTIVE_ENCOUNTER_STATUSES.has(status),
 );
 export const CLOSED_ENCOUNTER_STATUSES = Object.values(EncounterStatus).filter(
-  (status) => inactiveEncounterStatus.includes(status),
+  (status) => INACTIVE_ENCOUNTER_STATUSES.has(status),
 );
 
 export type SectionVisibilityMode = "always" | "active" | "closed" | "custom";
@@ -92,9 +93,10 @@ export function sectionVisibilityMode(
 ): SectionVisibilityMode {
   const statuses = widget.visible_when?.["encounter.status"];
   if (!statuses) return "always";
+  const selected = new Set(statuses);
   const matches = (expected: EncounterStatus[]) =>
     statuses.length === expected.length &&
-    expected.every((status) => statuses.includes(status));
+    expected.every((status) => selected.has(status));
   if (matches(ACTIVE_ENCOUNTER_STATUSES)) return "active";
   if (matches(CLOSED_ENCOUNTER_STATUSES)) return "closed";
   return "custom";

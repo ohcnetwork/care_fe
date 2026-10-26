@@ -13,8 +13,12 @@ export interface WorkspaceAvailabilityContext {
   canReadPatientHistory: boolean;
   canReadSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
+  /** Response history can be granted separately from clinical history. */
+  canReadPatientResponses?: boolean;
   /** Referral creation keeps quick actions useful without clinical write access. */
   selectedEncounterPermissions?: { canCreateReferral: boolean };
+  /** False once the installed apps are known to add nothing to the extension slot. */
+  hasEncounterExtensions?: boolean;
 }
 
 export interface WorkspaceWidgetContext extends WorkspaceAvailabilityContext {
@@ -26,6 +30,8 @@ export interface WidgetRequirements {
   encounter: "none" | "any" | "active";
   /** "actions" also accepts referral creation, matching the quick actions strip. */
   access: "clinical" | "encounter" | "write" | "actions";
+  /** Which patient-history grant a widget without an encounter needs. */
+  history?: "clinical" | "responses" | "any";
 }
 
 const clinical: WidgetRequirements = { encounter: "any", access: "clinical" };
@@ -36,6 +42,8 @@ const shortcuts: WidgetRequirements = {
   access: "actions",
 };
 const history: WidgetRequirements = { encounter: "none", access: "clinical" };
+const responses: WidgetRequirements = { ...history, history: "responses" };
+const anyHistory: WidgetRequirements = { ...history, history: "any" };
 const patient: WidgetRequirements = { encounter: "none", access: "encounter" };
 
 export const CORE_WIDGET_REQUIREMENTS = {
@@ -72,8 +80,8 @@ export const CORE_WIDGET_REQUIREMENTS = {
   account: details,
   encounter_summary: details,
   encounter_extensions: clinical,
-  clinical_history: history,
-  history_responses: history,
+  clinical_history: anyHistory,
+  history_responses: responses,
   history_diagnostic_reports: history,
   history_symptoms: history,
   history_diagnoses: history,
@@ -97,7 +105,16 @@ export type WidgetHiddenReason =
   | "workspace_hidden_by_status"
   | "workspace_requires_encounter"
   | "workspace_auto_hides_closed"
-  | "workspace_requires_editable_encounter";
+  | "workspace_requires_editable_encounter"
+  | "workspace_no_extensions";
+
+/** Grants for patient-wide history sections, derived from the widget context. */
+export function patientHistoryAccess(context: WorkspaceAvailabilityContext) {
+  return {
+    clinicalData: context.canReadPatientHistory,
+    responses: context.canReadPatientResponses ?? context.canReadPatientHistory,
+  };
+}
 
 export type WidgetAvailability =
   | { state: "visible" | "denied" }
@@ -131,13 +148,26 @@ export function getWidgetAvailability(
   ) {
     return { state: "hidden", reason: "workspace_auto_hides_closed" };
   }
+  if (
+    widget.type === "encounter_extensions" &&
+    context.hasEncounterExtensions === false
+  ) {
+    return { state: "hidden", reason: "workspace_no_extensions" };
+  }
   const statuses = widget.visible_when?.["encounter.status"];
   if (statuses && (!encounter || !statuses.includes(encounter.status))) {
     return { state: "hidden", reason: "workspace_hidden_by_status" };
   }
+  const grants = patientHistoryAccess(context);
+  const historyRead =
+    requirements.history === "responses"
+      ? grants.responses
+      : requirements.history === "any"
+        ? grants.clinicalData || grants.responses
+        : grants.clinicalData;
   const canRead =
     (requirements.encounter === "none"
-      ? context.canReadPatientHistory
+      ? historyRead
       : context.canReadClinicalData) ||
     (requirements.access === "encounter" && context.canReadSelectedEncounter);
   if (!canRead) return { state: "denied" };

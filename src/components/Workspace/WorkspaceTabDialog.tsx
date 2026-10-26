@@ -1,14 +1,5 @@
-import {
-  Activity,
-  ChevronDown,
-  ClipboardList,
-  HeartPulse,
-  LayoutDashboard,
-  PanelsTopLeft,
-  Stethoscope,
-  type LucideIcon,
-} from "lucide-react";
-import { useId, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,15 +21,7 @@ import {
 } from "@/types/workspace/encounterWorkspace";
 
 import { type WorkspacePage } from "./workspaceEditorUtils";
-
-export const TAB_ICONS: Record<string, LucideIcon> = {
-  "layout-dashboard": LayoutDashboard,
-  stethoscope: Stethoscope,
-  "clipboard-list": ClipboardList,
-  "panels-top-left": PanelsTopLeft,
-  activity: Activity,
-  "heart-pulse": HeartPulse,
-};
+import { TAB_ICONS } from "./workspaceTabIcons";
 
 interface WorkspaceTabDialogProps {
   page?: Extract<WorkspacePage, { kind: "custom" }>;
@@ -68,7 +51,8 @@ export function WorkspaceTabDialog({
   const id = useId();
   const [title, setTitle] = useState(page?.title ?? "");
   const [key, setKey] = useState(page?.key ?? "");
-  const [keyEdited, setKeyEdited] = useState(!!page);
+  // Only consulted inside handlers, so it never needs to trigger a render.
+  const keyEdited = useRef(!!page);
   const [icon, setIcon] = useState(page?.icon ?? "layout-dashboard");
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -128,7 +112,8 @@ export function WorkspaceTabDialog({
               placeholder={t("workspace_studio_tab_name_placeholder")}
               onChange={(event) => {
                 setTitle(event.target.value);
-                if (!keyEdited) setKey(keyFromTitle(event.target.value));
+                if (!keyEdited.current)
+                  setKey(keyFromTitle(event.target.value));
               }}
               aria-invalid={showErrors && !validTitle}
             />
@@ -180,7 +165,7 @@ export function WorkspaceTabDialog({
                 id={`${id}-key`}
                 value={key}
                 onChange={(event) => {
-                  setKeyEdited(true);
+                  keyEdited.current = true;
                   setKey(event.target.value);
                 }}
                 aria-invalid={showErrors && !validKey}

@@ -1,5 +1,12 @@
 import { useQueryParams, type QueryParam } from "raviger";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 type QueryState<T extends QueryParam = QueryParam> = ReturnType<
   typeof useQueryParams<T>
@@ -14,7 +21,7 @@ export function ScopedQueryParamsProvider({
   children: ReactNode;
 }) {
   const [params, setParams] = useState<QueryParam>({});
-  const update: QueryState[1] = (next, options) => {
+  const update = useCallback<QueryState[1]>((next, options) => {
     setParams((previous) =>
       Object.fromEntries(
         Object.entries(
@@ -22,9 +29,11 @@ export function ScopedQueryParamsProvider({
         ).filter(([, value]) => value !== undefined && value !== null),
       ),
     );
-  };
+  }, []);
+  // A stable tuple keeps every consumer from re-rendering on unrelated updates.
+  const value = useMemo<QueryState>(() => [params, update], [params, update]);
   return (
-    <QueryParamsContext.Provider value={[params, update]}>
+    <QueryParamsContext.Provider value={value}>
       {children}
     </QueryParamsContext.Provider>
   );

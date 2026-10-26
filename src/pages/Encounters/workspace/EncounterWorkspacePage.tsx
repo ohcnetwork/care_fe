@@ -3,12 +3,11 @@ import { useTranslation } from "react-i18next";
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  visibleWorkspaceColumns,
-  WorkspacePageLayout,
-} from "@/components/Workspace/WorkspacePageLayout";
+import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
+import { WorkspacePageLayout } from "@/components/Workspace/WorkspacePageLayout";
 import { WorkspaceWidget } from "@/components/Workspace/WorkspaceWidget";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
+import { useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import type { WorkspaceWidgetContext } from "@/types/workspace/widgetAvailability";
 
@@ -20,8 +19,18 @@ interface EncounterWorkspacePageProps {
 
 export function EncounterWorkspacePage({ page }: EncounterWorkspacePageProps) {
   const { t } = useTranslation();
-  const context = useEncounter();
-  const { selectedEncounter, isSelectedEncounterLoading } = context;
+  const encounter = useEncounter();
+  const careApps = useCareApps();
+  const { selectedEncounter, isSelectedEncounterLoading } = encounter;
+  // Known before layout so a column holding only the extension slot collapses
+  // instead of leaving an empty grid track.
+  const hasEncounterExtensions = careApps.some(
+    (app) => app.isLoading || !!app.components?.EncounterOverviewTop,
+  );
+  const context: WorkspaceWidgetContext = {
+    ...encounter,
+    hasEncounterExtensions,
+  };
 
   if (isSelectedEncounterLoading) {
     return <Skeleton className="h-64 w-full" />;
