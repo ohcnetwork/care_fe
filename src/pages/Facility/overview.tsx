@@ -50,7 +50,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
-    useUserPreferences();
+    useUserPreferences(facilityId);
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -111,7 +111,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   // Combine default and custom dashboard links
   const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
-  const pinnedLinks = customLinks(facilityId);
 
   return (
     <Page title="">
@@ -169,7 +168,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         </div>
 
         {/* Pinned Links Section */}
-        {pinnedLinks.length > 0 && (
+        {customLinks.length > 0 && (
           <div>
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">
@@ -182,9 +181,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => resetCustomLinks(facilityId)}
-                  >
+                  <DropdownMenuItem onClick={() => resetCustomLinks()}>
                     <RotateCcw className="size-4" />
                     {t("reset_pinned_links")}
                   </DropdownMenuItem>
@@ -192,7 +189,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               </DropdownMenu>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {pinnedLinks.map((link) => (
+              {customLinks.map((link) => (
                 <div
                   key={link.link}
                   className="relative group block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"

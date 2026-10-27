@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -139,7 +139,19 @@ function getFacilityQuickLinks(
   );
 }
 
-function useUserPreferences() {
+// Links without a facilityId are admin/global links and are shown for every facility.
+function getLinksForFacility(
+  links: QuickLinkCustom[] | undefined,
+  facilityId?: string,
+): QuickLinkCustom[] {
+  return (
+    links?.filter(
+      (link) => !link.facilityId || link.facilityId === facilityId,
+    ) ?? []
+  );
+}
+
+function useUserPreferences(facilityId?: string) {
   const user = useAuthUser();
   const queryClient = useQueryClient();
 
@@ -150,12 +162,9 @@ function useUserPreferences() {
   );
   const facilityQuickLinks = getFacilityQuickLinks(preferences);
   const blacklist = facilityQuickLinks.blacklist ?? [];
-  const customLinks = useCallback(
-    (facilityId?: string) =>
-      facilityQuickLinks.custom_links?.filter(
-        (link) => !link.facilityId || link.facilityId === facilityId,
-      ) ?? [],
-    [facilityQuickLinks.custom_links],
+  const customLinks = useMemo(
+    () => getLinksForFacility(facilityQuickLinks.custom_links, facilityId),
+    [facilityQuickLinks.custom_links, facilityId],
   );
 
   // Mutation to sync with backend
@@ -202,13 +211,16 @@ function useUserPreferences() {
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      if (customLinks(link.facilityId).length >= MAX_QUICK_LINKS) {
+      if (
+        getLinksForFacility(facilityQuickLinks.custom_links, link.facilityId)
+          .length >= MAX_QUICK_LINKS
+      ) {
         return false;
       }
       updatePreferences({ type: ActionType.ADD_CUSTOM_LINK, payload: link });
       return true;
     },
-    [customLinks, updatePreferences],
+    [facilityQuickLinks.custom_links, updatePreferences],
   );
 
   const removeCustomLink = useCallback(
@@ -259,26 +271,20 @@ function useUserPreferences() {
     [updatePreferences],
   );
 
-  // Resets the custom links for the given facility. Other facilities' links remain unchanged.
-  const resetCustomLinks = useCallback(
-    (facilityId?: string) => {
-      const facilityLinks = new Set(customLinks(facilityId));
-      const newQuickLinks = { ...facilityQuickLinks };
-      newQuickLinks.custom_links = facilityQuickLinks.custom_links?.filter(
-        (link) => !facilityLinks.has(link),
-      );
-      updatePreferences({
-        type: ActionType.SET_CUSTOM_LINKS,
-        payload: newQuickLinks,
-      });
-    },
-    [updatePreferences, facilityQuickLinks, customLinks],
-  );
+  // Resets the custom links for the current facility. Other facilities' links remain unchanged.
+  const resetCustomLinks = useCallback(() => {
+    const facilityLinks = new Set(customLinks);
+    const newQuickLinks = { ...facilityQuickLinks };
+    newQuickLinks.custom_links = facilityQuickLinks.custom_links?.filter(
+      (link) => !facilityLinks.has(link),
+    );
+    updatePreferences({
+      type: ActionType.SET_CUSTOM_LINKS,
+      payload: newQuickLinks,
+    });
+  }, [updatePreferences, facilityQuickLinks, customLinks]);
 
-  const canAddMoreLinks = useCallback(
-    (facilityId?: string) => customLinks(facilityId).length < MAX_QUICK_LINKS,
-    [customLinks],
-  );
+  const canAddMoreLinks = customLinks.length < MAX_QUICK_LINKS;
 
   const isBlacklisted = useCallback(
     (shortcutId: string) => {
