@@ -147,7 +147,7 @@ export const FormDialog = ({
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="max-h-[80vh] w-full">
+        <CommandList className="max-h-[60dvh] w-full">
           {isLoading ? (
             <CardListSkeleton count={10} />
           ) : questionnaireList.length === 0 ? (

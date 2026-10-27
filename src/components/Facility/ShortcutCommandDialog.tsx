@@ -115,7 +115,7 @@ export function ShortcutCommandDialog({
               className="border-none focus:ring-0 text-base sm:text-sm"
             />
           </div>
-          <CommandList className="h-[80vh] max-h-[80vh] w-full">
+          <CommandList className="max-h-[60dvh] w-full">
             <CommandEmpty>{t("no_results")}</CommandEmpty>
             {facilityActions.map((group) => (
               <div key={group.group}>
