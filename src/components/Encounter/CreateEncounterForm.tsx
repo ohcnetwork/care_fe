@@ -221,7 +221,7 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 md:flex-row ">
                         <DatePicker
                           date={date}
                           disabled={(date) =>
@@ -401,7 +401,7 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-            <div className="flex justify-end mt-6 space-x-2">
+            <div className="flex justify-end mt-6 space-x-4">
               <Button
                 type="button"
                 variant="outline"
@@ -415,10 +415,11 @@ export default function CreateEncounterForm({
               </Button>
               <Button
                 type="submit"
+                className="flex-1 md:flex-none"
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge actionId="submit-action" variant="primary" />
               </Button>
             </div>
           </form>
