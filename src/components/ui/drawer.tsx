@@ -237,7 +237,7 @@ function DrawerSwipeHandle({
         "group-data-[swipe-direction=left]/drawer-popup:order-last group-data-[swipe-direction=left]/drawer-popup:justify-start",
         "group-data-[swipe-direction=right]/drawer-popup:justify-end",
         "group-data-[swipe-direction=up]/drawer-popup:order-last group-data-[swipe-direction=up]/drawer-popup:items-start",
-        "after:bg-muted after:block after:shrink-0 after:rounded-full",
+        "after:bg-strong-background after:block after:shrink-0 after:rounded-full",
         "group-data-[swipe-axis=x]/drawer-popup:after:h-25 group-data-[swipe-axis=x]/drawer-popup:after:w-1.5",
         "group-data-[swipe-axis=y]/drawer-popup:after:h-1.5 group-data-[swipe-axis=y]/drawer-popup:after:w-25",
         "active:cursor-grabbing",
