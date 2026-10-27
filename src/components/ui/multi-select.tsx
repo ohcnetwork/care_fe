@@ -60,18 +60,14 @@ export function MultiSelect({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectAllId = React.useId();
 
-  React.useEffect(() => {
-    setSelectedValues(value);
-  }, [value]);
-
   const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setSelectedValues(value);
-    } else if (open) {
-      // Existing callers commit the draft when the panel closes, including Cancel.
-      onValueChange(selectedValues);
-    }
+    setSelectedValues(value);
     setOpen(nextOpen);
+  };
+
+  const handleDone = () => {
+    onValueChange(selectedValues);
+    setOpen(false);
   };
 
   const groups = [
@@ -98,15 +94,35 @@ export function MultiSelect({
       ref={ref}
       role="combobox"
       aria-expanded={open}
-      className={cn("w-full min-w-0 justify-between font-normal", className)}
+      className={cn(
+        "h-auto min-h-9 w-full min-w-0 justify-between py-1 font-normal",
+        className,
+      )}
       {...props}
     >
       {value.length === 0 ? (
         <span className="truncate text-muted-foreground">{placeholder}</span>
-      ) : (
-        <Badge variant="neutral" className="max-w-full truncate">
-          {selectionSummary || t("options_selected", { count: value.length })}
+      ) : selectionSummary ? (
+        <Badge
+          variant="neutral"
+          className="max-w-full whitespace-normal wrap-break-word"
+        >
+          {selectionSummary}
         </Badge>
+      ) : (
+        <div className="flex min-w-0 flex-wrap gap-1">
+          {options
+            .filter((option) => value.includes(option.value))
+            .map((option) => (
+              <Badge
+                key={option.value}
+                variant="neutral"
+                className="max-w-full whitespace-normal wrap-break-word"
+              >
+                {option.label}
+              </Badge>
+            ))}
+        </div>
       )}
       <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
     </Button>
@@ -169,7 +185,7 @@ export function MultiSelect({
         <Button variant="ghost" onClick={() => handleOpenChange(false)}>
           {t("cancel")}
         </Button>
-        <Button onClick={() => handleOpenChange(false)}>{t("done")}</Button>
+        <Button onClick={handleDone}>{t("done")}</Button>
       </div>
     </>
   );
