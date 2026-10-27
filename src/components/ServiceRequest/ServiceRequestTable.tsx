@@ -100,7 +100,7 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="flex flex-col gap-1">
+              <TableCell className="flex flex-wrap gap-2">
                 <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
                   {t(request.status)}
                 </Badge>
