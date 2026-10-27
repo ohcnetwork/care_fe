@@ -27,7 +27,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import type { Code } from "@/types/base/code/code";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
-import type { EncounterWorkspaceWidget } from "@/types/workspace/encounterWorkspace";
+import type {
+  EncounterWorkspaceWidget,
+  WorkspaceSurface,
+} from "@/types/workspace/encounterWorkspace";
 import { getWidgetRequirements } from "@/types/workspace/widgetAvailability";
 import { getCoreWidgetConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
@@ -44,6 +47,7 @@ import {
   type SectionVisibilityMode,
 } from "./workspaceLayouts";
 import { WorkspaceSchemaFields } from "./WorkspaceSchemaFields";
+import { widgetConfigConsistencyIssues } from "./workspaceValidation";
 import { WorkspaceWidgetAvailability } from "./WorkspaceWidgetAvailability";
 import { prepareWidgetConfigSchema } from "./workspaceWidgetSchema";
 import {
@@ -54,6 +58,7 @@ import {
 
 interface WorkspaceSectionSettingsProps {
   widget: EncounterWorkspaceWidget;
+  surface?: WorkspaceSurface;
   disabled?: boolean;
   onChange: (widget: EncounterWorkspaceWidget) => void;
   onRemove: () => void;
@@ -72,6 +77,7 @@ function parseConfig(text: string): Record<string, unknown> | undefined {
 /** Mount keyed by section identity so an unfinished draft belongs to one section. */
 export function WorkspaceSectionSettings({
   widget,
+  surface = "encounter",
   disabled = false,
   onChange,
   onRemove,
@@ -122,11 +128,24 @@ export function WorkspaceSectionSettings({
     [editedConfig, preparedSchema, t],
   );
   const issues = useMemo(
-    () => (validation && !validation.success ? validation.error.issues : []),
-    [validation],
+    () =>
+      validation && !validation.success
+        ? validation.error.issues
+        : editedConfig && preparedSchema
+          ? widgetConfigConsistencyIssues(editedConfig, t)
+          : [],
+    [editedConfig, preparedSchema, t, validation],
   );
   const valid = !jsonError && !issues.length;
-  const visibility = sectionVisibilityMode(widget);
+  // "Custom" is the author's choice, not a property of the statuses: picking it
+  // from a preset keeps those statuses and simply exposes the checklist.
+  const [customVisibility, setCustomVisibility] = useState(
+    () => sectionVisibilityMode(widget) === "custom",
+  );
+  const visibility: SectionVisibilityMode =
+    customVisibility && widget.visible_when
+      ? "custom"
+      : sectionVisibilityMode(widget);
   const statuses = widget.visible_when?.["encounter.status"];
   const selectedStatuses = new Set(statuses);
   // These options get purpose-built pickers instead of the generic schema form.
@@ -135,7 +154,9 @@ export function WorkspaceSectionSettings({
     vitals: ["codes"],
     observation_chart: ["plot", "groups"],
   };
-  const customFieldNames = new Set(customFields[widget.type] ?? []);
+  const customFieldNames = new Set(
+    Object.hasOwn(customFields, widget.type) ? customFields[widget.type] : [],
+  );
   const fields =
     preparedSchema?.fieldMetadata.filter(
       (field) => !customFieldNames.has(field.name),
@@ -154,7 +175,9 @@ export function WorkspaceSectionSettings({
   // it as part of the same event instead of a follow-up effect.
   const isAcceptable = (nextConfig: Record<string, unknown> | undefined) =>
     nextConfig !== undefined &&
-    preparedSchema?.validator.safeParse(nextConfig).success !== false;
+    (!preparedSchema ||
+      (preparedSchema.validator.safeParse(nextConfig).success &&
+        !widgetConfigConsistencyIssues(nextConfig, t).length));
   const updateConfig = (
     nextConfig: Record<string, unknown>,
     text = JSON.stringify(nextConfig, null, 2),
@@ -329,97 +352,127 @@ export function WorkspaceSectionSettings({
             </p>
           )}
 
-          <section
-            aria-label={t("workspace_studio_section_visibility")}
-            className="space-y-3"
-          >
-            <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
-              {t("workspace_studio_section_visibility")}
-            </h4>
-            <div className="space-y-2">
-              <Label
-                htmlFor={`${id}-visibility`}
-                className="text-sm font-medium"
+          {surface === "patient_history" ? (
+            widget.visible_when && (
+              <section
+                aria-label={t("workspace_studio_section_visibility")}
+                className="space-y-3"
               >
-                {t("workspace_studio_show_section")}
-              </Label>
-              <Select
-                value={visibility}
-                disabled={disabled}
-                onValueChange={(mode: SectionVisibilityMode) =>
-                  onChange(applySectionVisibilityMode(widget, mode))
-                }
-              >
-                <SelectTrigger id={`${id}-visibility`} className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="always">
-                    {t("workspace_studio_show_always")}
-                  </SelectItem>
-                  <SelectItem value="active">
-                    {t("workspace_studio_show_active")}
-                  </SelectItem>
-                  <SelectItem
-                    value="closed"
-                    disabled={requirements.encounter === "active"}
-                  >
-                    {t("workspace_studio_show_closed")}
-                  </SelectItem>
-                  <SelectItem value="custom">
-                    {t("workspace_studio_show_custom")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs leading-5 text-soft-foreground">
-                {t(
-                  requirements.encounter === "active"
-                    ? "workspace_studio_show_hint_active_only"
-                    : requirements.encounter === "none"
-                      ? "workspace_studio_show_hint_patient"
-                      : "workspace_studio_show_hint",
-                )}
-              </p>
-            </div>
-            {visibility === "custom" && statuses && (
-              <fieldset
-                disabled={disabled}
-                className="space-y-2.5 rounded-lg border border-border p-3"
-              >
-                <legend className="sr-only">
-                  {t("workspace_widget_encounter_statuses")}
-                </legend>
-                {Object.values(EncounterStatus).map((status) => (
-                  <div key={status} className="flex items-center gap-2.5">
-                    <Checkbox
-                      id={`${id}-status-${status}`}
-                      checked={selectedStatuses.has(status)}
-                      disabled={
-                        disabled ||
-                        (statuses.length === 1 && selectedStatuses.has(status))
+                <Alert variant="destructive" className="p-3">
+                  <AlertDescription className="space-y-2 text-xs">
+                    <p>{t("workspace_studio_history_status_filter")}</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={disabled}
+                      onClick={() =>
+                        onChange(applySectionVisibilityMode(widget, "always"))
                       }
-                      onCheckedChange={(checked) => {
-                        const nextStatuses = checked
-                          ? [...statuses, status]
-                          : statuses.filter((value) => value !== status);
-                        if (nextStatuses.length)
-                          onChange({
-                            ...widget,
-                            visible_when: { "encounter.status": nextStatuses },
-                          });
-                      }}
-                    />
-                    <Label
-                      htmlFor={`${id}-status-${status}`}
-                      className="text-sm leading-5 font-normal"
                     >
-                      {t(status)}
-                    </Label>
-                  </div>
-                ))}
-              </fieldset>
-            )}
-          </section>
+                      {t("workspace_studio_show_always_action")}
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </section>
+            )
+          ) : (
+            <section
+              aria-label={t("workspace_studio_section_visibility")}
+              className="space-y-3"
+            >
+              <h4 className="text-xs font-semibold tracking-wide text-soft-foreground uppercase">
+                {t("workspace_studio_section_visibility")}
+              </h4>
+              <div className="space-y-2">
+                <Label
+                  htmlFor={`${id}-visibility`}
+                  className="text-sm font-medium"
+                >
+                  {t("workspace_studio_show_section")}
+                </Label>
+                <Select
+                  value={visibility}
+                  disabled={disabled}
+                  onValueChange={(mode: SectionVisibilityMode) => {
+                    setCustomVisibility(mode === "custom");
+                    onChange(applySectionVisibilityMode(widget, mode));
+                  }}
+                >
+                  <SelectTrigger id={`${id}-visibility`} className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="always">
+                      {t("workspace_studio_show_always")}
+                    </SelectItem>
+                    <SelectItem value="active">
+                      {t("workspace_studio_show_active")}
+                    </SelectItem>
+                    <SelectItem
+                      value="closed"
+                      disabled={requirements.encounter === "active"}
+                    >
+                      {t("workspace_studio_show_closed")}
+                    </SelectItem>
+                    <SelectItem value="custom">
+                      {t("workspace_studio_show_custom")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs leading-5 text-soft-foreground">
+                  {t(
+                    requirements.encounter === "active"
+                      ? "workspace_studio_show_hint_active_only"
+                      : requirements.encounter === "none"
+                        ? "workspace_studio_show_hint_patient"
+                        : "workspace_studio_show_hint",
+                  )}
+                </p>
+              </div>
+              {visibility === "custom" && statuses && (
+                <fieldset
+                  disabled={disabled}
+                  className="space-y-2.5 rounded-lg border border-border p-3"
+                >
+                  <legend className="sr-only">
+                    {t("workspace_widget_encounter_statuses")}
+                  </legend>
+                  {Object.values(EncounterStatus).map((status) => (
+                    <div key={status} className="flex items-center gap-2.5">
+                      <Checkbox
+                        id={`${id}-status-${status}`}
+                        checked={selectedStatuses.has(status)}
+                        disabled={
+                          disabled ||
+                          (statuses.length === 1 &&
+                            selectedStatuses.has(status))
+                        }
+                        onCheckedChange={(checked) => {
+                          const nextStatuses = checked
+                            ? [...statuses, status]
+                            : statuses.filter((value) => value !== status);
+                          if (nextStatuses.length)
+                            onChange({
+                              ...widget,
+                              visible_when: {
+                                "encounter.status": nextStatuses,
+                              },
+                            });
+                        }}
+                      />
+                      <Label
+                        htmlFor={`${id}-status-${status}`}
+                        className="text-sm leading-5 font-normal"
+                      >
+                        {t(status)}
+                      </Label>
+                    </div>
+                  ))}
+                </fieldset>
+              )}
+            </section>
+          )}
 
           <details
             className="group rounded-lg border border-border"

@@ -5,7 +5,10 @@ import { before, test } from "node:test";
 import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
 import { CORE_WIDGET_CATALOG } from "@/components/Workspace/workspaceEditorCatalog";
 import { standardWorkspaceTemplate } from "@/components/Workspace/workspacePresets";
-import { workspaceWidgetIssues } from "@/components/Workspace/workspaceValidation";
+import {
+  widgetConfigConsistencyIssues,
+  workspaceWidgetIssues,
+} from "@/components/Workspace/workspaceValidation";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 
@@ -348,8 +351,11 @@ test("tab subsets, chart groups, and encounter filters validate their options", 
       },
     ],
   });
-  // Mismatched default tabs are accepted by validation and fall back at runtime.
-  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 9);
+  // A default tab outside the chosen subset is reported like any other invalid setting.
+  assert.equal(
+    workspaceWidgetIssues(template, new Map(), i18next.t).length,
+    10,
+  );
 });
 
 test("automatically hidden columns collapse and an all-hidden page has no tracks", () => {
@@ -456,6 +462,51 @@ test("encounter-only widgets cannot be published on the patient-history surface"
     ["legacy.tool", { component: () => null, pluginSlug: "legacy" }],
   ]);
   assert.equal(workspaceWidgetIssues(template, plugins, i18next.t).length, 3);
+});
+
+test("status filters and stray default tabs are reported before saving", () => {
+  const template = standardWorkspaceTemplate("patient_history", i18next.t);
+  template.pages.push({
+    kind: "custom",
+    key: "filters",
+    title: "Filters",
+    columns: [
+      {
+        span: 1,
+        widgets: [
+          // No encounter exists on history screens, so this hides for everyone.
+          {
+            type: "history_diagnoses",
+            visible_when: { "encounter.status": [EncounterStatus.IN_PROGRESS] },
+          },
+          {
+            type: "clinical_history",
+            config: { tabs: ["responses"], default_tab: "allergies" },
+          },
+          {
+            type: "clinical_history",
+            config: {
+              tabs: ["responses", "allergies"],
+              default_tab: "allergies",
+            },
+          },
+        ],
+      },
+    ],
+  });
+  const issues = workspaceWidgetIssues(template, new Map(), i18next.t);
+  assert.equal(issues.length, 2);
+  assert.deepEqual(
+    widgetConfigConsistencyIssues(
+      { tabs: ["responses"], default_tab: "allergies" },
+      i18next.t,
+    ).map((issue) => issue.path),
+    [["default_tab"]],
+  );
+  assert.deepEqual(
+    widgetConfigConsistencyIssues({ default_tab: "allergies" }, i18next.t),
+    [],
+  );
 });
 
 test("new system references and surface changes cannot bypass page compatibility", () => {

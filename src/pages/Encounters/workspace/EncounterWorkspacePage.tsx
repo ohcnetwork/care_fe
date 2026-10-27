@@ -29,11 +29,18 @@ export function EncounterWorkspacePage({ page }: EncounterWorkspacePageProps) {
   );
   const context: WorkspaceWidgetContext = {
     ...encounter,
+    // Patient-level responses need their own grant, unlike encounter responses.
+    canReadPatientResponses:
+      encounter.patientPermissions.canViewPatientQuestionnaireResponses,
     hasEncounterExtensions,
   };
 
   if (isSelectedEncounterLoading) {
-    return <Skeleton className="h-64 w-full" />;
+    return (
+      <div role="status" aria-label={t("loading")}>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
   }
   if (!selectedEncounter) {
     return <p role="alert">{t("encounter_not_found")}</p>;

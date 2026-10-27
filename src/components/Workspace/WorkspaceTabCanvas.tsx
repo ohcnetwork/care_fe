@@ -182,6 +182,11 @@ export function WorkspaceTabCanvas({
                       {t("workspace_studio_column_hidden_in_preview")}
                     </span>
                   )}
+                  {column.widgets.length === 0 && (
+                    <span className="text-[11px] text-soft-foreground">
+                      {t("workspace_studio_column_empty_note")}
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-3">
                   {column.widgets.map((widget, widgetIndex) => {

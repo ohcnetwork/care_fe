@@ -116,6 +116,9 @@ export function WorkspaceTabDialog({
                   setKey(keyFromTitle(event.target.value));
               }}
               aria-invalid={showErrors && !validTitle}
+              aria-describedby={
+                showErrors && !validTitle ? `${id}-error` : undefined
+              }
             />
           </div>
           <fieldset className="space-y-2">
@@ -169,15 +172,23 @@ export function WorkspaceTabDialog({
                   setKey(event.target.value);
                 }}
                 aria-invalid={showErrors && !validKey}
+                aria-describedby={
+                  showErrors && !validKey
+                    ? `${id}-key-hint ${id}-error`
+                    : `${id}-key-hint`
+                }
                 className="font-mono text-sm"
               />
-              <p className="text-xs leading-relaxed text-soft-foreground">
+              <p
+                id={`${id}-key-hint`}
+                className="text-xs leading-relaxed text-soft-foreground"
+              >
                 {t("workspace_studio_tab_key_hint")}
               </p>
             </div>
           </details>
           {showErrors && (!validTitle || !validKey) && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" id={`${id}-error`}>
               <AlertDescription>
                 {t(
                   !validTitle

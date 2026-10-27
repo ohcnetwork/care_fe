@@ -123,8 +123,11 @@ async function mockEncounterWorkspaceApi(
     facility_tags: [],
     instance_identifiers: [],
     facility_identifiers: [],
+    // Patient-level responses are granted separately from clinical data.
     permissions:
-      options.clinicalRead === false ? [] : ["can_view_clinical_data"],
+      options.clinicalRead === false
+        ? []
+        : ["can_view_clinical_data", "can_view_questionnaire_responses"],
   };
   const currentEncounter = {
     id: faker.string.uuid(),
@@ -3774,6 +3777,47 @@ test("studio history layouts work without an active encounter and remain separat
     fullPage: true,
   });
   expect(fixture.defaultWrites).toEqual([]);
+
+  await test.step("Standard history returns and clears the browser-local choice", async () => {
+    await page
+      .getByRole("button", { name: "Clinical history workspace", exact: true })
+      .click();
+    await page
+      .getByRole("option", { name: "Standard clinical history", exact: true })
+      .click();
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith("/history/responses"),
+    );
+    await expect(
+      page.getByRole("region", { name: "All diagnoses", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        (key) => localStorage.getItem(key),
+        `care:history-workspace:${fixture.actor.id}`,
+      ),
+    ).toBeNull();
+  });
+
+  await test.step("A saved layout that no longer exists falls back with a notice", async () => {
+    await page.evaluate(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`care:history-workspace:${fixture.actor.id}`, faker.string.uuid()],
+    );
+    await page.reload();
+    await expect(
+      page.getByText(
+        "Your saved history workspace is no longer available. Showing standard clinical history.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+    ).toBeVisible();
+  });
 
   await page.goto(`${fixture.basePath}/rounds`);
   await page.getByRole("button", { name: "Workspace", exact: true }).click();

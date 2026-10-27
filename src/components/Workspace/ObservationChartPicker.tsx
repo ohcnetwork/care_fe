@@ -92,12 +92,12 @@ export function ObservationChartPicker({
             {t("workspace_widget_chart_groups")}
           </legend>
           <div className="space-y-2 rounded-lg border border-border p-3">
-            {groupTitles.map((title) => {
+            {groupTitles.map((title, index) => {
               const checked = isSelected(title);
               return (
                 <div key={title} className="flex items-center gap-2.5">
                   <Checkbox
-                    id={`${id}-group-${title}`}
+                    id={`${id}-group-${index}`}
                     checked={checked}
                     // At least one chart must remain.
                     disabled={disabled || (checked && selectedCount === 1)}
@@ -114,7 +114,7 @@ export function ObservationChartPicker({
                     }}
                   />
                   <Label
-                    htmlFor={`${id}-group-${title}`}
+                    htmlFor={`${id}-group-${index}`}
                     className="text-sm leading-5 font-normal"
                   >
                     {title}

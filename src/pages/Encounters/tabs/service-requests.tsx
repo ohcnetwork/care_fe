@@ -151,6 +151,7 @@ export const EncounterServiceRequestTab = ({
                   requests={data.results}
                   facilityId={facilityId || ""}
                   showPatientInfo={false}
+                  readOnly={!canWriteClinicalData}
                 />
               ) : (
                 <div className="p-6 text-center text-gray-500">

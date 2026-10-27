@@ -54,7 +54,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
-import { useCareAppTabs } from "@/hooks/useCareApps";
+import { useCareAppTabs, useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import {
@@ -150,6 +150,11 @@ export function WorkspaceStudio({
   const { t } = useTranslation();
   const id = useId();
   const pluginTabs = useCareAppTabs("encounterTabs");
+  const careApps = useCareApps();
+  // Mirrors the runtime page so the extension slot previews honestly.
+  const hasEncounterExtensions = careApps.some(
+    (app) => app.isLoading || !!app.components?.EncounterOverviewTop,
+  );
   const { widgets: pluginWidgets, loadingPlugins } =
     useCareAppEncounterWidgets();
   const [mode, setMode] = useState<"design" | "json">("design");
@@ -270,6 +275,7 @@ export function WorkspaceStudio({
           canReadSelectedEncounter: true,
           canWriteClinicalData:
             previewAccess === "editing" && previewEncounter === "active",
+          hasEncounterExtensions,
         };
 
   const dialogTab = tabDialog?.tabKey
@@ -367,7 +373,12 @@ export function WorkspaceStudio({
   };
   const tabIcon = (page: WorkspacePage): LucideIcon => {
     if (page.kind === "system") return LockKeyhole;
-    return (page.icon && TAB_ICONS[page.icon]) || LayoutDashboard;
+    return (
+      (page.icon &&
+        Object.hasOwn(TAB_ICONS, page.icon) &&
+        TAB_ICONS[page.icon]) ||
+      LayoutDashboard
+    );
   };
   const tabTitle = (page: WorkspacePage) =>
     page.kind === "custom" ? page.title : systemPageLabel(page.key, t);
@@ -662,7 +673,7 @@ export function WorkspaceStudio({
                     type="button"
                     variant="ghost"
                     disabled={busy}
-                    aria-pressed={item.key === tab?.key}
+                    aria-current={item.key === tab?.key ? "true" : undefined}
                     onClick={() => setSelectedTab(item.key)}
                     className={cn(
                       "h-auto min-h-10 shrink-0 justify-start gap-2 px-3 py-2 text-left text-sm font-normal lg:w-full lg:whitespace-normal",
@@ -984,6 +995,7 @@ export function WorkspaceStudio({
         <WorkspaceSectionSettings
           key={`${settingsTarget.tabKey}:${settingsTarget.column}:${settingsTarget.widget}:${settingsWidget.type}`}
           widget={settingsWidget}
+          surface={surface}
           disabled={disabled}
           onValidityChange={handleSettingsValidity}
           onClose={() => setSettingsTarget(null)}

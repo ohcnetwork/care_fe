@@ -42,6 +42,8 @@ export function useHistoryWorkspace() {
     queryKey,
     queryFn: () => localStorage.getItem(storageKey),
     staleTime: Infinity,
+    // Another tab may have changed the selection while history was unmounted.
+    refetchOnMount: "always",
     retry: false,
   });
   useEffect(() => {

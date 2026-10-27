@@ -2145,7 +2145,12 @@ test("studio shows what hides automatically without loading clinical records", a
     await expect(
       page
         .getByRole("region", { name: "Side", exact: true })
-        .getByText("Whole column hidden in this view", { exact: true }),
+        .getByText(
+          "Whole column hidden in this view; the other columns widen",
+          {
+            exact: true,
+          },
+        ),
     ).toBeVisible();
     await expect(patientHistory.getByText(/Hidden in this view/)).toHaveCount(
       0,
@@ -2203,6 +2208,59 @@ test("studio shows what hides automatically without loading clinical records", a
     ).toHaveAttribute("aria-disabled", "true");
     await page.keyboard.press("Escape");
     await closeSectionSettings(page);
+  });
+
+  await test.step("Custom statuses start from the chosen preset", async () => {
+    await openSectionSettings(page, "Patient history");
+    const settings = sectionSettings(page);
+    const show = settings.getByRole("combobox", {
+      name: "Show this section",
+      exact: true,
+    });
+    await show.click();
+    await page
+      .getByRole("option", {
+        name: "Only while the encounter is active",
+        exact: true,
+      })
+      .click();
+    await expect(show).toHaveText("Only while the encounter is active");
+    const statuses = settings.getByRole("group", {
+      name: "Encounter statuses",
+      exact: true,
+    });
+    await expect(statuses).toHaveCount(0);
+    await show.click();
+    await page
+      .getByRole("option", {
+        name: "Only for specific encounter statuses…",
+        exact: true,
+      })
+      .click();
+    // The preset's statuses stay selected; the author now only narrows them.
+    await expect(show).toHaveText("Only for specific encounter statuses…");
+    await expect(
+      statuses.getByRole("checkbox", { name: "Planned", exact: true }),
+    ).toBeChecked();
+    await expect(
+      statuses.getByRole("checkbox", { name: "Completed", exact: true }),
+    ).not.toBeChecked();
+    await statuses
+      .getByRole("checkbox", { name: "Planned", exact: true })
+      .click();
+    await expect(
+      statuses.getByRole("checkbox", { name: "Planned", exact: true }),
+    ).not.toBeChecked();
+    await expect(show).toHaveText("Only for specific encounter statuses…");
+    await closeSectionSettings(page);
+    await expect(
+      page.getByRole("button", { name: "Save Changes", exact: true }),
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Save Changes", exact: true }),
+    ).toBeDisabled();
   });
 
   await test.step("The design fits a phone and never touches patient data", async () => {
@@ -2388,6 +2446,130 @@ test("studio customises supported built-in tabs and starts history screens from 
   });
 });
 
+test("history screens reject encounter status filters and offer to clear them", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "patient_history",
+    pages: [
+      {
+        key: "background",
+        kind: "custom",
+        title: "Background",
+        columns: [
+          {
+            span: 12,
+            widgets: [
+              {
+                type: "history_diagnoses",
+                title: "Past diagnoses",
+                // Written in JSON: history screens have no encounter to match.
+                visible_when: { "encounter.status": ["in_progress"] },
+              },
+              { type: "history_allergies", title: "Allergy history" },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  const save = page.getByRole("button", { name: "Save Changes", exact: true });
+  await expect(
+    page.getByRole("article", { name: "Past diagnoses", exact: true }),
+  ).toContainText("Hidden in this view");
+
+  await openSectionSettings(page, "Allergy history");
+  const settings = sectionSettings(page);
+  await expect(
+    settings.getByRole("combobox", { name: "Show this section", exact: true }),
+  ).toHaveCount(0);
+  await closeSectionSettings(page);
+
+  await openSectionSettings(page, "Past diagnoses");
+  await expect(
+    settings.getByText(
+      "This section is limited to encounter statuses, but history screens have no encounter, so nobody will see it.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    settings.getByRole("combobox", { name: "Show this section", exact: true }),
+  ).toHaveCount(0);
+  await closeSectionSettings(page);
+
+  // The template-wide rule catches the filter even when it is written in JSON.
+  await openJsonEditor(page);
+  const json = page.getByRole("textbox", {
+    name: "Template (JSON)",
+    exact: true,
+  });
+  const template = record.data.template as {
+    pages: { title: string }[];
+  };
+  await json.fill(
+    JSON.stringify({
+      ...template,
+      pages: [{ ...template.pages[0], title: "Background notes" }],
+    }),
+  );
+  await save.click();
+  await expect(
+    page.getByText(
+      /Background notes: Past diagnoses is limited to encounter statuses, which cannot apply on history screens/,
+    ),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(0);
+  await page
+    .getByRole("button", { name: "Back to design", exact: true })
+    .click();
+
+  await openSectionSettings(page, "Past diagnoses");
+  await settings
+    .getByRole("button", { name: "Always show this section", exact: true })
+    .click();
+  await expect(settings.getByText(/limited to encounter statuses/)).toHaveCount(
+    0,
+  );
+  await closeSectionSettings(page);
+  await expect(
+    page.getByRole("article", { name: "Past diagnoses", exact: true }),
+  ).not.toContainText("Hidden in this view");
+  await save.click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      surface: "patient_history",
+      pages: [
+        {
+          title: "Background notes",
+          columns: [
+            {
+              widgets: [
+                { type: "history_diagnoses", title: "Past diagnoses" },
+                { type: "history_allergies", title: "Allergy history" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+  expect(
+    (
+      api.writes[0].body as {
+        template: { pages: { columns: { widgets: object[] }[] }[] };
+      }
+    ).template.pages[0].columns[0].widgets[0],
+  ).not.toHaveProperty("visible_when");
+});
+
 test("studio picks vital sign codes from observation charts and saves them as section settings", async ({
   page,
 }) => {
@@ -2471,6 +2653,124 @@ test("studio picks vital sign codes from observation charts and saves them as se
       ],
     },
   });
+});
+
+test("studio picks a chart set and narrows its charts without emptying it", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "trends",
+        title: "Trends",
+        columns: [
+          {
+            span: 12,
+            widgets: [{ type: "observation_chart", title: "Vital trends" }],
+          },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await openSectionSettings(page, "Vital trends");
+  const drawer = sectionSettings(page);
+  const chartSet = drawer.getByRole("combobox", {
+    name: "Chart set",
+    exact: true,
+  });
+  // Without a saved plot the first chart set is shown with every chart on.
+  await expect(chartSet).toHaveText("Primary Parameters");
+  const charts = drawer.getByRole("group", {
+    name: "Charts to show",
+    exact: true,
+  });
+  await expect(
+    charts.getByRole("checkbox", { name: "Pulse", exact: true }),
+  ).toBeChecked();
+
+  await chartSet.click();
+  await page.getByRole("option", { name: "ABG Analysis", exact: true }).click();
+  await expect(
+    charts.getByRole("checkbox", { name: "PH", exact: true }),
+  ).toBeChecked();
+  await expect(
+    charts.getByRole("checkbox", { name: "Pulse", exact: true }),
+  ).toHaveCount(0);
+  for (const title of [
+    "PCO2",
+    "PO2",
+    "HCO3",
+    "Base Excess",
+    "Lactate",
+    "Sodium",
+  ]) {
+    await charts.getByRole("checkbox", { name: title, exact: true }).click();
+  }
+  await charts
+    .getByRole("checkbox", { name: "Potassium", exact: true })
+    .click();
+  // The last remaining chart cannot be removed.
+  await expect(
+    charts.getByRole("checkbox", { name: "PH", exact: true }),
+  ).toBeDisabled();
+  await closeSectionSettings(page);
+
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [
+        {
+          columns: [
+            {
+              widgets: [
+                {
+                  type: "observation_chart",
+                  title: "Vital trends",
+                  config: { plot: "abg-analysis", groups: ["PH"] },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  // Re-selecting every chart clears the filter instead of listing them all.
+  await openSectionSettings(page, "Vital trends");
+  for (const title of [
+    "PCO2",
+    "PO2",
+    "HCO3",
+    "Base Excess",
+    "Lactate",
+    "Sodium",
+    "Potassium",
+  ]) {
+    await charts.getByRole("checkbox", { name: title, exact: true }).click();
+  }
+  await closeSectionSettings(page);
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect.poll(() => api.writes.length).toBe(2);
+  expect(
+    (
+      api.writes[1].body as {
+        template: {
+          pages: { columns: { widgets: { config: object }[] }[] }[];
+        };
+      }
+    ).template.pages[0].columns[0].widgets[0].config,
+  ).toEqual({ plot: "abg-analysis" });
 });
 
 test("studio flags full-width browsers in narrow columns and saves tab subsets as checkboxes", async ({

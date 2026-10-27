@@ -52,15 +52,15 @@ export function ClinicalHistoryWorkspace({
     }),
     enabled: !access,
   });
-  const canViewClinicalData = getPermissions(
+  const patientPermissions = getPermissions(
     hasPermission,
     patient.data?.permissions ?? [],
-  ).canViewClinicalData;
+  );
   // Responses and clinical data are granted separately; either opens history
   // and each section then checks its own grant.
   const grants = access ?? {
-    clinicalData: canViewClinicalData,
-    responses: canViewClinicalData,
+    clinicalData: patientPermissions.canViewClinicalData,
+    responses: patientPermissions.canViewPatientQuestionnaireResponses,
   };
   const canRead = grants.clinicalData || grants.responses;
   const context: WorkspaceWidgetContext = {
@@ -180,7 +180,12 @@ export function ClinicalHistoryWorkspace({
       </Alert>
     );
   }
-  if (loading) return <Skeleton className="h-64 w-full" />;
+  if (loading)
+    return (
+      <div role="status" aria-label={t("loading")}>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
   if (!canRead)
     return (
       <EmptyState

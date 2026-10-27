@@ -186,13 +186,13 @@ function EnumArrayField({
     <fieldset disabled={disabled} className="space-y-2">
       <legend className="text-sm font-medium">{field.label}</legend>
       <div className="space-y-2 rounded-lg border border-border p-3">
-        {options.map((option) => {
+        {options.map((option, index) => {
           const key = String(option.value);
           const checked = selected.has(option.value);
           return (
             <div key={key} className="flex items-center gap-2.5">
               <Checkbox
-                id={`${id}-${key}`}
+                id={`${id}-${index}`}
                 checked={checked}
                 disabled={disabled}
                 onCheckedChange={(state) =>
@@ -210,7 +210,7 @@ function EnumArrayField({
                 }
               />
               <Label
-                htmlFor={`${id}-${key}`}
+                htmlFor={`${id}-${index}`}
                 className="text-sm leading-5 font-normal"
               >
                 {option.label}

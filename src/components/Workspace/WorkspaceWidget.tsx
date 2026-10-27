@@ -177,16 +177,29 @@ function WorkspaceWidgetContent({
     );
   }
 
+  // Widgets that merely tune an embedded tab still refuse to render with a
+  // configuration the studio could not have saved.
+  const invalidConfig = frame(
+    <Alert variant="destructive">
+      <AlertDescription>
+        {t("encounter_widget_config_invalid")}
+      </AlertDescription>
+    </Alert>,
+  );
+
   if (type === "clinical_history" || type.startsWith("history_")) {
-    const historyConfig = clinicalHistoryConfigSchema.safeParse(config).data;
+    const historyConfig = clinicalHistoryConfigSchema.safeParse(config);
+    // Single-section history widgets take no options; only the full widget does.
+    if (type === "clinical_history" && !historyConfig.success)
+      return invalidConfig;
     return frame(
       <ClinicalHistoryWidget
         type={type}
         patientId={patientId}
         facilityId={facilityId}
         access={patientHistoryAccess(context)}
-        tabs={historyConfig?.tabs}
-        defaultTab={historyConfig?.default_tab}
+        tabs={historyConfig.data?.tabs}
+        defaultTab={historyConfig.data?.default_tab}
       />,
     );
   }
@@ -242,6 +255,7 @@ function WorkspaceWidgetContent({
         return <Account title={title} />;
       case "encounter_summary": {
         const summaryConfig = encounterSummaryConfigSchema.safeParse(config);
+        if (!summaryConfig.success) return invalidConfig;
         const only =
           summaryConfig.data?.tabs?.length === 1
             ? summaryConfig.data.tabs[0]
@@ -294,24 +308,26 @@ function WorkspaceWidgetContent({
           readOnly={!canWriteClinicalData}
         />,
       );
-    case "observations":
+    case "observations": {
+      const observationsConfig = observationsConfigSchema.safeParse(config);
+      if (!observationsConfig.success) return invalidConfig;
       return frame(
-        <EncounterObservationsTab
-          limit={observationsConfigSchema.safeParse(config).data?.limit}
-        />,
+        <EncounterObservationsTab limit={observationsConfig.data.limit} />,
       );
+    }
     case "medications": {
-      const medicationConfig = medicationsConfigSchema.safeParse(config).data;
+      const medicationsConfig = medicationsConfigSchema.safeParse(config);
+      if (!medicationsConfig.success) return invalidConfig;
       return frame(
         <EncounterMedicinesTab
           returnPage={returnPage}
-          tabs={medicationConfig?.tabs?.map((tab) =>
+          tabs={medicationsConfig.data.tabs?.map((tab) =>
             tab === "statements" ? "ongoing" : tab,
           )}
           defaultTab={
-            medicationConfig?.default_tab === "statements"
+            medicationsConfig.data.default_tab === "statements"
               ? "ongoing"
-              : medicationConfig?.default_tab
+              : medicationsConfig.data.default_tab
           }
         />,
       );
@@ -326,12 +342,11 @@ function WorkspaceWidgetContent({
           facilityId={facilityId ? selectedEncounter.facility.id : undefined}
         />,
       );
-    case "plots":
-      return frame(
-        <EncounterPlotsTab
-          defaultPlot={plotsConfigSchema.safeParse(config).data?.plot}
-        />,
-      );
+    case "plots": {
+      const plotsConfig = plotsConfigSchema.safeParse(config);
+      if (!plotsConfig.success) return invalidConfig;
+      return frame(<EncounterPlotsTab defaultPlot={plotsConfig.data.plot} />);
+    }
     case "observation_chart":
       return <ObservationChartWidget title={title} config={config} />;
     case "encounter_extensions": {

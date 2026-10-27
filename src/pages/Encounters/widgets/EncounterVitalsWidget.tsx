@@ -82,7 +82,9 @@ export function EncounterVitalsWidget({
           {isError ? (
             <ClinicalListError isFetching={isFetching} onRetry={refetch} />
           ) : (
-            <Skeleton className="h-24 w-full" />
+            <div role="status" aria-label={t("loading")}>
+              <Skeleton className="h-24 w-full" />
+            </div>
           )}
         </EncounterAccordionLayout>
       </section>

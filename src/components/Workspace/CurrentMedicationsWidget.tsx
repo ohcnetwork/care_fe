@@ -106,7 +106,6 @@ export function CurrentMedicationsWidget({
             status: "active",
             medications_only: true,
             limit,
-            ordering: "-authored_on",
           },
           silent: true,
         }),
