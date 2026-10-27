@@ -3,7 +3,7 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 
 import { collectActionOutcomes } from "@/Utils/actions/actionOutcomes";
-import { presentActionOutcomes } from "@/Utils/actions/presentActionOutcomes";
+import { toastActionOutcomes } from "@/Utils/actions/toastActionOutcomes";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
 
@@ -38,7 +38,7 @@ const queryClient = new QueryClient({
     // the outcomes. onSettled runs after it and the outcomes stack above.
     onSettled: (data, error) => {
       if (error) return;
-      presentActionOutcomes(collectActionOutcomes(data));
+      toastActionOutcomes(collectActionOutcomes(data));
     },
   }),
 });
