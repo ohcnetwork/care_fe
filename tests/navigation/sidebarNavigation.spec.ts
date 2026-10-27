@@ -42,7 +42,7 @@ test.describe("Shared workspace navigation", () => {
       { name: "sidebar:state", value: "true", url: baseURL! },
     ]);
     await page.addInitScript(() => {
-      for (const name of ["Patients", "Billing", "RBAC", "Organizations"]) {
+      for (const name of ["Encounters", "Billing", "RBAC", "Organizations"]) {
         localStorage.removeItem(`nav-expansion-state--${name}`);
       }
     });
@@ -88,7 +88,7 @@ test.describe("Shared workspace navigation", () => {
       ).toHaveAttribute("aria-current", "page");
 
       await navigation
-        .getByRole("button", { name: "Patients", exact: true })
+        .getByRole("button", { name: "Encounters", exact: true })
         .click();
       await expect(
         navigation.getByRole("link", { name: "Locations", exact: true }),
@@ -704,7 +704,7 @@ test.describe("Shared workspace navigation", () => {
           navigation.getByRole("link", { name: "Queues", exact: true }),
         ).toHaveCount(0);
         await expect(
-          navigation.getByRole("button", { name: "Patients", exact: true }),
+          navigation.getByRole("button", { name: "Encounters", exact: true }),
         ).toHaveCount(0);
         await expect(
           navigation.getByRole("link", { name: "Settings", exact: true }),

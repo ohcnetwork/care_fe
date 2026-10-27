@@ -111,7 +111,7 @@ function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
 
   const hasBlockingOverlay = [
     ...document.querySelectorAll(MOUNTED_OVERLAY_SELECTOR),
-  ].some((overlay) => !overlay.querySelector("[cmdk-root]"));
+  ].some((overlay) => !overlay.querySelector("[data-shortcut-command-dialog]"));
   if (hasBlockingOverlay) {
     return undefined;
   }
