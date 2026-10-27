@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -77,19 +78,11 @@ export function ActionConfigurationList() {
         {isLoading ? (
           <TableSkeleton count={5} />
         ) : configurations.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-            <Zap aria-hidden className="mx-auto mb-2 size-6 text-gray-400" />
-            <p className="text-sm font-medium text-gray-900">
-              {t("action_configurations_empty")}
-            </p>
-            <p className="mb-4 text-sm text-gray-500">
-              {t("action_configurations_empty_hint")}
-            </p>
-            <Button onClick={() => navigate(`${ADMIN_ACTIONS_PATH}/new`)}>
-              <Plus className="size-4" />
-              {t("action_configuration_new")}
-            </Button>
-          </div>
+          <EmptyState
+            icon={<Zap aria-hidden className="size-6 text-gray-400" />}
+            title={t("action_configurations_empty")}
+            description={t("action_configurations_empty_hint")}
+          />
         ) : (
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
             <Table className="table-fixed">
