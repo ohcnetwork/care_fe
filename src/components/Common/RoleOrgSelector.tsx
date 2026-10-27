@@ -45,7 +45,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     Organization[]
-  >([]);
+  >(currentOrganizations || []);
   const [currentSelection, setCurrentSelection] = useState<Organization | null>(
     null,
   );
@@ -68,7 +68,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   });
 
   const handleSelect = (org: Organization) => {
-    const isAlreadySelected = !!currentOrganizations?.find(
+    const isAlreadySelected = selectedOrganizations?.find(
       (o) => o.id === org.id,
     );
     if (isAlreadySelected) {
@@ -84,7 +84,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
 
   const handleConfirmSelection = useCallback(
     (org: Organization) => {
-      if (!selectedOrganizations.includes(org)) {
+      if (!selectedOrganizations.some((o) => o.id === org.id)) {
         const newSelection = [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
         onChange(newSelection.map((org) => org.id));
@@ -99,6 +99,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   const handleRemoveOrganization = (index: number) => {
     const newSelection = selectedOrganizations.filter((_, i) => i !== index);
     setSelectedOrganizations(newSelection);
+    setCurrentSelection(null);
     onChange(
       newSelection.length > 0 ? newSelection.map((org) => org.id) : null,
     );
@@ -245,10 +246,9 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
     );
   };
 
-  const isDisabled =
-    selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-    (!!currentOrganizations &&
-      currentOrganizations.some((org) => org.id === currentSelection?.id));
+  const isDisabled = selectedOrganizations.some(
+    (org) => org.id === currentSelection?.id,
+  );
 
   return (
     <div className="space-y-4">
@@ -279,6 +279,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                   variant="ghost"
                   size="sm"
                   className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  type="button"
                   onClick={() => handleRemoveOrganization(index)}
                 >
                   <X className="size-4" />
