@@ -56,8 +56,8 @@ function ActionOutcomesSummary({
 }
 
 /**
- * Show what a record's actions reported: one toast per outcome titled by
- * the instruction's plain name, or a single summary when there are many.
+ * Show what a record's action instructions reported: one toast per outcome
+ * titled by the instruction's plain name, or a summary when there are many.
  * Outcomes with no readable message are not shown. Toasts live at the app
  * root, so a page that navigates away right after its write still gets
  * them on the screen it lands on.
@@ -75,7 +75,9 @@ export function toastActionOutcomes(outcomes: ActionOutcome[]) {
       icon: null,
       description: (
         <ActionOutcomesSummary
-          heading={t("questionnaire_actions_ran", { count: readable.length })}
+          heading={t("action_instruction_results", {
+            count: readable.length,
+          })}
           entries={readable}
         />
       ),
