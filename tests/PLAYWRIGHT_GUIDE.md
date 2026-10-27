@@ -379,7 +379,7 @@ await page.goto(`/facility/${facilityId}/settings/locations`);
 
 ```typescript
 await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-await page.getByRole("button", { name: "Patients", exact: true }).click();
+await page.getByRole("button", { name: "Encounters", exact: true }).click();
 await page.getByRole("link", { name: /search patients/i }).click();
 ```
 
