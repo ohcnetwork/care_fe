@@ -1,4 +1,4 @@
-import { isTouchDevice, sleep } from "@/Utils/utils";
+import { isTouchDevice } from "@/Utils/utils";
 import { useEffect, useState } from "react";
 
 export interface AutoPrintOptions {
@@ -7,38 +7,73 @@ export interface AutoPrintOptions {
   window?: Window;
 }
 
-/**
- * React hook to automatically trigger window.print() after a delay
- *
- * Usage:
- * ```
- * useAutoPrint({ enabled: !isLoading, delay: 1000 });
- * ```
- */
+const RETURN_COUNTDOWN_SECONDS = 5;
+
 export default function useAutoPrint({
   enabled = true,
   delay = 300,
   window: printWindow = window,
 }: AutoPrintOptions) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [isCountdownVisible, setIsCountdownVisible] = useState(true);
 
   useEffect(() => {
-    if (enabled) {
-      setIsProcessing(true);
-      const timer = setTimeout(async () => {
-        printWindow.print();
-        // Give some time for the print dialog to appear before navigating back
-        await sleep(300);
-        setIsProcessing(false);
-        // will figure out a better solution later
-        if (!isTouchDevice) {
-          window.history.go(-1);
-        }
-      }, delay); // Delay to ensure content is rendered
-
-      return () => clearTimeout(timer);
+    if (!enabled) {
+      setIsProcessing(false);
+      setCountdown(null);
+      return;
     }
-  }, [enabled, printWindow]);
 
-  return { isPrinting: isProcessing };
+    let countdownTimer: ReturnType<typeof setInterval> | undefined;
+
+    setIsProcessing(true);
+    setCountdown(null);
+    setIsCountdownVisible(true);
+
+    const printTimer = setTimeout(() => {
+      printWindow.print();
+
+      if (isTouchDevice) {
+        setIsProcessing(false);
+        return;
+      }
+
+      setCountdown(RETURN_COUNTDOWN_SECONDS);
+
+      let remaining = RETURN_COUNTDOWN_SECONDS;
+
+      countdownTimer = setInterval(() => {
+        remaining -= 1;
+
+        if (remaining <= 0) {
+          if (countdownTimer) {
+            clearInterval(countdownTimer);
+          }
+
+          setCountdown(0);
+          setIsProcessing(false);
+          printWindow.history.go(-1);
+          return;
+        }
+
+        setCountdown(remaining);
+      }, 1000);
+    }, delay);
+
+    return () => {
+      clearTimeout(printTimer);
+
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+      }
+    };
+  }, [enabled, delay, printWindow]);
+
+  return {
+    isPrinting: isProcessing,
+    countdown,
+    isCountdownVisible,
+    dismissCountdown: () => setIsCountdownVisible(false),
+  };
 }
