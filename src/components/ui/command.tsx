@@ -45,7 +45,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden rounded-xl!",
+        "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden",
         "in-data-[slot=drawer-content]:h-auto! in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
         className,
       )}
@@ -82,7 +82,7 @@ function CommandDialog({
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent
           className={cn(
-            "bg-foreground/10 top-1/4 translate-y-0 overflow-hidden rounded-xl! p-1.5",
+            "bg-foreground/10 top-1/4 translate-y-0 overflow-hidden p-1.5",
             className,
           )}
           innerClassName="bg-background grid gap-4 rounded-lg p-1 text-sm md:p-1"
@@ -103,7 +103,12 @@ function CommandDialog({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-      <DrawerContent className={cn("p-1.5", className)}>
+      <DrawerContent
+        className={cn(
+          "h-[calc(90dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
+          className,
+        )}
+      >
         <div className="sr-only">
           <DrawerTitle>{resolvedTitle}</DrawerTitle>
           <DrawerDescription>{resolvedDescription}</DrawerDescription>
