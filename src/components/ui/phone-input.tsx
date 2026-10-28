@@ -6,7 +6,7 @@ import {
   getExampleNumber,
 } from "libphonenumber-js";
 import examples from "libphonenumber-js/mobile/examples";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import * as RPNInput from "react-phone-number-input";
@@ -232,7 +232,7 @@ const CountrySelect = ({
           />
           <ChevronsUpDown
             className={cn(
-              "-mr-2 size-4 opacity-50",
+              "size-4 opacity-50",
               disabled ? "hidden" : "opacity-100",
             )}
           />
@@ -263,7 +263,7 @@ const CountrySelect = ({
             className="border-none shadow-none outline-hidden ring-0"
           />
           <CommandList>
-            <ScrollArea ref={scrollAreaRef} className="h-72">
+            <ScrollArea ref={scrollAreaRef}>
               <CommandEmpty>{t("no_country_found")}</CommandEmpty>
               <CommandGroup>
                 {countryList.map(({ value, label }) =>
@@ -298,13 +298,14 @@ const CountrySelectOption = ({
   onChange,
 }: CountrySelectOptionProps) => {
   return (
-    <CommandItem className="gap-2" onSelect={() => onChange(country)}>
+    <CommandItem
+      className="gap-2"
+      data-checked={country === selectedCountry}
+      onSelect={() => onChange(country)}
+    >
       <FlagComponent country={country} countryName={countryName} />
       <span className="flex-1 text-sm">{countryName}</span>
       <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
-      <CheckIcon
-        className={`ml-auto size-4 ${country === selectedCountry ? "opacity-100" : "opacity-0"}`}
-      />
     </CommandItem>
   );
 };
