@@ -198,13 +198,12 @@ const PrescriptionCard = ({
           )}
 
           {/* Print button */}
-          <Button variant="outline" size="icon" asChild>
+          <Button variant="outline" size="icon" aria-label={t("print")} asChild>
             <Link
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
               basePath="/"
             >
               <PrinterIcon />
-              <span className="sr-only">{t("print")}</span>
             </Link>
           </Button>
 
