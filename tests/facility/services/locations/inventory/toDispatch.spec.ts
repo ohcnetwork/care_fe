@@ -16,10 +16,13 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   async function addRequestedStock(page: Page) {
     await page.getByRole("button", { name: /^Load from order\b/ }).click();
     const requestPicker = page.getByRole("dialog", {
-      name: "Select Item",
+      name: "Select Items to Add",
       exact: true,
     });
-    await requestPicker.getByRole("radio", { name: /Paracetamol/ }).check();
+    await requestPicker
+      .getByRole("checkbox", { name: "Select All", exact: true })
+      .uncheck();
+    await requestPicker.getByRole("checkbox", { name: /Paracetamol/ }).check();
     await requestPicker.getByRole("button", { name: /^Done\b/ }).click();
     await expect(requestPicker).not.toBeVisible();
     const form = page.getByRole("form", {

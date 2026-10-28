@@ -171,16 +171,22 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    await page
+    const reportTypeSelect = page
       .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+      .filter({ hasText: "Select Diagnostic Report Type" });
+
+    if (!(await reportTypeSelect.isVisible())) {
+      await page.getByText("Test Results Entry").click();
+    }
+    await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
     const observationCombobox = page
-      .locator('[data-slot="card-content"]')
-      .filter({ hasText: "Observation 1" })
-      .getByRole("combobox");
+      .getByRole("group", { name: observationDefinitionTitle, exact: true })
+      .getByRole("combobox", {
+        name: `${observationDefinitionTitle} Unit`,
+        exact: true,
+      });
     await observationCombobox.scrollIntoViewIfNeeded();
     await expect(observationCombobox).toContainText("mg");
   });
