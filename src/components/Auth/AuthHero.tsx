@@ -49,14 +49,14 @@ export const AuthHero = () => {
           {customDescriptionHtml ? (
             <div className="py-6">
               <div
-                className="max-w-xl text-secondary-400"
+                className="max-w-xl text-white"
                 dangerouslySetInnerHTML={{
                   __html: __CUSTOM_DESCRIPTION_HTML__,
                 }}
               />
             </div>
           ) : (
-            <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
+            <div className="max-w-xl py-6 pl-1 text-base font-semibold text-white md:text-lg lg:text-xl">
               {t("goal")}
             </div>
           )}
@@ -89,7 +89,7 @@ export const AuthHero = () => {
             href={urls.ohcn}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-secondary-500"
+            className="text-white/80 hover:text-white"
           >
             {t("footer_body")}
           </a>
