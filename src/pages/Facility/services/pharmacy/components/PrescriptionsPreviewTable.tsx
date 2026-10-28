@@ -141,7 +141,9 @@ const PrescriptionCard = ({
 
     const matchesStatus =
       !filters?.medicationDispenseStatus ||
-      medication.dispense_status === filters.medicationDispenseStatus;
+      (medication.dispense_status ||
+        MedicationRequestDispenseStatus.incomplete) ===
+        filters.medicationDispenseStatus;
 
     return matchesSearch && matchesStatus;
   });
