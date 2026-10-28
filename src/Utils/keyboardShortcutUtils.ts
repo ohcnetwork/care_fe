@@ -59,6 +59,8 @@ const INTERACTIVE_HOST_SELECTOR =
   "button, [role='button'], a, [data-shortcut-target]";
 
 const OPEN_OVERLAY_SELECTOR = [
+  "[role='dialog'][data-open]",
+  "[role='alertdialog'][data-open]",
   "[role='dialog'][data-state='open']",
   "[role='alertdialog'][data-state='open']",
   "[data-radix-popper-content-wrapper] [data-state='open']",
