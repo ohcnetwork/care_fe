@@ -35,11 +35,16 @@ test.describe("Queue Creation & Editing", () => {
     const modifiedQueueName = faker.lorem.words(4);
     await createQueue(page, uniqueQueueName);
     await openQueueEditMenu(page, uniqueQueueName);
-    await page
-      .getByRole("textbox", { name: /queue name/i })
-      .fill(modifiedQueueName);
+    const queueNameInput = page.getByRole("textbox", { name: /queue name/i });
+    await queueNameInput.fill("");
+    // fill() bypasses key events; typing with spaces covers the menu stealing keystrokes
+    await queueNameInput.pressSequentially(modifiedQueueName);
+    await expect(queueNameInput).toHaveValue(modifiedQueueName);
     await page.getByRole("button", { name: /update queue/i }).click();
     await expectToast(page, /queue updated successfully/i);
+    await expect(
+      page.getByRole("row").filter({ hasText: modifiedQueueName }),
+    ).toBeVisible();
   });
 
   test("should not allow creating a queue without a name", async ({ page }) => {
