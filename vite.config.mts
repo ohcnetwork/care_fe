@@ -538,7 +538,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     build: {
       target: "es2022",
       outDir: "build",
-      sourcemap: true,
+      sourcemap: mode !== "production",
     },
     esbuild: {
       target: "es2022",
