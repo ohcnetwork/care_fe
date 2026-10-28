@@ -116,9 +116,24 @@ type EnableWhenString = {
   answer: string;
 };
 
+/** Coded choice targets (value set or coded answer options) are matched by
+ *  `answer.code`; `display` is kept so the builder can label the rule. */
+type EnableWhenCoding = {
+  operator: "equals" | "not_equals";
+  answer: Code;
+};
+
 export type EnableWhen = {
   question: string;
-} & (EnableWhenNumeric | EnableWhenBoolean | EnableWhenString);
+} & (
+  EnableWhenNumeric | EnableWhenBoolean | EnableWhenString | EnableWhenCoding
+);
+
+export function isCodedEnableWhenAnswer(
+  answer: EnableWhen["answer"] | null | undefined,
+): answer is Code {
+  return typeof answer === "object" && answer !== null;
+}
 
 export interface AnswerOption {
   value: string;

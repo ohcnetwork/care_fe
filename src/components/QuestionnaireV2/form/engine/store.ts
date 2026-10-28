@@ -9,7 +9,11 @@ import {
   ResponsePath,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { EnableWhen, Question } from "@/types/questionnaire/question";
+import {
+  EnableWhen,
+  Question,
+  isCodedEnableWhenAnswer,
+} from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { entryIsAnswered } from "./inputs/answeredEntry";
@@ -168,16 +172,18 @@ function evaluateEnableWhen(
 
   const normalizedAnswers = answered.map((v) => normalizeValue(v.value));
 
+  // Coded rules match the answer's coding by code; the rest compare values.
+  const matchesAnswer = (v: ResponseValue) =>
+    isCodedEnableWhenAnswer(enableWhen.answer)
+      ? v.coding?.code === enableWhen.answer.code
+      : foldBoolean(v.value) === foldBoolean(enableWhen.answer);
+
   switch (enableWhen.operator) {
     case "equals":
-      return answered
-        .map((v) => foldBoolean(v.value))
-        .includes(foldBoolean(enableWhen.answer));
+      return answered.some(matchesAnswer);
 
     case "not_equals":
-      return !answered
-        .map((v) => foldBoolean(v.value))
-        .includes(foldBoolean(enableWhen.answer));
+      return !answered.some(matchesAnswer);
 
     case "greater":
       return normalizedAnswers.some(
