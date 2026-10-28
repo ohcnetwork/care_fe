@@ -1,5 +1,5 @@
 import { Permissions } from "@/types/emr/permission/permission";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import {
   PatientIdentifier,
@@ -65,7 +65,7 @@ export interface PatientUpdate extends PatientBase {
 }
 
 export interface PatientCreate extends PatientUpdate {
-  tags?: string[];
+  tags?: TagSetRequest[];
 }
 
 export interface PartialPatientModel {

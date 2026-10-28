@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
 import { Permissions } from "@/types/emr/permission/permission";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { LocationAssociationRead } from "@/types/location/association";
@@ -245,7 +245,7 @@ export interface EncounterCreate extends Omit<
   patient: string;
   facility: string;
   organizations: string[];
-  tags?: string[];
+  tags?: TagSetRequest[];
   appointment?: string;
   external_identifier?: string;
   discharge_summary_advice?: string;

@@ -255,6 +255,7 @@ export default function RequestOrderForm({
     } else {
       createRequestOrder({
         ...data,
+        tags: data.tags.map((tag) => ({ tag })),
         status: RequestOrderStatus.draft,
       });
     }
