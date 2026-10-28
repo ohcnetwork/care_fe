@@ -260,7 +260,7 @@ const CountrySelect = ({
               }, 0);
             }}
             placeholder={t("search_country")}
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="border-none shadow-none outline-hidden ring-0"
           />
           <CommandList>
             <ScrollArea ref={scrollAreaRef} className="h-72">
@@ -311,10 +311,11 @@ const CountrySelectOption = ({
 
 const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   const Flag = flags[country];
+  const flagProps = { title: countryName, className: "size-full" };
 
   return (
-    <span className="flex h-4 w-6 overflow-hidden rounded-sm bg-foreground/20 [&_svg]:size-full">
-      {Flag && <Flag title={countryName} />}
+    <span className="flex h-4 w-6 overflow-hidden rounded bg-foreground/20 [&_svg]:size-full">
+      {Flag && <Flag {...flagProps} />}
     </span>
   );
 };
