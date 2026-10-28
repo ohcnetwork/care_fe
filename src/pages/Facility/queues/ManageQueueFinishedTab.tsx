@@ -117,6 +117,7 @@ export function ManageQueueFinishedTab({
                     </TableCell>
                     <TableCell>
                       <Link
+                        basePath="/"
                         href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                         className="hover:underline transition-colors flex items-center gap-1"
                       >
