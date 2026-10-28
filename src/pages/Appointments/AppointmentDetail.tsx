@@ -12,7 +12,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -820,6 +819,9 @@ const AppointmentActions = ({
     useState<ScheduleResourceFormState>(appointment);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
+  const [isNoShowOpen, setIsNoShowOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [isEnteredInErrorOpen, setIsEnteredInErrorOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
@@ -1022,309 +1024,296 @@ const AppointmentActions = ({
 
             <DropdownMenuSeparator />
 
-            {/* Reschedule */}
             {appointment.status !== AppointmentStatus.IN_CONSULTATION &&
               canRescheduleAppointment && (
-                <>
-                  <AlertDialog
-                    open={isRescheduleReasonOpen}
-                    onOpenChange={setIsRescheduleReasonOpen}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <CalendarIcon className="size-4 mr-2" />
-                        {t("reschedule")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("reschedule_appointment")}
-                        </AlertDialogTitle>
-                        <Label>{t("note")}</Label>
-                        <Textarea
-                          value={oldNote}
-                          onChange={(e) => setRescheduleReason(e.target.value)}
-                        />
-                        <AlertDialogDescription>
-                          <Alert variant="destructive">
-                            <AlertTitle>{t("warning")}</AlertTitle>
-                            <AlertDescription>
-                              {t("reschedule_appointment_warning")}
-                            </AlertDescription>
-                          </Alert>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel
-                          onClick={() => setIsRescheduleReasonOpen(false)}
-                        >
-                          {t("cancel")}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => {
-                            setIsRescheduleReasonOpen(false);
-                            setIsRescheduleOpen(true);
-                          }}
-                          disabled={!oldNote.trim()}
-                        >
-                          {t("continue")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <Sheet
-                    open={isRescheduleOpen}
-                    onOpenChange={setIsRescheduleOpen}
-                  >
-                    <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-                      </SheetHeader>
-
-                      <div className="mt-6 flex-1">
-                        <div className="text-sm">
-                          <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                            <Label className="font-medium">
-                              {t("tags", { count: 2 })}
-                            </Label>
-                            <TagAssignmentSheet
-                              entityType="appointment"
-                              entityId={appointment.id}
-                              facilityId={facilityId}
-                              currentTags={appointment.tags}
-                              onUpdate={() => {
-                                queryClient.invalidateQueries({
-                                  queryKey: ["appointment", appointment.id],
-                                });
-                              }}
-                              canWrite={true}
-                            />
-                          </div>
-                          {appointment.tags?.length > 0 ? (
-                            <p className="text-gray-600 flex flex-wrap gap-1">
-                              {appointment.tags.map((tag) => (
-                                <TagBadge
-                                  key={tag.id}
-                                  tag={tag}
-                                  hierarchyDisplay
-                                />
-                              ))}
-                            </p>
-                          ) : (
-                            <p className="text-gray-600 md:-mt-2">
-                              {t("no_tags_assigned")}
-                            </p>
-                          )}
-                        </div>
-                        <Label className="mb-2 aria-required mt-8">
-                          {t("note")}
-                        </Label>
-                        <Textarea
-                          placeholder={t("appointment_note")}
-                          value={newNote}
-                          onChange={(e) => setNewVisitReason(e.target.value)}
-                        />
-                        <div className="my-4 space-y-4">
-                          <div className="flex flex-col">
-                            <Label className="mb-2 text-sm font-medium text-gray-950">
-                              {t(
-                                `schedulable_resource__${selectedResource.resource_type}`,
-                              )}
-                            </Label>
-                            <ScheduleResourceSelector
-                              selectedResource={selectedResource}
-                              facilityId={facilityId}
-                              setSelectedResource={setSelectedResource}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <AppointmentDateSelection
-                            facilityId={facilityId}
-                            resourceId={selectedResource.resource?.id}
-                            resourceType={selectedResource.resource_type}
-                            currentAppointment={appointment}
-                            setSelectedDate={setSelectedDate}
-                            selectedDate={selectedDate}
-                          />
-                          <AppointmentSlotPicker
-                            selectedDate={selectedDate}
-                            facilityId={facilityId}
-                            resourceId={selectedResource.resource?.id}
-                            resourceType={selectedResource.resource_type}
-                            selectedSlotId={selectedSlotId}
-                            onSlotSelect={setSelectedSlotId}
-                            currentAppointment={appointment}
-                          />
-                        </div>
-
-                        <div className="flex justify-end gap-2 mt-6">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setIsRescheduleOpen(false);
-                              setSelectedSlotId(undefined);
-                            }}
-                          >
-                            {t("cancel")}
-                          </Button>
-                          <Button
-                            variant="default"
-                            disabled={!selectedSlotId || isPending}
-                            onClick={addRescheduleAppointment}
-                          >
-                            {isPending ? t("rescheduling") : t("reschedule")}
-                          </Button>
-                        </div>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </>
+                <DropdownMenuItem
+                  onClick={() => setIsRescheduleReasonOpen(true)}
+                >
+                  <CalendarIcon className="size-4 mr-2" />
+                  {t("reschedule")}
+                </DropdownMenuItem>
               )}
 
-            {/* Mark as No Show */}
             {[AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN].includes(
               currentStatus,
             ) && (
-              <AlertDialog>
-                <AlertDialogTrigger
-                  asChild
-                  disabled={!canMarkFulfilledOrNoShow}
-                >
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <EyeNoneIcon className="size-4 mr-2" />
-                    {t("mark_as_noshow")}
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("mark_as_noshow_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        updateAppointment({
-                          status: AppointmentStatus.NO_SHOW,
-                          note,
-                        })
-                      }
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isUpdating ? (
-                        <Spinner className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem
+                disabled={!canMarkFulfilledOrNoShow}
+                onClick={() => setIsNoShowOpen(true)}
+              >
+                <EyeNoneIcon className="size-4 mr-2" />
+                {t("mark_as_noshow")}
+              </DropdownMenuItem>
             )}
 
-            {/* Cancel Appointment */}
             {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <BanIcon className="size-4 mr-2" />
-                    {t("cancel_appointment")}
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("cancel_appointment")}
-                    </AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("cancel_appointment_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => addCancelAppointment("cancelled", note)}
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isPending ? (
-                        <Spinner className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem onClick={() => setIsCancelOpen(true)}>
+                <BanIcon className="size-4 mr-2" />
+                {t("cancel_appointment")}
+              </DropdownMenuItem>
             )}
 
-            {/* Mark as Entered in Error */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <BanIcon className="size-4 mr-2" />
-                  {t("mark_as_entered_in_error")}
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("mark_as_entered_in_error")}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <Alert variant="destructive" className="mt-4">
-                      <AlertTitle>{t("warning")}</AlertTitle>
-                      <AlertDescription>
-                        {t("entered_in_error_warning")}
-                      </AlertDescription>
-                    </Alert>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      addCancelAppointment("entered_in_error", note)
-                    }
-                    className={cn(buttonVariants({ variant: "destructive" }))}
-                  >
-                    {isPending ? (
-                      <Spinner className="size-4 animate-spin mr-2" />
-                    ) : (
-                      t("confirm")
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DropdownMenuItem onClick={() => setIsEnteredInErrorOpen(true)}>
+              <BanIcon className="size-4 mr-2" />
+              {t("mark_as_entered_in_error")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <>
+          <AlertDialog
+            open={isRescheduleReasonOpen}
+            onOpenChange={setIsRescheduleReasonOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("reschedule_appointment")}
+                </AlertDialogTitle>
+                <Label>{t("note")}</Label>
+                <Textarea
+                  value={oldNote}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                />
+                <AlertDialogDescription>
+                  <Alert variant="destructive">
+                    <AlertTitle>{t("warning")}</AlertTitle>
+                    <AlertDescription>
+                      {t("reschedule_appointment_warning")}
+                    </AlertDescription>
+                  </Alert>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => setIsRescheduleReasonOpen(false)}
+                >
+                  {t("cancel")}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setIsRescheduleReasonOpen(false);
+                    setIsRescheduleOpen(true);
+                  }}
+                  disabled={!oldNote.trim()}
+                >
+                  {t("continue")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+            <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+              </SheetHeader>
+
+              <div className="mt-6 flex-1">
+                <div className="text-sm">
+                  <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                    <Label className="font-medium">
+                      {t("tags", { count: 2 })}
+                    </Label>
+                    <TagAssignmentSheet
+                      entityType="appointment"
+                      entityId={appointment.id}
+                      facilityId={facilityId}
+                      currentTags={appointment.tags}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["appointment", appointment.id],
+                        });
+                      }}
+                      canWrite={true}
+                    />
+                  </div>
+                  {appointment.tags?.length > 0 ? (
+                    <p className="text-gray-600 flex flex-wrap gap-1">
+                      {appointment.tags.map((tag) => (
+                        <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+                      ))}
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 md:-mt-2">
+                      {t("no_tags_assigned")}
+                    </p>
+                  )}
+                </div>
+                <Label className="mb-2 aria-required mt-8">{t("note")}</Label>
+                <Textarea
+                  placeholder={t("appointment_note")}
+                  value={newNote}
+                  onChange={(e) => setNewVisitReason(e.target.value)}
+                />
+                <div className="my-4 space-y-4">
+                  <div className="flex flex-col">
+                    <Label className="mb-2 text-sm font-medium text-gray-950">
+                      {t(
+                        `schedulable_resource__${selectedResource.resource_type}`,
+                      )}
+                    </Label>
+                    <ScheduleResourceSelector
+                      selectedResource={selectedResource}
+                      facilityId={facilityId}
+                      setSelectedResource={setSelectedResource}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <AppointmentDateSelection
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id}
+                    resourceType={selectedResource.resource_type}
+                    currentAppointment={appointment}
+                    setSelectedDate={setSelectedDate}
+                    selectedDate={selectedDate}
+                  />
+                  <AppointmentSlotPicker
+                    selectedDate={selectedDate}
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id}
+                    resourceType={selectedResource.resource_type}
+                    selectedSlotId={selectedSlotId}
+                    onSlotSelect={setSelectedSlotId}
+                    currentAppointment={appointment}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsRescheduleOpen(false);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId || isPending}
+                    onClick={addRescheduleAppointment}
+                  >
+                    {isPending ? t("rescheduling") : t("reschedule")}
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+
+        {/* Mark as No Show */}
+        <AlertDialog open={isNoShowOpen} onOpenChange={setIsNoShowOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <AlertDialogDescription>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("mark_as_noshow_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  updateAppointment({
+                    status: AppointmentStatus.NO_SHOW,
+                    note,
+                  })
+                }
+                className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
+              >
+                {isUpdating ? (
+                  <Spinner className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Cancel Appointment */}
+        <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
+              <Label>{t("note")}</Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <AlertDialogDescription>
+                <Alert variant="destructive">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("cancel_appointment_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => addCancelAppointment("cancelled", note)}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+                disabled={!note.trim()}
+              >
+                {isPending ? (
+                  <Spinner className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Mark as Entered in Error */}
+        <AlertDialog
+          open={isEnteredInErrorOpen}
+          onOpenChange={setIsEnteredInErrorOpen}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t("mark_as_entered_in_error")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>{t("warning")}</AlertTitle>
+                  <AlertDescription>
+                    {t("entered_in_error_warning")}
+                  </AlertDescription>
+                </Alert>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => addCancelAppointment("entered_in_error", note)}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {isPending ? (
+                  <Spinner className="size-4 animate-spin mr-2" />
+                ) : (
+                  t("confirm")
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

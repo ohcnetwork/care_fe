@@ -55,6 +55,8 @@ interface QueueFormSheetProps {
   resourceId: string;
   queueId?: string; // If provided, we're in edit mode
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onSuccess?: () => void;
   initialDate?: Date;
 }
@@ -65,11 +67,19 @@ export default function QueueFormSheet({
   resourceId,
   queueId,
   trigger,
+  open,
+  onOpenChange,
   onSuccess,
   initialDate,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = (value: boolean) => {
+    if (!isControlled) setInternalOpen(value);
+    onOpenChange?.(value);
+  };
   const queryClient = useQueryClient();
 
   const isEditMode = Boolean(queueId);
@@ -166,14 +176,16 @@ export default function QueueFormSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="size-4 mr-2" />
-            {isEditMode ? t("edit") : t("create_queue")}
-          </Button>
-        )}
-      </SheetTrigger>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          {trigger || (
+            <Button>
+              <Plus className="size-4 mr-2" />
+              {isEditMode ? t("edit") : t("create_queue")}
+            </Button>
+          )}
+        </SheetTrigger>
+      )}
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
