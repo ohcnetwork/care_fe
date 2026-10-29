@@ -116,6 +116,15 @@ export type EncounterWorkspaceWidget = z.infer<typeof widgetSchema>;
 export type EncounterWorkspaceCustomPage = z.infer<typeof customPageSchema>;
 export type EncounterWorkspaceTemplate = z.infer<typeof workspaceSchema>;
 
+/** Empty columns are valid while editing but must not be saved. */
+export function hasEmptyColumn(template: EncounterWorkspaceTemplate) {
+  return template.pages.some(
+    (page) =>
+      page.kind === "custom" &&
+      page.columns.some((column) => column.widgets.length === 0),
+  );
+}
+
 /** Widget availability is a rendering concern; unknown widget types remain valid. */
 export function createEncounterWorkspaceSchema(
   additionalSystemPageKeys: readonly string[] = [],
