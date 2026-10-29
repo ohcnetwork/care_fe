@@ -96,7 +96,7 @@ const typeTestedSchema = z.object({
 interface SpecimenDefinitionFormProps {
   facilityId: string;
   specimenSlug?: string;
-  onSuccess?: (specimenDefinition?: SpecimenDefinitionRead) => void;
+  onSuccess?: () => void;
   onCancel?: () => void;
 }
 
@@ -148,7 +148,7 @@ interface SpecimenDefinitionFormContentProps {
   facilityId: string;
   specimenSlug?: string;
   initialData?: SpecimenDefinitionRead;
-  onSuccess?: (specimenDefinition?: SpecimenDefinitionRead) => void;
+  onSuccess?: () => void;
   onCancel?: () => void;
 }
 
@@ -156,14 +156,7 @@ function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
-  onSuccess = (specimenDefinition) => {
-    const slug = specimenDefinition?.slug ?? specimenSlug;
-    if (slug) {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions/${slug}`);
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onSuccess,
   onCancel = () => {
     if (specimenSlug) {
       navigate(
@@ -287,7 +280,11 @@ function SpecimenDefinitionFormContent({
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+        }
       },
     });
 
@@ -301,7 +298,13 @@ function SpecimenDefinitionFormContent({
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.(updated);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${updated.slug}`,
+          );
+        }
       },
     });
 
