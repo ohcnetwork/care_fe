@@ -106,7 +106,7 @@ function CommandDialog({
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         className={cn(
-          "h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
+          "h-[80dvh] max-h-[min(36rem,var(--drawer-available-height))] p-1.5",
           className,
         )}
       >
