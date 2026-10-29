@@ -21,7 +21,6 @@ import { useTranslation } from "react-i18next";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import TagConfigForm from "@/pages/Admin/TagConfig/TagConfigForm";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface TagConfigFormDrawerProps {
   title: string;
@@ -67,11 +66,7 @@ export default function TagConfigFormDrawer({
   return (
     <>
       {isMobile ? (
-        <Drawer
-          open={open}
-          onOpenChange={onOpenChange}
-          repositionInputs={!isIOSDevice}
-        >
+        <Drawer open={open} onOpenChange={onOpenChange}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent className="min-h-[65vh] max-h-[100vh]">
             <DrawerHeader className="flex flex-row items-center justify-between">

@@ -27,7 +27,6 @@ import {
 import { Label } from "@/components/ui/label";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
-import { isIOSDevice } from "@/Utils/utils";
 
 type ButtonProps = Omit<
   React.ComponentProps<typeof Button>,
@@ -126,7 +125,7 @@ export function MultiSelect({
             ? t(`search_${translationBasekey}`)
             : t("search_options")
         }
-        autoFocus={!isIOSDevice}
+        autoFocus={isMobile}
       />
       <div className="flex items-center gap-2 border-b border-border px-3 py-2">
         <Checkbox

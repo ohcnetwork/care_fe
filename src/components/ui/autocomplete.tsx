@@ -136,24 +136,14 @@ export default function Autocomplete({
     </Button>
   );
 
-  const searchInputRef = React.useCallback(
-    (input: HTMLInputElement | null) => {
-      // Focus synchronously on mount so iOS opens the keyboard, but without
-      // scrolling the page while the drawer is still sliding in. The desktop
-      // popover focuses its input itself once positioned.
-      if (input && isMobile) input.focus({ preventScroll: true });
-    },
-    [isMobile],
-  );
-
   const content = (
     <>
       <ComboboxInput
-        ref={searchInputRef}
         placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
         aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
         disabled={disabled}
         showTrigger={false}
+        autoFocus={isMobile}
       />
       {isLoading ? (
         <CardListSkeleton count={3} />

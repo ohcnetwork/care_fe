@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { conditionalAttribute, isIOSDevice } from "@/Utils/utils";
+import { conditionalAttribute } from "@/Utils/utils";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -124,7 +124,7 @@ export function QuestionnaireSearch({
         )}
         onValueChange={setSearch}
         value={search}
-        autoFocus={!isIOSDevice}
+        autoFocus
       />
       <CommandList className={cn("overflow-y-auto", "max-h-72")}>
         {isLoading ? (

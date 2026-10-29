@@ -19,6 +19,7 @@ import {
   type RenderProp,
 } from "@/components/ui/overlay-compat";
 import { cn } from "@/lib/utils";
+import { isIOSDevice } from "@/Utils/utils";
 
 // ---------------------------------------------------------------------------
 // Direction compat shim (vaul "bottom"/"top" → Base UI "down"/"up")
@@ -82,7 +83,9 @@ function Drawer({
   snapPoints,
   swipeDirection = "down",
   direction, // backwards compat with vaul
-  repositionInputs = true,
+  // Base UI's virtual keyboard handling misplaces the sheet on iOS Safari,
+  // which already pans the viewport itself when an input is focused.
+  repositionInputs = !isIOSDevice,
   onOpenChange,
   ...props
 }: DrawerPrimitive.Root.Props & {
