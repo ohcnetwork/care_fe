@@ -334,7 +334,7 @@ function DrawerContent({
               "data-[swipe-direction=right]:after:left-full data-[swipe-direction=up]:after:bottom-full",
               // Sizing
               "[--drawer-content-height:var(--drawer-height,auto)]",
-              "data-[swipe-axis=x]:[--drawer-content-width:75%] data-[swipe-axis=y]:[--drawer-content-max-height:calc(100dvh-6rem-var(--drawer-keyboard-inset,0px))]",
+              "data-[swipe-axis=x]:[--drawer-content-width:75%] data-[swipe-axis=y]:[--drawer-content-max-height:calc(100dvh-6rem)]",
               "data-[swipe-axis=y]:data-snap-points:[--drawer-content-height:100dvh]",
               "data-[swipe-axis=x]:sm:[--drawer-content-width:24rem]",
               // Stack
@@ -385,6 +385,9 @@ function DrawerContent({
                 data-slot="drawer-content"
                 className={cn(
                   "flex min-h-0 flex-1 flex-col overflow-hidden overscroll-contain rounded-[inherit]",
+                  // Callers override the popup's max-height, so the room left
+                  // above the keyboard is enforced on the content instead.
+                  "group-data-[swipe-axis=y]/drawer-popup:max-h-[calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-3rem)]",
                   "transition-opacity duration-300 ease-[cubic-bezier(0.45,1.005,0,1.005)] select-text",
                   "group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100",
                   "group-data-swiping/drawer-popup:select-none",
