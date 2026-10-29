@@ -239,9 +239,7 @@ function CreateReferralContent({
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
-  const questionnaires = (questionnairesQuery.data?.results ?? []).filter(
-    (item) => encounterId || item.subject_type === "patient",
-  );
+  const questionnaires = questionnairesQuery.data?.results ?? [];
   const questionnaire = questionnaireId
     ? questionnaires.find((item) => item.id === questionnaireId)
     : questionnaires[0];
@@ -540,11 +538,7 @@ function CreateReferralContent({
                     </div>
                   ) : !questionnaire ? (
                     <p className="text-sm text-muted-foreground">
-                      {t(
-                        encounterId
-                          ? "referral_no_request_form"
-                          : "referral_no_patient_request_form",
-                      )}
+                      {t("referral_no_request_form")}
                     </p>
                   ) : (
                     <>

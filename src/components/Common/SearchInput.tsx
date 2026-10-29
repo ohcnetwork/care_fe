@@ -125,17 +125,27 @@ const SearchInputFieldRenderer = ({
     return (
       <div className="flex w-full min-w-0 items-center gap-2">
         {searchTrigger}
-        <PhoneInput
-          name={selectedOption.key}
-          placeholder={selectedOption.placeholder}
-          value={searchValue}
-          onChange={handlePhoneChange}
-          className={cn("min-w-0 flex-1", inputClassName)}
-          autoFocus={autoFocus}
-          ref={inputRef}
-          {...prop}
-        />
-        {!isSingleOption && <KeyboardShortcutHint open={open} />}
+        <div className="relative min-w-0 flex-1">
+          <PhoneInput
+            name={selectedOption.key}
+            placeholder={selectedOption.placeholder}
+            value={searchValue}
+            onChange={handlePhoneChange}
+            className={cn(
+              "min-w-0",
+              !isSingleOption && "[&_input]:pr-20",
+              inputClassName,
+            )}
+            autoFocus={autoFocus}
+            ref={inputRef}
+            {...prop}
+          />
+          {!isSingleOption && (
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <KeyboardShortcutHint open={open} />
+            </div>
+          )}
+        </div>
       </div>
     );
   }
