@@ -55,8 +55,7 @@ function answerLabel(
 ): string {
   if (isCodedEnableWhenAnswer(answer)) return answer.display || answer.code;
   const option = target?.answer_option?.find(
-    (candidate) =>
-      !candidate.code && String(candidate.value) === String(answer),
+    (candidate) => String(candidate.value) === String(answer),
   );
   return option?.display || String(answer ?? "");
 }

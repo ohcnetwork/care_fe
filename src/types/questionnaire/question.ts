@@ -116,8 +116,9 @@ type EnableWhenString = {
   answer: string;
 };
 
-/** Coded choice targets (value set or coded answer options) are matched by
- *  `answer.code`; `display` is kept so the builder can label the rule. */
+/** Value-set choice targets are matched by `answer.system` and `answer.code`;
+ *  `display` is kept so the builder can label the rule. Fixed answer options
+ *  stay value-based: the backend does not persist their coding. */
 type EnableWhenCoding = {
   operator: "equals" | "not_equals";
   answer: Code;

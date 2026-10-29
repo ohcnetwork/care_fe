@@ -160,7 +160,11 @@ function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {
-  const answered = (response?.values ?? []).filter(entryIsAnswered);
+  // Coded rules only see entries that carry a coding, as on the backend.
+  const coded = isCodedEnableWhenAnswer(enableWhen.answer);
+  const answered = (response?.values ?? []).filter(
+    (v) => entryIsAnswered(v) && (!coded || !!v.coding),
+  );
 
   if (enableWhen.operator === "exists") {
     return enableWhen.answer === false
@@ -172,7 +176,7 @@ function evaluateEnableWhen(
 
   const normalizedAnswers = answered.map((v) => normalizeValue(v.value));
 
-  // Coded rules match the answer's coding by code; the rest compare values.
+  // Coded rules match the coding's system and code; the rest compare values.
   const matchesAnswer = (v: ResponseValue) =>
     isCodedEnableWhenAnswer(enableWhen.answer)
       ? v.coding?.code === enableWhen.answer.code &&
