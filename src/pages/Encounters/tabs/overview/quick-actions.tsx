@@ -30,13 +30,11 @@ import { FormDialog } from "./FormsDialog";
 
 interface QuickActionsProps extends React.ComponentProps<"div"> {
   showEmpty?: boolean;
-  returnPage?: string;
 }
 
 export const QuickActions = ({
   title,
   showEmpty: _showEmpty,
-  returnPage,
   ...props
 }: QuickActionsProps) => {
   const { t } = useTranslation();
@@ -53,15 +51,11 @@ export const QuickActions = ({
     selectedEncounterPermissions.canCreateReferral &&
     selectedEncounter?.id === selectedEncounterId &&
     selectedEncounter?.patient.id === patientId;
-  const formLink = (questionnaire: string) => {
-    const path = `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`;
-    return appendReferralNativeContext(
-      returnPage
-        ? `${path}?${new URLSearchParams({ return_page: returnPage })}`
-        : path,
+  const formLink = (questionnaire: string) =>
+    appendReferralNativeContext(
+      `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`,
       window.location.search,
     );
-  };
 
   if (!canWriteClinicalData && !canCreateReferral) return null;
 
@@ -165,7 +159,6 @@ export const QuickActions = ({
               />
               <FormDialog
                 subjectType="encounter"
-                returnPage={returnPage}
                 trigger={
                   <QuickAction
                     compact

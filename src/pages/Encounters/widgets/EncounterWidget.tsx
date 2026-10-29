@@ -1,5 +1,4 @@
 import { Blocks, ShieldAlert } from "lucide-react";
-import { useFullPath } from "raviger";
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,10 +25,7 @@ import { Locations } from "@/pages/Encounters/tabs/overview/summary-panel-detail
 import { ManageCareTeam } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/manage-care-team";
 import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import {
-  ENCOUNTER_WIDGET_TYPES,
-  encounterPageKeySchema,
-} from "@/types/workspace/encounterWorkspace";
+import { ENCOUNTER_WIDGET_TYPES } from "@/types/workspace/encounterWorkspace";
 
 import { EncounterReferralsWidget } from "./EncounterReferralsWidget";
 import { EncounterResponsesWidget } from "./EncounterResponsesWidget";
@@ -50,10 +46,6 @@ export function EncounterWidget({
   showEmpty = false,
 }: EncounterWidgetProps) {
   const { t } = useTranslation();
-  const fullPath = useFullPath();
-  const returnPage =
-    encounterPageKeySchema.safeParse(fullPath.split("/").pop()).data ??
-    "updates";
   const { widgets, loadingPlugins } = useCareAppEncounterWidgets();
   const {
     facilityId,
@@ -145,7 +137,7 @@ export function EncounterWidget({
 
   if (!canReadClinicalData) return noClinicalAccess;
 
-  const actionProps = { title, showEmpty, returnPage };
+  const actionProps = { title, showEmpty };
   switch (type) {
     case "quick_actions":
       return facilityId &&

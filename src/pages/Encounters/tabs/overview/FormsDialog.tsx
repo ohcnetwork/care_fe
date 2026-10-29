@@ -26,11 +26,9 @@ import careConfig from "@careConfig";
 export const FormDialog = ({
   subjectType,
   trigger,
-  returnPage,
 }: {
   subjectType: string;
   trigger?: React.ReactNode;
-  returnPage?: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -163,7 +161,7 @@ export const FormDialog = ({
                     onSelect={() => {
                       navigate(
                         appendReferralNativeContext(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}`,
                           window.location.search,
                         ),
                       );
