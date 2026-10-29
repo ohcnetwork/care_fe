@@ -293,10 +293,12 @@ export function useQuestionResponse(questionId: string) {
 }
 
 /** Every condition is evaluated against the root response map, matching
- *  the backend; row answers never shadow root answers. A hidden question
- *  keeps its answer in state but is not submitted, so a controller that is
- *  itself hidden (directly, or inside a hidden group) counts as unanswered:
- *  hiding A also hides C when C depends on B and B depends on A. */
+ *  the backend; row answers never shadow root answers. A question whose
+ *  own conditions fail keeps its answer in state but is not submitted (even
+ *  with `disabled_display: "protected"`, which only affects display), so a
+ *  controller that is itself disabled — directly, or inside a disabled
+ *  group — counts as unanswered: hiding A also hides C when C depends on B
+ *  and B depends on A. */
 export function isQuestionEnabledInState(
   question: Question,
   responses: Record<string, QuestionnaireResponse>,
@@ -327,9 +329,12 @@ function isEnabledByConditions(
         current && controllerShown;
         current = nodes?.get(current.id)?.parent
       )
-        controllerShown =
-          current.disabled_display === "protected" ||
-          isEnabledByConditions(current, responses, linkIndex, visiting);
+        controllerShown = isEnabledByConditions(
+          current,
+          responses,
+          linkIndex,
+          visiting,
+        );
       return evaluateEnableWhen(
         condition,
         controllerShown ? responses[controllerId] : undefined,
