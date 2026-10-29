@@ -2773,6 +2773,179 @@ test("studio picks a chart set and narrows its charts without emptying it", asyn
   ).toEqual({ plot: "abg-analysis" });
 });
 
+test("studio explains the tab limit beside Add tab and clears it after removal", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  const pages = Array.from({ length: 49 }, (_, index) => ({
+    kind: "custom",
+    key: `tab-${index}`,
+    title: `Tab ${index + 1}`,
+    columns: [{ span: 12, widgets: [] }],
+  }));
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages,
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  const addTab = page.getByRole("button", { name: "Add tab", exact: true });
+  const message =
+    "A workspace can have at most 50 tabs. Remove a tab before adding another.";
+  const explanation = page.getByRole("status").filter({ hasText: message });
+  await expect(addTab).toBeEnabled();
+  await expect(explanation).toHaveCount(0);
+
+  await addTab.click();
+  await page
+    .getByRole("menuitem", { name: "Immunizations", exact: true })
+    .click();
+  await expect(addTab).toBeDisabled();
+  await expect(addTab).toHaveAccessibleDescription(message);
+  for (const viewport of [
+    { width: 1440, height: 1000 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await explanation.scrollIntoViewIfNeeded();
+    await expect(explanation).toBeInViewport();
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect.poll(() => api.writes.length).toBe(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [...pages, { kind: "system", key: "immunizations" }],
+    },
+  });
+  await page.reload();
+  await expect(addTab).toBeDisabled();
+  await expect(addTab).toHaveAccessibleDescription(message);
+  await expect(explanation).toBeVisible();
+
+  await page.getByRole("button", { name: "Remove tab", exact: true }).click();
+  await page
+    .getByRole("alertdialog", { name: "Remove tab", exact: true })
+    .getByRole("button", { name: "Remove", exact: true })
+    .click();
+  await expect(addTab).toBeEnabled();
+  await expect(addTab).not.toHaveAttribute("aria-describedby");
+  await expect(explanation).toHaveCount(0);
+});
+
+for (const limit of ["column", "workspace"] as const) {
+  test(`studio explains the ${limit} section limit beside Add a section and clears it after removal`, async ({
+    page,
+  }) => {
+    const record = workspace("instance");
+    const widgets = Array.from({ length: 49 }, (_, index) => ({
+      type: "allergies",
+      title: `Allergy section ${index + 1}`,
+    }));
+    const pages = [
+      {
+        kind: "custom",
+        key: "ward",
+        title: "Ward",
+        columns: [
+          { span: 8, widgets },
+          { span: 4, widgets: [] },
+        ],
+      },
+      ...(limit === "workspace"
+        ? Array.from({ length: 3 }, (_, index) => ({
+            kind: "custom",
+            key: `extra-${index}`,
+            title: `Extra ${index + 1}`,
+            columns: [
+              {
+                span: 12,
+                widgets: Array.from({ length: 50 }, () => ({
+                  type: "allergies",
+                })),
+              },
+            ],
+          }))
+        : []),
+    ];
+    record.data.template = {
+      schema_version: 2,
+      surface: "encounter",
+      pages,
+    };
+    const api = await mockWorkspaceApi(page, { records: [record] });
+    await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+    const addMain = page.getByRole("button", {
+      name: "Add a section to Main",
+      exact: true,
+    });
+    const addSide = page.getByRole("button", {
+      name: "Add a section to Side",
+      exact: true,
+    });
+    const message =
+      "This column or workspace has reached its section limit (50 per column, 200 in total). Remove a section before adding another.";
+    const explanations = page.getByRole("status").filter({ hasText: message });
+    await expect(addMain).toBeEnabled();
+    await expect(addSide).toBeEnabled();
+    await expect(explanations).toHaveCount(0);
+
+    await addSection(page, "Main", "Allergies");
+    await expect(page.getByRole("article")).toHaveCount(50);
+    await expect(addMain).toBeDisabled();
+    await expect(addMain).toHaveAccessibleDescription(message);
+    if (limit === "workspace") {
+      await expect(addSide).toBeDisabled();
+      await expect(addSide).toHaveAccessibleDescription(message);
+      await expect(explanations).toHaveCount(2);
+    } else {
+      await expect(addSide).toBeEnabled();
+      await expect(addSide).not.toHaveAttribute("aria-describedby");
+      await expect(explanations).toHaveCount(1);
+    }
+    for (const viewport of [
+      { width: 1440, height: 1000 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      for (const explanation of await explanations.all()) {
+        await explanation.scrollIntoViewIfNeeded();
+        await expect(explanation).toBeInViewport();
+      }
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+    await expect.poll(() => api.writes.length).toBe(1);
+    expect(api.writes[0].body).toMatchObject({
+      template: {
+        pages: [
+          {
+            ...pages[0],
+            columns: [
+              { span: 8, widgets: [...widgets, { type: "allergies" }] },
+              { span: 4, widgets: [] },
+            ],
+          },
+          ...pages.slice(1),
+        ],
+      },
+    });
+    await page.reload();
+    await expect(addMain).toBeDisabled();
+    await expect(addMain).toHaveAccessibleDescription(message);
+    await expect(explanations).toHaveCount(limit === "workspace" ? 2 : 1);
+
+    await sectionAction(page, "Allergies", "Remove section");
+    await expect(page.getByRole("article")).toHaveCount(49);
+    await expect(addMain).toBeEnabled();
+    await expect(addSide).toBeEnabled();
+    await expect(addMain).not.toHaveAttribute("aria-describedby");
+    await expect(addSide).not.toHaveAttribute("aria-describedby");
+    await expect(explanations).toHaveCount(0);
+  });
+}
+
 test("studio flags full-width browsers in narrow columns and saves tab subsets as checkboxes", async ({
   page,
 }) => {

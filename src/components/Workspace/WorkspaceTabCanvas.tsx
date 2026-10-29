@@ -12,7 +12,7 @@ import {
   StretchHorizontal,
   Trash2,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,7 @@ export function WorkspaceTabCanvas({
   onAddSection,
 }: WorkspaceTabCanvasProps) {
   const { t } = useTranslation();
+  const id = useId();
   const { widgets: plugins, loadingPlugins } = useCareAppEncounterWidgets();
   const dragged = useRef<(WidgetSelection & { pageRevision: string }) | null>(
     null,
@@ -148,6 +149,9 @@ export function WorkspaceTabCanvas({
             const label = columnLabelKeys[columnIndex]
               ? t(columnLabelKeys[columnIndex])
               : t("workspace_builder_column", { number: columnIndex + 1 });
+            const sectionLimitReached =
+              !canAddSection || column.widgets.length >= 50;
+            const sectionLimitId = `${id}-section-limit-${columnIndex}`;
             const allHidden =
               column.widgets.length > 0 &&
               column.widgets.every(
@@ -465,8 +469,9 @@ export function WorkspaceTabCanvas({
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={
-                      disabled || !canAddSection || column.widgets.length >= 50
+                    disabled={disabled || sectionLimitReached}
+                    aria-describedby={
+                      sectionLimitReached ? sectionLimitId : undefined
                     }
                     onClick={() => onAddSection(columnIndex)}
                     aria-label={t("workspace_studio_add_section_to", {
@@ -481,6 +486,15 @@ export function WorkspaceTabCanvas({
                     <Plus className="size-4" />
                     {t("workspace_studio_add_section")}
                   </Button>
+                  {sectionLimitReached && (
+                    <p
+                      id={sectionLimitId}
+                      role="status"
+                      className="text-xs leading-relaxed text-soft-foreground"
+                    >
+                      {t("workspace_studio_section_limit")}
+                    </p>
+                  )}
                 </div>
               </section>
             );

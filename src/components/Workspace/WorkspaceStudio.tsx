@@ -315,6 +315,7 @@ export function WorkspaceStudio({
   if (removeTabTarget && !removeTab) setRemoveTabTarget(null);
   if (settingsTarget && !settingsWidget) setSettingsTarget(null);
   const busy = disabled || !settingsValid;
+  const tabLimitReached = pages.length >= 50;
 
   const commit = (next: string) => {
     if (disabled || next === value) return;
@@ -711,7 +712,10 @@ export function WorkspaceStudio({
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={busy || pages.length >= 50}
+                    disabled={busy || tabLimitReached}
+                    aria-describedby={
+                      tabLimitReached ? `${id}-tab-limit` : undefined
+                    }
                     className="w-full border-dashed shadow-none"
                   >
                     <Plus className="size-3.5" />
@@ -752,6 +756,15 @@ export function WorkspaceStudio({
                   })}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {tabLimitReached && (
+                <p
+                  id={`${id}-tab-limit`}
+                  role="status"
+                  className="mt-2 text-xs leading-relaxed text-soft-foreground"
+                >
+                  {t("workspace_studio_tab_limit")}
+                </p>
+              )}
               <p className="mt-3 hidden text-xs leading-relaxed text-placeholder-foreground lg:block">
                 {t("workspace_studio_tabs_hint")}
               </p>
