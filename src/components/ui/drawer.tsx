@@ -252,7 +252,7 @@ function DrawerSwipeHandle({
 }
 
 // ---------------------------------------------------------------------------
-// iOS keyboard tracking — iOS keeps the layout viewport fixed and pans the
+// iOS keyboard handling — iOS keeps the layout viewport fixed and pans the
 // visual viewport when the keyboard opens, so a bottom-anchored sheet ends up
 // partly out of frame. While the keyboard is open, the sheet is anchored to
 // the bottom of the visual viewport and capped to its height instead.
@@ -260,9 +260,49 @@ function DrawerSwipeHandle({
 const KEYBOARD_MIN_HEIGHT = 60;
 const KEYBOARD_SHEET_MARGIN = 16;
 
-function trackIOSKeyboardViewport(viewport: HTMLElement | null) {
+let iosPageLockCount = 0;
+let restoreIOSPage: (() => void) | null = null;
+
+// `overflow: hidden` does not stop iOS from scrolling the document to reveal a
+// focused input, which drags the page behind the drawer along. Pinning the
+// body in place is the only reliable way to keep it still. Counted so nested
+// drawers don't capture an already-pinned scroll position.
+function lockIOSPage() {
+  if (iosPageLockCount++ > 0) return;
+  const { body } = document;
+  const scrollY = window.scrollY;
+  const previous = {
+    position: body.style.position,
+    top: body.style.top,
+    left: body.style.left,
+    right: body.style.right,
+    width: body.style.width,
+  };
+  Object.assign(body.style, {
+    position: "fixed",
+    top: `-${scrollY}px`,
+    left: "0",
+    right: "0",
+    width: "100%",
+  });
+  restoreIOSPage = () => {
+    Object.assign(body.style, previous);
+    // Instant: a smooth-scrolling root would still read 0 when re-locked.
+    window.scrollTo({ top: scrollY, behavior: "instant" });
+  };
+}
+
+function unlockIOSPage() {
+  if (--iosPageLockCount > 0) return;
+  restoreIOSPage?.();
+  restoreIOSPage = null;
+}
+
+function setupIOSViewport(viewport: HTMLElement | null) {
   const visualViewport = window.visualViewport;
   if (!viewport || !visualViewport) return;
+
+  lockIOSPage();
 
   const update = () => {
     const covered = window.innerHeight - visualViewport.height;
@@ -291,6 +331,7 @@ function trackIOSKeyboardViewport(viewport: HTMLElement | null) {
   return () => {
     visualViewport.removeEventListener("resize", update);
     visualViewport.removeEventListener("scroll", update);
+    unlockIOSPage();
   };
 }
 
@@ -345,7 +386,7 @@ function DrawerContent({
       )}
       <KeyboardProvider>
         <DrawerPrimitive.Viewport
-          ref={isIOSDevice ? trackIOSKeyboardViewport : undefined}
+          ref={isIOSDevice ? setupIOSViewport : undefined}
           data-slot="drawer-viewport"
           data-modal={modal}
           className={cn(
