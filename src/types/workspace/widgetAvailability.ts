@@ -4,7 +4,10 @@ import {
 } from "@/types/emr/encounter/encounter";
 
 import type { EncounterWorkspaceWidget } from "./encounterWorkspace";
-import type { CoreWidgetConfigType } from "./widgetConfigSchemas";
+import {
+  encounterSummaryConfigSchema,
+  type CoreWidgetConfigType,
+} from "./widgetConfigSchemas";
 
 export interface WorkspaceAvailabilityContext {
   facilityId?: string;
@@ -101,6 +104,19 @@ export function getWidgetRequirements(
     : clinical;
 }
 
+/** A summary narrowed to its actions tab renders only for editable encounters. */
+function widgetInstanceRequirements(
+  widget: EncounterWorkspaceWidget,
+  requiresActiveEncounter: boolean,
+): WidgetRequirements {
+  if (widget.type === "encounter_summary") {
+    const tabs = encounterSummaryConfigSchema.safeParse(widget.config).data
+      ?.tabs;
+    if (tabs?.length === 1 && tabs[0] === "actions") return action;
+  }
+  return getWidgetRequirements(widget.type, requiresActiveEncounter);
+}
+
 export type WidgetHiddenReason =
   | "workspace_hidden_by_status"
   | "workspace_requires_encounter"
@@ -127,8 +143,8 @@ export function getWidgetAvailability(
   requiresActiveEncounter = false,
 ): WidgetAvailability {
   const encounter = context.selectedEncounter;
-  const requirements = getWidgetRequirements(
-    widget.type,
+  const requirements = widgetInstanceRequirements(
+    widget,
     requiresActiveEncounter,
   );
   if (requirements.encounter !== "none" && !encounter) {

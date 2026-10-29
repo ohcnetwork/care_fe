@@ -161,6 +161,32 @@ test("active-only widgets hide for closed encounters without an explicit status 
   );
 });
 
+test("an actions-only summary follows editable-encounter requirements", () => {
+  const actionsOnly = {
+    type: "encounter_summary",
+    config: { tabs: ["actions"] },
+  };
+  assert.equal(getWidgetAvailability(actionsOnly, active).state, "visible");
+  assert.deepEqual(getWidgetAvailability(actionsOnly, closed), {
+    state: "hidden",
+    reason: "workspace_auto_hides_closed",
+  });
+  assert.deepEqual(
+    getWidgetAvailability(actionsOnly, {
+      ...active,
+      canWriteClinicalData: false,
+    }),
+    { state: "hidden", reason: "workspace_requires_editable_encounter" },
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "encounter_summary", config: { tabs: ["actions", "reports"] } },
+      closed,
+    ).state,
+    "visible",
+  );
+});
+
 test("referral creation keeps quick actions on closed encounters", () => {
   const referrer = {
     ...closed,

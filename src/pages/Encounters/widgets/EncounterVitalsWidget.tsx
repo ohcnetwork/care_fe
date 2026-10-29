@@ -20,6 +20,7 @@ import {
   ObservationListRead,
   ObservationPlotConfig,
   ObservationStatus,
+  QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { vitalsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
@@ -106,10 +107,12 @@ export function EncounterVitalsWidget({
   );
 }
 
-// The analysis endpoint returns the newest readings per code, so one request
-// resolves every tile regardless of how often other vitals were charted. A
-// few extra rows absorb the difference between entry order and effective time.
-const READINGS_PER_CODE = 3;
+// The analysis endpoint returns the most recently modified readings per code,
+// so one request resolves every tile regardless of how often other vitals were
+// charted. It cannot exclude entered-in-error rows, and marking one bumps it to
+// the top, so extra rows leave room for corrections and back-dated entries
+// while still yielding the two valid readings each tile needs.
+const READINGS_PER_CODE = 8;
 
 interface VitalReading {
   code: Code;
@@ -141,6 +144,10 @@ function latestVitalReadings(
   });
 }
 
+function codingText(value: QuestionnaireSubmitResultValue) {
+  return value.coding?.display || value.coding?.code || undefined;
+}
+
 function readingValue(observation: ObservationListRead) {
   const raw = observation.value.value;
   if (raw !== null && raw !== undefined && raw !== "") {
@@ -151,9 +158,12 @@ function readingValue(observation: ObservationListRead) {
       unit: observation.value.unit?.code,
     };
   }
+  // Coded answers have no numeric value, so they never produce a delta.
+  const coded = codingText(observation.value);
+  if (coded) return { text: coded, numeric: undefined, unit: undefined };
   const components =
     observation.component
-      ?.map((component) => component.value.value)
+      ?.map((component) => component.value.value || codingText(component.value))
       .filter((value) => value !== null && value !== undefined && value !== "")
       .map(String) ?? [];
   return {

@@ -130,12 +130,9 @@ export function WorkspaceSchemaFields({
                     : []
                 }
                 disabled={disabled || field.readOnly}
-                onChange={(next) =>
-                  form.setValue(
-                    `config.${field.name}`,
-                    next.length ? next : undefined,
-                  )
-                }
+                // Keep an emptied selection so validation rejects it; omission
+                // would silently restore every option.
+                onChange={(next) => form.setValue(`config.${field.name}`, next)}
               />
             ) : (
               <SchemaField
