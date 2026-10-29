@@ -334,8 +334,6 @@ function DrawerContent({
               "data-[swipe-direction=right]:after:left-full data-[swipe-direction=up]:after:bottom-full",
               // Sizing
               "[--drawer-content-height:var(--drawer-height,auto)]",
-              // Room above the on-screen keyboard; callers use it in their own max-h.
-              "[--drawer-available-height:calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-1rem)]",
               "data-[swipe-axis=x]:[--drawer-content-width:75%] data-[swipe-axis=y]:[--drawer-content-max-height:calc(100dvh-6rem)]",
               "data-[swipe-axis=y]:data-snap-points:[--drawer-content-height:100dvh]",
               "data-[swipe-axis=x]:sm:[--drawer-content-width:24rem]",
@@ -363,6 +361,7 @@ function DrawerContent({
               "data-[swipe-axis=x]:inset-y-0 data-[swipe-axis=x]:flex-row",
               // Direction: down
               "data-[swipe-direction=down]:bottom-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:origin-bottom",
+              "data-[swipe-direction=down]:before:pointer-events-none data-[swipe-direction=down]:before:absolute data-[swipe-direction=down]:before:inset-x-0 data-[swipe-direction=down]:before:top-full data-[swipe-direction=down]:before:h-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:before:bg-popover",
               "data-[swipe-direction=down]:[--closed-transform:translate3d(0,calc(100%+var(--drawer-inset,0px)+2px),0)]",
               "data-[swipe-direction=down]:[--translate-y:calc(var(--drawer-snap-point-offset,0px)+var(--drawer-swipe-movement-y)-var(--stack-peek-offset)-(var(--stack-shrink)*var(--stack-height)))]",
               // Direction: up
@@ -389,7 +388,7 @@ function DrawerContent({
                   "flex min-h-0 flex-1 flex-col overflow-hidden overscroll-contain rounded-[inherit]",
                   // Callers override the popup's max-height, so the room left
                   // above the keyboard is enforced on the content instead.
-                  "group-data-[swipe-axis=y]/drawer-popup:max-h-[calc(var(--drawer-available-height)-2rem)]",
+                  "group-data-[swipe-axis=y]/drawer-popup:max-h-[calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-3rem)]",
                   "transition-opacity duration-300 ease-[cubic-bezier(0.45,1.005,0,1.005)] select-text",
                   "group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100",
                   "group-data-swiping/drawer-popup:select-none",

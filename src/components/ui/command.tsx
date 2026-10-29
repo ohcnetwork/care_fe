@@ -74,6 +74,12 @@ function CommandDialog({
 }) {
   const { t } = useTranslation();
   const isDesktop = !useIsMobile();
+  // A drawer focuses its popup by default. iOS only opens the keyboard when the
+  // input is focused as the drawer mounts (what native autoFocus does), not from
+  // Base UI's deferred initial focus, so focus it here at mount.
+  const focusSearchInput = React.useCallback((popup: HTMLDivElement | null) => {
+    popup?.querySelector("input")?.focus({ preventScroll: true });
+  }, []);
   const resolvedTitle = title ?? t("search");
   const resolvedDescription = description ?? t("search_encounter_command");
 
@@ -105,8 +111,9 @@ function CommandDialog({
     <Drawer open={open} onOpenChange={onOpenChange}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
+        ref={focusSearchInput}
         className={cn(
-          "h-[80dvh] max-h-[min(36rem,var(--drawer-available-height))] p-1.5",
+          "h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
           className,
         )}
       >
