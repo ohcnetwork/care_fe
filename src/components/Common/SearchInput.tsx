@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -24,7 +18,6 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Popover,
@@ -60,14 +53,6 @@ interface SearchInputProps extends Omit<
   autoFocus?: boolean;
 }
 
-const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
-  const { t } = useTranslation();
-  return open ? (
-    <Kbd>{t("esc")}</Kbd>
-  ) : (
-    <ShortcutBadge actionId="search-input-shortcut" />
-  );
-};
 const SearchInputFieldRenderer = ({
   selectedOption,
   searchValue,
@@ -76,7 +61,6 @@ const SearchInputFieldRenderer = ({
   inputClassName,
   autoFocus,
   isSingleOption,
-  open,
   onSearch,
   searchTrigger,
   ...prop
@@ -88,10 +72,18 @@ const SearchInputFieldRenderer = ({
   inputClassName?: string;
   autoFocus?: boolean;
   isSingleOption: boolean;
-  open: boolean;
   onSearch: (key: string, value: string) => void;
   searchTrigger?: React.ReactNode;
 }) => {
+  const { t } = useTranslation();
+  const hasValue = searchValue.length !== 0;
+
+  const handleClear = () => {
+    setSearchValue("");
+    onSearch(selectedOption.key, "");
+    inputRef?.current?.focus();
+  };
+
   const handlePhoneChange = useCallback(
     (value: string | undefined) => {
       const phoneValue = value || "";
@@ -133,17 +125,33 @@ const SearchInputFieldRenderer = ({
             onChange={handlePhoneChange}
             className={cn(
               "min-w-0",
-              !isSingleOption && "[&_input]:pr-20",
+              (!isSingleOption || hasValue) && "[&_input]:pr-20",
               inputClassName,
             )}
             autoFocus={autoFocus}
             ref={inputRef}
             {...prop}
           />
-          {!isSingleOption && (
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <KeyboardShortcutHint open={open} />
+          {hasValue ? (
+            <div className="absolute inset-y-0 right-1.5 flex items-center">
+              <InputGroupButton
+                size="icon-sm"
+                aria-label={t("clear_search")}
+                onClick={handleClear}
+              >
+                <CareIcon icon="l-times" />
+              </InputGroupButton>
             </div>
+          ) : (
+            !isSingleOption && (
+              <div
+                data-shortcut-target
+                onClick={() => inputRef?.current?.focus()}
+                className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center"
+              >
+                <ShortcutBadge actionId="search-input-shortcut" />
+              </div>
+            )
           )}
         </div>
       </div>
@@ -164,10 +172,22 @@ const SearchInputFieldRenderer = ({
       {searchTrigger && (
         <InputGroupAddon align="inline-start">{searchTrigger}</InputGroupAddon>
       )}
-      {!isSingleOption && (
+      {hasValue ? (
         <InputGroupAddon align="inline-end">
-          <KeyboardShortcutHint open={open} />
+          <InputGroupButton
+            size="icon-sm"
+            aria-label={t("clear_search")}
+            onClick={handleClear}
+          >
+            <CareIcon icon="l-times" />
+          </InputGroupButton>
         </InputGroupAddon>
+      ) : (
+        !isSingleOption && (
+          <InputGroupAddon align="inline-end" data-shortcut-target>
+            <ShortcutBadge actionId="search-input-shortcut" />
+          </InputGroupAddon>
+        )
       )}
     </InputGroup>
   );
@@ -194,10 +214,11 @@ export default function SearchInput({
   );
   const [selectedOptionIndex, setSelectedOptionIndex] =
     useState(initialOptionIndex);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState(
+    options?.[initialOptionIndex]?.value ?? "",
+  );
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [focusedIndex, setFocusedIndex] = useState(0);
 
   // Safe access to options
   const safeOptions = useMemo(() => options || [], [options]);
@@ -213,7 +234,6 @@ export default function SearchInput({
       setSelectedOptionIndex(index);
       const option = safeOptions[index];
       setSearchValue(option.value || "");
-      setFocusedIndex(safeOptions.findIndex((op) => op.key === option.key));
       setOpen(false);
       inputRef.current?.focus();
 
@@ -226,76 +246,20 @@ export default function SearchInput({
     [onSearch, safeOptions, onFieldChange],
   );
 
-  useEffect(() => {
-    if (selectedOption) {
-      setSearchValue(selectedOption.value);
+  const selectedOptionValue = selectedOption?.value;
+
+  const [prevSelectedOptionValue, setPrevSelectedOptionValue] =
+    useState(selectedOptionValue);
+  if (selectedOptionValue !== prevSelectedOptionValue) {
+    setPrevSelectedOptionValue(selectedOptionValue);
+    if (selectedOptionValue !== undefined) {
+      setSearchValue(selectedOptionValue);
     }
-  }, [selectedOption?.value]);
+  }
 
   const unselectedOptions = safeOptions.filter(
     (option) => option.key !== selectedOption?.key,
   );
-
-  useEffect(() => {
-    if (open) {
-      setFocusedIndex(0);
-    }
-  }, [open]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        e.stopPropagation();
-        inputRef.current?.focus();
-        setOpen(true);
-      }
-
-      if (e.key === "Escape") {
-        inputRef.current?.focus();
-        if (open) {
-          setOpen(false);
-        } else {
-          setSearchValue("");
-        }
-      }
-
-      if (open) {
-        if (e.key === "ArrowDown") {
-          setFocusedIndex((prevIndex) =>
-            prevIndex === unselectedOptions.length - 1 ? 0 : prevIndex + 1,
-          );
-        } else if (e.key === "ArrowUp") {
-          setFocusedIndex((prevIndex) =>
-            prevIndex === 0 ? unselectedOptions.length - 1 : prevIndex - 1,
-          );
-        } else if (e.key === "Enter") {
-          if (focusedIndex >= 0 && focusedIndex < unselectedOptions.length) {
-            const selectedOptionIndex = options.findIndex(
-              (option) => option.key === unselectedOptions[focusedIndex].key,
-            );
-            handleOptionChange(selectedOptionIndex);
-          }
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [
-    focusedIndex,
-    open,
-    handleOptionChange,
-    safeOptions,
-    unselectedOptions,
-    options,
-  ]);
-
-  useEffect(() => {
-    if (autoFocus) {
-      inputRef.current?.focus();
-    }
-  }, [autoFocus, open, selectedOptionIndex]);
 
   if (!hasOptions) {
     return (
@@ -308,18 +272,11 @@ export default function SearchInput({
   const searchTrigger = !isSingleOption && !hideSearchButton && (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <InputGroupButton
-          size="icon-xs"
-          aria-label={t("search_by")}
-          onClick={() => setOpen(true)}
-        >
+        <InputGroupButton size="icon-xs" aria-label={t("search_by")}>
           <CareIcon icon="l-search" />
         </InputGroupButton>
       </PopoverTrigger>
-      <PopoverContent
-        className="p-0"
-        onEscapeKeyDown={(event) => event.preventDefault()}
-      >
+      <PopoverContent className="p-0">
         <Command>
           <CommandList>
             <CommandGroup heading={t("search_by")}>
@@ -339,7 +296,7 @@ export default function SearchInput({
             </CommandGroup>
             <Separator />
             <CommandGroup heading={t("choose_other_search_type")}>
-              {unselectedOptions.map((option, index) => (
+              {unselectedOptions.map((option) => (
                 <CommandItem
                   key={option.key}
                   onSelect={() =>
@@ -349,17 +306,8 @@ export default function SearchInput({
                       ),
                     )
                   }
-                  className={cn(
-                    focusedIndex === index &&
-                      "bg-accent text-accent-foreground",
-                  )}
-                  onMouseEnter={() => setFocusedIndex(index)}
-                  onMouseLeave={() => setFocusedIndex(-1)}
                 >
                   <span className="flex-1">{t(option.display)}</span>
-                  {focusedIndex === index && (
-                    <Kbd title={t("press_enter_to_select")}>↵</Kbd>
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -379,7 +327,6 @@ export default function SearchInput({
         inputClassName={inputClassName}
         autoFocus={autoFocus}
         isSingleOption={isSingleOption}
-        open={open}
         onSearch={onSearch}
         searchTrigger={searchTrigger}
         {...props}
@@ -395,25 +342,15 @@ export default function SearchInput({
               }
               aria-pressed={selectedOption.key === option.key}
               size="xs"
-              className={buttonClassName}
+              className={cn(
+                buttonClassName,
+                "aria-pressed:bg-primary-700/10 aria-pressed:hover:bg-primary-700/20 aria-pressed:text-primary-700 aria-pressed:hover:text-primary-900",
+              )}
             >
               {t(option.display)}
             </Button>
           ))}
         </div>
-      )}
-      {searchValue.length !== 0 && !isSingleOption && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSearchValue("");
-            inputRef.current?.focus();
-          }}
-        >
-          <CareIcon icon="l-times" />
-          {t("clear_search")}
-        </Button>
       )}
     </div>
   );

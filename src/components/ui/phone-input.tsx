@@ -30,7 +30,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 function getMaxDigits(countryCode: CountryCode): number {
   const example = getExampleNumber(countryCode, examples);
@@ -78,6 +77,7 @@ function PhoneInput({
       <RPNInput.default
         className={cn(
           "PhoneInput",
+          "overflow-clip",
           className,
           value && !RPNInput.isValidPhoneNumber(value)
             ? "ring-destructive"
@@ -203,7 +203,7 @@ const CountrySelect = ({
   onChange,
 }: CountrySelectProps) => {
   const { t } = useTranslation();
-  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
+  const listRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const handleCountrySelect = (country: RPNInput.Country) => {
@@ -239,7 +239,7 @@ const CountrySelect = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64"
+        className="p-2 sm:p-0 w-[--anchor-width] min-w-64 overflow-clip"
         align="start"
         sideOffset={5}
       >
@@ -248,37 +248,26 @@ const CountrySelect = ({
             value={searchValue}
             onValueChange={(value) => {
               setSearchValue(value);
-              setTimeout(() => {
-                if (scrollAreaRef.current) {
-                  const viewportElement = scrollAreaRef.current.querySelector(
-                    '[data-slot="scroll-area-viewport"]',
-                  );
-                  if (viewportElement) {
-                    viewportElement.scrollTop = 0;
-                  }
-                }
-              }, 0);
+              listRef.current?.scrollTo({ top: 0 });
             }}
             placeholder={t("search_country")}
             className="border-none shadow-none outline-hidden ring-0"
           />
-          <CommandList>
-            <ScrollArea ref={scrollAreaRef}>
-              <CommandEmpty>{t("no_country_found")}</CommandEmpty>
-              <CommandGroup>
-                {countryList.map(({ value, label }) =>
-                  value ? (
-                    <CountrySelectOption
-                      key={value}
-                      country={value}
-                      countryName={label}
-                      selectedCountry={selectedCountry}
-                      onChange={handleCountrySelect}
-                    />
-                  ) : null,
-                )}
-              </CommandGroup>
-            </ScrollArea>
+          <CommandList ref={listRef}>
+            <CommandEmpty>{t("no_country_found")}</CommandEmpty>
+            <CommandGroup>
+              {countryList.map(({ value, label }) =>
+                value ? (
+                  <CountrySelectOption
+                    key={value}
+                    country={value}
+                    countryName={label}
+                    selectedCountry={selectedCountry}
+                    onChange={handleCountrySelect}
+                  />
+                ) : null,
+              )}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
