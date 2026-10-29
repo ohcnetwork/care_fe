@@ -211,16 +211,13 @@ function useUserPreferences(facilityId?: string) {
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      if (
-        getLinksForFacility(facilityQuickLinks.custom_links, link.facilityId)
-          .length >= MAX_QUICK_LINKS
-      ) {
+      if (customLinks.length >= MAX_QUICK_LINKS) {
         return false;
       }
       updatePreferences({ type: ActionType.ADD_CUSTOM_LINK, payload: link });
       return true;
     },
-    [facilityQuickLinks.custom_links, updatePreferences],
+    [customLinks, updatePreferences],
   );
 
   const removeCustomLink = useCallback(
