@@ -524,7 +524,6 @@ export function EncounterCommandDialog({
             placeholder={t("search_encounter_command")}
             className="text-base border-none focus:ring-0 sm:text-sm"
             onValueChange={setSearch}
-            autoFocus={true}
           />
         </div>
         <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">

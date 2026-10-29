@@ -19,7 +19,6 @@ import {
   type RenderProp,
 } from "@/components/ui/overlay-compat";
 import { cn } from "@/lib/utils";
-import { isIOSDevice } from "@/Utils/utils";
 
 // ---------------------------------------------------------------------------
 // Direction compat shim (vaul "bottom"/"top" → Base UI "down"/"up")
@@ -83,7 +82,7 @@ function Drawer({
   snapPoints,
   swipeDirection = "down",
   direction, // backwards compat with vaul
-  repositionInputs = !isIOSDevice,
+  repositionInputs = true,
   onOpenChange,
   ...props
 }: DrawerPrimitive.Root.Props & {
