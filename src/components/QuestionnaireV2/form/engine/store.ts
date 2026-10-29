@@ -327,12 +327,9 @@ function isEnabledByConditions(
         current && controllerShown;
         current = nodes?.get(current.id)?.parent
       )
-        controllerShown = isEnabledByConditions(
-          current,
-          responses,
-          linkIndex,
-          visiting,
-        );
+        controllerShown =
+          current.disabled_display === "protected" ||
+          isEnabledByConditions(current, responses, linkIndex, visiting);
       return evaluateEnableWhen(
         condition,
         controllerShown ? responses[controllerId] : undefined,
