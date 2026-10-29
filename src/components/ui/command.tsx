@@ -10,6 +10,7 @@ import * as React from "react";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -27,12 +28,15 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { CheckIcon, SearchIcon } from "lucide-react";
+import { CheckIcon, SearchIcon, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const CommandDialogContext = React.createContext(false);
 
 function Command({
   className,
@@ -42,7 +46,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden rounded-xl!",
+        "bg-popover text-popover-foreground flex size-full flex-col overflow-hidden",
         "in-data-[slot=drawer-content]:h-auto! in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
         className,
       )}
@@ -79,16 +83,19 @@ function CommandDialog({
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent
           className={cn(
-            "bg-foreground/10 top-1/3 translate-y-0 overflow-hidden rounded-xl! p-1.5",
+            "bg-foreground/10 top-1/4 translate-y-0 overflow-hidden p-1.5",
             className,
           )}
-          innerClassName="p-1 md:p-1"
+          innerClassName="bg-background grid gap-4 rounded-lg p-1 text-sm"
+          showCloseButton={false}
         >
           <DialogHeader className="sr-only" showCloseButton={false}>
             <DialogTitle>{resolvedTitle}</DialogTitle>
             <DialogDescription>{resolvedDescription}</DialogDescription>
           </DialogHeader>
-          <Command>{children}</Command>
+          <CommandDialogContext.Provider value={true}>
+            <Command>{children}</Command>
+          </CommandDialogContext.Provider>
         </DialogContent>
       </Dialog>
     );
@@ -99,13 +106,15 @@ function CommandDialog({
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         className={cn(
-          "inset-x-0 top-0 bottom-0 mt-0! flex h-dvh! max-h-dvh! flex-col rounded-none! p-1.5",
+          "h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
           className,
         )}
       >
-        <DrawerHeader className="sr-only">
+        <DrawerHeader className="pb-2 pl-1" showCloseButton>
           <DrawerTitle>{resolvedTitle}</DrawerTitle>
-          <DrawerDescription>{resolvedDescription}</DrawerDescription>
+          <DrawerDescription className="sr-only">
+            {resolvedDescription}
+          </DrawerDescription>
         </DrawerHeader>
         <Command>{children}</Command>
       </DrawerContent>
@@ -123,6 +132,8 @@ function CommandInput({
   wrapperClassName?: string;
 }) {
   const innerRef = React.useRef<HTMLInputElement>(null);
+  const isDesktopCommandDialog = React.useContext(CommandDialogContext);
+  const { t } = useTranslation();
 
   React.useImperativeHandle(
     ref,
@@ -143,9 +154,9 @@ function CommandInput({
   return (
     <div
       data-slot="command-input-wrapper"
-      className={cn("w-full shrink-0 px-1 pt-4 pb-0 md:pt-1", wrapperClassName)}
+      className={cn("w-full shrink-0 px-1 pt-2 pb-2 md:pt-1", wrapperClassName)}
     >
-      <InputGroup className="border-input/30 bg-input/30 rounded-lg shadow-none has-[[data-slot=command-input]:focus-visible]:border-ring has-[[data-slot=command-input]:focus-visible]:ring-3 has-[[data-slot=command-input]:focus-visible]:ring-ring/50">
+      <InputGroup className="border-input/30 bg-input/30 rounded-sm shadow-none has-[[data-slot=command-input]:focus-visible]:border-ring has-[[data-slot=command-input]:focus-visible]:ring-3 has-[[data-slot=command-input]:focus-visible]:ring-ring/50">
         <CommandPrimitive.Input ref={innerRef} {...props} asChild>
           <InputGroupInput
             data-slot="command-input"
@@ -153,8 +164,21 @@ function CommandInput({
           />
         </CommandPrimitive.Input>
         <InputGroupAddon>
-          <SearchIcon className="size-4 shrink-0 opacity-50" />
+          <SearchIcon className="opacity-50 size-4 shrink-0" />
         </InputGroupAddon>
+        {isDesktopCommandDialog && (
+          <InputGroupAddon align="inline-end">
+            <DialogClose asChild>
+              <InputGroupButton
+                variant="ghost"
+                size="icon-xs"
+                aria-label={t("close")}
+              >
+                <XIcon />
+              </InputGroupButton>
+            </DialogClose>
+          </InputGroupAddon>
+        )}
       </InputGroup>
     </div>
   );
@@ -168,8 +192,8 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
-        "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
+        "max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+        "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1 in-data-[slot=drawer-content]:overscroll-contain",
         className,
       )}
       {...props}
@@ -228,7 +252,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item data-[selected=true]:bg-muted data-[selected=true]:text-foreground data-[selected=true]:**:[svg]:text-foreground relative flex min-h-(--command-item-min-height) cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [--command-item-min-height:--spacing(12)] md:[--command-item-min-height:--spacing(10)] in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/command-item data-[selected=true]:bg-muted data-[selected=true]:text-foreground data-[selected=true]:**:[svg]:text-foreground relative flex min-h-(--command-item-min-height) cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none [--command-item-min-height:--spacing(12)] md:[--command-item-min-height:--spacing(10)] in-data-[slot=dialog-content]:rounded-sm data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

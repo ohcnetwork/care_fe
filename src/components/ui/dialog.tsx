@@ -166,7 +166,7 @@ function DialogContent({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 z-20"
+                className="absolute z-20 top-2 right-2"
               >
                 <XIcon />
                 <span className="sr-only">{t("close")}</span>
@@ -246,7 +246,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-base leading-none font-semibold", className)}
       {...props}
     />
   );

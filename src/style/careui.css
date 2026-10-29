@@ -67,7 +67,7 @@
   --inverse-border: var(--color-white);
 
   --input: var(--color-neutral-300);
-  --ring: --alpha(var(--color-indigo-500) / 75%);
+  --ring: --alpha(var(--color-primary-600) / 75%);
 
   --chart-1: var(--color-orange-600);
   --chart-2: var(--color-primary-600);
@@ -82,7 +82,7 @@
   --sidebar-accent: var(--color-neutral-200);
   --sidebar-accent-foreground: var(--color-neutral-950);
   --sidebar-border: var(--color-neutral-200);
-  --sidebar-ring: var(--color-indigo-400);
+  --sidebar-ring: var(--color-primary-500);
 }
 
 .dark {
@@ -126,7 +126,7 @@
   --inverse-border: var(--color-neutral-50);
 
   --input: --alpha(var(--color-white) / 15%);
-  --ring: --alpha(var(--color-indigo-500) / 75%);
+  --ring: --alpha(var(--color-primary-600) / 75%);
 
   --chart-1: var(--color-blue-700);
   --chart-2: var(--color-green-500);
@@ -141,7 +141,7 @@
   --sidebar-accent: var(--color-neutral-800);
   --sidebar-accent-foreground: var(--color-neutral-50);
   --sidebar-border: --alpha(var(--color-white) / 12%);
-  --sidebar-ring: var(--color-indigo-400);
+  --sidebar-ring: var(--color-primary-500);
 }
 
 /* ── Protanopia & Deuteranopia ────────────────────────────────────────────
@@ -411,7 +411,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply font-sans antialiased bg-background text-foreground;
   }
   html {
     @apply font-sans;
@@ -430,11 +430,8 @@
 }
 
 @layer components {
-  .sidebar-content-scroll {
-    --sidebar-content-mask-start: rgb(0 0 0 / 1);
-    --sidebar-content-mask-end: rgb(0 0 0 / 1);
-    --sidebar-content-fade-size: --spacing(7);
-
+  .sidebar-content-scroll,
+  [data-slot="command-list"] {
     scrollbar-color: color-mix(
         in oklch,
         var(--sidebar-foreground) 32%,
@@ -443,6 +440,13 @@
       transparent;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
+  }
+
+  .sidebar-content-scroll {
+    --sidebar-content-mask-start: rgb(0 0 0 / 1);
+    --sidebar-content-mask-end: rgb(0 0 0 / 1);
+    --sidebar-content-fade-size: --spacing(7);
+
     -webkit-mask-image: linear-gradient(
       to bottom,
       var(--sidebar-content-mask-start) 0,
@@ -467,15 +471,18 @@
     --sidebar-content-mask-end: rgb(0 0 0 / 0);
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar {
+  .sidebar-content-scroll::-webkit-scrollbar,
+  [data-slot="command-list"]::-webkit-scrollbar {
     width: --spacing(2);
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar-track {
+  .sidebar-content-scroll::-webkit-scrollbar-track,
+  [data-slot="command-list"]::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .sidebar-content-scroll::-webkit-scrollbar-thumb {
+  .sidebar-content-scroll::-webkit-scrollbar-thumb,
+  [data-slot="command-list"]::-webkit-scrollbar-thumb {
     background-clip: content-box;
     background-color: color-mix(
       in oklch,
@@ -808,10 +815,10 @@
     bottom: var(--hit-area-b, 0px);
     left: var(--hit-area-l, 0px);
     pointer-events: inherit;
-    @apply border border-dashed border-blue-500 bg-blue-500/10;
+    @apply border border-blue-500 border-dashed bg-blue-500/10;
   }
   &:hover::before {
-    @apply border border-dashed border-green-500 bg-green-500/10;
+    @apply border border-green-500 border-dashed bg-green-500/10;
   }
 }
 

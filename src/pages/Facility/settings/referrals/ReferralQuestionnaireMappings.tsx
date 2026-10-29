@@ -61,7 +61,7 @@ export function ReferralQuestionnaireMappings({
       queryParams: {
         title: search || undefined,
         status: "active",
-        subject_type: "patient,encounter",
+        subject_type: "referral",
         facility_or_instance: facilityId,
         limit: 50,
       },
@@ -69,7 +69,7 @@ export function ReferralQuestionnaireMappings({
   });
   const options = (data?.results ?? []).filter(
     (form) =>
-      ["patient", "encounter"].includes(form.subject_type) &&
+      form.subject_type === "referral" &&
       !value.some((selected) => selected.id === form.id),
   );
 

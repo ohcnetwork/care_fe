@@ -237,7 +237,7 @@ function DrawerSwipeHandle({
         "group-data-[swipe-direction=left]/drawer-popup:order-last group-data-[swipe-direction=left]/drawer-popup:justify-start",
         "group-data-[swipe-direction=right]/drawer-popup:justify-end",
         "group-data-[swipe-direction=up]/drawer-popup:order-last group-data-[swipe-direction=up]/drawer-popup:items-start",
-        "after:bg-muted after:block after:shrink-0 after:rounded-full",
+        "after:bg-strong-background after:block after:shrink-0 after:rounded-full",
         "group-data-[swipe-axis=x]/drawer-popup:after:h-25 group-data-[swipe-axis=x]/drawer-popup:after:w-1.5",
         "group-data-[swipe-axis=y]/drawer-popup:after:h-1.5 group-data-[swipe-axis=y]/drawer-popup:after:w-25",
         "active:cursor-grabbing",
@@ -429,7 +429,7 @@ function DrawerHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2"
+            className="absolute top-0 right-0"
           >
             <XIcon />
             <span className="sr-only">{t("close")}</span>
@@ -484,7 +484,7 @@ function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("text-foreground font-medium", className)}
+      className={cn("text-base text-foreground font-semibold", className)}
       {...props}
     />
   );
