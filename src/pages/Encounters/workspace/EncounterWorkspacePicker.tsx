@@ -1,5 +1,5 @@
 import { Spinner } from "@/components/ui/spinner";
-import { Check } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +34,7 @@ interface EncounterWorkspacePickerProps {
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
-  onSelect: (workspace: WorkspaceRead) => void;
+  onSelect: (workspace: WorkspaceRead | null) => void;
   isSaving: boolean;
   saveError: boolean;
   encounterClass?: EncounterClass;
@@ -92,15 +92,31 @@ export function EncounterWorkspacePicker({
       </Tooltip>
       <PopoverContent
         align="end"
-        className="w-80 max-w-[calc(100vw-2rem)] p-0"
+        className="w-80 max-w-[calc(100vw-2rem)] p-0 gap-1 overflow-clip"
         aria-label={t("encounter_workspace")}
       >
         <div className="border-b px-3 py-2.5">
-          <h2 className="text-sm font-semibold">{t("encounter_workspace")}</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold">
+              {t("encounter_workspace")}
+            </h2>
+            {workspaceId && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                disabled={busy}
+                onClick={() => onSelect(null)}
+              >
+                <RotateCcw className="size-3" aria-hidden="true" />
+                {t("reset_to_default")}
+              </Button>
+            )}
+          </div>
           <p className="mt-1 truncate text-xs text-gray-700">
             {t("encounter_workspace_current", { name: currentName })}
           </p>
-          <p className="mt-0.5 text-xs text-gray-500">
+          <p className="text-xs text-gray-500">
             {t("encounter_workspace_picker_hint", {
               encounterClass: encounterClass
                 ? t(`encounter_class__${encounterClass}`)
@@ -140,7 +156,10 @@ export function EncounterWorkspacePicker({
             aria-label={t("search_workspaces")}
             disabled={isLoading || isSaving}
           />
-          <CommandList aria-label={t("workspaces")}>
+          <CommandList
+            aria-label={t("workspaces")}
+            className="scrollbar-gutter-auto"
+          >
             {isLoading ? (
               <div
                 className="space-y-2 p-3"
@@ -158,6 +177,7 @@ export function EncounterWorkspacePicker({
                     <CommandItem
                       key={workspace.id}
                       value={workspace.id}
+                      data-checked={workspace.id === workspaceId}
                       keywords={[workspace.name, workspace.description]}
                       disabled={busy}
                       onSelect={() => {
@@ -166,24 +186,17 @@ export function EncounterWorkspacePicker({
                           setOpen(false);
                         else onSelect(workspace);
                       }}
-                      className="items-start gap-2 px-3 py-2.5"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="break-words text-sm font-medium">
+                        <p className="wrap-break-word text-sm font-medium">
                           {workspace.name}
                         </p>
                         {workspace.description && (
-                          <p className="mt-1 line-clamp-2 break-words text-xs text-gray-600">
+                          <p className="line-clamp-2 text-xs text-gray-600">
                             {workspace.description}
                           </p>
                         )}
                       </div>
-                      {workspace.id === workspaceId && (
-                        <Check
-                          className="mt-0.5 size-4 text-primary-600"
-                          aria-label={t("selected")}
-                        />
-                      )}
                     </CommandItem>
                   ))}
                 </CommandGroup>
