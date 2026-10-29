@@ -115,27 +115,6 @@ export const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 export const isMacDevice = /Mac/i.test(navigator.userAgent);
 export const isAppleDevice = isIOSDevice || isMacDevice;
 
-/**
- * Focuses an input inside an animating, transformed sheet (e.g. a drawer that
- * is still sliding in) without letting iOS Safari scroll the page towards it,
- * which leaves the sheet floating above the keyboard. `preventScroll` alone is
- * not enough there, so the input is moved off-screen for the synchronous
- * focus call only.
- */
-export function focusInputWithoutPageScroll(input: HTMLElement) {
-  const { opacity, transform, transition } = input.style;
-  input.style.transition = "none";
-  input.style.opacity = "0";
-  input.style.transform = "translateY(-2000px)";
-  try {
-    input.focus({ preventScroll: true });
-  } finally {
-    input.style.opacity = opacity;
-    input.style.transform = transform;
-    input.style.transition = transition;
-  }
-}
-
 function hasTouch() {
   try {
     document.createEvent("TouchEvent");

@@ -26,7 +26,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { focusInputWithoutPageScroll } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -139,9 +138,10 @@ export default function Autocomplete({
 
   const searchInputRef = React.useCallback(
     (input: HTMLInputElement | null) => {
-      // Native autoFocus scrolls the page on iOS while the drawer slides in.
-      // The desktop popover focuses its input itself once positioned.
-      if (input && isMobile) focusInputWithoutPageScroll(input);
+      // Focus synchronously on mount so iOS opens the keyboard, but without
+      // scrolling the page while the drawer is still sliding in. The desktop
+      // popover focuses its input itself once positioned.
+      if (input && isMobile) input.focus({ preventScroll: true });
     },
     [isMobile],
   );
