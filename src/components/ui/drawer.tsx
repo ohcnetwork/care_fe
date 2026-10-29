@@ -252,6 +252,46 @@ function DrawerSwipeHandle({
 }
 
 // ---------------------------------------------------------------------------
+// iOS keyboard tracking — iOS keeps the layout viewport fixed and pans the
+// visual viewport when the keyboard opens, so a bottom-anchored sheet ends up
+// partly out of frame. While the keyboard is open, the sheet is anchored to
+// the bottom of the visual viewport and capped to its height instead.
+// ---------------------------------------------------------------------------
+const KEYBOARD_MIN_HEIGHT = 60;
+const KEYBOARD_SHEET_MARGIN = 16;
+
+function trackIOSKeyboardViewport(viewport: HTMLElement | null) {
+  const visualViewport = window.visualViewport;
+  if (!viewport || !visualViewport) return;
+
+  const update = () => {
+    const covered = window.innerHeight - visualViewport.height;
+    if (covered <= KEYBOARD_MIN_HEIGHT) {
+      viewport.removeAttribute("data-keyboard-open");
+      viewport.style.removeProperty("--drawer-vv-inset");
+      viewport.style.removeProperty("--drawer-vv-max-height");
+      return;
+    }
+    const inset =
+      window.innerHeight - visualViewport.offsetTop - visualViewport.height;
+    viewport.setAttribute("data-keyboard-open", "");
+    viewport.style.setProperty("--drawer-vv-inset", `${Math.max(0, inset)}px`);
+    viewport.style.setProperty(
+      "--drawer-vv-max-height",
+      `${visualViewport.height - KEYBOARD_SHEET_MARGIN}px`,
+    );
+  };
+
+  update();
+  visualViewport.addEventListener("resize", update);
+  visualViewport.addEventListener("scroll", update);
+  return () => {
+    visualViewport.removeEventListener("resize", update);
+    visualViewport.removeEventListener("scroll", update);
+  };
+}
+
+// ---------------------------------------------------------------------------
 // DrawerContent — upstream Viewport + Popup + Content structure
 // Local additions: size prop, showSwipeHandle from context
 // ---------------------------------------------------------------------------
@@ -302,9 +342,13 @@ function DrawerContent({
       )}
       <KeyboardProvider>
         <DrawerPrimitive.Viewport
+          ref={isIOSDevice ? trackIOSKeyboardViewport : undefined}
           data-slot="drawer-viewport"
           data-modal={modal}
-          className="pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto"
+          className={cn(
+            "pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto",
+            "data-keyboard-open:[&>[data-slot=drawer-popup]]:bottom-[var(--drawer-vv-inset)] data-keyboard-open:[&>[data-slot=drawer-popup]]:max-h-[var(--drawer-vv-max-height)] data-keyboard-open:[&>[data-slot=drawer-popup]]:min-h-0",
+          )}
         >
           <DrawerPrimitive.Popup
             data-slot="drawer-popup"
