@@ -272,8 +272,11 @@ function trackIOSKeyboardViewport(viewport: HTMLElement | null) {
       viewport.style.removeProperty("--drawer-vv-max-height");
       return;
     }
+    // Measure against the viewport element itself: on iOS its height can
+    // differ from window.innerHeight (browser toolbars), which left a gap.
     const inset =
-      window.innerHeight - visualViewport.offsetTop - visualViewport.height;
+      viewport.getBoundingClientRect().bottom -
+      (visualViewport.offsetTop + visualViewport.height);
     viewport.setAttribute("data-keyboard-open", "");
     viewport.style.setProperty("--drawer-vv-inset", `${Math.max(0, inset)}px`);
     viewport.style.setProperty(
