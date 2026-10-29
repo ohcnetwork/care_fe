@@ -19,7 +19,6 @@ import {
   type RenderProp,
 } from "@/components/ui/overlay-compat";
 import { cn } from "@/lib/utils";
-import { isIOSDevice } from "@/Utils/utils";
 
 // ---------------------------------------------------------------------------
 // Direction compat shim (vaul "bottom"/"top" → Base UI "down"/"up")
@@ -83,9 +82,7 @@ function Drawer({
   snapPoints,
   swipeDirection = "down",
   direction, // backwards compat with vaul
-  // Base UI's virtual keyboard handling misplaces the sheet on iOS Safari,
-  // which already pans the viewport itself when an input is focused.
-  repositionInputs = !isIOSDevice,
+  repositionInputs = true,
   onOpenChange,
   ...props
 }: DrawerPrimitive.Root.Props & {
@@ -252,90 +249,6 @@ function DrawerSwipeHandle({
 }
 
 // ---------------------------------------------------------------------------
-// iOS keyboard handling — iOS keeps the layout viewport fixed and pans the
-// visual viewport when the keyboard opens, so a bottom-anchored sheet ends up
-// partly out of frame. While the keyboard is open, the sheet is anchored to
-// the bottom of the visual viewport and capped to its height instead.
-// ---------------------------------------------------------------------------
-const KEYBOARD_MIN_HEIGHT = 60;
-const KEYBOARD_SHEET_MARGIN = 16;
-
-let iosPageLockCount = 0;
-let restoreIOSPage: (() => void) | null = null;
-
-// `overflow: hidden` does not stop iOS from scrolling the document to reveal a
-// focused input, which drags the page behind the drawer along. Pinning the
-// body in place is the only reliable way to keep it still. Counted so nested
-// drawers don't capture an already-pinned scroll position.
-function lockIOSPage() {
-  if (iosPageLockCount++ > 0) return;
-  const { body } = document;
-  const scrollY = window.scrollY;
-  const previous = {
-    position: body.style.position,
-    top: body.style.top,
-    left: body.style.left,
-    right: body.style.right,
-    width: body.style.width,
-  };
-  Object.assign(body.style, {
-    position: "fixed",
-    top: `-${scrollY}px`,
-    left: "0",
-    right: "0",
-    width: "100%",
-  });
-  restoreIOSPage = () => {
-    Object.assign(body.style, previous);
-    // Instant: a smooth-scrolling root would still read 0 when re-locked.
-    window.scrollTo({ top: scrollY, behavior: "instant" });
-  };
-}
-
-function unlockIOSPage() {
-  if (--iosPageLockCount > 0) return;
-  restoreIOSPage?.();
-  restoreIOSPage = null;
-}
-
-function setupIOSViewport(viewport: HTMLElement | null) {
-  const visualViewport = window.visualViewport;
-  if (!viewport || !visualViewport) return;
-
-  lockIOSPage();
-
-  const update = () => {
-    const covered = window.innerHeight - visualViewport.height;
-    if (covered <= KEYBOARD_MIN_HEIGHT) {
-      viewport.removeAttribute("data-keyboard-open");
-      viewport.style.removeProperty("--drawer-vv-inset");
-      viewport.style.removeProperty("--drawer-vv-max-height");
-      return;
-    }
-    // Measure against the viewport element itself: on iOS its height can
-    // differ from window.innerHeight (browser toolbars), which left a gap.
-    const inset =
-      viewport.getBoundingClientRect().bottom -
-      (visualViewport.offsetTop + visualViewport.height);
-    viewport.setAttribute("data-keyboard-open", "");
-    viewport.style.setProperty("--drawer-vv-inset", `${Math.max(0, inset)}px`);
-    viewport.style.setProperty(
-      "--drawer-vv-max-height",
-      `${visualViewport.height - KEYBOARD_SHEET_MARGIN}px`,
-    );
-  };
-
-  update();
-  visualViewport.addEventListener("resize", update);
-  visualViewport.addEventListener("scroll", update);
-  return () => {
-    visualViewport.removeEventListener("resize", update);
-    visualViewport.removeEventListener("scroll", update);
-    unlockIOSPage();
-  };
-}
-
-// ---------------------------------------------------------------------------
 // DrawerContent — upstream Viewport + Popup + Content structure
 // Local additions: size prop, showSwipeHandle from context
 // ---------------------------------------------------------------------------
@@ -386,13 +299,9 @@ function DrawerContent({
       )}
       <KeyboardProvider>
         <DrawerPrimitive.Viewport
-          ref={isIOSDevice ? setupIOSViewport : undefined}
           data-slot="drawer-viewport"
           data-modal={modal}
-          className={cn(
-            "pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto",
-            "data-keyboard-open:[&>[data-slot=drawer-popup]]:bottom-[var(--drawer-vv-inset)] data-keyboard-open:[&>[data-slot=drawer-popup]]:max-h-[var(--drawer-vv-max-height)] data-keyboard-open:[&>[data-slot=drawer-popup]]:min-h-0",
-          )}
+          className="pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto"
         >
           <DrawerPrimitive.Popup
             data-slot="drawer-popup"
@@ -425,7 +334,7 @@ function DrawerContent({
               "data-[swipe-direction=right]:after:left-full data-[swipe-direction=up]:after:bottom-full",
               // Sizing
               "[--drawer-content-height:var(--drawer-height,auto)]",
-              "data-[swipe-axis=x]:[--drawer-content-width:75%] data-[swipe-axis=y]:[--drawer-content-max-height:calc(100dvh-6rem)]",
+              "data-[swipe-axis=x]:[--drawer-content-width:75%] data-[swipe-axis=y]:[--drawer-content-max-height:calc(100dvh-6rem-var(--drawer-keyboard-inset,0px))]",
               "data-[swipe-axis=y]:data-snap-points:[--drawer-content-height:100dvh]",
               "data-[swipe-axis=x]:sm:[--drawer-content-width:24rem]",
               // Stack
@@ -451,7 +360,7 @@ function DrawerContent({
               // Axis: x
               "data-[swipe-axis=x]:inset-y-0 data-[swipe-axis=x]:flex-row",
               // Direction: down
-              "data-[swipe-direction=down]:bottom-0 data-[swipe-direction=down]:origin-bottom",
+              "data-[swipe-direction=down]:bottom-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:origin-bottom",
               "data-[swipe-direction=down]:[--closed-transform:translate3d(0,calc(100%+var(--drawer-inset,0px)+2px),0)]",
               "data-[swipe-direction=down]:[--translate-y:calc(var(--drawer-snap-point-offset,0px)+var(--drawer-swipe-movement-y)-var(--stack-peek-offset)-(var(--stack-shrink)*var(--stack-height)))]",
               // Direction: up
