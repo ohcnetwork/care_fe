@@ -26,7 +26,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { isIOSDevice } from "@/Utils/utils";
+import { focusInputWithoutPageScroll } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -137,14 +137,23 @@ export default function Autocomplete({
     </Button>
   );
 
+  const searchInputRef = React.useCallback(
+    (input: HTMLInputElement | null) => {
+      // Native autoFocus scrolls the page on iOS while the drawer slides in.
+      // The desktop popover focuses its input itself once positioned.
+      if (input && isMobile) focusInputWithoutPageScroll(input);
+    },
+    [isMobile],
+  );
+
   const content = (
     <>
       <ComboboxInput
+        ref={searchInputRef}
         placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
         aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
         disabled={disabled}
         showTrigger={false}
-        autoFocus={!isIOSDevice}
       />
       {isLoading ? (
         <CardListSkeleton count={3} />
