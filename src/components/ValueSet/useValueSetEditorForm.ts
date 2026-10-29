@@ -6,6 +6,11 @@ import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
 import {
+  SLUG_VALUE_MAX_LENGTH,
+  SLUG_VALUE_MIN_LENGTH,
+  SLUG_VALUE_PATTERN,
+} from "@/types/base/slug/schema";
+import {
   ValueSetRead,
   ValueSetScope,
   ValueSetStatus,
@@ -14,7 +19,7 @@ import valueSetApi from "@/types/valueSet/valueSetApi";
 
 import query from "@/Utils/request/query";
 
-import { SLUG_MAX, SLUG_MIN, type ValueSetFormData } from "./valueSetFormTypes";
+import { type ValueSetFormData } from "./valueSetFormTypes";
 
 interface ValueSetEditorFormOptions {
   scope: ValueSetScope;
@@ -105,19 +110,22 @@ export function useValueSetEditorForm({
       // These are authoring rules for a NEW slug. They do not apply to a
       // slug the server assigned: an inherited set takes its parent's
       // verbatim, and an existing set keeps its own — several system slugs
-      // are longer than SLUG_MAX, and re-validating them here would make
+      // are longer than SLUG_VALUE_MAX_LENGTH, and re-validating them here would make
       // those sets impossible to save.
       if (data.inherited || data.slug === initialData?.slug) return;
-      if (data.slug.length < SLUG_MIN || data.slug.length > SLUG_MAX) {
+      if (
+        data.slug.length < SLUG_VALUE_MIN_LENGTH ||
+        data.slug.length > SLUG_VALUE_MAX_LENGTH
+      ) {
         ctx.addIssue({
           code: "custom",
           path: ["slug"],
           message: t("character_count_validation", {
-            min: SLUG_MIN,
-            max: SLUG_MAX,
+            min: SLUG_VALUE_MIN_LENGTH,
+            max: SLUG_VALUE_MAX_LENGTH,
           }),
         });
-      } else if (!/^[-\w]+$/.test(data.slug)) {
+      } else if (!SLUG_VALUE_PATTERN.test(data.slug)) {
         ctx.addIssue({
           code: "custom",
           path: ["slug"],

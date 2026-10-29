@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { expectedSlug } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -20,7 +21,7 @@ test.describe("Charge Item Definition Creation", () => {
     facilityId = getFacilityId();
     const chargeItemName = faker.string.alphanumeric(10);
     title = chargeItemName;
-    slug = chargeItemName.replace(/\s+/g, "-").slice(0, 25);
+    slug = expectedSlug(chargeItemName);
     basePrice = faker.commerce.price({ dec: 0 });
     mrp = faker.commerce.price({ dec: 0 });
     purchasePrice = faker.commerce.price({ dec: 0 });
@@ -43,7 +44,7 @@ test.describe("Charge Item Definition Creation", () => {
     // Title required
     await expect(page.getByText(/title.*required/i)).toBeVisible();
     // Slug required/length
-    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+    await expect(page.getByText(/slug.*atleast 5.*atmost 50/i)).toBeVisible();
     // Base Price required/invalid
     await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });

@@ -15,10 +15,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import type { ValueSetRead } from "@/types/valueSet/valueSet";
 
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
 
 import type { ScopedValueSet } from "./useScopedValueSets";
-import { SLUG_MAX, type ValueSetFormData } from "./valueSetFormTypes";
+import { type ValueSetFormData } from "./valueSetFormTypes";
 import { ValueSetParentPicker } from "./ValueSetParentPicker";
 
 /**
@@ -51,7 +51,7 @@ export function ValueSetBasedOnFields({
   const { t } = useTranslation();
   const parentLabelId = useId();
   const modeId = useId();
-  const authoredSlug = () => generateSlug(form.getValues("name"), SLUG_MAX);
+  const authoredSlug = () => generateSlugValue(form.getValues("name"));
   const standaloneSlug = useRef<string | undefined>(
     form.getValues("inherited") ? undefined : form.getValues("slug"),
   );
