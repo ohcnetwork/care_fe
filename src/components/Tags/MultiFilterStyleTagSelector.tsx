@@ -228,7 +228,10 @@ export function MultiFilterStyleTagSelector({
   ) : (
     <Button
       variant="outline"
-      className={cn("w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none!", className)}
+      className={cn(
+        "w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none!",
+        className,
+      )}
       disabled={disabled || isTagMutationInProgress}
     >
       <div className="flex items-center w-full min-w-0 gap-2">
