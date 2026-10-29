@@ -205,10 +205,7 @@ export default function Autocomplete({
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             {clearButton}
           </ButtonGroup>
-          <DrawerContent
-            aria-describedby={undefined}
-            className="min-h-[50vh] max-h-[85vh]"
-          >
+          <DrawerContent aria-describedby={undefined}>
             <DrawerTitle className="sr-only">
               {t("autocomplete_options")}
             </DrawerTitle>
