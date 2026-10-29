@@ -273,8 +273,12 @@ export function QuestionnaireDetailPage({
                         }),
                       )
                     }
-                    onEditQuestions={() =>
-                      navigate(`${scope.basePath}/${id}/edit`)
+                    onEditQuestions={(questionId) =>
+                      navigate(
+                        questionId
+                          ? `${scope.basePath}/${id}/edit?question=${encodeURIComponent(questionId)}`
+                          : `${scope.basePath}/${id}/edit`,
+                      )
                     }
                     onImportQuestions={() =>
                       navigate(`${scope.basePath}/${id}/edit?import=1`)
