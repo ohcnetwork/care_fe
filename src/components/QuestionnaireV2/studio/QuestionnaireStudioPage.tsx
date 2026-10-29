@@ -251,8 +251,9 @@ export function QuestionnaireStudioPage({
 
         {/* Mobile fallback for the outline (hidden below md) — without it a
             phone user who drills into a nested sub-question has no way back
-            to the parent or its siblings. */}
-        {editing && state.questions.length > 0 && (
+            to the parent or its siblings. Shown even with no questions yet,
+            since the canvas empty state is hidden on phones while editing. */}
+        {editing && (
           <StudioMobileQuestionNav
             questions={state.questions}
             selectedId={state.selectedId}
