@@ -175,7 +175,8 @@ function evaluateEnableWhen(
   // Coded rules match the answer's coding by code; the rest compare values.
   const matchesAnswer = (v: ResponseValue) =>
     isCodedEnableWhenAnswer(enableWhen.answer)
-      ? v.coding?.code === enableWhen.answer.code
+      ? v.coding?.code === enableWhen.answer.code &&
+        (v.coding.system ?? null) === (enableWhen.answer.system ?? null)
       : foldBoolean(v.value) === foldBoolean(enableWhen.answer);
 
   switch (enableWhen.operator) {
