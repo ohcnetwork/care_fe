@@ -239,7 +239,7 @@ const CountrySelect = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-2 sm:p-0 w-[--anchor-width] min-w-64 overflow-clip"
+        className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64 overflow-clip"
         align="start"
         sideOffset={5}
       >

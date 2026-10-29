@@ -74,9 +74,12 @@ const SearchInputFieldRenderer = ({
   isSingleOption: boolean;
   onSearch: (key: string, value: string) => void;
   searchTrigger?: React.ReactNode;
+  disabled?: boolean;
+  readOnly?: boolean;
 }) => {
   const { t } = useTranslation();
   const hasValue = searchValue.length !== 0;
+  const showClear = hasValue && !prop.disabled && !prop.readOnly;
 
   const handleClear = () => {
     setSearchValue("");
@@ -132,7 +135,7 @@ const SearchInputFieldRenderer = ({
             ref={inputRef}
             {...prop}
           />
-          {hasValue ? (
+          {showClear ? (
             <div className="absolute inset-y-0 right-1.5 flex items-center">
               <InputGroupButton
                 size="icon-sm"
@@ -172,7 +175,7 @@ const SearchInputFieldRenderer = ({
       {searchTrigger && (
         <InputGroupAddon align="inline-start">{searchTrigger}</InputGroupAddon>
       )}
-      {hasValue ? (
+      {showClear ? (
         <InputGroupAddon align="inline-end">
           <InputGroupButton
             size="icon-sm"
@@ -344,7 +347,7 @@ export default function SearchInput({
               size="xs"
               className={cn(
                 buttonClassName,
-                "aria-pressed:bg-primary-700/10 aria-pressed:hover:bg-primary-700/20 aria-pressed:text-primary-700 aria-pressed:hover:text-primary-900",
+                "aria-pressed:bg-primary-700/10 aria-pressed:hover:bg-primary-700/20 aria-pressed:text-primary-700 aria-pressed:hover:text-primary-900 dark:aria-pressed:text-primary-300 dark:aria-pressed:hover:text-primary-200",
               )}
             >
               {t(option.display)}
