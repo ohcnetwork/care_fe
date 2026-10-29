@@ -270,16 +270,14 @@ function useUserPreferences(facilityId?: string) {
 
   // Resets the custom links for the current facility. Other facilities' links remain unchanged.
   const resetCustomLinks = useCallback(() => {
-    const facilityLinks = new Set(customLinks);
-    const newQuickLinks = { ...facilityQuickLinks };
-    newQuickLinks.custom_links = facilityQuickLinks.custom_links?.filter(
-      (link) => !facilityLinks.has(link),
+    const filteredCustomLinks = facilityQuickLinks.custom_links?.filter(
+      (link) => !!link.facilityId && link.facilityId !== facilityId,
     );
     updatePreferences({
       type: ActionType.SET_CUSTOM_LINKS,
-      payload: newQuickLinks,
+      payload: { ...facilityQuickLinks, custom_links: filteredCustomLinks },
     });
-  }, [updatePreferences, facilityQuickLinks, customLinks]);
+  }, [updatePreferences, facilityQuickLinks, facilityId]);
 
   const canAddMoreLinks = customLinks.length < MAX_QUICK_LINKS;
 
