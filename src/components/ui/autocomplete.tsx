@@ -26,6 +26,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -143,7 +144,7 @@ export default function Autocomplete({
         aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
         disabled={disabled}
         showTrigger={false}
-        autoFocus={isMobile}
+        autoFocus={isMobile && !isIOSDevice}
       />
       {isLoading ? (
         <CardListSkeleton count={3} />
