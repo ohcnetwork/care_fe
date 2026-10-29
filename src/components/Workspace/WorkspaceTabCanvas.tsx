@@ -109,13 +109,15 @@ export function WorkspaceTabCanvas({
   const updateColumn = (
     columnIndex: number,
     widgets: EncounterWorkspaceCustomPage["columns"][number]["widgets"],
-  ) =>
+  ) => {
+    if (disabled) return;
     onChange({
       ...page,
       columns: page.columns.map((column, index) =>
         index === columnIndex ? { ...column, widgets } : column,
       ),
     });
+  };
   const acceptDrop = (event: React.DragEvent) => {
     if (!disabled && dragged.current?.pageRevision === pageRevision)
       event.preventDefault();
@@ -382,7 +384,9 @@ export function WorkspaceTabCanvas({
                               )}
                               <DropdownMenuItem
                                 disabled={
-                                  !canAddSection || column.widgets.length >= 50
+                                  disabled ||
+                                  !canAddSection ||
+                                  column.widgets.length >= 50
                                 }
                                 onSelect={() => {
                                   const widgets = [...column.widgets];
@@ -400,6 +404,7 @@ export function WorkspaceTabCanvas({
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-red-700 focus:text-red-700"
+                                disabled={disabled}
                                 onSelect={() =>
                                   updateColumn(
                                     columnIndex,

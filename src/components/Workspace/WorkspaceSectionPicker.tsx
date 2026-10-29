@@ -2,6 +2,7 @@ import { Blocks, Plus, Search, StretchHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,8 @@ import { WorkspaceWidgetAvailability } from "./WorkspaceWidgetAvailability";
 
 interface WorkspaceSectionPickerProps {
   surface: WorkspaceSurface;
+  /** False once the target column or workspace has reached its section limit. */
+  canAdd: boolean;
   onClose: () => void;
   onAdd: (type: string) => void;
 }
@@ -31,6 +34,7 @@ const GROUP_ORDER = {
 
 export function WorkspaceSectionPicker({
   surface,
+  canAdd,
   onClose,
   onAdd,
 }: WorkspaceSectionPickerProps) {
@@ -85,6 +89,13 @@ export function WorkspaceSectionPicker({
           />
         </div>
         <div className="max-h-[55dvh] space-y-6 overflow-y-auto border-t bg-soft-background/70 p-6">
+          {!canAdd && (
+            <Alert>
+              <AlertDescription>
+                {t("workspace_studio_section_limit")}
+              </AlertDescription>
+            </Alert>
+          )}
           {GROUP_ORDER[surface].map((group) => {
             const items = options.filter((item) => item.group === group);
             if (!items.length) return null;
@@ -108,7 +119,7 @@ export function WorkspaceSectionPicker({
                         type="button"
                         variant="outline"
                         aria-label={item.label}
-                        disabled={incompatible}
+                        disabled={!canAdd || incompatible}
                         title={
                           incompatible
                             ? t("workspace_studio_section_needs_encounter")

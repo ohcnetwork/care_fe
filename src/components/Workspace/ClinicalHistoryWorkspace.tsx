@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
 import { useHistoryWorkspace } from "@/hooks/useWorkspaces";
 import { WorkspacePage } from "@/pages/Encounters/workspace/EncounterWorkspacePage";
@@ -43,6 +44,13 @@ export function ClinicalHistoryWorkspace({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { list, preference, workspace, save } = useHistoryWorkspace();
+  const showMoreAfterIndex = useBreakpoints({
+    default: 1,
+    xs: 2,
+    sm: 6,
+    xl: 9,
+    "2xl": 12,
+  });
   const patient = useQuery({
     queryKey: ["patient", patientId, facilityId],
     queryFn: query(patientApi.get, {
@@ -138,6 +146,26 @@ export function ClinicalHistoryWorkspace({
       };
     }
   }
+  // Deep links (e.g. "View medication history") name a standard history tab.
+  // Keep them reachable even when the chosen layout omits or hides that tab.
+  const requestedSystemTab = Object.hasOwn(systemTabs, currentTab)
+    ? systemTabs[currentTab as keyof typeof systemTabs]
+    : undefined;
+  if (
+    parsed &&
+    requestedSystemTab?.visible &&
+    tabs[currentTab]?.visible !== true
+  ) {
+    tabs[currentTab] = {
+      ...requestedSystemTab,
+      visible: true,
+      component: (
+        <ScopedQueryParamsProvider key={`${workspace?.id}:${currentTab}`}>
+          {requestedSystemTab.component}
+        </ScopedQueryParamsProvider>
+      ),
+    };
+  }
   const firstTab = Object.keys(tabs).find((key) => tabs[key].visible !== false);
   const activeTab =
     Object.hasOwn(tabs, currentTab) && tabs[currentTab].visible !== false
@@ -161,18 +189,21 @@ export function ClinicalHistoryWorkspace({
       .map((page) => page.key);
   };
   const choose = (id: string | null) => {
-    save.mutate(id);
     const keys = visibleTabKeys(
       id ? list.data?.find((item) => item.id === id)?.template : undefined,
     );
-    if (keys.length && !keys.includes(currentTab)) onTabChange(keys[0]);
+    save.mutate(id, {
+      onSuccess: () => {
+        if (keys.length && !keys.includes(currentTab)) onTabChange(keys[0]);
+      },
+    });
   };
 
   if (patient.isError) {
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          {t("error")}
+          {t("workspace_history_patient_load_error")}
           <Button variant="outline" onClick={() => patient.refetch()}>
             {t("try_again")}
           </Button>
@@ -244,7 +275,7 @@ export function ClinicalHistoryWorkspace({
           currentTab={activeTab}
           onTabChange={onTabChange}
           setPageTitle={false}
-          showMoreAfterIndex={embedded ? 3 : 7}
+          showMoreAfterIndex={showMoreAfterIndex}
           tabContentClassName="mt-4"
         />
       ) : (

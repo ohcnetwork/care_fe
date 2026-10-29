@@ -8171,8 +8171,7 @@
   "your_request_order_list": "Your Request Order List",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
-  ,
+  "℞": "℞",
   "workspace_history_layout": "Clinical history workspace",
   "workspace_history_standard": "Standard clinical history",
   "workspace_history_browser_preference": "This layout choice is saved in this browser for your account. Workspace content is shared through the server.",
@@ -8400,5 +8399,9 @@
   "workspace_config_default_tab_not_selected": "Choose one of the selected tabs as the default tab.",
   "workspace_studio_column_empty_note": "Not shown to users while empty",
   "workspace_editors_only": "Editors only: hidden for read-only users",
-  "workspace_editors_only_actions": "Editors only: hidden for read-only users, except referral shortcuts"
+  "workspace_editors_only_actions": "Editors only: hidden for read-only users, except referral shortcuts",
+  "workspace_studio_tab_limit": "A workspace can have at most 50 tabs. Remove a tab before adding another.",
+  "workspace_studio_section_limit": "This column or workspace has reached its section limit (50 per column, 200 in total). Remove a section before adding another.",
+  "workspace_history_patient_load_error": "Unable to load this patient's clinical history. Please try again.",
+  "workspace_orders_none_in_recent": "No outstanding orders among the most recent requests. Load more to search older orders."
 }

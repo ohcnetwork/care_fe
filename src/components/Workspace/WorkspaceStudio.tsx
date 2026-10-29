@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -339,9 +340,10 @@ export function WorkspaceStudio({
       pages.length >= 50 ||
       pages.some((page) => page.key === next.key)
     )
-      return;
+      return false;
     write([...pages, next]);
     setSelectedTab(next.key);
+    return true;
   };
   const navigateHistory = (direction: "undo" | "redo") => {
     const source = direction === "undo" ? history.past : history.future;
@@ -1070,7 +1072,10 @@ export function WorkspaceStudio({
                   item.key === activeTabDialog.tabKey ? next : item,
                 ),
               );
-            } else addTab(next);
+            } else if (!addTab(next)) {
+              toast.error(t("workspace_studio_tab_limit"));
+              return;
+            }
             setSelectedTab(next.key);
             setTabDialog(null);
           }}
@@ -1079,6 +1084,7 @@ export function WorkspaceStudio({
       {pickerTarget && pickerTab?.kind === "custom" && pickerColumn && (
         <WorkspaceSectionPicker
           surface={surface}
+          canAdd={pickerColumn.widgets.length < 50 && totalSections < 200}
           onClose={() => setPickerTarget(null)}
           onAdd={(type) => {
             if (

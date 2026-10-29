@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
@@ -28,8 +29,12 @@ interface OutstandingOrdersWidgetProps {
   config?: Record<string, unknown>;
 }
 
-// Bounds the follow-up requests when nearly everything is excluded.
+// Bounds the automatic follow-up requests when nearly everything is excluded;
+// past this the author can keep paging with "Load more".
 const MAX_PAGES = 5;
+// Exclusions are applied client-side, so fetch more than a tiny display limit
+// per request to avoid exhausting MAX_PAGES on a handful of drafts.
+const MIN_PAGE_SIZE = 20;
 
 const EXCLUDED_STATUSES: readonly Status[] = [
   Status.draft,
@@ -115,6 +120,7 @@ export function OutstandingOrdersWidget({
     isLoading,
     isError,
     isFetching,
+    isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     refetch,
@@ -132,7 +138,7 @@ export function OutstandingOrdersWidget({
         queryParams: {
           encounter: selectedEncounterId,
           category,
-          limit,
+          limit: Math.max(limit, MIN_PAGE_SIZE),
           offset: pageParam,
           ordering: "-created_date",
         },
@@ -159,6 +165,13 @@ export function OutstandingOrdersWidget({
     pagesLoaded < MAX_PAGES &&
     !isFetching &&
     !isError;
+  // The automatic search stopped at MAX_PAGES but the server has more orders,
+  // so an empty or short list is not the whole picture.
+  const capped =
+    eligible.length < limit &&
+    !!hasNextPage &&
+    pagesLoaded >= MAX_PAGES &&
+    !isError;
   useEffect(() => {
     if (canRead && parsedConfig.success && needsMore) fetchNextPage();
   }, [canRead, parsedConfig.success, needsMore, fetchNextPage]);
@@ -179,7 +192,8 @@ export function OutstandingOrdersWidget({
 
   const orders = eligible.slice(0, limit);
   const settling = isLoading || needsMore;
-  if (!settling && !isError && !orders.length && !showEmpty) return null;
+  if (!settling && !isError && !orders.length && !showEmpty && !capped)
+    return null;
   const ready = orders.filter((order) => orderOutcome(order) === "ready");
   const sameFacility = routeFacilityId === facilityId;
   const reportBase = sameFacility
@@ -202,7 +216,11 @@ export function OutstandingOrdersWidget({
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         ) : !orders.length ? (
           <p className="px-2 py-5 text-sm text-soft-foreground">
-            {t("no_service_requests_found")}
+            {t(
+              capped
+                ? "workspace_orders_none_in_recent"
+                : "no_service_requests_found",
+            )}
           </p>
         ) : (
           <div className="@container space-y-2">
@@ -275,6 +293,18 @@ export function OutstandingOrdersWidget({
               })}
             </ul>
           </div>
+        )}
+        {capped && !settling && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {t("load_more")}
+          </Button>
         )}
       </EncounterAccordionLayout>
     </section>

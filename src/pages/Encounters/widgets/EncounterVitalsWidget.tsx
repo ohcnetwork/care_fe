@@ -19,6 +19,7 @@ import {
   ObservationAnalyzeGroup,
   ObservationListRead,
   ObservationPlotConfig,
+  ObservationStatus,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { vitalsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
@@ -130,7 +131,12 @@ function latestVitalReadings(
         (group) =>
           group.code.code === code.code && group.code.system === code.system,
       )?.results ?? []),
-    ].sort((a, b) => observationTime(b) - observationTime(a));
+    ]
+      .filter(
+        (observation) =>
+          observation.status !== ObservationStatus.ENTERED_IN_ERROR,
+      )
+      .sort((a, b) => observationTime(b) - observationTime(a));
     return { code, latest: matches[0], previous: matches[1] };
   });
 }
