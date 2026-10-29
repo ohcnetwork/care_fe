@@ -77,16 +77,31 @@ export function useClearStructuredRenderFailed(questionId: string) {
   return useAtom(clearAtom)[1];
 }
 
+interface QuestionNode {
+  question: Question;
+  parent?: Question;
+}
+
+/** Question definitions behind each link index, so enable_when can follow
+ *  a controller to its own conditions and ancestors. */
+const questionNodes = new WeakMap<
+  Record<string, string>,
+  Map<string, QuestionNode>
+>();
+
 /** link_id → question_id for enable_when lookups. */
 export function buildLinkIndex(questions: Question[]): Record<string, string> {
   const index: Record<string, string> = {};
-  const walk = (list: Question[]) => {
+  const nodes = new Map<string, QuestionNode>();
+  const walk = (list: Question[], parent?: Question) => {
     for (const question of list) {
       index[question.link_id] = question.id;
-      if (question.questions) walk(question.questions);
+      nodes.set(question.id, { question, parent });
+      if (question.questions) walk(question.questions, question);
     }
   };
   walk(questions);
+  questionNodes.set(index, nodes);
   return index;
 }
 
@@ -278,21 +293,57 @@ export function useQuestionResponse(questionId: string) {
 }
 
 /** Every condition is evaluated against the root response map, matching
- *  the backend; row answers never shadow root answers. */
+ *  the backend; row answers never shadow root answers. A hidden question
+ *  keeps its answer in state but is not submitted, so a controller that is
+ *  itself hidden (directly, or inside a hidden group) counts as unanswered:
+ *  hiding A also hides C when C depends on B and B depends on A. */
 export function isQuestionEnabledInState(
   question: Question,
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
 ): boolean {
+  return isEnabledByConditions(question, responses, linkIndex, new Set());
+}
+
+function isEnabledByConditions(
+  question: Question,
+  responses: Record<string, QuestionnaireResponse>,
+  linkIndex: Record<string, string>,
+  visiting: Set<string>,
+): boolean {
   if (!question.enable_when?.length) return true;
-  const results = question.enable_when.map((condition) =>
-    condition.question in linkIndex
-      ? evaluateEnableWhen(condition, responses[linkIndex[condition.question]])
-      : false,
-  );
-  return question.enable_behavior === "any"
-    ? results.some(Boolean)
-    : results.every(Boolean);
+  // A dependency cycle can never be satisfied.
+  if (visiting.has(question.id)) return false;
+  visiting.add(question.id);
+  try {
+    const nodes = questionNodes.get(linkIndex);
+    const results = question.enable_when.map((condition) => {
+      if (!(condition.question in linkIndex)) return false;
+      const controllerId = linkIndex[condition.question];
+      const node = nodes?.get(controllerId);
+      let controllerShown = true;
+      for (
+        let current: Question | undefined = node?.question;
+        current && controllerShown;
+        current = nodes?.get(current.id)?.parent
+      )
+        controllerShown = isEnabledByConditions(
+          current,
+          responses,
+          linkIndex,
+          visiting,
+        );
+      return evaluateEnableWhen(
+        condition,
+        controllerShown ? responses[controllerId] : undefined,
+      );
+    });
+    return question.enable_behavior === "any"
+      ? results.some(Boolean)
+      : results.every(Boolean);
+  } finally {
+    visiting.delete(question.id);
+  }
 }
 
 export function useQuestionEnabled(question: Question): boolean {
