@@ -2,7 +2,10 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/form/engine/store";
+import {
+  useHasVisibleTopLevelQuestions,
+  useSiblingNumbers,
+} from "@/components/QuestionnaireV2/form/engine/store";
 import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
@@ -102,6 +105,7 @@ function CanvasBody({
   const { AppendZone } = useFormChrome();
   const hasVisibleQuestions = useHasVisibleTopLevelQuestions();
   const questions = questionnaire.questions;
+  const numbers = useSiblingNumbers(questions, "", revealHidden);
 
   const sectionCount = questions.filter(
     (question) => question.type === "group",
@@ -168,7 +172,7 @@ function CanvasBody({
             index={index}
             siblingCount={questions.length}
             depth={0}
-            number={`${index + 1}.`}
+            number={numbers[index]}
           />
         ))}
         {AppendZone && <AppendZone parentId={null} />}

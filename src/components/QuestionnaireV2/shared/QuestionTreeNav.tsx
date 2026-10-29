@@ -17,8 +17,11 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Question ids currently hidden by enable_when; numbering stays stable. */
+  /** Question ids to filter out (e.g. search misses); numbering stays stable. */
   hiddenIds?: Set<string>;
+  /** Question ids dropped *before* numbering (enable_when-hidden in preview),
+   *  so ordinals close the gap and match the canvas. */
+  numberingHiddenIds?: ReadonlySet<string>;
   /** Decorative per-row trailing icons (the studio's logic/issue cues) —
    *  rendered aria-hidden so row accessible names stay number + title. */
   rowAdornment?: (question: Question) => React.ReactNode;
@@ -35,11 +38,12 @@ export function QuestionTreeNav({
   footer,
   renderSeparator,
   hiddenIds,
+  numberingHiddenIds,
   rowAdornment,
   ariaLabel,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
-  const items = numberQuestions(questions).filter(
+  const items = numberQuestions(questions, numberingHiddenIds).filter(
     (item) => !hiddenIds?.has(item.question.id),
   );
 

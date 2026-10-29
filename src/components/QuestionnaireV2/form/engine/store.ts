@@ -374,6 +374,46 @@ export function useHasVisibleTopLevelQuestions(): boolean {
   return useAtomValue(hasVisibleAtom);
 }
 
+const EMPTY_QUESTION_LIST: Question[] = [];
+
+/** Dotted ordinals for a sibling list (prefix "2." → "2.1.", "2.2."),
+ *  skipping enable_when-hidden questions so the visible sequence has no gaps.
+ *  `revealHidden` keeps authored ordinals. The atom yields a visibility mask
+ *  string so callers only re-render when visibility flips. */
+export function useSiblingNumbers(
+  questions: Question[],
+  prefix: string | undefined,
+  revealHidden?: boolean,
+): (string | undefined)[] {
+  const siblings = questions.length ? questions : EMPTY_QUESTION_LIST;
+  const maskAtom = useMemo(
+    () =>
+      atom((get) => {
+        const responses = get(responsesAtom);
+        const linkIndex = get(questionIdByLinkIdAtom);
+        return siblings
+          .map((question) =>
+            question.disabled_display === "protected" ||
+            isQuestionEnabledInState(question, responses, linkIndex)
+              ? "1"
+              : "0",
+          )
+          .join("");
+      }),
+    [siblings],
+  );
+  const mask = useAtomValue(maskAtom);
+  return useMemo(() => {
+    if (prefix === undefined) return [];
+    let ordinal = 0;
+    return siblings.map((_, index) =>
+      revealHidden || mask[index] === "1"
+        ? `${prefix}${++ordinal}.`
+        : undefined,
+    );
+  }, [siblings, prefix, revealHidden, mask]);
+}
+
 /** Ids of every question with at least one recorded answer. */
 export function useAnsweredQuestionIds(): Set<string> {
   const answeredAtom = useMemo(

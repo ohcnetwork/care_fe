@@ -29,9 +29,8 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const answeredIds = useAnsweredQuestionIds();
   const { activeQuestionId, scrollToQuestion } = useFillOutlineNav();
 
-  const items = numberQuestions(questionnaire.questions).filter(
-    (item) => !hiddenIds.has(item.question.id),
-  );
+  // Numbered after dropping hidden questions so ordinals match the canvas.
+  const items = numberQuestions(questionnaire.questions, hiddenIds);
 
   const stateIcon = (question: Question) => {
     if (question.type === "group" || question.type === "display") return null;

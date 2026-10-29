@@ -110,7 +110,7 @@ test.describe("Fill outline overlay", () => {
       const row = nav.getByRole("button", {
         name: /Medications taken \(repeats\)/,
       });
-      await expect(row).toContainText("21.");
+      await expect(row).toContainText("15.");
       await row.click();
       await expect(
         questionBlock(page, "Medications taken (repeats)"),
