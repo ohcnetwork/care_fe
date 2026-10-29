@@ -212,7 +212,7 @@ export default function Autocomplete({
             <DrawerTitle className="sr-only">
               {t("autocomplete_options")}
             </DrawerTitle>
-            <div className="group/combobox-content flex min-h-0 flex-col overflow-y-auto p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
+            <div className="flex min-h-0 flex-col overflow-y-auto p-3">
               {content}
             </div>
           </DrawerContent>
