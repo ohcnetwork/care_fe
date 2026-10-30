@@ -26,8 +26,6 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponseStatus } from "@/types/questionnaire/questionnaireResponse";
 import { ResourceQuestionnaireResponse } from "@/types/questionnaire/resourceQuestionnaireResponseApi";
@@ -68,7 +66,6 @@ export default function ResourceResponseViewer({
   onCopyLink,
 }: ResourceResponseViewerProps) {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const SubjectIcon = {
     location: MapPin,
     device: Monitor,
@@ -118,7 +115,6 @@ export default function ResourceResponseViewer({
   return (
     <Sheet
       open={open}
-      modal={isMobile}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) onClose();
       }}
@@ -135,9 +131,6 @@ export default function ResourceResponseViewer({
         onCloseAutoFocus={(event) => {
           event.preventDefault();
           if (openerRef.current?.isConnected) openerRef.current.focus();
-        }}
-        onInteractOutside={(event) => {
-          if (!isMobile) event.preventDefault();
         }}
       >
         <SheetHeader className="shrink-0 space-y-0 border-b border-neutral-200 bg-white px-4 pb-4 pt-2 text-left">

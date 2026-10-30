@@ -447,7 +447,7 @@ export function EncounterWorkspaceEditor({
                 {pages.length}
               </span>
             </div>
-            <div className="flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-col lg:overflow-visible">
+            <div className="mb-2 flex gap-1 overflow-x-auto px-2 pb-2 lg:mb-0 lg:flex-col lg:overflow-visible">
               {pages.map((item) => (
                 <Button
                   key={item.key}
