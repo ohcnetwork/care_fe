@@ -229,7 +229,8 @@ export function MultiFilterStyleTagSelector({
     <Button
       variant="outline"
       className={cn(
-        "w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none!",
+        "h-10 w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none! px-2.5",
+        selected.length > 0 && "border-blue-300 bg-blue-50 h-auto",
         className,
       )}
       disabled={disabled || isTagMutationInProgress}
