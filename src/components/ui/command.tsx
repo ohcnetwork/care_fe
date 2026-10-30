@@ -105,7 +105,7 @@ function CommandDialog({
     <Drawer open={open} onOpenChange={onOpenChange}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent height="fixed" className={cn("p-1.5", className)}>
-        <DrawerHeader className="pb-2 pl-1" showCloseButton>
+        <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
           <DrawerTitle>{resolvedTitle}</DrawerTitle>
           <DrawerDescription className="sr-only">
             {resolvedDescription}

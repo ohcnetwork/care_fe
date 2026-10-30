@@ -449,8 +449,8 @@ export function ResourceDefinitionCategoryPicker<T>({
     }
 
     return (
-      <div className="flex items-center gap-1 min-w-0">
-        <span className="truncate text-left" title={selectedDefinition.title}>
+      <div className="flex items-center min-w-0 gap-1">
+        <span className="text-left truncate" title={selectedDefinition.title}>
           {selectedDefinition.title}
         </span>
       </div>
@@ -474,21 +474,21 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const renderBreadcrumbs = () =>
     breadcrumbs.length > 0 && (
-      <div className="px-3 py-2 border-b bg-gray-100">
-        <div className="flex items-center gap-1 text-xs overflow-auto">
+      <div className="px-3 py-2 bg-gray-100 border-b">
+        <div className="flex items-center gap-1 overflow-auto text-xs">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBackToRoot}
             className="h-6 px-2 text-xs hover:bg-white"
           >
-            <Home className="size-3 mr-1" />
+            <Home className="mr-1 size-3" />
             {t("root")}
           </Button>
           {breadcrumbs.length <= 2 || breadcrumbsExpanded ? (
             breadcrumbs.map((breadcrumb, index) => (
               <div key={breadcrumb.slug} className="flex items-center">
-                <ChevronRight className="size-3 mx-1 text-gray-500" />
+                <ChevronRight className="mx-1 text-gray-500 size-3" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -501,7 +501,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             ))
           ) : (
             <>
-              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <ChevronRight className="mx-1 text-gray-500 size-3" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -510,7 +510,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               >
                 <MoreHorizontal className="size-3" />
               </Button>
-              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <ChevronRight className="mx-1 text-gray-500 size-3" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -530,23 +530,23 @@ export function ResourceDefinitionCategoryPicker<T>({
       {isLoading ? (
         <div className="p-6 space-y-3">
           <div className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
-            <div className="space-y-1 flex-1">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="rounded size-4" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="w-3/4 h-4" />
+              <Skeleton className="w-1/2 h-3" />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
-            <div className="space-y-1 flex-1">
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/3" />
+            <Skeleton className="rounded size-4" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="w-2/3 h-4" />
+              <Skeleton className="w-1/3 h-3" />
             </div>
           </div>
         </div>
       ) : searchQuery ? (
         <div className="p-6 text-center text-gray-500">
-          <Search className="size-8 mx-auto mb-2 opacity-50" />
+          <Search className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">
             {currentParent
               ? t("no_results_found_for", { term: searchQuery })
@@ -555,7 +555,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         </div>
       ) : (
         <div className="p-6 text-center text-gray-500">
-          <Folder className="size-8 mx-auto mb-2 opacity-50" />
+          <Folder className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">
             {currentParent
               ? t(`no_${translationBaseKey}_found`) || t("no_items_found")
@@ -585,17 +585,17 @@ export function ResourceDefinitionCategoryPicker<T>({
               }
               className="[&>svg:last-child]:hidden"
             >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="flex items-center flex-1 min-w-0 gap-2">
                 <div className="shrink-0">
                   <FolderOpen className="size-4.5 text-gray-500" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-sm line-clamp-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium line-clamp-2">
                     {category.title}
                   </div>
                 </div>
               </div>
-              <ChevronRight className="size-4 text-gray-500" />
+              <ChevronRight className="text-gray-500 size-4" />
             </CommandItem>
           ))}
       </>
@@ -612,12 +612,12 @@ export function ResourceDefinitionCategoryPicker<T>({
             onSelect={() => handleCategorySelect(category.slug, category.title)}
             className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 [&>svg:last-child]:hidden"
           >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="flex items-center flex-1 min-w-0 gap-2">
               <div className="flex-shrink-0">
                 <FolderOpen className="size-4.5 text-gray-500" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-sm truncate">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate">
                   {category.title}
                 </div>
                 {category.description && (
@@ -627,7 +627,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               </div>
             </div>
-            <ChevronRight className="size-4 text-gray-500" />
+            <ChevronRight className="text-gray-500 size-4" />
           </CommandItem>
         ))}
       </>
@@ -652,8 +652,8 @@ export function ResourceDefinitionCategoryPicker<T>({
               searchQuery && definition.category && "py-1",
             )}
           >
-            <div className="min-w-0 flex-1">
-              <span className="break-all text-sm font-medium">
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium break-all">
                 {definition.title}
               </span>
               {searchQuery && definition.category && (
@@ -666,7 +666,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               (Array.isArray(value)
                 ? value.some((v: T) => mapper!(v).slug === definition.slug)
                 : mapper!(value).slug === definition.slug) && (
-                <Check className="size-4 text-gray-700" />
+                <Check className="text-gray-700 size-4" />
               )}
           </CommandItem>
           {enableFavorites && (
@@ -708,11 +708,11 @@ export function ResourceDefinitionCategoryPicker<T>({
         className="h-auto min-w-0 flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left whitespace-normal"
         onClick={() => handleDefinitionSelect(definition)}
       >
-        <span className="w-full break-all text-sm font-medium">
+        <span className="w-full text-sm font-medium break-all">
           {definition.title}
         </span>
         {definition.category && (
-          <span className="w-full truncate text-xs font-normal text-muted-foreground">
+          <span className="w-full text-xs font-normal truncate text-muted-foreground">
             {getDisplayPath(definition)}
           </span>
         )}
@@ -725,7 +725,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           aria-label={t("remove_from_favorites")}
           onClick={() => handleToggleFavorite(definition)}
         >
-          <Star className="size-4 fill-current" />
+          <Star className="fill-current size-4" />
         </Button>
       )}
     </div>
@@ -740,9 +740,9 @@ export function ResourceDefinitionCategoryPicker<T>({
     >
       {recentlyUsed.length === 0 ? (
         <div className="p-6 text-center text-gray-500">
-          <Clock className="size-8 mx-auto mb-2 opacity-50" />
+          <Clock className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">{t("no_recent_items")}</div>
-          <div className="text-xs mt-1">{t("items_will_appear_here")}</div>
+          <div className="mt-1 text-xs">{t("items_will_appear_here")}</div>
         </div>
       ) : (
         <div className="p-2">
@@ -761,9 +761,9 @@ export function ResourceDefinitionCategoryPicker<T>({
     >
       {favorites.length === 0 ? (
         <div className="p-6 text-center text-gray-500">
-          <Star className="size-8 mx-auto mb-2 opacity-50" />
+          <Star className="mx-auto mb-2 opacity-50 size-8" />
           <div className="text-sm">{t("no_favorites_yet")}</div>
-          <div className="text-xs mt-1">{t("click_star_to_add")}</div>
+          <div className="mt-1 text-xs">{t("click_star_to_add")}</div>
         </div>
       ) : (
         <div className="p-2">
@@ -812,7 +812,7 @@ export function ResourceDefinitionCategoryPicker<T>({
       disabled={disabled}
       data-shortcut-id={shortcutId}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center flex-1 min-w-0 gap-2">
         {getDisplayValue()}
       </div>
       {!clearVisible && (
@@ -853,7 +853,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           </ButtonGroup>
 
           <DrawerContent height="fixed" className="p-1.5">
-            <DrawerHeader className="pb-2 pl-1" showCloseButton>
+            <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
               <DrawerTitle>
                 {t(`select_${translationBaseKey}`) || t("select_item")}
               </DrawerTitle>
@@ -934,7 +934,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 <div className="px-4 py-3.5 border-b bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Home className="size-4 text-gray-500 shrink-0" />
+                      <Home className="text-gray-500 size-4 shrink-0" />
                       <span className="text-sm font-medium text-gray-600 line-clamp-1">
                         {getCurrentLevelTitle()}
                       </span>
@@ -959,7 +959,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
               {/* Favorites panel */}
               {enableFavorites && (
-                <div className="flex max-w-72 w-full flex-col border-l border-gray-200">
+                <div className="flex flex-col w-full border-l border-gray-200 max-w-72">
                   <div className="px-4 py-1 border-b bg-gray-50 shrink-0">
                     <Tabs value={favSubTab} onValueChange={setFavSubTab}>
                       <TabsList className="grid w-full grid-cols-2">
@@ -972,16 +972,16 @@ export function ResourceDefinitionCategoryPicker<T>({
                   </div>
 
                   {/* Absolute inner box keeps this list from growing the row; the left column sets the height. */}
-                  <div className="relative min-h-32 flex-1">
+                  <div className="relative flex-1 min-h-32">
                     <div className="absolute inset-0 overflow-auto">
                       {favSubTab === "recent" ? (
                         recentlyUsed.length === 0 ? (
                           <div className="p-6 text-center text-gray-500">
-                            <Clock className="size-8 mx-auto mb-2 opacity-50" />
+                            <Clock className="mx-auto mb-2 opacity-50 size-8" />
                             <div className="text-sm">
                               {t("no_recent_items")}
                             </div>
-                            <div className="text-xs mt-1">
+                            <div className="mt-1 text-xs">
                               {t("items_will_appear_here")}
                             </div>
                           </div>
@@ -994,9 +994,9 @@ export function ResourceDefinitionCategoryPicker<T>({
                         )
                       ) : favorites.length === 0 ? (
                         <div className="p-6 text-center text-gray-500">
-                          <Star className="size-8 mx-auto mb-2 opacity-50" />
+                          <Star className="mx-auto mb-2 opacity-50 size-8" />
                           <div className="text-sm">{t("no_favorites_yet")}</div>
-                          <div className="text-xs mt-1">
+                          <div className="mt-1 text-xs">
                             {t("click_star_to_add")}
                           </div>
                         </div>
@@ -1024,15 +1024,15 @@ export function ResourceDefinitionCategoryPicker<T>({
                 return (
                   <div
                     key={def.id}
-                    className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-sm border border-gray-200 rounded-md bg-gray-50"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center min-w-0 gap-2">
                       {getDisplayPath(def)}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="size-6 p-0 hover:bg-gray-200"
+                      className="p-0 size-6 hover:bg-gray-200"
                       onClick={() => handleRemoveDefinition(def)}
                       type="button"
                     >

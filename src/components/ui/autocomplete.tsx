@@ -111,7 +111,7 @@ export default function Autocomplete({
       <span className={cn("truncate", !displayText && "text-muted-foreground")}>
         {displayText || placeholder || t("autocomplete_select_placeholder")}
       </span>
-      <span className="flex shrink-0 items-center gap-1">
+      <span className="flex items-center gap-1 shrink-0">
         {shortcutId && <ShortcutBadge actionId={shortcutId} />}
         {!clearVisible && (
           <ChevronDown className="size-4 text-muted-foreground" />
@@ -139,7 +139,7 @@ export default function Autocomplete({
 
   const content = (
     <>
-      <div className="border-b border-gray-100 p-2 shadow-xs">
+      <div className="p-2 border-b border-gray-100 shadow-xs">
         <ComboboxInput
           placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
           aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
@@ -154,7 +154,7 @@ export default function Autocomplete({
           {noOptionsMessage || t("autocomplete_no_options")}
         </ComboboxEmpty>
       )}
-      <ComboboxList showScrollbar className="min-h-0 flex-1">
+      <ComboboxList showScrollbar className="flex-1 min-h-0">
         {(option: AutoCompleteOption) => (
           <ComboboxItem
             key={option.value}
@@ -216,8 +216,8 @@ export default function Autocomplete({
             height="fixed"
             className="p-1.5"
           >
-            <DrawerHeader className="pb-2 pl-1" showCloseButton>
-              <DrawerTitle>{t(placeholder ?? "")}</DrawerTitle>
+            <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+              <DrawerTitle>{t(placeholder ?? "search")}</DrawerTitle>
             </DrawerHeader>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}

@@ -474,7 +474,7 @@ function DrawerHeader({
     <div
       data-slot="drawer-header"
       className={cn(
-        "relative flex shrink-0 flex-1 justify-between gap-0.5 p-4 text-left md:gap-1.5",
+        "relative flex shrink-0 items-center justify-between gap-0.5 md:p-4 text-left md:gap-1.5",
         drawerContainerClasses[size],
         className,
       )}

@@ -123,14 +123,14 @@ export function QuestionnaireSearch({
           <div
             role="status"
             aria-label={t("loading")}
-            className="space-y-2 p-4"
+            className="p-4 space-y-2"
           >
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
+            <Skeleton className="w-full h-8" />
+            <Skeleton className="w-full h-8" />
+            <Skeleton className="w-full h-8" />
           </div>
         ) : isError ? (
-          <div role="alert" className="space-y-3 p-4 text-sm text-gray-600">
+          <div role="alert" className="p-4 space-y-3 text-sm text-gray-600">
             <p>{t("questionnaire_error_loading")}</p>
             <Button
               variant="outline"
@@ -202,13 +202,13 @@ export function QuestionnaireSearch({
               ) : (
                 <span>{placeholder || t("add_forms")}</span>
               )}
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+              <CaretSortIcon className="ml-2 opacity-50 size-4 shrink-0" />
             </Button>
           )}
         </DrawerTrigger>
 
         <DrawerContent height="fixed" className="p-1.5">
-          <DrawerHeader className="pb-2 pl-1" showCloseButton>
+          <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
             <DrawerTitle>{t("forms")}</DrawerTitle>
             <DrawerDescription className="sr-only">
               {t("search_forms")}
@@ -241,7 +241,7 @@ export function QuestionnaireSearch({
                 {t("loading")}
               </>
             ) : (
-              <div className="flex justify-start items-center gap-2 text-primary-800 w-full">
+              <div className="flex items-center justify-start w-full gap-2 text-primary-800">
                 <Plus className="size-4" />
                 <span>{placeholder || t("add_forms")}</span>
               </div>
