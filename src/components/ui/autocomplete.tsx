@@ -216,10 +216,8 @@ export default function Autocomplete({
             height="fixed"
             className="p-1.5"
           >
-            <DrawerHeader className="p-1">
-              <DrawerTitle className="sr-only">
-                {t("autocomplete_options")}
-              </DrawerTitle>
+            <DrawerHeader className="pb-2 pl-1" showCloseButton>
+              <DrawerTitle>{t(placeholder ?? "")}</DrawerTitle>
             </DrawerHeader>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}

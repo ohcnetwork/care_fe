@@ -959,8 +959,8 @@ export function ResourceDefinitionCategoryPicker<T>({
 
               {/* Favorites panel */}
               {enableFavorites && (
-                <div className="max-w-72 w-full border-l border-gray-200">
-                  <div className="px-4 py-1 border-b bg-gray-50">
+                <div className="flex max-w-72 w-full flex-col border-l border-gray-200">
+                  <div className="px-4 py-1 border-b bg-gray-50 shrink-0">
                     <Tabs value={favSubTab} onValueChange={setFavSubTab}>
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
@@ -971,38 +971,43 @@ export function ResourceDefinitionCategoryPicker<T>({
                     </Tabs>
                   </div>
 
-                  <div className="overflow-auto min-h-0 max-h-63">
-                    {favSubTab === "recent" ? (
-                      recentlyUsed.length === 0 ? (
+                  {/* Absolute inner box keeps this list from growing the row; the left column sets the height. */}
+                  <div className="relative min-h-32 flex-1">
+                    <div className="absolute inset-0 overflow-auto">
+                      {favSubTab === "recent" ? (
+                        recentlyUsed.length === 0 ? (
+                          <div className="p-6 text-center text-gray-500">
+                            <Clock className="size-8 mx-auto mb-2 opacity-50" />
+                            <div className="text-sm">
+                              {t("no_recent_items")}
+                            </div>
+                            <div className="text-xs mt-1">
+                              {t("items_will_appear_here")}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-2">
+                            {recentlyUsed.map((item) =>
+                              renderSavedDefinition(item),
+                            )}
+                          </div>
+                        )
+                      ) : favorites.length === 0 ? (
                         <div className="p-6 text-center text-gray-500">
-                          <Clock className="size-8 mx-auto mb-2 opacity-50" />
-                          <div className="text-sm">{t("no_recent_items")}</div>
+                          <Star className="size-8 mx-auto mb-2 opacity-50" />
+                          <div className="text-sm">{t("no_favorites_yet")}</div>
                           <div className="text-xs mt-1">
-                            {t("items_will_appear_here")}
+                            {t("click_star_to_add")}
                           </div>
                         </div>
                       ) : (
                         <div className="p-2">
-                          {recentlyUsed.map((item) =>
-                            renderSavedDefinition(item),
+                          {favorites.map((item) =>
+                            renderSavedDefinition(item, true),
                           )}
                         </div>
-                      )
-                    ) : favorites.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500">
-                        <Star className="size-8 mx-auto mb-2 opacity-50" />
-                        <div className="text-sm">{t("no_favorites_yet")}</div>
-                        <div className="text-xs mt-1">
-                          {t("click_star_to_add")}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-2">
-                        {favorites.map((item) =>
-                          renderSavedDefinition(item, true),
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

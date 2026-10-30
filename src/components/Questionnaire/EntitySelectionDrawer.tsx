@@ -169,8 +169,8 @@ export function EntitySelectionDrawer({
       <Drawer open={open} onOpenChange={onOpenChange} repositionInputs>
         <DrawerContent height="fixed" className="px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
-            <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)] mt-2">
-              <DrawerHeader className="py-1 px-1 border-b border-gray-200 sticky top-0 z-10 bg-white">
+            <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+              <DrawerHeader className="shrink-0 border-b border-gray-200 bg-white px-1 py-1">
                 <div className="flex justify-between w-full p-1">
                   <Button
                     variant="link"
@@ -191,7 +191,9 @@ export function EntitySelectionDrawer({
                   {selectedEntity.display}
                 </DrawerTitle>
               </DrawerHeader>
-              <div className="p-3">{children}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto p-3">
+                {children}
+              </div>
             </div>
           ) : enableProduct ? (
             <MedicationValueSetSelect
