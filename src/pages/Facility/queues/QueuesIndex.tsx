@@ -8,7 +8,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +78,7 @@ function QueueRow({
   index,
 }: QueueRowProps) {
   const { t } = useTranslation();
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
@@ -151,18 +152,10 @@ function QueueRow({
                 {t("open_queue_board")}
               </Link>
             </DropdownMenuItem>
-            <QueueFormSheet
-              facilityId={facilityId}
-              resourceType={resourceType}
-              resourceId={resourceId}
-              queueId={queue.id}
-              trigger={
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Pencil className="size-4 mr-2" />
-                  {t("edit_queue_name")}
-                </DropdownMenuItem>
-              }
-            />
+            <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+              <Pencil className="size-4 mr-2" />
+              {t("edit_queue_name")}
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setPrimary({})}
               disabled={queue.is_primary}
@@ -172,6 +165,14 @@ function QueueRow({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <QueueFormSheet
+          facilityId={facilityId}
+          resourceType={resourceType}
+          resourceId={resourceId}
+          queueId={queue.id}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+        />
       </TableCell>
     </TableRow>
   );

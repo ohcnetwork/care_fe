@@ -17,7 +17,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,6 +59,7 @@ export function CollectedSpecimenHeader({
   const { t } = useTranslation();
   const [selectedDiscardReason, setSelectedDiscardReason] =
     useState<SpecimenStatus | null>(null);
+  const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   return (
     <div className="w-full space-y-3">
       <CollapsibleTrigger className="flex w-full items-start justify-between gap-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
@@ -167,76 +167,71 @@ export function CollectedSpecimenHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                  onSelect={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  disabled={disableEdit}
-                >
-                  <Trash2 className="size-4 mr-2" />
-                  {t("discard")}
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("specimen_discard_dialog_description")}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <RadioGroup
-                  defaultValue=""
-                  onValueChange={(value: SpecimenStatus) =>
-                    setSelectedDiscardReason(value)
-                  }
-                  className="space-y-3 justify-center items-center"
-                >
-                  {SPECIMEN_DISCARD_REASONS.map((reason) => (
-                    <div
-                      key={reason.status}
-                      className="flex items-start space-x-2 p-2 rounded-md border border-border hover:bg-soft-background"
-                    >
-                      <RadioGroupItem
-                        value={reason.status}
-                        id={reason.status}
-                      />
-                      <Label
-                        htmlFor={reason.status}
-                        className="flex flex-col gap-0.5 px-1"
-                      >
-                        <span className="font-medium text-sm text-foreground">
-                          {reason.label}
-                        </span>
-                        <span className="text-sm text-muted-foreground font-normal">
-                          {reason.description}
-                        </span>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDiscarding}>
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      selectedDiscardReason && onDiscard(selectedDiscardReason)
-                    }
-                    disabled={isDiscarding || !selectedDiscardReason}
-                  >
-                    {isDiscarding ? t("discarding") : t("discard")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDiscardOpen(true);
+              }}
+              disabled={disableEdit}
+            >
+              <Trash2 className="size-4 mr-2" />
+              {t("discard")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <AlertDialog open={isDiscardOpen} onOpenChange={setIsDiscardOpen}>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("specimen_discard_dialog_description")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <RadioGroup
+              defaultValue=""
+              onValueChange={(value: SpecimenStatus) =>
+                setSelectedDiscardReason(value)
+              }
+              className="space-y-3 justify-center items-center"
+            >
+              {SPECIMEN_DISCARD_REASONS.map((reason) => (
+                <div
+                  key={reason.status}
+                  className="flex items-start space-x-2 p-2 rounded-md border border-border hover:bg-soft-background"
+                >
+                  <RadioGroupItem value={reason.status} id={reason.status} />
+                  <Label
+                    htmlFor={reason.status}
+                    className="flex flex-col gap-0.5 px-1"
+                  >
+                    <span className="font-medium text-sm text-foreground">
+                      {reason.label}
+                    </span>
+                    <span className="text-sm text-muted-foreground font-normal">
+                      {reason.description}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDiscarding}>
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() =>
+                  selectedDiscardReason && onDiscard(selectedDiscardReason)
+                }
+                disabled={isDiscarding || !selectedDiscardReason}
+              >
+                {isDiscarding ? t("discarding") : t("discard")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
