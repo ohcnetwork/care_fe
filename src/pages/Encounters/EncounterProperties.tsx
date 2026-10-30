@@ -24,11 +24,7 @@ export const StatusBadge = ({ encounter }: { encounter: EncounterRead }) => {
     <Popover>
       <PopoverTrigger asChild>
         <Badge
-          variant={
-            encounter.status === "in_progress"
-              ? "indigo"
-              : ENCOUNTER_STATUS_COLORS[encounter.status]
-          }
+          variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
           size="sm"
           className="min-h-7 cursor-pointer px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
           asChild

@@ -30,7 +30,7 @@ export const appointmentDefinition: StructuredTypeDefinition<"appointment"> = {
         body: {
           note,
           patient: patientId,
-          tags,
+          tags: tags?.map((tag) => ({ tag })),
         },
         reference_id: structuredReferenceId("appointment", questionId, path),
       }));

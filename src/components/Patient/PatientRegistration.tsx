@@ -365,7 +365,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     if (!patientId) {
       createPatient({
         ...basePayload,
-        tags: restValues.tags,
+        tags: restValues.tags.map((tag) => ({ tag })),
       });
     } else {
       updatePatient(basePayload);
