@@ -140,9 +140,9 @@ export default function CreateScheduleTemplateSheet({
                 num_of_slots: z
                   .union([
                     z.number().min(1, t("number_min_error", { min: 1 })),
-                    z.undefined(),
+                    z.null(),
                   ])
-                  .refine((val) => val !== undefined, {
+                  .refine((val) => val !== null, {
                     message: t("field_required"),
                   }),
               }),
@@ -302,7 +302,7 @@ export default function CreateScheduleTemplateSheet({
       const start = form.watch(`availabilities.${index}.start_time`);
       const end = form.watch(`availabilities.${index}.end_time`);
       const numOfSlots = form.watch(`availabilities.${index}.num_of_slots`);
-      if (!start || !end) return;
+      if (!start || !end || !numOfSlots) return;
       const duration = calculateSlotDuration(start, end, numOfSlots);
       form.setValue(`availabilities.${index}.slot_size_in_minutes`, duration);
     }
@@ -636,16 +636,24 @@ export default function CreateScheduleTemplateSheet({
                                             inputMode="numeric"
                                             pattern="[0-9]*"
                                             min={1}
-                                            defaultValue={1}
                                             {...field}
+                                            value={field.value ?? ""}
                                             className="shadow-none"
+                                            onBeforeInput={(e) => {
+                                              if (
+                                                /[eE+]/.test(
+                                                  (e.nativeEvent as InputEvent)
+                                                    .data ?? "",
+                                                )
+                                              ) {
+                                                e.preventDefault();
+                                              }
+                                            }}
                                             onChange={(e) => {
                                               const value =
                                                 e.target.valueAsNumber;
                                               field.onChange(
-                                                isNaN(value)
-                                                  ? undefined
-                                                  : value,
+                                                isNaN(value) ? null : value,
                                               );
                                               updateSlotDuration(index);
                                             }}
