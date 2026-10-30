@@ -78,6 +78,22 @@ const drawerHeightClasses = {
 
 type DrawerHeight = keyof typeof drawerHeightClasses;
 
+// A drawer focuses its popup, not the search field inside it. On iOS the keyboard
+// only opens if the field is focused while the tap is still being handled, which
+// is when the content mounts (what native autoFocus relies on) and not Base UI's
+// deferred initial focus. Mark a field with data-autofocus to opt in.
+const DRAWER_AUTOFOCUS_SELECTOR =
+  '[data-autofocus], [data-slot="command-input"], input[role="combobox"]';
+
+function focusDrawerSearchInput(popup: HTMLElement | null) {
+  if (!popup) return;
+  const active = popup.ownerDocument.activeElement;
+  if (active && active !== popup && popup.contains(active)) return;
+  popup
+    .querySelector<HTMLElement>(DRAWER_AUTOFOCUS_SELECTOR)
+    ?.focus({ preventScroll: true });
+}
+
 const DrawerContentSizeContext = React.createContext<DrawerSize>("full");
 
 // Base UI skips the backdrop of any nested popup. That suits a drawer stacked on
@@ -225,7 +241,10 @@ function DrawerOverlay({
         "data-starting-style:opacity-0 data-swiping:duration-0",
         "motion-reduce:transition-opacity motion-reduce:duration-150 motion-reduce:data-ending-style:duration-150 motion-reduce:data-starting-style:duration-150",
         "supports-backdrop-filter:backdrop-blur-sm",
-        "supports-[-webkit-touch-callout:none]:absolute",
+        // Base UI uses `absolute` here so iOS 26 covers the area under the Safari
+        // toolbars, but that anchors it to the document top and it ends up
+        // off-screen once the page is scrolled. Stay fixed and overshoot instead.
+        "supports-[-webkit-touch-callout:none]:-inset-y-24",
         className,
       )}
       {...props}
@@ -281,6 +300,7 @@ function DrawerContent({
   onInteractOutside,
   onPointerDownOutside,
   onFocusOutside,
+  ref,
   ...props
 }: DrawerPrimitive.Popup.Props &
   OverlayContentEvents & {
@@ -295,6 +315,14 @@ function DrawerContent({
     repositionInputs,
   } = useDrawer();
   const insideDrawer = React.useContext(InsideDrawerContext);
+  const setPopupRef = React.useCallback(
+    (popup: HTMLDivElement | null) => {
+      focusDrawerSearchInput(popup);
+      if (typeof ref === "function") return ref(popup);
+      if (ref) ref.current = popup;
+    },
+    [ref],
+  );
   const focusProps = useOverlayContent({
     onOpenAutoFocus,
     onCloseAutoFocus,
@@ -326,6 +354,7 @@ function DrawerContent({
           className="pointer-events-none fixed inset-0 z-50 select-none data-[modal=true]:pointer-events-auto"
         >
           <DrawerPrimitive.Popup
+            ref={setPopupRef}
             data-slot="drawer-popup"
             {...focusProps}
             data-swipe-axis={swipeAxis}
