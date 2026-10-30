@@ -79,7 +79,7 @@ export function ActionConfigurationList() {
           <TableSkeleton count={5} />
         ) : configurations.length === 0 ? (
           <EmptyState
-            icon={<Zap aria-hidden className="size-6 text-gray-400" />}
+            icon={<Zap aria-hidden className="size-6 text-primary" />}
             title={t("action_configurations_empty")}
             description={t("action_configurations_empty_hint")}
           />
