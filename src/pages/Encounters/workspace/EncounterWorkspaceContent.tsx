@@ -27,7 +27,7 @@ import { EncounterWorkspacePage } from "./EncounterWorkspacePage";
 import { parseEncounterWorkspace } from "./parseEncounterWorkspace";
 import { useEncounterWorkspaces } from "./useEncounterWorkspaces";
 
-const customPageIcons: Record<string, LucideIcon> = {
+export const customPageIcons: Record<string, LucideIcon> = {
   stethoscope: Stethoscope,
   "clipboard-list": ClipboardList,
   "layout-dashboard": LayoutDashboard,

@@ -54,7 +54,10 @@ import { useCareAppTabs } from "@/hooks/useCareApps";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import mutate from "@/Utils/request/mutate";
-import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
+import {
+  createEncounterWorkspaceSchema,
+  hasEmptyColumn,
+} from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
   WORKSPACE_STATUS_COLORS,
@@ -125,6 +128,11 @@ export function WorkspaceForm({
               ctx.addIssue({
                 code: "custom",
                 message: t("encounter_workspace_template_invalid"),
+              });
+            } else if (hasEmptyColumn(parsed.data)) {
+              ctx.addIssue({
+                code: "custom",
+                message: t("workspace_builder_empty_column_error"),
               });
             }
           }

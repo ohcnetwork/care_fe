@@ -36,6 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
+import { customPageIcons } from "@/pages/Encounters/workspace/EncounterWorkspaceContent";
 import {
   createEncounterWorkspaceSchema,
   ENCOUNTER_WIDGET_TYPES,
@@ -57,6 +58,14 @@ import {
   type WidgetSelection,
   type WorkspacePage,
 } from "./workspaceEditorUtils";
+
+function PageIcon({ icon, className }: { icon?: string; className: string }) {
+  const Icon =
+    icon && Object.hasOwn(customPageIcons, icon)
+      ? customPageIcons[icon]
+      : LayoutDashboard;
+  return <Icon className={className} />;
+}
 
 interface EncounterWorkspaceEditorProps {
   value: string;
@@ -469,7 +478,7 @@ export function EncounterWorkspaceEditor({
                   {item.kind === "system" ? (
                     <LockKeyhole className="size-3.5 shrink-0 text-gray-400" />
                   ) : (
-                    <LayoutDashboard className="size-3.5 shrink-0" />
+                    <PageIcon icon={item.icon} className="size-3.5 shrink-0" />
                   )}
                   <span className="min-w-0 flex-1 break-words">
                     {item.kind === "custom"

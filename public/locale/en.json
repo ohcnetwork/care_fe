@@ -8046,6 +8046,7 @@
   "workspace_builder_duplicate_widget": "Duplicate {{name}}",
   "workspace_builder_editing_mode": "Editing mode",
   "workspace_builder_empty_column": "Add a widget here, or drag one from another column.",
+  "workspace_builder_empty_column_error": "Every column must contain at least one widget. Add a widget or remove the empty column.",
   "workspace_builder_empty_column_first": "Move or remove the widgets before removing this column.",
   "workspace_builder_empty_hint": "Build focused pages with the clinical tools you need, or start with the standard encounter pages.",
   "workspace_builder_empty_title": "Create a workspace for your team",
