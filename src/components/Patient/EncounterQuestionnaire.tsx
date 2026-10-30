@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import Page from "@/components/Common/Page";
 import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm";
 
 import query from "@/Utils/request/query";
+import { goBack } from "@/Utils/utils";
 import {
   PatientDeceasedInfo,
   PatientHeader,
@@ -67,15 +67,15 @@ export default function EncounterQuestionnaire({
               questionnaireSlug={questionnaireSlug}
               onSubmit={() => {
                 if (encounterId && facilityId) {
-                  navigate(
+                  goBack(
                     `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
                   );
                 } else if (facilityId) {
-                  navigate(
+                  goBack(
                     `/facility/${facilityId}/patient/${patientId}/updates`,
                   );
                 } else {
-                  navigate(`/patient/${patientId}/updates`);
+                  goBack(`/patient/${patientId}/updates`);
                 }
               }}
             />
