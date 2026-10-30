@@ -156,15 +156,7 @@ function SpecimenDefinitionFormContent({
   facilityId,
   specimenSlug,
   initialData,
-  onSuccess = () => {
-    if (specimenSlug) {
-      navigate(
-        `/facility/${facilityId}/settings/specimen_definitions/${specimenSlug}`,
-      );
-    } else {
-      navigate(`/facility/${facilityId}/settings/specimen_definitions`);
-    }
-  },
+  onSuccess,
   onCancel = () => {
     if (specimenSlug) {
       navigate(
@@ -288,7 +280,11 @@ function SpecimenDefinitionFormContent({
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(`/facility/${facilityId}/settings/specimen_definitions`);
+        }
       },
     });
 
@@ -297,12 +293,18 @@ function SpecimenDefinitionFormContent({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
         pathParams: { facilityId, specimenSlug },
       }),
-      onSuccess: () => {
+      onSuccess: (updated: SpecimenDefinitionRead) => {
         toast.success(t("specimen_definition_updated"));
         queryClient.invalidateQueries({
           queryKey: ["specimenDefinitions", facilityId],
         });
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${updated.slug}`,
+          );
+        }
       },
     });
 
