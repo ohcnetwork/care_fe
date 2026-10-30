@@ -7010,6 +7010,8 @@
   "showing_latest_of_versions": "Showing latest {{shown}} of {{total}} versions",
   "showing_x_of_y": "Showing <strong>{{x}}</strong> of <strong>{{y}}</strong>",
   "shown_when": "Shown when {{summary}}",
+  "shown_when_any_n_rules_one": "Shown when {{count}} rule matches",
+  "shown_when_any_n_rules_other": "Shown when any of {{count}} rules match",
   "shown_when_n_rules_one": "Shown when {{count}} rule matches",
   "shown_when_n_rules_other": "Shown when {{count}} rules match",
   "shuffle_color": "Shuffle Color",

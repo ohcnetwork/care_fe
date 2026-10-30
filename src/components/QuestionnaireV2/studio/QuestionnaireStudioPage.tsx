@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { navigate, useNavigationPrompt, useQueryParams } from "raviger";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { findActionIssues } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { BuilderEmptyState } from "@/components/QuestionnaireV2/builder/BuilderEmptyState";
+import { findQuestion } from "@/components/QuestionnaireV2/builder/builderReducer";
 import { ImportQuestionsDialog } from "@/components/QuestionnaireV2/builder/ImportQuestionsDialog";
 
 import { findFirstInvalidQuestion } from "@/components/QuestionnaireV2/builder/saveValidation";
@@ -105,7 +106,7 @@ export function QuestionnaireStudioPage({
   });
 
   const [queryParams, setQueryParams] = useQueryParams();
-  const { mode, import: importParam } = queryParams;
+  const { mode, import: importParam, question: questionParam } = queryParams;
   const [requestedView, setView] = useState<"edit" | "preview">(
     mode === "preview" ? "preview" : "edit",
   );
@@ -115,11 +116,22 @@ export function QuestionnaireStudioPage({
     // The dialog's open state above already captured `?import=1` — strip it
     // from the URL (preserving any other params, e.g. `mode`) so a refresh
     // or Back navigation doesn't reopen the dialog.
-    if (importParam !== "1") return;
-    const { import: _import, ...rest } = queryParams;
+    if (importParam !== "1" && !questionParam) return;
+    const { import: _import, question: _question, ...rest } = queryParams;
     setQueryParams(rest, { overwrite: true, replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // `?question=<id>` (the overview's per-question Edit) opens on that
+  // question. The draft loads asynchronously, so apply it once the question
+  // exists, then never again so later selections aren't overridden.
+  const pendingQuestionIdRef = useRef<string | null>(questionParam ?? null);
+  useEffect(() => {
+    const pendingId = pendingQuestionIdRef.current;
+    if (!pendingId || state.questions.length === 0) return;
+    pendingQuestionIdRef.current = null;
+    if (findQuestion(state.questions, pendingId)) revealQuestion(pendingId);
+  }, [state.questions, revealQuestion]);
 
   useNavigationPrompt(dirty, t("unsaved_changes_warning"));
 
@@ -251,8 +263,9 @@ export function QuestionnaireStudioPage({
 
         {/* Mobile fallback for the outline (hidden below md) — without it a
             phone user who drills into a nested sub-question has no way back
-            to the parent or its siblings. */}
-        {editing && state.questions.length > 0 && (
+            to the parent or its siblings. Shown even with no questions yet,
+            since the canvas empty state is hidden on phones while editing. */}
+        {editing && (
           <StudioMobileQuestionNav
             questions={state.questions}
             selectedId={state.selectedId}
