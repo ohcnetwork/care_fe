@@ -148,18 +148,18 @@ const PrescriptionContent = ({
                 ];
               },
             )}
-            cellClassName="text-sm print:text-xs wrap-break-word whitespace-break-spaces text-gray-950 font-normal text-left border-t border-gray-300"
+            cellClassName="text-sm print:text-xs text-gray-950 font-normal text-left border-t border-gray-300"
             cellConfig={{
               hash_tag: {
-                className: "text-center text-gray-600 w-8 print:w-[5%]",
+                className: "whitespace-nowrap text-center text-gray-600 w-8",
               },
               medicine: {
-                className: "font-medium max-w-56 min-w-32 print:w-[20%]",
+                className: "print-wrap whitespace-pre-wrap font-medium",
               },
-              dosage: { className: "w-24 print:w-[12%]" },
-              frequency: { className: "min-w-24 max-w-56 print:w-[18%]" },
-              duration: { className: "border-r w-20 print:w-[10%]" },
-              instructions: { className: "min-w-28 max-w-56 print:w-[30%]" },
+              dosage: { className: "whitespace-pre-wrap" },
+              frequency: { className: "whitespace-pre-wrap" },
+              duration: { className: "whitespace-pre-wrap border-r" },
+              instructions: { className: "print-wrap whitespace-pre-wrap" },
             }}
             headerClassName="text-gray-700 text-left font-normal bg-gray-50 text-xs print:text-[11px] first:rounded-none border-y border-gray-300"
             tableClassName="border-0 rounded-none"
