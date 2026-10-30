@@ -18,7 +18,6 @@ import {
   CardGridSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import TagColorDot from "@/components/Tags/TagColorDot";
 import {
   Table,
   TableBody,
@@ -27,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import TagColorDot from "@/components/Tags/TagColorDot";
 
 import {
   TAG_STATUS_COLORS,

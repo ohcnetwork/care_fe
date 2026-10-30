@@ -572,13 +572,10 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const isDisabled = useMemo(() => {
-    return (
-      selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
-      (!!currentOrganizations &&
-        currentOrganizations.some((org) => org.id === currentSelection?.id))
-    );
-  }, [currentSelection, currentOrganizations, selectedOrganizations]);
+  const isDisabled =
+    selectedOrganizations.some((org) => org.id === currentSelection?.id) ||
+    (!!currentOrganizations &&
+      currentOrganizations.some((org) => org.id === currentSelection?.id));
 
   return (
     <div className="space-y-4">

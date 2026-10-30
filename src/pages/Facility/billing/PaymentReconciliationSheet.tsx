@@ -89,6 +89,7 @@ import {
 } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { callApi } from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
 import Decimal from "decimal.js";
 
@@ -275,14 +276,62 @@ const PaymentReconciliationSheetBase = ({
     }
   }, [selectedLocationObject, form]);
 
+  const { mutate: autoBalanceInvoice, isPending: isAutoBalancing } =
+    useMutation({
+      mutationFn: async (invoiceId: string) => {
+        const currentInvoice = await callApi(invoiceApi.retrieveInvoice, {
+          pathParams: { facilityId, invoiceId },
+        });
+        const netPaid = new Decimal(currentInvoice.total_payments).minus(
+          currentInvoice.total_credit_notes,
+        );
+        if (
+          currentInvoice.status !== InvoiceStatus.issued ||
+          currentInvoice.is_refund ||
+          !netPaid.equals(currentInvoice.total_gross)
+        ) {
+          return currentInvoice;
+        }
+
+        return mutate(invoiceApi.updateInvoice, {
+          pathParams: { facilityId, invoiceId },
+        })({
+          status: InvoiceStatus.balanced,
+          payment_terms: currentInvoice.payment_terms,
+          note: currentInvoice.note,
+          account: currentInvoice.account.id,
+          charge_items: currentInvoice.charge_items.map((item) => item.id),
+        });
+      },
+      onSuccess: async (updatedInvoice) => {
+        // A refetch started after payment may still contain the issued status.
+        await queryClient.cancelQueries({
+          queryKey: ["invoice"],
+          predicate: (query) => query.queryKey.includes(updatedInvoice.id),
+        });
+        queryClient.setQueriesData<InvoiceRead>(
+          { queryKey: ["invoice"] },
+          (cached) =>
+            cached?.id === updatedInvoice.id ? updatedInvoice : cached,
+        );
+        if (updatedInvoice.status === InvoiceStatus.balanced) {
+          toast.success(t("invoice_marked_as_balanced"));
+          queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+          queryClient.invalidateQueries({ queryKey: ["accounts"] });
+        }
+      },
+      onError: () => toast.error(t("failed_to_mark_invoice_as_balanced")),
+    });
+
   const { mutate: submitPayment, isPending } = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
-      pathParams: { facilityId },
-    }),
+    mutationFn: async (data: PaymentReconciliationCreate) =>
+      mutate(paymentReconciliationApi.createPaymentReconciliation, {
+        pathParams: { facilityId },
+      })(data),
     onSuccess: (data) => {
       // Invalidate relevant queries so the parent invoice/account is refetched
       if (invoice) {
-        queryClient.invalidateQueries({ queryKey: ["invoice", invoice.id] });
+        queryClient.invalidateQueries({ queryKey: ["invoice"] });
         queryClient.invalidateQueries({
           queryKey: ["payments", invoice.id],
         });
@@ -299,7 +348,19 @@ const PaymentReconciliationSheetBase = ({
       }
       // Show in-sheet success view using the returned reconciliation data so it
       // remains stable even if the form is later reset.
-      setSuccessData(data as PaymentReconciliationRead);
+      setSuccessData(data);
+      if (
+        invoice &&
+        !isCreditNote &&
+        !data.is_credit_note &&
+        data.target_invoice?.id === invoice.id &&
+        data.status === PaymentReconciliationStatus.active &&
+        data.outcome === PaymentReconciliationOutcome.complete
+      ) {
+        // Balancing is separate from recording payment: failure must leave the
+        // receipt available and must never cause the payment to be submitted again.
+        autoBalanceInvoice(invoice.id);
+      }
       onSuccess?.();
     },
     onError: () => {
@@ -409,6 +470,7 @@ const PaymentReconciliationSheetBase = ({
             invoice={invoice}
             isCreditNote={isCreditNote}
             paymentReconciliation={successData}
+            isAutoBalancing={isAutoBalancing}
             onClose={() => handleSheetOpenChange(false)}
           />
         ) : (
@@ -798,6 +860,7 @@ interface PaymentReconciliationSuccessViewProps {
   invoice?: InvoiceRead;
   isCreditNote: boolean;
   paymentReconciliation: PaymentReconciliationRead;
+  isAutoBalancing: boolean;
   onClose: () => void;
 }
 
@@ -806,6 +869,7 @@ function PaymentReconciliationSuccessView({
   invoice,
   isCreditNote,
   paymentReconciliation,
+  isAutoBalancing,
   onClose,
 }: PaymentReconciliationSuccessViewProps) {
   const {
@@ -931,17 +995,26 @@ function PaymentReconciliationSuccessView({
           </div>
           <ReceiptEdge direction="down" shadow />
         </div>
-        {canMarkAsBalanced && (
+        {(isAutoBalancing || canMarkAsBalanced) && (
           <Button
             type="button"
             variant="outline_primary"
             className="w-full"
             onClick={handleMarkAsBalanced}
-            disabled={isMarkingBalanced}
+            disabled={isAutoBalancing || isMarkingBalanced}
           >
-            <EqualApproximatelyIcon className="size-4" />
-            {t("mark_as_balanced")}
-            <ShortcutBadge actionId="enter-action" />
+            {isAutoBalancing ? (
+              <>
+                <CareIcon icon="l-spinner" className="size-4 animate-spin" />
+                {t("processing_with_dots")}
+              </>
+            ) : (
+              <>
+                <EqualApproximatelyIcon className="size-4" />
+                {t("mark_as_balanced")}
+                <ShortcutBadge actionId="enter-action" />
+              </>
+            )}
           </Button>
         )}
       </div>

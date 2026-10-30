@@ -1,9 +1,51 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import {
+  dischargeDispositionCombobox,
+  encounterStatusCombobox,
+  getEncounterCreateDialog,
+  openCreateEncounterDialog,
+} from "tests/facility/patient/encounter/encounterFormHelpers";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+async function createEncounter(
+  page: Page,
+  encounterClass: "Ambulatory" | "Inpatient",
+) {
+  await openCreateEncounterDialog(page);
+  const dialog = getEncounterCreateDialog(page);
+  await dialog
+    .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
+    .click();
+
+  await Promise.all([
+    page.waitForURL(/\/encounter\/[^/]+/),
+    dialog.getByRole("button", { name: /^Create Encounter/ }).click(),
+  ]);
+
+  await expect(page.getByText("Encounter created successfully")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+}
+
+async function markEncounterAsComplete(page: Page) {
+  await page.keyboard.press("m");
+  await page.keyboard.press("c");
+
+  const dialog = page.getByRole("alertdialog", { name: "Mark as Complete" });
+  await expect(dialog).toBeVisible();
+  await expect(
+    page.getByText("This action will close Appointment, Token and Encounter"),
+  ).toBeVisible();
+
+  await dialog.getByRole("button", { name: /^Mark as Complete/ }).click();
+  await expect(
+    page.getByText("Encounter Completed", { exact: true }),
+  ).toBeVisible();
+}
 
 test.describe("Encounter Keyboard Shortcuts", () => {
   let encounterUrl: string;
@@ -135,5 +177,48 @@ test.describe("Encounter Keyboard Shortcuts", () => {
         "active",
       );
     });
+  });
+});
+
+test.describe("Mark as Completed Shortcut ('m c')", () => {
+  test("should complete a non-inpatient encounter", async ({ page }) => {
+    await createEncounter(page, "Ambulatory");
+
+    await markEncounterAsComplete(page);
+  });
+
+  test("should navigate to update encounter page with Discharged status for an Inpatient encounter", async ({
+    page,
+  }) => {
+    await createEncounter(page, "Inpatient");
+
+    await page.keyboard.press("m");
+    await page.keyboard.press("c");
+
+    await expect(page).toHaveURL(/questionnaire\/encounter\?toDischarge=true/);
+    await expect(encounterStatusCombobox(page)).toHaveText("Discharged");
+
+    await dischargeDispositionCombobox(page).click();
+    await page.getByRole("option", { name: "Home", exact: true }).click();
+    await page.getByRole("button", { name: "Submit", exact: true }).click();
+
+    await expect(
+      page.getByText("Questionnaire submitted successfully"),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/updates$/);
+    await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible();
+
+    await expect(page.getByText("Discharged").nth(1)).toBeVisible();
+
+    const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
+    expect(encounterId).toBeTruthy();
+    const response = await page.request.get(
+      `${getApiUrl()}/api/v1/encounter/${encounterId}/`,
+      { headers: getApiHeaders() },
+    );
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).status).toBe("discharged");
+
+    await markEncounterAsComplete(page);
   });
 });
