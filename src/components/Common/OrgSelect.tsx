@@ -52,6 +52,8 @@ export function OrgSelect({
     queryKey: ["organizations", orgType, value, "selected"],
     queryFn: query(organizationApi.get, {
       pathParams: { id: value! },
+      // A stale id (e.g. from a shared URL) should leave the field empty, not toast "Not found".
+      silent: true,
     }),
     enabled:
       !!value && !searchResults?.results?.some((org) => org.id === value),

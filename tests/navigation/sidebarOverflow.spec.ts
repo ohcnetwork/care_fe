@@ -13,18 +13,19 @@ test("admin navigation indicates overflow and explains the header search", async
   await page.setViewportSize({ width: 1280, height: 440 });
   await page.goto("/admin/questionnaires");
   const content = page.locator('[data-sidebar="content"]');
-  const more = page.getByRole("button", { name: "More navigation" });
-  await expect(more).toBeVisible();
-  await more.click();
-  await expect
-    .poll(() => content.evaluate((el) => el.scrollTop))
-    .toBeGreaterThan(0);
+  // The overflow cue is decorative (aria-hidden); it is shown via CSS while
+  // the content can scroll further down.
+  const cue = content.locator('[data-slot="sidebar-scroll-cue"]');
+  await expect(content).toHaveAttribute("data-scroll-down", "");
+  await expect(cue).toBeVisible();
   await content.evaluate((el) => el.scrollTo(0, el.scrollHeight));
-  await expect(more).not.toBeVisible();
+  await expect(content).toHaveAttribute("data-scroll-up", "");
+  await expect(content).not.toHaveAttribute("data-scroll-down");
+  await expect(cue).toBeHidden();
   await content.evaluate((el) => el.scrollTo(0, 0));
-  await expect(more).toBeVisible();
+  await expect(cue).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 1200 });
-  await expect(more).not.toBeVisible();
+  await expect(cue).toBeHidden();
   await page.getByRole("button", { name: "Search page actions" }).click();
   await expect(page.getByPlaceholder("Search page actions")).toBeVisible();
 });

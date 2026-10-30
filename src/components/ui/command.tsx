@@ -21,6 +21,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -85,7 +86,7 @@ function CommandDialog({
             "bg-foreground/10 top-1/4 translate-y-0 overflow-hidden p-1.5",
             className,
           )}
-          innerClassName="bg-background grid gap-4 rounded-lg p-1 text-sm md:p-1"
+          innerClassName="bg-background grid gap-4 rounded-lg p-1 text-sm"
           showCloseButton={false}
         >
           <DialogHeader className="sr-only" showCloseButton={false}>
@@ -105,14 +106,16 @@ function CommandDialog({
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         className={cn(
-          "h-[calc(90dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
+          "h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
           className,
         )}
       >
-        <div className="sr-only">
+        <DrawerHeader className="pb-2 pl-1" showCloseButton>
           <DrawerTitle>{resolvedTitle}</DrawerTitle>
-          <DrawerDescription>{resolvedDescription}</DrawerDescription>
-        </div>
+          <DrawerDescription className="sr-only">
+            {resolvedDescription}
+          </DrawerDescription>
+        </DrawerHeader>
         <Command>{children}</Command>
       </DrawerContent>
     </Drawer>
@@ -190,7 +193,7 @@ function CommandList({
       data-slot="command-list"
       className={cn(
         "max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
-        "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1",
+        "in-data-[slot=drawer-content]:max-h-none in-data-[slot=drawer-content]:min-h-0 in-data-[slot=drawer-content]:flex-1 in-data-[slot=drawer-content]:overscroll-contain",
         className,
       )}
       {...props}
