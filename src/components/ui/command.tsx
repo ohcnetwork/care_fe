@@ -121,10 +121,12 @@ function CommandInput({
   className,
   wrapperClassName,
   autoFocus,
+  showCloseButton = false,
   ref,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input> & {
   wrapperClassName?: string;
+  showCloseButton?: boolean;
 }) {
   const innerRef = React.useRef<HTMLInputElement>(null);
   const isDesktopCommandDialog = React.useContext(CommandDialogContext);
@@ -161,7 +163,7 @@ function CommandInput({
         <InputGroupAddon>
           <SearchIcon className="opacity-50 size-4 shrink-0" />
         </InputGroupAddon>
-        {isDesktopCommandDialog && (
+        {isDesktopCommandDialog && showCloseButton && (
           <InputGroupAddon align="inline-end">
             <DialogClose asChild>
               <InputGroupButton

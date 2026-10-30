@@ -474,21 +474,16 @@ function DrawerHeader({
     <div
       data-slot="drawer-header"
       className={cn(
-        "relative flex shrink-0 flex-col gap-0.5 p-4 text-left md:gap-1.5",
+        "relative flex shrink-0 flex-1 justify-between gap-0.5 p-4 text-left md:gap-1.5",
         drawerContainerClasses[size],
-        showCloseButton && "pr-14",
         className,
       )}
       {...props}
     >
-      {children}
+      <div>{children}</div>
       {showCloseButton && (
         <DrawerClose asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-0 right-0"
-          >
+          <Button variant="ghost" size="icon">
             <XIcon />
             <span className="sr-only">{t("close")}</span>
           </Button>
