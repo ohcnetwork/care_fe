@@ -154,7 +154,11 @@ export default function Autocomplete({
       )}
       <ComboboxList showScrollbar className="min-h-0 flex-1">
         {(option: AutoCompleteOption) => (
-          <ComboboxItem key={option.value} value={option}>
+          <ComboboxItem
+            key={option.value}
+            value={option}
+            className={cn(isMobile && "min-h-11 py-2.5")}
+          >
             {option.label}
           </ComboboxItem>
         )}
@@ -201,7 +205,7 @@ export default function Autocomplete({
     >
       {isMobile ? (
         <Drawer open={open} onOpenChange={handleOpenChange}>
-          <ButtonGroup className="w-full">
+          <ButtonGroup className="w-full min-w-0">
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             {clearButton}
           </ButtonGroup>
@@ -216,7 +220,7 @@ export default function Autocomplete({
         </Drawer>
       ) : (
         <>
-          <ButtonGroup className="w-full">
+          <ButtonGroup className="w-full min-w-0">
             <ComboboxTrigger render={triggerButton} showChevron={false} />
             {clearButton}
           </ButtonGroup>

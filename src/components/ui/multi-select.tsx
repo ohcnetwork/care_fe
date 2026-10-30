@@ -125,9 +125,13 @@ export function MultiSelect({
             ? t(`search_${translationBasekey}`)
             : t("search_options")
         }
-        autoFocus={isMobile}
       />
-      <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+      <div
+        className={cn(
+          "flex items-center gap-2 border-b border-border px-3 py-2",
+          isMobile && "min-h-11",
+        )}
+      >
         <Checkbox
           id={selectAllId}
           checked={allSelected}
@@ -152,7 +156,11 @@ export function MultiSelect({
                   (option) => option.value === optionValue,
                 );
                 return (
-                  <ComboboxItem key={optionValue} value={optionValue}>
+                  <ComboboxItem
+                    key={optionValue}
+                    value={optionValue}
+                    className={cn(isMobile && "min-h-11 py-2.5")}
+                  >
                     {option?.icon && (
                       <CareIcon icon={option.icon} className="size-4" />
                     )}
@@ -164,7 +172,7 @@ export function MultiSelect({
           </ComboboxGroup>
         )}
       </ComboboxList>
-      <div className="flex shrink-0 justify-end gap-2 border-t border-border p-3">
+      <div className="flex shrink-0 justify-end gap-2 border-t border-border p-2">
         <Button variant="ghost" onClick={() => handleOpenChange(false)}>
           {t("cancel")}
         </Button>
@@ -199,7 +207,7 @@ export function MultiSelect({
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent height="fixed">
             <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-0">
               {content}
             </div>
           </DrawerContent>
