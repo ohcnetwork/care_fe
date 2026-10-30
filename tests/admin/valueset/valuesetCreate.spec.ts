@@ -185,7 +185,7 @@ test.describe("ValueSet Create", () => {
     }
   });
 
-  test("verify slug validation of 5 - 25 character", async ({ page }) => {
+  test("verify slug validation of 5 - 50 character", async ({ page }) => {
     await page.getByRole("link", { name: "Create ValueSet" }).click();
 
     await page.getByRole("textbox", { name: "Name *" }).fill(name);
@@ -199,9 +199,11 @@ test.describe("ValueSet Create", () => {
       page.getByRole("textbox", { name: "Slug *" }),
     );
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 25/i);
+    await expect(errorMessage).toHaveText(
+      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+    );
 
-    // Test: Slug too long (more than 25 characters)
+    // Test: Slug too long (more than 50 characters)
     const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
     await page.getByRole("textbox", { name: "Slug *" }).fill(longSlug);
 
@@ -209,7 +211,9 @@ test.describe("ValueSet Create", () => {
     await page.getByRole("button", { name: /save/i }).click();
 
     await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toHaveText(/atleast \d+.*atmost 25/i);
+    await expect(errorMessage).toHaveText(
+      new RegExp(`atleast \\d+.*atmost ${MAX_SLUG_LENGTH}`, "i"),
+    );
 
     const validSlug = faker.string.alphanumeric(
       faker.number.int({ min: MIN_SLUG_LENGTH, max: MAX_SLUG_LENGTH }),

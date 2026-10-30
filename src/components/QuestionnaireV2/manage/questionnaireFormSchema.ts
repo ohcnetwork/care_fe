@@ -1,17 +1,11 @@
 import { TFunction } from "i18next";
 import { z } from "zod";
 
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   QUESTIONNAIRE_STATUSES,
   QuestionStatus,
 } from "@/types/questionnaire/questionnaire";
-
-/**
- * Backend slug bounds shared by create, detail and clone forms, slug
- * auto-generation, and the clone dialog's `-copy` suffix clamp.
- */
-export const SLUG_MIN_LENGTH = 5;
-export const SLUG_MAX_LENGTH = 50;
 
 /**
  * The `title`/`slug`/`description`/`status` validation shared by the three
@@ -21,17 +15,9 @@ export const SLUG_MAX_LENGTH = 50;
  * the call (plus any `.extend`/`.pick`) in `useMemo(..., [t])`.
  */
 export function questionnaireBasicSchema(t: TFunction) {
-  const characterCountMessage = t("character_count_validation", {
-    min: SLUG_MIN_LENGTH,
-    max: SLUG_MAX_LENGTH,
-  });
   return z.object({
     title: z.string().trim().min(1, t("field_required")),
-    slug: z
-      .string()
-      .min(SLUG_MIN_LENGTH, characterCountMessage)
-      .max(SLUG_MAX_LENGTH, characterCountMessage)
-      .regex(/^[-\w]+$/, t("slug_format_message")),
+    slug: slugValueSchema(),
     description: z.string(),
     status: z.enum(QUESTIONNAIRE_STATUSES),
   });

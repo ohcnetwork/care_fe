@@ -22,9 +22,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { ValueSetRead, ValueSetStatus } from "@/types/valueSet/valueSet";
 
-import { generateSlug, valuesOf } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
+import { valuesOf } from "@/Utils/utils";
 
-import { SLUG_MAX, type ValueSetFormData } from "./valueSetFormTypes";
+import { type ValueSetFormData } from "./valueSetFormTypes";
 
 interface ValueSetBasicFieldsProps {
   form: UseFormReturn<ValueSetFormData>;
@@ -79,7 +80,7 @@ export function ValueSetBasicFields({
                     }
                     form.setValue(
                       "slug",
-                      generateSlug(event.target.value, SLUG_MAX),
+                      generateSlugValue(event.target.value),
                       {
                         shouldValidate: true,
                         shouldDirty: false,
