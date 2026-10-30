@@ -50,7 +50,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const user = useAuthUser();
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
-    useUserPreferences(facilityId);
+    useUserPreferences({ facilityId });
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],

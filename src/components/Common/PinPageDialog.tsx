@@ -35,7 +35,7 @@ function PinPageDialog({ url }: PinPageDialogProps) {
     isPending,
     canAddMoreLinks,
     maxCustomLinks,
-  } = useUserPreferences(facilityId);
+  } = useUserPreferences({ facilityId });
 
   const [includeQueryParams, setIncludeQueryParams] = useState(false);
   const pathUrl = includeQueryParams

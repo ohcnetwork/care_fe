@@ -151,7 +151,11 @@ function getLinksForFacility(
   );
 }
 
-function useUserPreferences(facilityId?: string) {
+interface UserPreferencesContext {
+  facilityId?: string;
+}
+
+function useUserPreferences({ facilityId }: UserPreferencesContext) {
   const user = useAuthUser();
   const queryClient = useQueryClient();
 
