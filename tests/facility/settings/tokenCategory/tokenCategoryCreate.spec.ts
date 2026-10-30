@@ -25,85 +25,68 @@ test.describe("Token Category Create - Permission Tests", () => {
     // Use admin authenticated state
     test.use({ storageState: "tests/.auth/user.json" });
 
-    test("Admin can view Add Token Category button", async ({ page }) => {
-      // Navigate directly to token category page
+    test.beforeEach(async ({ page }) => {
       await page.goto(`/facility/${facilityId}/settings/token_category`);
 
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
       ).toBeVisible({ timeout: 10000 });
-
-      // Verify we're on the token category list page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category/,
-      );
-
-      // Verify Add Token Category button is visible
-      const addButton = page.getByRole("button", {
-        name: "Add Token Category",
-      });
-      await expect(addButton).toBeVisible();
     });
 
-    test("Admin can create a token category", async ({ page }) => {
-      // Navigate directly to creation page
-      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
+    test("Admin can view Add Token Category trigger for each resource type", async ({
+      page,
+    }) => {
+      // Verify each resource type group has its own Add Token Category trigger
+      for (const label of resourceTypes) {
+        await expect(
+          page.getByRole("button", { name: `Add ${label} Token Category` }),
+        ).toBeVisible();
+      }
+    });
 
-      // Wait for the creation page heading to be visible instead of networkidle
+    test("Admin can create a token category inline", async ({ page }) => {
+      // Open the inline create form for the resource type group
+      await page
+        .getByRole("button", { name: `Add ${resourceType} Token Category` })
+        .click();
+      const popover = page.getByRole("dialog", {
+        name: `Add ${resourceType} Token Category`,
+      });
+      await expect(popover).toBeVisible();
+
+      // Resource type is derived from the group and is not selectable
       await expect(
-        page.getByRole("heading", { name: "Create Token Category" }),
-      ).toBeVisible({ timeout: 10000 });
+        popover.getByRole("combobox", { name: "Resource Type" }),
+      ).toHaveCount(0);
 
-      // Verify we're on the creation page
+      // Fill all mandatory fields and submit
+      await popover
+        .getByRole("textbox", { name: "Name" })
+        .fill(tokenCategoryName);
+      await popover.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await popover.getByRole("button", { name: "Create" }).click();
+
+      // Popover closes and we stay on the list page
+      await expect(popover).not.toBeVisible();
       await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
-      await expect(
-        page.getByRole("heading", { name: "Create Token Category" }),
-      ).toBeVisible();
-
-      // Fill all mandatory fields
-      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: resourceType }).click();
-      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
-
-      // Submit the form
-      await page.getByRole("button", { name: "Create" }).click();
-
-      // Wait for navigation back to list page
-      await page.waitForURL(
-        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
+        /\/facility\/[^/]+\/settings\/token_category$/,
       );
 
-      // Verify the created token category appears in the list
-      // Wait for table to be visible instead of networkidle
-      const tableBody = page.locator("tbody");
-      await expect(tableBody).toBeVisible({ timeout: 10000 });
-
-      // Search for the created token category
+      // Verify the created token category appears under its resource type group
+      const groupBody = page
+        .getByRole("region", { name: resourceType, exact: true })
+        .locator("tbody");
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(tokenCategoryName);
-
-      // Verify search results contain the created token category
-      await expect(tableBody).toContainText(tokenCategoryName);
-      await expect(tableBody).toContainText(shorthand);
-      await expect(tableBody).toContainText(resourceType);
+      await expect(groupBody).toContainText(tokenCategoryName);
+      await expect(groupBody).toContainText(shorthand);
     });
 
     test("Admin sees no results when searching for non-existent token category", async ({
       page,
     }) => {
-      // Navigate directly to token category page
-      await page.goto(`/facility/${facilityId}/settings/token_category`);
-
-      // Wait for page heading to be visible instead of networkidle
-      await expect(
-        page.getByRole("heading", { name: "Token Categories" }),
-      ).toBeVisible({ timeout: 10000 });
-
       const nonExistentName = "NonExistentTokenCategory12345";
 
       // Search for non-existent item
@@ -111,49 +94,43 @@ test.describe("Token Category Create - Permission Tests", () => {
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(nonExistentName);
 
-      // Verify no results found message is displayed
-      const noResultsText = page.getByText("No token categories found");
-      await expect(noResultsText).toBeVisible();
+      // Verify no results found message is displayed in every group
+      await expect(page.getByText("No token categories found")).toHaveCount(
+        resourceTypes.length,
+      );
     });
 
     test("Admin sees validation errors when submitting empty form", async ({
       page,
     }) => {
-      // Navigate directly to creation page
-      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
-
-      // Wait for the creation page heading to be visible instead of networkidle
-      await expect(
-        page.getByRole("heading", { name: "Create Token Category" }),
-      ).toBeVisible({ timeout: 10000 });
-
-      // Verify we're on the creation page
-      await expect(page).toHaveURL(
-        /\/facility\/[^/]+\/settings\/token_category\/new/,
-      );
+      await page
+        .getByRole("button", { name: `Add ${resourceType} Token Category` })
+        .click();
+      const popover = page.getByRole("dialog", {
+        name: `Add ${resourceType} Token Category`,
+      });
+      await expect(popover).toBeVisible();
 
       // Click Create button without filling any fields
-      await page.getByRole("button", { name: "Create" }).click();
+      await popover.getByRole("button", { name: "Create" }).click();
 
       // Verify error message for Name field
-      const nameLabel = page.getByLabel("Name");
-      const nameError = page
+      const nameError = popover
         .locator('[data-slot="form-item"]')
-        .filter({ has: nameLabel })
+        .filter({ has: popover.getByLabel("Name") })
         .getByText("This field is required");
       await expect(nameError).toBeVisible();
 
       // Verify error message for Shorthand field
-      const shorthandLabel = page.getByLabel("Shorthand");
-      const shorthandError = page
+      const shorthandError = popover
         .locator('[data-slot="form-item"]')
-        .filter({ has: shorthandLabel })
+        .filter({ has: popover.getByLabel("Shorthand") })
         .getByText("This field is required");
       await expect(shorthandError).toBeVisible();
 
-      // Verify Resource Type field exists (has default value so no error)
-      const resourceTypeLabel = page.getByLabel("Resource Type");
-      await expect(resourceTypeLabel).toBeVisible();
+      // Cancelling closes the inline form
+      await popover.getByRole("button", { name: "Cancel" }).click();
+      await expect(popover).not.toBeVisible();
     });
   });
 
@@ -201,11 +178,10 @@ test.describe("Token Category Create - Permission Tests", () => {
           /\/facility\/[^/]+\/settings\/token_category/,
         );
 
-        // Verify Add Token Category button is NOT visible
-        const addButton = page.getByRole("button", {
-          name: "Add Token Category",
-        });
-        await expect(addButton).not.toBeVisible();
+        // Verify Add Token Category triggers are NOT visible
+        await expect(
+          page.getByRole("button", { name: /Add .* Token Category/ }),
+        ).toHaveCount(0);
       }
       // If page is not accessible, that's also valid for nurses (access denied)
     });
