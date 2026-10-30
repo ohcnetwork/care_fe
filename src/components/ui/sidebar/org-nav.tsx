@@ -1,6 +1,8 @@
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { Organization, OrgType } from "@/types/organization/organization";
+import { Building2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function generateOrganizationLinks(
   organizations: Organization[],
@@ -11,9 +13,16 @@ function generateOrganizationLinks(
     .map((org) => ({
       name: org.name,
       url: `/organization/${org.id}`,
+      icon: <Building2 />,
     }));
 }
 
 export function OrgNav({ organizations }: { organizations: Organization[] }) {
-  return <NavMain links={generateOrganizationLinks(organizations)} />;
+  const { t } = useTranslation();
+  return (
+    <NavMain
+      label={t("organizations")}
+      links={generateOrganizationLinks(organizations)}
+    />
+  );
 }

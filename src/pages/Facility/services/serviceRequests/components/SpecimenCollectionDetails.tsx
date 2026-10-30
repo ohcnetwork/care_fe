@@ -1,11 +1,5 @@
-import { CheckCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -15,115 +9,82 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CollectionReadSpec } from "@/types/emr/specimen/specimen";
+import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
-import { cn } from "@/lib/utils";
-import { SpecimenRead } from "@/types/emr/specimen/specimen";
-import { formatName } from "@/Utils/utils";
-
-import { formatQuantity } from "./specimenQuantity";
-
-interface SpecimenCollectionDetailsProps {
-  specimen: SpecimenRead;
+function formatQuantity(quantity?: QuantitySpec | null) {
+  if (!quantity) return "";
+  return `${quantity.value} ${quantity.unit.display || quantity.unit.code}`;
 }
 
+/** Collection presentation shared with the native specimen workflow. */
 export function SpecimenCollectionDetails({
-  specimen,
-}: SpecimenCollectionDetailsProps) {
+  collection,
+}: {
+  collection: CollectionReadSpec;
+}) {
   const { t } = useTranslation();
+  const fasting = [
+    collection.fasting_status_codeable_concept?.display ||
+      collection.fasting_status_codeable_concept?.code,
+    formatQuantity(collection.fasting_status_duration),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const fields: [string, string | undefined][] = [
+    [
+      "collector",
+      collection.collector
+        ? collection.collector_object
+          ? formatName(collection.collector_object)
+          : t("unknown")
+        : "",
+    ],
+    [
+      "collected_time",
+      collection.collected_date_time
+        ? formatDateTime(collection.collected_date_time)
+        : "",
+    ],
+    ["body_site", collection.body_site?.display || collection.body_site?.code],
+    ["quantity", formatQuantity(collection.quantity)],
+    ["method", collection.method?.display || collection.method?.code],
+    ["fasting_status", fasting],
+  ];
+  const rows = fields.filter(
+    ([, value]) => value !== undefined && value !== null && value !== "",
+  );
+  if (!rows.length) return null;
   return (
-    <AccordionItem value="collection-details" className="border-none">
-      <AccordionTrigger
-        className={cn(
-          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-gray-100 data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
-        )}
-      >
-        <div className="flex items-center gap-2 flex-1 mr-4">
-          <span className="font-medium flex items-center gap-2 underline">
-            {t("specimen_collection")}
-            <CheckCheck className="size-4 text-blue-500 shrink-0" />
-          </span>
-        </div>
-      </AccordionTrigger>
-      <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
-        <p className="font-semibold text-xs mb-2 flex items-center gap-2">
-          {t("collected_specimen_details")}
-        </p>
-        <Card className="rounded-xl overflow-clip border-none shadow-md">
-          <Table>
-            <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
-              <TableRow>
-                <TableHead className="w-[150px] text-gray-700 ">
-                  {t("field")}
-                </TableHead>
-                <TableHead className="text-gray-700">{t("details")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {specimen.collection?.collector && (
-                <TableRow>
-                  <TableHead className="w-[150px] text-gray-700">
-                    {t("collector")}
-                  </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
-                    {specimen.collection.collector_object
-                      ? formatName(specimen.collection.collector_object)
-                      : "--"}
-                  </TableCell>
-                </TableRow>
-              )}
-              {specimen.collection?.collected_date_time && (
-                <TableRow>
-                  <TableHead className="text-gray-700">
-                    {t("collected_time")}
-                  </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
-                    {new Date(
-                      specimen.collection.collected_date_time,
-                    ).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              )}
-              {specimen.collection?.body_site && (
-                <TableRow>
-                  <TableHead className="text-gray-700">
-                    {t("body_site")}
-                  </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
-                    {specimen.collection.body_site.display}
-                  </TableCell>
-                </TableRow>
-              )}
-              {specimen.collection?.quantity && (
-                <TableRow>
-                  <TableHead className="text-gray-700">
-                    {t("quantity")}
-                  </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
-                    {formatQuantity({
-                      quantity: specimen.collection.quantity,
-                    })}
-                  </TableCell>
-                </TableRow>
-              )}
-              {specimen.collection?.fasting_status_codeable_concept && (
-                <TableRow>
-                  <TableHead className="text-gray-700">
-                    {t("fasting_status")}
-                  </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
-                    {
-                      specimen.collection.fasting_status_codeable_concept
-                        .display
-                    }{" "}
-                    {specimen.collection.fasting_status_duration &&
-                      `(${formatQuantity({ quantity: specimen.collection.fasting_status_duration })})`}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </AccordionContent>
-    </AccordionItem>
+    <Card className="min-w-0 rounded-xl overflow-hidden border-none shadow-md">
+      <Table className="table-fixed">
+        <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
+          <TableRow>
+            <TableHead className="w-2/5 text-muted-foreground whitespace-normal">
+              {t("field")}
+            </TableHead>
+            <TableHead className="text-muted-foreground">
+              {t("details")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map(([label, value]) => (
+            <TableRow key={label}>
+              <TableHead
+                scope="row"
+                className="text-muted-foreground whitespace-normal break-words"
+              >
+                {t(label)}
+              </TableHead>
+              <TableCell className="text-foreground font-semibold whitespace-normal break-words">
+                {value}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
   );
 }

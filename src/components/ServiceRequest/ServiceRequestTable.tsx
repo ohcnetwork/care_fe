@@ -1,8 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/table";
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import { TagBadges } from "@/components/Tags/TagBadges";
 
 import { LocationNode } from "@/components/Location/LocationTree";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ interface ServiceRequestTableProps {
   facilityId: string;
   locationId?: string;
   showPatientInfo?: boolean;
+  readOnly?: boolean;
   onPatientClick?: (request: ServiceRequestReadSpec) => void;
 }
 
@@ -38,6 +39,7 @@ export default function ServiceRequestTable({
   facilityId,
   locationId,
   showPatientInfo = true,
+  readOnly = false,
   onPatientClick,
 }: ServiceRequestTableProps) {
   const { t } = useTranslation();
@@ -51,7 +53,7 @@ export default function ServiceRequestTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="min-w-0">
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
@@ -62,7 +64,11 @@ export default function ServiceRequestTable({
             </TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
             <TableHead>{t("location")}</TableHead>
-            <TableHead>{t("actions")}</TableHead>
+            {!readOnly && (
+              <TableHead className="w-px whitespace-nowrap">
+                {t("actions")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -73,10 +79,7 @@ export default function ServiceRequestTable({
             >
               {showPatientInfo && (
                 <TableCell
-                  className={cn(
-                    "font-medium",
-                    onPatientClick && "group-hover:underline cursor-pointer",
-                  )}
+                  className={cn("font-medium", onPatientClick)}
                   onClick={() => onPatientClick?.(request)}
                 >
                   <div className="font-semibold text-gray-900">
@@ -89,7 +92,7 @@ export default function ServiceRequestTable({
               )}
               <TableCell>
                 <div>
-                  <div className="text-lg">{request.title || "-"}</div>
+                  <div>{request.title || "-"}</div>
                   {request.code?.display && (
                     <div className="text-xs text-gray-500">
                       {request.code.display}
@@ -97,29 +100,37 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="flex flex-col gap-1">
-                <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
-                  {t(request.status)}
-                </Badge>
-                <Badge
-                  variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
-                >
-                  {t(request.priority)}
-                </Badge>
+              <TableCell>
+                <div className="flex gap-1">
+                  <Badge
+                    variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}
+                  >
+                    {t(request.status)}
+                  </Badge>
+                  <Badge
+                    variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
+                  >
+                    {t(request.priority)}
+                  </Badge>
+                </div>
               </TableCell>
               <TableCell>
-                <TagAssignmentSheet
-                  entityType="service_request"
-                  entityId={request.id}
-                  facilityId={facilityId}
-                  currentTags={request.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["serviceRequests", facilityId],
-                    });
-                  }}
-                  patientId={request.encounter.patient.id}
-                />
+                {readOnly ? (
+                  <TagBadges tags={request.tags ?? []} />
+                ) : (
+                  <TagAssignmentSheet
+                    entityType="service_request"
+                    entityId={request.id}
+                    facilityId={facilityId}
+                    currentTags={request.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["serviceRequests", facilityId],
+                      });
+                    }}
+                    patientId={request.encounter.patient.id}
+                  />
+                )}
               </TableCell>
               <TableCell>
                 <div className="text-xs text-gray-500">
@@ -131,16 +142,18 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-left">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewDetails(request)}
-                >
-                  <CareIcon icon="l-edit" />
-                  {t("see_details")}
-                </Button>
-              </TableCell>
+              {!readOnly && (
+                <TableCell className="w-px text-left whitespace-nowrap">
+                  <Button
+                    variant="tertiary"
+                    size="sm"
+                    onClick={() => handleViewDetails(request)}
+                  >
+                    {t("see_details")}
+                    <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

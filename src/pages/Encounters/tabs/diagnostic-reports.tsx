@@ -8,8 +8,14 @@ import { useInView } from "react-intersection-observer";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -39,20 +45,23 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
   const { t } = useTranslation();
 
   return (
-    <Card
+    <Button
+      type="button"
+      variant="ghost"
+      aria-current={isActive ? "true" : undefined}
       onClick={onClick}
       className={cn(
-        "cursor-pointer p-3 text-sm border hover:border-primary-500 transition-colors rounded-md",
+        "h-auto w-full justify-start whitespace-normal p-3 text-left text-sm font-normal tracking-normal border border-border hover:border-primary-500 transition-colors rounded-md",
         isActive && "border-primary-600 bg-primary-50",
       )}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="font-medium pb-1 truncate">
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-muted-foreground">
             {formatDateTime(report.created_date)}
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -63,15 +72,17 @@ function LeftCard({ report, isActive, onClick }: LeftCardProps) {
               {t(report.status)}
             </Badge>
             {report.category?.display && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {report.category.display}
               </span>
             )}
           </div>
         </div>
-        {isActive && <ArrowRight className="size-4 text-gray-500 ml-2" />}
+        {isActive && (
+          <ArrowRight className="size-4 text-muted-foreground ml-2" />
+        )}
       </div>
-    </Card>
+    </Button>
   );
 }
 
@@ -156,7 +167,7 @@ function LeftPanel({
             <div ref={scrollRef} />
             {isFetchingNextPage && <CardListSkeleton count={3} />}
             {!hasNextPage && reports.length > 0 && (
-              <div className="border-b border-gray-300 pb-2" />
+              <div className="border-b border-border pb-2" />
             )}
           </ul>
         )}
@@ -171,12 +182,14 @@ interface DiagnosticReportsTabProps {
   patientId: string;
   encounterId?: string;
   facilityId?: string;
+  embedded?: boolean;
 }
 
 export const DiagnosticReportsTab = ({
   patientId,
   encounterId,
   facilityId,
+  embedded = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -298,26 +311,26 @@ export const DiagnosticReportsTab = ({
                 {t("ENCOUNTER_TAB__diagnostic_reports")}
               </Button>
             </DrawerTrigger>
-            <DrawerContent
-              className="h-[85vh]"
-              onCloseAutoFocus={(e) => e.preventDefault()}
-            >
-              <ScrollArea className="h-full">
-                <div className="p-3 h-full">
-                  <LeftPanel
-                    reports={reports}
-                    isLoading={isLoading}
-                    isFetchingNextPage={isFetchingNextPage}
-                    hasNextPage={!!hasNextPage}
-                    selectedReportId={selectedReport?.id}
-                    selectedActivityDefinition={activityDefinition}
-                    facilityId={facilityId || ""}
-                    onReportClick={handleReportClick}
-                    onActivityDefinitionChange={handleActivityDefinitionChange}
-                    scrollRef={ref}
-                  />
-                </div>
-              </ScrollArea>
+            <DrawerContent className="h-[85dvh] max-h-[85dvh]">
+              <DrawerHeader showCloseButton>
+                <DrawerTitle>
+                  {t("ENCOUNTER_TAB__diagnostic_reports")}
+                </DrawerTitle>
+              </DrawerHeader>
+              <DrawerBody className="flex min-h-0 flex-col">
+                <LeftPanel
+                  reports={reports}
+                  isLoading={isLoading}
+                  isFetchingNextPage={isFetchingNextPage}
+                  hasNextPage={!!hasNextPage}
+                  selectedReportId={selectedReport?.id}
+                  selectedActivityDefinition={activityDefinition}
+                  facilityId={facilityId || ""}
+                  onReportClick={handleReportClick}
+                  onActivityDefinitionChange={handleActivityDefinitionChange}
+                  scrollRef={ref}
+                />
+              </DrawerBody>
             </DrawerContent>
           </Drawer>
         </div>
@@ -335,6 +348,7 @@ export const DiagnosticReportsTab = ({
                   reportId={selectedReport.id}
                   patientId={patientId}
                   facilityId={facilityId}
+                  embedded={embedded}
                 />
               )
             )}

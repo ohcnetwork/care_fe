@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreVertical, Printer } from "lucide-react";
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,12 +39,14 @@ interface DiagnosticReportDetailCardProps {
   reportId: string;
   patientId: string;
   facilityId?: string;
+  embedded?: boolean;
 }
 
 export function DiagnosticReportDetailCard({
   reportId,
   patientId,
   facilityId,
+  embedded = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -90,7 +92,7 @@ export function DiagnosticReportDetailCard({
   return (
     <Card className="shadow-sm border rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-        <CardTitle className="flex items-center gap-2 text-gray-700 text-lg">
+        <CardTitle className="flex items-center gap-2 text-muted-foreground text-lg">
           <span>
             {report.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
@@ -104,22 +106,24 @@ export function DiagnosticReportDetailCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
+                  asChild
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() =>
-                    navigate(
-                      buildEncounterUrl(
-                        patientId,
-                        `/diagnostic_reports/${report.id}/print`,
-                        facilityId,
-                      ),
-                    )
-                  }
                   data-shortcut-id="print-button"
                   aria-label={t("print")}
                 >
-                  <Printer className="size-4" />
+                  <Link
+                    href={buildEncounterUrl(
+                      patientId,
+                      `/diagnostic_reports/${report.id}/print`,
+                      facilityId,
+                    )}
+                    target={embedded ? "_blank" : undefined}
+                    rel={embedded ? "noopener noreferrer" : undefined}
+                  >
+                    <Printer className="size-4" />
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t("print")}</TooltipContent>
@@ -161,7 +165,7 @@ export function DiagnosticReportDetailCard({
 
         {filteredObservations && filteredObservations.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-700">
+            <h4 className="text-sm font-semibold text-muted-foreground">
               {t("test_results")}
             </h4>
             <DiagnosticReportResultsTable observations={filteredObservations} />
@@ -170,7 +174,7 @@ export function DiagnosticReportDetailCard({
 
         {files.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-gray-700">
+            <h4 className="text-sm font-semibold text-muted-foreground">
               {t("uploaded_files")}
             </h4>
             <FileListTable

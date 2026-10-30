@@ -1,5 +1,14 @@
-import { ChevronRight } from "lucide-react";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 
 import { LocationRead } from "@/types/location/location";
 
@@ -23,39 +32,44 @@ export function LocationBreadcrumb({
   }
 
   return (
-    <div className="flex items-center gap-1 text-sm text-gray-600 mt-4">
-      <div className="flex items-center gap-1">
-        <span
-          className="hover:text-gray-900 cursor-pointer"
-          onClick={onRootClick}
-        >
-          {t("locations")}
-        </span>
-        <ChevronRight className="size-4" />
-      </div>
-      {locationHistory.slice(0, -1).map((_loc, _index) => (
-        <div key={_loc.id} className="flex items-center gap-1">
-          <span
-            className="hover:text-gray-900 cursor-pointer"
-            onClick={() => {
-              const newHistory = locationHistory.slice(0, _index + 1);
-              const lastLocation = newHistory[newHistory.length - 1];
-              onLocationClick(lastLocation);
-            }}
+    <Breadcrumb className="mt-4">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto p-0 font-normal"
+            onClick={onRootClick}
           >
-            {_loc.name}
-          </span>
-          <ChevronRight className="size-4" />
-        </div>
-      ))}
-      {locationHistory.length > 0 && (
-        <div className="flex items-center gap-1">
-          <span className="text-gray-900 font-medium">
-            {locationHistory[locationHistory.length - 1].name}
-          </span>
-          <ChevronRight className="size-4" />
-        </div>
-      )}
-    </div>
+            {t("locations")}
+          </Button>
+        </BreadcrumbItem>
+        {locationHistory.slice(0, -1).map((location) => (
+          <Fragment key={location.id}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto p-0 font-normal"
+                onClick={() => onLocationClick(location)}
+              >
+                {location.name}
+              </Button>
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
+        {locationHistory.length > 0 && (
+          <>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                {locationHistory[locationHistory.length - 1].name}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </>
+        )}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }

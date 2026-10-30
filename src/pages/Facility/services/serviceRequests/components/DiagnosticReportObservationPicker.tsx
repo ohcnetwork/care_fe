@@ -112,12 +112,8 @@ export function DiagnosticReportObservationPicker({
           }
         }}
       >
-        <Command
-          shouldFilter={false}
-          className="**:data-[slot=command-input-wrapper]:focus-within:border-gray-500"
-        >
+        <Command shouldFilter={false}>
           <CommandInput
-            className="border-0 focus:ring-0"
             value={search}
             onValueChange={setSearch}
             placeholder={t("search_observations")}
@@ -125,7 +121,7 @@ export function DiagnosticReportObservationPicker({
           />
           <CommandList>
             {isLoading ? (
-              <div role="status" className="p-4 text-sm text-gray-500">
+              <div role="status" className="p-4 text-sm text-muted-foreground">
                 {t("loading")}
               </div>
             ) : isError ? (
@@ -147,11 +143,13 @@ export function DiagnosticReportObservationPicker({
                       value={definition.id}
                       onSelect={() => {
                         onSelect(definition);
+                        setOpen(false);
+                        setSearch("");
                       }}
                     >
                       <div className="min-w-0">
                         <p className="font-medium">{definition.title}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {definition.code.display || definition.code.code}
                         </p>
                       </div>
@@ -159,7 +157,7 @@ export function DiagnosticReportObservationPicker({
                   ))}
                   {hasNextPage && <div ref={ref} aria-hidden="true" />}
                   {isFetchingNextPage && (
-                    <div className="text-center text-sm py-2 text-gray-500">
+                    <div className="text-center text-sm py-2 text-muted-foreground">
                       {t("loading")}
                     </div>
                   )}

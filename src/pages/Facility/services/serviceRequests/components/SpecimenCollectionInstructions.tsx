@@ -37,7 +37,7 @@ export function SpecimenCollectionInstructions({
     <AccordionItem value="instructions" className="border-none">
       <AccordionTrigger
         className={cn(
-          "px-4 py-2 text-sm hover:bg-gray-50/50 data-[state=closed]:bg-gray-100 data-[state=open]:bg-gray-50 data-[state=open]:rounded-b-none",
+          "px-4 py-2 text-sm hover:bg-soft-background/50 aria-[expanded=false]:bg-muted aria-expanded:bg-soft-background aria-expanded:rounded-b-none",
         )}
       >
         <div className="flex items-center gap-2 flex-1 mr-4">
@@ -46,50 +46,50 @@ export function SpecimenCollectionInstructions({
             {hasCollected ? (
               <CheckCheck className="size-4 text-blue-500 shrink-0" />
             ) : (
-              <Eye className="size-4 text-gray-500 shrink-0" />
+              <Eye className="size-4 text-muted-foreground shrink-0" />
             )}
           </span>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-gray-50 rounded-b-lg">
+      <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-soft-background rounded-b-lg">
         <div className="space-y-1">
-          <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+          <p className="font-medium text-xs text-foreground uppercase tracking-wide">
             {t("specimen_collection")}
           </p>
           <Card className="rounded-xl overflow-clip">
             <Table>
-              <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+              <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                 <TableRow>
-                  <TableHead className="w-[150px] text-gray-700 ">
+                  <TableHead className="w-[150px] text-muted-foreground ">
                     {t("field")}
                   </TableHead>
-                  <TableHead className="text-gray-700">
+                  <TableHead className="text-muted-foreground">
                     {t("details")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableHead className="w-[150px] text-gray-700">
+                  <TableHead className="w-[150px] text-muted-foreground">
                     {t("required_type")}
                   </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
+                  <TableCell className="text-foreground font-semibold">
                     {requirement.type_collected?.display ?? t("na")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableHead className="text-gray-700">
+                  <TableHead className="text-muted-foreground">
                     {t("required_method")}
                   </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
+                  <TableCell className="text-foreground font-semibold">
                     {requirement.collection?.display ?? t("na")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableHead className="text-gray-700">
+                  <TableHead className="text-muted-foreground">
                     {t("patient_prep")}
                   </TableHead>
-                  <TableCell className="text-gray-950 font-semibold break-words whitespace-pre-wrap">
+                  <TableCell className="text-foreground font-semibold break-words whitespace-pre-wrap">
                     {requirement.patient_preparation &&
                     requirement.patient_preparation.length > 0
                       ? requirement.patient_preparation
@@ -104,35 +104,35 @@ export function SpecimenCollectionInstructions({
         </div>
         {container && (
           <div className="space-y-1">
-            <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+            <p className="font-medium text-xs text-foreground uppercase tracking-wide">
               {t("required_container")}
             </p>
             <Card className="rounded-xl overflow-clip">
               <Table>
-                <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+                <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                   <TableRow>
-                    <TableHead className="w-[150px] text-gray-700 ">
+                    <TableHead className="w-[150px] text-muted-foreground ">
                       {t("field")}
                     </TableHead>
-                    <TableHead className="text-gray-700">
+                    <TableHead className="text-muted-foreground">
                       {t("details")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableHead className="w-[150px] text-gray-700">
+                    <TableHead className="w-[150px] text-muted-foreground">
                       {t("container")}
                     </TableHead>
-                    <TableCell className="text-gray-950 font-semibold">
+                    <TableCell className="text-foreground font-semibold">
                       {container.cap?.display ?? t("na")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableHead className="text-gray-700">
+                    <TableHead className="text-muted-foreground">
                       {t("capacity")}
                     </TableHead>
-                    <TableCell className="text-gray-950 font-semibold">
+                    <TableCell className="text-foreground font-semibold">
                       {container.capacity
                         ? formatQuantity({
                             quantity: container.capacity,
@@ -141,20 +141,20 @@ export function SpecimenCollectionInstructions({
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableHead className="text-gray-700">
+                    <TableHead className="text-muted-foreground">
                       {t("min_volume")}
                     </TableHead>
-                    <TableCell className="text-gray-950 font-semibold">
+                    <TableCell className="text-foreground font-semibold">
                       {container.minimum_volume
                         ? formatQuantity(container.minimum_volume)
                         : t("na")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableHead className="text-gray-700">
+                    <TableHead className="text-muted-foreground">
                       {t("preparation")}
                     </TableHead>
-                    <TableCell className="text-gray-950 font-semibold">
+                    <TableCell className="text-foreground font-semibold">
                       {container.preparation ?? t("na")}
                     </TableCell>
                   </TableRow>
@@ -164,27 +164,27 @@ export function SpecimenCollectionInstructions({
           </div>
         )}
         <div className="space-y-1">
-          <p className="font-medium text-xs text-gray-950 uppercase tracking-wide">
+          <p className="font-medium text-xs text-foreground uppercase tracking-wide">
             {t("required_processing_storage")}
           </p>
           <Card className="rounded-xl overflow-clip border">
             <Table>
-              <TableHeader className="text-xs text-gray-700 bg-gray-100 uppercase tracking-wide">
+              <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                 <TableRow>
-                  <TableHead className="w-[150px] text-gray-700">
+                  <TableHead className="w-[150px] text-muted-foreground">
                     {t("field")}
                   </TableHead>
-                  <TableHead className="text-gray-700">
+                  <TableHead className="text-muted-foreground">
                     {t("details")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableHead className="w-[150px] text-gray-700">
+                  <TableHead className="w-[150px] text-muted-foreground">
                     {t("retention")}
                   </TableHead>
-                  <TableCell className="text-gray-950 font-semibold">
+                  <TableCell className="text-foreground font-semibold">
                     {requirement.type_tested?.retention_time
                       ? `${round(requirement.type_tested.retention_time.value)} ${requirement.type_tested.retention_time.unit.display}`
                       : t("na")}

@@ -1,3 +1,5 @@
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -6,7 +8,7 @@ import {
   ArrowUp,
   ChevronLeft,
   Component,
-  Loader2,
+  Plus,
   Space,
   Tag as TagIcon,
 } from "lucide-react";
@@ -29,6 +31,7 @@ import {
 } from "@/components/ui/drawer";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -160,15 +163,15 @@ export function MultiFilterStyleTagSelector({
 
   const renderTagNameWithParent = (tag: TagConfig) => {
     return (
-      <div className="flex items-center gap-2 max-w-xs truncate">
-        <span className="text-sm flex flex-row items-center gap-1 min-w-0">
+      <div className="flex items-center max-w-xs gap-2 truncate">
+        <span className="flex flex-row items-center min-w-0 gap-1 text-sm">
           {tag.parent && <Component className="size-3 text-black/80" />}
           {tag.parent && (
-            <span className="flex gap-1 items-center flex-shrink-0">
+            <span className="flex items-center flex-shrink-0 gap-1">
               <span className="text-gray-700 truncate">
                 {tag.parent.display}
               </span>
-              <ArrowRight className="size-3 flex-shrink-0" />
+              <ArrowRight className="flex-shrink-0 size-3" />
             </span>
           )}
           <TagColorDot
@@ -184,79 +187,76 @@ export function MultiFilterStyleTagSelector({
   // Render tag list for mobile
   const renderMobileTagList = (tags: TagConfig[]) => (
     <div className="space-y-1">
-      {tags?.map((tag) => (
-        <div
-          key={tag.id}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-          onClick={() => {
-            if (tag.has_children) {
-              handleMobileGroupClick(tag);
-            } else {
-              handleSelect(tag);
-            }
-          }}
-        >
-          {tag.has_children ? (
-            // Group Tags
-            <div className="flex items-center justify-between w-full min-w-0">
-              <div className="flex items-center gap-2 min-w-0">
-                <Component className="size-4 text-gray-600 flex-shrink-0" />
-                <span className="text-sm truncate">{tag.display}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Badge className="text-xs px-1 py-0.5 bg-gray-100 border-gray-300 text-gray-900">
-                  {t("group")}
-                </Badge>
-                <ArrowRight className="size-4 text-gray-400" />
-              </div>
-            </div>
-          ) : (
-            // Other Tags
-            <>
-              <Checkbox checked={isSelected(tag)} className="size-4" />
-              {renderTagNameWithParent(tag)}
-            </>
-          )}
-        </div>
-      ))}
+      {tags?.map((tag) =>
+        tag.has_children ? (
+          <Button
+            key={tag.id}
+            type="button"
+            variant="ghost"
+            className="justify-between w-full h-auto gap-3 p-3 rounded-lg"
+            onClick={() => handleMobileGroupClick(tag)}
+          >
+            <span className="flex items-center min-w-0 gap-2">
+              <Component className="text-gray-600 size-4 shrink-0" />
+              <span className="text-sm truncate">{tag.display}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <Badge className="border-gray-300 bg-gray-100 px-1 py-0.5 text-xs text-gray-900">
+                {t("group")}
+              </Badge>
+              <ArrowRight className="text-gray-400 size-4" />
+            </span>
+          </Button>
+        ) : (
+          <Label
+            key={tag.id}
+            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
+          >
+            <Checkbox
+              checked={isSelected(tag)}
+              onCheckedChange={() => handleSelect(tag)}
+              className="size-4"
+            />
+            {renderTagNameWithParent(tag)}
+          </Label>
+        ),
+      )}
     </div>
-  );
-
-  // Common trigger button
+  ); // Common trigger button
   const triggerButton = trigger ? (
     trigger
   ) : (
     <Button
       variant="outline"
       className={cn(
-        "h-10",
-        selected.length > 0 && "border-blue-300 bg-blue-50 h-auto",
+        "w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none!",
         className,
       )}
       disabled={disabled || isTagMutationInProgress}
     >
-      <div className="flex items-center gap-2 min-w-0 w-full">
+      <div className="flex items-center w-full min-w-0 gap-2">
         {isTagMutationInProgress ? (
-          <Loader2 className="size-3 animate-spin" />
-        ) : (
+          <Spinner className="size-3 animate-spin" />
+        ) : selected.length > 0 ? (
           <TagIcon className="size-3" />
+        ) : (
+          <Plus className="size-3" />
         )}
 
         <div>
           {isTagMutationInProgress ? (
             <span>{t("updating_tags")}</span>
           ) : selected.length > 0 ? (
-            <div className="flex gap-1 flex-wrap min-w-0 w-full overflow-hidden">
+            <div className="flex flex-wrap w-full min-w-0 gap-1 overflow-hidden">
               {selected.slice(0, 3).map((tag) => (
                 <TagBadge
                   key={tag.id}
                   tag={tag}
-                  className="bg-blue-100 text-blue-900 border-blue-300 whitespace-normal break-words overflow-wrap-anywhere"
+                  className="text-blue-900 break-words whitespace-normal bg-blue-100 border-blue-300 overflow-wrap-anywhere"
                 />
               ))}
               {selected.length > 3 && (
-                <Badge className="bg-gray-100 text-gray-900 border-gray-300 shrink-0">
+                <Badge className="text-gray-900 bg-gray-100 border-gray-300 shrink-0">
                   +{selected.length - 3} {t("more")}
                 </Badge>
               )}
@@ -283,7 +283,7 @@ export function MultiFilterStyleTagSelector({
                 </DrawerTitle>
               </DrawerHeader>
 
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex flex-col flex-1 overflow-hidden">
                 {/* Search */}
                 <div className="px-4 pb-3">
                   <Input
@@ -298,35 +298,38 @@ export function MultiFilterStyleTagSelector({
                 {/* Selected Tags */}
                 {selected.length > 0 && (
                   <div className="mb-4">
-                    <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {t("selected_tags")}
                     </div>
                     {selected.map((tag) => (
-                      <div
+                      <Label
                         key={tag.id}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleSelect(tag)}
+                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
                       >
-                        <Checkbox checked className="size-4" />
+                        <Checkbox
+                          checked
+                          className="size-4"
+                          onCheckedChange={() => handleSelect(tag)}
+                        />
                         {renderTagNameWithParent(tag)}
-                      </div>
+                      </Label>
                     ))}
                   </div>
                 )}
                 {isLoadingRoot ? (
-                  <div className="py-8 text-sm text-gray-500 text-center">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     {t("loading")}
                   </div>
                 ) : !rootTags?.results?.length ? (
-                  <div className="py-8 text-sm text-gray-500 text-center">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     {t("no_tags_group")}
                   </div>
                 ) : (
-                  <div className="flex-1 overflow-y-auto px-4">
+                  <div className="flex-1 px-4 overflow-y-auto">
                     {/* Tag Groups */}
                     {groupTags.length > 0 && (
                       <div className="mb-4">
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("tag_groups")}
                         </div>
                         {renderMobileTagList(groupTags)}
@@ -336,7 +339,7 @@ export function MultiFilterStyleTagSelector({
                     {/* Other Tags */}
                     {otherTags.length > 0 && (
                       <div className="mb-4">
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("other_tags")}
                         </div>
                         {renderMobileTagList(otherTags)}
@@ -368,25 +371,25 @@ export function MultiFilterStyleTagSelector({
                 </div>
               </DrawerHeader>
 
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex-1 overflow-y-auto px-4">
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="flex-1 px-4 overflow-y-auto">
                   {isLoadingChildren ? (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("loading")}
                     </div>
                   ) : childTags?.results?.length ? (
                     <div className="space-y-1">
                       {childTags.results.map((childTag) => (
-                        <div
+                        <Label
                           key={childTag.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleSelect(childTag)}
+                          className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
                         >
                           <Checkbox
                             checked={isSelected(childTag)}
                             className="size-4"
+                            onCheckedChange={() => handleSelect(childTag)}
                           />
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="flex items-center flex-1 min-w-0 gap-2">
                             <TagColorDot
                               tag={childTag}
                               fallbackColorClass="bg-green-100 border-green-300"
@@ -395,11 +398,11 @@ export function MultiFilterStyleTagSelector({
                               {childTag.display}
                             </span>
                           </div>
-                        </div>
+                        </Label>
                       ))}
                     </div>
                   ) : (
-                    <div className="py-8 text-sm text-gray-500 text-center">
+                    <div className="py-8 text-sm text-center text-gray-500">
                       {t("no_tags")}
                     </div>
                   )}
@@ -423,7 +426,7 @@ export function MultiFilterStyleTagSelector({
                   variant="ghost"
                   size="sm"
                   onClick={() => setOpen(false)}
-                  className="size-6 p-0"
+                  className="p-0 size-6"
                 >
                   <ArrowLeft className="size-4" />
                 </Button>
@@ -448,24 +451,25 @@ export function MultiFilterStyleTagSelector({
                       {t("selected_tags")}
                     </div>
                     {selected.map((tag) => (
-                      <div
+                      <DropdownMenuCheckboxItem
                         key={tag.id}
                         className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                        onClick={() => handleSelect(tag)}
+                        checked
+                        closeOnClick={false}
+                        onCheckedChange={() => handleSelect(tag)}
                       >
-                        <Checkbox checked className="size-4" />
                         {renderTagNameWithParent(tag)}
-                      </div>
+                      </DropdownMenuCheckboxItem>
                     ))}
                   </>
                 )}
 
                 {isLoadingRoot ? (
-                  <div className="px-2 py-4 text-sm text-gray-500 text-center">
+                  <div className="px-2 py-4 text-sm text-center text-gray-500">
                     {t("loading")}
                   </div>
                 ) : !rootTags?.results?.length ? (
-                  <div className="px-2 py-4 text-sm text-gray-500 text-center">
+                  <div className="px-2 py-4 text-sm text-center text-gray-500">
                     {t("no_tags_group")}
                   </div>
                 ) : (
@@ -473,8 +477,8 @@ export function MultiFilterStyleTagSelector({
                     {/* Tag Groups */}
                     {groupTags.length > 0 && (
                       <>
-                        <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
+                        <div className="h-px my-1 -mx-1 bg-gray-200"></div>
+                        <div className="px-2 py-1 mt-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("tag_groups")}
                         </div>
                         {groupTags.map((tag) => (
@@ -486,8 +490,12 @@ export function MultiFilterStyleTagSelector({
                               }
                             >
                               <PopoverTrigger asChild>
-                                <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
-                                  <div className="flex items-center gap-2 flex-1 justify-between">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="h-auto w-full focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5"
+                                >
+                                  <div className="flex items-center justify-between flex-1 gap-2">
                                     <div className="flex items-center gap-1">
                                       <Component className="size-4 text-black/80" />
                                       <span className="text-sm">
@@ -499,7 +507,7 @@ export function MultiFilterStyleTagSelector({
                                     </Badge>
                                   </div>
                                   <ArrowRight className="ml-auto size-4" />
-                                </div>
+                                </Button>
                               </PopoverTrigger>
                               <PopoverContent
                                 className="w-64 p-0"
@@ -508,7 +516,7 @@ export function MultiFilterStyleTagSelector({
                                 sideOffset={5}
                               >
                                 <div className="p-2 border-b border-gray-200">
-                                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                  <div className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                     {tag.display}
                                   </div>
                                 </div>
@@ -518,16 +526,18 @@ export function MultiFilterStyleTagSelector({
                                   </div>
                                 ) : childTags?.results?.length ? (
                                   childTags.results.map((childTag) => (
-                                    <div
+                                    <Label
                                       key={childTag.id}
-                                      className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
-                                      onClick={() => handleSelect(childTag)}
+                                      className="relative flex items-center gap-2 px-2 py-1 text-sm rounded-sm cursor-pointer select-none focus:bg-gray-100 focus:text-gray-900 outline-hidden"
                                     >
                                       <Checkbox
                                         checked={isSelected(childTag)}
                                         className="size-4"
+                                        onCheckedChange={() =>
+                                          handleSelect(childTag)
+                                        }
                                       />
-                                      <div className="flex items-center gap-2 flex-1">
+                                      <div className="flex items-center flex-1 gap-2">
                                         <TagColorDot
                                           tag={childTag}
                                           fallbackColorClass="bg-green-100 border-green-300"
@@ -536,7 +546,7 @@ export function MultiFilterStyleTagSelector({
                                           {childTag.display}
                                         </span>
                                       </div>
-                                    </div>
+                                    </Label>
                                   ))
                                 ) : (
                                   <div className="p-2 text-sm text-gray-500">
@@ -553,22 +563,20 @@ export function MultiFilterStyleTagSelector({
                     {/* Other Tags */}
                     {otherTags.length > 0 && (
                       <>
-                        <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
+                        <div className="h-px my-1 -mx-1 bg-gray-200"></div>
+                        <div className="px-2 py-1 mt-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("other_tags")}
                         </div>
                         {otherTags.map((tag) => (
-                          <div
+                          <DropdownMenuCheckboxItem
                             key={tag.id}
                             className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
-                            onClick={() => handleSelect(tag)}
+                            checked={isSelected(tag)}
+                            closeOnClick={false}
+                            onCheckedChange={() => handleSelect(tag)}
                           >
-                            <Checkbox
-                              checked={isSelected(tag)}
-                              className="size-4"
-                            />
                             {renderTagNameWithParent(tag)}
-                          </div>
+                          </DropdownMenuCheckboxItem>
                         ))}
                       </>
                     )}
@@ -577,24 +585,24 @@ export function MultiFilterStyleTagSelector({
               </div>
 
               {/* Footer Navigation */}
-              <div className="bg-gray-200 h-px"></div>
-              <div className="flex justify-between items-center h-11">
+              <div className="h-px bg-gray-200"></div>
+              <div className="flex items-center justify-between h-11">
                 <div className="flex gap-1 my-3.5 mx-4">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <ArrowUp className="size-3" />
                   </div>
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <ArrowDown className="size-3" />
                   </div>
-                  <span className="text-xs text-gray-700 self-center">
+                  <span className="self-center text-xs text-gray-700">
                     {t("navigate")}
                   </span>
                 </div>
                 <div className="flex gap-1 my-3.5 mx-4">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                  <div className="flex items-center px-1 bg-gray-100 border border-gray-300 rounded-md shadow-full">
                     <Space className="size-3" />
                   </div>
-                  <span className="text-xs text-gray-700 self-center">
+                  <span className="self-center text-xs text-gray-700">
                     {t("to_select")}
                   </span>
                 </div>

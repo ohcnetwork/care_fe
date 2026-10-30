@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
+import { CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,9 +62,9 @@ export function CollectedSpecimenHeader({
     useState<SpecimenStatus | null>(null);
   return (
     <div className="w-full space-y-3">
-      <div className="flex items-start justify-between gap-3">
+      <CollapsibleTrigger className="flex w-full items-start justify-between gap-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
         <div className="min-w-0 space-y-1">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted-foreground">
             {t("collected_specimen")}:
           </span>
           <CardTitle className="text-base font-semibold">
@@ -90,13 +91,13 @@ export function CollectedSpecimenHeader({
             <ChevronsUpDown className="size-4 mx-2" />
           )}
         </div>
-      </div>
+      </CollapsibleTrigger>
 
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-gray-700">
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
         {collectedSpecimen.specimen_definition?.type_tested?.container?.cap
           ?.display && (
           <span className="flex flex-col">
-            <span className="text-sm text-gray-600 flex items-center">
+            <span className="text-sm text-muted-foreground flex items-center">
               {t("container_cap")}:
             </span>
             <span className="text-base capitalize">
@@ -109,7 +110,7 @@ export function CollectedSpecimenHeader({
         )}
         {collectedSpecimen.specimen_type?.display && (
           <span className="flex flex-col">
-            <span className="text-sm text-gray-600 flex items-center">
+            <span className="text-sm text-muted-foreground flex items-center">
               {t("specimen")}:
             </span>
             <span className="text-base font-semibold capitalize">
@@ -119,7 +120,7 @@ export function CollectedSpecimenHeader({
         )}
         {collectedSpecimen.collection?.collector_object && (
           <span className="flex flex-col">
-            <span className="text-sm text-gray-600 flex items-center">
+            <span className="text-sm text-muted-foreground flex items-center">
               {t("collected_by")}:
             </span>
             <div className="flex items-center gap-2">
@@ -141,7 +142,7 @@ export function CollectedSpecimenHeader({
           </span>
         )}
         <span className="flex flex-col gap-1">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted-foreground">
             {t("processing_steps")}:
           </span>
           <Badge
@@ -156,7 +157,12 @@ export function CollectedSpecimenHeader({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="ml-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto"
+              aria-label={t("actions")}
+            >
               <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -193,7 +199,7 @@ export function CollectedSpecimenHeader({
                   {SPECIMEN_DISCARD_REASONS.map((reason) => (
                     <div
                       key={reason.status}
-                      className="flex items-start space-x-2 p-2 rounded-md border border-gray-200 hover:bg-gray-50"
+                      className="flex items-start space-x-2 p-2 rounded-md border border-border hover:bg-soft-background"
                     >
                       <RadioGroupItem
                         value={reason.status}
@@ -203,10 +209,10 @@ export function CollectedSpecimenHeader({
                         htmlFor={reason.status}
                         className="flex flex-col gap-0.5 px-1"
                       >
-                        <span className="font-medium text-sm text-gray-950">
+                        <span className="font-medium text-sm text-foreground">
                           {reason.label}
                         </span>
-                        <span className="text-sm text-gray-500 font-normal">
+                        <span className="text-sm text-muted-foreground font-normal">
                           {reason.description}
                         </span>
                       </Label>

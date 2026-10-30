@@ -20,7 +20,7 @@ export function ServiceRequestRequirements({
 
   return (
     <dl className="space-y-1.5 text-sm">
-      <dt className="text-gray-600">{t("observation_definitions")}</dt>
+      <dt className="text-muted-foreground">{t("observation_definitions")}</dt>
       <dd className="flex flex-wrap gap-1.5">
         {observationRequirements.map((definition) => (
           <Badge

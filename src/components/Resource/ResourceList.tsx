@@ -130,17 +130,15 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 />
                 <div>
                   <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8 w-full">
+                    <TabsList className="w-full">
                       <TabsTrigger
                         value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: false })}
                       >
                         {t("outgoing")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: true })}
                       >
                         {t("incoming")}
@@ -150,10 +148,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                 </div>
                 <div className="sm:hidden block">
                   <Tabs value={isActive ? "active" : "completed"}>
-                    <TabsList className="bg-transparent p-0 h-8 w-full">
+                    <TabsList className="w-full">
                       <TabsTrigger
                         value="active"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() =>
                           updateQuery({ status: ResourceRequestStatus.PENDING })
                         }
@@ -162,7 +159,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       </TabsTrigger>
                       <TabsTrigger
                         value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() =>
                           updateQuery({
                             status: ResourceRequestStatus.COMPLETED,
@@ -177,10 +173,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               </div>
               <div className="hidden sm:block">
                 <Tabs value={isActive ? "active" : "completed"}>
-                  <TabsList className="bg-transparent p-0 h-8">
+                  <TabsList>
                     <TabsTrigger
                       value="active"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.PENDING })
                       }
@@ -189,7 +184,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() =>
                         updateQuery({ status: ResourceRequestStatus.COMPLETED })
                       }
@@ -224,12 +218,14 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
               {/* Desktop Tabs */}
               <Tabs value={currentStatus} className="hidden sm:block w-full">
-                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
+                <TabsList
+                  variant="line"
+                  className="h-auto max-w-full flex-wrap justify-start gap-y-2"
+                >
                   {currentStatuses.map((statusOption) => (
                     <TabsTrigger
                       key={statusOption}
                       value={statusOption}
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                       onClick={() => updateQuery({ status: statusOption })}
                     >
                       <CareIcon

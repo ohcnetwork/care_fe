@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Building, Loader2, Trash2 } from "lucide-react";
+import { Building, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -170,7 +171,7 @@ function DeleteOrganizationButton({
       disabled={isPending}
     >
       {isPending ? (
-        <Loader2 className="size-4 animate-spin" />
+        <Spinner className="size-4 animate-spin" />
       ) : (
         <Trash2 className="size-4 text-destructive" />
       )}
@@ -280,7 +281,7 @@ export default function LinkDepartmentsSheet({
                 onClick={handleAddOrganizations}
                 disabled={!selectedOrgs?.length || isAdding}
               >
-                {isAdding && <Loader2 className="mr-2 size-4 animate-spin" />}
+                {isAdding && <Spinner className="mr-2 size-4 animate-spin" />}
                 {t("add_organization", {
                   count: entityType === "device" ? 1 : 0,
                 })}

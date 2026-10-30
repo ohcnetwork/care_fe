@@ -43,12 +43,19 @@ test.describe("Locations", () => {
       page.getByRole("heading").getByText("Prescription Queue"),
     ).toBeVisible();
     await toggleSidebar(page, true);
-    await page.getByRole("button", { name: "Pharmacy" }).click();
-    await expect(page.getByText("Current Location:Pharmacy")).toBeVisible();
-    await page.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
-    await page.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
+    await page
+      .getByRole("button", { name: "Pharmacy", exact: true })
+      .and(page.locator('[aria-haspopup="dialog"]'))
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("heading")).toContainText("Pharmacy");
+    await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
+    await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
+    await expect(dialog).not.toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Bio-Chemistry Lab" }),
+      page
+        .getByRole("button", { name: "Bio-Chemistry Lab" })
+        .and(page.locator('[aria-haspopup="dialog"]')),
     ).toBeVisible();
   });
 
@@ -62,17 +69,29 @@ test.describe("Locations", () => {
       page.getByRole("heading").getByText("Prescription Queue"),
     ).toBeVisible();
     await toggleSidebar(page, false);
+    const toggle = page
+      .getByRole("button", {
+        name: "Toggle Sidebar",
+        exact: true,
+        includeHidden: true,
+      })
+      .and(page.locator('[data-sidebar="trigger"]:visible'));
+    await page.mouse.move(900, 700);
+    await toggle.hover();
     await page
-      .getByRole("button")
-      .filter({ hasText: /Current Location/ })
+      .getByRole("button", { name: "Pharmacy", exact: true })
+      .and(page.locator('[aria-haspopup="dialog"]'))
       .click();
-    await expect(page.getByText("Current LocationPharmacy")).toBeVisible();
-    await page.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
-    await page.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("heading")).toContainText("Pharmacy");
+    await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
+    await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
+    await expect(dialog).not.toBeVisible();
+    await toggle.hover();
     await expect(
       page
-        .getByRole("button")
-        .filter({ hasText: "Current LocationBio-Chemistry" }),
+        .getByRole("button", { name: "Bio-Chemistry Lab", exact: true })
+        .and(page.locator('[aria-haspopup="dialog"]')),
     ).toBeVisible();
   });
 });

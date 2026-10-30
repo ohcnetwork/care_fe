@@ -83,11 +83,15 @@ export function SpecimenHistorySheet({
 
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <p className="text-gray-500">{t("specimen_type")}</p>
+                        <p className="text-muted-foreground">
+                          {t("specimen_type")}
+                        </p>
                         <p>{specimen.specimen_type?.display || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("collected_at")}</p>
+                        <p className="text-muted-foreground">
+                          {t("collected_at")}
+                        </p>
                         <p>
                           {specimen.collection?.collected_date_time
                             ? new Date(
@@ -97,7 +101,7 @@ export function SpecimenHistorySheet({
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("quantity")}</p>
+                        <p className="text-muted-foreground">{t("quantity")}</p>
                         <p>
                           {specimen.collection?.quantity
                             ? `${round(specimen.collection.quantity.value)} ${specimen.collection.quantity.unit.display}`
@@ -105,7 +109,7 @@ export function SpecimenHistorySheet({
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-muted-foreground">
                           {t("collection_method")}
                         </p>
                         <p>{specimen.collection?.method?.display || "-"}</p>
@@ -129,13 +133,13 @@ export function SpecimenHistorySheet({
                                 {processing.method?.display &&
                                   processing.description !==
                                     processing.method.display && (
-                                    <p className="text-gray-500">
+                                    <p className="text-muted-foreground">
                                       {processing.description}
                                     </p>
                                   )}
                                 {processing.time_date_time && (
                                   <time
-                                    className="block text-gray-500"
+                                    className="block text-muted-foreground"
                                     dateTime={processing.time_date_time}
                                   >
                                     {format(
@@ -153,7 +157,7 @@ export function SpecimenHistorySheet({
 
                     {specimen.note && (
                       <div>
-                        <p className="text-gray-500">{t("notes")}</p>
+                        <p className="text-muted-foreground">{t("notes")}</p>
                         <p className="text-sm">{specimen.note}</p>
                       </div>
                     )}

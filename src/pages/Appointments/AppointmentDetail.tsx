@@ -30,6 +30,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -51,27 +52,24 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
-import {
-  AvatarIcon,
-  CalendarIcon,
-  CheckCircledIcon,
-  ClockIcon,
-  DotsVerticalIcon,
-  DrawingPinIcon,
-  EnterIcon,
-  EyeNoneIcon,
-  MobileIcon,
-  PersonIcon,
-  PlusCircledIcon,
-} from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, isBefore, isWithinInterval, subDays } from "date-fns";
 import {
+  CircleUserRound as AvatarIcon,
   BanIcon,
+  Calendar as CalendarIcon,
   CheckCircle2Icon,
+  CircleCheck as CheckCircledIcon,
   ChevronLeft,
+  Clock as ClockIcon,
+  EllipsisVertical as DotsVerticalIcon,
+  Pin as DrawingPinIcon,
+  LogIn as EnterIcon,
   EyeIcon,
-  Loader2,
+  EyeOff as EyeNoneIcon,
+  Smartphone as MobileIcon,
+  UserRound as PersonIcon,
+  CirclePlus as PlusCircledIcon,
   PlusSquare,
   PrinterIcon,
   ReceiptText,
@@ -94,6 +92,8 @@ import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { ReferralAppointmentContext } from "@/components/Referral/ReferralAppointmentContext";
+import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -150,6 +150,15 @@ export default function AppointmentDetail(props: Props) {
     }),
     enabled: canViewAppointments && !!facility,
   });
+  const referralContext = useAppointmentReferral(appointment?.patient.id ?? "");
+  const referralContextLoading =
+    referralContext.requested && referralContext.isLoading;
+  const referralEncounterParams = referralContext.referral
+    ? {
+        ...referralContext.successQueryParams,
+        referralAppointmentId: appointment?.id,
+      }
+    : undefined;
 
   useEffect(() => {
     // Don't redirect while facility is still loading
@@ -192,6 +201,14 @@ export default function AppointmentDetail(props: Props) {
     return <Loading />;
   }
   const currentStatus = appointment.status;
+  const encounterUrl = (encounterId: string) => {
+    const params = new URLSearchParams(
+      Object.entries(referralEncounterParams ?? {}).filter(
+        (entry): entry is [string, string] => entry[1] !== undefined,
+      ),
+    );
+    return `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${encounterId}/updates${params.size ? `?${params}` : ""}`;
+  };
 
   const canCheckIn = isWithinInterval(new Date(), {
     start: subDays(appointment.token_slot.start_datetime, 1),
@@ -216,6 +233,9 @@ export default function AppointmentDetail(props: Props) {
             {t("appointment_details")}
           </h4>
         </div>
+        {params.referralId && (
+          <ReferralAppointmentContext appointment={appointment} />
+        )}
         {showSuccess && (
           <div className="mb-4 flex flex-col gap-2">
             <Alert className="bg-green-50 border-green-400 items-center">
@@ -225,7 +245,10 @@ export default function AppointmentDetail(props: Props) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setQueryParams({})}
+                  onClick={() => {
+                    const { showSuccess: _, ...remainingParams } = params;
+                    setQueryParams(remainingParams);
+                  }}
                   className="self-end"
                   aria-label={t("close")}
                 >
@@ -277,7 +300,7 @@ export default function AppointmentDetail(props: Props) {
             tagEntityId={appointment.id}
             children={
               canWriteAppointment && (
-                <div className="md:mx-4">
+                <div className="w-full min-w-0 sm:w-auto sm:shrink-0">
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
@@ -434,9 +457,10 @@ export default function AppointmentDetail(props: Props) {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={referralContextLoading}
                       onClick={() =>
                         navigate(
-                          `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                          encounterUrl(appointment.associated_encounter!.id),
                         )
                       }
                       className="flex items-center gap-2"
@@ -477,13 +501,16 @@ export default function AppointmentDetail(props: Props) {
                           icon={<PlusSquare className="text-primary-500" />}
                           title={t("start_consultation")}
                           actionId="start-consultation"
+                          disabled={referralContextLoading}
                           onClick={() => {
                             updateAppointment({
                               status: AppointmentStatus.IN_CONSULTATION,
                               note: appointment.note,
                             });
                             navigate(
-                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                              encounterUrl(
+                                appointment.associated_encounter!.id,
+                              ),
                             );
                           }}
                         />
@@ -494,6 +521,7 @@ export default function AppointmentDetail(props: Props) {
                           facilityId={facilityId}
                           patientName={appointment.patient.name}
                           appointment={appointment.id}
+                          redirectQueryParams={referralEncounterParams}
                           defaultOpen={from_queue === "true"}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
                           trigger={
@@ -501,6 +529,7 @@ export default function AppointmentDetail(props: Props) {
                               icon={<PlusSquare className="text-primary-500" />}
                               title={t("start_consultation")}
                               actionId="start-consultation"
+                              disabled={referralContextLoading}
                             />
                           }
                           onSuccess={() => {
@@ -914,7 +943,7 @@ const AppointmentActions = ({
         new_slot: selectedSlotId || "",
         previous_booking_note: oldNote,
         new_booking_note: newNote,
-        tags: appointment.tags.map((tag) => tag.id),
+        tags: appointment.tags.map((tag) => ({ tag: tag.id })),
       },
     });
     if (
@@ -944,9 +973,9 @@ const AppointmentActions = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
+    <div className="w-full min-w-0 sm:w-auto">
       {/* Primary Actions */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center justify-end gap-2">
         {/* Check In - Only for booked appointments */}
         {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
@@ -958,11 +987,10 @@ const AppointmentActions = ({
                 note: appointment.note,
               })
             }
-            size="lg"
-            className="w-full justify-start"
+            className="min-w-0 flex-1 sm:flex-none"
           >
             <EnterIcon className="size-4" />
-            {t("check_in")}
+            <span className="truncate">{t("check_in")}</span>
             <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
@@ -970,7 +998,7 @@ const AppointmentActions = ({
         {/* Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={t("actions")}>
               <DotsVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -1200,7 +1228,7 @@ const AppointmentActions = ({
                       disabled={!note.trim()}
                     >
                       {isUpdating ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
+                        <Spinner className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
                       )}
@@ -1246,7 +1274,7 @@ const AppointmentActions = ({
                       disabled={!note.trim()}
                     >
                       {isPending ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
+                        <Spinner className="size-4 animate-spin mr-2" />
                       ) : (
                         t("confirm")
                       )}
@@ -1287,7 +1315,7 @@ const AppointmentActions = ({
                     className={cn(buttonVariants({ variant: "destructive" }))}
                   >
                     {isPending ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
+                      <Spinner className="size-4 animate-spin mr-2" />
                     ) : (
                       t("confirm")
                     )}

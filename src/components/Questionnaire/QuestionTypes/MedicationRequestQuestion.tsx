@@ -1,4 +1,3 @@
-import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import {
@@ -6,6 +5,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   CopyPlus,
+  CircleMinus as MinusCircledIcon,
   MoreVerticalIcon,
   Pipette,
   PlusIcon,
@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useQueryParams } from "raviger";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -116,7 +116,6 @@ import { formatName } from "@/Utils/utils";
 
 import { filterStructuredQuestionnaireSlugs } from "@/components/Questionnaire/data/StructuredFormData";
 import ManageResponseTemplatesSheet from "@/components/Questionnaire/ManageResponseTemplatesSheet";
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Question } from "@/types/questionnaire/question";
 
@@ -213,6 +212,7 @@ interface MedicationRequestQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  initializeQuestionnaireResponseCB?: (values: ResponseValue[]) => void;
   disabled?: boolean;
   encounterId: string;
   errors?: QuestionValidationError[];
@@ -345,13 +345,13 @@ export function validateMedicationRequestQuestion(
 export function MedicationRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  initializeQuestionnaireResponseCB,
   disabled,
   patientId,
   encounterId,
   errors,
   questionnaireId: _questionnaireId,
   questionnaireSlug,
-  question,
 }: MedicationRequestQuestionProps) {
   const authUser = useAuthUser();
   const { t } = useTranslation();
@@ -388,9 +388,15 @@ export function MedicationRequestQuestion({
     enabled: !isPreview && !!prescriptionId,
   });
 
-  useEffect(() => {
-    if (prescriptionId && patientMedications?.results) {
-      updateQuestionnaireResponseCB(
+  // Reconcile fresh server data without reinitializing on clinician edits.
+  const initializeResponse = useEffectEvent(() => {
+    if (
+      prescriptionId &&
+      patientMedications?.results &&
+      (initializeQuestionnaireResponseCB ||
+        questionnaireResponse.values.length === 0)
+    ) {
+      (initializeQuestionnaireResponseCB ?? updateQuestionnaireResponseCB)(
         [
           {
             type: "medication_request",
@@ -406,6 +412,10 @@ export function MedicationRequestQuestion({
         questionnaireResponse.question_id,
       );
     }
+  });
+
+  useEffect(() => {
+    initializeResponse();
   }, [patientMedications, prescriptionId]);
 
   const [expandedMedicationIndex, setExpandedMedicationIndex] = useState<
@@ -898,12 +908,7 @@ export function MedicationRequestQuestion({
   });
 
   return (
-    <div
-      className={cn(
-        "space-y-4",
-        medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
-      )}
-    >
+    <div className="min-w-0 w-full space-y-4">
       <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
@@ -915,9 +920,7 @@ export function MedicationRequestQuestion({
         confirmText={t("remove")}
         variant="destructive"
       />
-      <div className="flex justify-between items-center flex-wrap">
-        <QuestionLabel question={question} />
-
+      <div className="flex flex-wrap items-center justify-end">
         {/* Add to Template Dialog */}
         <AddToTemplateDialog
           open={!!medicationToAddToTemplate}
@@ -1125,6 +1128,7 @@ export function MedicationRequestQuestion({
               buttonLabel={t("medication_history")}
               onAddSelected={handleAddHistoricalMedications}
               disableAPI={isPreview}
+              disabled={disabled}
             />
             {questionnaireSlug && (
               <ManageResponseTemplatesSheet
@@ -1190,12 +1194,17 @@ export function MedicationRequestQuestion({
                   {t("duration")}
                 </div>
                 {/* Expand/Collapse bar for advanced fields */}
-                <div
+                <Button
+                  type="button"
+                  variant="ghost"
                   className={cn(
-                    "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
-                    showAdvancedFields
-                      ? "bg-primary-50 hover:bg-primary-100"
-                      : "bg-gray-100 hover:bg-gray-200",
+                    "h-full rounded-none px-0",
+                    cn(
+                      "flex items-center justify-center border-r border-gray-200 cursor-pointer transition-colors",
+                      showAdvancedFields
+                        ? "bg-primary-50 hover:bg-primary-100"
+                        : "bg-gray-100 hover:bg-gray-200",
+                    ),
                   )}
                   onClick={() => setShowAdvancedFields(!showAdvancedFields)}
                   title={
@@ -1209,7 +1218,7 @@ export function MedicationRequestQuestion({
                   ) : (
                     <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
                   )}
-                </div>
+                </Button>
                 {/* Advanced fields - inserted between bar and notes when expanded */}
                 {showAdvancedFields && (
                   <>
@@ -1452,7 +1461,7 @@ export function MedicationRequestQuestion({
             </EntitySelectionDrawer>
           </>
         ) : (
-          <div className="max-w-4xl flex gap-1">
+          <div className="flex min-w-0 w-full gap-1">
             <MedicationValueSetSelect
               placeholder={addMedicationPlaceholder}
               onSelect={handleAddMedication}
@@ -1465,7 +1474,7 @@ export function MedicationRequestQuestion({
 
       {/* Prescription Note Field - show when editing, or when creating with at least one medication */}
       {(prescriptionId || medications.length > 0) && (
-        <div className="max-w-4xl space-y-2">
+        <div className="w-full space-y-2">
           <Label htmlFor="prescription-note">{t("note")}</Label>
           {prescriptionId ? (
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[80px] text-sm text-gray-700 whitespace-pre-wrap">
@@ -1721,13 +1730,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             {displayMedicationName(medication)}
           </span>
           {!isReadOnly && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
-              className="text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
+              className="h-auto w-auto p-1 text-[10px] text-gray-400 hover:text-primary-600 transition-colors self-end mt-0.5"
               onClick={handleAddDosageInstruction}
+              aria-label={t("add_dosage_step")}
             >
               <PlusIcon className="size-3" />
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -1792,24 +1803,28 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 </div>
                 <div className="flex items-center">
                   <div className="flex items-end">
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="size-3 rounded-full hover:bg-transparent text-gray-500"
+                      className="h-auto p-0 size-3 rounded-full hover:bg-transparent text-gray-500"
                       onClick={() => handleDoseRangeClick(dIdx)}
+                      aria-label={t("configure_dose_range")}
                       disabled={disabled || isReadOnly}
                     >
                       <Pipette className="size-3" />
-                    </button>
+                    </Button>
                   </div>
                   {isMultiple && !isReadOnly && (
-                    <button
+                    <Button
+                      variant="ghost"
                       type="button"
-                      className="shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
+                      className="h-auto w-auto p-1 shrink-0 text-gray-500 hover:text-red-500 transition-colors ml-1"
                       onClick={() => handleRemoveDosageInstruction(dIdx)}
+                      aria-label={t("remove_dosage_step")}
                       title={t("remove_dosage_step")}
                     >
                       <Trash2 className="size-3" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1958,12 +1973,17 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       </div>
       {/* Clickable expand/collapse bar column - Desktop only */}
       {desktopLayout && (
-        <div
+        <Button
+          type="button"
+          variant="ghost"
           className={cn(
-            "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
-            showAdvancedFields
-              ? "bg-primary-50 hover:bg-primary-100"
-              : "bg-gray-100 hover:bg-gray-200",
+            "h-full rounded-none px-0",
+            cn(
+              "lg:border-r border-gray-200 cursor-pointer transition-colors flex items-center justify-center",
+              showAdvancedFields
+                ? "bg-primary-50 hover:bg-primary-100"
+                : "bg-gray-100 hover:bg-gray-200",
+            ),
           )}
           onClick={onToggleAdvanced}
           title={
@@ -1977,7 +1997,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           ) : (
             <ChevronsUpDown className="h-4 w-4 text-gray-500 rotate-90" />
           )}
-        </div>
+        </Button>
       )}
       {/* Advanced Fields - Desktop: inserted between bar and notes when expanded */}
       {showAdvancedFields && desktopLayout && (

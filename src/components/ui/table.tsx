@@ -1,3 +1,9 @@
+/**
+ * @name table
+ * @description A responsive table component.
+ * @dependencies none
+ * @type registry:ui
+ */
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -6,7 +12,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto border rounded-md"
     >
       <table
         data-slot="table"
@@ -42,7 +48,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "bg-gray-100/50 border-t font-medium [&>tr]:last:border-b-0 dark:bg-gray-800/50",
+        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
         className,
       )}
       {...props}
@@ -54,10 +60,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
-      className={cn(
-        "hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 border-b transition-colors dark:hover:bg-gray-800/50 dark:data-[state=selected]:bg-gray-800",
-        className,
-      )}
+      className={cn("border-b", className)}
       {...props}
     />
   );
@@ -68,7 +71,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "text-gray-950 h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] dark:text-gray-50",
+        "bg-soft-background text-foreground h-10 min-h-10 px-2 py-1 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className,
       )}
       {...props}
@@ -81,7 +84,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className,
       )}
       {...props}
@@ -96,7 +99,7 @@ function TableCaption({
   return (
     <caption
       data-slot="table-caption"
-      className={cn("text-gray-500 mt-4 text-sm dark:text-gray-400", className)}
+      className={cn("text-muted-foreground mt-4 text-sm", className)}
       {...props}
     />
   );

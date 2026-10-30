@@ -4,15 +4,16 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { Accordion } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 import { PrintableQRCode } from "@/components/PrintableQRCode";
 
@@ -80,73 +81,66 @@ export function SpecimenWorkflowCard({
     <Card
       className={cn(
         "overflow-hidden rounded-lg shadow-xs",
-        isDiscarded && "opacity-70 bg-gray-50",
+        isDiscarded && "opacity-70 bg-soft-background",
       )}
     >
-      <Collapsible open={isOpen}>
-        <CollapsibleTrigger
-          asChild
-          className={cn((hasCollected || isDraft) && "cursor-pointer")}
-        >
-          {/* === Header: Changes based on collection status === */}
-          <CardHeader
-            className="p-3 bg-white"
-            onClick={() => {
-              if (hasCollected) {
-                setIsOpen(!isOpen);
-              } else if (isDraft && !disableEdit) {
-                onCollect();
-              }
-            }}
-          >
-            {collectedSpecimen ? (
-              // --- Collected Header ---
-              <CollectedSpecimenHeader
-                collectedSpecimen={collectedSpecimen}
-                isOpen={isOpen}
-                disableEdit={disableEdit}
-                isDiscarding={isDiscarding}
-                onDiscard={discardSpecimen}
-              />
-            ) : (
-              // --- Pending Collection Header ---
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                <div className="min-w-0">
-                  <span className="text-sm text-gray-600">
-                    {t("required")}:
-                  </span>
-                  <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
-                    <span className="truncate">{requirement.title}</span>
-                    {isDraft && <Badge variant="indigo">{t("draft")}</Badge>}
-                  </CardTitle>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
-                  <Badge variant="orange">{t("collection_pending")}</Badge>
-
-                  {isDraft ? (
-                    <ChevronsUpDown className="size-4 mx-2" />
-                  ) : (
-                    <Button
-                      onClick={onCollect}
-                      variant="outline_primary"
-                      disabled={disableEdit}
-                    >
-                      <Plus className="size-4" />
-                      {t("collect_specimen")}
-                      <ShortcutBadge actionId="collect-specimen" />
-                    </Button>
-                  )}
-                </div>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CardHeader className="p-3 bg-background">
+          {collectedSpecimen ? (
+            // --- Collected Header ---
+            <CollectedSpecimenHeader
+              collectedSpecimen={collectedSpecimen}
+              isOpen={isOpen}
+              disableEdit={disableEdit}
+              isDiscarding={isDiscarding}
+              onDiscard={discardSpecimen}
+            />
+          ) : (
+            // --- Pending Collection Header ---
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+              <div className="min-w-0">
+                <span className="text-sm text-muted-foreground">
+                  {t("required")}:
+                </span>
+                <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
+                  <span className="truncate">{requirement.title}</span>
+                  {isDraft && <Badge variant="indigo">{t("draft")}</Badge>}
+                </CardTitle>
               </div>
-            )}
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+
+              <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
+                <Badge variant="orange">{t("collection_pending")}</Badge>
+
+                {isDraft ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onCollect}
+                    disabled={disableEdit}
+                    aria-label={t("collect_specimen")}
+                  >
+                    <ChevronsUpDown className="size-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={onCollect}
+                    variant="outline_primary"
+                    disabled={disableEdit}
+                  >
+                    <Plus className="size-4" />
+                    {t("collect_specimen")}
+                    <ShortcutBadge actionId="collect-specimen" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </CardHeader>
+        <CollapsibleContent className="data-open:animate-collapsible-down data-closed:animate-collapsible-up overflow-hidden">
           {/* === Accordion for Instructions, Collection Details, Processing, Discard === */}
           <CardContent className="p-2">
             {collectedSpecimen && (
-              <div className="rounded-lg mb-3 p-4 text-center bg-gray-50">
+              <div className="rounded-lg mb-3 p-4 text-center bg-soft-background">
                 <PrintableQRCode
                   value={
                     collectedSpecimen.accession_identifier ||
@@ -170,7 +164,24 @@ export function SpecimenWorkflowCard({
 
               {/* 2. Collection Details (Only if collected) */}
               {collectedSpecimen && (
-                <SpecimenCollectionDetails specimen={collectedSpecimen} />
+                <AccordionItem
+                  value="collection-details"
+                  className="border-none"
+                >
+                  <AccordionTrigger className="px-4 py-2 text-sm hover:bg-soft-background/50 aria-[expanded=false]:bg-muted aria-expanded:bg-soft-background aria-expanded:rounded-b-none">
+                    {t("specimen_collection")}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pt-1 pb-4 space-y-4 bg-soft-background rounded-b-lg">
+                    <p className="font-semibold text-xs mb-2">
+                      {t("collected_specimen_details")}
+                    </p>
+                    {collectedSpecimen.collection && (
+                      <SpecimenCollectionDetails
+                        collection={collectedSpecimen.collection}
+                      />
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
               )}
 
               {/* 3. Processing (Only if collected and not discarded) */}

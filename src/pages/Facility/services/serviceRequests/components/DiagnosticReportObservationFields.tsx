@@ -49,7 +49,10 @@ export function DiagnosticReportObservationFields({
         const label = component.code.display || component.code.code;
         return (
           <div key={component.code.code} className="space-y-1.5">
-            <Label htmlFor={componentId} className="text-sm text-gray-700">
+            <Label
+              htmlFor={componentId}
+              className="text-sm text-muted-foreground"
+            >
               {label}
             </Label>
             <DiagnosticReportObservationInput

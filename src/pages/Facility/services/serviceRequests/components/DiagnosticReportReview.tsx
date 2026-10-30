@@ -37,7 +37,7 @@ export function DiagnosticReportReview({
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <h5 className="text-gray-950 font-semibold">
+      <h5 className="text-foreground font-semibold">
         {diagnosticReports.some(
           (report) => report.status !== DiagnosticReportStatus.final,
         )
@@ -109,8 +109,8 @@ function DiagnosticReportReviewItem({
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg bg-white",
-        isExpanded && "bg-gray-100",
+        "shadow-none border-border rounded-lg bg-background",
+        isExpanded && "bg-muted",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>

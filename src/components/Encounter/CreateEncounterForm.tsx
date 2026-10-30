@@ -63,6 +63,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: (encounter: EncounterRead) => void;
   disableRedirectOnSuccess?: boolean;
+  redirectQueryParams?: Record<string, string | undefined>;
   defaultOpen?: boolean;
   defaultStatus?:
     | EncounterStatus.PLANNED
@@ -78,6 +79,7 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  redirectQueryParams,
   defaultOpen = false,
   defaultStatus = EncounterStatus.PLANNED,
 }: Props) {
@@ -146,8 +148,13 @@ export default function CreateEncounterForm({
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
+        const params = new URLSearchParams(
+          Object.entries(redirectQueryParams ?? {}).filter(
+            (entry): entry is [string, string] => entry[1] !== undefined,
+          ),
+        );
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates${params.size ? `?${params}` : ""}`,
         );
       }
     },
@@ -161,7 +168,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
-      tags: data.tags,
+      tags: data.tags.map((tag) => ({ tag })),
       appointment: appointment,
     };
 
@@ -180,14 +187,14 @@ export default function CreateEncounterForm({
         {trigger || (
           <Button
             variant="secondary"
-            className="h-14 w-full justify-start text-lg"
+            className="justify-start w-full text-lg h-14"
           >
             <Stethoscope className="mr-4 size-6" />
             {t("create_encounter")}
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent size="md" className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
@@ -214,7 +221,7 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 md:flex-row ">
                         <DatePicker
                           date={date}
                           disabled={(date) =>
@@ -232,7 +239,7 @@ export default function CreateEncounterForm({
                         />
                         <Input
                           type="time"
-                          className="border-gray-400 text-sm sm:py-px shadow-sm"
+                          className="text-sm border-gray-400 shadow-sm sm:py-px"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -281,7 +288,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="whitespace-normal wrap-break-word text-center text-xs text-gray-500">
+                              <div className="text-xs text-center text-gray-500 whitespace-normal wrap-break-word">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
@@ -394,24 +401,25 @@ export default function CreateEncounterForm({
                 )}
               />
             </div>
-            <div className="flex justify-end mt-6 space-x-2">
+            <div className="flex justify-end mt-6 space-x-4">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 type="submit"
+                className="flex-1 md:flex-none"
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge actionId="submit-action" variant="primary" />
               </Button>
             </div>
           </form>

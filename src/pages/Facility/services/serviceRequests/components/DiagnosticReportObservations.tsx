@@ -25,12 +25,12 @@ export function DiagnosticReportObservations({
   return (
     <section
       aria-labelledby={`observations-${reportId}`}
-      className="rounded-lg border border-gray-200 bg-white px-4"
+      className="rounded-lg border border-border bg-background px-4"
     >
-      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border py-3">
         <h3
           id={`observations-${reportId}`}
-          className="text-base font-semibold text-gray-950"
+          className="text-base font-semibold text-foreground"
         >
           {t("observations")}
         </h3>
@@ -49,7 +49,7 @@ export function DiagnosticReportObservations({
           />
         ))}
       </div>
-      <div className="flex justify-end border-t border-gray-200 py-3">
+      <div className="flex justify-end border-t border-border py-3">
         <DiagnosticReportObservationPicker
           facilityId={facilityId}
           selectedIds={draft.reportDefinitions.map(

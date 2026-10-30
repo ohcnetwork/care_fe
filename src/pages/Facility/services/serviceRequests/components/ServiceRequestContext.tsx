@@ -22,28 +22,30 @@ export function ServiceRequestContext({
       <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
         {activityDefinition.healthcare_service && (
           <div className="space-y-1.5">
-            <dt className="text-gray-600">{t("healthcare_service")}</dt>
-            <dd className="font-semibold text-gray-700 wrap-break-word">
+            <dt className="text-muted-foreground">{t("healthcare_service")}</dt>
+            <dd className="font-semibold text-muted-foreground wrap-break-word">
               {activityDefinition.healthcare_service.name}
             </dd>
           </div>
         )}
         <div className="space-y-1">
-          <dt className="text-gray-600">{t("intent")}</dt>
-          <dd className="font-semibold text-gray-700">{t(request.intent)}</dd>
+          <dt className="text-muted-foreground">{t("intent")}</dt>
+          <dd className="font-semibold text-muted-foreground">
+            {t(request.intent)}
+          </dd>
         </div>
         {request.requester && (
           <div className="space-y-1">
-            <dt className="text-gray-600">{t("requested by")}</dt>
-            <dd className="font-semibold text-gray-700 wrap-break-word">
+            <dt className="text-muted-foreground">{t("requested by")}</dt>
+            <dd className="font-semibold text-muted-foreground wrap-break-word">
               {formatName(request.requester)}
             </dd>
           </div>
         )}
         {request.created_date && (
           <div className="space-y-1">
-            <dt className="text-gray-600">{t("requested_on")}</dt>
-            <dd className="font-semibold text-gray-700">
+            <dt className="text-muted-foreground">{t("requested_on")}</dt>
+            <dd className="font-semibold text-muted-foreground">
               {format(request.created_date, "MMM d, yyyy, h:mm a")}
             </dd>
           </div>
@@ -51,7 +53,7 @@ export function ServiceRequestContext({
       </dl>
       {request.encounter.current_location && (
         <dl className="space-y-1">
-          <dt className="text-gray-600">{t("patient_location")}</dt>
+          <dt className="text-muted-foreground">{t("patient_location")}</dt>
           <dd className="wrap-break-word">
             <LocationNode
               location={request.encounter.current_location}
@@ -62,8 +64,8 @@ export function ServiceRequestContext({
       )}
       {request.patient_instruction && (
         <dl className="space-y-1">
-          <dt className="text-gray-600">{t("patient_instruction")}</dt>
-          <dd className="whitespace-pre-wrap text-gray-950 wrap-break-word">
+          <dt className="text-muted-foreground">{t("patient_instruction")}</dt>
+          <dd className="whitespace-pre-wrap text-foreground wrap-break-word">
             {request.patient_instruction}
           </dd>
         </dl>

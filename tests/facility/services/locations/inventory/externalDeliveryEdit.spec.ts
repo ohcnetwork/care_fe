@@ -212,7 +212,7 @@ async function createExternalDeliveryDraft(
     await responseData(
       await page.request.post(
         `${apiUrl}/api/v1/facility/${facilityId}/charge_item_definition/${chargeItemSlug}/set_tags/`,
-        { headers, data: { tags: [tag.id] } },
+        { headers, data: { tags: [{ tag: tag.id }] } },
       ),
     );
   }
@@ -1025,9 +1025,7 @@ test.describe("External delivery draft items", () => {
       await savedRows
         .getByRole("button", { name: "Actions", exact: true })
         .click();
-      await page
-        .getByRole("menuitem", { name: "Continue editing", exact: true })
-        .click();
+      await page.getByRole("menuitem", { name: /^continue editing$/i }).click();
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
       await expect(editForm.getByRole("combobox")).toBeDisabled();
       await expect(editForm.getByRole("combobox")).toContainText(

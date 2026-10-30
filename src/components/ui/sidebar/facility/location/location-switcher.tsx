@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, MapPinIcon, X } from "lucide-react";
+import { ChevronLeft, ChevronsUpDown, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,8 +23,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import PaginationComponent from "@/components/Common/Pagination";
 
@@ -41,9 +42,15 @@ import query from "@/Utils/request/query";
 export function LocationSwitcher() {
   const { t } = useTranslation();
   const { facilityId, location: extractedLocation } = useCurrentLocation();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const { handleMenuOpenChange } = useAppSidebar();
+  const handleDialogOpenChange = (open: boolean) => {
+    setOpenDialog(open);
+    handleMenuOpenChange(open);
+  };
 
   const fallbackUrl = `/facility/${facilityId}/overview`;
 
@@ -58,63 +65,76 @@ export function LocationSwitcher() {
         location={location}
         setLocation={setLocation}
         open={openDialog}
-        setOpen={setOpenDialog}
+        setOpen={handleDialogOpenChange}
         myLocations={true}
       />
-      <div className="flex flex-col items-start gap-4">
-        {state === "collapsed" ? (
+      <div
+        className={cn("flex min-w-0 flex-col gap-2", !isCollapsed && "px-2")}
+      >
+        <div className="flex min-h-8 items-center justify-between">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => navigate(fallbackUrl)}
-            className="w-8 h-8"
+            size={isCollapsed ? "icon-sm" : "sm"}
+            onClick={() => {
+              if (isMobile) setOpenMobile(false);
+              navigate(fallbackUrl);
+            }}
+            className={cn(
+              "gap-1.5 text-muted-foreground",
+              !isCollapsed && "-ml-2 px-2",
+            )}
             aria-label={t("home")}
-            title={t("home")}
+            title={isCollapsed ? t("home") : undefined}
           >
-            <CareIcon icon="l-home-alt" />
+            <ChevronLeft className="size-4" />
+            {!isCollapsed && <span>{t("home")}</span>}
           </Button>
-        ) : (
-          <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
-            <CareIcon icon="l-arrow-left" />
-            <span className="underline underline-offset-2">{t("home")}</span>
-          </Button>
-        )}
-
-        <div className={cn("w-full", state === "expanded" ? "px-2" : "px-0")}>
-          <TooltipComponent content={location?.name ?? t("select_location")}>
+          {isMobile && (
             <Button
               variant="ghost"
+              size="icon-sm"
+              onClick={() => setOpenMobile(false)}
+              aria-label={t("close_sidebar")}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
+
+        <div className="w-full">
+          <TooltipComponent content={location?.name ?? t("select_location")}>
+            <Button
+              variant="outline"
+              size={isCollapsed ? "icon-sm" : "sm"}
               className={cn(
-                "w-full flex items-center justify-between gap-3 overflow-hidden rounded-md border border-gray-200 bg-white px-2",
-                state === "collapsed" ? "justify-center" : "py-6",
+                "w-full min-w-0 gap-2 font-normal shadow-sm",
+                !isCollapsed && "h-auto justify-between py-2",
               )}
               aria-label={location?.name ?? t("select_location")}
-              onClick={() => setOpenDialog(true)}
+              aria-haspopup="dialog"
+              aria-expanded={openDialog}
+              onClick={() => handleDialogOpenChange(true)}
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                <MapPinIcon className="size-5 text-green-600" />
-                <div
-                  className={cn(
-                    "min-w-0 flex-1",
-                    state === "collapsed" && "hidden",
-                  )}
-                >
+                {isCollapsed && (
+                  <MapPinIcon className="mx-auto size-4 text-muted-foreground" />
+                )}
+                <div className={cn("min-w-0 flex-1", isCollapsed && "hidden")}>
                   <div className="flex min-w-0 w-full flex-col items-start overflow-hidden">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {t("current_location")}
                     </span>
-                    <span className="max-w-full truncate text-left text-sm font-medium text-gray-900">
-                      {location?.name}
+                    <span className="max-w-full truncate text-left text-sm font-medium">
+                      {location?.name ?? t("select_location")}
                     </span>
                   </div>
                 </div>
               </div>
-              {state === "expanded" && (
-                <CareIcon icon="l-sort" className="shrink-0" />
+              {!isCollapsed && (
+                <ChevronsUpDown className="size-3.5 shrink-0 opacity-60" />
               )}
             </Button>
           </TooltipComponent>
-          <Separator className="mt-4" />
         </div>
       </div>
     </Fragment>
@@ -177,7 +197,7 @@ export function LocationSelectorDialog({
   });
 
   const handleSelect = (location: LocationRead) => {
-    if (location.has_children) {
+    if (location.has_sub_locations) {
       setLocationLevel(buildLocationPath(location));
     } else {
       handleConfirmSelection(location);
@@ -233,7 +253,7 @@ export function LocationSelectorDialog({
               className="flex flex-row gap-1 items-center truncate max-w-xs"
               key={loc.id}
             >
-              {loc.has_children ? (
+              {loc.has_sub_locations ? (
                 <Button
                   variant="link"
                   className="p-0 text-nowrap h-5 justify-start overflow-hidden"
@@ -277,7 +297,7 @@ export function LocationSelectorDialog({
                   key={level.id}
                   className="flex flex-row gap-1 items-center"
                 >
-                  {level.has_children ? (
+                  {level.has_sub_locations ? (
                     <Button
                       variant="link"
                       className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
@@ -343,7 +363,7 @@ export function LocationSelectorDialog({
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                    <Spinner className="h-4 w-4 animate-spin text-gray-500" />
                     <span className="ml-2 text-sm text-gray-500">
                       {t("loading")}
                     </span>
@@ -398,7 +418,7 @@ function LocationCommandItem({
       key={location.id}
       value={location.id}
       onSelect={() =>
-        location.has_children
+        location.has_sub_locations
           ? handleSelect(location)
           : handleConfirmSelection(location)
       }
@@ -413,7 +433,7 @@ function LocationCommandItem({
       <div>
         <Button variant="white" size="xs" className="p-2 mr-4 w-full shadow">
           <CareIcon icon="l-corner-down-left" />
-          {location.has_children ? t("view_sub_locations") : t("select")}
+          {location.has_sub_locations ? t("view_sub_locations") : t("select")}
         </Button>
       </div>
     </CommandItem>

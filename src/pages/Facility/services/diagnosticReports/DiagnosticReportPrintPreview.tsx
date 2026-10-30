@@ -44,7 +44,7 @@ function PDFRenderer({ fileUrl, onReady, onError }: AttachmentRendererProps) {
         onLoadError={() => onError(fileUrl)}
         onSourceError={() => onError(fileUrl)}
         error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
-        loading={<div className="text-gray-500">{t("loading")}</div>}
+        loading={<div className="text-muted-foreground">{t("loading")}</div>}
       >
         <div className="flex flex-col justify-center w-full">
           {Array.from(new Array(numPages), (_, index) => (
@@ -86,7 +86,9 @@ function ImageRenderer({
   return (
     <div className="break-before-page flex flex-col justify-center w-full">
       {isLoading && (
-        <div className="text-gray-500 text-center py-4">{t("loading")}</div>
+        <div className="text-muted-foreground text-center py-4">
+          {t("loading")}
+        </div>
       )}
       {hasError && (
         <div className="text-red-500 text-center py-4">
@@ -210,16 +212,16 @@ export const DiagnosticReportPrintPreview = ({
               {t("diagnostic_report_print_load_error")}
             </div>
           )}
-          <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mb-2">
+          <h2 className="text-muted-foreground uppercase text-sm tracking-wide font-semibold mb-2">
             {diagnosticReportDetail?.service_request?.title ||
               t("diagnostic_report", { count: 1 })}
           </h2>
 
           {/* Patient Details */}
-          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 border-t border-gray-200 pt-2">
+          <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 border-t border-border pt-2">
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("patient")}</span>
-              <span className="text-gray-600">:</span>
+              <span className="text-muted-foreground">{t("patient")}</span>
+              <span className="text-muted-foreground">:</span>
               <span className="font-semibold ml-2 wrap-break-word">
                 {diagnosticReportDetail?.encounter.patient.name}
               </span>
@@ -231,18 +233,18 @@ export const DiagnosticReportPrintPreview = ({
                 key={identifier.config.id}
                 className="grid grid-cols-[6rem_auto_1fr] items-center"
               >
-                <span className="text-gray-600">
+                <span className="text-muted-foreground">
                   {identifier.config.config.display}
                 </span>
-                <span className="text-gray-600">:</span>
+                <span className="text-muted-foreground">:</span>
                 <span className="font-semibold ml-2">{identifier.value}</span>
               </div>
             ))}
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-              <span className="text-gray-600">
+              <span className="text-muted-foreground">
                 {t("age")} / {t("sex")}
               </span>
-              <span className="text-gray-600">:</span>
+              <span className="text-muted-foreground">:</span>
               <span className="font-semibold ml-2">
                 {diagnosticReportDetail?.encounter.patient && (
                   <>
@@ -312,7 +314,7 @@ const DiagnosticReportPreviewItem = ({
   });
 
   return (
-    <div className="mt-8 border-t border-gray-300 pt-6">
+    <div className="mt-8 border-t border-border pt-6">
       {/* Report header with per-report details */}
       <div className="break-inside-avoid">
         <h2 className="text-lg font-semibold mb-3">
@@ -320,30 +322,30 @@ const DiagnosticReportPreviewItem = ({
         </h2>
         <div className="grid md:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 mb-6">
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-            <span className="text-gray-600">{t("category")}</span>
-            <span className="text-gray-600">:</span>
+            <span className="text-muted-foreground">{t("category")}</span>
+            <span className="text-muted-foreground">:</span>
             <span className="font-semibold ml-2 wrap-break-word">
               {report.category?.display || "-"}
             </span>
           </div>
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-            <span className="text-gray-600">{t("report_date")}</span>
-            <span className="text-gray-600">:</span>
+            <span className="text-muted-foreground">{t("report_date")}</span>
+            <span className="text-muted-foreground">:</span>
             <span className="font-semibold ml-2">
               {report.created_date && format(report.created_date, "dd-MM-yyyy")}
             </span>
           </div>
           <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-            <span className="text-gray-600">{t("requested_by")}</span>
-            <span className="text-gray-600">:</span>
+            <span className="text-muted-foreground">{t("requested_by")}</span>
+            <span className="text-muted-foreground">:</span>
             <span className="font-semibold ml-2">
               {formatName(report.requester)}
             </span>
           </div>
           {report.encounter?.current_location && (
             <div className="grid grid-cols-[6rem_auto_1fr] items-center">
-              <span className="text-gray-600">{t("location")}</span>
-              <span className="text-gray-600">:</span>
+              <span className="text-muted-foreground">{t("location")}</span>
+              <span className="text-muted-foreground">:</span>
               <span className="font-semibold ml-2">
                 {report.encounter.current_location.name}
               </span>
@@ -366,7 +368,7 @@ const DiagnosticReportPreviewItem = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
           {report.note && (
             <div className="col-span-full">
-              <div className="text-sm font-medium text-gray-500 mb-1">
+              <div className="text-sm font-medium text-muted-foreground mb-1">
                 {t("notes")}
               </div>
               <div className="whitespace-pre-wrap text-sm">{report.note}</div>
@@ -374,13 +376,13 @@ const DiagnosticReportPreviewItem = ({
           )}
           {report.conclusion && (
             <div className="col-span-full min-w-0">
-              <div className="text-sm font-medium text-gray-950 mb-1">
+              <div className="text-sm font-medium text-foreground mb-1">
                 {t("conclusion")}
               </div>
               <Markdown
                 richText
                 content={report.conclusion}
-                className="prose-sm wrap-anywhere text-gray-950 [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+                className="prose-sm wrap-anywhere text-foreground [&>:first-child]:mt-0 [&>:last-child]:mb-0"
               />
             </div>
           )}

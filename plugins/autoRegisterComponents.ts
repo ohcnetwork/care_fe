@@ -327,7 +327,7 @@ function collectComponentTargets(
   return targets;
 }
 
-export function collectUnsupportedComponentTargets(
+function collectUnsupportedComponentTargets(
   source: string,
   id: string,
 ): ComponentTarget[] {
@@ -416,7 +416,7 @@ function collectRegisteredComponentTargets(
   return { targets, unsupported };
 }
 
-export function assertUniqueComponentNames(targets: ComponentTarget[]) {
+function assertUniqueComponentNames(targets: ComponentTarget[]) {
   const componentFiles = new Map<string, Set<string>>();
 
   for (const target of targets) {
@@ -449,7 +449,7 @@ export function assertUniqueComponentNames(targets: ComponentTarget[]) {
   );
 }
 
-export function assertAllowlistFormsSupported(
+function assertAllowlistFormsSupported(
   unsupported: ComponentTarget[],
   include: ReadonlySet<string> | null | undefined,
 ) {
@@ -482,7 +482,7 @@ export function assertAllowlistFormsSupported(
   );
 }
 
-export function assertKnownComponentNames(
+function assertKnownComponentNames(
   targets: ComponentTarget[],
   include: ReadonlySet<string> | null | undefined,
   unsupported: ComponentTarget[],
@@ -509,7 +509,7 @@ export function assertKnownComponentNames(
   );
 }
 
-export function transformSource(
+function transformSource(
   source: string,
   id: string,
   include: ReadonlySet<string> | null | undefined,

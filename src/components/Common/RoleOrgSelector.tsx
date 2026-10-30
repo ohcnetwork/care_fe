@@ -1,5 +1,6 @@
+import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
-import { Building, ChevronDown, Loader2, X } from "lucide-react";
+import { Building, ChevronDown, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -169,7 +170,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
           <CommandEmpty>
             {isLoadingAvailableOrganizations ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <Spinner className="h-4 w-4 animate-spin text-gray-500" />
                 <span className="ml-2 text-sm text-gray-500">
                   {t("loading_organizations")}
                 </span>
@@ -332,7 +333,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                   <PopoverContent
                     align="start"
                     sideOffset={4}
-                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                    className="p-0 w-[var(--anchor-width)] max-h-[80vh] overflow-auto"
                   >
                     {renderOrganizationCommand()}
                   </PopoverContent>

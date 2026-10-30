@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -10,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import {
   Card,
@@ -37,6 +38,7 @@ import {
   processCustomDashboardLinks,
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
@@ -48,6 +50,13 @@ interface FacilityOverviewProps {
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12
+      ? "overview_greeting_morning"
+      : hour < 18
+        ? "overview_greeting_afternoon"
+        : "overview_greeting_evening";
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
@@ -117,23 +126,25 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   );
 
   return (
-    <Page title="">
-      <div className="container mx-auto space-y-8">
+    <Page title={t("overview")} hideTitleOnPage className="md:px-0">
+      <div className="space-y-8">
         {/* Welcome Header */}
-        <div className="rounded-lg">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {t("hey_user", {
-                  user: [user.prefix, user.first_name]
-                    .filter(Boolean)
-                    .join(" "),
-                })}
-              </h1>
-              <p className="text-gray-500">
-                {t("welcome_back_to_hospital_dashboard")}
-              </p>
-            </div>
+        <div
+          data-cy="facility-overview-greeting"
+          className="rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 p-5"
+        >
+          <div className="space-y-0.5">
+            <h1 className="text-base font-normal text-neutral-600 md:text-xl wrap-break-word">
+              <Trans
+                i18nKey={greeting}
+                values={{ name: formatName(user) }}
+                components={{
+                  name: <span className="font-semibold text-neutral-950" />,
+                  wave: <span aria-hidden="true" />,
+                }}
+              />
+            </h1>
+            <p className="text-sm text-neutral-600">{t("welcome_back")}</p>
           </div>
         </div>
 
@@ -180,9 +191,14 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               </h2>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    aria-label={t("configure")}
+                    className="h-auto w-auto p-1 p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
                     <Wrench className="size-5" />
-                  </button>
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={resetCustomLinks}>
@@ -198,13 +214,15 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   key={link.link}
                   className="relative group block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <button
+                  <Button
+                    variant="ghost"
+                    type="button"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="h-auto w-auto p-1 absolute -top-2 -right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                     aria-label={t("remove")}
                   >
                     <X className="size-4" />
-                  </button>
+                  </Button>
                   <Link href={link.link} className="block h-full">
                     <Card className="h-full border border-gray-200 shadow-sm rounded-xl p-5">
                       <CardContent className="p-0 flex flex-row items-center justify-between h-full gap-4">

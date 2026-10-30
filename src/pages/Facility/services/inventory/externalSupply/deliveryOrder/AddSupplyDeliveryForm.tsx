@@ -775,7 +775,7 @@ export function AddSupplyDeliveryForm({
           price_components: priceComponents,
           discount_configuration:
             sourceChargeItem?.discount_configuration ?? null,
-          tags: sourceChargeItem?.tags?.map((tag) => tag.id),
+          tags: sourceChargeItem?.tags?.map(({ id }) => ({ tag: id })),
         };
 
         const newChargeItem =

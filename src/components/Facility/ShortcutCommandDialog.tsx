@@ -109,11 +109,11 @@ export function ShortcutCommandDialog({
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
-            placeholder={t("search")}
-            className="border-none focus:ring-0 text-base sm:text-sm"
+            placeholder={t("search_page_actions")}
+            className="text-base border-none focus:ring-0 sm:text-sm"
           />
         </div>
-        <CommandList className="h-[80vh] max-h-[80vh] w-full">
+        <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
           <CommandEmpty>{t("no_results")}</CommandEmpty>
           {facilityActions.map((group) => (
             <div key={group.group}>
@@ -123,7 +123,7 @@ export function ShortcutCommandDialog({
                     key={action.id}
                     value={action.id}
                     onSelect={() => handleSelect(action.id)}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"
                     autoFocus={false}
                   >
                     <span className="flex-1">{action.label}</span>

@@ -1,11 +1,5 @@
-import {
-  FileTextIcon,
-  Loader2,
-  PillIcon,
-  PlusIcon,
-  Search,
-  X,
-} from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { FileTextIcon, PillIcon, PlusIcon, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -74,6 +68,9 @@ export function AddToTemplateDialog<T>({
   const isMedication = itemType === "medication";
   const Icon = isMedication ? PillIcon : FileTextIcon;
   const countKey = isMedication ? "medication_request" : "activity_definition";
+  const otherCountKey = isMedication
+    ? "activity_definition"
+    : "medication_request";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -202,7 +199,7 @@ export function AddToTemplateDialog<T>({
               >
                 {isCreating ? (
                   <>
-                    <Loader2 className="size-4 mr-2 animate-spin" />
+                    <Spinner className="size-4 mr-2 animate-spin" />
                     {t("creating")}
                   </>
                 ) : (
@@ -275,7 +272,7 @@ export function AddToTemplateDialog<T>({
             <div className="max-h-48 overflow-y-auto space-y-2 -mx-1 px-1">
               {isLoadingTemplates ? (
                 <div className="flex flex-col items-center justify-center py-6 text-gray-400">
-                  <Loader2 className="size-5 animate-spin mb-2" />
+                  <Spinner className="size-5 animate-spin mb-2" />
                   <span className="text-sm">{t("loading_templates")}</span>
                 </div>
               ) : templatesData?.results?.length === 0 ? (
@@ -299,9 +296,6 @@ export function AddToTemplateDialog<T>({
                   .map((template) => {
                     const itemCount =
                       template.template_data?.[countKey]?.length ?? 0;
-                    const otherCountKey = isMedication
-                      ? "activity_definition"
-                      : "medication_request";
                     const otherCount =
                       template.template_data?.[otherCountKey]?.length ?? 0;
                     const hasItems = itemCount > 0;

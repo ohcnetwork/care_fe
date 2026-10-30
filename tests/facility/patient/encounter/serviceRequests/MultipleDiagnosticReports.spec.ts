@@ -11,25 +11,36 @@ import { createServiceRequest } from "./serviceRequest";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-function getReportCards(page: Page, reportType: string) {
-  return page.locator('[data-slot="collapsible"]').filter({
-    has: page.locator('[data-slot="collapsible-trigger"]').filter({
-      hasText: reportType,
-    }),
-  });
+function getReportCards(
+  page: Page,
+  reportType: string,
+  section: "results" | "review",
+) {
+  return page
+    .locator(`#service-request-section-${section}`)
+    .locator('[data-slot="collapsible"]')
+    .filter({
+      has: page.locator('[data-slot="collapsible-trigger"]').filter({
+        hasText: reportType,
+      }),
+    });
 }
 
 async function createReport(page: Page, reportType: string) {
   await page
-    .getByRole("combobox")
-    .filter({ hasText: "Select Diagnostic Report Type" })
+    .getByRole("combobox", {
+      name: "Select Diagnostic Report Type",
+      exact: true,
+    })
     .click();
   await page.getByRole("option", { name: reportType }).click();
   await page
     .getByRole("button", { name: "Create Report", exact: true })
     .click();
   await expect(
-    getReportCards(page, reportType).first().getByPlaceholder("Result value"),
+    getReportCards(page, reportType, "results").getByPlaceholder(
+      "Result value",
+    ),
   ).toBeVisible();
 }
 
@@ -164,12 +175,12 @@ test.describe("Multiple diagnostic reports", () => {
         .click();
     });
 
-    const firstEntry = getReportCards(page, firstReportType).first();
-    const secondEntry = getReportCards(page, secondReportType).first();
-    const firstReview = getReportCards(page, firstReportType).last();
-    const secondReview = getReportCards(page, secondReportType).last();
-    const reportCards = getReportCards(page, firstReportType).or(
-      getReportCards(page, secondReportType),
+    const firstEntry = getReportCards(page, firstReportType, "results");
+    const secondEntry = getReportCards(page, secondReportType, "results");
+    const firstReview = getReportCards(page, firstReportType, "review");
+    const secondReview = getReportCards(page, secondReportType, "review");
+    const reportCards = getReportCards(page, firstReportType, "results").or(
+      getReportCards(page, secondReportType, "results"),
     );
 
     await test.step("Keep the first report's draft when creating a second report", async () => {
@@ -233,25 +244,25 @@ test.describe("Multiple diagnostic reports", () => {
         name: "More formatting options",
         exact: true,
       });
-      const moreOptions = firstEntry.getByRole("dialog", {
+      const moreOptions = page.getByRole("dialog", {
         name: "More formatting options",
         exact: true,
       });
       await conclusion.fill("Revised first draft");
       await conclusion.press("ControlOrMeta+a");
       await firstEntry
-        .getByRole("radio", { name: "Bold", exact: true })
+        .getByRole("button", { name: "Bold", exact: true })
         .click();
       await firstEntry
-        .getByRole("radio", { name: "Underline", exact: true })
+        .getByRole("button", { name: "Underline", exact: true })
         .click();
       await more.click();
       await moreOptions
-        .getByRole("radio", { name: "Highlight", exact: true })
+        .getByRole("button", { name: "Highlight", exact: true })
         .click();
       await more.press("Escape");
       await firstEntry
-        .getByRole("combobox", { name: "Block type", exact: true })
+        .getByRole("combobox", { name: "Select block type", exact: true })
         .click();
       await page
         .getByRole("option", { name: "Heading 2", exact: true })
@@ -259,18 +270,18 @@ test.describe("Multiple diagnostic reports", () => {
       await conclusion.press("ArrowRight");
       await conclusion.press("Enter");
       await firstEntry
-        .getByRole("radio", { name: "Remove bold", exact: true })
+        .getByRole("button", { name: "Bold", exact: true })
         .click();
       await firstEntry
-        .getByRole("radio", { name: "Remove underline", exact: true })
+        .getByRole("button", { name: "Underline", exact: true })
         .click();
       await more.click();
       await moreOptions
-        .getByRole("radio", { name: "Remove highlight", exact: true })
+        .getByRole("button", { name: "Highlight", exact: true })
         .click();
       await more.press("Escape");
       await firstEntry
-        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .getByRole("button", { name: "Bulleted list", exact: true })
         .click();
       await conclusion.pressSequentially("First finding");
       await conclusion.press("Enter");
@@ -279,7 +290,7 @@ test.describe("Multiple diagnostic reports", () => {
       await conclusion.press("Enter");
       await more.click();
       await moreOptions
-        .getByRole("radio", { name: "Check list", exact: true })
+        .getByRole("button", { name: "Check list", exact: true })
         .click();
       await more.press("Escape");
       await conclusion.pressSequentially("Follow up");

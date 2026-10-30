@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -277,16 +278,21 @@ export default function StockLotSelector({
               const isDisabled = !dontRestrictExpired && isRestricted;
 
               return (
-                <div
+                <Label
                   key={inv.id}
                   className={`flex items-center space-x-2 p-2 ${
                     isDisabled
                       ? "cursor-not-allowed opacity-50 bg-gray-50"
                       : "cursor-pointer hover:bg-accent"
                   }`}
-                  onClick={() => toggleLotSelection(inv, isRestricted)}
                 >
-                  <Checkbox checked={isSelected} disabled={isDisabled} />
+                  <Checkbox
+                    checked={isSelected}
+                    disabled={isDisabled}
+                    onCheckedChange={() =>
+                      toggleLotSelection(inv, isRestricted)
+                    }
+                  />
                   <div className="flex-1 flex items-center justify-between gap-2">
                     <span
                       className={cn(
@@ -332,7 +338,7 @@ export default function StockLotSelector({
                       )}
                     </div>
                   </div>
-                </div>
+                </Label>
               );
             })
           ) : (

@@ -164,8 +164,12 @@ export default function TagAssignmentSheet({
         ? entityConfig.setTagsApi
         : entityConfig.removeTagsApi;
 
-    const createBodyPayload = (tags: string[]) =>
-      isFacilityPatientTag ? { tags, facility: facilityId || null } : { tags };
+    const createBodyPayload = (tags: string[]) => {
+      const tagRequests = tags.map((tag) => ({ tag }));
+      return isFacilityPatientTag
+        ? { tags: tagRequests, facility: facilityId || null }
+        : { tags: tagRequests };
+    };
 
     return { apiEndpoint, createBodyPayload };
   };
