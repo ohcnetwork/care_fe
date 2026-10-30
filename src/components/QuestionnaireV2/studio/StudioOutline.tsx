@@ -75,9 +75,9 @@ export function StudioOutline({
 
   const logicHiddenIds = useHiddenQuestionIds();
   const queryHiddenIds = searchHiddenIds(questions, query);
-  const hiddenIds = editing
-    ? queryHiddenIds
-    : new Set([...logicHiddenIds, ...queryHiddenIds]);
+  // Edit view keeps authored ordinals (the canvas reveals hidden questions);
+  // preview drops logic-hidden ones before numbering, like the canvas.
+  const numberingHiddenIds = editing ? undefined : logicHiddenIds;
 
   // Judged against the query filter alone — in preview a top-level question
   // hidden by enable_when must not make a matching search read as "no
@@ -181,7 +181,8 @@ export function StudioOutline({
         ariaLabel={t("structure")}
         activeId={formSelected ? null : selectedId}
         onSelect={onSelectQuestion}
-        hiddenIds={hiddenIds}
+        hiddenIds={queryHiddenIds}
+        numberingHiddenIds={numberingHiddenIds}
         rowAdornment={(question) => (
           <>
             {(question.enable_when?.length ?? 0) > 0 && (

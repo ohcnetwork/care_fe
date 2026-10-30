@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { sanitizeStylingClasses } from "@/components/QuestionnaireV2/form/engine/sanitizeStylingClasses";
+import { useSiblingNumbers } from "@/components/QuestionnaireV2/form/engine/store";
 import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { Question } from "@/types/questionnaire/question";
@@ -27,7 +28,7 @@ export function SectionCard({
   number?: string;
 }) {
   const { t } = useTranslation();
-  const { inert } = useFormRenderer();
+  const { inert, revealHidden } = useFormRenderer();
   const { AppendZone, QuestionAnnotation } = useFormChrome();
 
   // A natively disabled fieldset would also disable the edit canvas's chrome.
@@ -45,8 +46,11 @@ export function SectionCard({
     question.styling_metadata?.containerClasses,
   );
 
-  const childNumber = (index: number) =>
-    number ? `${number}${index + 1}.` : undefined;
+  const childNumbers = useSiblingNumbers(
+    children,
+    number || undefined,
+    revealHidden,
+  );
 
   const renderChildren = () =>
     children.map((child, index) => (
@@ -57,7 +61,7 @@ export function SectionCard({
         index={index}
         siblingCount={children.length}
         depth={depth + 1}
-        number={childNumber(index)}
+        number={childNumbers[index]}
       />
     ));
 

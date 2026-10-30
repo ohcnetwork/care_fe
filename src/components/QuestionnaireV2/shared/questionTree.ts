@@ -12,17 +12,25 @@ export interface TreeItem {
   children: TreeItem[];
 }
 
-/** Stable dotted ordinals at every authored depth: 1., 1.1., 1.1.1., … */
-export function numberQuestions(questions: Question[]): TreeItem[] {
+/** Dotted ordinals at every authored depth: 1., 1.1., 1.1.1., …
+ *  Questions in `hiddenIds` (and their subtrees) are dropped before
+ *  numbering so the remaining sequence has no gaps; omit it for stable
+ *  authored ordinals. */
+export function numberQuestions(
+  questions: Question[],
+  hiddenIds?: ReadonlySet<string>,
+): TreeItem[] {
   const numberLevel = (list: Question[], prefix: string): TreeItem[] =>
-    list.map((question, index) => {
-      const number = `${prefix}${index + 1}.`;
-      return {
-        question,
-        number,
-        children: numberLevel(question.questions ?? [], number),
-      };
-    });
+    list
+      .filter((question) => !hiddenIds?.has(question.id))
+      .map((question, index) => {
+        const number = `${prefix}${index + 1}.`;
+        return {
+          question,
+          number,
+          children: numberLevel(question.questions ?? [], number),
+        };
+      });
   return numberLevel(questions, "");
 }
 

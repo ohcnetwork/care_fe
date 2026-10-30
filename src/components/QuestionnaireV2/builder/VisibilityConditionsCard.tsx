@@ -45,12 +45,14 @@ export function VisibilityConditionsCard({
 }: VisibilityConditionsCardProps) {
   const { t } = useTranslation();
   const radioGroupName = useId();
+  const disabledDisplayName = useId();
   const enableWhen = question.enable_when ?? [];
   const { rowKeys, removeRowKey } = useEditorRowKeys(
     question.id,
     enableWhen.length,
   );
   const enableBehavior = question.enable_behavior ?? "all";
+  const disabledDisplay = question.disabled_display ?? "hidden";
   const excludedIds = new Set(collectIds(question));
   const flatQuestions = flattenQuestions(allQuestions);
   const availableTargets = flatQuestions.filter(
@@ -135,6 +137,40 @@ export function VisibilityConditionsCard({
           />
         ))}
       </div>
+
+      {enableWhen.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-gray-500">
+            {t("when_conditions_not_met")}
+          </p>
+          <ChoiceChipGroup
+            aria-label={t("when_conditions_not_met")}
+            className="flex flex-wrap gap-2"
+          >
+            <ChoiceChip
+              control="radio"
+              name={disabledDisplayName}
+              label={t("hide_question")}
+              checked={disabledDisplay === "hidden"}
+              onCheckedChange={() => onChange({ disabled_display: "hidden" })}
+            />
+            <ChoiceChip
+              control="radio"
+              name={disabledDisplayName}
+              label={t("keep_visible_with_answer")}
+              checked={disabledDisplay === "protected"}
+              onCheckedChange={() =>
+                onChange({ disabled_display: "protected" })
+              }
+            />
+          </ChoiceChipGroup>
+          {disabledDisplay === "protected" && (
+            <p className="text-xs text-gray-500">
+              {t("keep_visible_with_answer_hint")}
+            </p>
+          )}
+        </div>
+      )}
 
       <Button
         type="button"

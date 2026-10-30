@@ -20,6 +20,7 @@ import {
   initializeResponses,
   responsesAtom,
   useScopedResponses,
+  useSiblingNumbers,
 } from "@/components/QuestionnaireV2/form/engine/store";
 import { useFormRenderer } from "@/components/QuestionnaireV2/form/FormContext";
 import { QuestionBlock } from "@/components/QuestionnaireV2/form/QuestionBlock";
@@ -52,7 +53,8 @@ export function RegisteredGroupSlot(props: {
 }) {
   const { question, disabled } = props;
   const { t } = useTranslation();
-  const { questionnaire, inert, frozen, mode } = useFormRenderer();
+  const { questionnaire, inert, frozen, mode, revealHidden } =
+    useFormRenderer();
   const store = useStore();
   const path = useResponseScope();
   const responses = useScopedResponses();
@@ -63,6 +65,11 @@ export function RegisteredGroupSlot(props: {
     getQuestionGroupsVersion,
   );
   const [rowKeys, setRowKeys] = useState(EMPTY_ROW_KEYS);
+  const childNumbers = useSiblingNumbers(
+    question.questions ?? [],
+    props.number || undefined,
+    revealHidden,
+  );
   const definition = question.structured_type
     ? getQuestionGroup(question.structured_type)
     : undefined;
@@ -203,7 +210,7 @@ export function RegisteredGroupSlot(props: {
         index={index}
         siblingCount={children.length}
         depth={props.depth + 1}
-        number={props.number ? `${props.number}${index + 1}.` : undefined}
+        number={childNumbers[index]}
       />
     ));
   const fallback = (
