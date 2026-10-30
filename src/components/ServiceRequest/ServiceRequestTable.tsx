@@ -100,15 +100,19 @@ export default function ServiceRequestTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="flex flex-wrap gap-2">
-                <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
-                  {t(request.status)}
-                </Badge>
-                <Badge
-                  variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
-                >
-                  {t(request.priority)}
-                </Badge>
+              <TableCell>
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}
+                  >
+                    {t(request.status)}
+                  </Badge>
+                  <Badge
+                    variant={SERVICE_REQUEST_PRIORITY_COLORS[request.priority]}
+                  >
+                    {t(request.priority)}
+                  </Badge>
+                </div>
               </TableCell>
               <TableCell>
                 {readOnly ? (

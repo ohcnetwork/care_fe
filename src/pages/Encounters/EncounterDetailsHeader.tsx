@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-
 import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
+
 import {
   ENCOUNTER_PRIORITY_COLORS,
   EncounterRead,
@@ -168,11 +168,7 @@ export default function EncounterDetailsHeader({
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge encounter={encounter} />
             <Badge
-              variant={
-                encounter.priority === "routine"
-                  ? "pink"
-                  : ENCOUNTER_PRIORITY_COLORS[encounter.priority]
-              }
+              variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
               className="min-h-7 px-2"
             >
               {t(`encounter_priority__${encounter.priority}`)}
