@@ -308,4 +308,87 @@ test.describe("Action editor regression checks", () => {
       page.getByRole("textbox", { name: "Expression", exact: true }),
     ).toHaveValue('patient["deceased"] == False');
   });
+
+  test("shows the logical operator selector only when there are two or more conditions", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add a condition" }).click();
+    await page.getByRole("combobox", { name: "Condition 1 Field" }).click();
+    await page
+      .getByRole("option", { name: "Patient › Age", exact: true })
+      .click();
+    await page
+      .getByRole("spinbutton", { name: "Condition 1 Value" })
+      .fill("19");
+
+    await expect(
+      page.getByRole("radio", { name: "Any condition is true (OR)" }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("radio", { name: "All conditions are true (AND)" }),
+    ).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Add a condition" }).click();
+    await page.getByRole("combobox", { name: "Condition 2 Field" }).click();
+    await page
+      .getByRole("option", { name: "Patient › Age", exact: true })
+      .click();
+    await page
+      .getByRole("spinbutton", { name: "Condition 2 Value" })
+      .fill("60");
+
+    await expect(
+      page.getByRole("radio", { name: "Any condition is true (OR)" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: "All conditions are true (AND)" }),
+    ).toBeVisible();
+  });
+
+  test("confirms before removing an action; cancel keeps it, confirm removes only that action", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Add action", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Action 1" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Action 2" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Add a condition" }).click();
+    await page.getByRole("combobox", { name: "Condition 1 Field" }).click();
+    await page
+      .getByRole("option", { name: "Patient › Age", exact: true })
+      .click();
+    await page
+      .getByRole("spinbutton", { name: "Condition 1 Value" })
+      .fill("60");
+
+    await page.getByRole("button", { name: "Remove action 2" }).click();
+    const dialog = page.getByRole("alertdialog", {
+      name: "Remove action 2?",
+    });
+    await expect(dialog).toContainText(
+      "This removes the action from the list only. Click Save to apply the changes.",
+    );
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Action 2" })).toBeVisible();
+    await expect(
+      page.getByRole("spinbutton", { name: "Condition 1 Value" }),
+    ).toHaveValue("60");
+
+    await page.getByRole("button", { name: "Remove action 2" }).click();
+    await page
+      .getByRole("alertdialog", { name: "Remove action 2?" })
+      .getByRole("button", { name: "Remove", exact: true })
+      .click();
+    await expect(page.getByRole("heading", { name: "Action 2" })).toHaveCount(
+      0,
+    );
+    await expect(page.getByRole("heading", { name: "Action 1" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Remove action 1" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("spinbutton", { name: "Condition 1 Value" }),
+    ).toHaveCount(0);
+  });
 });
