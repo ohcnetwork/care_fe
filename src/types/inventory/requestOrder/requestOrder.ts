@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
@@ -72,6 +72,7 @@ export interface RequestOrderCreate extends RequestOrder {
   supplier?: string;
   origin?: string;
   destination: string;
+  tags?: TagSetRequest[];
 }
 
 export interface RequestOrderUpdate extends RequestOrder {
