@@ -544,7 +544,7 @@ export function EncounterCommandDialog({
                     key={`${group.group}-${action.id}`}
                     value={`${group.group} ${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
-                    className="flex justify-between rounded-sm cursor-pointer hover:bg-soft-background aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-sm cursor-pointer hover:bg-soft-background aria-selected:bg-muted"
                     autoFocus={false}
                     disabled={action.disabled}
                   >
@@ -569,7 +569,7 @@ export function EncounterCommandDialog({
               <PLUGIN_Component
                 __name="EncounterActions"
                 encounter={encounter}
-                className="flex w-full p-2 text-gray-600 rounded-md cursor-pointer hover:bg-gray-100 justify-baseline aria-selected:bg-gray-100"
+                className="flex w-full p-2 text-muted-foreground rounded-md cursor-pointer hover:bg-soft-background justify-baseline aria-selected:bg-muted"
               />
             </CommandGroup>
           )}

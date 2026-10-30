@@ -190,6 +190,8 @@ export function PlugConfigList() {
   const {
     data: storePages,
     isLoading: isStoreLoading,
+    isError: isStoreError,
+    refetch: refetchStore,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -416,6 +418,17 @@ export function PlugConfigList() {
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <CardGridSkeleton count={3} />
               </div>
+            ) : isStoreError && !storePages ? (
+              <EmptyState
+                title={t("app_store_load_error")}
+                description={t("app_store_load_error_description")}
+                icon={<Store className="size-5 text-primary m-1" />}
+                action={
+                  <Button variant="outline" onClick={() => refetchStore()}>
+                    {t("retry")}
+                  </Button>
+                }
+              />
             ) : filteredAvailable.length > 0 ? (
               <>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
