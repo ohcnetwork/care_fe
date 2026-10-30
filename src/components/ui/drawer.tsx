@@ -429,7 +429,7 @@ function DrawerHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2"
+            className="absolute top-0 right-0"
           >
             <XIcon />
             <span className="sr-only">{t("close")}</span>
@@ -484,7 +484,7 @@ function DrawerTitle({ className, ...props }: DrawerPrimitive.Title.Props) {
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("text-foreground font-medium", className)}
+      className={cn("text-base text-foreground font-semibold", className)}
       {...props}
     />
   );

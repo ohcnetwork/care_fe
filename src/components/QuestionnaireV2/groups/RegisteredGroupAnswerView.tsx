@@ -8,7 +8,7 @@ import {
   getQuestionGroupsVersion,
   subscribeToQuestionGroups,
 } from "./registry";
-import { compatibleGroupFields } from "./schema";
+import { compatibleGroupFields, incompatibleGroupQuestions } from "./schema";
 import { storedGroupFields, type StoredGroupAnswer } from "./storedGroupFields";
 
 const noop = () => {};
@@ -30,7 +30,12 @@ export function RegisteredGroupAnswerView({
   const definition = question.structured_type
     ? getQuestionGroup(question.structured_type)
     : undefined;
-  if (!definition) {
+  // Saved fields the current plugin schema no longer matches would be hidden
+  // by the custom view, so show the generic answers instead.
+  if (
+    !definition ||
+    incompatibleGroupQuestions(question, definition).length > 0
+  ) {
     return <>{fallback}</>;
   }
   const schema = compatibleGroupFields(question, definition);

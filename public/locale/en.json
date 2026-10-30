@@ -869,6 +869,8 @@
   "app_store_hero_description": "Tools from the community and partners to simplify tasks, extend CARE, and automate healthcare workflows.",
   "app_store_hero_title": "Enhance your workflow with extensions",
   "app_store_installed_description": "Installed plug configuration.",
+  "app_store_load_error": "Couldn't load the App Store",
+  "app_store_load_error_description": "The app catalog could not be reached. Check the connection and try again.",
   "app_store_not_configured": "App Store is not configured",
   "app_store_not_configured_description": "Set REACT_APP_STORE_INDEX_URL to a published root index JSON to browse apps by category or developer.",
   "app_store_search_placeholder": "Search for apps",

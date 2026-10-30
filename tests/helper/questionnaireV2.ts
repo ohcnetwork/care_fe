@@ -174,9 +174,8 @@ export async function pickValuesetFromAutocomplete(
  * which would also satisfy `has:` through their children) and exact label
  * matching, so strict mode stays armed: two questions sharing a label fail
  * loudly instead of silently resolving to whichever renders last. Assert
- * the block visible (or use `expectQuestionBlock`) before building any
- * negative assertion on it — a zero-match locator passes `.not.` checks
- * vacuously.
+ * the block's count (`toHaveCount(1)`) before building any negative
+ * assertion on it — a zero-match locator passes `.not.` checks vacuously.
  */
 export function questionBlock(page: Page, label: string) {
   return page
@@ -187,14 +186,6 @@ export function questionBlock(page: Page, label: string) {
         `xpath=.//label[normalize-space(.)=${JSON.stringify(label)}]`,
       ),
     });
-}
-
-/** questionBlock + a count assertion — use before any `.not.` assertion,
- *  where a zero-match locator would otherwise pass vacuously. */
-export async function expectQuestionBlock(page: Page, label: string) {
-  const block = questionBlock(page, label);
-  await expect(block).toHaveCount(1);
-  return block;
 }
 
 /**

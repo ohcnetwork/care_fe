@@ -168,7 +168,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
-      tags: data.tags,
+      tags: data.tags.map((tag) => ({ tag })),
       appointment: appointment,
     };
 

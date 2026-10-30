@@ -11,7 +11,7 @@ import {
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
@@ -261,7 +261,7 @@ export type AppointmentRead = Appointment & {
 export interface AppointmentCreateRequest {
   patient: string;
   note: string;
-  tags: string[];
+  tags: TagSetRequest[];
 }
 
 export interface AppointmentCreatePublicRequest {
@@ -289,7 +289,7 @@ export interface AppointmentRescheduleRequest {
   new_slot: string;
   previous_booking_note: string;
   new_booking_note: string;
-  tags: string[];
+  tags: TagSetRequest[];
 }
 
 export const getUserFromLocalStorage = (): UserReadMinimal => {
