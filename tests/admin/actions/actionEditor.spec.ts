@@ -309,7 +309,7 @@ test.describe("Action editor regression checks", () => {
     ).toHaveValue('patient["deceased"] == False');
   });
 
-  test("shows the logical operator selector only when there are two or more conditions", async ({
+  test("shows AND/OR for two or more conditions and compiles the chosen combinator", async ({
     page,
   }) => {
     await page.getByRole("button", { name: "Add a condition" }).click();
@@ -331,11 +331,10 @@ test.describe("Action editor regression checks", () => {
     await page.getByRole("button", { name: "Add a condition" }).click();
     await page.getByRole("combobox", { name: "Condition 2 Field" }).click();
     await page
-      .getByRole("option", { name: "Patient › Age", exact: true })
+      .getByRole("option", { name: "Patient › Deceased", exact: true })
       .click();
-    await page
-      .getByRole("spinbutton", { name: "Condition 2 Value" })
-      .fill("60");
+    await page.getByRole("combobox", { name: "Condition 2 Value" }).click();
+    await page.getByRole("option", { name: "No", exact: true }).click();
 
     await expect(
       page.getByRole("radio", { name: "Any condition is true (OR)" }),
@@ -343,6 +342,23 @@ test.describe("Action editor regression checks", () => {
     await expect(
       page.getByRole("radio", { name: "All conditions are true (AND)" }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: "All conditions are true (AND)" }),
+    ).toBeChecked();
+    await expect(page.getByText("and", { exact: true })).toBeVisible();
+
+    await page
+      .getByRole("radio", { name: "Any condition is true (OR)" })
+      .click();
+    await expect(
+      page.getByRole("radio", { name: "Any condition is true (OR)" }),
+    ).toBeChecked();
+    await expect(page.getByText("or", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit as expression" }).click();
+    await expect(
+      page.getByRole("textbox", { name: "Expression", exact: true }),
+    ).toHaveValue('patient["age"] == 19 or patient["deceased"] == False');
   });
 
   test("confirms before removing an action; cancel keeps it, confirm removes only that action", async ({

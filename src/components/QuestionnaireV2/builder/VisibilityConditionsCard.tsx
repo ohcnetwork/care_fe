@@ -77,9 +77,9 @@ export function VisibilityConditionsCard({
 
   const content = (
     <div className="space-y-3">
-      {/* In bare (tab) mode the AND/OR choice only appears once there is
-            a rule to combine — the reference's empty state takes its place. */}
-      {(!bare || enableWhen.length > 0) && (
+      {/* Match ActionConditionEditor: AND/OR only when two or more rules
+            can be combined. With zero or one condition, behavior is moot. */}
+      {enableWhen.length > 1 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-gray-500">
             {t("show_question_when")}

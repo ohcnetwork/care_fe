@@ -78,6 +78,12 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
         .click();
 
       await conditionGrid(page).getByRole("spinbutton").fill("5");
+      await expect(
+        page.getByRole("radio", { name: "Any condition is true (OR)" }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("radio", { name: "All conditions are true (AND)" }),
+      ).toHaveCount(0);
       await page.getByRole("button", { name: "Save Changes" }).click();
       await expectToast(page, "Questionnaire updated successfully");
     });
@@ -131,11 +137,22 @@ test.describe("Questionnaire v2 visibility condition authoring", () => {
       await fields.nth(2).click();
       await page.getByRole("option", { name: "Yes", exact: true }).click();
 
+      await expect(
+        page.getByRole("radio", { name: "Any condition is true (OR)" }),
+      ).toHaveCount(0);
+
       await page.getByRole("button", { name: "Add a condition" }).click();
       fields = conditionGrid(page).nth(1).getByRole("combobox");
       await fields.nth(0).click();
       await page.getByRole("option", { name: scoreTitle }).click();
       await conditionGrid(page).nth(1).getByRole("spinbutton").fill("7");
+
+      await expect(
+        page.getByRole("radio", { name: "Any condition is true (OR)" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("radio", { name: "All conditions are true (AND)" }),
+      ).toBeVisible();
 
       await page
         .getByRole("radio", { name: "Any condition is true (OR)" })
