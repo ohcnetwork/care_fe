@@ -15,8 +15,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandEmpty,
@@ -28,6 +28,8 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -448,7 +450,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     return (
       <div className="flex items-center gap-1 min-w-0">
-        <span className="wrap-anywhere text-wrap text-left">
+        <span className="truncate text-left" title={selectedDefinition.title}>
           {selectedDefinition.title}
         </span>
       </div>
@@ -461,13 +463,11 @@ export function ResourceDefinitionCategoryPicker<T>({
   };
 
   const renderSearchInput = () => (
-    <div className="px-3 border-b">
+    <div className="border-b border-gray-100 shadow-xs">
       <CommandInput
         placeholder={t(`search_${translationBaseKey}`)}
         value={searchQuery}
         onValueChange={setSearchQuery}
-        className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
-        autoFocus
       />
     </div>
   );
@@ -583,14 +583,14 @@ export function ResourceDefinitionCategoryPicker<T>({
               onSelect={() =>
                 handleCategorySelect(category.slug, category.title)
               }
-              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
+              className="[&>svg:last-child]:hidden"
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <FolderOpen className="size-4.5 text-gray-500" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-sm truncate">
+                  <div className="font-medium text-sm line-clamp-2">
                     {category.title}
                   </div>
                 </div>
@@ -610,7 +610,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             key={category.id}
             value={category.title}
             onSelect={() => handleCategorySelect(category.slug, category.title)}
-            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
+            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 [&>svg:last-child]:hidden"
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="flex-shrink-0">
@@ -735,7 +735,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     <div
       className={cn(
         "overflow-auto min-h-0",
-        isMobile ? "max-h-full" : "max-h-[40vh]",
+        isMobile ? "max-h-full" : "max-h-63",
       )}
     >
       {recentlyUsed.length === 0 ? (
@@ -756,7 +756,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     <div
       className={cn(
         "overflow-auto min-h-0",
-        isMobile ? "max-h-full" : "max-h-[40vh]",
+        isMobile ? "max-h-full" : "max-h-63",
       )}
     >
       {favorites.length === 0 ? (
@@ -774,11 +774,16 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
 
   const renderMainContent = () => (
-    <Command className={cn("border-0", isMobile ? "h-full" : "max-h-[40vh]")}>
+    <Command
+      className={cn(
+        "border-0",
+        isMobile && "in-data-[slot=drawer-content]:h-full!",
+      )}
+    >
       {renderSearchInput()}
       {renderBreadcrumbs()}
       <CommandList
-        className={cn(isMobile ? "max-h-full h-[40vh]" : "max-h-[40vh]")}
+        className={cn("scrollbar-gutter-auto", !isMobile && "max-h-63")}
       >
         {renderEmptyState()}
         <CommandGroup>
@@ -788,6 +793,44 @@ export function ResourceDefinitionCategoryPicker<T>({
         </CommandGroup>
       </CommandList>
     </Command>
+  );
+
+  const clearVisible = !!value && !shouldHideClearButton;
+
+  const triggerButton = (
+    <Button
+      type="button"
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      className={cn(
+        "min-w-0 flex-1 justify-between font-normal",
+        "rounded-l-md! border-l!",
+        disabled && "opacity-50 cursor-not-allowed",
+        className,
+      )}
+      disabled={disabled}
+      data-shortcut-id={shortcutId}
+    >
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {getDisplayValue()}
+      </div>
+      {!clearVisible && (
+        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+      )}
+    </Button>
+  );
+
+  const clearButton = clearVisible && (
+    <Button
+      variant="outline"
+      size="icon"
+      type="button"
+      aria-label={t("clear_selection")}
+      onClick={handleClearSelection}
+    >
+      <X />
+    </Button>
   );
 
   return (
@@ -804,76 +847,20 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <div className="flex relative">
-            <DrawerTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium h-auto min-h-9",
-                  disabled && "opacity-50 cursor-not-allowed",
-                  className,
-                )}
-                disabled={disabled}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getDisplayValue()}
-                </div>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                    open && "rotate-180",
-                  )}
-                />
-              </Button>
-            </DrawerTrigger>
-            {value && !shouldHideClearButton && (
-              <Button
-                variant="outline"
-                type="button"
-                onClick={handleClearSelection}
-                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300 h-auto"
-              >
-                <X />
-                <span className="sr-only">{t("clear_selection")}</span>
-              </Button>
-            )}
-          </div>
+          <ButtonGroup className="w-full min-w-0">
+            <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+            {clearButton}
+          </ButtonGroup>
 
-          <DrawerContent className="flex flex-col max-h-[85vh]">
-            <DrawerTitle className="sr-only">
-              {t(`select_${translationBaseKey}`) || t("select_item")}
-            </DrawerTitle>
-            <div className="px-4 py-3 border-b shrink-0">
-              {!isMobile && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Home className="size-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
-                      {getCurrentLevelTitle()}
-                    </span>
-                    {breadcrumbs.length > 0 && (
-                      <Badge variant="secondary" className="text-xs truncate">
-                        {t("level")} {breadcrumbs.length + 1}
-                      </Badge>
-                    )}
-                  </div>
-                  {value && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClearSelection}
-                      className="text-gray-500 hover:text-gray-700"
-                      type="button"
-                    >
-                      <X className="mr-1" />
-                      {t("clear")}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
+          <DrawerContent height="fixed" className="p-1.5">
+            <DrawerHeader className="pb-2 pl-1" showCloseButton>
+              <DrawerTitle>
+                {t(`select_${translationBaseKey}`) || t("select_item")}
+              </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {t(`search_${translationBaseKey}`)}
+              </DrawerDescription>
+            </DrawerHeader>
 
             {enableFavorites ? (
               <Tabs
@@ -881,7 +868,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 onValueChange={setActiveTab}
                 className="flex flex-col flex-1 min-h-0"
               >
-                <div className="px-4 py-2 border-b shrink-0">
+                <div className="px-1 py-2 border-b shrink-0">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="search">{t("search")}</TabsTrigger>
                     <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
@@ -921,63 +908,15 @@ export function ResourceDefinitionCategoryPicker<T>({
           }}
           modal
         >
-          <div className="flex relative">
+          <ButtonGroup className="w-full min-w-0">
             <PopoverTrigger asChild ref={ref}>
-              <Button
-                type="button"
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className={cn(
-                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300 h-auto min-h-9",
-                  "hover:bg-gray-50 hover:text-gray-900",
-                  "transition-all duration-200",
-                  disabled && "opacity-50 cursor-not-allowed",
-                  className,
-                )}
-                disabled={disabled}
-                data-shortcut-id={shortcutId}
-                onClick={() => {
-                  if (!open) {
-                    setOpen(true);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setOpen(true);
-                  }
-                }}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {getDisplayValue()}
-                </div>
-                <ChevronDown
-                  className={cn(
-                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                    open && "rotate-180",
-                  )}
-                />
-              </Button>
+              {triggerButton}
             </PopoverTrigger>
-            {value && !shouldHideClearButton && (
-              <Button
-                variant="outline"
-                onClick={handleClearSelection}
-                className="rounded-l-none -ml-1 shadow-none text-gray-400 border-gray-300 h-auto"
-                type="button"
-              >
-                <X />
-                <span className="sr-only">{t("clear_selection")}</span>
-              </Button>
-            )}
-          </div>
+            {clearButton}
+          </ButtonGroup>
 
           <PopoverContent
-            className={cn(
-              "p-0 shadow-lg border-0 -w-[var(--anchor-width)] sm:max-w-[80vw]",
-              enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
-            )}
+            className="p-0 shadow-lg border-0 w-168 max-w-[80vw] overflow-clip min-h-40"
             align={alignContent}
             sideOffset={4}
           >
@@ -992,11 +931,11 @@ export function ResourceDefinitionCategoryPicker<T>({
                 )}
               >
                 {/* Header with current location */}
-                <div className="px-4 py-3 border-b bg-gray-50">
+                <div className="px-4 py-3.5 border-b bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Home className="size-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-600">
+                      <Home className="size-4 text-gray-500 shrink-0" />
+                      <span className="text-sm font-medium text-gray-600 line-clamp-1">
                         {getCurrentLevelTitle()}
                       </span>
                     </div>
@@ -1032,7 +971,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                     </Tabs>
                   </div>
 
-                  <div className="overflow-auto min-h-0 max-h-[40vh]">
+                  <div className="overflow-auto min-h-0 max-h-63">
                     {favSubTab === "recent" ? (
                       recentlyUsed.length === 0 ? (
                         <div className="p-6 text-center text-gray-500">
