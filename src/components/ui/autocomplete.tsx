@@ -143,7 +143,6 @@ export default function Autocomplete({
         aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
         disabled={disabled}
         showTrigger={false}
-        autoFocus={isMobile}
       />
       {isLoading ? (
         <CardListSkeleton count={3} />
