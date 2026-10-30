@@ -365,7 +365,7 @@ function SheetHeader({
     <div
       data-slot="sheet-header"
       className={cn(
-        "bg-background relative flex shrink-0 flex-col gap-1.5 border-b pr-10 pb-4 transition-all duration-200 p-4 md:p-6",
+        "bg-background relative flex shrink-0 flex-col gap-1.5 border-b pr-10 transition-all duration-200 p-4 md:p-6",
         showCloseButton && "pr-12",
         className,
       )}
