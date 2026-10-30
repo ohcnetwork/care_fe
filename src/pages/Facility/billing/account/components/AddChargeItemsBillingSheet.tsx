@@ -181,7 +181,7 @@ export default function AddChargeItemsBillingSheet({
               queryParams: { status: ChargeItemDefinitionStatus.active },
             }}
             translationBaseKey="charge_item_definition"
-            data-shortcut-id="keydown-action"
+            data-shortcut-id="enter-action"
             defaultOpen={open}
           />
         </div>
@@ -389,7 +389,7 @@ export default function AddChargeItemsBillingSheet({
               className="flex flex-row items-center gap-2 justify-between"
             >
               {t("add_items")}
-              {open && <ShortcutBadge actionId="enter-action" />}
+              {open && <ShortcutBadge actionId="submit-action" />}
             </Button>
           </div>
         </SheetFooter>

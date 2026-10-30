@@ -67,7 +67,7 @@ function ClinicalHistoryPage({
       }
       hideTitleOnPage
     >
-      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
+      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-3 md:-mx-8 px-3 md:px-6 pb-3 pt-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="outline" onClick={handleClose} size="icon">
@@ -99,7 +99,7 @@ function ClinicalHistoryPage({
       <section>
         <NavTabs
           className="w-full mt-4"
-          tabContentClassName="mt-8"
+          tabContentClassName="mt-4"
           tabs={tabs}
           currentTab={tab}
           onTabChange={handleTabChange}
