@@ -284,8 +284,8 @@ function SheetContent({
   const resolvedContainerClassName =
     containerClassName ??
     (side === "top" || side === "bottom"
-      ? "mx-auto w-full max-w-2xl px-4"
-      : "px-4");
+      ? "mx-auto w-full max-w-2xl px-4 md:px-6"
+      : "px-4 md:px-6");
 
   const contextValue = React.useMemo(
     () => ({
@@ -310,7 +310,7 @@ function SheetContent({
           "bg-background data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-50 flex flex-col overflow-y-auto bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out",
           sheetSideClasses[side],
           (side === "left" || side === "right") && sheetSizeClasses[size],
-          "gap-4 p-6",
+          "gap-4",
           className,
         )}
         {...focusProps}
@@ -365,7 +365,7 @@ function SheetHeader({
     <div
       data-slot="sheet-header"
       className={cn(
-        "bg-background relative flex shrink-0 flex-col gap-1.5 border-b pr-10 pb-4 transition-all duration-200",
+        "bg-background relative flex shrink-0 flex-col gap-1.5 border-b pr-10 pb-4 transition-all duration-200 p-4 md:p-6",
         showCloseButton && "pr-12",
         className,
       )}
@@ -401,7 +401,7 @@ function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sheet-body"
       className={cn(
-        "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4 [scrollbar-gutter:stable]",
+        "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4",
         className,
       )}
       onScroll={(e) =>
@@ -418,7 +418,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sheet-footer"
       className={cn(
-        "bg-soft-background mt-auto flex shrink-0 flex-col-reverse gap-4 border-t pt-4 sm:flex-row sm:justify-end",
+        "bg-soft-background mt-auto flex shrink-0 flex-col-reverse gap-4 border-t p-4 md:p-6 sm:flex-row sm:justify-end",
         className,
       )}
       {...props}

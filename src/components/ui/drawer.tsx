@@ -74,6 +74,8 @@ const drawerHeightClasses = {
   auto: "",
   fixed:
     "data-[swipe-axis=y]:h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] data-[swipe-axis=y]:max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-1rem))]",
+  child:
+    "data-[swipe-axis=y]:h-[calc(70dvh+var(--drawer-keyboard-inset,0px))] data-[swipe-axis=y]:max-h-[min(32rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-1rem))]",
 } as const;
 
 type DrawerHeight = keyof typeof drawerHeightClasses;
@@ -474,7 +476,7 @@ function DrawerHeader({
     <div
       data-slot="drawer-header"
       className={cn(
-        "relative flex shrink-0 items-center justify-between gap-0.5 md:p-4 text-left md:gap-1.5",
+        "relative flex shrink-0 items-center justify-between gap-0.5 md:p-4 text-left md:gap-1.5 px-2",
         drawerContainerClasses[size],
         className,
       )}

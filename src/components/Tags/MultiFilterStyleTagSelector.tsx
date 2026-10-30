@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  ChevronLeft,
   Component,
   Plus,
   Space,
@@ -277,46 +276,19 @@ export function MultiFilterStyleTagSelector({
         <>
           <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent height="fixed" className="flex flex-col">
-              <DrawerHeader className="pb-3">
-                <DrawerTitle className="flex items-center gap-2">
-                  {t("manage_tags")}
-                </DrawerTitle>
+            <DrawerContent height="fixed">
+              <DrawerHeader showCloseButton>
+                <DrawerTitle>{t("manage_tags")}</DrawerTitle>
               </DrawerHeader>
-
+              {/* Search */}
+              <div className="p-2 border-b border-gray-100 shadow-xs">
+                <Input
+                  placeholder={t("search_tags")}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
               <div className="flex flex-col flex-1 overflow-hidden">
-                {/* Search */}
-                <div className="px-4 pb-3">
-                  <Input
-                    placeholder={t("search_tags")}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="h-8"
-                  />
-                </div>
-
-                {/* Content */}
-                {/* Selected Tags */}
-                {selected.length > 0 && (
-                  <div className="mb-4">
-                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {t("selected_tags")}
-                    </div>
-                    {selected.map((tag) => (
-                      <Label
-                        key={tag.id}
-                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
-                      >
-                        <Checkbox
-                          checked
-                          className="size-4"
-                          onCheckedChange={() => handleSelect(tag)}
-                        />
-                        {renderTagNameWithParent(tag)}
-                      </Label>
-                    ))}
-                  </div>
-                )}
                 {isLoadingRoot ? (
                   <div className="py-8 text-sm text-center text-gray-500">
                     {t("loading")}
@@ -326,7 +298,27 @@ export function MultiFilterStyleTagSelector({
                     {t("no_tags_group")}
                   </div>
                 ) : (
-                  <div className="flex-1 px-4 overflow-y-auto">
+                  <div className="flex-1 px-2 overflow-y-auto">
+                    {selected.length > 0 && (
+                      <div className="p-2">
+                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                          {t("selected_tags")}
+                        </div>
+                        {selected.map((tag) => (
+                          <Label
+                            key={tag.id}
+                            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
+                          >
+                            <Checkbox
+                              checked
+                              className="size-4"
+                              onCheckedChange={() => handleSelect(tag)}
+                            />
+                            {renderTagNameWithParent(tag)}
+                          </Label>
+                        ))}
+                      </div>
+                    )}
                     {/* Tag Groups */}
                     {groupTags.length > 0 && (
                       <div className="mb-4">
@@ -354,16 +346,11 @@ export function MultiFilterStyleTagSelector({
 
           {/* Child Tags Drawer */}
           <Drawer open={childDrawerOpen} onOpenChange={setChildDrawerOpen}>
-            <DrawerContent className="flex flex-col max-h-[85vh]">
-              <DrawerHeader className="pb-3">
+            <DrawerContent height="child">
+              <DrawerHeader className="p-2 border-b border-gray-100 shadow-xs">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleMobileBack}
-                    className="p-1 size-8"
-                  >
-                    <ChevronLeft className="size-4" />
+                  <Button variant="ghost" onClick={handleMobileBack}>
+                    <ArrowLeft className="size-4" />
                   </Button>
                   <DrawerTitle className="flex items-center gap-2">
                     <Component className="size-4" />
