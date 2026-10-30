@@ -5561,6 +5561,8 @@
   "see_attachments": "See Attachments",
   "see_clinical_history": "See Clinical History",
   "see_container_requirements": "See Container Requirements",
+  "see_count_more_responsibilities_one": "{{count}} more responsibility, see details",
+  "see_count_more_responsibilities_other": "{{count}} more responsibilities, see details",
   "see_details": "See Details",
   "see_invoice": "See Invoice",
   "see_less": "See less...",

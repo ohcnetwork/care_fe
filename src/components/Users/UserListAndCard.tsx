@@ -79,6 +79,11 @@ export function UserCard(props: UserCardProps) {
   } = props;
 
   const { t } = useTranslation();
+  const responsibilities = user.role_orgs ?? [];
+  const visibleResponsibilities = responsibilities.slice(0, 2);
+  const additionalResponsibilities =
+    responsibilities.length - visibleResponsibilities.length;
+  const userDetailsPath = `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`;
 
   return (
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
@@ -121,22 +126,44 @@ export function UserCard(props: UserCardProps) {
             )}
           </div>
         </div>
-        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex justify-end gap-2">
+        <div className="mt-2 -mx-2 -mb-2 sm:-mx-4 sm:-mb-4 rounded-md py-4 px-4 bg-gray-50 flex items-center justify-between gap-2">
           {!user.deleted ? (
             <>
-              {actions}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigate(
-                    `${facility ? `/facility/${facility}/users/${user.username}` : `/users/${user.username}`}`,
-                  );
-                }}
-              >
-                <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
-                <span>{t("see_details")}</span>
-              </Button>
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                {visibleResponsibilities.map((membership) => (
+                  <Badge
+                    key={membership.id}
+                    variant="outline"
+                    className="w-auto"
+                    size="xs"
+                  >
+                    {membership.organization.name}
+                  </Badge>
+                ))}
+                {additionalResponsibilities > 0 && (
+                  <Button
+                    variant="outline"
+                    className="h-4 w-fit px-2 text-xs"
+                    aria-label={t("see_count_more_responsibilities", {
+                      count: additionalResponsibilities,
+                    })}
+                    onClick={() => navigate(userDetailsPath)}
+                  >
+                    +{t("count_more", { count: additionalResponsibilities })}
+                  </Button>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center justify-end gap-2">
+                {actions}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(userDetailsPath)}
+                >
+                  <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
+                  <span>{t("see_details")}</span>
+                </Button>
+              </div>
             </>
           ) : (
             <div className="bg-gray-200 rounded-md px-2 py-1 text-sm inline-block">
