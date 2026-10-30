@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { FormProvider, useForm, type Path } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { z } from "zod";
 
 import { SchemaField } from "@/components/Extensions/SchemaField";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import type { ExtensionFieldMetadata } from "@/Utils/schema/types";
 
 interface ConfigFormValues {
@@ -118,17 +120,33 @@ export function WorkspaceSchemaFields({
       <fieldset disabled={disabled} className="min-w-0 space-y-4">
         {fields.map((field) => (
           <div key={field.name} className="min-w-0 space-y-1">
-            <SchemaField
-              metadata={{ ...field, readOnly: disabled || field.readOnly }}
-              control={form.control}
-              basePath="config"
-            />
+            {field.type === "array" && field.itemMetadata?.options?.length ? (
+              <EnumArrayField
+                field={field}
+                options={field.itemMetadata.options}
+                value={
+                  Array.isArray(config[field.name])
+                    ? (config[field.name] as unknown[])
+                    : []
+                }
+                disabled={disabled || field.readOnly}
+                // Keep an emptied selection so validation rejects it; omission
+                // would silently restore every option.
+                onChange={(next) => form.setValue(`config.${field.name}`, next)}
+              />
+            ) : (
+              <SchemaField
+                metadata={{ ...field, readOnly: disabled || field.readOnly }}
+                control={form.control}
+                basePath="config"
+              />
+            )}
             {!field.required && !field.isConst && !field.readOnly && (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-0 text-xs text-gray-500"
+                className="h-6 px-0 text-xs text-soft-foreground"
                 disabled={disabled || config[field.name] === undefined}
                 onClick={() => {
                   if (disabled) return;
@@ -142,5 +160,67 @@ export function WorkspaceSchemaFields({
         ))}
       </fieldset>
     </FormProvider>
+  );
+}
+
+/** A fixed set of choices reads better as checkboxes than as an add/remove list. */
+function EnumArrayField({
+  field,
+  options,
+  value,
+  disabled,
+  onChange,
+}: {
+  field: ExtensionFieldMetadata;
+  options: NonNullable<ExtensionFieldMetadata["options"]>;
+  value: unknown[];
+  disabled: boolean;
+  onChange: (value: unknown[]) => void;
+}) {
+  const id = useId();
+  const selected = new Set(value);
+  return (
+    <fieldset disabled={disabled} className="space-y-2">
+      <legend className="text-sm font-medium">{field.label}</legend>
+      <div className="space-y-2 rounded-lg border border-border p-3">
+        {options.map((option, index) => {
+          const key = String(option.value);
+          const checked = selected.has(option.value);
+          return (
+            <div key={key} className="flex items-center gap-2.5">
+              <Checkbox
+                id={`${id}-${index}`}
+                checked={checked}
+                disabled={disabled}
+                onCheckedChange={(state) =>
+                  onChange(
+                    state
+                      ? // Keep the schema's option order rather than click order.
+                        options
+                          .map((item) => item.value)
+                          .filter(
+                            (item) =>
+                              item === option.value || selected.has(item),
+                          )
+                      : value.filter((item) => item !== option.value),
+                  )
+                }
+              />
+              <Label
+                htmlFor={`${id}-${index}`}
+                className="text-sm leading-5 font-normal"
+              >
+                {option.label}
+              </Label>
+            </div>
+          );
+        })}
+      </div>
+      {field.description && (
+        <p className="text-xs leading-5 text-soft-foreground">
+          {field.description}
+        </p>
+      )}
+    </fieldset>
   );
 }

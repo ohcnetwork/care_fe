@@ -30,8 +30,26 @@ export const MAX_ENCOUNTER_WORKSPACE_COLUMNS = 4;
 
 export { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
 
+export const WORKSPACE_SURFACES = ["encounter", "patient_history"] as const;
+export type WorkspaceSurface = (typeof WORKSPACE_SURFACES)[number];
+
+export const HISTORY_PAGE_KEYS = [
+  "responses",
+  "diagnostic_reports",
+  "symptoms",
+  "diagnoses",
+  "allergies",
+  "medications",
+  "immunizations",
+];
+
 export const PLUGIN_ENCOUNTER_WIDGET_TYPE_PATTERN =
   /^[a-z0-9][a-z0-9_-]{0,63}\.[a-z][a-z0-9_]{0,63}$/;
+
+export const systemPageKeySchema = z
+  .string()
+  .regex(/^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/)
+  .refine((key) => !RESERVED_ROUTE_KEYS.includes(key));
 
 // Shared by custom page keys and questionnaire return links.
 export const encounterPageKeySchema = z
@@ -79,19 +97,25 @@ const customPageSchema = z.strictObject({
 });
 
 const systemPageSchema = z.strictObject({
-  key: z.string().min(1).max(64),
+  key: systemPageKeySchema,
   kind: z.literal("system"),
   hidden: z.boolean().optional(),
 });
 
 const workspaceSchema = z
   .strictObject({
-    schema_version: z.literal(1),
+    schema_version: z.union([z.literal(1), z.literal(2)]),
+    surface: z.enum(WORKSPACE_SURFACES).optional(),
     pages: z
       .array(z.discriminatedUnion("kind", [customPageSchema, systemPageSchema]))
       .min(1)
       .max(50),
   })
+  .refine(
+    ({ schema_version, surface }) =>
+      schema_version === 2 || surface === undefined,
+    { message: "Workspace surfaces require schema version 2" },
+  )
   .refine(
     ({ pages }) => new Set(pages.map((page) => page.key)).size === pages.length,
     { message: "Page keys must be unique" },
@@ -115,22 +139,47 @@ const workspaceSchema = z
 export type EncounterWorkspaceWidget = z.infer<typeof widgetSchema>;
 export type EncounterWorkspaceCustomPage = z.infer<typeof customPageSchema>;
 export type EncounterWorkspaceTemplate = z.infer<typeof workspaceSchema>;
+export const workspaceStructureSchema = workspaceSchema;
+
+export function getWorkspaceSurface(template: unknown): WorkspaceSurface {
+  return template !== null &&
+    typeof template === "object" &&
+    "surface" in template &&
+    template.surface === "patient_history"
+    ? "patient_history"
+    : "encounter";
+}
 
 /** Widget availability is a rendering concern; unknown widget types remain valid. */
 export function createEncounterWorkspaceSchema(
   additionalSystemPageKeys: readonly string[] = [],
+  savedTemplate?: unknown,
 ) {
-  const systemKeys = new Set([
-    ...SYSTEM_PAGE_KEYS,
-    ...additionalSystemPageKeys,
-  ]);
+  const saved = workspaceSchema.safeParse(savedTemplate);
+  const savedKeys = new Set(
+    saved.success
+      ? saved.data.pages
+          .filter((page) => page.kind === "system")
+          .map((page) => page.key)
+      : [],
+  );
   return workspaceSchema.refine(
-    ({ pages }) =>
-      pages.every((page) =>
+    (template) => {
+      const surface = getWorkspaceSurface(template);
+      const systemKeys = new Set([
+        ...(surface === "patient_history"
+          ? HISTORY_PAGE_KEYS
+          : [...SYSTEM_PAGE_KEYS, ...additionalSystemPageKeys]),
+      ]);
+      const preserveUnavailable =
+        saved.success && getWorkspaceSurface(saved.data) === surface;
+      return template.pages.every((page) =>
         page.kind === "system"
-          ? systemKeys.has(page.key)
-          : !systemKeys.has(page.key),
-      ),
-    { message: "System pages must exist and custom pages cannot replace them" },
+          ? systemKeys.has(page.key) ||
+            (preserveUnavailable && savedKeys.has(page.key))
+          : template.schema_version === 2 || !systemKeys.has(page.key),
+      );
+    },
+    { message: "Invalid system page or reserved legacy custom page" },
   );
 }

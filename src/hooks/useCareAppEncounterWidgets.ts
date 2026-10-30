@@ -11,6 +11,7 @@ export interface CareAppEncounterWidget {
   component: PluginEncounterWidgetComponent;
   pluginSlug: string;
   configSchema?: JSONSchema2020;
+  requiresActiveEncounter?: boolean;
 }
 
 function isWidgetDefinition(
@@ -46,6 +47,9 @@ export function useCareAppEncounterWidgets() {
         component: isDefinition ? definition.component : definition,
         pluginSlug: app.slug,
         configSchema: isDefinition ? definition.configSchema : undefined,
+        requiresActiveEncounter: isDefinition
+          ? definition.requiresActiveEncounter
+          : undefined,
       });
     }
   }

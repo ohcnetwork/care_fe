@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,7 @@ import { ObservationVisualizer } from "@/components/Common/Charts/ObservationCha
 import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
@@ -19,9 +19,14 @@ type QueryParams = {
 
 const fetchOptions = { cache: "no-store" as RequestCache };
 
-export const EncounterPlotsTab = () => {
+export const EncounterPlotsTab = ({
+  defaultPlot,
+}: {
+  /** Plot id from the plots configuration that opens first. */
+  defaultPlot?: string;
+} = {}) => {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
+  const [qParams, setQParams] = useScopedQueryParams<QueryParams>();
 
   const { patientId, selectedEncounterId: encounterId } = useEncounter();
 
@@ -37,7 +42,11 @@ export const EncounterPlotsTab = () => {
     return <Loading />;
   }
 
-  const currentTabId = qParams.plot || data[0]?.id;
+  const currentTabId =
+    qParams.plot ||
+    (defaultPlot && data.some((tab) => tab.id === defaultPlot)
+      ? defaultPlot
+      : data[0]?.id);
   const currentTab = data.find((tab) => tab.id === currentTabId);
 
   if (!currentTab) {

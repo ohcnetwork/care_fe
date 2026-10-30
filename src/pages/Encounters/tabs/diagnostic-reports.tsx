@@ -1,6 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ArrowRight, Menu } from "lucide-react";
-import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -22,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
 import { cn } from "@/lib/utils";
 import { DiagnosticReportDetailCard } from "@/pages/Encounters/DiagnosticReportDetailCard";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -194,7 +194,7 @@ export const DiagnosticReportsTab = ({
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const [qParams, setQueryParams] = useQueryParams<{
+  const [qParams, setQueryParams] = useScopedQueryParams<{
     reportId?: string;
     activityDefinition?: string;
   }>();

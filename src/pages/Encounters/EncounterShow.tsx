@@ -83,6 +83,7 @@ export const EncounterShow = (props: Props) => {
     isPatientLoading,
     canWritePrimaryEncounter,
     canWriteSelectedEncounter,
+    canWriteClinicalData,
     canReadClinicalData,
     canReadSelectedEncounter,
     selectedEncounterPermissions,
@@ -133,6 +134,7 @@ export const EncounterShow = (props: Props) => {
           patientId={patientId}
           encounterId={selectedEncounterId}
           canAccess={canAccess}
+          readOnly={!canWriteClinicalData}
         />
       ),
       shortcutId: "responses",

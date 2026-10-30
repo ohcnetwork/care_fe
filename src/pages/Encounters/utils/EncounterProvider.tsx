@@ -45,6 +45,7 @@ type EncounterContextType = {
   canReadPrimaryEncounter: boolean;
   canReadSelectedEncounter: boolean;
   canReadClinicalData: boolean;
+  canReadPatientHistory: boolean;
 
   canWritePrimaryEncounter: boolean;
   canWriteSelectedEncounter: boolean;
@@ -236,6 +237,7 @@ export function EncounterProvider({
         canReadPrimaryEncounter,
         canWritePrimaryEncounter,
         canReadClinicalData,
+        canReadPatientHistory: patientPermissions.canViewClinicalData,
         canWriteClinicalData,
         actions: {
           markAsCompleted: (completeEverythingToMark = false) => {
@@ -290,6 +292,7 @@ export function EncounterProvider({
             completeEverythingToMark={completeEverything}
           />
           <LocationSheet
+            readOnly={!canWriteSelectedEncounter}
             open={
               activeAction === EncounterAction.AssignLocation ||
               activeAction === EncounterAction.LocationHistory

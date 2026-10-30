@@ -68,21 +68,29 @@ function groupObservationsByDate(
   }, {});
 }
 
-export const EncounterObservationsTab = () => {
+const PAGE_SIZE = 20;
+
+export const EncounterObservationsTab = ({
+  limit,
+}: {
+  /** Show only the latest readings instead of the endless timeline. */
+  limit?: number;
+} = {}) => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
+  const pageSize = limit === undefined ? PAGE_SIZE : Math.min(limit, PAGE_SIZE);
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
-      queryKey: ["infinite-observations", patientId, encounterId],
+      queryKey: ["infinite-observations", patientId, encounterId, limit],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(observationApi.list, {
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
             ignore_group: true,
-            limit: 20,
+            limit: pageSize,
             offset: String(pageParam),
           },
         })({ signal });
@@ -90,8 +98,12 @@ export const EncounterObservationsTab = () => {
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 20;
-        return currentOffset < lastPage.count ? currentOffset : null;
+        const currentOffset = allPages.length * pageSize;
+        const total =
+          limit === undefined
+            ? lastPage.count
+            : Math.min(lastPage.count, limit);
+        return currentOffset < total ? currentOffset : null;
       },
     });
 
@@ -109,7 +121,9 @@ export const EncounterObservationsTab = () => {
     );
   }
 
-  const observations = data?.pages.flatMap((page) => page.results) ?? [];
+  const observations = (
+    data?.pages.flatMap((page) => page.results) ?? []
+  ).slice(0, limit);
 
   if (observations.length === 0) {
     return (

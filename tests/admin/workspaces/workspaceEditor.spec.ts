@@ -70,6 +70,62 @@ async function openGeneralSettings(page: Page) {
   await page.getByRole("button", { name: /^General settings\b/ }).click();
 }
 
+/** JSON is an advanced escape hatch; unrecognised templates open it automatically. */
+async function openJsonEditor(page: Page) {
+  const templateField = page.getByRole("textbox", {
+    name: "Template (JSON)",
+    exact: true,
+  });
+  if (await templateField.isVisible()) return;
+  await page.getByRole("button", { name: "More options", exact: true }).click();
+  await page
+    .getByRole("menuitem", { name: "Edit as JSON (advanced)", exact: true })
+    .click();
+  await expect(templateField).toBeVisible();
+}
+
+async function addSection(page: Page, column: string, label: string) {
+  await page
+    .getByRole("button", { name: `Add a section to ${column}`, exact: true })
+    .click();
+  const picker = page.getByRole("dialog", {
+    name: "Add a section",
+    exact: true,
+  });
+  await picker
+    .getByRole("textbox", { name: "Search sections", exact: true })
+    .fill(label);
+  await picker.getByRole("button", { name: label, exact: true }).click();
+  await expect(picker).not.toBeVisible();
+}
+
+function sectionSettings(page: Page) {
+  return page.getByRole("dialog", { name: "Section settings", exact: true });
+}
+
+async function openSectionSettings(page: Page, name: string) {
+  await page
+    .getByRole("button", { name: `Settings for ${name}`, exact: true })
+    .first()
+    .click();
+  await expect(sectionSettings(page)).toBeVisible();
+}
+
+async function closeSectionSettings(page: Page) {
+  await sectionSettings(page)
+    .getByRole("button", { name: "Done", exact: true })
+    .click();
+  await expect(sectionSettings(page)).not.toBeVisible();
+}
+
+async function sectionAction(page: Page, name: string, action: string) {
+  await page
+    .getByRole("button", { name: `More actions for ${name}`, exact: true })
+    .first()
+    .click();
+  await page.getByRole("menuitem", { name: action, exact: true }).click();
+}
+
 async function mockWorkspaceApi(
   page: Page,
   options: {
@@ -426,9 +482,7 @@ test("instance admins can validate, create, reopen, update, and delete a workspa
     await page
       .getByRole("textbox", { name: "Description", exact: true })
       .fill(description);
-    if (!(await templateField.isVisible())) {
-      await page.getByRole("button", { name: "JSON", exact: true }).click();
-    }
+    await openJsonEditor(page);
     for (const invalidTemplate of [
       "{ invalid JSON }",
       "[]",
@@ -598,7 +652,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     });
   });
   const name = `Clinical workspace ${faker.string.alphanumeric(8)}`;
-  const pageTitle = `Ward rounds ${faker.string.alphanumeric(6)}`;
+  const tabTitle = `Ward rounds ${faker.string.alphanumeric(6)}`;
   const description = faker.lorem.sentence();
   const opaqueConfig = {
     compact: true,
@@ -607,28 +661,19 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     display_code: "5",
   };
   const template = {
-    schema_version: 1,
+    schema_version: 2,
+    surface: "encounter",
     pages: [
       { kind: "system", key: "immunizations", hidden: true },
       {
         kind: "custom",
         key: "rounds",
-        title: pageTitle,
+        title: tabTitle,
         icon: "layout-dashboard",
         hidden: true,
         columns: [
           {
-            span: 1,
-            widgets: [
-              {
-                type: "service_requests",
-                title: "Active requests",
-                config: { status: "active" },
-              },
-            ],
-          },
-          {
-            span: 1,
+            span: 6,
             widgets: [
               {
                 type: "questionnaire_responses",
@@ -640,9 +685,16 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
                   role: api.roleOrganizations[0].id,
                 },
               },
+              { type: "symptoms", config: opaqueConfig },
+            ],
+          },
+          {
+            span: 6,
+            widgets: [
               {
-                type: "symptoms",
-                config: opaqueConfig,
+                type: "service_requests",
+                title: "Active requests",
+                config: { status: "active" },
               },
             ],
           },
@@ -650,32 +702,23 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
       },
     ],
   };
-  const column = (index: number) =>
-    page.getByRole("region", { name: `Column ${index}`, exact: true });
-  const inspector = page.getByRole("region", {
-    name: "Widget settings",
-    exact: true,
-  });
-  const addWidget = async (columnIndex: number, label: string) => {
-    await column(columnIndex)
-      .getByRole("button", { name: "Add widget", exact: true })
-      .click();
-    const library = page.getByRole("dialog", {
-      name: "Add widget",
-      exact: true,
-    });
-    await library
-      .getByRole("textbox", { name: "Search widgets", exact: true })
-      .fill(label);
-    await library.getByRole("button", { name: label, exact: true }).click();
-    await expect(library).not.toBeVisible();
-  };
-  const configJson = inspector.getByRole("textbox", {
+  const column = (label: string) =>
+    page.getByRole("region", { name: label, exact: true });
+  const settings = sectionSettings(page);
+  const configJson = settings.getByRole("textbox", {
     name: "Widget configuration (JSON)",
     exact: true,
   });
+  const create = page.getByRole("button", {
+    name: "Create workspace",
+    exact: true,
+  });
+  const showTab = page.getByRole("switch", {
+    name: "Show this tab",
+    exact: true,
+  });
 
-  await test.step("Start an empty workspace with a custom page and two columns", async () => {
+  await test.step("Start from a blank screen and name its first tab", async () => {
     await page.goto("/admin/workspaces");
     await page
       .getByRole("link", { name: "Create workspace", exact: true })
@@ -690,75 +733,89 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await expect(
       page.getByRole("textbox", { name: "Template (JSON)", exact: true }),
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "What would you like to design?" }),
+    ).toBeVisible();
     await page
-      .getByRole("button", { name: "Create custom page", exact: true })
+      .getByRole("region", { name: "Encounter screen", exact: true })
+      .getByRole("button", { name: "Blank", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Overview", exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Tab settings", exact: true })
       .click();
     const dialog = page.getByRole("dialog", {
-      name: "Add custom page",
+      name: "Tab settings",
       exact: true,
     });
     await dialog
-      .getByRole("textbox", { name: "Page title", exact: true })
-      .fill(pageTitle);
+      .getByRole("textbox", { name: "Tab name", exact: true })
+      .fill(tabTitle);
+    await dialog.getByText("Advanced", { exact: true }).click();
     await dialog
-      .getByRole("textbox", { name: "Page key", exact: true })
+      .getByRole("textbox", { name: "Address in the URL", exact: true })
       .fill("rounds");
     await dialog
-      .getByRole("button", { name: "Add custom page", exact: true })
+      .getByRole("button", { name: "Apply changes", exact: true })
       .click();
-    await expect(column(1)).toBeVisible();
-    await page.getByRole("button", { name: "Add column", exact: true }).click();
-    await expect(column(2)).toBeVisible();
+    await expect(dialog).not.toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: tabTitle, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "One column", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await page
+      .getByRole("button", { name: "Two columns", exact: true })
+      .click();
+    await expect(column("Left")).toBeVisible();
+    await expect(column("Right")).toBeVisible();
   });
 
-  await test.step("Configure clinical widgets and edit their layout", async () => {
-    await addWidget(1, "Symptoms");
-    await inspector
-      .getByText("Advanced configuration", { exact: true })
-      .click();
+  await test.step("Add sections, adjust their options, and arrange them", async () => {
+    await addSection(page, "Left", "Symptoms");
+    await openSectionSettings(page, "Symptoms");
+    await settings.getByText("Advanced configuration", { exact: true }).click();
     const invalidConfig = '{"compact":true,"limit":{"toString":';
     await configJson.fill(invalidConfig);
     await expect(configJson).toHaveValue(invalidConfig);
     await expect(configJson).toHaveAttribute("aria-invalid", "true");
+    // The drawer is modal, so an invalid draft blocks Done rather than Save.
     await expect(
-      page.getByRole("button", { name: "Create workspace", exact: true }),
+      settings.getByRole("button", { name: "Done", exact: true }),
     ).toBeDisabled();
     await configJson.fill(JSON.stringify(opaqueConfig));
     await expect(configJson).toHaveAttribute("aria-invalid", "false");
     await expect(
-      page.getByRole("button", { name: "Create workspace", exact: true }),
+      settings.getByRole("button", { name: "Done", exact: true }),
     ).toBeEnabled();
+    await closeSectionSettings(page);
+    await expect(create).toBeEnabled();
 
-    await addWidget(1, "Questionnaire Responses");
-    await column(1)
-      .getByRole("button", {
-        name: "Move Questionnaire Responses up",
-        exact: true,
-      })
-      .click();
-    await column(1)
-      .getByRole("button", {
-        name: "Configure Questionnaire Responses",
-        exact: true,
-      })
-      .first()
-      .click();
-    await inspector
-      .getByRole("textbox", { name: "Display title", exact: true })
+    await addSection(page, "Left", "Questionnaire Responses");
+    await sectionAction(page, "Questionnaire Responses", "Move up");
+    await expect(
+      column("Left").getByRole("article").first(),
+    ).toHaveAccessibleName("Questionnaire Responses");
+    await openSectionSettings(page, "Questionnaire Responses");
+    await settings
+      .getByRole("textbox", { name: "Title shown to users", exact: true })
       .fill("Progress notes");
-    await inspector
+    await settings
       .getByRole("textbox", { name: "Form slug", exact: true })
       .fill("daily-progress-note");
-    await inspector
+    await settings
       .getByRole("checkbox", { name: "Form responses only", exact: true })
       .check();
-    await inspector
+    await settings
       .getByRole("combobox", { name: "Author role", exact: true })
       .click();
     await page
       .getByRole("option", { name: api.roleOrganizations[0].name, exact: true })
       .click();
-    const responseLimit = inspector.getByRole("spinbutton", {
+    const responseLimit = settings.getByRole("spinbutton", {
       name: "Latest results",
       exact: true,
     });
@@ -770,52 +827,56 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
       await responseLimit.fill(invalidLimit);
       await expect(responseLimit).toHaveValue(invalidLimit);
       await expect(
-        inspector.getByText(message, { exact: true }).first(),
+        settings.getByText(message, { exact: true }).first(),
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: "Create workspace", exact: true }),
+        settings.getByRole("button", { name: "Done", exact: true }),
       ).toBeDisabled();
     }
     await responseLimit.fill("1");
     await expect(
-      page.getByRole("button", { name: "Create workspace", exact: true }),
+      settings.getByRole("button", { name: "Done", exact: true }),
     ).toBeEnabled();
+    await closeSectionSettings(page);
+    await expect(create).toBeEnabled();
 
-    const originalSymptoms = column(1)
-      .getByRole("button", { name: "Configure Symptoms", exact: true })
-      .first();
-    const movedSymptoms = column(2)
-      .getByRole("button", { name: "Configure Symptoms", exact: true })
-      .first();
-    await column(1)
-      .getByRole("button", { name: "Move Symptoms to column", exact: true })
+    const leftSymptoms = column("Left").getByRole("article", {
+      name: "Symptoms",
+      exact: true,
+    });
+    const rightSymptoms = column("Right").getByRole("article", {
+      name: "Symptoms",
+      exact: true,
+    });
+    await page
+      .getByRole("button", { name: "More actions for Symptoms", exact: true })
       .click();
-    await page.getByRole("menuitem", { name: "Column 2", exact: true }).click();
-    await expect(originalSymptoms).toHaveCount(0);
-    await expect(movedSymptoms).toBeVisible();
+    await page.getByRole("menuitem", { name: "Move to", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Right", exact: true }).click();
+    await expect(leftSymptoms).toHaveCount(0);
+    await expect(rightSymptoms).toBeVisible();
     await page.getByRole("button", { name: "Undo", exact: true }).click();
-    await expect(originalSymptoms).toBeVisible();
-    await expect(movedSymptoms).toHaveCount(0);
+    await expect(leftSymptoms).toBeVisible();
+    await expect(rightSymptoms).toHaveCount(0);
     await page.getByRole("button", { name: "Redo", exact: true }).click();
-    await expect(originalSymptoms).toHaveCount(0);
-    await expect(movedSymptoms).toBeVisible();
+    await expect(leftSymptoms).toHaveCount(0);
+    await expect(rightSymptoms).toBeVisible();
     await page.getByRole("button", { name: "Undo", exact: true }).click();
-    await expect(originalSymptoms).toBeVisible();
-    await expect(movedSymptoms).toHaveCount(0);
+    await expect(leftSymptoms).toBeVisible();
+    await expect(rightSymptoms).toHaveCount(0);
 
-    await addWidget(1, "Vitals");
-    await column(1)
-      .getByRole("button", { name: "Remove Vitals", exact: true })
-      .click();
+    await addSection(page, "Left", "Vitals");
+    await sectionAction(page, "Vitals", "Remove section");
     await expect(
-      column(1).getByRole("button", { name: "Configure Vitals", exact: true }),
+      column("Left").getByRole("article", { name: "Vitals", exact: true }),
     ).toHaveCount(0);
 
-    await addWidget(2, "Service Requests");
-    await inspector
-      .getByRole("textbox", { name: "Display title", exact: true })
+    await addSection(page, "Right", "Service Requests");
+    await openSectionSettings(page, "Service Requests");
+    await settings
+      .getByRole("textbox", { name: "Title shown to users", exact: true })
       .fill("Active requests");
-    const requestStatus = inspector.getByRole("combobox", {
+    const requestStatus = settings.getByRole("combobox", {
       name: requestStatusLabel,
       exact: true,
     });
@@ -824,79 +885,53 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await page
       .getByRole("option", { name: activeStatusLabel, exact: true })
       .click();
-    const requestLimit = inspector.getByRole("spinbutton", {
+    const requestLimit = settings.getByRole("spinbutton", {
       name: "Latest results",
       exact: true,
     });
     await expect(requestLimit).toHaveValue("");
     await requestLimit.fill("5");
     await requestLimit.clear();
-    const addColumn = page.getByRole("button", {
-      name: "Add column",
-      exact: true,
-    });
-    await addColumn.click();
-    await addColumn.click();
-    await expect(column(4)).toBeVisible();
-    await expect(addColumn).toBeDisabled();
-    await expect(column(5)).toHaveCount(0);
-    await column(4)
-      .getByRole("button", { name: "Remove column 4", exact: true })
+    await closeSectionSettings(page);
+
+    await page
+      .getByRole("button", { name: "Three columns", exact: true })
       .click();
-    await expect(addColumn).toBeEnabled();
-    await column(3)
-      .getByRole("button", { name: "Remove column 3", exact: true })
+    await expect(column("Middle")).toBeVisible();
+    await page
+      .getByRole("button", { name: "Two columns", exact: true })
       .click();
-    await expect(column(3)).toHaveCount(0);
-    await column(2)
-      .getByRole("button", { name: "Move column 2 left", exact: true })
-      .click();
+    await expect(column("Middle")).toHaveCount(0);
     await expect(
-      column(1)
-        .getByRole("button", {
-          name: "Configure Active requests",
-          exact: true,
-        })
-        .first(),
-    ).toBeVisible();
-    await expect(
-      column(2)
-        .getByRole("button", {
-          name: "Configure Progress notes",
-          exact: true,
-        })
-        .first(),
+      column("Right").getByRole("article", {
+        name: "Active requests",
+        exact: true,
+      }),
     ).toBeVisible();
   });
 
-  await test.step("Add a fixed system page, hide it, and place it first", async () => {
-    await page
-      .getByRole("checkbox", {
-        name: "Show in encounter navigation",
-        exact: true,
-      })
-      .uncheck();
-    await page
-      .getByRole("button", { name: "Add system page", exact: true })
-      .click();
+  await test.step("Hide the tab, add a built-in tab, and place it first", async () => {
+    await showTab.click();
+    await expect(showTab).not.toBeChecked();
+    await expect(
+      page.getByText("Hidden from users", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Add tab", exact: true }).click();
     await page
       .getByRole("menuitem", { name: "Immunizations", exact: true })
       .click();
+    await expect(
+      page.getByText("This tab is built into CARE", { exact: true }),
+    ).toBeVisible();
+    await showTab.click();
+    await expect(showTab).not.toBeChecked();
     await page
-      .getByRole("checkbox", {
-        name: "Show in encounter navigation",
-        exact: true,
-      })
-      .uncheck();
-    await page
-      .getByRole("button", { name: "Move page up", exact: true })
+      .getByRole("button", { name: "Move tab up", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Add column", exact: true }),
+      page.getByRole("button", { name: "Add a section", exact: true }),
     ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "Create workspace", exact: true })
-      .click();
+    await create.click();
     await page.waitForURL(/\/admin\/workspaces\/[\da-f-]+\/edit$/);
     expect(api.writes).toEqual([
       {
@@ -914,7 +949,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     ]);
   });
 
-  await test.step("Reload restores the visual settings and the same JSON contract", async () => {
+  await test.step("Reload restores the design and the same JSON contract", async () => {
     await expect(
       page.getByRole("button", { name: /^General settings\b/ }),
     ).toHaveAttribute("aria-expanded", "false");
@@ -925,89 +960,64 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await expect(
       page.getByRole("button", { name: "Save Changes", exact: true }),
     ).toBeDisabled();
+    await expect(showTab).not.toBeChecked();
+    await page.getByRole("button", { name: tabTitle, exact: true }).click();
+    await expect(showTab).not.toBeChecked();
     await expect(
-      page.getByRole("checkbox", {
-        name: "Show in encounter navigation",
-        exact: true,
-      }),
-    ).not.toBeChecked();
-    await page.getByRole("button", { name: pageTitle, exact: true }).click();
+      page.getByRole("button", { name: "Two columns", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await openSectionSettings(page, "Active requests");
     await expect(
-      page.getByRole("checkbox", {
-        name: "Show in encounter navigation",
-        exact: true,
-      }),
-    ).not.toBeChecked();
-    await column(1)
-      .getByRole("button", { name: "Configure Active requests", exact: true })
-      .first()
-      .click();
-    await expect(
-      inspector.getByRole("combobox", {
-        name: requestStatusLabel,
-        exact: true,
-      }),
+      settings.getByRole("combobox", { name: requestStatusLabel, exact: true }),
     ).toHaveText(activeStatusLabel);
     await expect(
-      inspector.getByRole("spinbutton", {
-        name: "Latest results",
-        exact: true,
-      }),
+      settings.getByRole("spinbutton", { name: "Latest results", exact: true }),
     ).toHaveValue("");
-    await column(2)
-      .getByRole("button", { name: "Configure Symptoms", exact: true })
-      .first()
-      .click();
-    await inspector
-      .getByText("Advanced configuration", { exact: true })
-      .click();
+    await closeSectionSettings(page);
+    await openSectionSettings(page, "Symptoms");
+    await settings.getByText("Advanced configuration", { exact: true }).click();
     expect(JSON.parse(await configJson.inputValue())).toEqual(opaqueConfig);
     await page.screenshot({
-      path: testInfo.outputPath("workspace-config-fields-desktop.png"),
+      path: testInfo.outputPath("workspace-section-settings.png"),
       fullPage: true,
     });
-    await column(2)
-      .getByRole("button", { name: "Configure Progress notes", exact: true })
-      .first()
-      .click();
+    await closeSectionSettings(page);
+    await openSectionSettings(page, "Progress notes");
     await expect(
-      inspector.getByRole("textbox", { name: "Form slug", exact: true }),
+      settings.getByRole("textbox", { name: "Form slug", exact: true }),
     ).toHaveValue("daily-progress-note");
     await expect(
-      inspector.getByRole("spinbutton", {
-        name: "Latest results",
-        exact: true,
-      }),
+      settings.getByRole("spinbutton", { name: "Latest results", exact: true }),
     ).toHaveValue("1");
     await expect(
-      inspector.getByRole("checkbox", {
+      settings.getByRole("checkbox", {
         name: "Form responses only",
         exact: true,
       }),
     ).toBeChecked();
     await expect(
-      inspector.getByRole("combobox", { name: "Author role", exact: true }),
+      settings.getByRole("combobox", { name: "Author role", exact: true }),
     ).toHaveText(api.roleOrganizations[0].name);
+    await closeSectionSettings(page);
     await page.screenshot({
-      path: testInfo.outputPath("workspace-visual-desktop.png"),
+      path: testInfo.outputPath("workspace-studio-desktop.png"),
       fullPage: true,
     });
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(column(1)).toBeVisible();
-    await expect(column(2)).toBeVisible();
+    await expect(column("Left")).toBeVisible();
+    await expect(column("Right")).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(390);
     await page.screenshot({
-      path: testInfo.outputPath("workspace-visual-mobile.png"),
+      path: testInfo.outputPath("workspace-studio-mobile.png"),
       fullPage: true,
     });
-    await page.getByRole("button", { name: "JSON", exact: true }).click();
+    await openJsonEditor(page);
     const json = page.getByRole("textbox", {
       name: "Template (JSON)",
       exact: true,
     });
-    await expect(json).toBeVisible();
     expect(JSON.parse(await json.inputValue())).toEqual(template);
     expect(api.writes).toHaveLength(1);
   });
@@ -1396,9 +1406,7 @@ test("department workspaces validate ownership and preserve edits after a backen
     const pathname = `/api/v1/workspace/${api.records[0].data.id}/`;
     api.rejectedWrites.add(`PUT ${pathname}`);
     await nameField.fill(updatedName);
-    if (!(await templateField.isVisible())) {
-      await page.getByRole("button", { name: "JSON", exact: true }).click();
-    }
+    await openJsonEditor(page);
     await templateField.fill(JSON.stringify(updatedTemplate));
     const save = page.getByRole("button", {
       name: "Save Changes",
@@ -1605,8 +1613,8 @@ test("open workspace editor controls close when a server refresh replaces their 
   page,
 }) => {
   const record = workspace("instance");
-  const initialWidgetTitle = `Original summary ${faker.string.alphanumeric(6)}`;
-  const replacementWidgetTitle = `Updated summary ${faker.string.alphanumeric(6)}`;
+  const initialSectionTitle = `Original summary ${faker.string.alphanumeric(6)}`;
+  const replacementSectionTitle = `Updated summary ${faker.string.alphanumeric(6)}`;
   const primaryPage = {
     key: "rounds",
     kind: "custom",
@@ -1614,7 +1622,7 @@ test("open workspace editor controls close when a server refresh replaces their 
     columns: [
       {
         span: 1,
-        widgets: [{ type: "symptoms", title: initialWidgetTitle }],
+        widgets: [{ type: "symptoms", title: initialSectionTitle }],
       },
       { span: 1, widgets: [] },
     ],
@@ -1631,6 +1639,7 @@ test("open workspace editor controls close when a server refresh replaces their 
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
   const detailPath = `/api/v1/workspace/${record.data.id}/`;
+  // Widths that match no preset keep their numbered column names.
   const column = (number: number) =>
     page.getByRole("region", { name: `Column ${number}`, exact: true });
   const save = page.getByRole("button", { name: "Save Changes", exact: true });
@@ -1649,7 +1658,7 @@ test("open workspace editor controls close when a server refresh replaces their 
     columns: [
       {
         span: 1,
-        widgets: [{ type: "diagnosis", title: replacementWidgetTitle }],
+        widgets: [{ type: "diagnosis", title: replacementSectionTitle }],
       },
       { span: 1, widgets: [] },
     ],
@@ -1657,11 +1666,19 @@ test("open workspace editor controls close when a server refresh replaces their 
 
   await page.goto(`/admin/workspaces/${record.data.id}/edit`);
   await expect(column(2)).toBeVisible();
+  await expect(
+    page.getByText(
+      "Custom widths from JSON. Pick a layout to standardise them.",
+      {
+        exact: true,
+      },
+    ),
+  ).toBeVisible();
 
-  await test.step("Close a move menu when the widget at its position is replaced", async () => {
+  await test.step("Close a section menu when the section at its position is replaced", async () => {
     await column(1)
       .getByRole("button", {
-        name: `Move ${initialWidgetTitle} to column`,
+        name: `More actions for ${initialSectionTitle}`,
         exact: true,
       })
       .click();
@@ -1674,31 +1691,75 @@ test("open workspace editor controls close when a server refresh replaces their 
     await expect.soft(menu).not.toBeVisible();
     await page.keyboard.press("Escape");
     await expect(
-      column(1)
-        .getByRole("button", {
-          name: `Configure ${replacementWidgetTitle}`,
-          exact: true,
-        })
-        .first(),
+      column(1).getByRole("article", {
+        name: replacementSectionTitle,
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
-      column(2).getByRole("button", {
-        name: `Configure ${replacementWidgetTitle}`,
+      column(2).getByRole("article", {
+        name: replacementSectionTitle,
         exact: true,
       }),
     ).toHaveCount(0);
     await expect(save).toBeDisabled();
   });
 
-  await test.step("Close the widget library when its destination column is removed", async () => {
-    await column(2)
-      .getByRole("button", { name: "Add widget", exact: true })
+  await test.step("Close section settings when a server refresh changes the template", async () => {
+    await openSectionSettings(page, replacementSectionTitle);
+    const settings = sectionSettings(page);
+    await refreshTemplate({
+      schema_version: 1,
+      pages: [
+        {
+          ...updatedPage,
+          columns: [
+            {
+              span: 1,
+              widgets: [
+                {
+                  type: "diagnosis",
+                  title: replacementSectionTitle,
+                  config: { compact: true },
+                },
+              ],
+            },
+            ...updatedPage.columns.slice(1),
+          ],
+        },
+        ...remainingPages,
+      ],
+    });
+    await expect.soft(settings).not.toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", {
+        name: "Add a section to Column 2",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await expect(save).toBeDisabled();
+    // Reopening shows the refreshed configuration rather than a stale draft.
+    await openSectionSettings(page, replacementSectionTitle);
+    await settings.getByText("Advanced configuration", { exact: true }).click();
+    await expect(
+      settings.getByRole("textbox", {
+        name: "Widget configuration (JSON)",
+        exact: true,
+      }),
+    ).toHaveValue(JSON.stringify({ compact: true }, null, 2));
+    await closeSectionSettings(page);
+  });
+
+  await test.step("Close the section picker when its destination column is removed", async () => {
+    await page
+      .getByRole("button", { name: "Add a section to Column 2", exact: true })
       .click();
-    const library = page.getByRole("dialog", {
-      name: "Add widget",
+    const picker = page.getByRole("dialog", {
+      name: "Add a section",
       exact: true,
     });
-    await expect(library).toBeVisible();
+    await expect(picker).toBeVisible();
     await refreshTemplate({
       schema_version: 1,
       pages: [
@@ -1706,26 +1767,22 @@ test("open workspace editor controls close when a server refresh replaces their 
         ...remainingPages,
       ],
     });
-    await expect.soft(library).not.toBeVisible();
+    await expect.soft(picker).not.toBeVisible();
     await page.keyboard.press("Escape");
     await expect(column(2)).toHaveCount(0);
     await expect(
-      column(1)
-        .getByRole("button", {
-          name: `Configure ${replacementWidgetTitle}`,
-          exact: true,
-        })
-        .first(),
+      column(1).getByRole("article", {
+        name: replacementSectionTitle,
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(save).toBeDisabled();
   });
 
-  await test.step("Close removal confirmation when its page disappears without deleting a remaining page", async () => {
-    await page
-      .getByRole("button", { name: "Remove page", exact: true })
-      .click();
+  await test.step("Close removal confirmation when its tab disappears without deleting a remaining tab", async () => {
+    await page.getByRole("button", { name: "Remove tab", exact: true }).click();
     const confirmation = page.getByRole("alertdialog", {
-      name: "Remove page",
+      name: "Remove tab",
       exact: true,
     });
     await expect(confirmation).toBeVisible();
@@ -2009,5 +2066,965 @@ test("workspace status filters the list and saves with the configuration", async
     });
     await page.goto("/admin/workspaces?status=draft");
     await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
+  });
+});
+
+test("studio shows what hides automatically without loading clinical records", async ({
+  page,
+}, testInfo) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        key: "rounds",
+        kind: "custom",
+        title: "Rounds",
+        columns: [
+          {
+            span: 4,
+            widgets: [{ type: "quick_actions", title: "Active tools" }],
+          },
+          {
+            span: 8,
+            widgets: [{ type: "history_diagnoses", title: "Patient history" }],
+          },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  const clinicalRequests: string[] = [];
+  page.on("request", (request) => {
+    if (
+      /\/api\/v1\/(patient|encounter|facility)\//.test(
+        new URL(request.url()).pathname,
+      )
+    ) {
+      clinicalRequests.push(request.url());
+    }
+  });
+  const activeTools = page.getByRole("article", {
+    name: "Active tools",
+    exact: true,
+  });
+  const patientHistory = page.getByRole("article", {
+    name: "Patient history",
+    exact: true,
+  });
+  const hiddenNotice =
+    "Hidden in this view: Requires an active encounter. Automatically hidden when closed.";
+
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await expect(
+    page.getByRole("button", { name: "Side + main", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(activeTools).toBeVisible();
+  await expect(
+    activeTools.getByText(hiddenNotice, { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    activeTools.getByText(
+      "Requires an active encounter. Automatically hidden when closed.",
+      { exact: true },
+    ),
+  ).toHaveCount(0);
+  await page.screenshot({
+    path: testInfo.outputPath("studio-active.png"),
+    fullPage: true,
+  });
+
+  await test.step("Closed encounters dim auto-hidden sections and name empty columns", async () => {
+    await page
+      .getByRole("button", { name: "Closed encounter", exact: true })
+      .click();
+    await expect(
+      activeTools.getByText(hiddenNotice, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "Side", exact: true })
+        .getByText(
+          "Whole column hidden in this view; the other columns widen",
+          {
+            exact: true,
+          },
+        ),
+    ).toBeVisible();
+    await expect(patientHistory.getByText(/Hidden in this view/)).toHaveCount(
+      0,
+    );
+    await page.screenshot({
+      path: testInfo.outputPath("studio-closed.png"),
+      fullPage: true,
+    });
+  });
+
+  await test.step("Access levels distinguish encounter access from patient history", async () => {
+    await page
+      .getByRole("button", { name: "More options", exact: true })
+      .click();
+    await page
+      .getByRole("menuitem", { name: "Preview with access level", exact: true })
+      .click();
+    await page
+      .getByRole("menuitemradio", {
+        name: "Encounter read-only, without patient history",
+        exact: true,
+      })
+      .click();
+    await expect(
+      patientHistory.getByText(
+        "You do not have permission to view this patient's clinical history",
+        { exact: true },
+      ),
+    ).toBeVisible();
+  });
+
+  await test.step("Section settings explain intrinsic rules in plain language", async () => {
+    await openSectionSettings(page, "Active tools");
+    const settings = sectionSettings(page);
+    await expect(
+      settings.getByRole("combobox", {
+        name: "Show this section",
+        exact: true,
+      }),
+    ).toHaveText("Whenever it has something to show");
+    await expect(
+      settings.getByText(
+        "This section always hides once the encounter is closed, even without a filter.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await settings
+      .getByRole("combobox", { name: "Show this section", exact: true })
+      .click();
+    await expect(
+      page.getByRole("option", {
+        name: "Only after the encounter is closed",
+        exact: true,
+      }),
+    ).toHaveAttribute("aria-disabled", "true");
+    await page.keyboard.press("Escape");
+    await closeSectionSettings(page);
+  });
+
+  await test.step("Custom statuses start from the chosen preset", async () => {
+    await openSectionSettings(page, "Patient history");
+    const settings = sectionSettings(page);
+    const show = settings.getByRole("combobox", {
+      name: "Show this section",
+      exact: true,
+    });
+    await show.click();
+    await page
+      .getByRole("option", {
+        name: "Only while the encounter is active",
+        exact: true,
+      })
+      .click();
+    await expect(show).toHaveText("Only while the encounter is active");
+    const statuses = settings.getByRole("group", {
+      name: "Encounter statuses",
+      exact: true,
+    });
+    await expect(statuses).toHaveCount(0);
+    await show.click();
+    await page
+      .getByRole("option", {
+        name: "Only for specific encounter statuses…",
+        exact: true,
+      })
+      .click();
+    // The preset's statuses stay selected; the author now only narrows them.
+    await expect(show).toHaveText("Only for specific encounter statuses…");
+    await expect(
+      statuses.getByRole("checkbox", { name: "Planned", exact: true }),
+    ).toBeChecked();
+    await expect(
+      statuses.getByRole("checkbox", { name: "Completed", exact: true }),
+    ).not.toBeChecked();
+    await statuses
+      .getByRole("checkbox", { name: "Planned", exact: true })
+      .click();
+    await expect(
+      statuses.getByRole("checkbox", { name: "Planned", exact: true }),
+    ).not.toBeChecked();
+    await expect(show).toHaveText("Only for specific encounter statuses…");
+    await closeSectionSettings(page);
+    await expect(
+      page.getByRole("button", { name: "Save Changes", exact: true }),
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Save Changes", exact: true }),
+    ).toBeDisabled();
+  });
+
+  await test.step("The design fits a phone and never touches patient data", async () => {
+    await page.getByRole("button", { name: "Mobile", exact: true }).click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(390);
+    await page.screenshot({
+      path: testInfo.outputPath("studio-mobile.png"),
+      fullPage: true,
+    });
+    expect(clinicalRequests).toEqual([]);
+    expect(api.writes).toEqual([]);
+  });
+});
+
+test("studio validates JSON section settings and preserves unavailable tabs on archive", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 1,
+    pages: [{ kind: "system", key: "retired_plugin_page" }],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await expect(
+    page.getByRole("alert").filter({
+      hasText:
+        "These system pages are currently unavailable: retired_plugin_page.",
+    }),
+  ).toBeVisible();
+  await openJsonEditor(page);
+  const json = page.getByRole("textbox", {
+    name: "Template (JSON)",
+    exact: true,
+  });
+  await json.fill(
+    JSON.stringify({
+      schema_version: 2,
+      surface: "encounter",
+      pages: [
+        {
+          kind: "custom",
+          key: "rounds",
+          title: "Rounds",
+          columns: [
+            {
+              span: 12,
+              widgets: [
+                { type: "questionnaire_responses", config: { limit: 0 } },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText(/Correct the configuration for Rounds:/),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(0);
+
+  const retiredTemplate = {
+    schema_version: 1,
+    pages: [{ kind: "system", key: "retired_plugin_page" }],
+  };
+  await json.fill(JSON.stringify(retiredTemplate));
+  await openGeneralSettings(page);
+  await page.getByRole("combobox", { name: "Status", exact: true }).click();
+  await page.getByRole("option", { name: "Archived", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    status: "archived",
+    template: retiredTemplate,
+  });
+});
+
+test("studio customises supported built-in tabs and starts history screens from a template", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 1,
+    pages: [
+      { key: "medicines", kind: "system" },
+      { key: "files", kind: "system" },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await expect(
+    page.getByText("This tab is built into CARE", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Customise this tab", exact: true })
+    .click();
+  await expect(
+    page.getByRole("article", { name: "Medications", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Tab settings", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Tab name", exact: true })
+    .fill("Medication studio");
+  await page
+    .getByRole("button", { name: "Apply changes", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Files", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Customise this tab", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "You can show, hide, or reorder it. Its contents are managed by CARE and can't be customised yet.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      schema_version: 2,
+      pages: [
+        {
+          key: "medicines",
+          kind: "custom",
+          title: "Medication studio",
+          columns: [{ widgets: [{ type: "medications" }] }],
+        },
+        { key: "files", kind: "system" },
+      ],
+    },
+  });
+
+  await page.goto("/admin/workspaces/create");
+  await page
+    .getByRole("textbox", { name: "Name", exact: true })
+    .fill(`History ${faker.string.alphanumeric(8)}`);
+  await page
+    .getByRole("region", { name: "Patient history screen", exact: true })
+    .getByRole("button", { name: "Standard history", exact: true })
+    .click();
+  await expect(
+    page.getByRole("article", {
+      name: "Patient response history",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Closed encounter", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Add a section to Main", exact: true })
+    .click();
+  const picker = page.getByRole("dialog", {
+    name: "Add a section",
+    exact: true,
+  });
+  await expect(
+    picker.getByRole("button", { name: "Quick Actions", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    picker.getByRole("button", {
+      name: "Patient allergy history",
+      exact: true,
+    }),
+  ).toBeEnabled();
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Create workspace", exact: true })
+    .click();
+  await page.waitForURL(/\/admin\/workspaces\/[\da-f-]+\/edit$/);
+  expect(api.writes.at(-1)?.body).toMatchObject({
+    template: { schema_version: 2, surface: "patient_history" },
+  });
+});
+
+test("history screens reject encounter status filters and offer to clear them", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "patient_history",
+    pages: [
+      {
+        key: "background",
+        kind: "custom",
+        title: "Background",
+        columns: [
+          {
+            span: 12,
+            widgets: [
+              {
+                type: "history_diagnoses",
+                title: "Past diagnoses",
+                // Written in JSON: history screens have no encounter to match.
+                visible_when: { "encounter.status": ["in_progress"] },
+              },
+              { type: "history_allergies", title: "Allergy history" },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  const save = page.getByRole("button", { name: "Save Changes", exact: true });
+  await expect(
+    page.getByRole("article", { name: "Past diagnoses", exact: true }),
+  ).toContainText("Hidden in this view");
+
+  await openSectionSettings(page, "Allergy history");
+  const settings = sectionSettings(page);
+  await expect(
+    settings.getByRole("combobox", { name: "Show this section", exact: true }),
+  ).toHaveCount(0);
+  await closeSectionSettings(page);
+
+  await openSectionSettings(page, "Past diagnoses");
+  await expect(
+    settings.getByText(
+      "This section is limited to encounter statuses, but history screens have no encounter, so nobody will see it.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    settings.getByRole("combobox", { name: "Show this section", exact: true }),
+  ).toHaveCount(0);
+  await closeSectionSettings(page);
+
+  // The template-wide rule catches the filter even when it is written in JSON.
+  await openJsonEditor(page);
+  const json = page.getByRole("textbox", {
+    name: "Template (JSON)",
+    exact: true,
+  });
+  const template = record.data.template as {
+    pages: { title: string }[];
+  };
+  await json.fill(
+    JSON.stringify({
+      ...template,
+      pages: [{ ...template.pages[0], title: "Background notes" }],
+    }),
+  );
+  await save.click();
+  await expect(
+    page.getByText(
+      /Background notes: Past diagnoses is limited to encounter statuses, which cannot apply on history screens/,
+    ),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(0);
+  await page
+    .getByRole("button", { name: "Back to design", exact: true })
+    .click();
+
+  await openSectionSettings(page, "Past diagnoses");
+  await settings
+    .getByRole("button", { name: "Always show this section", exact: true })
+    .click();
+  await expect(settings.getByText(/limited to encounter statuses/)).toHaveCount(
+    0,
+  );
+  await closeSectionSettings(page);
+  await expect(
+    page.getByRole("article", { name: "Past diagnoses", exact: true }),
+  ).not.toContainText("Hidden in this view");
+  await save.click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      surface: "patient_history",
+      pages: [
+        {
+          title: "Background notes",
+          columns: [
+            {
+              widgets: [
+                { type: "history_diagnoses", title: "Past diagnoses" },
+                { type: "history_allergies", title: "Allergy history" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+  expect(
+    (
+      api.writes[0].body as {
+        template: { pages: { columns: { widgets: object[] }[] }[] };
+      }
+    ).template.pages[0].columns[0].widgets[0],
+  ).not.toHaveProperty("visible_when");
+});
+
+test("studio picks vital sign codes from observation charts and saves them as section settings", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "summary",
+        title: "Summary",
+        columns: [
+          { span: 12, widgets: [{ type: "vitals", title: "Latest vitals" }] },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await openSectionSettings(page, "Latest vitals");
+  const drawer = sectionSettings(page);
+  await expect(
+    drawer.getByText("No codes selected: the standard vitals table is shown."),
+  ).toBeVisible();
+  const quickAdd = drawer.getByRole("group", {
+    name: "Primary Parameters",
+    exact: true,
+  });
+  await quickAdd.getByRole("button", { name: "Pulse", exact: true }).click();
+  await quickAdd.getByRole("button", { name: "SpO2", exact: true }).click();
+  const selected = drawer.getByRole("list", {
+    name: "Vital signs to show",
+    exact: true,
+  });
+  await expect(selected.getByRole("listitem")).toHaveText(["Pulse", "SpO2"]);
+  await expect(
+    quickAdd.getByRole("button", { name: "Pulse", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  // Chart entries without a code cannot become section settings.
+  await drawer.getByText("More charted observations", { exact: true }).click();
+  await expect(drawer.getByRole("button", { name: /TODO/ })).toHaveCount(0);
+  await expect(
+    drawer.getByRole("group", { name: "ABG Analysis", exact: true }),
+  ).toBeVisible();
+  await drawer
+    .getByRole("button", { name: "Remove SpO2", exact: true })
+    .click();
+  await expect(selected.getByRole("listitem")).toHaveText(["Pulse"]);
+  await closeSectionSettings(page);
+
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [
+        {
+          columns: [
+            {
+              widgets: [
+                {
+                  type: "vitals",
+                  title: "Latest vitals",
+                  config: {
+                    codes: [
+                      {
+                        system: "http://loinc.org",
+                        code: "8867-4",
+                        display: "Pulse",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+});
+
+test("studio picks a chart set and narrows its charts without emptying it", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "trends",
+        title: "Trends",
+        columns: [
+          {
+            span: 12,
+            widgets: [{ type: "observation_chart", title: "Vital trends" }],
+          },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await openSectionSettings(page, "Vital trends");
+  const drawer = sectionSettings(page);
+  const chartSet = drawer.getByRole("combobox", {
+    name: "Chart set",
+    exact: true,
+  });
+  // Without a saved plot the first chart set is shown with every chart on.
+  await expect(chartSet).toHaveText("Primary Parameters");
+  const charts = drawer.getByRole("group", {
+    name: "Charts to show",
+    exact: true,
+  });
+  await expect(
+    charts.getByRole("checkbox", { name: "Pulse", exact: true }),
+  ).toBeChecked();
+
+  await chartSet.click();
+  await page.getByRole("option", { name: "ABG Analysis", exact: true }).click();
+  await expect(
+    charts.getByRole("checkbox", { name: "PH", exact: true }),
+  ).toBeChecked();
+  await expect(
+    charts.getByRole("checkbox", { name: "Pulse", exact: true }),
+  ).toHaveCount(0);
+  for (const title of [
+    "PCO2",
+    "PO2",
+    "HCO3",
+    "Base Excess",
+    "Lactate",
+    "Sodium",
+  ]) {
+    await charts.getByRole("checkbox", { name: title, exact: true }).click();
+  }
+  await charts
+    .getByRole("checkbox", { name: "Potassium", exact: true })
+    .click();
+  // The last remaining chart cannot be removed.
+  await expect(
+    charts.getByRole("checkbox", { name: "PH", exact: true }),
+  ).toBeDisabled();
+  await closeSectionSettings(page);
+
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [
+        {
+          columns: [
+            {
+              widgets: [
+                {
+                  type: "observation_chart",
+                  title: "Vital trends",
+                  config: { plot: "abg-analysis", groups: ["PH"] },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  // Re-selecting every chart clears the filter instead of listing them all.
+  await openSectionSettings(page, "Vital trends");
+  for (const title of [
+    "PCO2",
+    "PO2",
+    "HCO3",
+    "Base Excess",
+    "Lactate",
+    "Sodium",
+    "Potassium",
+  ]) {
+    await charts.getByRole("checkbox", { name: title, exact: true }).click();
+  }
+  await closeSectionSettings(page);
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect.poll(() => api.writes.length).toBe(2);
+  expect(
+    (
+      api.writes[1].body as {
+        template: {
+          pages: { columns: { widgets: { config: object }[] }[] }[];
+        };
+      }
+    ).template.pages[0].columns[0].widgets[0].config,
+  ).toEqual({ plot: "abg-analysis" });
+});
+
+test("studio explains the tab limit beside Add tab and clears it after removal", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  const pages = Array.from({ length: 49 }, (_, index) => ({
+    kind: "custom",
+    key: `tab-${index}`,
+    title: `Tab ${index + 1}`,
+    columns: [{ span: 12, widgets: [] }],
+  }));
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages,
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  const addTab = page.getByRole("button", { name: "Add tab", exact: true });
+  const message =
+    "A workspace can have at most 50 tabs. Remove a tab before adding another.";
+  const explanation = page.getByRole("status").filter({ hasText: message });
+  await expect(addTab).toBeEnabled();
+  await expect(explanation).toHaveCount(0);
+
+  await addTab.click();
+  await page
+    .getByRole("menuitem", { name: "Immunizations", exact: true })
+    .click();
+  await expect(addTab).toBeDisabled();
+  await expect(addTab).toHaveAccessibleDescription(message);
+  for (const viewport of [
+    { width: 1440, height: 1000 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await explanation.scrollIntoViewIfNeeded();
+    await expect(explanation).toBeInViewport();
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect.poll(() => api.writes.length).toBe(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [...pages, { kind: "system", key: "immunizations" }],
+    },
+  });
+  await page.reload();
+  await expect(addTab).toBeDisabled();
+  await expect(addTab).toHaveAccessibleDescription(message);
+  await expect(explanation).toBeVisible();
+
+  await page.getByRole("button", { name: "Remove tab", exact: true }).click();
+  await page
+    .getByRole("alertdialog", { name: "Remove tab", exact: true })
+    .getByRole("button", { name: "Remove", exact: true })
+    .click();
+  await expect(addTab).toBeEnabled();
+  await expect(addTab).not.toHaveAttribute("aria-describedby");
+  await expect(explanation).toHaveCount(0);
+});
+
+for (const limit of ["column", "workspace"] as const) {
+  test(`studio explains the ${limit} section limit beside Add a section and clears it after removal`, async ({
+    page,
+  }) => {
+    const record = workspace("instance");
+    const widgets = Array.from({ length: 49 }, (_, index) => ({
+      type: "allergies",
+      title: `Allergy section ${index + 1}`,
+    }));
+    const pages = [
+      {
+        kind: "custom",
+        key: "ward",
+        title: "Ward",
+        columns: [
+          { span: 8, widgets },
+          { span: 4, widgets: [] },
+        ],
+      },
+      ...(limit === "workspace"
+        ? Array.from({ length: 3 }, (_, index) => ({
+            kind: "custom",
+            key: `extra-${index}`,
+            title: `Extra ${index + 1}`,
+            columns: [
+              {
+                span: 12,
+                widgets: Array.from({ length: 50 }, () => ({
+                  type: "allergies",
+                })),
+              },
+            ],
+          }))
+        : []),
+    ];
+    record.data.template = {
+      schema_version: 2,
+      surface: "encounter",
+      pages,
+    };
+    const api = await mockWorkspaceApi(page, { records: [record] });
+    await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+    const addMain = page.getByRole("button", {
+      name: "Add a section to Main",
+      exact: true,
+    });
+    const addSide = page.getByRole("button", {
+      name: "Add a section to Side",
+      exact: true,
+    });
+    const message =
+      "This column or workspace has reached its section limit (50 per column, 200 in total). Remove a section before adding another.";
+    const explanations = page.getByRole("status").filter({ hasText: message });
+    await expect(addMain).toBeEnabled();
+    await expect(addSide).toBeEnabled();
+    await expect(explanations).toHaveCount(0);
+
+    await addSection(page, "Main", "Allergies");
+    await expect(page.getByRole("article")).toHaveCount(50);
+    await expect(addMain).toBeDisabled();
+    await expect(addMain).toHaveAccessibleDescription(message);
+    if (limit === "workspace") {
+      await expect(addSide).toBeDisabled();
+      await expect(addSide).toHaveAccessibleDescription(message);
+      await expect(explanations).toHaveCount(2);
+    } else {
+      await expect(addSide).toBeEnabled();
+      await expect(addSide).not.toHaveAttribute("aria-describedby");
+      await expect(explanations).toHaveCount(1);
+    }
+    for (const viewport of [
+      { width: 1440, height: 1000 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      for (const explanation of await explanations.all()) {
+        await explanation.scrollIntoViewIfNeeded();
+        await expect(explanation).toBeInViewport();
+      }
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+    await expect.poll(() => api.writes.length).toBe(1);
+    expect(api.writes[0].body).toMatchObject({
+      template: {
+        pages: [
+          {
+            ...pages[0],
+            columns: [
+              { span: 8, widgets: [...widgets, { type: "allergies" }] },
+              { span: 4, widgets: [] },
+            ],
+          },
+          ...pages.slice(1),
+        ],
+      },
+    });
+    await page.reload();
+    await expect(addMain).toBeDisabled();
+    await expect(addMain).toHaveAccessibleDescription(message);
+    await expect(explanations).toHaveCount(limit === "workspace" ? 2 : 1);
+
+    await sectionAction(page, "Allergies", "Remove section");
+    await expect(page.getByRole("article")).toHaveCount(49);
+    await expect(addMain).toBeEnabled();
+    await expect(addSide).toBeEnabled();
+    await expect(addMain).not.toHaveAttribute("aria-describedby");
+    await expect(addSide).not.toHaveAttribute("aria-describedby");
+    await expect(explanations).toHaveCount(0);
+  });
+}
+
+test("studio flags full-width browsers in narrow columns and saves tab subsets as checkboxes", async ({
+  page,
+}) => {
+  const record = workspace("instance");
+  record.data.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "ward",
+        title: "Ward",
+        columns: [
+          { span: 8, widgets: [{ type: "vitals", title: "Vitals" }] },
+          { span: 4, widgets: [{ type: "medications", title: "Medicines" }] },
+        ],
+      },
+    ],
+  };
+  const api = await mockWorkspaceApi(page, { records: [record] });
+  await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  const medicines = page.getByRole("article", {
+    name: "Medicines",
+    exact: true,
+  });
+  const hint =
+    "This section has its own filters and panes. It works best in a full-width column.";
+  await expect(medicines.getByText(hint)).toBeVisible();
+  await expect(
+    page.getByRole("article", { name: "Vitals", exact: true }).getByText(hint),
+  ).toHaveCount(0);
+
+  // Moving it into the wide column clears the hint. The [8, 4] preset labels
+  // its columns Main and Side.
+  await sectionAction(page, "Medicines", "Move to");
+  await page.getByRole("menuitem", { name: "Main", exact: true }).click();
+  await expect(medicines.getByText(hint)).toHaveCount(0);
+
+  await openSectionSettings(page, "Medicines");
+  const drawer = sectionSettings(page);
+  const tabs = drawer.getByRole("group", { name: "Tabs to show", exact: true });
+  await tabs
+    .getByRole("checkbox", { name: "Medicine Administration", exact: true })
+    .check();
+  await tabs
+    .getByRole("checkbox", { name: "Prescriptions", exact: true })
+    .check();
+  await drawer.getByRole("combobox", { name: "Open on", exact: true }).click();
+  await page
+    .getByRole("option", { name: "Medicine Administration", exact: true })
+    .click();
+  await closeSectionSettings(page);
+
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(
+    page.getByText("Workspace updated", { exact: true }),
+  ).toBeVisible();
+  expect(api.writes).toHaveLength(1);
+  expect(api.writes[0].body).toMatchObject({
+    template: {
+      pages: [
+        {
+          columns: [
+            {
+              widgets: [
+                { type: "vitals" },
+                {
+                  type: "medications",
+                  config: {
+                    tabs: ["prescriptions", "administration"],
+                    default_tab: "administration",
+                  },
+                },
+              ],
+            },
+            { widgets: [] },
+          ],
+        },
+      ],
+    },
   });
 });

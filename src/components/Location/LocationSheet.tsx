@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -44,6 +45,7 @@ interface LocationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultTab?: "assign" | "history";
+  readOnly?: boolean;
 }
 
 export function LocationSheet({
@@ -53,15 +55,30 @@ export function LocationSheet({
   open,
   onOpenChange,
   defaultTab = "assign",
+  readOnly = false,
 }: LocationSheetProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<"assign" | "history">(defaultTab);
+  const activeTab = readOnly ? "history" : tab;
+
+  useEffect(() => {
+    if (open) setTab(readOnly ? "history" : defaultTab);
+  }, [open, readOnly, defaultTab, encounter.id]);
 
   // Custom hooks
-  const navigation = useLocationNavigation({ facilityId, open, tab });
+  const navigation = useLocationNavigation({
+    facilityId,
+    open,
+    tab: activeTab,
+  });
   const assignment = useLocationAssignment();
   const dialogs = useLocationDialogs();
   const mutations = useLocationMutations(encounter.id);
+  const canMutate = () => {
+    if (!readOnly) return true;
+    toast.error(t("permission_denied_encounter"));
+    return false;
+  };
 
   // Derived state
   const { currentLocation, reservedLocations, plannedLocations } = useMemo(
@@ -162,6 +179,7 @@ export function LocationSheet({
   };
 
   const handleConfirmDelete = async () => {
+    if (!canMutate()) return;
     if (!dialogs.locationToDelete) return;
 
     const requests: BatchRequestObject[] = [];
@@ -201,6 +219,7 @@ export function LocationSheet({
   const handleConfirmTime = async (
     existingLocation?: LocationAssociationRead,
   ) => {
+    if (!canMutate()) return;
     const requests: BatchRequestObject[] = [];
     const selectedBed = navigation.selectedBed;
     const action = assignment.sheetState.action;
@@ -292,6 +311,7 @@ export function LocationSheet({
 
   // Confirm edit for existing location
   const handleConfirmEdit = async (location: LocationAssociationRead) => {
+    if (!canMutate()) return;
     const requests: BatchRequestObject[] = [];
 
     const isUpdatingActiveLocation =
@@ -504,24 +524,30 @@ export function LocationSheet({
           </SheetHeader>
 
           <Tabs
-            value={tab}
+            value={activeTab}
             onValueChange={(value) => setTab(value as "assign" | "history")}
             className="mt-2"
           >
             <div className="max-w-full overflow-x-auto pb-1">
               <TabsList variant="line">
-                <TabsTrigger value="assign">{t("assign_location")}</TabsTrigger>
+                {!readOnly && (
+                  <TabsTrigger value="assign">
+                    {t("assign_location")}
+                  </TabsTrigger>
+                )}
                 <TabsTrigger value="history">
                   {t("location_history")}
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
-                {renderScreen()}
-              </ScrollArea>
-            </TabsContent>
+            {!readOnly && (
+              <TabsContent value="assign" className="mt-2">
+                <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
+                  {renderScreen()}
+                </ScrollArea>
+              </TabsContent>
+            )}
 
             <TabsContent value="history" className="mt-2">
               <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
@@ -534,7 +560,7 @@ export function LocationSheet({
 
       {/* Discharge Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showDischargeDialog}
+        open={dialogs.showDischargeDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeDischargeDialog();
@@ -548,7 +574,7 @@ export function LocationSheet({
 
       {/* Delete Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showDeleteDialog}
+        open={dialogs.showDeleteDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeDeleteDialog();
@@ -563,7 +589,7 @@ export function LocationSheet({
 
       {/* Occupied Dialog */}
       <ConfirmActionDialog
-        open={dialogs.showOccupiedDialog}
+        open={dialogs.showOccupiedDialog && !readOnly}
         onOpenChange={(open) => {
           if (!open) {
             dialogs.closeOccupiedDialog();

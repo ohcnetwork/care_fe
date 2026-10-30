@@ -25,6 +25,10 @@ export function parseWorkspaceJson(text: string): Record<string, unknown> {
 export function systemPageLabel(key: string, t: TFunction) {
   if (key === "medicines") return t("medications");
   if (key === "responses") return t("ENCOUNTER_TAB__qnr_responses");
+  if (key === "symptoms") return t("past_symptoms");
+  if (key === "diagnoses") return t("past_diagnoses");
+  if (key === "allergies") return t("allergies");
+  if (key === "medications") return t("past_medications");
   return t("ENCOUNTER_TAB__" + key, { defaultValue: key });
 }
 
