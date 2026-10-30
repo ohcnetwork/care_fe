@@ -1,8 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,7 @@ export default function ServiceRequestTable({
   };
 
   return (
-    <div className="min-w-0 rounded-md border">
+    <div className="min-w-0">
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-gray-200">
@@ -65,7 +64,11 @@ export default function ServiceRequestTable({
             </TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
             <TableHead>{t("location")}</TableHead>
-            {!readOnly && <TableHead>{t("actions")}</TableHead>}
+            {!readOnly && (
+              <TableHead className="w-px whitespace-nowrap">
+                {t("actions")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white">
@@ -76,10 +79,7 @@ export default function ServiceRequestTable({
             >
               {showPatientInfo && (
                 <TableCell
-                  className={cn(
-                    "font-medium",
-                    onPatientClick && "group-hover:underline cursor-pointer",
-                  )}
+                  className={cn("font-medium", onPatientClick)}
                   onClick={() => onPatientClick?.(request)}
                 >
                   <div className="font-semibold text-gray-900">
@@ -92,7 +92,7 @@ export default function ServiceRequestTable({
               )}
               <TableCell>
                 <div>
-                  <div className="text-lg">{request.title || "-"}</div>
+                  <div>{request.title || "-"}</div>
                   {request.code?.display && (
                     <div className="text-xs text-gray-500">
                       {request.code.display}
@@ -101,7 +101,7 @@ export default function ServiceRequestTable({
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-1">
                   <Badge
                     variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}
                   >
@@ -143,14 +143,14 @@ export default function ServiceRequestTable({
                 </div>
               </TableCell>
               {!readOnly && (
-                <TableCell className="text-left">
+                <TableCell className="w-px text-left whitespace-nowrap">
                   <Button
-                    variant="outline"
+                    variant="tertiary"
                     size="sm"
                     onClick={() => handleViewDetails(request)}
                   >
-                    <CareIcon icon="l-edit" />
                     {t("see_details")}
+                    <ArrowRight data-icon="inline-end" aria-hidden="true" />
                   </Button>
                 </TableCell>
               )}
