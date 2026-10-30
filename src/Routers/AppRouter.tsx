@@ -201,7 +201,7 @@ export default function AppRouter() {
               onSearch={() => setCommandDialogOpen(true)}
             />
           ) : null}
-          <div className={"min-w-0 py-2 px-2"} data-cui-page>
+          <div className={"min-w-0 p-4"} data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>
