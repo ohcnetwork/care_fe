@@ -18,6 +18,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -138,12 +139,14 @@ export default function Autocomplete({
 
   const content = (
     <>
-      <ComboboxInput
-        placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
-        aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
-        disabled={disabled}
-        showTrigger={false}
-      />
+      <div className="border-b border-gray-100 p-2 shadow-xs">
+        <ComboboxInput
+          placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
+          aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
+          disabled={disabled}
+          showTrigger={false}
+        />
+      </div>
       {isLoading ? (
         <CardListSkeleton count={3} />
       ) : (
@@ -208,11 +211,17 @@ export default function Autocomplete({
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             {clearButton}
           </ButtonGroup>
-          <DrawerContent aria-describedby={undefined} height="fixed">
-            <DrawerTitle className="sr-only">
-              {t("autocomplete_options")}
-            </DrawerTitle>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
+          <DrawerContent
+            aria-describedby={undefined}
+            height="fixed"
+            className="p-1.5"
+          >
+            <DrawerHeader className="p-1">
+              <DrawerTitle className="sr-only">
+                {t("autocomplete_options")}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}
             </div>
           </DrawerContent>
@@ -225,7 +234,10 @@ export default function Autocomplete({
           </ButtonGroup>
           <ComboboxContent
             align={align}
-            className={cn("w-(--anchor-width)", popoverContentClassName)}
+            className={cn(
+              "w-(--anchor-width) min-h-40",
+              popoverContentClassName,
+            )}
           >
             {content}
           </ComboboxContent>
