@@ -107,7 +107,7 @@ export default function ValueSetSelect({
               variant="white"
               role="combobox"
               className={cn(
-                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
+                "w-full flex justify-between whitespace-normal text-left font-normal border-gray-300 shadow-xs",
                 !value?.display && "text-gray-500 hover:bg-white",
               )}
               {...props}

@@ -204,7 +204,7 @@ export function DosageFrequencyInput({
       inputPlaceholder={t("frequency_input_placeholder")}
       noOptionsMessage={t("no_frequency_found")}
       disabled={disabled}
-      className={cn("h-9 text-sm", hasError && "border-red-500", className)}
+      className={cn("text-sm", hasError && "border-red-500", className)}
       popoverContentClassName="w-80"
       showClearButton={false}
     />

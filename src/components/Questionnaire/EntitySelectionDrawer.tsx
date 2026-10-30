@@ -170,8 +170,8 @@ export function EntitySelectionDrawer({
         <DrawerContent height="fixed" className="px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
             <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
-              <DrawerHeader className="shrink-0 border-b border-gray-200 bg-white px-1 py-1">
-                <div className="flex justify-between w-full p-1">
+              <DrawerHeader className="flex shrink-0 flex-col items-stretch justify-start border-b border-gray-200 shadow-2xs">
+                <div className="flex w-full items-center justify-between p-1">
                   <Button
                     variant="link"
                     onClick={handleBack}
@@ -187,7 +187,7 @@ export function EntitySelectionDrawer({
                     {t("done")}
                   </Button>
                 </div>
-                <DrawerTitle className="text-center text-base font-semibold">
+                <DrawerTitle className="text-center text-base font-semibold pb-2">
                   {selectedEntity.display}
                 </DrawerTitle>
               </DrawerHeader>

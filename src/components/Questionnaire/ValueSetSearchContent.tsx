@@ -253,14 +253,14 @@ export default function ValueSetSearchContent({
 
   return (
     <Command filter={() => 1}>
-      <div className="p-3 border-b border-gray-200 flex justify-between items-center md:hidden">
+      <div className="p-2 border-b border-gray-200 flex justify-between items-center md:hidden">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
-          className="md:hidden"
+          className={cn("md:hidden", !title && "w-full")}
         >
           <TabsList className="flex w-full">
             <TabsTrigger value={"0"} className="flex-1">
@@ -272,14 +272,12 @@ export default function ValueSetSearchContent({
           </TabsList>
         </Tabs>
       </div>
-      <div className="border-b border-gray-200">
+      <div className="border-b shadow-2xs">
         <CommandInput
           ref={inputRef}
           placeholder={placeholder}
-          className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
           onValueChange={onSearchChange}
           value={search}
-          autoFocus
         />
       </div>
       <CommandList

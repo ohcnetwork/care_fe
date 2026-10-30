@@ -240,7 +240,7 @@ export function DurationInput({
         view === "period" ? "w-auto" : "w-72",
       )}
       className={cn(
-        "h-9 text-sm",
+        "text-sm",
         BoundIcon && "pl-9",
         hasError && "border-red-500",
         className,
@@ -253,13 +253,13 @@ export function DurationInput({
     >
       {view === "list" && (
         <>
-          <div className="max-h-56 overflow-y-auto py-1">
+          <div className="sm:max-h-56 overflow-y-auto py-1">
             {customDuration && (
               <Button
                 variant="ghost"
                 type="button"
                 onClick={() => commitDuration(customDuration)}
-                className="h-auto justify-start whitespace-normal flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
+                className="justify-start whitespace-normal flex w-full items-center gap-2 px-3.5 py-2 text-left text-sm hover:bg-accent"
               >
                 {t("use_duration", {
                   duration: formatDurationLabel(customDuration),
@@ -273,7 +273,7 @@ export function DurationInput({
                 key={`${s.decoded.value}-${s.decoded.unit}`}
                 onClick={() => commitDuration(s.decoded)}
                 className={cn(
-                  "h-auto justify-start whitespace-normal",
+                  "justify-start whitespace-normal",
                   cn(
                     "flex w-full items-center justify-between px-3.5 py-2 text-left text-sm hover:bg-accent",
                     isSelected(s.decoded) && "bg-accent",
@@ -301,7 +301,7 @@ export function DurationInput({
                 seedRange();
                 setView("range");
               }}
-              className="h-auto justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+              className="justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
               <ArrowLeftRight className="size-4 shrink-0" />
               <span className="flex-1">{t("duration_set_range")}</span>
@@ -314,7 +314,7 @@ export function DurationInput({
                 seedPeriod();
                 setView("period");
               }}
-              className="h-auto justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+              className="justify-start whitespace-normal flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
               <CalendarIcon className="size-4 shrink-0" />
               <span className="flex-1">{t("duration_set_period")}</span>
@@ -330,7 +330,7 @@ export function DurationInput({
             variant="ghost"
             type="button"
             onClick={() => setView("list")}
-            className="h-auto justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+            className="justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
           >
             <ChevronLeft className="size-4 text-muted-foreground" />
             {t("duration_range_title")}
@@ -343,7 +343,7 @@ export function DurationInput({
                 aria-label={t("start")}
                 value={rLow}
                 onChange={(e) => setRLow(e.target.value.replace(/\D/g, ""))}
-                className="h-9 w-12 text-center text-sm"
+                className="w-12 text-center text-sm"
               />
               <span className="text-muted-foreground">–</span>
               <Input
@@ -352,13 +352,13 @@ export function DurationInput({
                 aria-label={t("end")}
                 value={rHigh}
                 onChange={(e) => setRHigh(e.target.value.replace(/\D/g, ""))}
-                className="h-9 w-12 text-center text-sm"
+                className="w-12 text-center text-sm"
               />
               <Select
                 value={rUnit}
                 onValueChange={(u: RangeUnit) => setRUnit(u)}
               >
-                <SelectTrigger className="h-9 flex-1 text-sm">
+                <SelectTrigger className="flex-1 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -392,7 +392,7 @@ export function DurationInput({
             variant="ghost"
             type="button"
             onClick={() => setView("list")}
-            className="h-auto justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
+            className="justify-start whitespace-normal flex w-full items-center gap-2 border-b px-3 py-2.5 text-left text-sm font-medium"
           >
             <ChevronLeft className="size-4 text-muted-foreground" />
             {t("duration_set_period")}
