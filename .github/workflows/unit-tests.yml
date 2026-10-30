@@ -9,6 +9,7 @@ on:
 jobs:
   unit-tests:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     permissions:
       contents: read
 
