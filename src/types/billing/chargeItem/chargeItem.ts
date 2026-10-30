@@ -104,6 +104,7 @@ export interface ChargeItemRead extends ChargeItemBase {
   service_resource: ChargeItemServiceResource;
   service_resource_id?: string;
   performer_actor?: UserReadMinimal;
+  account?: string;
   created_date: string;
   modified_date: string;
   created_by: UserReadMinimal;
