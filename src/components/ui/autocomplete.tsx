@@ -217,7 +217,7 @@ export default function Autocomplete({
             className="p-1.5"
           >
             <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
-              <DrawerTitle>{t(placeholder ?? "search")}</DrawerTitle>
+              <DrawerTitle>{placeholder || t("search")}</DrawerTitle>
             </DrawerHeader>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}
