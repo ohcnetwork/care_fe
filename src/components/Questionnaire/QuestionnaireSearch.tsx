@@ -221,8 +221,9 @@ export function QuestionnaireSearch({
         </DrawerTrigger>
 
         <DrawerContent
+          height="fixed"
           className={cn(
-            "min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg",
+            "px-0 pt-2 pb-0 rounded-t-lg",
             "border-neutral-200 bg-white text-neutral-950",
           )}
         >

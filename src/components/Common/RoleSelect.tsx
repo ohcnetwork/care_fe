@@ -197,7 +197,7 @@ export function RoleSelect({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent height="fixed" className="px-0 pt-2 rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <RoleCommandContent
               setSearchTerm={setSearchTerm}

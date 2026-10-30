@@ -274,7 +274,7 @@ export function MultiFilterStyleTagSelector({
         <>
           <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="flex flex-col min-h-[50vh] max-h-[85vh]">
+            <DrawerContent height="fixed" className="flex flex-col">
               <DrawerHeader className="pb-3">
                 <DrawerTitle className="flex items-center gap-2">
                   {t("manage_tags")}

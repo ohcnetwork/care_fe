@@ -67,7 +67,23 @@ const drawerContainerClasses = {
 
 type DrawerSize = keyof typeof drawerContainerClasses;
 
+// "fixed" gives bottom drawers a definite height that follows the room left
+// above the on-screen keyboard (--drawer-keyboard-inset), so search/picker
+// sheets don't resize as results change or get pushed off-screen by the lift.
+const drawerHeightClasses = {
+  auto: "",
+  fixed:
+    "data-[swipe-axis=y]:h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] data-[swipe-axis=y]:max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-1rem))]",
+} as const;
+
+type DrawerHeight = keyof typeof drawerHeightClasses;
+
 const DrawerContentSizeContext = React.createContext<DrawerSize>("full");
+
+// Base UI skips the backdrop of any nested popup. That suits a drawer stacked on
+// a drawer (the parent shrinks behind it), but a drawer opened from a Sheet or
+// Dialog would have no dimming/blur at all, so it is only skipped inside a drawer.
+const InsideDrawerContext = React.createContext(false);
 
 function useDrawerContentSize() {
   return React.useContext(DrawerContentSizeContext);
@@ -256,6 +272,7 @@ function DrawerContent({
   className,
   children,
   size = "full",
+  height = "auto",
   initialFocus,
   finalFocus,
   onOpenAutoFocus,
@@ -268,6 +285,7 @@ function DrawerContent({
 }: DrawerPrimitive.Popup.Props &
   OverlayContentEvents & {
     size?: DrawerSize;
+    height?: DrawerHeight;
   }) {
   const {
     hasSnapPoints,
@@ -276,6 +294,7 @@ function DrawerContent({
     swipeDirection,
     repositionInputs,
   } = useDrawer();
+  const insideDrawer = React.useContext(InsideDrawerContext);
   const focusProps = useOverlayContent({
     onOpenAutoFocus,
     onCloseAutoFocus,
@@ -295,7 +314,10 @@ function DrawerContent({
   return (
     <DrawerPortal>
       {modal === true && (
-        <DrawerOverlay data-snap-points={hasSnapPoints ? "" : undefined} />
+        <DrawerOverlay
+          forceRender={!insideDrawer}
+          data-snap-points={hasSnapPoints ? "" : undefined}
+        />
       )}
       <KeyboardProvider>
         <DrawerPrimitive.Viewport
@@ -361,7 +383,7 @@ function DrawerContent({
               "data-[swipe-axis=x]:inset-y-0 data-[swipe-axis=x]:flex-row",
               // Direction: down
               "data-[swipe-direction=down]:bottom-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:origin-bottom",
-              "data-[swipe-direction=down]:before:pointer-events-none data-[swipe-direction=down]:before:absolute data-[swipe-direction=down]:before:inset-x-0 data-[swipe-direction=down]:before:top-full data-[swipe-direction=down]:before:h-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:before:bg-popover",
+              "data-[swipe-direction=down]:before:pointer-events-none data-[swipe-direction=down]:before:absolute data-[swipe-direction=down]:before:inset-x-0 data-[swipe-direction=down]:before:top-full data-[swipe-direction=down]:before:h-[var(--drawer-keyboard-inset,0px)] data-[swipe-direction=down]:before:bg-popover/80 data-[swipe-direction=down]:before:backdrop-blur-md",
               "data-[swipe-direction=down]:[--closed-transform:translate3d(0,calc(100%+var(--drawer-inset,0px)+2px),0)]",
               "data-[swipe-direction=down]:[--translate-y:calc(var(--drawer-snap-point-offset,0px)+var(--drawer-swipe-movement-y)-var(--stack-peek-offset)-(var(--stack-shrink)*var(--stack-height)))]",
               // Direction: up
@@ -376,27 +398,30 @@ function DrawerContent({
               "data-[swipe-direction=right]:right-0 data-[swipe-direction=right]:origin-right",
               "data-[swipe-direction=right]:[--closed-transform:translate3d(calc(100%+var(--drawer-inset,0px)+2px),0,0)]",
               "data-[swipe-direction=right]:[--translate-x:calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)-(var(--stack-shrink)*100%))]",
+              drawerHeightClasses[height],
               className,
             )}
             {...props}
           >
             {showSwipeHandle && <DrawerSwipeHandle />}
-            <DrawerContentSizeContext.Provider value={size}>
-              <DrawerPrimitive.Content
-                data-slot="drawer-content"
-                className={cn(
-                  "flex min-h-0 flex-1 flex-col overflow-hidden overscroll-contain rounded-[inherit]",
-                  // Callers override the popup's max-height, so the room left
-                  // above the keyboard is enforced on the content instead.
-                  "group-data-[swipe-axis=y]/drawer-popup:max-h-[calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-3rem)]",
-                  "transition-opacity duration-300 ease-[cubic-bezier(0.45,1.005,0,1.005)] select-text",
-                  "group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100",
-                  "group-data-swiping/drawer-popup:select-none",
-                )}
-              >
-                {children}
-              </DrawerPrimitive.Content>
-            </DrawerContentSizeContext.Provider>
+            <InsideDrawerContext.Provider value={true}>
+              <DrawerContentSizeContext.Provider value={size}>
+                <DrawerPrimitive.Content
+                  data-slot="drawer-content"
+                  className={cn(
+                    "flex min-h-0 flex-1 flex-col overflow-hidden overscroll-contain rounded-[inherit]",
+                    // Callers override the popup's max-height, so the room left
+                    // above the keyboard is enforced on the content instead.
+                    "group-data-[swipe-axis=y]/drawer-popup:max-h-[calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top,0px)-3rem)]",
+                    "transition-opacity duration-300 ease-[cubic-bezier(0.45,1.005,0,1.005)] select-text",
+                    "group-data-nested-drawer-open/drawer-popup:opacity-0 group-data-nested-drawer-swiping/drawer-popup:opacity-100",
+                    "group-data-swiping/drawer-popup:select-none",
+                  )}
+                >
+                  {children}
+                </DrawerPrimitive.Content>
+              </DrawerContentSizeContext.Provider>
+            </InsideDrawerContext.Provider>
           </DrawerPrimitive.Popup>
         </DrawerPrimitive.Viewport>
       </KeyboardProvider>

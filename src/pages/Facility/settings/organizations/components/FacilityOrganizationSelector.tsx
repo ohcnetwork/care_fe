@@ -590,7 +590,7 @@ export default function FacilityOrganizationSelector(
               <>
                 <Drawer open={open} onOpenChange={handleOpenChange}>
                   <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-                  <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+                  <DrawerContent height="fixed">
                     {renderOrganizationCommand()}
                   </DrawerContent>
                 </Drawer>

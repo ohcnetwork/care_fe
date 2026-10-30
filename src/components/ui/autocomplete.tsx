@@ -152,7 +152,7 @@ export default function Autocomplete({
           {noOptionsMessage || t("autocomplete_no_options")}
         </ComboboxEmpty>
       )}
-      <ComboboxList showScrollbar>
+      <ComboboxList showScrollbar className="min-h-0 flex-1">
         {(option: AutoCompleteOption) => (
           <ComboboxItem key={option.value} value={option}>
             {option.label}
@@ -205,11 +205,11 @@ export default function Autocomplete({
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             {clearButton}
           </ButtonGroup>
-          <DrawerContent aria-describedby={undefined}>
+          <DrawerContent aria-describedby={undefined} height="fixed">
             <DrawerTitle className="sr-only">
               {t("autocomplete_options")}
             </DrawerTitle>
-            <div className="flex min-h-0 flex-col overflow-y-auto p-3">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
               {content}
             </div>
           </DrawerContent>

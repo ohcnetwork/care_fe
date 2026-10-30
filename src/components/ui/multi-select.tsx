@@ -197,7 +197,7 @@ export function MultiSelect({
       {isMobile ? (
         <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+          <DrawerContent height="fixed">
             <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
               {content}

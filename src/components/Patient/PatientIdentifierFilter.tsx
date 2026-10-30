@@ -511,7 +511,7 @@ export default function PatientIdentifierFilter({
         {isMobile ? (
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+            <DrawerContent height="fixed">
               <PatientSearchSelector
                 allIdentifierConfigs={allIdentifierConfigs}
                 searchType={searchType}

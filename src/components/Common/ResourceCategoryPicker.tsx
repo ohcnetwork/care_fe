@@ -443,7 +443,7 @@ export function ResourceCategoryPicker({
         }}
       >
         <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent height="fixed" className="px-0 pt-2 rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto">
             {content}
           </div>

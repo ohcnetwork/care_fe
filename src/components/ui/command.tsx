@@ -112,10 +112,8 @@ function CommandDialog({
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
       <DrawerContent
         ref={focusSearchInput}
-        className={cn(
-          "h-[calc(80dvh+var(--drawer-keyboard-inset,0px))] max-h-[min(36rem,calc(100dvh-var(--drawer-keyboard-inset,0px)-env(safe-area-inset-top)-1rem))] p-1.5 data-[swipe-direction=down]:bottom-(--drawer-keyboard-inset,0px)",
-          className,
-        )}
+        height="fixed"
+        className={cn("p-1.5", className)}
       >
         <DrawerHeader className="pb-2 pl-1" showCloseButton>
           <DrawerTitle>{resolvedTitle}</DrawerTitle>
