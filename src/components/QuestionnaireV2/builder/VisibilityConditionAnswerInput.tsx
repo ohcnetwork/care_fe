@@ -9,24 +9,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { EnableWhen, QuestionType } from "@/types/questionnaire/question";
+import {
+  EnableWhen,
+  Question,
+  isCodedEnableWhenAnswer,
+} from "@/types/questionnaire/question";
 
+import { ChoiceConditionInput } from "./ChoiceConditionInput";
 import { NumericConditionInput } from "./NumericConditionInput";
 
 interface VisibilityConditionAnswerInputProps {
   condition: EnableWhen;
-  targetType: QuestionType | undefined;
+  target: Question | undefined;
   onChange: (answer: EnableWhen["answer"]) => void;
   "aria-label"?: string;
 }
 
 export function VisibilityConditionAnswerInput({
   condition,
-  targetType,
+  target,
   onChange,
   "aria-label": ariaLabel,
 }: VisibilityConditionAnswerInputProps) {
   const { t } = useTranslation();
+  const targetType = target?.type;
   return condition.operator === "exists" ? (
     <Select
       value={condition.answer === false ? "false" : "true"}
@@ -52,7 +58,15 @@ export function VisibilityConditionAnswerInput({
     </Select>
   ) : targetType === "integer" || targetType === "decimal" ? (
     <NumericConditionInput
-      value={condition.answer}
+      value={isCodedEnableWhenAnswer(condition.answer) ? "" : condition.answer}
+      onChange={onChange}
+      aria-label={ariaLabel}
+    />
+  ) : target?.type === "choice" &&
+    (target.answer_option?.length || target.answer_value_set) ? (
+    <ChoiceConditionInput
+      target={target}
+      answer={condition.answer}
       onChange={onChange}
       aria-label={ariaLabel}
     />

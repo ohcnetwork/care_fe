@@ -7,7 +7,11 @@ import {
 } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { QuestionnaireAction } from "@/types/questionnaire/actions";
-import { EnableWhen, Question } from "@/types/questionnaire/question";
+import {
+  EnableWhen,
+  Question,
+  isCodedEnableWhenAnswer,
+} from "@/types/questionnaire/question";
 import { swapElements } from "@/Utils/array";
 
 export interface BuilderState {
@@ -94,6 +98,8 @@ export function buildCondition(
       return { question, operator, answer: answer === true };
     case "equals":
     case "not_equals":
+      if (isCodedEnableWhenAnswer(answer))
+        return { question, operator, answer };
       return { question, operator, answer: String(answer) };
     default:
       return {

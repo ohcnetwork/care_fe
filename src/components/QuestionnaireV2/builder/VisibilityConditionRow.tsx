@@ -213,7 +213,7 @@ export function VisibilityConditionRow({
             <p className="text-xs text-gray-500">{t("answer")}</p>
             <VisibilityConditionAnswerInput
               condition={condition}
-              targetType={target?.type}
+              target={target}
               aria-label={t("answer")}
               onChange={(answer) =>
                 onChange(

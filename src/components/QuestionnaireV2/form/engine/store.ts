@@ -9,7 +9,11 @@ import {
   ResponsePath,
   ResponseValue,
 } from "@/types/questionnaire/form";
-import { EnableWhen, Question } from "@/types/questionnaire/question";
+import {
+  EnableWhen,
+  Question,
+  isCodedEnableWhenAnswer,
+} from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import { entryIsAnswered } from "./inputs/answeredEntry";
@@ -156,7 +160,11 @@ function evaluateEnableWhen(
   enableWhen: EnableWhen,
   response: QuestionnaireResponse | undefined,
 ): boolean {
-  const answered = (response?.values ?? []).filter(entryIsAnswered);
+  // Coded rules only see entries that carry a coding, as on the backend.
+  const coded = isCodedEnableWhenAnswer(enableWhen.answer);
+  const answered = (response?.values ?? []).filter(
+    (v) => entryIsAnswered(v) && (!coded || !!v.coding),
+  );
 
   if (enableWhen.operator === "exists") {
     return enableWhen.answer === false
@@ -168,16 +176,19 @@ function evaluateEnableWhen(
 
   const normalizedAnswers = answered.map((v) => normalizeValue(v.value));
 
+  // Coded rules match the coding's system and code; the rest compare values.
+  const matchesAnswer = (v: ResponseValue) =>
+    isCodedEnableWhenAnswer(enableWhen.answer)
+      ? v.coding?.code === enableWhen.answer.code &&
+        (v.coding.system ?? null) === (enableWhen.answer.system ?? null)
+      : foldBoolean(v.value) === foldBoolean(enableWhen.answer);
+
   switch (enableWhen.operator) {
     case "equals":
-      return answered
-        .map((v) => foldBoolean(v.value))
-        .includes(foldBoolean(enableWhen.answer));
+      return answered.some(matchesAnswer);
 
     case "not_equals":
-      return !answered
-        .map((v) => foldBoolean(v.value))
-        .includes(foldBoolean(enableWhen.answer));
+      return !answered.some(matchesAnswer);
 
     case "greater":
       return normalizedAnswers.some(
