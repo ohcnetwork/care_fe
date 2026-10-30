@@ -96,6 +96,7 @@ export function ManageQueueFinishedTab({
                     <TableCell>
                       {token.patient ? (
                         <Link
+                          basePath="/"
                           href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                             {
                               phone_number: token.patient.phone_number,
@@ -117,6 +118,7 @@ export function ManageQueueFinishedTab({
                     </TableCell>
                     <TableCell>
                       <Link
+                        basePath="/"
                         href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
                         className="hover:underline transition-colors flex items-center gap-1"
                       >
@@ -210,6 +212,7 @@ const FinishedTokenCard = forwardRef<
           </span>
           {token.patient ? (
             <Link
+              basePath="/"
               href={`/facility/${facilityId}/patients/home?${new URLSearchParams(
                 {
                   phone_number: token.patient.phone_number,
@@ -256,6 +259,7 @@ const FinishedTokenCard = forwardRef<
           </span>
         </div>
         <Link
+          basePath="/"
           href={`/facility/${facilityId}/queue/${token.queue.id}/token/${token.id}`}
           className="hover:underline transition-colors flex items-center gap-1 font-medium"
         >
