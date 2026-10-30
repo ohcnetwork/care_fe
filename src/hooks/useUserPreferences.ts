@@ -139,7 +139,23 @@ function getFacilityQuickLinks(
   );
 }
 
-function useUserPreferences() {
+// Links without a facilityId are admin/global links and are shown for every facility.
+function getLinksForFacility(
+  links: QuickLinkCustom[] | undefined,
+  facilityId?: string,
+): QuickLinkCustom[] {
+  return (
+    links?.filter(
+      (link) => !link.facilityId || link.facilityId === facilityId,
+    ) ?? []
+  );
+}
+
+interface UserPreferencesContext {
+  facilityId?: string;
+}
+
+function useUserPreferences({ facilityId }: UserPreferencesContext) {
   const user = useAuthUser();
   const queryClient = useQueryClient();
 
@@ -149,9 +165,11 @@ function useUserPreferences() {
     user.preferences ?? {},
   );
   const facilityQuickLinks = getFacilityQuickLinks(preferences);
-  const customLinksCount = facilityQuickLinks.custom_links?.length ?? 0;
   const blacklist = facilityQuickLinks.blacklist ?? [];
-  const customLinks = facilityQuickLinks.custom_links ?? [];
+  const customLinks = useMemo(
+    () => getLinksForFacility(facilityQuickLinks.custom_links, facilityId),
+    [facilityQuickLinks.custom_links, facilityId],
+  );
 
   // Mutation to sync with backend
   const { mutate: syncPreferences, isPending } = useMutation({
@@ -197,14 +215,13 @@ function useUserPreferences() {
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
-      const currentCount = facilityQuickLinks.custom_links?.length ?? 0;
-      if (currentCount >= MAX_QUICK_LINKS) {
+      if (customLinks.length >= MAX_QUICK_LINKS) {
         return false;
       }
       updatePreferences({ type: ActionType.ADD_CUSTOM_LINK, payload: link });
       return true;
     },
-    [facilityQuickLinks.custom_links?.length, updatePreferences],
+    [customLinks, updatePreferences],
   );
 
   const removeCustomLink = useCallback(
@@ -255,19 +272,18 @@ function useUserPreferences() {
     [updatePreferences],
   );
 
+  // Resets the custom links for the current facility. Other facilities' links remain unchanged.
   const resetCustomLinks = useCallback(() => {
-    const newQuickLinks = { ...facilityQuickLinks };
-    newQuickLinks.custom_links = [];
+    const filteredCustomLinks = facilityQuickLinks.custom_links?.filter(
+      (link) => !!link.facilityId && link.facilityId !== facilityId,
+    );
     updatePreferences({
       type: ActionType.SET_CUSTOM_LINKS,
-      payload: newQuickLinks,
+      payload: { ...facilityQuickLinks, custom_links: filteredCustomLinks },
     });
-  }, [updatePreferences, facilityQuickLinks]);
+  }, [updatePreferences, facilityQuickLinks, facilityId]);
 
-  const canAddMoreLinks = useMemo(() => {
-    const currentCount = facilityQuickLinks.custom_links?.length ?? 0;
-    return currentCount < MAX_QUICK_LINKS;
-  }, [facilityQuickLinks.custom_links?.length]);
+  const canAddMoreLinks = customLinks.length < MAX_QUICK_LINKS;
 
   const isBlacklisted = useCallback(
     (shortcutId: string) => {
@@ -299,7 +315,6 @@ function useUserPreferences() {
     updateCustomLink,
     isCustomLink,
     customLinks,
-    customLinksCount,
     canAddMoreLinks,
     maxCustomLinks: MAX_QUICK_LINKS,
     // Blacklist methods
