@@ -39,12 +39,16 @@ interface DiagnosticReportDetailCardProps {
   reportId: string;
   patientId: string;
   facilityId?: string;
+  encounterId?: string;
+  showObservationHistory?: boolean;
 }
 
 export function DiagnosticReportDetailCard({
   reportId,
   patientId,
   facilityId,
+  encounterId,
+  showObservationHistory = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -164,7 +168,12 @@ export function DiagnosticReportDetailCard({
             <h4 className="text-sm font-semibold text-gray-700">
               {t("test_results")}
             </h4>
-            <DiagnosticReportResultsTable observations={filteredObservations} />
+            <DiagnosticReportResultsTable
+              observations={filteredObservations}
+              showObservationHistory={showObservationHistory}
+              patientId={patientId}
+              encounterId={encounterId}
+            />
           </div>
         )}
 

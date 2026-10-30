@@ -14,6 +14,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
+
+import { Button } from "@/components/ui/button";
 import { Code } from "@/types/base/code/code";
 
 export interface VitalsObservation {
@@ -23,9 +26,16 @@ export interface VitalsObservation {
 interface VitalsTableProps {
   vitals: Record<string, VitalsObservation>[];
   vitalCodes?: Code[];
+  patientId: string;
+  encounterId: string;
 }
 
-export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
+export function VitalsTable({
+  vitals,
+  vitalCodes,
+  patientId,
+  encounterId,
+}: VitalsTableProps) {
   const getVitalValue = (
     vital: VitalsTableProps["vitals"][number],
     field: keyof VitalsTableProps["vitals"][number],
@@ -44,9 +54,22 @@ export function VitalsTable({ vitals, vitalCodes }: VitalsTableProps) {
               className="h-auto  py-1 px-2  text-gray-600 text-center"
             >
               <div className="flex items-center justify-center space-x-1">
-                <span className="text-sm font-medium">
-                  {code.display || ""}
-                </span>
+                <ObservationDetailSheet
+                  codes={[code]}
+                  title={code.display || code.code}
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  trigger={
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-sm font-medium p-0 h-fit"
+                    >
+                      {code.display || ""}
+                    </Button>
+                  }
+                />
+
                 <Popover>
                   <PopoverTrigger>
                     <Info className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
