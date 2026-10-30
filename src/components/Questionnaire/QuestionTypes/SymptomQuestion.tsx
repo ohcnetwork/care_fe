@@ -70,6 +70,7 @@ import {
 import symptomApi from "@/types/emr/symptom/symptomApi";
 import {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -83,6 +84,7 @@ interface SymptomQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
   question: Question;
 }
@@ -651,6 +653,7 @@ export function SymptomQuestion({
   patientId,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   encounterId,
   question,
@@ -689,6 +692,10 @@ export function SymptomQuestion({
           },
         ],
         questionnaireResponse.question_id,
+      );
+      setResponseContext(
+        questionnaireResponse.question_id,
+        patientSymptoms.results,
       );
     }
   }, [patientSymptoms]);
