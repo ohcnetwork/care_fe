@@ -14,6 +14,7 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { EDITABLE_SERVICE_REQUEST_STATUSES } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
+
 import { ServiceRequestActions } from "./components/ServiceRequestActions";
 import { ServiceRequestCompletion } from "./components/ServiceRequestCompletion";
 import { ServiceRequestDetails } from "./components/ServiceRequestDetails";
@@ -45,6 +46,7 @@ export default function ServiceRequestShow({
   locationId,
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
+
   const isMobile = useBreakpoints({ default: true, sm: false });
   const [focusedSectionId, setFocusedSectionId] = useState<string | null>(null);
   // Set only by a tab click; scrolling never highlights, and it fades after a moment
@@ -276,7 +278,6 @@ export default function ServiceRequestShow({
         <ServiceRequestCompletion
           request={request}
           facilityId={facilityId}
-          serviceRequestId={serviceRequestId}
           pendingReports={pendingReports}
           totalReports={totalReports}
         />

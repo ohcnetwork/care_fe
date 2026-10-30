@@ -5,22 +5,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ServiceRequestReadSpec,
   Status,
@@ -32,7 +18,6 @@ import mutate from "@/Utils/request/mutate";
 interface ServiceRequestCompletionProps {
   request: ServiceRequestReadSpec;
   facilityId: string;
-  serviceRequestId: string;
   pendingReports: number;
   totalReports: number;
 }
@@ -40,13 +25,11 @@ interface ServiceRequestCompletionProps {
 export function ServiceRequestCompletion({
   request,
   facilityId,
-  serviceRequestId,
   pendingReports,
   totalReports,
 }: ServiceRequestCompletionProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isMobile = useBreakpoints({ default: true, lg: false });
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
   const hasPendingReports = pendingReports > 0;
@@ -55,16 +38,21 @@ export function ServiceRequestCompletion({
     isPending: isCompletingServiceRequest,
   } = useMutation({
     mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
-      pathParams: { facilityId, serviceRequestId },
+      pathParams: { facilityId, serviceRequestId: request.id },
     }),
     onSuccess: () => {
       toast.success(t("service_request_completed"));
       setIsCompleteDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+        queryKey: ["serviceRequest", facilityId, request.id],
       });
     },
   });
+
+  const handleOpenChange = (open: boolean) => {
+    if (isCompletingServiceRequest) return;
+    setIsCompleteDialogOpen(open);
+  };
 
   return (
     <>
@@ -98,109 +86,50 @@ export function ServiceRequestCompletion({
         </div>
       </div>
 
-      {isMobile ? (
-        <Sheet
-          open={isCompleteDialogOpen}
-          onOpenChange={(open) => {
-            if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-          }}
-        >
-          <SheetContent side="bottom">
-            <SheetHeader>
-              <SheetTitle>{t("add_completion_note")}</SheetTitle>
-              <SheetDescription>
-                {t("service_request_completion_note_description")}
-              </SheetDescription>
-            </SheetHeader>
-            <CompletionNoteContent
-              note={completionNote}
-              isUpdating={isCompletingServiceRequest}
-              onNoteChange={setCompletionNote}
-              onComplete={() =>
-                completeServiceRequest({
-                  status: Status.completed,
-                  note: completionNote.trim() || null,
-                  locations: request.locations.map((loc) => loc.id),
-                })
-              }
-              onCancel={() => setIsCompleteDialogOpen(false)}
-            />
-          </SheetContent>
-        </Sheet>
-      ) : (
-        <Dialog
-          open={isCompleteDialogOpen}
-          onOpenChange={(open) => {
-            if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
-          }}
-        >
-          <DialogContent className="sm:max-w-lg shadow-lg border-white/20">
-            <DialogHeader>
-              <DialogTitle>{t("add_completion_note")}</DialogTitle>
-              <DialogDescription>
-                {t("service_request_completion_note_description")}
-              </DialogDescription>
-            </DialogHeader>
-            <CompletionNoteContent
-              note={completionNote}
-              isUpdating={isCompletingServiceRequest}
-              onNoteChange={setCompletionNote}
-              onComplete={() =>
-                completeServiceRequest({
-                  status: Status.completed,
-                  note: completionNote.trim() || null,
-                  locations: request.locations.map((loc) => loc.id),
-                })
-              }
-              onCancel={() => setIsCompleteDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      <ResponsiveDialog
+        open={isCompleteDialogOpen}
+        onOpenChange={handleOpenChange}
+        title={t("add_completion_note")}
+        description={t("service_request_completion_note_description")}
+      >
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-900">
+            {t("completion_note")}
+          </p>
+          <Textarea
+            value={completionNote}
+            onChange={(e) => setCompletionNote(e.target.value)}
+            placeholder={t("enter_note")}
+            className="min-h-14"
+            aria-label={t("completion_note")}
+          />
+        </div>
+        <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
+          <Button
+            variant="primary"
+            onClick={() =>
+              completeServiceRequest({
+                status: Status.completed,
+                note: completionNote.trim() || null,
+                locations: request.locations.map((loc) => loc.id),
+              })
+            }
+            disabled={isCompletingServiceRequest}
+          >
+            <CheckIcon className="size-4" />
+            {isCompletingServiceRequest
+              ? t("updating")
+              : t("save_and_complete")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isCompletingServiceRequest}
+          >
+            {t("cancel")}
+          </Button>
+        </div>
+      </ResponsiveDialog>
     </>
   );
 }
-
-interface CompletionNoteContentProps {
-  note: string;
-  isUpdating: boolean;
-  onNoteChange: (note: string) => void;
-  onComplete: () => void;
-  onCancel: () => void;
-}
-
-const CompletionNoteContent = ({
-  note,
-  isUpdating,
-  onNoteChange,
-  onComplete,
-  onCancel,
-}: CompletionNoteContentProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">
-          {t("completion_note")}
-        </p>
-        <Textarea
-          value={note}
-          onChange={(e) => onNoteChange(e.target.value)}
-          placeholder={t("enter_note")}
-          className="min-h-14"
-          aria-label={t("completion_note")}
-        />
-      </div>
-      <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
-        <Button variant="primary" onClick={onComplete} disabled={isUpdating}>
-          <CheckIcon className="size-4" />
-          {isUpdating ? t("updating") : `${t("save_and_complete")}`}
-        </Button>
-        <Button variant="outline" onClick={onCancel} disabled={isUpdating}>
-          {t("cancel")}
-        </Button>
-      </div>
-    </>
-  );
-};
