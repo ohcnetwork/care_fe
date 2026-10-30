@@ -197,15 +197,13 @@ const PrescriptionCard = ({
             </Badge>
           )}
 
-          {/* Collapse button */}
           {/* Print button */}
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="icon" aria-label={t("print")} asChild>
             <Link
               href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/prescription/${prescription.id}/print`}
               basePath="/"
             >
               <PrinterIcon />
-              <span>{t("print")}</span>
             </Link>
           </Button>
 
