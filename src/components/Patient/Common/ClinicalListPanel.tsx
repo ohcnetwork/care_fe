@@ -61,9 +61,6 @@ export function ClinicalListPanel({
   const [queryParams] = useQueryParams<Record<string, string>>();
   const search = new URLSearchParams(queryParams).toString();
   const sourceUrl = search ? `${fullPath}?${search}` : fullPath;
-  const editSearch = new URLSearchParams({
-    return_page: fullPath.split("/").pop() ?? "updates",
-  });
   const patientPath = facilityId
     ? `/facility/${facilityId}/patient/${patientId}`
     : `/patient/${patientId}`;
@@ -81,7 +78,7 @@ export function ClinicalListPanel({
         className={cn("min-w-0 overflow-hidden", className)}
         editLink={
           !readOnly && encounterId
-            ? `${patientPath}/encounter/${encounterId}/questionnaire/${questionnaire}?${editSearch}`
+            ? `${patientPath}/encounter/${encounterId}/questionnaire/${questionnaire}`
             : undefined
         }
         actionButton={

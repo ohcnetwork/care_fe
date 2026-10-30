@@ -1,7 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Plus } from "lucide-react";
-import { navigate, useNavigationPrompt } from "raviger";
+import { useNavigationPrompt } from "raviger";
 import {
   type CSSProperties,
   useCallback,
@@ -71,7 +71,8 @@ interface FillPageBodyProps {
   serverDraftDropped?: DroppedDraftAnswer[];
   continueDraftId?: string;
   serverDraft?: FormSubmissionRead;
-  exitTarget: string;
+  /** Leaves the session — see `QuestionnaireFillPage` for where to. */
+  onExit: () => void;
   contextRefreshFailed: boolean;
   isRetryingContext: boolean;
   onRetryContext: () => void;
@@ -96,7 +97,7 @@ export function FillPageBody({
   serverDraftDropped,
   continueDraftId,
   serverDraft,
-  exitTarget,
+  onExit,
   contextRefreshFailed,
   isRetryingContext,
   onRetryContext,
@@ -104,6 +105,15 @@ export function FillPageBody({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  // An encounter fill leaves by going back through history, which settles
+  // asynchronously, so the session stays frozen until the route changes: a
+  // second Save or Close in that window would submit twice or step back
+  // past the page that opened the form.
+  const [exiting, setExiting] = useState(false);
+  const exit = () => {
+    setExiting(true);
+    onExit();
+  };
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
   const handleStore = useCallback((key: string, store: FormStore | null) => {
@@ -205,7 +215,7 @@ export function FillPageBody({
       // Order matters: finishDraft flushes the pristine state before the
       // redirect so useNavigationPrompt doesn't block it.
       autosave.finishDraft();
-      navigate(exitTarget);
+      exit();
     },
   });
 
@@ -219,7 +229,7 @@ export function FillPageBody({
     continueDraftId,
     onSaved: () => {
       autosave.finishDraft();
-      navigate(exitTarget);
+      exit();
     },
   });
 
@@ -243,7 +253,7 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate(exitTarget);
+      exit();
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -252,7 +262,10 @@ export function FillPageBody({
   // success. Freeze editing until either request settles so later edits
   // cannot be discarded with a payload that did not contain them.
   const frozen =
-    isPending || serverDraftSave.isSavingDraft || discardServerDraft.isPending;
+    exiting ||
+    isPending ||
+    serverDraftSave.isSavingDraft ||
+    discardServerDraft.isPending;
 
   // A detected local draft stays untouched until Resume or Discard; a
   // successful submit would delete it unreviewed, so Save waits too.
@@ -315,7 +328,7 @@ export function FillPageBody({
     if (serverDraft) {
       discardServerDraft.mutate(serverDraft);
     } else if (autosave.discardDraft()) {
-      navigate(exitTarget);
+      exit();
     }
   };
   const requestClose = () => {
@@ -331,7 +344,7 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate(exitTarget);
+      exit();
     }
   };
 

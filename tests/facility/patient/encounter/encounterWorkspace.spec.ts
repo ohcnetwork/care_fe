@@ -890,7 +890,6 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL(
         (url) =>
           url.pathname.endsWith("/questionnaire/symptom") &&
-          url.searchParams.get("return_page") === "rounds" &&
           !url.searchParams.has("workspace"),
       );
       await expect(
@@ -973,7 +972,7 @@ test.describe("Encounter workspace rendering", () => {
       await page.setViewportSize({ width: 1440, height: 1000 });
     });
 
-    await test.step("Overview renders the same clinical data and links to its own return page", async () => {
+    await test.step("Overview renders the same clinical data and links to its clinical forms", async () => {
       await page.getByRole("tab", { name: "Overview", exact: true }).click();
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
       for (const [panel, clinicalType, questionnaire] of [
@@ -993,7 +992,7 @@ test.describe("Encounter workspace rendering", () => {
           region.getByRole("link", { name: "Edit", exact: true }),
         ).toHaveAttribute(
           "href",
-          `${fixture.basePath}/questionnaire/${questionnaire}?return_page=updates`,
+          `${fixture.basePath}/questionnaire/${questionnaire}`,
         );
       }
       await expect(
@@ -1655,7 +1654,7 @@ test.describe("Encounter workspace rendering", () => {
       await page.setViewportSize({ width: 1920, height: 1080 });
     });
 
-    await test.step("Existing actions retain the configured return page and draft target", async () => {
+    await test.step("Existing actions return to the configured page and open the draft target", async () => {
       await expect(
         page
           .getByRole("region", { name: "Favorite ward forms", exact: true })
@@ -1665,7 +1664,7 @@ test.describe("Encounter workspace rendering", () => {
           }),
       ).toHaveAttribute(
         "href",
-        `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}?return_page=rounds`,
+        `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
       );
       await shortcuts
         .getByRole("link", { name: "Add Allergy", exact: true })
@@ -1673,8 +1672,7 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL(
         (url) =>
           url.pathname ===
-            `${fixture.basePath}/questionnaire/allergy_intolerance` &&
-          url.searchParams.get("return_page") === "rounds",
+          `${fixture.basePath}/questionnaire/allergy_intolerance`,
       );
       await page.getByRole("button", { name: "Close", exact: true }).click();
       await expect(page).toHaveURL(
@@ -1703,8 +1701,7 @@ test.describe("Encounter workspace rendering", () => {
         (url) =>
           url.pathname ===
             `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}` &&
-          url.searchParams.get("continue_draft") === fixture.draft.id &&
-          url.searchParams.get("return_page") === "rounds",
+          url.searchParams.get("continue_draft") === fixture.draft.id,
       );
       await page.goto(`${fixture.basePath}/rounds`);
     });
