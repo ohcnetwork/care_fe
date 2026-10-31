@@ -145,7 +145,7 @@ export function ComboboxInput({
             {title ?? inputProps.placeholder ?? ""}
           </DrawerTitle>
           <div className="border-b p-3">{field}</div>
-          <div>{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </DrawerContent>
       </Drawer>
     );

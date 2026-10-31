@@ -96,7 +96,7 @@ function UserCommandContent({
         value={search}
         onValueChange={setSearch}
         wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
-        className="text-base sm:text-sm [&>svg:last-child]:hidden"
+        className="text-base sm:text-sm"
       />
       <CommandList className="p-1 scrollbar-gutter-auto">
         <CommandEmpty>
@@ -124,7 +124,7 @@ function UserCommandContent({
                 onChange(user);
                 setOpen(false);
               }}
-              className="w-full cursor-pointer max-md:min-h-11"
+              className="w-full cursor-pointer max-md:min-h-11 [&>svg:last-child]:hidden"
               ref={i === usersList.length - 1 ? ref : undefined}
             >
               <div className="flex items-center gap-2 w-full">
