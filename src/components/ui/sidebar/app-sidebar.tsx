@@ -114,7 +114,7 @@ export function AppSidebar({
     scheduleClose,
     handleSidebarFocus,
     handleSidebarBlur,
-    setPinned,
+    handleToggleMouseEnter,
   } = useAppSidebar();
   const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
@@ -155,10 +155,7 @@ export function AppSidebar({
       onFocusCapture={handleSidebarFocus}
       onBlurCapture={handleSidebarBlur}
       {...props}
-      className={cn(
-        "z-30 [&>[data-slot=sidebar-inner]]:overflow-visible",
-        props.className,
-      )}
+      className={cn("z-30", props.className)}
     >
       <SidebarHeader
         inert={!showHeader}
@@ -255,10 +252,18 @@ export function AppSidebar({
         )}
       </SidebarFooter>
       {!isMobile && (
+        // Edge hover target that previews the collapsed sidebar, like the
+        // header toggle. Leaving is handled by the Sidebar's onMouseLeave.
+        // Starts below the header so it never overlaps the toggle's hit area.
         <SidebarRail
-          onClick={() => setPinned(!(pinned || isOverlay))}
-          className="group-data-[collapsible=offcanvas]:fixed group-data-[collapsible=offcanvas]:left-0! group-data-[collapsible=offcanvas]:right-auto! group-data-[collapsible=offcanvas]:visible group-data-[collapsible=offcanvas]:translate-x-0!"
-        />
+          onMouseEnter={handleToggleMouseEnter}
+          className="fixed top-[calc(var(--app-sidebar-offset)+--spacing(2))] left-0 right-auto! visible items-center justify-center after:hidden hover:group-data-[collapsible=offcanvas]:bg-sidebar-accent group-data-[state=expanded]:hidden"
+        >
+          <span
+            aria-hidden="true"
+            className="h-8 w-1 rounded-full bg-muted-foreground/40"
+          />
+        </SidebarRail>
       )}
     </Sidebar>
   );
