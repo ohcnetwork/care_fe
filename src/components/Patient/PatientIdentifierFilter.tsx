@@ -12,6 +12,7 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Command,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -23,7 +24,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
@@ -142,7 +149,7 @@ function PatientSearchSelector({
 
   return (
     <Command shouldFilter={false} className="border-none">
-      <div className="flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {allIdentifierConfigs.length > 2 ? (
           <div className="p-2">
             <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
@@ -190,35 +197,33 @@ function PatientSearchSelector({
           </div>
         ) : null}
 
-        <div className="relative px-2">
+        <div className="relative border-b border-gray-100 shadow-xs">
           {isPhoneNumberConfig ? (
-            <PhoneInput
-              ref={inputRef}
-              placeholder={selectedConfig?.config.display || t("search")}
-              value={searchTerm}
-              onChange={(value) => setSearchTerm(value || "")}
-              className="border-none focus:ring-0 focus:outline-none flex-1"
-              autoFocus
-            />
-          ) : (
-            <>
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
-              <Input
+            <div className="p-2 pt-0">
+              <PhoneInput
                 ref={inputRef}
-                type="text"
+                data-autofocus
                 placeholder={selectedConfig?.config.display || t("search")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-                autoFocus
+                onChange={(value) => setSearchTerm(value || "")}
               />
-            </>
+            </div>
+          ) : (
+            <CommandInput
+              ref={inputRef}
+              placeholder={selectedConfig?.config.display || t("search")}
+              aria-label={selectedConfig?.config.display || t("search")}
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+              wrapperClassName="p-2 pt-0 md:pt-0"
+              className="pr-8 text-base sm:text-sm"
+            />
           )}
           {searchTerm && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
+              className="absolute right-4 top-1/2 size-6 -translate-y-1/2 text-gray-400 hover:bg-transparent"
               onClick={() => setSearchTerm("")}
               aria-label="Clear search input"
             >
@@ -249,7 +254,7 @@ function PatientSearchSelector({
                 }}
               />
             </div>
-            <CommandList className="max-h-[calc(50vh-12rem)] overflow-y-auto">
+            <CommandList className="scrollbar-gutter-auto sm:max-h-[calc(50vh-12rem)]">
               <CommandGroup className="p-0">
                 {patientList?.results.map((patient) => (
                   <CommandItem
@@ -511,19 +516,28 @@ export default function PatientIdentifierFilter({
         {isMobile ? (
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent height="fixed">
-              <PatientSearchSelector
-                allIdentifierConfigs={allIdentifierConfigs}
-                searchType={searchType}
-                setSearchType={setSearchType}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                isPhoneNumberConfig={isPhoneNumberConfig}
-                selectedConfig={selectedConfig}
-                handlePatientSelect={handlePatientSelect}
-                patientList={patientList}
-                isPatientFetching={isPatientFetching}
-              />
+            <DrawerContent
+              aria-describedby={undefined}
+              height="fixed"
+              className="p-1.5"
+            >
+              <DrawerHeader className="border-b" showCloseButton>
+                <DrawerTitle>{t("search_patients")}</DrawerTitle>
+              </DrawerHeader>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+                <PatientSearchSelector
+                  allIdentifierConfigs={allIdentifierConfigs}
+                  searchType={searchType}
+                  setSearchType={setSearchType}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  isPhoneNumberConfig={isPhoneNumberConfig}
+                  selectedConfig={selectedConfig}
+                  handlePatientSelect={handlePatientSelect}
+                  patientList={patientList}
+                  isPatientFetching={isPatientFetching}
+                />
+              </div>
             </DrawerContent>
           </Drawer>
         ) : (

@@ -128,7 +128,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-      <PopoverContent className="w-150 p-0 overflow-clip">
+      <PopoverContent className="w-(--anchor-width) p-0 overflow-clip">
         {content}
       </PopoverContent>
     </Popover>
