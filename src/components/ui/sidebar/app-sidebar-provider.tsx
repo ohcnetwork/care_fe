@@ -210,12 +210,19 @@ export function AppSidebarProvider({
     );
     if (!sidebar) return;
     const hidden = !isMobile && !pinned && !overlayOpen;
-    sidebar.inert = hidden;
-    if (hidden) sidebar.setAttribute("aria-hidden", "true");
-    else sidebar.removeAttribute("aria-hidden");
+    const content = sidebar.querySelectorAll<HTMLElement>(
+      '[data-slot="sidebar-inner"] > :not([data-slot="sidebar-rail"])',
+    );
+    for (const element of content) {
+      element.inert = hidden;
+      if (hidden) element.setAttribute("aria-hidden", "true");
+      else element.removeAttribute("aria-hidden");
+    }
     return () => {
-      sidebar.inert = false;
-      sidebar.removeAttribute("aria-hidden");
+      for (const element of content) {
+        element.inert = false;
+        element.removeAttribute("aria-hidden");
+      }
     };
   }, [isMobile, pinned, overlayOpen, path]);
 

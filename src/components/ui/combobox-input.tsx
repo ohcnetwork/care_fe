@@ -140,12 +140,12 @@ export function ComboboxInput({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent height="fixed">
           <DrawerTitle className="sr-only">
             {title ?? inputProps.placeholder ?? ""}
           </DrawerTitle>
           <div className="border-b p-3">{field}</div>
-          <div className="max-h-[70vh] overflow-y-auto">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </DrawerContent>
       </Drawer>
     );

@@ -1764,7 +1764,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                       value={formatDoseRange(di.dose_and_rate.dose_range)}
                       onClick={() => setShowDosageDialog(dIdx)}
                       className={cn(
-                        "h-9 text-sm cursor-pointer",
+                        "text-sm cursor-pointer",
                         hasError(fieldKey) && "border-red-500",
                       )}
                       disabled={disabled || isReadOnly}
@@ -2178,7 +2178,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}
           disabled={disabled}
-          className="h-9 text-base sm:text-sm"
+          className="text-base sm:text-sm"
         />
       </div>
 
@@ -2192,7 +2192,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
                 className="w-full justify-between text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               >
                 <span className="flex items-center gap-2">
@@ -2313,7 +2312,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                   }
                   disabled={disabled || isReadOnly}
                 >
-                  <SelectTrigger className="h-9 text-sm capitalize">
+                  <SelectTrigger className="text-sm capitalize">
                     <SelectValue
                       className="capitalize"
                       placeholder={t("select_intent")}

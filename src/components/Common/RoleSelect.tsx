@@ -29,7 +29,6 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface RoleSelectProps {
   value?: RoleBase;
@@ -71,7 +70,7 @@ function RoleCommandContent({
         placeholder={t("search_roles")}
         onValueChange={setSearchTerm}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        autoFocus
       />
       <CommandList>
         <CommandEmpty>
@@ -198,7 +197,7 @@ export function RoleSelect({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent height="fixed" className="px-0 pt-2 rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <RoleCommandContent
               setSearchTerm={setSearchTerm}

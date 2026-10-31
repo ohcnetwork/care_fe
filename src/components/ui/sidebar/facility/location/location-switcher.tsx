@@ -1,4 +1,3 @@
-import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronsUpDown, MapPinIcon, X } from "lucide-react";
 import { navigate, usePath } from "raviger";
@@ -11,18 +10,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Command,
+  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
@@ -30,6 +24,7 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipComponent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
@@ -275,7 +270,7 @@ export function LocationSelectorDialog({
   };
 
   return (
-    <Dialog
+    <CommandDialog
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
@@ -284,13 +279,18 @@ export function LocationSelectorDialog({
           setCurrentPage(1);
         }
       }}
+      title={t("select_location")}
+      description={t("select_location")}
+      className="md:max-w-2xl"
     >
-      <DialogContent className="p-3 min-w-[calc(50vw)]">
-        <DialogHeader className="overflow-hidden">
-          <DialogTitle>{getCurrentLocation()}</DialogTitle>
-        </DialogHeader>
+      <Command shouldFilter={false}>
+        {location && (
+          <div className="shrink-0 overflow-hidden px-3 py-2">
+            {getCurrentLocation()}
+          </div>
+        )}
         {locationLevel.length > 0 && (
-          <div className="flex flex-row justify-between gap-1 bg-gray-100 p-1 overflow-auto">
+          <div className="flex shrink-0 flex-row justify-between gap-1 overflow-auto bg-gray-100 p-1">
             <div className="flex flex-row gap-1 items-center">
               {locationLevel.map((level, index) => (
                 <div
@@ -343,50 +343,45 @@ export function LocationSelectorDialog({
             </div>
           </div>
         )}
-        <Command className="pt-3" shouldFilter={false}>
-          <div className="border border-gray-200">
-            <CommandInput
-              className="border-0 ring-0 sm:text-sm text-base"
-              placeholder={t("search")}
-              onValueChange={(value) => {
-                setSearchValue(value);
-                setCurrentPage(1);
-              }}
-              value={searchValue}
-              autoFocus
-            />
-            <CommandList
-              onWheel={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <CommandEmpty>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <Spinner className="h-4 w-4 animate-spin text-gray-500" />
-                    <span className="ml-2 text-sm text-gray-500">
-                      {t("loading")}
-                    </span>
-                  </div>
-                ) : (
-                  t("no_locations_found")
-                )}
-              </CommandEmpty>
-              <CommandGroup>
-                {locations?.results.map((location) => (
-                  <LocationCommandItem
-                    key={location.id}
-                    location={location}
-                    handleSelect={handleSelect}
-                    handleConfirmSelection={handleConfirmSelection}
-                    isSearching={!!searchValue}
-                  />
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </div>
-        </Command>
-        <div className="flex w-full justify-center">
+        <div className="shrink-0 border-b border-gray-100 shadow-xs">
+          <CommandInput
+            className="border-0 ring-0 sm:text-sm text-base"
+            placeholder={t("search")}
+            onValueChange={(value) => {
+              setSearchValue(value);
+              setCurrentPage(1);
+            }}
+            value={searchValue}
+            autoFocus
+          />
+        </div>
+        <CommandList
+          className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))] scrollbar-gutter-auto"
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {isLoading ? (
+            <div className="gap-2 flex flex-col px-2 pt-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+          )}
+          <CommandGroup className="px-2">
+            {locations?.results.map((location) => (
+              <LocationCommandItem
+                key={location.id}
+                location={location}
+                handleSelect={handleSelect}
+                handleConfirmSelection={handleConfirmSelection}
+                isSearching={!!searchValue}
+              />
+            ))}
+          </CommandGroup>
+        </CommandList>
+        <div className="flex w-full shrink-0 justify-center py-2">
           <PaginationComponent
             cPage={currentPage}
             defaultPerPage={resultsPerPage}
@@ -394,8 +389,8 @@ export function LocationSelectorDialog({
             onChange={(page: number) => setCurrentPage(page)}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+      </Command>
+    </CommandDialog>
   );
 }
 
@@ -422,16 +417,16 @@ function LocationCommandItem({
           ? handleSelect(location)
           : handleConfirmSelection(location)
       }
-      className="flex items-start sm:items-center justify-between"
+      className="flex items-center justify-between [&>svg:last-child]:hidden"
     >
-      <div className="flex flex-col min-w-0">
+      <div className="flex flex-col min-w-0 flex-1">
         <span className="truncate">{location.name}</span>
         {isSearching && path && (
           <span className="text-xs text-gray-500 truncate">{path}</span>
         )}
       </div>
-      <div>
-        <Button variant="white" size="xs" className="p-2 mr-4 w-full shadow">
+      <div className="shrink-0">
+        <Button variant="white" size="xs" className="p-2 shadow">
           <CareIcon icon="l-corner-down-left" />
           {location.has_sub_locations ? t("view_sub_locations") : t("select")}
         </Button>

@@ -8,11 +8,15 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import useBreakpoints from "@/hooks/useBreakpoints";
 import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -46,7 +50,6 @@ function BaseLocationTreeNode({
   const { t } = useTranslation();
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocations.some((loc) => loc.id === location.id);
-  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch children when expanded
   const { data: children, isLoading } = useQuery({
@@ -88,7 +91,6 @@ function BaseLocationTreeNode({
           "group flex items-center py-1 rounded-md hover:bg-gray-50 transition-colors my-1",
           isSelected && "bg-primary-100/50 border border-primary-200",
           shouldShowExpand && "cursor-pointer hover:bg-gray-100",
-          isMobile ? "mr-3" : "mr-5",
           className,
         )}
         style={{ paddingLeft: getPaddingLeft(level) }}
@@ -116,7 +118,7 @@ function BaseLocationTreeNode({
             )}
           </Button>
         ) : (
-          <span className="w-6" />
+          <span className="w-7" />
         )}
 
         {renderLocationInfo(location)}
@@ -125,7 +127,7 @@ function BaseLocationTreeNode({
           <Button
             variant="ghost"
             size="icon"
-            className="ml-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-white hover:border-gray-300"
+            className="mx-2 size-8 shrink-0 rounded-lg border shadow-sm hover:bg-white hover:border-gray-300"
             aria-label={`${t("select")} ${location.name}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -324,21 +326,6 @@ function SelectedLocationPill({
   );
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className="p-4 h-72">
-      <div className="space-y-2">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-8 w-full animate-pulse rounded-md bg-gray-200"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function LocationMultiSelect<T extends LocationValue>({
   facilityId,
   value,
@@ -473,17 +460,17 @@ export default function LocationMultiSelect<T extends LocationValue>({
 
   const renderContent = () => {
     if (isLoadingLocations) {
-      return <LoadingSkeleton />;
+      return <FormSkeleton rows={4} />;
     }
 
     if (searchQuery.trim()) {
       if (isSearching) {
-        return <LoadingSkeleton />;
+        return <FormSkeleton rows={4} />;
       }
 
       if (searchResults.length > 0) {
         return (
-          <div className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
+          <>
             {searchResults.map((result) => (
               <SearchResultTreeNode
                 key={result.location.id}
@@ -498,12 +485,12 @@ export default function LocationMultiSelect<T extends LocationValue>({
                 path={result.path}
               />
             ))}
-          </div>
+          </>
         );
       }
 
       return (
-        <div className="p-4 text-sm text-gray-500 h-72 text-center">
+        <div className="p-4 text-sm text-gray-500 text-center">
           {t("no_locations_found")}
         </div>
       );
@@ -511,7 +498,7 @@ export default function LocationMultiSelect<T extends LocationValue>({
 
     if (topLevelLocations?.results && topLevelLocations.results.length > 0) {
       return (
-        <div className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
+        <>
           {topLevelLocations.results.map((location) => (
             <LocationTreeNode
               key={location.id}
@@ -524,7 +511,7 @@ export default function LocationMultiSelect<T extends LocationValue>({
               addLocationsToMap={addLocationsToMap}
             />
           ))}
-        </div>
+        </>
       );
     }
 
@@ -536,34 +523,36 @@ export default function LocationMultiSelect<T extends LocationValue>({
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col overflow-clip">
       {value.length > 0 && (
-        <>
-          <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto p-1.5 sm:max-h-32 mr-2">
-            {value.map((location) => (
-              <SelectedLocationPill
-                key={location.id}
-                location={location}
-                onRemove={handleRemove}
-              />
-            ))}
-          </div>
-          <div className="flex flex-col border-b py-1" />
-        </>
+        <div className="flex shrink-0 flex-nowrap gap-2 overflow-x-auto border-b p-1.5 sm:max-h-32 sm:flex-wrap">
+          {value.map((location) => (
+            <SelectedLocationPill
+              key={location.id}
+              location={location}
+              onRemove={handleRemove}
+            />
+          ))}
+        </div>
       )}
-      <div className="relative w-full px-3 pt-1">
-        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 size-4" />
-        <Input
-          type="text"
-          placeholder={t("search_locations")}
-          className="w-full rounded-md bg-background pl-8 py-2 text-sm focus-visible:ring-0 text-base sm:text-sm"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="shrink-0 border-b border-gray-100 p-2 shadow-xs">
+        <InputGroup className="border-input/30 bg-input/30 rounded-sm shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-3 has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50">
+          <InputGroupInput
+            type="text"
+            aria-label={t("search_locations")}
+            placeholder={t("search_locations")}
+            className="text-base sm:text-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <InputGroupAddon>
+            <Search className="size-4 opacity-50" />
+          </InputGroupAddon>
+        </InputGroup>
       </div>
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2 pb-4">{renderContent()}</div>
-      </ScrollArea>
+      <div className="min-h-0 flex-none overflow-y-auto overscroll-contain scrollbar-gutter-auto p-2 pb-4 h-[45dvh] md:h-[30dvh] in-data-[slot=drawer-content]:h-auto in-data-[slot=drawer-content]:flex-1">
+        {renderContent()}
+      </div>
     </div>
   );
 }

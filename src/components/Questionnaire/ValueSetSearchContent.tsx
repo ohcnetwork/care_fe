@@ -4,7 +4,6 @@ import { useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { isIOSDevice } from "@/Utils/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +18,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { ValueSetVariantChooser } from "@/components/Questionnaire/ValueSetVariantChooser";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code, CodeConceptMinimal, Designation } from "@/types/base/code/code";
@@ -177,6 +178,7 @@ export default function ValueSetSearchContent({
 }: Props) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Outside a facility route this is undefined, and the backend falls back to
   // instance-level valuesets.
@@ -251,14 +253,14 @@ export default function ValueSetSearchContent({
 
   return (
     <Command filter={() => 1}>
-      <div className="p-3 border-b border-gray-200 flex justify-between items-center md:hidden">
+      <div className="p-2 border-b border-gray-200 flex justify-between items-center md:hidden">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
           onValueChange={(value) => {
             setActiveTab(Number(value));
           }}
-          className="md:hidden"
+          className={cn("md:hidden", !title && "w-full")}
         >
           <TabsList className="flex w-full">
             <TabsTrigger value={"0"} className="flex-1">
@@ -270,17 +272,21 @@ export default function ValueSetSearchContent({
           </TabsList>
         </Tabs>
       </div>
-      <div className="border-b border-gray-200">
+      <div className="border-b shadow-2xs">
         <CommandInput
           ref={inputRef}
           placeholder={placeholder}
-          className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
           onValueChange={onSearchChange}
           value={search}
-          autoFocus={!isIOSDevice}
+          autoFocus={!isMobile}
         />
       </div>
-      <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[35dvh] lg:max-h-[40dvh]">
+      <CommandList
+        className={cn(
+          "overflow-y-auto",
+          isMobile ? "min-h-0 flex-1" : "max-h-[35dvh] lg:max-h-[40dvh]",
+        )}
+      >
         {!searchQuery.isFetching && (
           <CommandEmpty>
             {search.length < 3 ? (
@@ -294,7 +300,7 @@ export default function ValueSetSearchContent({
             )}
           </CommandEmpty>
         )}
-        <div className="flex">
+        <div className={cn("flex", !isMobile && "min-h-40")}>
           <div
             data-testid="valueset-search-results"
             className={cn(
@@ -356,7 +362,7 @@ export default function ValueSetSearchContent({
               </div>
               {favouritesQuery.isFetched &&
                 favouritesQuery.data?.length === 0 && (
-                  <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
+                  <div className="flex items-center flex-col justify-center py-6 text-xs text-gray-500">
                     {t("no_starred", {
                       star: "☆",
                     })}

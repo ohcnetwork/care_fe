@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
+import TagConfigForm from "./TagConfigForm";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -163,7 +163,7 @@ export default function TagConfigView({
               </h1>
             </div>
           </div>
-          <TagConfigFormDrawer
+          <TagConfigForm
             title={t("edit_tag_config")}
             configId={tagId}
             onSuccess={handleEditSuccess}
@@ -292,7 +292,7 @@ export default function TagConfigView({
                   <CareIcon icon="l-sitemap" className="size-5" />
                   {t("child_tags")}
                 </CardTitle>
-                <TagConfigFormDrawer
+                <TagConfigForm
                   title={t("add_child_tag")}
                   parentId={tagId}
                   onSuccess={handleAddChildSuccess}

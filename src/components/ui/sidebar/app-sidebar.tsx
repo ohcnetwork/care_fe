@@ -12,6 +12,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
@@ -113,6 +114,7 @@ export function AppSidebar({
     scheduleClose,
     handleSidebarFocus,
     handleSidebarBlur,
+    setPinned,
   } = useAppSidebar();
   const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
@@ -153,7 +155,10 @@ export function AppSidebar({
       onFocusCapture={handleSidebarFocus}
       onBlurCapture={handleSidebarBlur}
       {...props}
-      className={cn("z-30", props.className)}
+      className={cn(
+        "z-30 [&>[data-slot=sidebar-inner]]:overflow-visible",
+        props.className,
+      )}
     >
       <SidebarHeader
         inert={!showHeader}
@@ -249,6 +254,12 @@ export function AppSidebar({
           />
         )}
       </SidebarFooter>
+      {!isMobile && (
+        <SidebarRail
+          onClick={() => setPinned(!(pinned || isOverlay))}
+          className="group-data-[collapsible=offcanvas]:fixed group-data-[collapsible=offcanvas]:left-0! group-data-[collapsible=offcanvas]:right-auto! group-data-[collapsible=offcanvas]:visible group-data-[collapsible=offcanvas]:translate-x-0!"
+        />
+      )}
     </Sidebar>
   );
 }

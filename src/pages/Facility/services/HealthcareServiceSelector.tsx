@@ -197,8 +197,9 @@ export const HealthcareServiceSelector = ({
       <Drawer open={open} onOpenChange={setOpen} direction="bottom">
         <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
         <DrawerContent
+          height="fixed"
           aria-describedby={undefined}
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          className="px-0 pt-2 pb-0 rounded-t-lg"
         >
           <DrawerTitle className="sr-only">
             {t("select_healthcare_service")}

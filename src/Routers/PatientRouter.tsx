@@ -11,6 +11,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
+import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
@@ -85,6 +86,7 @@ const AppointmentRoutes = {
 };
 
 export default function PatientRouter() {
+  useRefreshStickyAfterScrollLock();
   const pages = useRoutes(DashboardRoutes);
 
   const appointmentPages = useRoutes(AppointmentRoutes);

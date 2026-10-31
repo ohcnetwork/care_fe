@@ -31,7 +31,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -402,29 +408,17 @@ export default function FacilityOrganizationSelector(
   const renderOrganizationCommand = (className?: string) => {
     return (
       <Command className={className}>
-        <div className="flex shrink-0 flex-col border-b border-border px-3 py-2">
-          <span className="font-semibold text-base">
-            {t("select_department")}
-          </span>
-          <span className="text-sm text-muted-foreground mt-0.5">
-            {t("select_department_description")}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center px-3 py-2">
-          {navigationLevels.length > 0 ? (
-            renderNavigationPath()
-          ) : (
-            <span className="text-sm text-muted-foreground">
-              {t("select_from_list")}
-            </span>
-          )}
-        </div>
+        {navigationLevels.length > 0 && (
+          <div className="flex shrink-0 items-center px-3 py-2">
+            {renderNavigationPath()}
+          </div>
+        )}
         <CommandInput
           placeholder={t("search_organizations")}
           aria-label={t("search_organizations")}
           onValueChange={setFacilityOrgSearch}
           value={facilityOrgSearch}
-          wrapperClassName="border-b border-border px-3 pt-0 pb-2 md:pt-0"
+          wrapperClassName="border-b border-border shadow-2xs"
         />
         <CommandList onWheel={(e) => e.stopPropagation()}>
           <CommandEmpty>
@@ -590,7 +584,10 @@ export default function FacilityOrganizationSelector(
               <>
                 <Drawer open={open} onOpenChange={handleOpenChange}>
                   <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-                  <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+                  <DrawerContent height="fixed">
+                    <DrawerHeader showCloseButton>
+                      <DrawerTitle>{t("select_department")}</DrawerTitle>
+                    </DrawerHeader>
                     {renderOrganizationCommand()}
                   </DrawerContent>
                 </Drawer>
@@ -601,7 +598,7 @@ export default function FacilityOrganizationSelector(
                 <PopoverContent
                   align="start"
                   sideOffset={4}
-                  className="p-0 w-[var(--anchor-width)] max-h-[80dvh] overflow-hidden"
+                  className="p-0 w-[var(--anchor-width)] max-h-[80dvh] overflow-clip"
                 >
                   {renderOrganizationCommand()}
                 </PopoverContent>

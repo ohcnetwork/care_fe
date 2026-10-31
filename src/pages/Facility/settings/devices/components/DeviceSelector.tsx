@@ -24,7 +24,6 @@ import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceT
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface DeviceSearchProps {
   facilityId: string;
@@ -60,7 +59,7 @@ function DeviceCommandContent({
         value={search}
         onValueChange={setSearch}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        autoFocus
       />
       {isPending ? (
         <CardListSkeleton count={3} />
@@ -131,7 +130,7 @@ export function DeviceSearch({
         <DrawerTrigger asChild disabled={disabled}>
           {renderTriggerButton()}
         </DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent height="fixed" className="px-0 pt-2 rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <DeviceCommandContent
               search={search}
