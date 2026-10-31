@@ -17,6 +17,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -25,6 +26,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -170,13 +172,13 @@ function RequirementsContent({
   const { t } = useTranslation();
 
   if (customSelector) {
-    return <div className="overflow-y-auto">{customSelector}</div>;
+    return <div className="flex min-h-0 flex-1 flex-col">{customSelector}</div>;
   }
 
   return (
     <Command filter={() => 1}>
       {value.length > 0 && (
-        <div className="flex flex-nowrap sm:flex-wrap border-b gap-2 p-1.5 overflow-x-auto flex-shrink-0 sm:max-h-32 mr-2">
+        <div className="flex flex-nowrap sm:flex-wrap border-b gap-2 p-1.5 overflow-x-auto shrink-0 sm:max-h-28">
           {value.map((item, index) => (
             <SmallSelectedItemCard
               key={`${item.value}-${index}`}
@@ -187,13 +189,14 @@ function RequirementsContent({
         </div>
       )}
       {canCreate && (
-        <div className="px-4 py-2 border-b">
+        <div className="p-2 border-b">
           <Sheet open={isCreateSheetOpen} onOpenChange={setIsCreateSheetOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => setIsCreateSheetOpen(true)}
+                size="sm"
               >
                 <Plus className="size-4" />
                 {t("create_new")}
@@ -215,66 +218,70 @@ function RequirementsContent({
       )}
       <CommandInput
         placeholder={t("search")}
+        aria-label={t("search")}
         onValueChange={onSearch}
-        className="border-0 focus:ring-0 text-base sm:text-sm"
+        wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
       />
-      {isLoading ? (
-        <div className="p-4">
-          <FormSkeleton rows={3} />
-        </div>
-      ) : (
-        <CommandEmpty className="text-center font-medium">
-          <Card className="flex flex-col items-center justify-center p-8 text-center border-none shadow-none ">
-            <div className="rounded-full bg-primary/10 p-3 mb-2">
-              <Search className="size-4 text-primary" />
-            </div>
-            <p className="text-sm sm:text-base font-medium text-gray-500">
-              {t("no_results_found")}
-            </p>
-          </Card>
-        </CommandEmpty>
-      )}
-      <CommandGroup className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
+      <CommandList className="max-h-[50dvh] lg:max-h-[40dvh] scrollbar-gutter-auto">
         {isLoading ? (
-          <div className="p-4">
-            <FormSkeleton rows={5} />
+          <div className="p-2">
+            <FormSkeleton rows={3} />
           </div>
         ) : (
-          <div className="p-2">
-            {options.map((option) => {
-              const isSelected = value.some(
-                (item) => item.value === option.value,
-              );
-              const showPlusButton = allowDuplicate || !isSelected;
-
-              return (
-                <CommandItem
-                  key={option.value}
-                  value={option.label}
-                  onSelect={() => addOption(option)}
-                  className="mx-2 flex cursor-pointer items-center justify-between rounded-md px-2"
-                >
-                  <span>{option.label}</span>
-                  {showPlusButton && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        addOption(option);
-                      }}
-                    >
-                      <Plus className="size-4" />
-                    </Button>
-                  )}
-                </CommandItem>
-              );
-            })}
-          </div>
+          <CommandEmpty className="text-center font-medium">
+            <Card className="flex flex-col items-center justify-center p-8 text-center border-none shadow-none ">
+              <div className="rounded-full bg-primary/10 p-3 mb-2">
+                <Search className="size-4 text-primary" />
+              </div>
+              <p className="text-sm sm:text-base font-medium text-gray-500">
+                {t("no_results_found")}
+              </p>
+            </Card>
+          </CommandEmpty>
         )}
-      </CommandGroup>
+        <CommandGroup>
+          {isLoading ? (
+            <div className="p-2">
+              <FormSkeleton rows={5} />
+            </div>
+          ) : (
+            <div>
+              {options.map((option) => {
+                const isSelected = value.some(
+                  (item) => item.value === option.value,
+                );
+                const showPlusButton = allowDuplicate || !isSelected;
+
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.label}
+                    onSelect={() => addOption(option)}
+                    className="flex cursor-pointer items-center justify-between rounded-md px-2 [&>svg:last-child]:hidden"
+                  >
+                    <span className="min-w-0 flex-1">{option.label}</span>
+                    {showPlusButton && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto h-8 w-8 shrink-0 p-0"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addOption(option);
+                        }}
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </div>
+          )}
+        </CommandGroup>
+      </CommandList>
     </Command>
   );
 }
@@ -357,29 +364,31 @@ export default function RequirementsSelector({
         )}
       </div>
 
-      <DrawerContent>
-        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
-          <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
-          {description && (
-            <DrawerDescription className="mt-1.5 text-sm">
-              {description}
-            </DrawerDescription>
-          )}
+      <DrawerContent
+        {...(!description && { "aria-describedby": undefined })}
+        height="fixed"
+        className="p-1.5"
+      >
+        <DrawerHeader showCloseButton>
+          <DrawerTitle className="mt-2">{title}</DrawerTitle>
+          {description && <DrawerDescription>{description}</DrawerDescription>}
+        </DrawerHeader>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+          <RequirementsContent
+            value={value}
+            options={options}
+            isLoading={isLoading}
+            onSearch={onSearch}
+            customSelector={customSelector}
+            canCreate={canCreate}
+            isCreateSheetOpen={isCreateSheetOpen}
+            setIsCreateSheetOpen={setIsCreateSheetOpen}
+            createForm={createForm}
+            allowDuplicate={allowDuplicate}
+            removeItem={removeItem}
+            addOption={addOption}
+          />
         </div>
-        <RequirementsContent
-          value={value}
-          options={options}
-          isLoading={isLoading}
-          onSearch={onSearch}
-          customSelector={customSelector}
-          canCreate={canCreate}
-          isCreateSheetOpen={isCreateSheetOpen}
-          setIsCreateSheetOpen={setIsCreateSheetOpen}
-          createForm={createForm}
-          allowDuplicate={allowDuplicate}
-          removeItem={removeItem}
-          addOption={addOption}
-        />
       </DrawerContent>
     </Drawer>
   ) : (
@@ -402,8 +411,8 @@ export default function RequirementsSelector({
         )}
       </div>
 
-      <PopoverContent className="p-0 w-[var(--anchor-width)]">
-        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
+      <PopoverContent className="w-[var(--anchor-width)] gap-0 p-0">
+        <div className="flex flex-col border-b px-3 py-2">
           {description && <p className="mt-1.5 text-sm">{description}</p>}
         </div>
         <RequirementsContent

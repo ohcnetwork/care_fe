@@ -12,8 +12,15 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -66,29 +73,33 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
     <Command>
       <CommandInput
         placeholder={t("search_icons")}
-        className="border-0 focus:ring-0 text-base sm:text-sm"
+        aria-label={t("search_icons")}
+        wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
       />
-      <CommandEmpty>{t("no_icons_found")}</CommandEmpty>
-      <CommandGroup className="max-h-[300px] overflow-auto">
-        {iconNames.map((iconName) => (
-          <CommandItem
-            key={iconName}
-            onSelect={() => {
-              onChange(iconName);
-              setOpen(false);
-            }}
-            className="flex items-center gap-2"
-          >
-            <div className="flex w-full items-center gap-2">
-              <CareIcon icon={getIconName(iconName)} className="size-5" />
-              <span>{iconName}</span>
-            </div>
-            {value === iconName && (
-              <Check className="ml-auto h-4 w-4 opacity-100" />
-            )}
-          </CommandItem>
-        ))}
-      </CommandGroup>
+      <CommandList>
+        <CommandEmpty>{t("no_icons_found")}</CommandEmpty>
+        <CommandGroup>
+          {iconNames.map((iconName) => (
+            <CommandItem
+              key={iconName}
+              onSelect={() => {
+                onChange(iconName);
+                setOpen(false);
+              }}
+              className="flex items-center gap-2 max-md:min-h-11"
+            >
+              <div className="flex w-full items-center gap-2">
+                <CareIcon icon={getIconName(iconName)} className="size-5" />
+                <span>{iconName}</span>
+              </div>
+              {value === iconName && (
+                <Check className="ml-auto h-4 w-4 opacity-100" />
+              )}
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
     </Command>
   );
 
@@ -97,8 +108,15 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-4">
+          <DrawerContent
+            aria-describedby={undefined}
+            height="fixed"
+            className="p-1.5"
+          >
+            <DrawerHeader showCloseButton>
+              <DrawerTitle>{t("select_icon")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}
             </div>
           </DrawerContent>
@@ -110,7 +128,9 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">{content}</PopoverContent>
+      <PopoverContent className="w-150 p-0 overflow-clip">
+        {content}
+      </PopoverContent>
     </Popover>
   );
 }

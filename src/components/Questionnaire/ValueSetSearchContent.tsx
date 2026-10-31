@@ -278,7 +278,7 @@ export default function ValueSetSearchContent({
           placeholder={placeholder}
           onValueChange={onSearchChange}
           value={search}
-          autoFocus
+          autoFocus={!isMobile}
         />
       </div>
       <CommandList

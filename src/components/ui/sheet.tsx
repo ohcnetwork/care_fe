@@ -310,7 +310,7 @@ function SheetContent({
           "bg-background data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-50 flex flex-col overflow-y-auto bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out",
           sheetSideClasses[side],
           (side === "left" || side === "right") && sheetSizeClasses[size],
-          "gap-4",
+          "gap-4 p-6",
           className,
         )}
         {...focusProps}
