@@ -218,13 +218,13 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               {pinnedLinks.map((link) => (
                 <div key={link.link} className="relative group block h-full">
                   <Button
-                    variant="secondary"
+                    variant="ghost"
                     size="icon"
                     onClick={() => removeCustomLink(link.link)}
-                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 text-gray-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600 focus-visible:opacity-100"
+                    className="absolute -top-2 -right-2 z-10 size-6 rounded-full bg-gray-100 p-0 text-gray-500 shadow-sm transition-opacity hover:bg-red-100 hover:text-red-600 focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                     aria-label={t("remove")}
                   >
-                    <X />
+                    <X className="size-4" />
                   </Button>
                   <Link
                     href={link.link}
