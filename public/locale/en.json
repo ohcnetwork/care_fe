@@ -8478,5 +8478,7 @@
   "workspace_studio_history_standard_title": "Clinical history uses the standard tabs",
   "workspace_studio_history_standard_hint": "Anyone who chooses this workspace sees the standard clinical history. Pick a starting point to design it, for example a page that shows only your forms.",
   "workspace_studio_use_standard_history": "Use standard clinical history",
-  "workspace_picker_scope_hint": "Your choice applies to all your encounters and clinical history."
+  "workspace_picker_scope_hint": "Your choice applies to all your encounters and clinical history.",
+  "plots": "Plots",
+  "table": "Table"
 }
