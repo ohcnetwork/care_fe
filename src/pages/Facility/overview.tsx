@@ -20,6 +20,7 @@ import {
 import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useDefaultEncounterClass } from "@/hooks/useDefaultEncounterClass";
 import useUserPreferences from "@/hooks/useUserPreferences";
 
 import { getPermissions } from "@/common/Permissions";
@@ -57,6 +58,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
+  const { defaultClass: defaultEncounterClass } = useDefaultEncounterClass();
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -86,10 +88,17 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       visible: canViewAppointments,
     },
     {
-      title: t("all_encounters"),
+      title:
+        defaultEncounterClass === "all"
+          ? t("all_encounters")
+          : t("encounter_class_encounters", {
+              encounterClassName: t(
+                `encounter_class__${defaultEncounterClass}`,
+              ),
+            }),
       description: t("view_and_manage_encounters"),
       icon: StethoscopeDuoIcon,
-      href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
+      href: `/facility/${facilityId}/encounters/patients/${defaultEncounterClass}`,
       visible: canListEncounters,
     },
     {
