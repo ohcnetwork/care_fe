@@ -264,8 +264,14 @@ test.describe("Planned Encounter Status Transition", () => {
       });
 
       await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
-        // Discharged disables the status picker. Reload the unchanged backend state.
+        // Discharged disables the status picker. Reload the unchanged backend
+        // state, then discard the failed attempt's local draft: saving is
+        // blocked until a restored draft is resumed or discarded.
         await page.reload();
+        await page
+          .getByRole("button", { name: "Discard", exact: true })
+          .click();
+        await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
         await expect(encounterStatusCombobox(page)).toContainText("Planned");
         await cancelEncounterFromCurrentForm(page);
       });
