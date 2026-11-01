@@ -18,7 +18,9 @@ export function useRefreshStickyAfterScrollLock() {
       if (wasLocked && !locked) {
         requestAnimationFrame(() => {
           const { scrollY } = window;
-          window.scrollTo({ top: scrollY + 1, behavior: "instant" });
+          // At the bottom of the page scrollY + 1 is clamped, so nudge toward the start instead.
+          const nudge = scrollY > 0 ? scrollY - 1 : scrollY + 1;
+          window.scrollTo({ top: nudge, behavior: "instant" });
           window.scrollTo({ top: scrollY, behavior: "instant" });
         });
       }
