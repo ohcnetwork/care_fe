@@ -20,6 +20,7 @@ import { FileExclamationPointIcon } from "lucide-react";
 import {
   ResolvedObservationEntry,
   toNumericValue,
+  unitLabel,
 } from "./observationDetailUtils";
 
 // Wide enough for a year-boundary tick ("27 Sep 2026") so labels never collide.
@@ -148,7 +149,7 @@ export function ObservationDetailContent({
     if (inView) loadMore();
   }, [inView, isFetchingNextPage]);
 
-  const unit = entries[0]?.unit?.display || entries[0]?.unit?.code || "";
+  const unit = unitLabel(entries[0]?.unit);
 
   const chartData = entries
     .map((entry) => {

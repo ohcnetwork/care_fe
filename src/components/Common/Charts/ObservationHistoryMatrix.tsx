@@ -17,7 +17,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 
-import { ResolvedObservationEntry } from "./observationDetailUtils";
+import { ResolvedObservationEntry, unitLabel } from "./observationDetailUtils";
 
 export const ObservationHistoryMatrix = ({
   codes,
@@ -73,15 +73,15 @@ export const ObservationHistoryMatrix = ({
     const rows = codes.map((code) => {
       const codeEntries = entriesByCode[code.code] ?? [];
 
-      const valuesByKey: Record<string, string | null | undefined> = {};
+      const entriesByKey: Record<string, ResolvedObservationEntry> = {};
       for (const entry of codeEntries) {
-        valuesByKey[entry.key] = entry.value;
+        entriesByKey[entry.key] = entry;
       }
 
       return {
         id: code.code,
         title: code.display || code.code,
-        valuesByKey,
+        entriesByKey,
       };
     });
 
@@ -183,7 +183,8 @@ export const ObservationHistoryMatrix = ({
                   </div>
                 </TableCell>
                 {columns.map((col, index) => {
-                  const value = row.valuesByKey[col.key];
+                  const entry = row.entriesByKey[col.key];
+                  const unit = entry?.value ? unitLabel(entry.unit) : "";
                   const isLatest = index === 0;
                   return (
                     <TableCell
@@ -194,8 +195,13 @@ export const ObservationHistoryMatrix = ({
                         isLatest && "sticky z-10",
                       )}
                     >
-                      <span className="inline-flex items-center gap-1">
-                        {value ?? "-"}
+                      <span className="inline-flex items-baseline gap-1">
+                        {entry?.value || "-"}
+                        {unit && (
+                          <span className="text-xs text-muted-foreground">
+                            {unit}
+                          </span>
+                        )}
                       </span>
                     </TableCell>
                   );

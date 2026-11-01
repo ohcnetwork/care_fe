@@ -12,9 +12,11 @@ import {
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useEncounterSilently } from "@/pages/Encounters/utils/EncounterProvider";
 import { Code } from "@/types/base/code/code";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
@@ -23,8 +25,17 @@ import query from "@/Utils/request/query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileExclamationPointIcon } from "lucide-react";
 import { ObservationDetailContent } from "./ObservationDetailContent";
-import { resolveObservationEntries } from "./observationDetailUtils";
+import {
+  groupEntriesByUnit,
+  resolveObservationEntries,
+} from "./observationDetailUtils";
 import { ObservationHistoryMatrix } from "./ObservationHistoryMatrix";
+
+// Amended results replace final ones, so history must include both.
+const RESULT_STATUSES = [
+  ObservationStatus.FINAL,
+  ObservationStatus.AMENDED,
+].join(",");
 
 interface ObservationDetailSheetProps {
   codes: Code[];
@@ -43,7 +54,15 @@ export function ObservationDetailSheet({
 }: ObservationDetailSheetProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [currentEncounterOnly, setCurrentEncounterOnly] = useState(false);
+  // Readers limited to this encounter cannot list patient-wide history; when the
+  // grant is unknown (outside an encounter page), start scoped to the encounter.
+  const canReadPatientHistory = useEncounterSilently()?.canReadPatientHistory;
+  const historyLocked = !!encounterId && canReadPatientHistory === false;
+  const [currentEncounterOnly, setCurrentEncounterOnly] = useState(
+    !!encounterId && canReadPatientHistory !== true,
+  );
+  const encounterScoped =
+    !!encounterId && (historyLocked || currentEncounterOnly);
 
   const validCodes = codes.filter((code) => !!code?.code);
 
@@ -52,6 +71,9 @@ export function ObservationDetailSheet({
   const {
     data: historyData,
     isLoading: isHistoryLoading,
+    isError,
+    isFetching,
+    refetch,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -61,19 +83,17 @@ export function ObservationDetailSheet({
       patientId,
       encounterId,
       codesParam,
-      currentEncounterOnly,
+      encounterScoped,
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           codes: codesParam,
-          status: ObservationStatus.FINAL,
+          status: RESULT_STATUSES,
           limit: String(RESULTS_PER_PAGE_LIMIT),
           offset: String(pageParam),
-          ...(currentEncounterOnly && encounterId
-            ? { encounter: encounterId }
-            : {}),
+          ...(encounterScoped ? { encounter: encounterId } : {}),
         },
       })({ signal });
       return response;
@@ -110,9 +130,7 @@ export function ObservationDetailSheet({
             )}
           >
             <span>
-              {currentEncounterOnly && encounterId
-                ? t("current_encounter")
-                : t("all_encounters")}
+              {encounterScoped ? t("current_encounter") : t("all_encounters")}
             </span>
             {totalCount > 0 && (
               <>
@@ -123,7 +141,7 @@ export function ObservationDetailSheet({
           </div>
         </SheetHeader>
 
-        {encounterId && (
+        {encounterId && !historyLocked && (
           <div className="flex items-center gap-2 text-sm ml-auto pt-2 pr-3">
             <Checkbox
               id="current-encounter-only"
@@ -141,6 +159,10 @@ export function ObservationDetailSheet({
         {isHistoryLoading ? (
           <div className="flex flex-col gap-4 overflow-hidden p-4 flex-1 min-h-0">
             <TableSkeleton count={3} />
+          </div>
+        ) : isError ? (
+          <div className="p-4">
+            <ClinicalListError isFetching={isFetching} onRetry={refetch} />
           </div>
         ) : totalCount === 0 || codeList.length === 0 ? (
           <EmptyState
@@ -164,19 +186,32 @@ export function ObservationDetailSheet({
               className="min-h-0 flex-1 overflow-y-auto p-4"
             >
               <div className="flex flex-col gap-4">
-                {codeList.map((code) => (
-                  <section key={code.code} className="min-w-0">
-                    <h3 className="mb-1 text-sm font-semibold text-foreground">
-                      {code.display || code.code}
-                    </h3>
-                    <ObservationDetailContent
-                      entries={entriesByCode[code.code] ?? []}
-                      hasNextPage={hasNextPage}
-                      isFetchingNextPage={isFetchingNextPage}
-                      fetchNextPage={fetchNextPage}
-                    />
-                  </section>
-                ))}
+                {codeList.flatMap((code) => {
+                  const unitGroups = groupEntriesByUnit(
+                    entriesByCode[code.code] ?? [],
+                  );
+                  return unitGroups.map((group) => (
+                    <section
+                      key={`${code.code}|${group.key}`}
+                      className="min-w-0"
+                    >
+                      <h3 className="mb-1 text-sm font-semibold text-foreground">
+                        {code.display || code.code}
+                        {unitGroups.length > 1 && group.unit && (
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            ({group.unit})
+                          </span>
+                        )}
+                      </h3>
+                      <ObservationDetailContent
+                        entries={group.entries}
+                        hasNextPage={hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        fetchNextPage={fetchNextPage}
+                      />
+                    </section>
+                  ));
+                })}
               </div>
             </TabsContent>
             <TabsContent

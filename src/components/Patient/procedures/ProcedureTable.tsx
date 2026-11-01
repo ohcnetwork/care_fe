@@ -233,7 +233,8 @@ export const ProcedureTable = ({
 
             {procedures.map((procedure) => (
               <ClinicalInformationRow
-                  key={procedure.id}
+                compact={compact}
+                key={procedure.id}
                 note={procedure.note ?? undefined}
                 createdBy={procedure.created_by}
                 onViewEncounter={viewEncounter(procedure)}

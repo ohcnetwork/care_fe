@@ -28,6 +28,8 @@ interface RowProps {
   note?: string;
   createdBy?: UserReadMinimal | null;
   onViewEncounter?: () => void;
+  /** Matches the tighter row gap used by panel presentations. */
+  compact?: boolean;
 }
 
 export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
@@ -58,6 +60,7 @@ export default function ClinicalInformationRow({
   note,
   createdBy,
   onViewEncounter,
+  compact = false,
 }: RowProps) {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -127,7 +130,12 @@ export default function ClinicalInformationRow({
       </div>
 
       {showNote && note && (
-        <div className="col-span-full relative -mt-2.5 border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none">
+        <div
+          className={cn(
+            "col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none",
+            compact ? "-mt-1.5" : "-mt-2.5",
+          )}
+        >
           <div className="text-sm font-semibold text-gray-800">
             {t("note")}
             {":"}

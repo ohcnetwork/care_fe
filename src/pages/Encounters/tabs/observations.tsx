@@ -6,6 +6,8 @@ import { useInView } from "react-intersection-observer";
 
 import { Card } from "@/components/ui/card";
 
+import { cn } from "@/lib/utils";
+
 import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
@@ -156,58 +158,72 @@ export const EncounterObservationsTab = () => {
                   new Date(b.effective_datetime).getTime() -
                   new Date(a.effective_datetime).getTime(),
               )
-              .map((item: ObservationListRead) => (
-                <div key={item.id} className="flex gap-4">
-                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium text-nowrap">
-                    {formatDisplayTime(item.effective_datetime)}:
+              .map((item: ObservationListRead) => {
+                const summary = (
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {item.value.value && (
+                        <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
+                          {formatValue(item.value.value, item.value_type)}
+                        </div>
+                      )}
+                    </div>
+                    {item.note && (
+                      <div className="mt-1 text-sm text-gray-500">
+                        {item.note}
+                      </div>
+                    )}
+                    <div className="font-medium text-sm text-gray-600">
+                      {item.main_code?.display ||
+                        item.main_code?.code ||
+                        t("unknown")}
+                    </div>
+                    {item.data_entered_by && (
+                      <div className="text-gray-600 text-sm">
+                        {t("filed_by")}{" "}
+                        <span className="font-medium text-gray-800">
+                          {formatName(item.data_entered_by)}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  {item.main_code && (
-                    <ObservationDetailSheet
-                      codes={[item.main_code]}
-                      title={item.main_code.display}
-                      patientId={patientId}
-                      encounterId={encounterId}
-                      trigger={
-                        <Card className="flex justify-between items-center p-4 border-gray-200 shadow-none bg-gray-50 hover:border-gray-300 cursor-pointer w-full">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              {item.value.value && (
-                                <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
-                                  {formatValue(
-                                    item.value.value,
-                                    item.value_type,
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                            {item.note && (
-                              <div className="mt-1 text-sm text-gray-500">
-                                {item.note}
-                              </div>
+                );
+                const cardClassName =
+                  "flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 text-left";
+                return (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium text-nowrap">
+                      {formatDisplayTime(item.effective_datetime)}:
+                    </div>
+                    {item.main_code?.code ? (
+                      <ObservationDetailSheet
+                        codes={[item.main_code]}
+                        title={item.main_code.display || item.main_code.code}
+                        patientId={patientId}
+                        encounterId={encounterId}
+                        trigger={
+                          <button
+                            type="button"
+                            className={cn(
+                              cardClassName,
+                              "cursor-pointer hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                             )}
-                            <div className="font-medium text-sm text-gray-600">
-                              {item.main_code?.display ||
-                                item.main_code?.code ||
-                                t("unknown")}
-                            </div>
-                            {item.data_entered_by && (
-                              <div className="text-gray-600 text-sm">
-                                {t("filed_by")}{" "}
-                                <span className="font-medium text-gray-800">
-                                  {formatName(item.data_entered_by)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <ArrowRight className="size-5 text-gray-700 hover:text-primary-500" />
-                          </div>
-                        </Card>
-                      }
-                    />
-                  )}
-                </div>
-              ))}
+                          >
+                            {summary}
+                            <ArrowRight
+                              aria-hidden="true"
+                              className="size-5 shrink-0 text-gray-700"
+                            />
+                          </button>
+                        }
+                      />
+                    ) : (
+                      // Uncoded observations have no history to chart, so show them as-is.
+                      <div className={cardClassName}>{summary}</div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
           {index < dates.length - 1 && (
             <div className="my-4 border-b border-dashed border-gray-200" />

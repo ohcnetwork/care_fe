@@ -351,3 +351,8 @@ export function useEncounter() {
   }
   return context;
 }
+
+/** Encounter context when rendered inside an EncounterProvider, otherwise undefined. */
+export function useEncounterSilently() {
+  return useContext(encounterContext);
+}
