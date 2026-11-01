@@ -177,135 +177,141 @@ test.describe("Shared workspace navigation", () => {
 
   test("encounter navigation opens any encounter list and saves a default", async ({
     page,
-    request,
   }) => {
-    // The default is saved on the admin account; start and end without one.
-    const clearSavedDefault = async () => {
-      const response = await request.post(
-        `${apiBaseUrl()}/api/v1/users/set_preferences/`,
-        {
-          headers: adminApiHeaders(),
-          data: { preference: "encounter_list", version: "0.0.1", value: {} },
+    // Keep the default in this page: parallel tests save other preferences to
+    // the same admin account, and each save rewrites all of its preferences.
+    const saves: unknown[] = [];
+    let savedEncounterList: unknown = {};
+    let failSaves = false;
+    await page.route("**/api/v1/users/getcurrentuser/", async (route) => {
+      const response = await route.fetch();
+      const user = await response.json();
+      await route.fulfill({
+        response,
+        json: {
+          ...user,
+          preferences: {
+            ...user.preferences,
+            encounter_list: savedEncounterList,
+          },
         },
+      });
+    });
+    await page.route("**/api/v1/users/set_preferences/", async (route) => {
+      const { preference, value } = route.request().postDataJSON();
+      if (preference !== "encounter_list") return route.continue();
+      if (failSaves) return route.fulfill({ status: 500, json: {} });
+      saves.push(value);
+      savedEncounterList = value;
+      await route.fulfill({ status: 201 });
+    });
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const navigation = sidebar(page);
+    const encounterTypes = navigation.getByRole("button", {
+      name: "Encounter Types",
+      exact: true,
+    });
+    const menu = page.getByRole("menu");
+
+    await test.step("without a saved default the link opens all encounters", async () => {
+      await page.goto(`${facilityPath}/overview`);
+      await expect(
+        navigation.getByRole("link", { name: "All Encounters", exact: true }),
+      ).toHaveAttribute("href", `${facilityPath}/encounters/patients/all`);
+    });
+
+    await test.step("the menu opens another list and the link follows it", async () => {
+      await encounterTypes.click();
+      await expect(menu.getByRole("menuitem")).toHaveText([
+        "All Encounters",
+        "Inpatient",
+        "Ambulatory",
+        "Observation",
+        "Emergency",
+        "Virtual",
+        "Home Health",
+        "Set Default",
+      ]);
+      await menu
+        .getByRole("menuitem", { name: "Inpatient", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/imp`,
       );
-      expect(response.ok()).toBe(true);
-    };
-    await clearSavedDefault();
-    try {
-      await page.setViewportSize({ width: 1280, height: 900 });
-      const navigation = sidebar(page);
-      const encounterTypes = navigation.getByRole("button", {
-        name: "Encounter Types",
+      await expect(menu).toHaveCount(0);
+      await expect(
+        navigation.getByRole("link", { name: "Inpatient", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+    });
+
+    await test.step("set default saves the choice and opens that list", async () => {
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await expect(
+        menu.getByRole("menuitemradio", { name: "All Encounters" }),
+      ).toHaveAttribute("aria-checked", "true");
+      await menu
+        .getByRole("menuitemradio", { name: "Emergency", exact: true })
+        .click();
+      await expect.poll(() => saves).toEqual([{ default_class: "emer" }]);
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
+      );
+      await expect(menu).toHaveCount(0);
+    });
+
+    await test.step("the saved default is used after a reload", async () => {
+      await page.goto(`${facilityPath}/overview`);
+      const encounterLink = navigation.getByRole("link", {
+        name: "Emergency",
         exact: true,
       });
-      const menu = page.getByRole("menu");
+      await expect(encounterLink).toHaveAttribute(
+        "href",
+        `${facilityPath}/encounters/patients/emer`,
+      );
+      await expect(encounterLink).not.toHaveAttribute("aria-current");
+    });
 
-      await test.step("without a saved default the link opens all encounters", async () => {
-        await page.goto(`${facilityPath}/overview`);
-        await expect(
-          navigation.getByRole("link", { name: "All Encounters", exact: true }),
-        ).toHaveAttribute("href", `${facilityPath}/encounters/patients/all`);
-      });
+    await test.step("choosing the current default opens that list", async () => {
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await menu
+        .getByRole("menuitemradio", { name: "Emergency", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
+      );
+    });
 
-      await test.step("the menu opens another list and the link follows it", async () => {
-        await encounterTypes.click();
-        await expect(menu.getByRole("menuitem")).toHaveText([
-          "All Encounters",
-          "Inpatient",
-          "Ambulatory",
-          "Observation",
-          "Emergency",
-          "Virtual",
-          "Home Health",
-          "Set Default",
-        ]);
-        await menu
-          .getByRole("menuitem", { name: "Inpatient", exact: true })
-          .click();
-        await expect(page).toHaveURL(
-          (url) => url.pathname === `${facilityPath}/encounters/patients/imp`,
-        );
-        await expect(menu).toHaveCount(0);
-        await expect(
-          navigation.getByRole("link", { name: "Inpatient", exact: true }),
-        ).toHaveAttribute("aria-current", "page");
-      });
+    await test.step("a failed save keeps the saved default", async () => {
+      failSaves = true;
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await menu
+        .getByRole("menuitemradio", { name: "Virtual", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/vr`,
+      );
+      // Navigate in-app so the default comes from client state, not a reload.
+      await navigation
+        .getByRole("link", { name: "Overview", exact: true })
+        .click();
+      await expect(
+        navigation.getByRole("link", { name: "Emergency", exact: true }),
+      ).toHaveAttribute("href", `${facilityPath}/encounters/patients/emer`);
+    });
 
-      await test.step("set default saves the choice and opens that list", async () => {
-        await encounterTypes.click();
-        await menu
-          .getByRole("menuitem", { name: "Set Default", exact: true })
-          .click();
-        await expect(
-          menu.getByRole("menuitemradio", { name: "All Encounters" }),
-        ).toHaveAttribute("aria-checked", "true");
-        const saved = page.waitForResponse(
-          (response) =>
-            response.url().endsWith("/api/v1/users/set_preferences/") &&
-            response.ok(),
-        );
-        await menu
-          .getByRole("menuitemradio", { name: "Emergency", exact: true })
-          .click();
-        await saved;
-        await expect(page).toHaveURL(
-          (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
-        );
-        await expect(menu).toHaveCount(0);
-      });
-
-      await test.step("the saved default is used after a reload", async () => {
-        await page.goto(`${facilityPath}/overview`);
-        const encounterLink = navigation.getByRole("link", {
-          name: "Emergency",
-          exact: true,
-        });
-        await expect(encounterLink).toHaveAttribute(
-          "href",
-          `${facilityPath}/encounters/patients/emer`,
-        );
-        await expect(encounterLink).not.toHaveAttribute("aria-current");
-      });
-
-      await test.step("choosing the current default opens that list", async () => {
-        await encounterTypes.click();
-        await menu
-          .getByRole("menuitem", { name: "Set Default", exact: true })
-          .click();
-        await menu
-          .getByRole("menuitemradio", { name: "Emergency", exact: true })
-          .click();
-        await expect(page).toHaveURL(
-          (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
-        );
-      });
-
-      await test.step("a failed save keeps the saved default", async () => {
-        await page.route("**/api/v1/users/set_preferences/", (route) =>
-          route.fulfill({ status: 500, json: {} }),
-        );
-        await encounterTypes.click();
-        await menu
-          .getByRole("menuitem", { name: "Set Default", exact: true })
-          .click();
-        await menu
-          .getByRole("menuitemradio", { name: "Virtual", exact: true })
-          .click();
-        await expect(page).toHaveURL(
-          (url) => url.pathname === `${facilityPath}/encounters/patients/vr`,
-        );
-        // Navigate in-app so the default comes from client state, not a reload.
-        await navigation
-          .getByRole("link", { name: "Overview", exact: true })
-          .click();
-        await expect(
-          navigation.getByRole("link", { name: "Emergency", exact: true }),
-        ).toHaveAttribute("href", `${facilityPath}/encounters/patients/emer`);
-        await page.unroute("**/api/v1/users/set_preferences/");
-      });
-    } finally {
-      await clearSavedDefault();
-    }
+    // Re-choosing the current default and the failed save stored nothing.
+    expect(saves).toEqual([{ default_class: "emer" }]);
   });
 
   test("desktop navigation hides fully, previews without moving content, and pins from the header", async ({
