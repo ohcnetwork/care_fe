@@ -194,6 +194,7 @@ export function coerceStructuredFillValue(
           [
             "diagnosis",
             "symptom",
+            "procedure",
             "medication_request",
             "service_request",
             "charge_item",

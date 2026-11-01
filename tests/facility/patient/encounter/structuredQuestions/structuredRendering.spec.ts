@@ -20,6 +20,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 const STRUCTURED_FIXED_FORMS: { slug: string; text: string }[] = [
   { slug: "symptom", text: "Symptom" },
   { slug: "diagnosis", text: "Diagnosis" },
+  { slug: "procedure", text: "Procedure" },
   { slug: "allergy_intolerance", text: "Allergy Intolerance" },
   { slug: "medication_request", text: "Medication Request" },
   { slug: "medication_statement", text: "Medication Statement" },
