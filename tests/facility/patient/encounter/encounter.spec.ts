@@ -64,7 +64,9 @@ test.describe("Create an Encounter", () => {
       page.getByText("Encounter created successfully"),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: randomEncounterClass }),
+      page
+        .getByRole("region", { name: "Encounter", exact: true })
+        .getByText(randomEncounterClass, { exact: true }),
     ).toBeVisible();
   });
 
@@ -133,7 +135,9 @@ test.describe("Create an Encounter", () => {
 
     //verify on encounter page
     await expect(
-      page.getByRole("heading", { name: randomEncounterClass }),
+      page
+        .getByRole("region", { name: "Encounter", exact: true })
+        .getByText(randomEncounterClass, { exact: true }),
     ).toBeVisible();
 
     //verify encounter details on the details tab

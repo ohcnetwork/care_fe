@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Page, expect, test } from "@playwright/test";
+import { setTimeout as delay } from "node:timers/promises";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -144,24 +145,36 @@ async function createPatient(): Promise<string> {
   if (!geoOrg)
     throw new Error("No govt organization found for geo_organization");
 
-  const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
-    method: "POST",
-    headers: getApiHeaders(),
-    body: JSON.stringify({
-      name: `Transfer Test ${faker.string.alphanumeric(6)}`,
-      gender: "male",
-      phone_number: phone,
-      date_of_birth: "1990-01-15",
-      geo_organization: geoOrg,
-      identifiers: [],
-    }),
+  const body = JSON.stringify({
+    name: `Transfer Test ${faker.string.alphanumeric(6)}`,
+    gender: "male",
+    phone_number: phone,
+    date_of_birth: "1990-01-15",
+    geo_organization: geoOrg,
+    identifiers: [],
   });
-  if (!res.ok) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
+      method: "POST",
+      headers: getApiHeaders(),
+      body,
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { id: string };
+      return data.id;
+    }
     const text = await res.text();
-    throw new Error(`Failed to create patient: ${res.status} — ${text}`);
+    // The backend serializes patient creation with a global lock. Only
+    // retry its explicit pre-create rejection, never an ambiguous failure.
+    if (
+      attempt >= 4 ||
+      res.status !== 400 ||
+      !text.includes("Patient creation failed, try again after a while")
+    ) {
+      throw new Error(`Failed to create patient: ${res.status} — ${text}`);
+    }
+    await delay(250 * (attempt + 1));
   }
-  const data = (await res.json()) as { id: string };
-  return data.id;
 }
 
 test.describe("Account Transfer Payment", () => {

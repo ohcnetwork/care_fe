@@ -74,26 +74,39 @@ export async function createQuestionnaireEncounter(
     }
     await delay(250 * (attempt + 1));
   }
-  const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      patient: patientId,
-      facility: facilityId,
-      status: "in_progress",
-      encounter_class: "amb",
-      period: { start: new Date().toISOString() },
-      priority: "routine",
-      organizations: [],
-    }),
+  const encounterBody = JSON.stringify({
+    patient: patientId,
+    facility: facilityId,
+    status: "in_progress",
+    encounter_class: "amb",
+    period: { start: new Date().toISOString() },
+    priority: "routine",
+    organizations: [],
   });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to create questionnaire encounter: ${response.status} — ${await response.text()}`,
-    );
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
+      method: "POST",
+      headers,
+      body: encounterBody,
+    });
+    if (response.ok) {
+      const encounterId = ((await response.json()) as { id: string }).id;
+      return { patientId, encounterId };
+    }
+    const error = await response.text();
+    // Encounter creation is serialized per facility the same way (the
+    // rejected create is rolled back), so retry only that rejection.
+    if (
+      attempt >= 4 ||
+      response.status !== 400 ||
+      !error.includes("Encounter creation failed, try again after a while")
+    ) {
+      throw new Error(
+        `Failed to create questionnaire encounter: ${response.status} — ${error}`,
+      );
+    }
+    await delay(250 * (attempt + 1));
   }
-  const encounterId = ((await response.json()) as { id: string }).id;
-  return { patientId, encounterId };
 }
 
 /**
