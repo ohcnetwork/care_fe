@@ -1,11 +1,11 @@
 import { TFunction } from "i18next";
 import {
-  Activity,
   ArrowUpRight,
   Box,
   CalendarDays,
   CreditCard,
   House,
+  MapPin,
   Package,
   Search,
   Settings2,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { EncounterNavItem } from "@/components/ui/sidebar/facility/encounter-nav-item";
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { useCareApps } from "@/hooks/useCareApps";
@@ -23,7 +24,6 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import careConfig from "@careConfig";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -45,7 +45,10 @@ function generateFacilityLinks(
 ) {
   if (!selectedFacility) return [];
 
-  const encounterClasses = careConfig.encounterClasses;
+  const canAccessEncounters =
+    permissions.canWriteAppointment ||
+    permissions.canListEncounters ||
+    permissions.canCreateEncounter;
 
   const baseUrl = `/facility/${selectedFacility.id}`;
 
@@ -72,36 +75,20 @@ function generateFacilityLinks(
       name: t("search_patients"),
       url: `${baseUrl}/patients`,
       icon: <Search />,
-      visibility:
-        permissions.canWriteAppointment ||
-        permissions.canListEncounters ||
-        permissions.canCreateEncounter,
+      visibility: canAccessEncounters,
     },
     {
+      section: t("encounters_and_locations"),
       name: t("encounters"),
-      url: `${baseUrl}/encounters/patients/all`,
-      icon: <Activity />,
-      visibility:
-        permissions.canWriteAppointment ||
-        permissions.canListEncounters ||
-        permissions.canCreateEncounter,
-      children: [
-        {
-          name: t("all_encounters"),
-          url: `${baseUrl}/encounters/patients/all`,
-          visibility: encounterClasses.length > 1,
-        },
-        ...encounterClasses.map((encounterClass) => ({
-          name: t(`encounter_class_encounters`, {
-            encounterClassName: t(`encounter_class__${encounterClass}`),
-          }),
-          url: `${baseUrl}/encounters/patients/${encounterClass}`,
-        })),
-        {
-          name: t("locations"),
-          url: `${baseUrl}/encounters/locations`,
-        },
-      ],
+      url: `${baseUrl}/encounters/patients`,
+      visibility: canAccessEncounters,
+      element: <EncounterNavItem facilityId={selectedFacility.id} />,
+    },
+    {
+      name: t("search_by_location"),
+      url: `${baseUrl}/encounters/locations`,
+      icon: <MapPin />,
+      visibility: canAccessEncounters,
     },
     {
       section: t("services"),

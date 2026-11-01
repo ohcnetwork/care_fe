@@ -194,6 +194,17 @@ function useUserPreferences() {
     [preferences, syncPreferences],
   );
 
+  const setPreference = useCallback(
+    (key: string, value: Record<string, unknown>) => {
+      updatePreferences({
+        type: ActionType.SET_PREFERENCE,
+        key,
+        payload: value,
+      });
+    },
+    [updatePreferences],
+  );
+
   // Custom links methods
   const addCustomLink = useCallback(
     (link: QuickLinkCustom) => {
@@ -293,6 +304,7 @@ function useUserPreferences() {
     isPending,
     // Raw dispatch for advanced usage
     dispatch: updatePreferences,
+    setPreference,
     // Custom links methods
     addCustomLink,
     removeCustomLink,

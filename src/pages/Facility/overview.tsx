@@ -29,6 +29,7 @@ import {
 import Page from "@/components/Common/Page";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useDefaultEncounterClass } from "@/hooks/useDefaultEncounterClass";
 import useUserPreferences from "@/hooks/useUserPreferences";
 
 import { getPermissions } from "@/common/Permissions";
@@ -60,6 +61,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
+  const [defaultEncounterClass] = useDefaultEncounterClass();
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -86,7 +88,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       title: t("encounters"),
       description: t("manage_facility_users"),
       icon: Users,
-      href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
+      href: `/facility/${facilityId}/encounters/patients/${defaultEncounterClass}`,
       visible: canListEncounters,
     },
     {

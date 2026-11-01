@@ -40,7 +40,7 @@ import { Avatar } from "@/components/Common/Avatar";
 const normalizeNavigationPath = (url: string) =>
   url.split(/[?#]/)[0].replace(/\/+$/, "");
 
-const isNavigationActive = (path: string | null, url: string) => {
+export const isNavigationActive = (path: string | null, url: string) => {
   if (path === null) return false;
   const currentPath = normalizeNavigationPath(path);
   const targetPath = normalizeNavigationPath(url);
@@ -66,6 +66,8 @@ export interface NavigationLink {
   icon?: ReactNode;
   visibility?: boolean;
   children?: NavigationLink[];
+  /** Replaces the default menu item; section and visibility still apply. */
+  element?: ReactNode;
 }
 
 interface NavLinkProps extends ComponentProps<typeof Link> {
@@ -75,7 +77,7 @@ interface NavLinkProps extends ComponentProps<typeof Link> {
   children: ReactNode;
 }
 
-function NavLink({
+export function NavLink({
   href,
   ariaLabel,
   isActive,
@@ -185,7 +187,9 @@ export function NavMain({ links, label }: NavMainProps) {
             )}
             <SidebarMenu>
               {section.links.map((link) =>
-                link.children ? (
+                link.element ? (
+                  <Fragment key={link.name}>{link.element}</Fragment>
+                ) : link.children ? (
                   isCollapsed ? (
                     <SidebarMenuItem key={link.name}>
                       <PopoverMenu link={link} path={path} />
