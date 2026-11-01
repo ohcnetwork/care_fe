@@ -43,11 +43,13 @@ import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScheduleEncounterDefaultsFields } from "@/pages/Scheduling/components/ScheduleEncounterDefaultsFields";
 import {
   calculateSlotDuration,
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
+import { CareTeamResponse, toCareTeamMembers } from "@/types/careTeam/careTeam";
 import {
   SchedulableResourceType,
   ScheduleAvailabilityCreateRequest,
@@ -94,6 +96,8 @@ export default function CreateScheduleTemplateSheet({
         }),
       valid_to: z.date({ error: t("field_required") }),
       is_public: z.boolean(),
+      organizations: z.array(z.string()),
+      care_team: z.array(z.custom<CareTeamResponse>()),
 
       weekdays: z
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
@@ -197,6 +201,8 @@ export default function CreateScheduleTemplateSheet({
       valid_to: undefined,
       weekdays: [],
       is_public: false,
+      organizations: [],
+      care_team: [],
       availabilities: [
         {
           name: "",
@@ -235,6 +241,8 @@ export default function CreateScheduleTemplateSheet({
       resource_type: resourceType,
       resource_id: resourceId,
       is_public: values.is_public,
+      organizations: values.organizations,
+      care_team: toCareTeamMembers(values.care_team),
       availabilities: values.availabilities.map(
         (availability) =>
           ({
@@ -436,6 +444,18 @@ export default function CreateScheduleTemplateSheet({
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+              <ScheduleEncounterDefaultsFields
+                facilityId={facilityId}
+                organizations={form.watch("organizations")}
+                onOrganizationsChange={(value) =>
+                  form.setValue("organizations", value, { shouldDirty: true })
+                }
+                careTeam={form.watch("care_team")}
+                onCareTeamChange={(value) =>
+                  form.setValue("care_team", value, { shouldDirty: true })
+                }
+                disabled={isPending}
               />
               <div className="space-y-4">
                 {form.watch("availabilities")?.map((_, index) => (
