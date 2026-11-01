@@ -76,9 +76,16 @@ const RELATIVE_TIME_UNITS = [
  * "in 3 days" in the active language. Day.js's `fromNow` is not localised in
  * this app, so this uses `Intl.RelativeTimeFormat` instead.
  */
-export function formatTimeUntil(date: Dayjs, locale: string) {
+export function formatTimeUntil(
+  date: Dayjs,
+  locale: string,
+  style: Intl.RelativeTimeFormatStyle = "long",
+) {
   const seconds = date.diff(dayjs(), "second");
-  const format = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  const format = new Intl.RelativeTimeFormat(locale, {
+    numeric: "auto",
+    style,
+  });
   for (const [unit, size] of RELATIVE_TIME_UNITS) {
     if (Math.abs(seconds) >= size) {
       return format.format(Math.round(seconds / size), unit);
