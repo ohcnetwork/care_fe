@@ -283,6 +283,7 @@ export function MultiFilterStyleTagSelector({
               {/* Search */}
               <div className="p-2 border-b border-gray-100 shadow-xs">
                 <Input
+                  data-autofocus
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -300,7 +301,7 @@ export function MultiFilterStyleTagSelector({
                 ) : (
                   <div className="flex-1 px-2 overflow-y-auto">
                     {selected.length > 0 && (
-                      <div className="p-2">
+                      <div className="pt-2 pb-2">
                         <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("selected_tags")}
                         </div>
@@ -321,7 +322,7 @@ export function MultiFilterStyleTagSelector({
                     )}
                     {/* Tag Groups */}
                     {groupTags.length > 0 && (
-                      <div className="mb-4">
+                      <div className="mb-4 pt-2">
                         <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("tag_groups")}
                         </div>
@@ -331,7 +332,7 @@ export function MultiFilterStyleTagSelector({
 
                     {/* Other Tags */}
                     {otherTags.length > 0 && (
-                      <div className="mb-4">
+                      <div className="mb-4 pt-2">
                         <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {t("other_tags")}
                         </div>

@@ -80,6 +80,7 @@ export function LocationSearch({
       aria-expanded={open}
       disabled={disabled}
       title={triggerTitle}
+      aria-label={t("select_location")}
       className="w-full min-w-0 justify-between font-normal"
     >
       <span className={cn("truncate", !displayText && "text-muted-foreground")}>

@@ -108,7 +108,12 @@ export default function Autocomplete({
         popoverClassName,
       )}
     >
-      <span className={cn("truncate", !displayText && "text-muted-foreground")}>
+      <span
+        className={cn(
+          "w-0 min-w-0 flex-1 truncate text-left",
+          !displayText && "text-muted-foreground",
+        )}
+      >
         {displayText || placeholder || t("autocomplete_select_placeholder")}
       </span>
       <span className="flex items-center gap-1 shrink-0">

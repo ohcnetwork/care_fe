@@ -812,7 +812,7 @@ export function ResourceDefinitionCategoryPicker<T>({
       disabled={disabled}
       data-shortcut-id={shortcutId}
     >
-      <div className="flex items-center flex-1 min-w-0 gap-2">
+      <div className="flex items-center flex-1 w-0 min-w-0 gap-2">
         {getDisplayValue()}
       </div>
       {!clearVisible && (

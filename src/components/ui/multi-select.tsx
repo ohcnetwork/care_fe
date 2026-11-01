@@ -207,7 +207,7 @@ export function MultiSelect({
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent height="fixed">
             <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 pb-0">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 pb-0">
               {content}
             </div>
           </DrawerContent>

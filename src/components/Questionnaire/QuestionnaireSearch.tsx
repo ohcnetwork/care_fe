@@ -144,7 +144,7 @@ export function QuestionnaireSearch({
         ) : (
           <>
             <CommandEmpty>{t("no_results_found")}</CommandEmpty>
-            <CommandGroup className="px-2">
+            <CommandGroup>
               {questionnaires.map((item) => (
                 <CommandItem
                   key={item.id}

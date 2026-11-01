@@ -35,11 +35,14 @@ interface Props {
   count?: number;
   searchPostFix?: string;
   hideTrigger?: boolean;
-  controlledOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   showCode?: boolean;
   title?: string;
   closeOnSelect?: boolean;
   mobileTrigger?: React.ReactNode;
+  /** Mobile only: rendered inside the drawer content, so a drawer it holds nests on top. */
+  drawerChildren?: React.ReactNode;
 }
 
 export default function ValueSetSelect({
@@ -51,37 +54,41 @@ export default function ValueSetSelect({
   count = 10,
   searchPostFix = "",
   hideTrigger = false,
-  controlledOpen = false,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
   closeOnSelect = true,
   showCode = false,
   title,
   mobileTrigger,
+  drawerChildren,
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
-  const [internalOpen, setInternalOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onControlledOpenChange ?? setUncontrolledOpen;
   const isMobile = useBreakpoints({ default: true, sm: false });
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (internalOpen && isMobile) {
+    if (open && isMobile) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 200);
       return () => clearTimeout(timer);
     }
-  }, [internalOpen, isMobile]);
+  }, [open, isMobile]);
   const searchContent = (
     <ValueSetPickerSearch
-      key={`${controlledOpen}-${internalOpen}`}
+      key={String(open)}
       inputRef={inputRef}
       system={system}
       valuesetId={valuesetId}
       onSelect={(selected) => {
         onSelect(selected);
         if (closeOnSelect) {
-          setInternalOpen(false);
-        } else {
+          setOpen(false);
+        } else if (!isMobile) {
           inputRef.current?.focus();
         }
       }}
@@ -95,10 +102,7 @@ export default function ValueSetSelect({
 
   if (isMobile && !hideTrigger) {
     return (
-      <Drawer
-        open={internalOpen || controlledOpen}
-        onOpenChange={setInternalOpen}
-      >
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           {mobileTrigger ? (
             mobileTrigger
@@ -122,11 +126,13 @@ export default function ValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
+
         <DrawerContent height="fixed">
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
           {searchContent}
+          {drawerChildren}
         </DrawerContent>
       </Drawer>
     );
@@ -138,11 +144,7 @@ export default function ValueSetSelect({
 
   return (
     <>
-      <Popover
-        open={controlledOpen || internalOpen}
-        onOpenChange={setInternalOpen}
-        modal={true}
-      >
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             type="button"

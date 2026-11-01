@@ -75,11 +75,13 @@ export function OrgSelector({
     <Command className="rounded-lg" filter={() => 1}>
       <CommandInput
         placeholder={t("search_organizations")}
+        aria-label={t("search_organizations")}
         value={searchQuery}
         onValueChange={onSearchChange}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+        wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
       />
-      <CommandList>
+      <CommandList className="scrollbar-gutter-auto">
         <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
         <CommandGroup>
           {isLoading ? (
@@ -124,7 +126,7 @@ export function OrgSelector({
       >
         <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
         <DrawerContent height="fixed" className="px-0 pt-2">
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto">
+          <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-[env(safe-area-inset-bottom)]">
             {content}
           </div>
         </DrawerContent>
@@ -145,7 +147,7 @@ export function OrgSelector({
     >
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
-        className={cn("p-0 w-[var(--anchor-width)]", className)}
+        className={cn("p-0 w-[var(--anchor-width)] overflow-clip", className)}
         align="start"
       >
         {content}

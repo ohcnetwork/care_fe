@@ -97,6 +97,7 @@ export function EntitySelectionDrawer({
 }: EntitySelectionDrawerProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleSelect = (code: Code) => {
     setSelectedEntity(code);
@@ -113,109 +114,94 @@ export function EntitySelectionDrawer({
     onProductEntitySelected?.(product);
   };
 
-  const handleBack = () => {
-    if (selectedEntity) {
-      setSelectedEntity(null);
-    }
+  // Back closes only the details drawer, revealing the search underneath.
+  const closeDetails = () => {
+    setSelectedEntity(null);
+    onOpenChange(false);
   };
 
   const handleConfirm = () => {
     onConfirm();
-    setSelectedEntity(null);
+    closeDetails();
+    setSearchOpen(false);
   };
 
-  return (
-    <>
-      {enableProduct ? (
-        <MedicationValueSetSelect
-          onSelect={handleSelect}
-          onProductSelect={handleProductSelect}
-          disabled={disabled}
-          placeholder={placeholder || t(`select_${entityType}`)}
-          title={t(`select_${entityType}`)}
-          mobileTrigger={
-            <Button
-              variant="outline"
-              role="combobox"
-              className="w-full border border-primary rounded-md px-2 text-primary-700"
-              disabled={disabled}
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              <span className="font-semibold">{placeholder}</span>
-            </Button>
-          }
-        />
-      ) : (
-        <ValueSetSelect
-          system={system}
-          placeholder={placeholder}
-          onSelect={handleSelect}
-          disabled={disabled}
-          searchPostFix={searchPostFix}
-          title={t(`select_${entityType}`)}
-          mobileTrigger={
-            <Button
-              variant="outline"
-              role="combobox"
-              className="w-full border border-primary rounded-md px-2 text-primary-700"
-              disabled={disabled}
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              <span className="font-semibold">{placeholder}</span>
-            </Button>
-          }
-        />
-      )}
-      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs>
-        <DrawerContent height="fixed" className="px-0 pt-2 pb-0 rounded-t-lg">
-          {selectedEntity ? (
-            <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
-              <DrawerHeader className="flex shrink-0 flex-col items-stretch justify-start border-b border-gray-200 shadow-2xs">
-                <div className="flex w-full items-center justify-between p-1">
-                  <Button
-                    variant="link"
-                    onClick={handleBack}
-                    className="underline text-sm"
-                  >
-                    {t("back")}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={handleConfirm}
-                    className="text-sm"
-                  >
-                    {t("done")}
-                  </Button>
-                </div>
-                <DrawerTitle className="text-center text-base font-semibold pb-2">
-                  {selectedEntity.display}
-                </DrawerTitle>
-              </DrawerHeader>
-              <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                {children}
-              </div>
+  const detailsDrawer = (
+    <Drawer
+      open={open && !!selectedEntity}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) closeDetails();
+      }}
+      repositionInputs
+    >
+      <DrawerContent height="fixed" className="px-0 pt-2 pb-0">
+        <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+          <DrawerHeader className="flex shrink-0 flex-col items-stretch justify-start border-b border-gray-200 bg-white px-1 py-1">
+            <div className="flex w-full items-center justify-between p-1">
+              <Button
+                variant="link"
+                onClick={closeDetails}
+                className="underline text-sm"
+              >
+                {t("back")}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleConfirm}
+                className="text-sm"
+              >
+                {t("done")}
+              </Button>
             </div>
-          ) : enableProduct ? (
-            <MedicationValueSetSelect
-              onSelect={handleSelect}
-              onProductSelect={handleProductSelect}
-              disabled={disabled}
-              hideTrigger={true}
-              title={t(`select_${entityType}`)}
-            />
-          ) : (
-            <ValueSetSelect
-              system={system}
-              placeholder={placeholder}
-              onSelect={handleSelect}
-              disabled={disabled}
-              hideTrigger={true}
-              searchPostFix={searchPostFix}
-              title={t(`select_${entityType}`)}
-            />
-          )}
-        </DrawerContent>
-      </Drawer>
-    </>
+            <DrawerTitle className="text-center text-base font-semibold">
+              {selectedEntity?.display}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+
+  const mobileTrigger = (
+    <Button
+      variant="outline"
+      role="combobox"
+      className="w-full border border-primary rounded-md px-2 text-primary-700"
+      disabled={disabled}
+    >
+      <CareIcon icon="l-plus" className="mr-2" />
+      <span className="font-semibold">{placeholder}</span>
+    </Button>
+  );
+
+  // The details drawer is rendered inside the search drawer, so it nests on top.
+  return enableProduct ? (
+    <MedicationValueSetSelect
+      onSelect={handleSelect}
+      onProductSelect={handleProductSelect}
+      disabled={disabled}
+      placeholder={placeholder || t(`select_${entityType}`)}
+      title={t(`select_${entityType}`)}
+      open={searchOpen}
+      onOpenChange={setSearchOpen}
+      closeOnSelect={false}
+      mobileTrigger={mobileTrigger}
+      drawerChildren={detailsDrawer}
+    />
+  ) : (
+    <ValueSetSelect
+      system={system}
+      placeholder={placeholder}
+      onSelect={handleSelect}
+      disabled={disabled}
+      searchPostFix={searchPostFix}
+      title={t(`select_${entityType}`)}
+      open={searchOpen}
+      onOpenChange={setSearchOpen}
+      closeOnSelect={false}
+      mobileTrigger={mobileTrigger}
+      drawerChildren={detailsDrawer}
+    />
   );
 }
