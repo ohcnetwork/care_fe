@@ -1,5 +1,5 @@
 import { TFunction } from "i18next";
-import { CalendarDays, Hospital } from "lucide-react";
+import { CalendarDays, FolderClosed, Home, Hospital, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { NavMain, NavigationLink } from "@/components/ui/sidebar/nav-main";
@@ -31,9 +31,24 @@ function generatePatientLinks(
 
   return [
     {
-      name: t("appointments"),
+      name: t("home"),
       url: "/patient/home",
+      icon: <Home />,
+    },
+    {
+      name: t("visits"),
+      url: "/patient/visits",
       icon: <CalendarDays />,
+    },
+    {
+      name: t("records"),
+      url: "/patient/records",
+      icon: <FolderClosed />,
+    },
+    {
+      name: t("profile"),
+      url: "/patient/profile",
+      icon: <User />,
     },
     {
       name: t("nearby_facilities"),
