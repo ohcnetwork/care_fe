@@ -327,7 +327,7 @@ export default function CreateScheduleTemplateSheet({
           {t("create_schedule_template")}
         </SheetDescription>
 
-        <div className="-mx-6 overflow-auto px-6 pb-32 md:pb-16 pt-6 bg-muted-background">
+        <div className="-mx-6 flex-1 overflow-auto px-6 pb-32 md:pb-16 pt-6 bg-muted-background">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
