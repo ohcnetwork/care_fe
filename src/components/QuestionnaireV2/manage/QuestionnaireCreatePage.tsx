@@ -32,12 +32,11 @@ import {
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
 
 import { BasicInformationCard } from "./BasicInformationCard";
 import {
   DetailFormValues,
-  SLUG_MAX_LENGTH,
   questionnaireBasicSchema,
 } from "./questionnaireFormSchema";
 
@@ -86,11 +85,9 @@ export function QuestionnaireCreatePage({
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue(
-          "slug",
-          generateSlug(value.title || "", SLUG_MAX_LENGTH),
-          { shouldValidate: true },
-        );
+        form.setValue("slug", generateSlugValue(value.title), {
+          shouldValidate: true,
+        });
       }
     });
     return () => subscription.unsubscribe();
