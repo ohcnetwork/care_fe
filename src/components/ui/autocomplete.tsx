@@ -39,6 +39,7 @@ interface AutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   onSearch?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
   placeholder?: string;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
@@ -63,6 +64,7 @@ export default function Autocomplete({
   value,
   onChange,
   onSearch,
+  onOpenChange,
   placeholder,
   inputPlaceholder,
   noOptionsMessage,
@@ -89,6 +91,7 @@ export default function Autocomplete({
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
     if (!nextOpen) setQuery("");
+    onOpenChange?.(nextOpen);
   };
 
   const triggerButton = (

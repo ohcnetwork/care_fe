@@ -59,3 +59,15 @@ export async function createTestPatient(
     await delay(250 * (attempt + 1));
   }
 }
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "Male",
+  female: "Female",
+  transgender: "Transgender",
+  non_binary: "Non-binary",
+};
+
+/** The label the UI shows for an API gender value (the GENDER__* strings). */
+export function genderLabel(gender: string): string {
+  return GENDER_LABELS[gender] ?? gender;
+}

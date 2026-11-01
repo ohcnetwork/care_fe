@@ -1,6 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Building2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
 
 import { AccessibleRoleOrgSelect } from "@/components/Common/AccessibleRoleOrgSelect";
 import { RoleSelect } from "@/components/Common/RoleSelect";
+import { UserProfileSection } from "@/components/Users/UserProfileSection";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
@@ -209,20 +210,19 @@ export function RoleOrgAccessSummary({
   const isPending = isAssigning || isRemoving;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded bg-gray-100 text-gray-600">
-            <ShieldCheck className="size-3.5" />
-          </div>
-          <h3 className="text-sm font-semibold text-gray-900">
-            {t("role_organizations")}
-          </h3>
-        </div>
+    <UserProfileSection
+      title={t("role_organizations")}
+      icon={ShieldCheck}
+      action={
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm">
-              {t("manage_access")}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="-mr-2 shrink-0"
+              aria-label={t("manage_access")}
+            >
+              {t("manage")}
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -314,33 +314,36 @@ export function RoleOrgAccessSummary({
             </div>
           </SheetContent>
         </Sheet>
-      </div>
-
-      <div className="p-3">
-        {memberships.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
-            {t("no_role_organizations_assigned")}
-          </p>
-        ) : (
-          <div className="grid gap-2 md:grid-cols-2">
-            {memberships.map((membership) => (
-              <div
-                key={membership.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900">
-                    {membership.organization.name}
-                  </p>
-                  <Badge variant="secondary" className="mt-0.5 text-[10px]">
-                    {membership.role.name}
-                  </Badge>
-                </div>
+      }
+    >
+      {memberships.length === 0 ? (
+        <p className="rounded-lg bg-soft-background px-4 py-6 text-center text-sm text-soft-foreground">
+          {t("no_role_organizations_assigned")}
+        </p>
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {memberships.map((membership) => (
+            <li
+              key={membership.id}
+              className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-soft-background text-soft-foreground">
+                <Building2
+                  className="size-4"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              <p className="min-w-0 flex-1 break-words text-sm font-medium">
+                {membership.organization.name}
+              </p>
+              <Badge variant="secondary" className="text-xs font-normal">
+                {membership.role.name}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+    </UserProfileSection>
   );
 }

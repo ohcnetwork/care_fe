@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { genderLabel } from "tests/helper/patient";
 import {
   adminApiHeaders,
   apiBaseUrl,
@@ -39,8 +40,7 @@ test("creates a patient referral using a referral form without attaching an enco
     name: string;
     gender: string;
   };
-  const gender =
-    patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1);
+  const gender = genderLabel(patient.gender);
   const facilityResponse = await request.get(
     `${apiBaseUrl()}/api/v1/facility/${facilityId}/`,
     { headers: adminApiHeaders() },

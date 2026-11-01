@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import actionsJson from "@/config/keyboardShortcuts.json";
 import { useShortcuts } from "@/context/ShortcutContext";
 import {
+  canRunFromCommandDialog,
   formatKeyboardShortcut,
   shortcutActionHandler,
 } from "@/Utils/keyboardShortcutUtils";
@@ -67,11 +68,8 @@ export function ShortcutCommandDialog({
             return false;
           }
 
-          // Only include actions if the corresponding element exists on the page
-          const element = document.querySelector(
-            `[data-shortcut-id='${action.action}']`,
-          );
-          return element !== null;
+          // Only include actions that can run from here right now
+          return canRunFromCommandDialog(action.action);
         })
         .map((action) => ({
           id: action.action,
@@ -93,7 +91,7 @@ export function ShortcutCommandDialog({
 
   const handleSelect = useCallback(
     (actionId: string) => {
-      shortcutActionHandler(actionId)();
+      shortcutActionHandler(actionId, { fromCommandDialog: true })();
       onOpenChange(false);
     },
     [onOpenChange],

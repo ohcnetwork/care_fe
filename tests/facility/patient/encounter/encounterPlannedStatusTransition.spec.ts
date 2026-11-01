@@ -56,8 +56,8 @@ function encounterStatusCombobox(page: Page) {
 }
 
 async function openEncounterUpdateForm(page: Page) {
-  await page.getByRole("tab", { name: "Details" }).click();
-  await page.getByRole("link", { name: "Update Encounter" }).click();
+  // The encounter header's edit link opens the encounter update form.
+  await page.getByRole("link", { name: "Edit encounter", exact: true }).click();
   await expect(encounterStatusCombobox(page)).toBeVisible();
 }
 
