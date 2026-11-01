@@ -4,8 +4,8 @@ import * as path from "path";
 
 import { expectToast } from "./ui";
 
-/** Deterministic backend fixtures loaded by the care repo's E2E fixture
- *  script (present in the Playwright DB snapshot, so restores keep them). */
+/** Deterministic fixtures seeded by the setup project
+ *  (tests/support/questionnaireE2EFixtures.ts). */
 export const KITCHEN_SINK_FACILITY_SLUG = "e2e-kitchen-sink-facility";
 export const KITCHEN_SINK_INSTANCE_SLUG = "e2e-kitchen-sink-instance";
 export const VERSIONED_SLUG = "e2e-versioned";
@@ -80,7 +80,7 @@ export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {
   }
 
   throw new Error(
-    `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+    `Fixture questionnaire "${slug}" not found — run the Playwright setup project`,
   );
 }
 
