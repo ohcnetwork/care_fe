@@ -244,25 +244,25 @@ export const EncounterResponsesTab = ({
               </Button>
             </DrawerTrigger>
             <DrawerContent
-              className="h-[85vh]"
+              aria-describedby={undefined}
+              height="fixed"
+              className="p-1.5"
               onCloseAutoFocus={(e) => e.preventDefault()}
             >
-              <ScrollArea className="h-full">
-                <div className="p-3 h-full">
-                  <LeftPanel
-                    encounterId={encounterId}
-                    patientId={patientId}
-                    canAccess={canAccess}
-                    responseId={responseId}
-                    questionnaireSlug={questionnaireSlug}
-                    authorRoleId={role}
-                    onAuthorRoleChange={handleAuthorRoleChange}
-                    questionnaireTitle={questionnaireTitle || ""}
-                    handleQuestionnaireChange={handleQuestionnaireChange}
-                    onResponseClick={handleResponseClick}
-                  />
-                </div>
-              </ScrollArea>
+              <div className="flex min-h-0 flex-1 flex-col pt-3 pb-[env(safe-area-inset-bottom)]">
+                <LeftPanel
+                  encounterId={encounterId}
+                  patientId={patientId}
+                  canAccess={canAccess}
+                  responseId={responseId}
+                  questionnaireSlug={questionnaireSlug}
+                  authorRoleId={role}
+                  onAuthorRoleChange={handleAuthorRoleChange}
+                  questionnaireTitle={questionnaireTitle || ""}
+                  handleQuestionnaireChange={handleQuestionnaireChange}
+                  onResponseClick={handleResponseClick}
+                />
+              </div>
             </DrawerContent>
           </Drawer>
         </div>

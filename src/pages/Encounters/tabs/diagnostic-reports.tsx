@@ -311,13 +311,13 @@ export const DiagnosticReportsTab = ({
                 {t("ENCOUNTER_TAB__diagnostic_reports")}
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[85dvh] max-h-[85dvh]">
-              <DrawerHeader showCloseButton>
+            <DrawerContent aria-describedby={undefined} height="fixed">
+              <DrawerHeader className="pl-1 border-b" showCloseButton>
                 <DrawerTitle>
                   {t("ENCOUNTER_TAB__diagnostic_reports")}
                 </DrawerTitle>
               </DrawerHeader>
-              <DrawerBody className="flex min-h-0 flex-col">
+              <DrawerBody className="flex min-h-0 p-2 flex-col pb-[env(safe-area-inset-bottom)]">
                 <LeftPanel
                   reports={reports}
                   isLoading={isLoading}

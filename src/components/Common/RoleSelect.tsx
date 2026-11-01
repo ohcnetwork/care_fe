@@ -1,8 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import {
-  ChevronsUpDown as CaretSortIcon,
-  Check as CheckIcon,
-} from "lucide-react";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -18,7 +15,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -29,7 +32,6 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface RoleSelectProps {
   value?: RoleBase;
@@ -69,11 +71,13 @@ function RoleCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search_roles")}
+        aria-label={t("search_roles")}
         onValueChange={setSearchTerm}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        wrapperClassName="border-b border-gray-100 shadow-xs"
+        className="text-base sm:text-sm"
+        autoFocus
       />
-      <CommandList>
+      <CommandList className="scrollbar-gutter-auto">
         <CommandEmpty>
           {isFetching ? t("searching") : t("no_roles_found")}
         </CommandEmpty>
@@ -87,14 +91,9 @@ function RoleCommandContent({
                 setOpen(false);
               }}
               className="cursor-pointer"
+              data-checked={value?.id === role.id}
               ref={i === rolesList.length - 1 ? ref : undefined}
             >
-              <CheckIcon
-                className={cn(
-                  "mr-2 size-4",
-                  value?.id === role.id ? "opacity-100" : "opacity-0",
-                )}
-              />
               <div className="flex flex-col items-start">
                 <span>{role.name}</span>
                 {role.description && (
@@ -198,8 +197,15 @@ export function RoleSelect({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerTrigger asChild>{renderTriggerButton()}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+        <DrawerContent
+          aria-describedby={undefined}
+          height="fixed"
+          className="p-1.5"
+        >
+          <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+            <DrawerTitle>{placeholder || t("select_role")}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex min-h-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
             <RoleCommandContent
               setSearchTerm={setSearchTerm}
               rolesList={rolesList}
@@ -219,7 +225,7 @@ export function RoleSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>{renderTriggerButton()}</PopoverTrigger>
-      <PopoverContent className="w-[var(--anchor-width)] p-0">
+      <PopoverContent className="w-[var(--anchor-width)] p-0 overflow-clip">
         <RoleCommandContent
           setSearchTerm={setSearchTerm}
           rolesList={rolesList}

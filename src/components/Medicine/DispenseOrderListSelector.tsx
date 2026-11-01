@@ -156,8 +156,8 @@ export default function DispenseOrderListSelector({
             )}
           </DrawerTrigger>
 
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader>
+          <DrawerContent height="fixed">
+            <DrawerHeader showCloseButton className="border-b shadow-2xs">
               <DrawerTitle>{t("dispense_orders")}</DrawerTitle>
             </DrawerHeader>
             <div className="overflow-y-auto pr-2">
