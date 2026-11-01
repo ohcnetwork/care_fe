@@ -3,7 +3,19 @@ import type { TFunction } from "i18next";
 import dayjs from "@/Utils/dayjs";
 import { TagConfig, TagExpiryOffset } from "@/types/emr/tagConfig/tagConfig";
 
-export const TAG_EXPIRY_OFFSET_UNITS = ["days", "hours", "minutes"] as const;
+export const TAG_EXPIRY_OFFSET_UNITS = [
+  "days",
+  "hours",
+  "minutes",
+  "seconds",
+] as const;
+
+/** Units offered for editing; `seconds` is kept but only settable via the API. */
+export const TAG_EXPIRY_OFFSET_INPUT_UNITS = [
+  "days",
+  "hours",
+  "minutes",
+] as const;
 
 /**
  * Reads the expiry of a tag set on a resource. The backend writes it with

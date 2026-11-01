@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
-import { TAG_EXPIRY_OFFSET_UNITS } from "@/components/Tags/tagExpiry";
+import { TAG_EXPIRY_OFFSET_INPUT_UNITS } from "@/components/Tags/tagExpiry";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ export function TagExpiryOffsetInput({
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      {TAG_EXPIRY_OFFSET_UNITS.map((unit) => (
+      {TAG_EXPIRY_OFFSET_INPUT_UNITS.map((unit) => (
         <Field key={unit}>
           <FieldLabel htmlFor={`${id}-${unit}`}>
             {t(`expiry_offset_unit_${unit}`)}
@@ -38,7 +38,8 @@ export function TagExpiryOffsetInput({
             placeholder="0"
             value={value[unit] || ""}
             onChange={(e) => {
-              const parsed = parseInt(e.target.value, 10);
+              // valueAsNumber handles exponent input such as 1e2 that parseInt misreads
+              const parsed = Math.trunc(e.target.valueAsNumber);
               onChange({
                 ...value,
                 [unit]: Number.isNaN(parsed) ? 0 : Math.max(0, parsed),

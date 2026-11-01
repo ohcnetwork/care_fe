@@ -253,9 +253,9 @@ export default function TagConfigView({
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-gray-600">
                   {t("expiry")}
-                </label>
+                </p>
                 <div className="mt-1 text-sm">{describeExpiry()}</div>
               </div>
               <div>

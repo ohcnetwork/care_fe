@@ -2373,6 +2373,8 @@
   "duration_placeholder": "eg. 5 days",
   "duration_range_help": "Between {{low}} and {{high}} {{unit}}",
   "duration_range_title": "Range of days",
+  "duration_seconds_one": "{{count}} second",
+  "duration_seconds_other": "{{count}} seconds",
   "duration_set_period": "Set fixed start & end dates",
   "duration_set_range": "Set a range of days",
   "duration_unit": "Duration Unit",

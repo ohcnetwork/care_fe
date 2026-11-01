@@ -100,7 +100,13 @@ test.describe("Tag expiry", () => {
       const days = page.getByRole("spinbutton", { name: "Days" });
       await expect(days).toHaveValue("1");
       await days.fill("3");
+      const setTagsRequest = page.waitForRequest((request) =>
+        request.url().includes("/set_facility_tags/"),
+      );
       await page.getByRole("button", { name: "Apply tag" }).click();
+      expect((await setTagsRequest).postDataJSON().tags).toEqual([
+        { tag: expect.any(String), expiry_offset: { days: 3 } },
+      ]);
       await expectToast(page, "Tags updated successfully");
     });
 

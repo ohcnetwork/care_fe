@@ -116,6 +116,7 @@ export default function TagConfigForm({
         days: z.number().int().min(0).optional(),
         hours: z.number().int().min(0).optional(),
         minutes: z.number().int().min(0).optional(),
+        seconds: z.number().int().min(0).optional(),
       }),
     })
     .refine(
