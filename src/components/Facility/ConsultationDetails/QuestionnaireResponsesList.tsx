@@ -472,7 +472,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         result.push(
           <div
             key={`group-${result.length}`}
-            className="border border-gray-200 rounded-md px-3 py-1.5"
+            className="border border-gray-200 rounded-md px-3 py-1.5 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0"
           >
             <div className="w-full">
               <Table className="table-fixed w-full">

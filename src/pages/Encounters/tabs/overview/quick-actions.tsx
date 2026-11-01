@@ -4,6 +4,7 @@ import {
   GitPullRequestArrow,
   HeartPulse,
   Microscope,
+  Scissors,
   Stethoscope,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -209,6 +210,13 @@ export const QuickActions = ({
                 aria-label={t("add_diagnosis")}
                 href={formLink("diagnosis")}
                 actionId="add-diagnosis"
+              />
+              <QuickAction
+                compact
+                icon={<Scissors className="text-sky-700" strokeWidth={1.5} />}
+                title={t("procedures")}
+                aria-label={t("add_procedure")}
+                href={formLink("procedure")}
               />
               {referralAction}
             </CollapsibleContent>

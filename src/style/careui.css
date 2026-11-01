@@ -67,7 +67,7 @@
   --inverse-border: var(--color-white);
 
   --input: var(--color-neutral-300);
-  --ring: --alpha(var(--color-primary-600) / 75%);
+  --ring: var(--color-primary-600);
 
   --chart-1: var(--color-orange-600);
   --chart-2: var(--color-primary-600);
@@ -204,7 +204,7 @@
   --destructive: var(--color-yellow-800);
   --destructive-foreground: var(--color-yellow-50);
 
-  --ring: --alpha(var(--color-blue-500) / 75%);
+  --ring: var(--color-blue-500);
 
   --sidebar-primary: var(--color-blue-800);
   --sidebar-primary-foreground: var(--color-blue-50);
@@ -270,7 +270,7 @@
   --primary: var(--color-rose-700);
   --primary-foreground: var(--color-rose-50);
 
-  --ring: --alpha(var(--color-rose-500) / 75%);
+  --ring: var(--color-rose-500);
 
   --sidebar-primary: var(--color-rose-700);
   --sidebar-primary-foreground: var(--color-rose-50);

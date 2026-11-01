@@ -16,6 +16,7 @@ export const STRUCTURED_QUESTION_TYPES = [
   "medication_statement",
   "symptom",
   "diagnosis",
+  "procedure",
   "encounter",
   "time_of_death",
   "files",

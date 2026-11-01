@@ -15,6 +15,7 @@ import { encounterDefinition } from "./definitions/encounter";
 import { filesDefinition } from "./definitions/files";
 import { medicationRequestDefinition } from "./definitions/medicationRequest";
 import { medicationStatementDefinition } from "./definitions/medicationStatement";
+import { procedureDefinition } from "./definitions/procedure";
 import { serviceRequestDefinition } from "./definitions/serviceRequest";
 import { symptomDefinition } from "./definitions/symptom";
 import { timeOfDeathDefinition } from "./definitions/timeOfDeath";
@@ -34,6 +35,7 @@ export const STRUCTURED_TYPE_REGISTRY: {
   medication_statement: medicationStatementDefinition,
   symptom: symptomDefinition,
   diagnosis: diagnosisDefinition,
+  procedure: procedureDefinition,
   encounter: encounterDefinition,
   appointment: appointmentDefinition,
   files: filesDefinition,
