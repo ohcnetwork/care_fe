@@ -65,8 +65,12 @@ export function MultiSelect({
     setOpen(nextOpen);
   };
 
+  const handleSelectionChange = (nextValues: string[]) => {
+    setSelectedValues(nextValues);
+    onValueChange(nextValues);
+  };
+
   const handleDone = () => {
-    onValueChange(selectedValues);
     setOpen(false);
   };
 
@@ -149,7 +153,7 @@ export function MultiSelect({
           id={selectAllId}
           checked={allSelected}
           onCheckedChange={() =>
-            setSelectedValues(
+            handleSelectionChange(
               allSelected ? [] : options.map((option) => option.value),
             )
           }
@@ -182,9 +186,6 @@ export function MultiSelect({
         )}
       </ComboboxList>
       <div className="flex shrink-0 justify-end gap-2 border-t border-border p-3">
-        <Button variant="ghost" onClick={() => handleOpenChange(false)}>
-          {t("cancel")}
-        </Button>
         <Button onClick={handleDone}>{t("done")}</Button>
       </div>
     </>
@@ -195,7 +196,7 @@ export function MultiSelect({
       multiple
       items={groups}
       value={selectedValues}
-      onValueChange={setSelectedValues}
+      onValueChange={handleSelectionChange}
       itemToStringLabel={(optionValue) =>
         options.find((option) => option.value === optionValue)?.label ??
         optionValue
