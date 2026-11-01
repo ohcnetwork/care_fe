@@ -39,11 +39,6 @@ test.describe("Patient Service Request Tab", () => {
       encounterId,
     );
 
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-    );
-
-    await clickTabOrMenuItem(page, /service requests/i);
     await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page
@@ -68,11 +63,6 @@ test.describe("Patient Service Request Tab", () => {
       true,
     );
 
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-    );
-
-    await clickTabOrMenuItem(page, /service requests/i);
     await expect(page).toHaveURL(/\/service_requests$/);
 
     const firstRow = page

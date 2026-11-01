@@ -300,9 +300,11 @@ test("local Continue preserves the saved prescription and discharge context and 
     `${fixture.encounterUrl}/questionnaire/${questionnaire.id}`,
   );
   expect(url.searchParams.get("resume_local_draft")).toBe("true");
-  expect(url.searchParams.get("return_page")).toBe("updates");
+  expect(url.searchParams.get("return_to")).toBe(
+    `${fixture.encounterUrl}/updates`,
+  );
   url.searchParams.delete("resume_local_draft");
-  url.searchParams.delete("return_page");
+  url.searchParams.delete("return_to");
   expect(url.searchParams.toString()).toBe(fixture.contextKey);
   expect(url.searchParams.has("continue_draft")).toBe(false);
   await expect(

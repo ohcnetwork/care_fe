@@ -7,13 +7,10 @@ import { Button } from "@/components/ui/button";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-import {
-  appendReferralNativeContext,
-  referralNativeQueryParams,
-} from "@/components/Referral/referralNativeNavigation";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 
+import { safeInternalPath, withReturnTo } from "@/Utils/returnTo";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
-import { encounterPageKeySchema } from "@/types/workspace/encounterWorkspace";
 
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
@@ -57,7 +54,7 @@ export function QuestionnaireFillPage({
       resume_local_draft: resumeLocalDraftParam,
       prescription,
       toDischarge,
-      return_page: requestedReturnPage,
+      return_to: requestedReturnTo,
     },
   ] = useQueryParams();
   const patientBound = isPatientBound(subject) ? subject : undefined;
@@ -97,16 +94,19 @@ export function QuestionnaireFillPage({
     },
   );
 
-  const defaultExitTarget = exitTargetOf(subject);
-  const returnPage =
-    encounterPageKeySchema.safeParse(requestedReturnPage).data ?? "updates";
+  // Encounter forms open from many pages (overview, medicines, service
+  // requests, custom pages, the command palette), so each link says where it
+  // came from with `withReturnTo`. One that doesn't, such as a bookmark, lands
+  // on the overview. Other subjects always exit to their own page (patient
+  // updates, resource responses).
   const exitTarget =
     subject.type === "encounter"
-      ? appendReferralNativeContext(
-          `${defaultExitTarget.slice(0, defaultExitTarget.lastIndexOf("/") + 1)}${returnPage}`,
+      ? (safeInternalPath(requestedReturnTo) ??
+        appendReferralNativeContext(
+          exitTargetOf(subject),
           window.location.search,
-        )
-      : defaultExitTarget;
+        ))
+      : exitTargetOf(subject);
 
   if (!questionnaireId) {
     return (
@@ -117,22 +117,25 @@ export function QuestionnaireFillPage({
           </h2>
           {/* Default onSelect navigates to `questionnaire/{id}` relative to
               the current path, which lands on this mount's :questionnaireId
-              route for every subject. The trigger is supplied rather than
-              defaulted for the same reason the in-session picker's is: a
-              `role="combobox"` takes no accessible name from its contents,
-              so the only control on this screen would reach screen readers
-              unnamed. The role stays (this IS the picker), the name comes
-              from aria-label. */}
+              route for every subject. An encounter's also passes on where to
+              exit, so the form returns to the picker's opener. The trigger is
+              supplied rather than defaulted for the same reason the
+              in-session picker's is: a `role="combobox"` takes no accessible
+              name from its contents, so the only control on this screen would
+              reach screen readers unnamed. The role stays (this IS the
+              picker), the name comes from aria-label. */}
           <QuestionnaireSearch
             subjectType={pickerSubjectType}
             facilityId={subject.facilityId}
             onSelect={
-              subject.type === "encounter" &&
-              referralNativeQueryParams(window.location.search).referralId
+              subject.type === "encounter"
                 ? (selected) =>
                     navigate(
                       appendReferralNativeContext(
-                        `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}?return_page=${encodeURIComponent(returnPage)}`,
+                        withReturnTo(
+                          `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}`,
+                          exitTarget,
+                        ),
                         window.location.search,
                       ),
                     )

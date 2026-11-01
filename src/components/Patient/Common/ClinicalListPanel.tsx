@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
+import { withReturnTo } from "@/Utils/returnTo";
 
 import { ClinicalListError } from "./ClinicalListError";
 
@@ -61,9 +62,6 @@ export function ClinicalListPanel({
   const [queryParams] = useQueryParams<Record<string, string>>();
   const search = new URLSearchParams(queryParams).toString();
   const sourceUrl = search ? `${fullPath}?${search}` : fullPath;
-  const editSearch = new URLSearchParams({
-    return_page: fullPath.split("/").pop() ?? "updates",
-  });
   const patientPath = facilityId
     ? `/facility/${facilityId}/patient/${patientId}`
     : `/patient/${patientId}`;
@@ -81,7 +79,10 @@ export function ClinicalListPanel({
         className={cn("min-w-0 overflow-hidden", className)}
         editLink={
           !readOnly && encounterId
-            ? `${patientPath}/encounter/${encounterId}/questionnaire/${questionnaire}?${editSearch}`
+            ? withReturnTo(
+                `${patientPath}/encounter/${encounterId}/questionnaire/${questionnaire}`,
+                sourceUrl,
+              )
             : undefined
         }
         actionButton={

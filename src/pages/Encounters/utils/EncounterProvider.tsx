@@ -24,6 +24,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 
 type EncounterContextType = {
   facilityId?: string;
@@ -245,7 +246,9 @@ export function EncounterProvider({
             }
             if (encounterRequiresDischarge(selectedEncounter)) {
               navigate(
-                `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
+                withReturnTo(
+                  `/facility/${selectedEncounter.facility.id}/patient/${selectedEncounter.patient.id}/encounter/${selectedEncounter.id}/questionnaire/encounter?toDischarge=true`,
+                ),
               );
               return;
             }

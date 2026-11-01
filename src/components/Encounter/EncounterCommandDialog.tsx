@@ -30,6 +30,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 import { useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
@@ -153,22 +154,23 @@ export function EncounterCommandDialog({
     [encounter, selectedEncounterId, primaryEncounterId],
   );
 
+  const buildFormUrl = useCallback(
+    (questionnaire: string) =>
+      withReturnTo(buildEncounterUrl(`/questionnaire/${questionnaire}`)),
+    [buildEncounterUrl],
+  );
+
   // Handle action execution
   const handleAction = useCallback(
     (actionId: string) => {
       const actionHandlers: Record<string, () => void> = {
-        "add-service-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/service_request")),
+        "add-service-request": () => navigate(buildFormUrl("service_request")),
         "add-medication-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/medication_request")),
-        "add-allergy": () =>
-          navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
-        "add-symptoms": () =>
-          navigate(buildEncounterUrl("/questionnaire/symptom")),
-        "add-diagnosis": () =>
-          navigate(buildEncounterUrl("/questionnaire/diagnosis")),
-        "update-encounter": () =>
-          navigate(buildEncounterUrl("/questionnaire/encounter")),
+          navigate(buildFormUrl("medication_request")),
+        "add-allergy": () => navigate(buildFormUrl("allergy_intolerance")),
+        "add-symptoms": () => navigate(buildFormUrl("symptom")),
+        "add-diagnosis": () => navigate(buildFormUrl("diagnosis")),
+        "update-encounter": () => navigate(buildFormUrl("encounter")),
         "service-requests": () =>
           navigate(buildEncounterUrl("/service_requests")),
         "diagnostic-reports": () =>
@@ -209,10 +211,10 @@ export function EncounterCommandDialog({
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
         const questionnaireId = actionId.replace("questionnaire-", "");
-        navigate(buildEncounterUrl(`/questionnaire/${questionnaireId}`));
+        navigate(buildFormUrl(questionnaireId));
       }
     },
-    [navigate, buildEncounterUrl, actions, encounter],
+    [navigate, buildEncounterUrl, buildFormUrl, actions, encounter],
   );
 
   const addRecentAction = useCallback(

@@ -1,5 +1,5 @@
 import { SquarePen } from "lucide-react";
-import { Link, useFullPath } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { withReturnTo } from "@/Utils/returnTo";
 
 interface HospitalizationDetailsProps {
   title?: string;
@@ -17,7 +18,6 @@ export const HospitalizationDetails = ({
   title,
 }: HospitalizationDetailsProps = {}) => {
   const { t } = useTranslation();
-  const returnPage = useFullPath().split("/").pop() ?? "updates";
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -47,7 +47,9 @@ export const HospitalizationDetails = ({
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
+              href={withReturnTo(
+                `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+              )}
               aria-label={t("edit")}
             >
               <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />

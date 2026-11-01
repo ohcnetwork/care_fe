@@ -14,6 +14,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { navigate } from "raviger";
@@ -26,11 +27,9 @@ import careConfig from "@careConfig";
 export const FormDialog = ({
   subjectType,
   trigger,
-  returnPage,
 }: {
   subjectType: string;
   trigger?: React.ReactNode;
-  returnPage?: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -163,7 +162,9 @@ export const FormDialog = ({
                     onSelect={() => {
                       navigate(
                         appendReferralNativeContext(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                          withReturnTo(
+                            `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.id}`,
+                          ),
                           window.location.search,
                         ),
                       );

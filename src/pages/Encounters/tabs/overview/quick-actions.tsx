@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { AllergyIcon, MedicineIcon } from "@/CAREUI/icons/CustomIcons";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { withReturnTo } from "@/Utils/returnTo";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -30,13 +31,11 @@ import { FormDialog } from "./FormsDialog";
 
 interface QuickActionsProps extends React.ComponentProps<"div"> {
   showEmpty?: boolean;
-  returnPage?: string;
 }
 
 export const QuickActions = ({
   title,
   showEmpty: _showEmpty,
-  returnPage,
   ...props
 }: QuickActionsProps) => {
   const { t } = useTranslation();
@@ -53,15 +52,13 @@ export const QuickActions = ({
     selectedEncounterPermissions.canCreateReferral &&
     selectedEncounter?.id === selectedEncounterId &&
     selectedEncounter?.patient.id === patientId;
-  const formLink = (questionnaire: string) => {
-    const path = `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`;
-    return appendReferralNativeContext(
-      returnPage
-        ? `${path}?${new URLSearchParams({ return_page: returnPage })}`
-        : path,
+  const formLink = (questionnaire: string) =>
+    appendReferralNativeContext(
+      withReturnTo(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/${questionnaire}`,
+      ),
       window.location.search,
     );
-  };
 
   if (!canWriteClinicalData && !canCreateReferral) return null;
 
@@ -165,7 +162,6 @@ export const QuickActions = ({
               />
               <FormDialog
                 subjectType="encounter"
-                returnPage={returnPage}
                 trigger={
                   <QuickAction
                     compact
