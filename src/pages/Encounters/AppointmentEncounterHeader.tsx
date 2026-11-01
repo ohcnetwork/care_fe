@@ -22,7 +22,6 @@ import {
 
 import { PatientIDScanDialog } from "@/components/Scan/PatientIDScanDialog";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { cn } from "@/lib/utils";
 import {
   encounterRequiresDischarge,
   useEncounterProgressController,
@@ -44,6 +43,7 @@ import {
   ListOrdered,
   Play,
   ScanLine,
+  SquareArrowUpRight,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { ReactNode, useState } from "react";
@@ -72,14 +72,15 @@ const getQueueLink = (appointment: AppointmentRead): string => {
   }
 };
 
+const barItemClassName =
+  "h-8 max-w-full shrink-0 gap-1.5 px-1.5 text-sm font-medium tracking-normal text-gray-900";
+
 const PatientScanButton = ({
   facilityId,
   appointment,
-  compact = false,
 }: {
   facilityId: string;
   appointment: AppointmentRead;
-  compact?: boolean;
 }) => {
   const { t } = useTranslation();
   const [scanDialogOpen, setScanDialogOpen] = useState(false);
@@ -145,14 +146,12 @@ const PatientScanButton = ({
         variant="ghost"
         onClick={() => setScanDialogOpen(true)}
         disabled={isPending}
-        aria-label={t("scan_qr")}
-        className={cn(
-          "h-8 shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700",
-          compact && "size-9 p-0",
-        )}
+        className={barItemClassName}
       >
         <ScanLine className="size-4" aria-hidden="true" />
-        {!compact && t("scan")}
+        <span className="underline underline-offset-4">
+          {t("scan_qr_short")}
+        </span>
       </Button>
       <PatientIDScanDialog
         open={scanDialogOpen}
@@ -221,61 +220,67 @@ export const AppointmentEncounterHeader = ({
   );
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-end gap-1 md:flex-wrap md:gap-x-3 md:gap-y-1 md:py-1">
-      <div
-        role="group"
-        aria-label={t("appointment")}
-        className="flex min-w-0 items-center justify-end gap-0.5 md:flex-wrap"
-      >
-        <PatientScanButton
-          facilityId={encounter.facility.id}
-          appointment={appointment}
-          compact={isCompact}
-        />
-        {!isCompact && appointmentActions}
-      </div>
-      {isCompact ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-9 shrink-0"
-              aria-label={t("more_actions")}
+    <div
+      data-cy="encounter-appointment-bar"
+      className="mx-2 rounded-b-xl border border-t-0 border-gray-200 bg-gray-100 p-1 sm:mx-4"
+    >
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-gray-200 bg-white px-2 py-1">
+        <div
+          role="group"
+          aria-label={t("appointment")}
+          className="flex min-w-0 flex-wrap items-center gap-y-1 divide-x divide-gray-300"
+        >
+          <div className="flex items-center pr-1.5">
+            <PatientScanButton
+              facilityId={encounter.facility.id}
+              appointment={appointment}
+            />
+          </div>
+          {!isCompact && appointmentActions}
+        </div>
+        {isCompact ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9 shrink-0"
+                aria-label={t("more_actions")}
+              >
+                <DotsVerticalIcon aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              collisionPadding={8}
+              aria-label={t("encounter_actions")}
+              className="w-72 max-w-[calc(100vw-2rem)] p-1"
             >
-              <DotsVerticalIcon aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            sideOffset={8}
-            collisionPadding={8}
-            aria-label={t("encounter_actions")}
-            className="w-72 max-w-[calc(100vw-2rem)] p-1"
-          >
-            <DropdownMenuGroup aria-label={t("appointment")}>
-              <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
-                {t("appointment")}
-              </DropdownMenuLabel>
-              {appointmentActions}
-            </DropdownMenuGroup>
-            {canWritePrimaryEncounter && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup aria-label={t("encounter_actions")}>
-                  <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
-                    {t("encounter")}
-                  </DropdownMenuLabel>
-                  {encounterActions}
-                </DropdownMenuGroup>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        encounterActions
-      )}
+              <DropdownMenuGroup aria-label={t("appointment")}>
+                <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
+                  {t("appointment")}
+                </DropdownMenuLabel>
+                {appointmentActions}
+              </DropdownMenuGroup>
+              {canWritePrimaryEncounter && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup aria-label={t("encounter_actions")}>
+                    <DropdownMenuLabel className="px-3 text-xs font-medium text-gray-500">
+                      {t("encounter")}
+                    </DropdownMenuLabel>
+                    {encounterActions}
+                  </DropdownMenuGroup>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          encounterActions
+        )}
+      </div>
     </div>
   );
 };
@@ -359,12 +364,16 @@ const AppointmentEncounterHeaderActions = ({
       <div
         role="group"
         aria-label={t("encounter_actions")}
-        className="flex min-w-0 flex-wrap items-center gap-1"
+        className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
       >
+        <span className="hidden text-sm text-gray-700 xl:inline">
+          {t("do_you_want_to_start_this_encounter")}
+        </span>
         <Button
           type="button"
-          variant="outline"
-          className="h-auto min-h-8 max-w-full whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
+          variant="outline_primary"
+          size="sm"
+          className="h-auto min-h-8 max-w-full whitespace-normal shadow-none"
           onClick={onStart}
           disabled={isPending}
         >
@@ -378,69 +387,84 @@ const AppointmentEncounterHeaderActions = ({
     <div
       role="group"
       aria-label={t("encounter_actions")}
-      className="flex min-w-0 flex-wrap items-center gap-1"
+      className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
     >
-      <Button
-        type="button"
-        variant="outline"
-        className="h-auto min-h-8 max-w-full gap-1.5 whitespace-normal border-gray-300 px-3 py-1.5 text-sm shadow-none"
-        disabled={isPending}
-        onClick={onComplete}
-      >
-        <CheckCircle aria-hidden="true" />
-        {requiresDischarge ? t("mark_for_discharge") : t("complete")}
-      </Button>
-      {encounter.status !== EncounterStatus.COMPLETED && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8 shrink-0"
-              aria-label={t("more_actions")}
+      {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+        <span className="hidden text-sm text-gray-700 xl:inline">
+          {t("how_do_you_to_finish_this_visit")}
+        </span>
+      )}
+      <div className="flex min-w-0 items-center gap-1">
+        <Button
+          type="button"
+          variant="outline_primary"
+          size="sm"
+          className="h-auto min-h-8 max-w-full whitespace-normal shadow-none"
+          disabled={isPending}
+          onClick={onComplete}
+        >
+          <CheckCircle aria-hidden="true" />
+          {requiresDischarge ? t("mark_for_discharge") : t("complete")}
+        </Button>
+        {encounter.status !== EncounterStatus.COMPLETED && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 shrink-0"
+                aria-label={t("more_actions")}
+              >
+                <DotsVerticalIcon
+                  className="text-gray-700"
+                  aria-hidden="true"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="max-w-[calc(100vw-2rem)]"
+              align="end"
             >
-              <DotsVerticalIcon className="text-gray-700" aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="max-w-[calc(100vw-2rem)]" align="end">
-            {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
+              {encounter.appointment?.status !==
+                AppointmentStatus.FULFILLED && (
+                <DropdownMenuItem
+                  className="p-2.5"
+                  onClick={onCloseAppointment}
+                  disabled={isPending}
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-black">
+                      {t("close_appointment")}
+                    </span>
+                    <p className="text-xs text-gray-700">
+                      {t("close_appointment_description")}
+                    </p>
+                  </div>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 className="p-2.5"
-                onClick={onCloseAppointment}
+                onClick={onComplete}
                 disabled={isPending}
               >
                 <div className="flex flex-col items-start">
                   <span className="text-sm font-medium text-black">
-                    {t("close_appointment")}
+                    {requiresDischarge
+                      ? t("mark_for_discharge")
+                      : t("mark_as_complete")}
                   </span>
                   <p className="text-xs text-gray-700">
-                    {t("close_appointment_description")}
+                    {requiresDischarge
+                      ? t("mark_for_discharge_description")
+                      : t("mark_as_complete_description")}
                   </p>
                 </div>
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              className="p-2.5"
-              onClick={onComplete}
-              disabled={isPending}
-            >
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-medium text-black">
-                  {requiresDischarge
-                    ? t("mark_for_discharge")
-                    : t("mark_as_complete")}
-                </span>
-                <p className="text-xs text-gray-700">
-                  {requiresDischarge
-                    ? t("mark_for_discharge_description")
-                    : t("mark_as_complete_description")}
-                </p>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
     </div>
   );
 };
@@ -467,14 +491,37 @@ const TokenActions = ({
   }
 
   const { token } = appointment;
+  const labelClassName = asMenuItems
+    ? undefined
+    : "underline underline-offset-4";
+  const boardIcon = !asMenuItems && (
+    <SquareArrowUpRight className="size-3.5 text-gray-500" aria-hidden="true" />
+  );
 
   return (
     <>
       {appointment.id && (
         <TokenAction asMenuItem={asMenuItems}>
           <Link href={getQueueLink(appointment)} basePath="/">
-            <CalendarRange className="size-4" aria-hidden="true" />
-            {asMenuItems ? t("appointments") : t("list")}
+            {asMenuItems && (
+              <CalendarRange className="size-4" aria-hidden="true" />
+            )}
+            <span className={labelClassName}>{t("appointments_board")}</span>
+            {boardIcon}
+          </Link>
+        </TokenAction>
+      )}
+      {token && (
+        <TokenAction asMenuItem={asMenuItems}>
+          <Link
+            basePath="/"
+            href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
+          >
+            {asMenuItems && (
+              <ListOrdered className="size-4" aria-hidden="true" />
+            )}
+            <span className={labelClassName}>{t("queue_board")}</span>
+            {boardIcon}
           </Link>
         </TokenAction>
       )}
@@ -496,31 +543,23 @@ const TokenActions = ({
               </>
             ) : token ? (
               <>
-                <span className="shrink-0 text-gray-500">{t("token")}:</span>
+                <span className="shrink-0 font-normal text-gray-500">
+                  {t("token")}:
+                </span>
                 <span
-                  className="truncate font-semibold text-gray-950"
+                  className="truncate font-semibold text-gray-950 underline underline-offset-4"
                   title={renderTokenNumber(token)}
                 >
                   {renderTokenNumber(token)}
                 </span>
+                {boardIcon}
               </>
             ) : (
               <>
-                <CalendarCheck className="size-4" aria-hidden="true" />
-                {t("view")}
+                <span className={labelClassName}>{t("view_appointment")}</span>
+                {boardIcon}
               </>
             )}
-          </Link>
-        </TokenAction>
-      )}
-      {token && (
-        <TokenAction asMenuItem={asMenuItems}>
-          <Link
-            basePath="/"
-            href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues/${token.queue.id}`}
-          >
-            <ListOrdered className="size-4" aria-hidden="true" />
-            {t("queue")}
           </Link>
         </TokenAction>
       )}
@@ -540,12 +579,10 @@ function TokenAction({
       {children}
     </DropdownMenuItem>
   ) : (
-    <Button
-      variant="ghost"
-      asChild
-      className="h-8 max-w-full shrink-0 gap-1.5 px-2 text-sm font-medium text-gray-700"
-    >
-      {children}
-    </Button>
+    <div className="flex items-center px-1.5">
+      <Button variant="ghost" asChild className={barItemClassName}>
+        {children}
+      </Button>
+    </div>
   );
 }
