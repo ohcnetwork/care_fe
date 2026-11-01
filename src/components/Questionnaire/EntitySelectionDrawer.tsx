@@ -188,6 +188,7 @@ export function EntitySelectionDrawer({
       closeOnSelect={false}
       mobileTrigger={mobileTrigger}
       drawerChildren={detailsDrawer}
+      drawerOnly
     />
   ) : (
     <ValueSetSelect
@@ -202,6 +203,7 @@ export function EntitySelectionDrawer({
       closeOnSelect={false}
       mobileTrigger={mobileTrigger}
       drawerChildren={detailsDrawer}
+      drawerOnly
     />
   );
 }

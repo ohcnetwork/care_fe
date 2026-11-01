@@ -71,6 +71,8 @@ interface Props {
   mobileTrigger?: React.ReactNode;
   /** Mobile only: rendered inside the drawer content, so a drawer it holds nests on top. */
   drawerChildren?: React.ReactNode;
+  /** Always render the drawer, even at widths where this would be a popover. */
+  drawerOnly?: boolean;
 }
 
 type TabType = "product" | "valueset";
@@ -88,6 +90,7 @@ export default function MedicationValueSetSelect({
   wrapTextForSmallScreen = false,
   mobileTrigger,
   drawerChildren,
+  drawerOnly = false,
 }: Props) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -98,7 +101,7 @@ export default function MedicationValueSetSelect({
     careConfig.medicationValueSetSelectDefaultTab,
   );
   const [search, setSearch] = useState("");
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const isMobile = useBreakpoints({ default: true, sm: false }) || drawerOnly;
 
   const [currentCategory, setCurrentCategory] = useState<string | undefined>(
     undefined,

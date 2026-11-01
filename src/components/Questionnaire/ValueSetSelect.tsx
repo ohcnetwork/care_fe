@@ -43,6 +43,8 @@ interface Props {
   mobileTrigger?: React.ReactNode;
   /** Mobile only: rendered inside the drawer content, so a drawer it holds nests on top. */
   drawerChildren?: React.ReactNode;
+  /** Always render the drawer, even at widths where this would be a popover. */
+  drawerOnly?: boolean;
 }
 
 export default function ValueSetSelect({
@@ -61,13 +63,14 @@ export default function ValueSetSelect({
   title,
   mobileTrigger,
   drawerChildren,
+  drawerOnly = false,
   ...props
 }: Props & ButtonProps) {
   const { t } = useTranslation();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
   const setOpen = onControlledOpenChange ?? setUncontrolledOpen;
-  const isMobile = useBreakpoints({ default: true, sm: false });
+  const isMobile = useBreakpoints({ default: true, sm: false }) || drawerOnly;
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

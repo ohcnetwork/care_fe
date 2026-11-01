@@ -199,7 +199,7 @@ export const HealthcareServiceSelector = ({
         <DrawerContent
           height="fixed"
           aria-describedby={undefined}
-          className="px-0 pt-2 pb-0 rounded-t-lg"
+          className="px-2 pt-2 pb-0"
         >
           <DrawerTitle className="sr-only">
             {t("select_healthcare_service")}
