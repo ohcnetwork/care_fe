@@ -13,7 +13,7 @@ import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireRespon
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface LeftCardProps {
@@ -174,12 +174,18 @@ export const EncounterResponsesTab = ({
   embedded = false,
 }: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
-  const [qParams, setQueryParams] = useQueryParams<{
+  const [qParams, _setQueryParams] = useQueryParams<{
     questionnaireSlug?: string;
     questionnaireTitle?: string;
     responseId?: string;
     role?: string;
   }>();
+
+  const setQueryParams = useCallback(
+    (next: Parameters<typeof _setQueryParams>[0]) =>
+      _setQueryParams(next, embedded ? { replace: true } : undefined),
+    [_setQueryParams, embedded],
+  );
 
   const { questionnaireSlug, questionnaireTitle, responseId, role } = qParams;
 
@@ -188,7 +194,14 @@ export const EncounterResponsesTab = ({
 
   const handleResponseClick = (response: QuestionnaireResponse) => {
     setQueryParams({ ...qParams, responseId: response.id });
-    window.location.hash = `#response-${response.id}`;
+
+    if (embedded) {
+      document
+        .getElementById(`response-${response.id}`)
+        ?.scrollIntoView({ block: "start" });
+    } else {
+      window.location.hash = `#response-${response.id}`;
+    }
     if (isMobile) setIsDrawerOpen(false);
   };
 
