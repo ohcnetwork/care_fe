@@ -161,7 +161,12 @@ export const VitalsList = ({
         {isLoading ? (
           <Skeleton className="h-[100px] w-full" />
         ) : vitals.length ? (
-          <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
+          <VitalsTable
+            vitals={vitals}
+            vitalCodes={filteredVitalCodes}
+            patientId={patientId}
+            encounterId={encounterId}
+          />
         ) : !isError ? (
           <p className="p-2 text-sm text-gray-500">{t("no_vitals_recorded")}</p>
         ) : null}

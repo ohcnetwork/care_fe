@@ -183,6 +183,7 @@ interface DiagnosticReportsTabProps {
   encounterId?: string;
   facilityId?: string;
   embedded?: boolean;
+  showObservationHistory?: boolean;
 }
 
 export const DiagnosticReportsTab = ({
@@ -190,6 +191,7 @@ export const DiagnosticReportsTab = ({
   encounterId,
   facilityId,
   embedded = false,
+  showObservationHistory = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -349,6 +351,8 @@ export const DiagnosticReportsTab = ({
                   patientId={patientId}
                   facilityId={facilityId}
                   embedded={embedded}
+                  encounterId={encounterId}
+                  showObservationHistory={showObservationHistory}
                 />
               )
             )}
@@ -371,6 +375,7 @@ export const EncounterDiagnosticReportsTab = () => {
       patientId={patientId}
       encounterId={encounterId}
       facilityId={facilityId}
+      showObservationHistory={true}
     />
   );
 };
