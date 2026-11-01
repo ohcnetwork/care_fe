@@ -184,7 +184,7 @@ export function ActionConditionEditor({
         </div>
       )}
 
-      {rules.length > 0 && (
+      {rules.length > 1 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-gray-500">
             {t("action_run_when")}

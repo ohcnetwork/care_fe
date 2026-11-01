@@ -139,6 +139,21 @@ export async function createQuestionnaireAndOpenBuilder(
 }
 
 /**
+ * Switches the questionnaire list's status filter. Each tab's radio is
+ * visually hidden inside its label, so the label is what takes the click.
+ */
+export async function selectQuestionnaireStatusTab(
+  page: Page,
+  status: "Active" | "Draft" | "Retired",
+): Promise<void> {
+  await page
+    .getByRole("radiogroup", { name: "Status" })
+    .locator("label")
+    .filter({ has: page.getByRole("radio", { name: status, exact: true }) })
+    .click();
+}
+
+/**
  * Picks a valueset in the builder's SelectOrCreateValueset autocomplete.
  * The search box (Autocomplete's Base UI combobox input) only renders while
  * the picker — a popover, or a drawer on mobile — is open, so the strict

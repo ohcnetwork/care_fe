@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Page, expect, test } from "@playwright/test";
-import { setTimeout as delay } from "node:timers/promises";
+import { createTestPatient } from "tests/helper/patient";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -131,52 +131,6 @@ async function deactivateAccount(
   }
 }
 
-async function createPatient(): Promise<string> {
-  const phone = `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`;
-  // Fetch a govt organization for geo_organization (required field)
-  const orgRes = await fetch(
-    `${getApiUrl()}/api/v1/organization/?org_type=govt&limit=1`,
-    { headers: getApiHeaders() },
-  );
-  if (!orgRes.ok)
-    throw new Error(`Failed to fetch organizations: ${orgRes.status}`);
-  const orgData = (await orgRes.json()) as { results: { id: string }[] };
-  const geoOrg = orgData.results[0]?.id;
-  if (!geoOrg)
-    throw new Error("No govt organization found for geo_organization");
-
-  const body = JSON.stringify({
-    name: `Transfer Test ${faker.string.alphanumeric(6)}`,
-    gender: "male",
-    phone_number: phone,
-    date_of_birth: "1990-01-15",
-    geo_organization: geoOrg,
-    identifiers: [],
-  });
-  for (let attempt = 0; ; attempt++) {
-    const res = await fetch(`${getApiUrl()}/api/v1/patient/`, {
-      method: "POST",
-      headers: getApiHeaders(),
-      body,
-    });
-    if (res.ok) {
-      const data = (await res.json()) as { id: string };
-      return data.id;
-    }
-    const text = await res.text();
-    // The backend serializes patient creation with a global lock. Only
-    // retry its explicit pre-create rejection, never an ambiguous failure.
-    if (
-      attempt >= 4 ||
-      res.status !== 400 ||
-      !text.includes("Patient creation failed, try again after a while")
-    ) {
-      throw new Error(`Failed to create patient: ${res.status} — ${text}`);
-    }
-    await delay(250 * (attempt + 1));
-  }
-}
-
 test.describe("Account Transfer Payment", () => {
   const facilityId = getFacilityId();
   let patientId: string;
@@ -188,7 +142,7 @@ test.describe("Account Transfer Payment", () => {
 
   test.beforeAll(async () => {
     // Create a dedicated patient so we don't interfere with other tests
-    patientId = await createPatient();
+    patientId = await createTestPatient("Transfer Test");
 
     const suffix = faker.string.alphanumeric(6);
 
