@@ -101,10 +101,13 @@ export function EncounterVitalsWidget({
 
 // The analysis endpoint returns the most recently modified readings per code,
 // so one request resolves every tile regardless of how often other vitals were
-// charted. It cannot exclude entered-in-error rows, and marking one bumps it to
-// the top, so extra rows leave room for corrections and back-dated entries
+// charted. Entered-in-error rows are excluded through the list `status` filter
+// so they cannot fill the slice; extra rows leave room for back-dated entries
 // while still yielding the two valid readings each tile needs.
 const READINGS_PER_CODE = 8;
+const VALID_READING_STATUSES = Object.values(ObservationStatus)
+  .filter((status) => status !== ObservationStatus.ENTERED_IN_ERROR)
+  .join(",");
 
 interface VitalReading {
   code: Code;
@@ -189,7 +192,7 @@ function LatestVitals({
     ],
     queryFn: query(observationApi.analyse, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: { encounter: encounterId, status: VALID_READING_STATUSES },
       body: { codes, page_size: READINGS_PER_CODE },
       silent: true,
     }),

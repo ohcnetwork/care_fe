@@ -76,7 +76,7 @@ export function LocationSheet({
   const mutations = useLocationMutations(encounter.id);
   const canMutate = () => {
     if (!readOnly) return true;
-    toast.error(t("permission_denied_encounter"));
+    toast.error(t("permission_denied"));
     return false;
   };
 

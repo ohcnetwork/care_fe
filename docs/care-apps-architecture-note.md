@@ -237,7 +237,8 @@ pages to use built-in page keys so presets can rebuild the supported pages witho
 changing their URLs.
 
 The clinical-history preset composes the six history widgets into pages and
-retains the existing immunizations system page. A patient-history workspace
+retains the existing immunizations and procedures system pages, which have no
+history widget yet. A patient-history workspace
 cannot publish known encounter-dependent widgets; the section picker disables
 them with an explanation. Individual history widgets can also be added to
 encounter layouts; they read the patient-wide history, not just the selected
