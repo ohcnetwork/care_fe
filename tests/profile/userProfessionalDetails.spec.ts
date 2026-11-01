@@ -97,6 +97,21 @@ test("saves professional details, preserves credential metadata and clears remov
       exact: true,
     });
     await language.getByRole("combobox", { name: /^Language/ }).click();
+    await expect(
+      page.getByRole("option", { name: "Afar", exact: true }),
+    ).toBeVisible();
+    await page.getByPlaceholder("Search languages").fill("Malayalam");
+    await expect(
+      page.getByRole("option", { name: "Malayalam", exact: true }),
+    ).toBeVisible();
+    await page.getByPlaceholder("Search languages").press("Escape");
+    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
+    await expect(dialog).toBeVisible();
+    await language.getByRole("combobox", { name: /^Language/ }).click();
+    await expect(page.getByPlaceholder("Search languages")).toHaveValue("");
+    await expect(
+      page.getByRole("option", { name: "Afar", exact: true }),
+    ).toBeVisible();
     await page.getByPlaceholder("Search languages").fill("English");
     await page.getByRole("option", { name: "English", exact: true }).click();
     await dialog
@@ -113,6 +128,14 @@ test("saves professional details, preserves credential metadata and clears remov
     await language.getByRole("combobox", { name: /^Language/ }).click();
     await page.getByPlaceholder("Search languages").fill("Malayalam");
     await page.getByRole("option", { name: "Malayalam", exact: true }).click();
+    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
+    await language.getByRole("combobox", { name: /^Language/ }).click();
+    await expect(page.getByPlaceholder("Search languages")).toHaveValue("");
+    await expect(
+      page.getByRole("option", { name: "Afar", exact: true }),
+    ).toBeVisible();
+    await page.getByPlaceholder("Search languages").press("Escape");
+    await expect(page.getByPlaceholder("Search languages")).not.toBeVisible();
     await expect(
       dialog.getByText("Each language can only be added once.", {
         exact: true,

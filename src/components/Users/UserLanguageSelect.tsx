@@ -72,6 +72,9 @@ export function UserLanguageSelect(props: UserLanguageSelectProps) {
         label: languageName(code),
       }))}
       onSearch={setSearch}
+      onOpenChange={(open) => {
+        if (!open) setSearch("");
+      }}
       isLoading={isLoading}
       disabled={isError}
       placeholder={t("select_language")}
