@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, LocateFixed, Trash2, XIcon } from "lucide-react";
+import { Check, LocateFixed, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -51,13 +51,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/location/location-switcher";
 import {
   Table,
@@ -523,27 +523,22 @@ export default function DispenseDrawer({
   }, []);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="h-[90vh] p-0 flex flex-col bg-gray-50"
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        aria-describedby={undefined}
+        className="bg-gray-50 p-0 data-[swipe-axis=y]:h-[calc(90dvh+var(--drawer-keyboard-inset,0px))]"
       >
-        <div className="sticky top-0 z-10 border-b bg-gray-50 border-gray-200">
-          <div className="absolute inset-x-0 top-0 h-2 w-16 mx-auto rounded-3xl bg-gray-300 mt-2" />
-          <SheetHeader className="max-w-6xl mx-auto w-full py-5 flex flex-row justify-between items-center pt-7">
-            <SheetTitle className="text-xl font-semibold m-0">
+        <div className="shrink-0 border-b border-gray-200 bg-gray-50">
+          <DrawerHeader
+            showCloseButton
+            className="mx-auto w-full max-w-6xl py-5"
+          >
+            <DrawerTitle className="text-xl font-semibold">
               {t("dispense")}
-            </SheetTitle>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4" />
-            </Button>
-          </SheetHeader>
+            </DrawerTitle>
+          </DrawerHeader>
         </div>
-        <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full min-h-0 -m-4">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col">
           {/* Selected Location */}
           <div className="my-4 px-3 md:mr-4">
             <Button
@@ -585,6 +580,7 @@ export default function DispenseDrawer({
                         className="text-primary size-6"
                       />
                     }
+                    className="border-primary-700"
                     title={t("no_items_added_yet")}
                     description={t("add_items_to_dispense_now_no_invoice")}
                     action={
@@ -608,7 +604,7 @@ export default function DispenseDrawer({
                             ...prev,
                           }));
                         }}
-                        className="text-primary-800 border-primary-600"
+                        className="text-primary-800 border-primary-900"
                         placeholder={t("add_item")}
                       />
                     }
@@ -907,7 +903,7 @@ export default function DispenseDrawer({
         </div>
         {/* Footer */}
         {fields.length === 0 ? null : (
-          <div className="sticky bottom-0 py-4 bg-white border-t px-4">
+          <div className="shrink-0 border-t bg-white px-4 py-4">
             <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
               <div className="text-xs text-gray-950 font-medium italic">
                 {t("selected_items_count", {
@@ -935,52 +931,52 @@ export default function DispenseDrawer({
             </div>
           </div>
         )}
-      </SheetContent>
 
-      <Dialog
-        open={isLocationWarningOpen}
-        onOpenChange={setIsLocationWarningOpen}
-      >
-        <DialogContent className="w-xs xl:w-sm">
-          <DialogHeader>
-            <DialogTitle>{t("change_location_confirm")}</DialogTitle>
-            <DialogDescription className="text-gray-700 mt-2">
-              <Trans
-                i18nKey="items_added_current_location_warning"
-                components={{ strong: <strong className="font-semibold" /> }}
-                values={{ location: selectedLocation.path }}
-              />
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleDiscardAndSwitch}
-              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full"
-            >
-              {t("discard_and_switch")}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setIsLocationWarningOpen(false)}
-              className="w-full"
-            >
-              {t("stay_here")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog
+          open={isLocationWarningOpen}
+          onOpenChange={setIsLocationWarningOpen}
+        >
+          <DialogContent className="w-xs xl:w-sm">
+            <DialogHeader>
+              <DialogTitle>{t("change_location_confirm")}</DialogTitle>
+              <DialogDescription className="text-gray-700 mt-2">
+                <Trans
+                  i18nKey="items_added_current_location_warning"
+                  components={{ strong: <strong className="font-semibold" /> }}
+                  values={{ location: selectedLocation.path }}
+                />
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleDiscardAndSwitch}
+                className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full"
+              >
+                {t("discard_and_switch")}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setIsLocationWarningOpen(false)}
+                className="w-full"
+              >
+                {t("stay_here")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <LocationSelectorDialog
-        facilityId={facilityId}
-        location={currentLocation}
-        setLocation={(location) =>
-          setCurrentLocation(location || currentLocation)
-        }
-        open={isLocationSelectorOpen}
-        setOpen={setIsLocationSelectorOpen}
-        onLocationSelect={handleLocationChange}
-      />
-    </Sheet>
+        <LocationSelectorDialog
+          facilityId={facilityId}
+          location={currentLocation}
+          setLocation={(location) =>
+            setCurrentLocation(location || currentLocation)
+          }
+          open={isLocationSelectorOpen}
+          setOpen={setIsLocationSelectorOpen}
+          onLocationSelect={handleLocationChange}
+        />
+      </DrawerContent>
+    </Drawer>
   );
 }

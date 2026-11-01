@@ -474,8 +474,8 @@ export function ChargeItemDefinitionForm({
         {/* Basic Information */}
         <div
           className={cn(
-            "grid grid-cols-1 md:grid-cols-3 gap-2 mb-4 sm:mb-2 items-start",
-            !minimal && "md:grid-cols-2 mb-2",
+            "grid grid-cols-1 md:grid-cols-3 gap-6 items-start",
+            !minimal && "md:grid-cols-2",
           )}
         >
           <FormField
@@ -682,7 +682,7 @@ export function ChargeItemDefinitionForm({
                       name="base_price"
                       render={({ field }) => (
                         <FormItem className="w-full">
-                          <FormLabel className="font-medium text-gray-900 text-base">
+                          <FormLabel className="text-base font-medium text-gray-900">
                             {t("base_price")}
                           </FormLabel>
                           <FormControl>
@@ -713,7 +713,7 @@ export function ChargeItemDefinitionForm({
                   name="mrp"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="font-medium text-gray-900 text-base">
+                      <FormLabel className="text-base font-medium text-gray-900">
                         {t("mrp")}
                       </FormLabel>
                       <FormControl>
@@ -738,7 +738,7 @@ export function ChargeItemDefinitionForm({
                   name="purchase_price"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel className="font-medium text-gray-900 text-base">
+                      <FormLabel className="text-base font-medium text-gray-900">
                         {t("purchase_price")}
                       </FormLabel>
                       <FormControl>
@@ -793,12 +793,12 @@ export function ChargeItemDefinitionForm({
 
             {/* Price Summary */}
             {!minimal && (
-              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
-                <h4 className="font-medium text-green-900 mb-3">
+              <div className="p-4 mt-6 border border-green-100 rounded-lg bg-green-50">
+                <h4 className="mb-3 font-medium text-green-900">
                   {t("price_summary")}
                 </h4>
                 <div className="space-y-2 divide-y divide-green-200">
-                  <div className="flex justify-between items-center py-2">
+                  <div className="flex items-center justify-between py-2">
                     <span className="text-gray-600">{t("base_price")}</span>
                     <MonetaryDisplay
                       className="font-medium text-gray-900"

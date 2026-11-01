@@ -107,7 +107,7 @@ export default function ValueSetSelect({
               variant="white"
               role="combobox"
               className={cn(
-                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
+                "w-full flex justify-between whitespace-normal text-left font-normal border-gray-300 shadow-xs",
                 !value?.display && "text-gray-500 hover:bg-white",
               )}
               {...props}
@@ -122,7 +122,7 @@ export default function ValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent height="fixed">
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
@@ -163,7 +163,10 @@ export default function ValueSetSelect({
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="transition-all w-150 p-0" align="start">
+        <PopoverContent
+          className="transition-all w-150 p-0 overflow-clip"
+          align="start"
+        >
           {searchContent}
         </PopoverContent>
       </Popover>

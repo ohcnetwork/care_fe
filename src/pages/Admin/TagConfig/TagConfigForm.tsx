@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -29,6 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
 const TAG_COLORS = [
@@ -44,8 +55,6 @@ const TAG_COLORS = [
   "#4D7C0F", // Lime
 ] as const;
 
-import useBreakpoints from "@/hooks/useBreakpoints";
-import { cn } from "@/lib/utils";
 import {
   TagCategory,
   TagConfigRequest,
@@ -55,26 +64,45 @@ import {
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface TagConfigFormProps {
+  title: string;
+  trigger: ReactNode;
   configId?: string;
   parentId?: string;
   facilityId?: string;
   onSuccess?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function TagConfigForm({
+  title,
+  trigger,
   configId,
   parentId,
   facilityId,
   onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: TagConfigFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
-  const isMobile = useBreakpoints({ default: true, sm: false });
+
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled =
+    controlledOpen !== undefined && controlledOnOpenChange !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
+
+  const handleSuccess = () => {
+    onSuccess?.();
+    if (!isControlled) {
+      setInternalOpen(false);
+    }
+  };
 
   const tagConfigSchema = z.object({
     display: z.string().trim().min(1, t("field_required")),
@@ -103,7 +131,7 @@ export default function TagConfigForm({
       pathParams: { external_id: parentId! },
       queryParams: facilityId ? { facility: facilityId } : undefined,
     }),
-    enabled: isCreatingChild,
+    enabled: open && isCreatingChild,
   });
 
   const form = useForm<TagConfigFormValues>({
@@ -128,7 +156,7 @@ export default function TagConfigForm({
       pathParams: { external_id: configId! },
       queryParams: facilityId ? { facility: facilityId } : undefined,
     }),
-    enabled: isEditing,
+    enabled: open && isEditing,
   });
 
   // Populate form when editing data is loaded
@@ -168,6 +196,12 @@ export default function TagConfigForm({
     }
   }, [parentTag, isCreatingChild, form]);
 
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open, form]);
+
   const createMutation = useMutation({
     mutationFn: mutate(tagConfigApi.create, {
       queryParams: facilityId ? { facility: facilityId } : undefined,
@@ -180,7 +214,7 @@ export default function TagConfigForm({
           queryKey: ["tagConfig", "children", parentId],
         });
       }
-      onSuccess?.();
+      handleSuccess();
     },
   });
 
@@ -192,7 +226,7 @@ export default function TagConfigForm({
     onSuccess: () => {
       toast.success(t("tag_config_updated_successfully"));
       queryClient.invalidateQueries({ queryKey: ["tagConfig"] });
-      onSuccess?.();
+      handleSuccess();
     },
   });
 
@@ -226,314 +260,342 @@ export default function TagConfigForm({
     isLoadingConfig || createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="display"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-required>{t("display_name")}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t("enter_display_name")}
-                  {...field}
-                  disabled={isLoading}
-                  autoFocus={!isIOSDevice}
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetContent className="flex flex-col">
+        <SheetHeader>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {configId
+              ? t("edit_tag_config")
+              : t("manage_tag_config_description")}
+          </SheetDescription>
+        </SheetHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col flex-1 min-h-0"
+          >
+            <SheetBody>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="display"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel aria-required>{t("display_name")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("enter_display_name")}
+                          {...field}
+                          disabled={isLoading}
+                          autoFocus
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("category")}</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoading}
-              >
-                <FormControl>
-                  <SelectTrigger className="capitalize" ref={field.ref}>
-                    <SelectValue placeholder={t("select_category")}>
-                      {t(field.value)}
-                    </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="capitalize">
-                  {Object.values(TagCategory).map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {t(category)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="resource"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("resource")}</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoading || isEditing || isCreatingChild}
-              >
-                <FormControl>
-                  <SelectTrigger ref={field.ref}>
-                    <SelectValue placeholder={t("select_resource")}>
-                      {t(field.value)}
-                    </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(TagResource).map((resource) => (
-                    <SelectItem key={resource} value={resource}>
-                      {t(resource)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="priority"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("priority")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("enter_priority")}
-                  {...field}
-                  onChange={(e) =>
-                    field.onChange(parseInt(e.target.value) || 0)
-                  }
-                  disabled={isLoading}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("category")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="capitalize" ref={field.ref}>
+                            <SelectValue placeholder={t("select_category")}>
+                              {t(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="capitalize">
+                          {Object.values(TagCategory).map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {t(category)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("status")}</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoading}
-              >
-                <FormControl>
-                  <SelectTrigger ref={field.ref}>
-                    <SelectValue placeholder={t("select_status")}>
-                      {t(field.value)}
-                    </SelectValue>
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(TagStatus).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {t(status)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("description")}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder={t("enter_description")}
-                  {...field}
-                  disabled={isLoading}
-                  rows={3}
+                <FormField
+                  control={form.control}
+                  name="resource"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("resource")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isLoading || isEditing || isCreatingChild}
+                      >
+                        <FormControl>
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder={t("select_resource")}>
+                              {t(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(TagResource).map((resource) => (
+                            <SelectItem key={resource} value={resource}>
+                              {t(resource)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
-        <FormField
-          control={form.control}
-          name="color"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("color")}</FormLabel>
-              <FormControl>
-                <input type="hidden" {...field} value={field.value || ""} />
-              </FormControl>
-              <div className="flex flex-col gap-2 min-w-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    const others = TAG_COLORS.filter((c) => c !== field.value);
-                    field.onChange(
-                      others[Math.floor(Math.random() * others.length)],
-                    );
-                  }}
-                  disabled={isLoading}
-                >
-                  <CareIcon icon="l-shuffle" className="size-4" />
-                  {field.value ? t("shuffle_color") : t("assign_color")}
-                </Button>
-                {field.value && (
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Badge
-                      style={{
-                        color: field.value,
-                        backgroundColor: field.value + "18",
-                        borderColor: field.value + "40",
-                      }}
-                      className="capitalize min-w-0 whitespace-normal break-words"
-                    >
-                      {form.watch("display") || t("preview")}
-                    </Badge>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 shrink-0 text-muted-foreground"
-                      onClick={() => field.onChange("")}
-                      disabled={isLoading}
-                    >
-                      <CareIcon icon="l-times" className="size-4" />
-                    </Button>
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("priority")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder={t("enter_priority")}
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("status")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder={t("select_status")}>
+                              {t(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(TagStatus).map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(status)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("description")}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t("enter_description")}
+                          {...field}
+                          disabled={isLoading}
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="color"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("color")}</FormLabel>
+                      <FormControl>
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <div className="flex flex-col min-w-0 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            const others = TAG_COLORS.filter(
+                              (c) => c !== field.value,
+                            );
+                            field.onChange(
+                              others[Math.floor(Math.random() * others.length)],
+                            );
+                          }}
+                          disabled={isLoading}
+                        >
+                          <CareIcon icon="l-shuffle" className="size-4" />
+                          {field.value ? t("shuffle_color") : t("assign_color")}
+                        </Button>
+                        {field.value && (
+                          <div className="flex items-center min-w-0 gap-2">
+                            <Badge
+                              style={{
+                                color: field.value,
+                                backgroundColor: field.value + "18",
+                                borderColor: field.value + "40",
+                              }}
+                              className="min-w-0 capitalize break-words whitespace-normal"
+                            >
+                              {form.watch("display") || t("preview")}
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 shrink-0 text-muted-foreground"
+                              onClick={() => field.onChange("")}
+                              disabled={isLoading}
+                            >
+                              <CareIcon icon="l-times" className="size-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {facilityId ? (
+                  <FormField
+                    control={form.control}
+                    name="facility_organization"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Facility Organisation</FormLabel>
+                        <FormControl>
+                          <FacilityOrganizationSelector
+                            facilityId={facilityId}
+                            value={field.value ? [field.value] : null}
+                            onChange={(value: string[] | null) => {
+                              field.onChange(value?.[0] || null);
+                            }}
+                            currentOrganizations={
+                              existingConfig?.facility_organization
+                                ? [existingConfig.facility_organization]
+                                : []
+                            }
+                            singleSelection={true}
+                            optional={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="organization"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Organization</FormLabel>
+                        <FormControl>
+                          <RoleOrgSelector
+                            value={field.value ? [field.value] : null}
+                            onChange={(value: string[] | null) => {
+                              field.onChange(value?.[0] || null);
+                            }}
+                            currentOrganizations={
+                              existingConfig?.organization
+                                ? [existingConfig.organization]
+                                : []
+                            }
+                            singleSelection={true}
+                            optional={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {/* Add parent tag info when creating a child */}
+                {isCreatingChild && parentTag && (
+                  <div className="p-4 border border-blue-100 rounded-lg bg-blue-50">
+                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                      <CareIcon icon="l-info-circle" className="size-4" />
+                      <span>
+                        {t("creating_child_tag_for")}{" "}
+                        <strong>{parentTag.display}</strong>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-blue-700">
+                      <div>
+                        <span className="font-medium">{t("category")}:</span>{" "}
+                        {t(parentTag.category)}
+                      </div>
+                      <div>
+                        <span className="font-medium">{t("resource")}:</span>{" "}
+                        {t(parentTag.resource)}
+                      </div>
+                      <div>
+                        <span className="font-medium">{t("priority")}:</span>{" "}
+                        {parentTag.priority}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {facilityId ? (
-          <FormField
-            control={form.control}
-            name="facility_organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Facility Organisation</FormLabel>
-                <FormControl>
-                  <FacilityOrganizationSelector
-                    facilityId={facilityId}
-                    value={field.value ? [field.value] : null}
-                    onChange={(value: string[] | null) => {
-                      field.onChange(value?.[0] || null);
-                    }}
-                    currentOrganizations={
-                      existingConfig?.facility_organization
-                        ? [existingConfig.facility_organization]
-                        : []
-                    }
-                    singleSelection={true}
-                    optional={true}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Organization</FormLabel>
-                <FormControl>
-                  <RoleOrgSelector
-                    value={field.value ? [field.value] : null}
-                    onChange={(value: string[] | null) => {
-                      field.onChange(value?.[0] || null);
-                    }}
-                    currentOrganizations={
-                      existingConfig?.organization
-                        ? [existingConfig.organization]
-                        : []
-                    }
-                    singleSelection={true}
-                    optional={true}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {/* Add parent tag info when creating a child */}
-        {isCreatingChild && parentTag && (
-          <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-            <div className="flex items-center gap-2 text-sm text-blue-800">
-              <CareIcon icon="l-info-circle" className="size-4" />
-              <span>
-                {t("creating_child_tag_for")}{" "}
-                <strong>{parentTag.display}</strong>
-              </span>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-blue-700">
-              <div>
-                <span className="font-medium">{t("category")}:</span>{" "}
-                {t(parentTag.category)}
-              </div>
-              <div>
-                <span className="font-medium">{t("resource")}:</span>{" "}
-                {t(parentTag.resource)}
-              </div>
-              <div>
-                <span className="font-medium">{t("priority")}:</span>{" "}
-                {parentTag.priority}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div
-          className={cn(
-            !isMobile && "flex justify-end space-x-2",
-            isMobile && "absolute top-8 right-4 z-10",
-          )}
-        >
-          <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
-            {isLoading
-              ? t("saving")
-              : isEditing
-                ? t("update_tag_config")
-                : t("create_tag_config")}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            </SheetBody>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button type="button" variant="outline" disabled={isLoading}>
+                  {t("cancel")}
+                </Button>
+              </SheetClose>
+              <Button
+                type="submit"
+                disabled={isLoading || !form.formState.isDirty}
+              >
+                {isLoading
+                  ? t("saving")
+                  : isEditing
+                    ? t("update_tag_config")
+                    : t("create_tag_config")}
+              </Button>
+            </SheetFooter>
+          </form>
+        </Form>
+      </SheetContent>
+    </Sheet>
   );
 }

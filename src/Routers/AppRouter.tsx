@@ -16,6 +16,7 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
+import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import { routes as publicRoutes } from "@/Routers/PublicRouter";
@@ -117,6 +118,7 @@ const publicRedirects = Object.fromEntries(
 );
 
 export default function AppRouter() {
+  useRefreshStickyAfterScrollLock();
   const pluginRoutes = usePluginRoutes();
   const organizationRoutes = useOrganizationRoutes();
   let routes = Routes;

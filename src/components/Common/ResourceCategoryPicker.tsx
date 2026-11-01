@@ -191,7 +191,7 @@ export function ResourceCategoryPicker({
           aria-live="polite"
           aria-label={t("loading")}
         >
-          <Skeleton className="h-4 w-20" />
+          <Skeleton className="w-20 h-4" />
         </div>
       );
     }
@@ -221,7 +221,7 @@ export function ResourceCategoryPicker({
 
     return (
       <div className="flex items-center gap-1">
-        <Folder className="h-4 w-4 text-gray-500 flex-shrink-0" />
+        <Folder className="flex-shrink-0 w-4 h-4 text-gray-500" />
         <span className="truncate">
           {pathParts.length === 0
             ? selectedCategory.title || t("select_category")
@@ -243,16 +243,14 @@ export function ResourceCategoryPicker({
       role="combobox"
       aria-expanded={open}
       className={cn(
-        "justify-between h-10 min-h-10 px-3 py-2",
+        "px-3 shadow-xs border-strong-border [:active,[data-pressed]]:inset-shadow-none",
         "hover:bg-gray-50 hover:text-gray-900",
-        "focus:ring-2 focus:ring-gray-300 focus:ring-offset-2",
-        "transition-all duration-200",
         disabled && "opacity-50 cursor-not-allowed",
         className,
       )}
       disabled={disabled}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center flex-1 min-w-0 gap-2">
         {getDisplayValue()}
       </div>
       <ChevronDown
@@ -267,10 +265,10 @@ export function ResourceCategoryPicker({
   const content = (
     <div className="flex flex-col">
       {/* Header with current location */}
-      <div className="px-4 py-3 border-b bg-gray-50">
+      <div className="px-2 py-3 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-gray-500" />
+            <Home className="w-4 h-4 text-gray-500" />
             <span className="text-sm font-medium text-gray-600">
               {getCurrentLevelTitle()}
             </span>
@@ -285,9 +283,9 @@ export function ResourceCategoryPicker({
               variant="ghost"
               size="sm"
               onClick={handleClearSelection}
-              className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+              className=""
             >
-              <X className="h-3 w-3 mr-1" />
+              <X className="w-3 h-3 mr-1" />
               {t("clear")}
             </Button>
           )}
@@ -296,7 +294,7 @@ export function ResourceCategoryPicker({
 
       {/* Breadcrumb Navigation */}
       {breadcrumbs.length > 0 && (
-        <div className="px-4 py-2 border-b bg-gray-100">
+        <div className="px-4 py-2 bg-gray-100 border-b">
           <div className="flex items-center gap-1 text-xs">
             <Button
               variant="ghost"
@@ -304,12 +302,12 @@ export function ResourceCategoryPicker({
               onClick={handleBackToRoot}
               className="h-6 px-2 text-xs hover:bg-white"
             >
-              <Home className="h-3 w-3 mr-1" />
+              <Home className="w-3 h-3 mr-1" />
               {t("root")}
             </Button>
             {breadcrumbs.map((breadcrumb, index) => (
               <div key={breadcrumb.slug} className="flex items-center">
-                <ChevronRight className="h-3 w-3 mx-1 text-gray-500" />
+                <ChevronRight className="w-3 h-3 mx-1 text-gray-500" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -325,16 +323,13 @@ export function ResourceCategoryPicker({
       )}
 
       <Command className="border-0">
-        <div className="px-3 py-2 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <CommandInput
-              placeholder={t("search_categories")}
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              className="pl-9 h-9 border-0 focus:ring-0 text-base"
-            />
-          </div>
+        <div className="py-2">
+          <CommandInput
+            placeholder={t("search_categories")}
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            className="text-base border-0 h-9 focus:ring-0"
+          />
         </div>
 
         <CommandList className="max-h-[300px]">
@@ -342,42 +337,42 @@ export function ResourceCategoryPicker({
             {isLoading ? (
               <div className="p-6 space-y-3">
                 <div className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-4 rounded" />
-                  <div className="space-y-1 flex-1">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="w-4 h-4 rounded" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="w-3/4 h-4" />
+                    <Skeleton className="w-1/2 h-3" />
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-4 rounded" />
-                  <div className="space-y-1 flex-1">
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="w-4 h-4 rounded" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="w-2/3 h-4" />
+                    <Skeleton className="w-1/3 h-3" />
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Skeleton className="h-4 w-4 rounded" />
-                  <div className="space-y-1 flex-1">
-                    <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="w-4 h-4 rounded" />
+                  <div className="flex-1 space-y-1">
+                    <Skeleton className="w-4/5 h-4" />
                   </div>
                 </div>
               </div>
             ) : error ? (
               <div className="p-6 text-center">
-                <div className="text-gray-500 text-sm">
+                <div className="text-sm text-gray-500">
                   {t("failed_to_load_categories")}
                 </div>
               </div>
             ) : searchQuery ? (
               <div className="p-6 text-center text-gray-500">
-                <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <div className="text-sm">
                   {t("no_categories_found_for", { term: searchQuery })}
                 </div>
               </div>
             ) : (
               <div className="p-6 text-center text-gray-500">
-                <Folder className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <Folder className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <div className="text-sm">{t("no_categories_found")}</div>
               </div>
             )}
@@ -396,16 +391,16 @@ export function ResourceCategoryPicker({
                   "border-b border-gray-200 last:border-b-0",
                 )}
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center flex-1 min-w-0 gap-3">
                   <div className="flex-shrink-0">
                     {category.has_children ? (
-                      <FolderOpen className="h-5 w-5 text-gray-500" />
+                      <FolderOpen className="w-5 h-5 text-gray-500" />
                     ) : (
-                      <Folder className="h-5 w-5 text-gray-500" />
+                      <Folder className="w-5 h-5 text-gray-500" />
                     )}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-sm truncate">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">
                       {category.title}
                     </div>
                     {category.description && (
@@ -415,12 +410,12 @@ export function ResourceCategoryPicker({
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center flex-shrink-0 gap-2">
                   {value === category.slug && (
-                    <Check className="h-4 w-4 text-gray-700" />
+                    <Check className="w-4 h-4 text-gray-700" />
                   )}
                   {category.has_children && (
-                    <ChevronRight className="h-4 w-4 text-gray-500" />
+                    <ChevronRight className="w-4 h-4 text-gray-500" />
                   )}
                 </div>
               </CommandItem>
@@ -443,7 +438,10 @@ export function ResourceCategoryPicker({
         }}
       >
         <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent
+          height="fixed"
+          className="px-0 pt-2 rounded-t-lg overflow-clip"
+        >
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto">
             {content}
           </div>
@@ -464,7 +462,7 @@ export function ResourceCategoryPicker({
     >
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
-        className="w-[420px] p-0 shadow-lg border-0"
+        className="w-[420px] overflow-clip p-0 shadow-lg border-0"
         align="start"
         sideOffset={4}
       >

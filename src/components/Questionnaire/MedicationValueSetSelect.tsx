@@ -56,7 +56,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface Props {
   onSelect: (value: Code) => void;
@@ -221,8 +220,8 @@ export default function MedicationValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pb-0 rounded-t-lg">
-          <DrawerHeader className="p-0 mt-1.5">
+        <DrawerContent height="fixed">
+          <DrawerHeader className="pt-2.5 flex flex-col items-stretch justify-start">
             <MedicationValueSetSelectTabs
               activeTab={activeTab}
               onChange={setActiveTab}
@@ -278,11 +277,13 @@ export default function MedicationValueSetSelect({
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[600px] p-0" align="start">
-        <MedicationValueSetSelectTabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
+      <PopoverContent className="w-150 p-0 gap-1" align="start">
+        <div className="p-2 pb-0">
+          <MedicationValueSetSelectTabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
         <CategoryBreadcrumbs
           breadcrumbs={breadcrumbs}
           activeTab={activeTab}
@@ -503,17 +504,16 @@ export function MedicationValueSetSelectTabContent({
       >
         <TabsContent value="product">
           <Command className="rounded-lg" filter={() => 1}>
-            <div className="bg-white z-10 w-full fixed mb-4">
+            <div className="bg-white z-10 w-full fixed mb-4 border-b shadow-2xs">
               <CommandInput
                 placeholder={t("search_products")}
                 onValueChange={onSearchChange}
                 value={search}
-                className="border-none ring-0 text-base sm:text-sm"
-                autoFocus={!isIOSDevice}
+                autoFocus
               />
             </div>
 
-            <CommandList className="flex-1 mt-7 overflow-y-auto">
+            <CommandList className="flex-1 md:mt-6 mt-10 overflow-y-auto">
               <CommandEmpty className="h-72 flex justify-center items-center py-6 text-gray-500">
                 {search.length < 3 ? (
                   <p className="p-4 text-sm text-gray-500">

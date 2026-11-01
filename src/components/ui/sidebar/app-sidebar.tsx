@@ -12,6 +12,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
@@ -113,6 +114,7 @@ export function AppSidebar({
     scheduleClose,
     handleSidebarFocus,
     handleSidebarBlur,
+    handleToggleMouseEnter,
   } = useAppSidebar();
   const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
@@ -249,6 +251,20 @@ export function AppSidebar({
           />
         )}
       </SidebarFooter>
+      {!isMobile && (
+        // Edge hover target that previews the collapsed sidebar, like the
+        // header toggle. Leaving is handled by the Sidebar's onMouseLeave.
+        // Starts below the header so it never overlaps the toggle's hit area.
+        <SidebarRail
+          onMouseEnter={handleToggleMouseEnter}
+          className="fixed top-[calc(var(--app-sidebar-offset)+--spacing(2))] left-0 right-auto! visible items-center justify-center after:hidden hover:group-data-[collapsible=offcanvas]:bg-sidebar-accent group-data-[state=expanded]:hidden"
+        >
+          <span
+            aria-hidden="true"
+            className="h-8 w-1 rounded-full bg-muted-foreground/40"
+          />
+        </SidebarRail>
+      )}
     </Sidebar>
   );
 }
