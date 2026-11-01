@@ -21,7 +21,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
-import { isNavigationActive, NavLink } from "@/components/ui/sidebar/nav-main";
+import { NavLink } from "@/components/ui/sidebar/nav-main";
+import { isNavigationActive } from "@/components/ui/sidebar/nav-utils";
 
 import {
   ENCOUNTER_LIST_CLASSES,
