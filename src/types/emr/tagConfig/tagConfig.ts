@@ -82,6 +82,10 @@ export interface TagConfigRequest {
   metadata?: TagConfigMeta;
 }
 
+export interface TagSetRequest {
+  tag: string;
+}
+
 export function getTagHierarchyDisplay(
   tag: TagConfig,
   separator: string = ": ",
