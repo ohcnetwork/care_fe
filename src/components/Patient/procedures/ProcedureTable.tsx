@@ -83,23 +83,26 @@ const ProcedureCard = ({
                 </DropdownMenuItem>
               )}
 
-              {(!!onViewEncounter || procedure.note) && (
-                <div className="my-1 border-t border-dashed border-gray-300" />
-              )}
+              {(!!onViewEncounter || procedure.note) &&
+                procedure.created_by && (
+                  <div className="my-1 border-t border-dashed border-gray-300" />
+                )}
 
-              <div className="p-1 text-xs">
-                <div className="text-gray-500">{t("recorded_by")}:</div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <Avatar
-                    name={formatName(procedure.created_by, true)}
-                    className="size-5"
-                    imageUrl={procedure.created_by.profile_picture_url}
-                  />
-                  <span className="font-medium text-gray-900 truncate">
-                    {formatName(procedure.created_by)}
-                  </span>
+              {procedure.created_by && (
+                <div className="p-1 text-xs">
+                  <div className="text-gray-500">{t("recorded_by")}:</div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <Avatar
+                      name={formatName(procedure.created_by, true)}
+                      className="size-5"
+                      imageUrl={procedure.created_by.profile_picture_url}
+                    />
+                    <span className="font-medium text-gray-900 truncate">
+                      {formatName(procedure.created_by)}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

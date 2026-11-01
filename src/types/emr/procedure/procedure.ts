@@ -47,8 +47,8 @@ export interface Procedure {
   outcome?: ProcedureOutcome | null;
   note?: string | null;
   encounter: string;
-  created_by: UserReadMinimal;
-  updated_by?: UserReadMinimal;
+  created_by?: UserReadMinimal | null;
+  updated_by?: UserReadMinimal | null;
   created_date: string;
   modified_date: string;
 }
@@ -66,7 +66,9 @@ export interface ProcedureRequest {
   note?: string | null;
   encounter: string;
   created_date?: string;
-  created_by?: UserReadMinimal;
+  created_by?: UserReadMinimal | null;
+  /** Set on rows added or edited in this session; only these are saved. */
+  dirty?: boolean;
 }
 
 export const PROCEDURE_STATUS_COLORS = {

@@ -29,13 +29,15 @@ export const procedureDefinition: StructuredTypeDefinition<"procedure"> = {
     procedures,
     { patientId, encounterId, questionId, path },
   ) => {
-    if (!patientId || !encounterId || procedures.length === 0) return [];
+    // Resending untouched prefill would overwrite concurrent edits.
+    const dirty = procedures.filter((procedure) => procedure.dirty);
+    if (!patientId || !encounterId || dirty.length === 0) return [];
     return [
       {
         url: `/api/v1/patient/${patientId}/procedure/upsert/`,
         method: "POST",
         body: {
-          datapoints: procedures.map((procedure) => ({
+          datapoints: dirty.map(({ dirty: _dirty, ...procedure }) => ({
             ...procedure,
             note: sanitizeNote(procedure.note),
             occurrence: sanitizeOccurrence(procedure.occurrence),

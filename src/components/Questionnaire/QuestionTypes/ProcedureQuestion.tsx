@@ -99,6 +99,7 @@ const PROCEDURE_INITIAL_VALUE: Omit<ProcedureRequest, "encounter"> = {
   body_site: [],
   reason: [],
   occurrence: {},
+  dirty: true,
 };
 
 const NO_OUTCOME = "none";
@@ -374,6 +375,7 @@ function convertToProcedureRequest(procedure: Procedure): ProcedureRequest {
     encounter: procedure.encounter,
     created_date: procedure.created_date,
     created_by: procedure.created_by,
+    dirty: false,
   };
 }
 
@@ -797,7 +799,9 @@ export function ProcedureQuestion({
       // For existing records, update status to entered_in_error
       updateProcedures(
         procedures.map((p, i) =>
-          i === index ? { ...p, status: "entered_in_error" as const } : p,
+          i === index
+            ? { ...p, status: "entered_in_error" as const, dirty: true }
+            : p,
         ),
       );
     } else {
@@ -812,7 +816,7 @@ export function ProcedureQuestion({
   ) => {
     updateProcedures(
       procedures.map((procedure, i) =>
-        i === index ? { ...procedure, ...updates } : procedure,
+        i === index ? { ...procedure, ...updates, dirty: true } : procedure,
       ),
     );
   };

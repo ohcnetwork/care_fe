@@ -210,7 +210,11 @@ export function coerceStructuredFillValue(
           nested.encounter = subject.encounterId;
         row.service_request = nested;
       }
-      if (type === "diagnosis" || type === "medication_request")
+      if (
+        type === "diagnosis" ||
+        type === "medication_request" ||
+        type === "procedure"
+      )
         row.dirty = true;
       return row;
     });
