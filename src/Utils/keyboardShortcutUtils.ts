@@ -68,6 +68,8 @@ const OPEN_OVERLAY_SELECTOR = [
 
 const MOUNTED_OVERLAY_SELECTOR = "[role='dialog'], [role='alertdialog']";
 
+const COMMAND_DIALOG_SELECTOR = "[data-shortcut-command-dialog]";
+
 const DISABLED_HOST_SELECTOR =
   "[disabled], [aria-disabled='true'], [data-disabled]";
 
@@ -97,31 +99,40 @@ function resolveInteractiveHosts(shortcutId: string): HTMLElement[] {
   return [...hosts];
 }
 
-// Among enabled candidates, prefer the one inside the topmost (last-rendered) open overlay
-function resolveBestHost(hosts: HTMLElement[]): HTMLElement | undefined {
-  let lastInOverlay: HTMLElement | undefined;
+// Only the topmost (last-rendered) open overlay can receive a shortcut. Actions
+// chosen from the command dialog skip it and run against what's underneath.
+function resolveBestHost(
+  hosts: HTMLElement[],
+  skipCommandDialog = false,
+): HTMLElement | undefined {
+  const isActiveOverlay = (overlay: Element) =>
+    !skipCommandDialog || !overlay.querySelector(COMMAND_DIALOG_SELECTOR);
 
-  for (const host of hosts) {
-    if (host.closest(OPEN_OVERLAY_SELECTOR)) {
-      lastInOverlay = host;
-    }
-  }
+  const topOverlay = [...document.querySelectorAll(OPEN_OVERLAY_SELECTOR)]
+    .filter(isActiveOverlay)
+    .at(-1);
 
-  if (lastInOverlay) {
-    return lastInOverlay;
+  if (topOverlay) {
+    return hosts.filter((host) => topOverlay.contains(host)).at(-1);
   }
 
   const hasBlockingOverlay = [
     ...document.querySelectorAll(MOUNTED_OVERLAY_SELECTOR),
-  ].some((overlay) => !overlay.querySelector("[data-shortcut-command-dialog]"));
-  if (hasBlockingOverlay) {
-    return undefined;
-  }
+  ].some(isActiveOverlay);
 
-  return hosts[0];
+  return hasBlockingOverlay ? undefined : hosts[0];
 }
 
-export function shortcutActionHandler(shortcutId: string) {
+export function canRunFromCommandDialog(shortcutId: string) {
+  return (
+    resolveBestHost(resolveInteractiveHosts(shortcutId), true) !== undefined
+  );
+}
+
+export function shortcutActionHandler(
+  shortcutId: string,
+  { fromCommandDialog = false }: { fromCommandDialog?: boolean } = {},
+) {
   return () => {
     const now = Date.now();
     const lastClick = clickDebounceMap.get(shortcutId) || 0;
@@ -133,7 +144,10 @@ export function shortcutActionHandler(shortcutId: string) {
 
     clickDebounceMap.set(shortcutId, now);
 
-    const host = resolveBestHost(resolveInteractiveHosts(shortcutId));
+    const host = resolveBestHost(
+      resolveInteractiveHosts(shortcutId),
+      fromCommandDialog,
+    );
 
     if (host) {
       host.click();
