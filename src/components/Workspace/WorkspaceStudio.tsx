@@ -235,7 +235,10 @@ export function WorkspaceStudio({
   const pages = template?.[sectionKey] ?? [];
   const usesStandardHistory =
     surface === "patient_history" && !template?.history_pages;
-  const allPages = [...(template?.pages ?? []), ...(template?.history_pages ?? [])];
+  const allPages = [
+    ...(template?.pages ?? []),
+    ...(template?.history_pages ?? []),
+  ];
   const unsupportedWidgets = [
     ...new Set(
       allPages.flatMap((page) =>

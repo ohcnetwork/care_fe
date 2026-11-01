@@ -5,11 +5,11 @@ import {
   RESERVED_ROUTE_KEYS,
   SYSTEM_PAGE_KEYS,
   WORKSPACE_SURFACE_PAGES_KEY,
-  normalizeWorkspaceTemplate,
-  type WorkspaceSurface,
   encounterPageKeySchema,
+  normalizeWorkspaceTemplate,
   titleSchema,
   widgetSchema,
+  type WorkspaceSurface,
 } from "@/types/workspace/encounterWorkspace";
 
 export type RenderWidget =

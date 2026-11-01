@@ -19,8 +19,8 @@ import { AllergyIcon, MedicineIcon } from "@/CAREUI/icons/CustomIcons";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 
 import { FormDialog } from "./FormsDialog";
 
@@ -123,7 +123,10 @@ export const QuickActions = ({
                 <QuickAction
                   compact
                   icon={
-                    <ClipboardList className="text-teal-700" strokeWidth={1.5} />
+                    <ClipboardList
+                      className="text-teal-700"
+                      strokeWidth={1.5}
+                    />
                   }
                   title={t("forms")}
                   actionId="add-questionnaire"
@@ -132,7 +135,9 @@ export const QuickActions = ({
             />
             <QuickAction
               compact
-              icon={<HeartPulse className="text-orange-700" strokeWidth={1.5} />}
+              icon={
+                <HeartPulse className="text-orange-700" strokeWidth={1.5} />
+              }
               title={t("symptoms")}
               aria-label={t("add_symptom")}
               href={formLink("symptom")}
@@ -140,7 +145,9 @@ export const QuickActions = ({
             />
             <QuickAction
               compact
-              icon={<Stethoscope className="text-purple-700" strokeWidth={1.5} />}
+              icon={
+                <Stethoscope className="text-purple-700" strokeWidth={1.5} />
+              }
               title={t("diagnosis")}
               aria-label={t("add_diagnosis")}
               href={formLink("diagnosis")}
