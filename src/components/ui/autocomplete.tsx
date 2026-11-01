@@ -241,7 +241,7 @@ export default function Autocomplete({
           <ComboboxContent
             align={align}
             className={cn(
-              "w-(--anchor-width) min-h-40",
+              "flex w-(--anchor-width) min-h-40 flex-col",
               popoverContentClassName,
             )}
           >

@@ -50,6 +50,7 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -815,6 +816,7 @@ export function ResourceDefinitionCategoryPicker<T>({
       <div className="flex items-center flex-1 w-0 min-w-0 gap-2">
         {getDisplayValue()}
       </div>
+      {shortcutId && <ShortcutBadge actionId={shortcutId} />}
       {!clearVisible && (
         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
       )}
