@@ -369,7 +369,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           </div>
                         </div>
                       ) : (
-                        <div className="rounded-lg border border-gray-200">
+                        <div>
                           <Table>
                             <TableHeader>
                               <TableRow>
@@ -499,7 +499,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           </div>
                         </div>
                       ) : (
-                        <div className="rounded-lg border border-gray-200">
+                        <div>
                           <Table>
                             <TableHeader>
                               <TableRow>

@@ -79,7 +79,7 @@ export const EncounterDevicesTab = () => {
         <TableSkeleton count={6} />
       ) : (
         <div className="space-y-6">
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
             <CardContent className="p-0">
               {data?.results?.length ? (
                 <Table className="w-full overflow-x-auto whitespace-nowrap">
