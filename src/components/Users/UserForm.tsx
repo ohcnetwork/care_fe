@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lock, Mail } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -34,10 +34,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { UserCommunicationFields } from "@/components/Users/UserCommunicationFields";
 import {
   ValidationHelper,
   validateRule,
 } from "@/components/Users/UserFormValidations";
+import { UserQualificationFields } from "@/components/Users/UserQualificationFields";
 import { RoleOrgAccessEditor } from "@/components/Users/UserRoleOrganizationAccess";
 
 import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
@@ -45,11 +47,21 @@ import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import validators from "@/Utils/validators";
+import Loading from "@/components/Common/Loading";
 import GovtOrganizationPicker from "@/components/Organization/GovtOrganizationPicker";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
-import { UserCreate, UserReadMinimal, UserUpdate } from "@/types/user/user";
+import {
+  CEFR_LEVELS,
+  USER_LANGUAGE_SYSTEM,
+  UserCreate,
+  UserReadMinimal,
+  UserUpdate,
+} from "@/types/user/user";
 import userApi from "@/types/user/userApi";
+
+export type UserProfileEditSection =
+  "personal" | "contact" | "communication" | "qualification";
 
 interface Props {
   onSubmitSuccess?: (
@@ -59,6 +71,7 @@ interface Props {
   existingUsername?: string;
   organizationId?: string;
   isServiceAccount?: boolean;
+  initialSection?: UserProfileEditSection;
 }
 
 export default function UserForm({
@@ -66,9 +79,12 @@ export default function UserForm({
   existingUsername,
   organizationId,
   isServiceAccount = false,
+  initialSection,
 }: Props) {
   const { t } = useTranslation();
   const isEditMode = !!existingUsername;
+  const formRef = useRef<HTMLFormElement>(null);
+  const [initializedUsername, setInitializedUsername] = useState<string>();
   const queryClient = useQueryClient();
   const [selectedGeoOrg, setSelectedGeoOrg] = useState<Organization | null>(
     null,
@@ -106,6 +122,41 @@ export default function UserForm({
       prefix: z.string().optional(),
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),
+      communication: z
+        .array(
+          z.object({
+            language: z.object({
+              code: z
+                .string()
+                .regex(/^[a-z]{3}$/, t("profile_select_language")),
+              system: z.literal(USER_LANGUAGE_SYSTEM),
+            }),
+            preferred: z.boolean(),
+            proficiency: z.enum(CEFR_LEVELS).nullable().optional(),
+          }),
+        )
+        .refine(
+          (entries) =>
+            new Set(entries.map((entry) => entry.language.code)).size ===
+            entries.length,
+          t("profile_duplicate_language"),
+        ),
+      qualification: z.array(
+        z.object({
+          degree: z
+            .object({
+              code: z.string(),
+              system: z.string(),
+            })
+            .refine(
+              (degree) => !!degree.code && !!degree.system,
+              t("profile_select_degree"),
+            ),
+          registration_number: z.string(),
+          issuer: z.string(),
+          meta: z.record(z.string(), z.unknown()),
+        }),
+      ),
       // role_orgs only used in create mode
       role_orgs: isEditMode
         ? z.array(roleOrgSchema).optional()
@@ -194,10 +245,17 @@ export default function UserForm({
       suffix: "",
       password_setup_method: "immediate",
       role_orgs: [],
+      communication: [],
+      qualification: [],
     },
   });
 
-  const { data: userData, isLoading: isLoadingUser } = useQuery({
+  const {
+    data: userData,
+    isLoading: isLoadingUser,
+    isError: isUserError,
+    refetch: refetchUser,
+  } = useQuery({
     queryKey: ["user", existingUsername],
     queryFn: query(userApi.get, {
       pathParams: { username: existingUsername! },
@@ -205,7 +263,7 @@ export default function UserForm({
     enabled: !!existingUsername,
   });
   useEffect(() => {
-    if (userData && isEditMode) {
+    if (userData && isEditMode && initializedUsername !== existingUsername) {
       const formData: Partial<UserFormValues> = {
         first_name: userData.first_name,
         last_name: userData.last_name,
@@ -214,10 +272,29 @@ export default function UserForm({
         prefix: userData.prefix || "",
         suffix: userData.suffix || "",
         geo_organization: userData.geo_organization?.id,
+        communication: userData.communication || [],
+        qualification: (userData.qualification || []).map((entry) => ({
+          ...entry,
+          meta: entry.meta || {},
+        })),
       };
       form.reset(formData);
+      setInitializedUsername(existingUsername);
+      setSelectedGeoOrg(userData.geo_organization || null);
     }
-  }, [userData, form, isEditMode]);
+  }, [userData, form, isEditMode, existingUsername, initializedUsername]);
+
+  useEffect(() => {
+    if (!initialSection || initializedUsername !== existingUsername) return;
+    const frame = requestAnimationFrame(() => {
+      const section = formRef.current?.querySelector<HTMLElement>(
+        `[data-profile-section="${initialSection}"]`,
+      );
+      section?.scrollIntoView({ block: "start" });
+      section?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [initialSection, initializedUsername, existingUsername]);
 
   const [isUsernameFieldFocused, setIsUsernameFieldFocused] = useState(false);
 
@@ -316,6 +393,12 @@ export default function UserForm({
         suffix: data.suffix || "",
         gender: data.gender,
         geo_organization: data.geo_organization || undefined,
+        ...(form.formState.dirtyFields.communication && {
+          communication: data.communication,
+        }),
+        ...(form.formState.dirtyFields.qualification && {
+          qualification: data.qualification,
+        }),
       };
 
       try {
@@ -348,6 +431,10 @@ export default function UserForm({
         geo_organization: data.geo_organization || undefined,
         is_service_account: isServiceAccount,
         role_orgs: roleOrganizations,
+        ...(!isServiceAccount && {
+          communication: data.communication,
+          qualification: data.qualification,
+        }),
       };
 
       try {
@@ -378,14 +465,10 @@ export default function UserForm({
   });
 
   useEffect(() => {
-    setSelectedGeoOrg(org && org.org_type === "govt" ? org : null);
-  }, [org, organizationId]);
-
-  useEffect(() => {
-    if (isEditMode && userData?.geo_organization) {
-      setSelectedGeoOrg(userData.geo_organization);
+    if (!isEditMode) {
+      setSelectedGeoOrg(org && org.org_type === "govt" ? org : null);
     }
-  }, [userData, isEditMode]);
+  }, [org, organizationId, isEditMode]);
 
   useEffect(() => {
     if (isEditMode || org?.org_type !== "role") {
@@ -410,10 +493,38 @@ export default function UserForm({
 
   const isSubmitting = updatePending || createPending;
 
+  if (isEditMode && isUserError && !userData) {
+    return (
+      <div role="alert" className="space-y-3">
+        <p>{t("something_went_wrong")}</p>
+        <Button type="button" variant="outline" onClick={() => refetchUser()}>
+          {t("retry")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (
+    isEditMode &&
+    (isLoadingUser || initializedUsername !== existingUsername)
+  ) {
+    return <Loading />;
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-start">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <div
+          data-profile-section="personal"
+          tabIndex={-1}
+          role="group"
+          aria-label={t("personal_information")}
+          className="grid grid-cols-2 md:grid-cols-4 gap-2 items-start scroll-mt-6 outline-none"
+        >
           <FormField
             control={form.control}
             name="prefix"
@@ -719,7 +830,13 @@ export default function UserForm({
           </>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+        <div
+          data-profile-section="contact"
+          tabIndex={-1}
+          role="group"
+          aria-label={t("contact_info")}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start scroll-mt-6 outline-none"
+        >
           <FormField
             control={form.control}
             name="phone_number"
@@ -815,6 +932,29 @@ export default function UserForm({
             </FormItem>
           )}
         />
+
+        {!(isServiceAccount || userData?.is_service_account) && (
+          <>
+            <div
+              data-profile-section="communication"
+              tabIndex={-1}
+              role="group"
+              aria-label={t("profile_communication")}
+              className="scroll-mt-6 outline-none"
+            >
+              <UserCommunicationFields />
+            </div>
+            <div
+              data-profile-section="qualification"
+              tabIndex={-1}
+              role="group"
+              aria-label={t("profile_qualifications")}
+              className="scroll-mt-6 outline-none"
+            >
+              <UserQualificationFields />
+            </div>
+          </>
+        )}
 
         <Button
           type="submit"
