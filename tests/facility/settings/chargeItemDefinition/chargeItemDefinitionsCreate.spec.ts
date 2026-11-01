@@ -5,6 +5,11 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+/** A tax-rate radio is named by its formatted percentage (e.g. "9.00%"). */
+function taxRateOption(rate: string) {
+  return new RegExp(`^${rate}(?:\\.0+)?%$`);
+}
+
 test.describe("Charge Item Definition Creation", () => {
   let facilityId: string;
   let title: string;
@@ -131,7 +136,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("cgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${cgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(cgstRate) })
       .click();
 
     await page
@@ -142,7 +147,7 @@ test.describe("Charge Item Definition Creation", () => {
     await page
       .getByText("sgst", { exact: true })
       .locator("../..")
-      .locator(`button[role="radio"][value="${sgstRate}"]`)
+      .getByRole("radio", { name: taxRateOption(sgstRate) })
       .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();

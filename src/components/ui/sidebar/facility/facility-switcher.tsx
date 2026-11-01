@@ -91,7 +91,11 @@ export function FacilitySwitcher({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-full"
                 onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => e.stopPropagation()}
+                // Keep typing out of the menu's typeahead, but let Escape
+                // reach the menu so it still closes from the search box.
+                onKeyDown={(e) => {
+                  if (e.key !== "Escape") e.stopPropagation();
+                }}
               />
               <InputGroupAddon>
                 <Search />

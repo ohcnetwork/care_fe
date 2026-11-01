@@ -89,7 +89,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
     );
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/^password$/i).fill("admin");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     const currentUserResponse = await currentUserResponsePromise;
     const { id: adminUserId } = (await currentUserResponse.json()) as {
       id: string;
@@ -142,7 +142,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
     // A mistyped password must not touch either draft.
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/^password$/i).fill("wrongpassword");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     await expect(page.getByText(/no active account found/i)).toBeVisible({
       timeout: 10000,
     });
@@ -159,7 +159,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
 
     // Sign in correctly as the same user.
     await page.getByLabel(/^password$/i).fill("admin");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     await page.waitForURL(loggedInUrl, { timeout: 15000 });
     await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
 

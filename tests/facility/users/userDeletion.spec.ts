@@ -20,9 +20,9 @@ test.describe("User Deletion Access Control", () => {
 
       // Login as admin user
       await page.getByRole("button", { name: "Log in as Staff" }).click();
-      await page.getByRole("textbox", { name: "Username" }).fill("admin");
-      await page.getByRole("textbox", { name: "Password" }).fill("admin");
-      await page.getByRole("button", { name: "Login" }).click();
+      await page.getByRole("textbox", { name: /username/i }).fill("admin");
+      await page.getByLabel(/^password$/i).fill("admin");
+      await page.getByRole("button", { name: /^sign in$/i }).click();
 
       // Wait for successful login and navigate to facility
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
@@ -34,7 +34,15 @@ test.describe("User Deletion Access Control", () => {
         .first();
       await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
       await firstFacilityLink.click();
-      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+      // The sidebar may already be expanded; only expand it when collapsed.
+      const sidebarToggle = page.getByRole("button", {
+        name: "Toggle Sidebar",
+        exact: true,
+      });
+      await expect(sidebarToggle).toBeVisible();
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
+      }
       await page.getByRole("link", { name: "Users" }).click();
 
       // Wait for users page to load by checking for See Details button
@@ -64,9 +72,9 @@ test.describe("User Deletion Access Control", () => {
 
       // Login as staff user
       await page.getByRole("button", { name: "Log in as Staff" }).click();
-      await page.getByRole("textbox", { name: "Username" }).fill("care-staff");
-      await page.getByRole("textbox", { name: "Password" }).fill("Ohcn@123");
-      await page.getByRole("button", { name: "Login" }).click();
+      await page.getByRole("textbox", { name: /username/i }).fill("care-staff");
+      await page.getByLabel(/^password$/i).fill("Ohcn@123");
+      await page.getByRole("button", { name: /^sign in$/i }).click();
 
       // Wait for successful login
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
