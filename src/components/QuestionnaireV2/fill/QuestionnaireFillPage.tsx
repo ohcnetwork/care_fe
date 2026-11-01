@@ -7,13 +7,10 @@ import { Button } from "@/components/ui/button";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { QuestionnaireSearch } from "@/components/Questionnaire/QuestionnaireSearch";
-import {
-  appendReferralNativeContext,
-  referralNativeQueryParams,
-} from "@/components/Referral/referralNativeNavigation";
+import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
 
+import { goBack } from "@/Utils/utils";
 import type { SubjectType } from "@/types/questionnaire/questionnaire";
-import { encounterPageKeySchema } from "@/types/workspace/encounterWorkspace";
 
 import { FillPageBody } from "./FillPageBody";
 import { FillShell } from "./FillShell";
@@ -57,7 +54,6 @@ export function QuestionnaireFillPage({
       resume_local_draft: resumeLocalDraftParam,
       prescription,
       toDischarge,
-      return_page: requestedReturnPage,
     },
   ] = useQueryParams();
   const patientBound = isPatientBound(subject) ? subject : undefined;
@@ -97,27 +93,35 @@ export function QuestionnaireFillPage({
     },
   );
 
-  const defaultExitTarget = exitTargetOf(subject);
-  const returnPage =
-    encounterPageKeySchema.safeParse(requestedReturnPage).data ?? "updates";
+  // Encounter forms open from many encounter pages (overview, medicines,
+  // service requests, custom pages, the command palette), so leaving goes
+  // back to whichever one opened the form; `exitTarget` is only the
+  // fallback when there is none (e.g. a form opened in a new tab). Other
+  // subjects always exit to their own page (patient updates, resource
+  // responses).
   const exitTarget =
     subject.type === "encounter"
       ? appendReferralNativeContext(
-          `${defaultExitTarget.slice(0, defaultExitTarget.lastIndexOf("/") + 1)}${returnPage}`,
+          exitTargetOf(subject),
           window.location.search,
         )
-      : defaultExitTarget;
+      : exitTargetOf(subject);
+  const exit = () =>
+    subject.type === "encounter" ? goBack(exitTarget) : navigate(exitTarget);
 
   if (!questionnaireId) {
     return (
-      <FillShell onClose={() => navigate(exitTarget)}>
+      <FillShell onClose={exit}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
           <h2 className="text-lg font-semibold text-gray-900">
             {t("select_questionnaire_to_fill")}
           </h2>
           {/* Default onSelect navigates to `questionnaire/{id}` relative to
               the current path, which lands on this mount's :questionnaireId
-              route for every subject. The trigger is supplied rather than
+              route for every subject. An encounter fill leaves by going
+              back, so its picker REPLACES this entry (carrying referral
+              context along) — otherwise leaving the form would land back
+              on this picker. The trigger is supplied rather than
               defaulted for the same reason the in-session picker's is: a
               `role="combobox"` takes no accessible name from its contents,
               so the only control on this screen would reach screen readers
@@ -127,14 +131,14 @@ export function QuestionnaireFillPage({
             subjectType={pickerSubjectType}
             facilityId={subject.facilityId}
             onSelect={
-              subject.type === "encounter" &&
-              referralNativeQueryParams(window.location.search).referralId
+              subject.type === "encounter"
                 ? (selected) =>
                     navigate(
                       appendReferralNativeContext(
-                        `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}?return_page=${encodeURIComponent(returnPage)}`,
+                        `/facility/${subject.facilityId}/patient/${subject.patientId}/encounter/${subject.encounterId}/questionnaire/${selected.id}`,
                         window.location.search,
                       ),
+                      { replace: true },
                     )
                 : undefined
             }
@@ -166,7 +170,7 @@ export function QuestionnaireFillPage({
     // jump shells when data lands — and the close affordance exists even
     // while loading.
     return (
-      <FillShell onClose={() => navigate(exitTarget)}>
+      <FillShell onClose={exit}>
         <div className="min-h-0 flex-1 overflow-hidden px-6 py-4">
           <FormSkeleton rows={10} />
         </div>
@@ -175,9 +179,7 @@ export function QuestionnaireFillPage({
   }
 
   if (isQuestionnaireError || !questionnaire) {
-    return (
-      <FillErrorPage message={t("no_data_found")} exitTarget={exitTarget} />
-    );
+    return <FillErrorPage message={t("no_data_found")} onExit={exit} />;
   }
 
   // The fetched questionnaire was authored for a subject family this mount
@@ -194,10 +196,7 @@ export function QuestionnaireFillPage({
     : questionnaire.subject_type !== subject.type;
   if (subjectTypeMismatch) {
     return (
-      <FillErrorPage
-        message={t("fill_subject_type_mismatch")}
-        exitTarget={exitTarget}
-      />
+      <FillErrorPage message={t("fill_subject_type_mismatch")} onExit={exit} />
     );
   }
 
@@ -208,10 +207,7 @@ export function QuestionnaireFillPage({
   // clinical data into it.
   if ((encounterId && isEncounterError) || isPatientError) {
     return (
-      <FillErrorPage
-        message={t("fill_context_load_failed")}
-        exitTarget={exitTarget}
-      />
+      <FillErrorPage message={t("fill_context_load_failed")} onExit={exit} />
     );
   }
 
@@ -223,9 +219,7 @@ export function QuestionnaireFillPage({
   // failed sub-request rolls the whole atomic batch back, so the URL
   // becomes an un-submittable dead end.
   if (isServerDraftError) {
-    return (
-      <FillErrorPage message={t("draft_load_failed")} exitTarget={exitTarget} />
-    );
+    return <FillErrorPage message={t("draft_load_failed")} onExit={exit} />;
   }
 
   // The URL is shareable: a draft the user may read but that belongs to
@@ -234,28 +228,18 @@ export function QuestionnaireFillPage({
   // list contains only drafts, so completed records use the recovery guard below.
   if (serverDraft?.status === "draft" && serverDraftForeign) {
     return (
-      <FillErrorPage
-        message={t("draft_subject_mismatch")}
-        exitTarget={exitTarget}
-      />
+      <FillErrorPage message={t("draft_subject_mismatch")} onExit={exit} />
     );
   }
 
   if (serverDraftState?.mismatch) {
-    return (
-      <FillErrorPage
-        message={t("draft_not_recoverable")}
-        exitTarget={exitTarget}
-      />
-    );
+    return <FillErrorPage message={t("draft_not_recoverable")} onExit={exit} />;
   }
 
   // A selected draft may have expired or been removed in another tab.
   // Do not present an empty form as though its answers were restored.
   if (resumeLocalDraft && !localDraft) {
-    return (
-      <FillErrorPage message={t("draft_load_failed")} exitTarget={exitTarget} />
-    );
+    return <FillErrorPage message={t("draft_load_failed")} onExit={exit} />;
   }
 
   // The route's patientId and encounterId disagree on whose encounter this
@@ -272,7 +256,7 @@ export function QuestionnaireFillPage({
     return (
       <FillErrorPage
         message={t("fill_patient_encounter_mismatch")}
-        exitTarget={exitTarget}
+        onExit={exit}
       />
     );
   }
@@ -307,7 +291,7 @@ export function QuestionnaireFillPage({
       }
       continueDraftId={continueDraftId}
       serverDraft={serverDraft}
-      exitTarget={exitTarget}
+      onExit={exit}
       contextRefreshFailed={contextRefreshFailed}
       isRetryingContext={isRetryingContext}
       onRetryContext={retryContext}
@@ -321,10 +305,10 @@ export function QuestionnaireFillPage({
  *  role="alert"). */
 function FillErrorPage({
   message,
-  exitTarget,
+  onExit,
 }: {
   message: string;
-  exitTarget: string;
+  onExit: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -333,7 +317,7 @@ function FillErrorPage({
         <AlertTitle>{t("error")}</AlertTitle>
         <AlertDescription>{message}</AlertDescription>
       </Alert>
-      <Button variant="outline" onClick={() => navigate(exitTarget)}>
+      <Button variant="outline" onClick={onExit}>
         <ArrowLeft className="size-4" />
         {t("back")}
       </Button>

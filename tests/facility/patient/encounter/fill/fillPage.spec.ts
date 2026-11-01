@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import {
   KITCHEN_SINK_FACILITY_SLUG,
@@ -166,6 +167,98 @@ test.describe("Fill page shell", () => {
       questionBlock(page, "Is bilateral air entry present?"),
     ).toBeVisible();
     expect(page.url()).toContain("/questionnaire/");
+  });
+
+  test("browsing the embedded clinical history does not strand the form's exit", async ({
+    page,
+  }) => {
+    const responseId = faker.string.uuid();
+    const title = `History response ${faker.string.alphanumeric(8)}`;
+    const author = {
+      username: faker.internet.username(),
+      first_name: faker.person.firstName(),
+      last_name: faker.person.lastName(),
+    };
+    await page.route(
+      `**/api/v1/patient/${getPatientId()}/questionnaire_response/?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            count: 1,
+            results: [
+              {
+                id: responseId,
+                created_date: new Date().toISOString(),
+                modified_date: new Date().toISOString(),
+                questionnaire: {
+                  id: faker.string.uuid(),
+                  slug: faker.string.alphanumeric(8),
+                  title,
+                  questions: [],
+                },
+                subject_id: getPatientId(),
+                encounter: getEncounterId(),
+                status: "completed",
+                responses: [],
+                created_by: author,
+                updated_by: author,
+              },
+            ],
+          },
+        }),
+    );
+
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const openerPath = fillUrl.split("/questionnaire/")[0] + "/updates";
+    await page.goto(openerPath);
+    const openerUrl = page.url();
+    await page
+      .getByRole("link", { name: "Edit encounter", exact: true })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "Form canvas", exact: true }),
+    ).toBeVisible();
+    const historyLength = await page.evaluate(() => window.history.length);
+
+    await page.getByRole("tab", { name: "Patient Clinical History" }).click();
+    await page.getByRole("tab", { name: "Responses" }).click();
+    // The left-hand selection card precedes the right-hand response content.
+    await page.getByText(title, { exact: true }).first().click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("responseId") === responseId,
+    );
+    await expect(
+      page.locator(`#response-${responseId} > [data-slot="card"]`),
+    ).toHaveClass(/ring-2/);
+    await expect(page.locator(`#response-${responseId}`)).toBeInViewport();
+    expect(new URL(page.url()).hash).toBe("");
+    expect(await page.evaluate(() => window.history.length)).toBe(
+      historyLength,
+    );
+
+    await page.getByRole("tab", { name: "Questionnaire", exact: true }).click();
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(page).toHaveURL(openerUrl);
+    await expect(
+      page.getByRole("region", { name: "Form canvas", exact: true }),
+    ).toHaveCount(0);
+  });
+
+  test("a form opened in a fresh tab closes to the overview", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: "tests/.auth/user.json",
+    });
+    const freshPage = await context.newPage();
+    await freshPage.goto(fillUrl);
+    await expect(
+      questionBlock(freshPage, "Is bilateral air entry present?"),
+    ).toBeVisible();
+    await freshPage.getByRole("button", { name: "Close", exact: true }).click();
+    await freshPage.waitForURL(/\/updates$/);
+
+    await context.close();
   });
 });
 

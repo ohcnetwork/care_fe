@@ -73,7 +73,9 @@ export function rendererSubjectOf(subject: FillSubject): RendererSubject {
   return { facilityId: subject.facilityId, resourceId };
 }
 
-/** Where Close/Cancel and a completed submission land. */
+/** Where Close/Cancel and a completed submission land. An encounter fill
+ *  goes back to the page that opened it instead, landing here only when
+ *  there is none (e.g. the form was opened in a new tab). */
 export function exitTargetOf(subject: FillSubject): string {
   switch (subject.type) {
     case "encounter":

@@ -33,7 +33,7 @@ export { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
 export const PLUGIN_ENCOUNTER_WIDGET_TYPE_PATTERN =
   /^[a-z0-9][a-z0-9_-]{0,63}\.[a-z][a-z0-9_]{0,63}$/;
 
-// Shared by custom page keys and questionnaire return links.
+// Custom page keys; each becomes its page's URL segment.
 export const encounterPageKeySchema = z
   .string()
   .regex(/^[a-z][a-z0-9_-]{0,63}$/)

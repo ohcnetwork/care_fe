@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ArrowRight, Menu } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
@@ -194,10 +194,16 @@ export const DiagnosticReportsTab = ({
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
-  const [qParams, setQueryParams] = useQueryParams<{
+  const [qParams, _setQueryParams] = useQueryParams<{
     reportId?: string;
     activityDefinition?: string;
   }>();
+
+  const setQueryParams = useCallback(
+    (next: Parameters<typeof _setQueryParams>[0]) =>
+      _setQueryParams(next, embedded ? { replace: true } : undefined),
+    [_setQueryParams, embedded],
+  );
 
   const { reportId, activityDefinition } = qParams;
 
