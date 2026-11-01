@@ -112,9 +112,11 @@ export function ValueSetVariantChooser({
       // This footer sits inside cmdk's <Command>, whose root key handler
       // claims Enter and the arrow keys for the result list with no check
       // on the event target — without this, Enter on "Change" is cancelled
-      // and picks the highlighted code instead. The chooser's own popover
-      // is portaled out, so its keys never reach here.
-      onKeyDown={(event) => event.stopPropagation()}
+      // and picks the highlighted code instead. Escape still bubbles (cmdk
+      // ignores it) so the surrounding popover can close.
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") event.stopPropagation();
+      }}
     >
       <span className="truncate">
         {t("valueset_using", { name: current?.name ?? slug })}
