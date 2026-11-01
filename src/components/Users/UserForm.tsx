@@ -135,12 +135,19 @@ export default function UserForm({
             proficiency: z.enum(CEFR_LEVELS).nullable().optional(),
           }),
         )
-        .refine(
-          (entries) =>
-            new Set(entries.map((entry) => entry.language.code)).size ===
-            entries.length,
-          t("profile_duplicate_language"),
-        ),
+        .superRefine((entries, context) => {
+          const languages = new Set<string>();
+          entries.forEach((entry, index) => {
+            if (languages.has(entry.language.code)) {
+              context.addIssue({
+                code: "custom",
+                message: t("profile_duplicate_language"),
+                path: [index, "language", "code"],
+              });
+            }
+            languages.add(entry.language.code);
+          });
+        }),
       qualification: z.array(
         z.object({
           degree: z

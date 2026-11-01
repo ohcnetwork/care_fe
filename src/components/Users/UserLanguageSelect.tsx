@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Autocomplete from "@/components/ui/autocomplete";
@@ -22,10 +22,14 @@ export function useUserLanguages() {
     },
     staleTime: Infinity,
   });
-  const names = new Intl.DisplayNames([i18n.resolvedLanguage || "en"], {
-    type: "language",
-    fallback: "none",
-  });
+  const names = useMemo(
+    () =>
+      new Intl.DisplayNames([i18n.resolvedLanguage || "en"], {
+        type: "language",
+        fallback: "none",
+      }),
+    [i18n.resolvedLanguage],
+  );
   const languageName = (code: string) => {
     const language = languages.data?.[code];
     return language?.alpha2

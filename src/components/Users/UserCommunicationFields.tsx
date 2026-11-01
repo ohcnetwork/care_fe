@@ -141,15 +141,6 @@ export function UserCommunicationFields() {
           </div>
         </fieldset>
       ))}
-      <FormField
-        control={control}
-        name="communication"
-        render={() => (
-          <FormItem>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       <Button
         type="button"
         variant="outline"

@@ -97,8 +97,27 @@ test("saves professional details, preserves credential metadata and clears remov
       exact: true,
     });
     await language.getByRole("combobox", { name: /^Language/ }).click();
+    await page.getByPlaceholder("Search languages").fill("English");
+    await page.getByRole("option", { name: "English", exact: true }).click();
+    await dialog
+      .getByRole("button", { name: "Update User", exact: true })
+      .click();
+    await expect(
+      language.getByText("Each language can only be added once.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      language.getByRole("combobox", { name: /^Language/ }),
+    ).toHaveAttribute("aria-invalid", "true");
+    await language.getByRole("combobox", { name: /^Language/ }).click();
     await page.getByPlaceholder("Search languages").fill("Malayalam");
     await page.getByRole("option", { name: "Malayalam", exact: true }).click();
+    await expect(
+      dialog.getByText("Each language can only be added once.", {
+        exact: true,
+      }),
+    ).not.toBeVisible();
     await language
       .getByRole("combobox", { name: "Proficiency", exact: true })
       .click();
