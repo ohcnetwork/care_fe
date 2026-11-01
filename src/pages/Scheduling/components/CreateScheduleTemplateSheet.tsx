@@ -31,7 +31,6 @@ import {
   SheetContent,
   SheetDescription,
   SheetFooter,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -322,15 +321,13 @@ export default function CreateScheduleTemplateSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-fit">
-        <SheetHeader>
-          <SheetTitle>{t("create_schedule_template")}</SheetTitle>
-          <SheetDescription className="sr-only">
-            {t("create_schedule_template")}
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent className="flex min-w-full flex-col bg-background sm:min-w-fit">
+        <SheetTitle>{t("create_schedule_template")}</SheetTitle>
+        <SheetDescription className="sr-only">
+          {t("create_schedule_template")}
+        </SheetDescription>
 
-        <div className="-mx-6 mb-16 overflow-auto px-6 pb-16 pt-6">
+        <div className="-mx-6 overflow-auto px-6 pb-32 md:pb-16 pt-6 bg-muted-background">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -788,7 +785,7 @@ export default function CreateScheduleTemplateSheet({
                 <span>{t("add_another_session")}</span>
               </Button>
 
-              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white p-6">
+              <SheetFooter className="absolute inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 pb-4">
                 <SheetClose asChild>
                   <Button
                     variant="outline"
