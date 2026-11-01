@@ -267,10 +267,17 @@ export default function RenderDateFilter({
       ? !options.some((option) => isSameRange(option))
       : false;
 
+  // Sync from the applied filter by date value, not object identity: the
+  // parent hands over a new `selected` object on every render, which would
+  // otherwise wipe a custom range the user is still typing.
+  const selectedFrom = selected.from?.getTime();
+  const selectedTo = selected.to?.getTime();
   useEffect(() => {
-    setDateFrom(selected.from);
-    setDateTo(selected.to);
-  }, [selected]);
+    setDateFrom(
+      selectedFrom === undefined ? undefined : new Date(selectedFrom),
+    );
+    setDateTo(selectedTo === undefined ? undefined : new Date(selectedTo));
+  }, [selectedFrom, selectedTo]);
 
   return (
     <div className="pt-0">
