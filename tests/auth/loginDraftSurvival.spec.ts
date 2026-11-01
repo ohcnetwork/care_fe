@@ -87,6 +87,12 @@ test.describe("Fill draft lifecycle at the login form", () => {
     const currentUserResponsePromise = page.waitForResponse(
       (res) => res.url().includes("/getcurrentuser/") && res.ok(),
     );
+    // Once the user loads, AuthUserProvider refreshes the token and writes
+    // the new pair to localStorage. Stripping the tokens before that write
+    // lands lets it put them back, and /login then opens signed in.
+    const tokenRefreshResponsePromise = page.waitForResponse(
+      (res) => res.url().includes("/auth/token/refresh/") && res.ok(),
+    );
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/^password$/i).fill("admin");
     await page.getByRole("button", { name: /^sign in$/i }).click();
@@ -96,6 +102,14 @@ test.describe("Fill draft lifecycle at the login form", () => {
     };
     expect(adminUserId).toBeTruthy();
     await page.waitForURL(loggedInUrl, { timeout: 15000 });
+    const { access: refreshedAccessToken } = (await (
+      await tokenRefreshResponsePromise
+    ).json()) as { access: string };
+    await expect
+      .poll(() =>
+        page.evaluate((key) => localStorage.getItem(key), ACCESS_TOKEN_KEY),
+      )
+      .toBe(refreshedAccessToken);
 
     // Drop back to a logged-out /login without going through the sign-out
     // UI: signOut() does a full, unconditional draft clear (unchanged by
