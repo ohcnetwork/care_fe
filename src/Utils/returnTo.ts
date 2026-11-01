@@ -6,7 +6,10 @@ export function safeInternalPath(value?: string | null) {
   if (!value?.startsWith("/") || value.startsWith("//")) return undefined;
   try {
     const url = new URL(value, LOCAL_ORIGIN);
-    if (url.origin !== LOCAL_ORIGIN) return undefined;
+    // Dot segments can normalize to a leading `//`, which is another site.
+    if (url.origin !== LOCAL_ORIGIN || url.pathname.startsWith("//")) {
+      return undefined;
+    }
     return url.pathname + url.search + url.hash;
   } catch {
     return undefined;

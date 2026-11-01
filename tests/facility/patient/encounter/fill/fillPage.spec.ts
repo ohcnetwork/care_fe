@@ -197,7 +197,11 @@ test.describe("Fill page exit", () => {
     await leaveWith(`${encounterUrl}/medicines`);
     await page.waitForURL(/\/medicines$/);
 
-    for (const outside of ["https://example.com/", "//example.com/"]) {
+    for (const outside of [
+      "https://example.com/",
+      "//example.com/",
+      "/a/..//example.com/",
+    ]) {
       await leaveWith(outside);
       await page.waitForURL(/\/updates$/);
     }
