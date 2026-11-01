@@ -253,7 +253,7 @@ export const EncounterShow = (props: Props) => {
           variant="ghost"
           size="xs"
           data-shortcut-id="go-back"
-          className="w-fit text-gray-700"
+          className="min-h-11 w-fit text-gray-700 md:min-h-8"
           onClick={() =>
             // Sections, forms and historical encounters (with their detail
             // pages) are all this patient's chart; leave to the page it was

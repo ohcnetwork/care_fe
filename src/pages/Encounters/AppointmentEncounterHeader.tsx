@@ -364,7 +364,7 @@ const AppointmentEncounterHeaderActions = ({
       <div
         role="group"
         aria-label={t("encounter_actions")}
-        className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
+        className="ml-auto flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
       >
         <span className="hidden text-sm text-gray-700 xl:inline">
           {t("do_you_want_to_start_this_encounter")}
@@ -387,7 +387,7 @@ const AppointmentEncounterHeaderActions = ({
     <div
       role="group"
       aria-label={t("encounter_actions")}
-      className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
+      className="ml-auto flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
     >
       {encounter.appointment?.status !== AppointmentStatus.FULFILLED && (
         <span className="hidden text-sm text-gray-700 xl:inline">
