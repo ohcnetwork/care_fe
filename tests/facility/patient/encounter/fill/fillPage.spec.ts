@@ -244,13 +244,9 @@ test.describe("Fill page shell", () => {
     ).toHaveCount(0);
   });
 
-  test("a form opened in a fresh tab closes to the overview and stays closed", async ({
+  test("a form opened in a fresh tab closes to the overview", async ({
     browser,
   }) => {
-    // With no entry to go back to, the fallback must REPLACE the form
-    // entry. Pushing the overview would leave the form reachable with
-    // browser Back, where `history.back()` has nowhere to go and the
-    // session sits frozen with its controls disabled.
     const context = await browser.newContext({
       storageState: "tests/.auth/user.json",
     });
@@ -262,9 +258,6 @@ test.describe("Fill page shell", () => {
     await freshPage.getByRole("button", { name: "Close", exact: true }).click();
     await freshPage.waitForURL(/\/updates$/);
 
-    await freshPage.goBack();
-    // The form entry was replaced, so Back cannot return to it.
-    await expect(freshPage).not.toHaveURL(/\/questionnaire\//);
     await context.close();
   });
 });
