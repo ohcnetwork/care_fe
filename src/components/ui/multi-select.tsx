@@ -61,17 +61,12 @@ export function MultiSelect({
   const selectAllId = React.useId();
 
   const handleOpenChange = (nextOpen: boolean) => {
-    setSelectedValues(value);
+    if (nextOpen) {
+      setSelectedValues(value);
+    } else {
+      onValueChange(selectedValues);
+    }
     setOpen(nextOpen);
-  };
-
-  const handleSelectionChange = (nextValues: string[]) => {
-    setSelectedValues(nextValues);
-    onValueChange(nextValues);
-  };
-
-  const handleDone = () => {
-    setOpen(false);
   };
 
   const groups = [
@@ -153,7 +148,7 @@ export function MultiSelect({
           id={selectAllId}
           checked={allSelected}
           onCheckedChange={() =>
-            handleSelectionChange(
+            setSelectedValues(
               allSelected ? [] : options.map((option) => option.value),
             )
           }
@@ -186,7 +181,7 @@ export function MultiSelect({
         )}
       </ComboboxList>
       <div className="flex shrink-0 justify-end gap-2 border-t border-border p-3">
-        <Button onClick={handleDone}>{t("done")}</Button>
+        <Button onClick={() => handleOpenChange(false)}>{t("done")}</Button>
       </div>
     </>
   );
@@ -196,7 +191,7 @@ export function MultiSelect({
       multiple
       items={groups}
       value={selectedValues}
-      onValueChange={handleSelectionChange}
+      onValueChange={setSelectedValues}
       itemToStringLabel={(optionValue) =>
         options.find((option) => option.value === optionValue)?.label ??
         optionValue
