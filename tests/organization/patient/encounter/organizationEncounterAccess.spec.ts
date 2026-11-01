@@ -17,11 +17,13 @@ test.describe("Patient Encounter Access via Organization", () => {
     // Click "View Encounter" link
     await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    // Verify we can see the encounter page
+    // Verify we can see the encounter page: the header shows its class
     await expect(
-      page.getByRole("heading", {
-        name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
-      }),
+      page
+        .getByRole("region", { name: "Encounter", exact: true })
+        .getByText(
+          /^(Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health)$/i,
+        ),
     ).toBeVisible();
   });
 });

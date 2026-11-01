@@ -7,6 +7,17 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+/**
+ * Each starting-point radio takes its accessible name from its whole option
+ * card (title + hint), so match the option title at the start of the name.
+ */
+function usageModeRadio(
+  page: Page,
+  title: "Separate value set" | "Facility customization",
+) {
+  return page.getByRole("radio", { name: new RegExp(`^${title}`) });
+}
+
 test.describe("Facility value sets", () => {
   let facilityId: string;
   let basePath: string;
@@ -45,14 +56,9 @@ test.describe("Facility value sets", () => {
       await expect(
         page.getByRole("heading", { name: "Starting point", exact: true }),
       ).toBeVisible();
+      await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
       await expect(
-        page.getByRole("radio", { name: "Separate value set", exact: true }),
-      ).toBeChecked();
-      await expect(
-        page.getByRole("radio", {
-          name: "Facility customization",
-          exact: true,
-        }),
+        usageModeRadio(page, "Facility customization"),
       ).toBeDisabled();
 
       await page.getByRole("button", { name: "Add Rule" }).first().click();
@@ -133,10 +139,7 @@ test.describe("Facility value sets", () => {
 
       await test.step("The create form is seeded as an override of the parent", async () => {
         await expect(
-          page.getByRole("radio", {
-            name: "Facility customization",
-            exact: true,
-          }),
+          usageModeRadio(page, "Facility customization"),
         ).toBeChecked();
         const slug = page.getByRole("textbox", { name: "Slug *" });
         await expect(slug).toBeDisabled();
@@ -155,14 +158,8 @@ test.describe("Facility value sets", () => {
         await useParentRules.click();
         await expect(useParentRules).not.toBeChecked();
         const slug = page.getByRole("textbox", { name: "Slug *" });
-        const separate = page.getByRole("radio", {
-          name: "Separate value set",
-          exact: true,
-        });
-        const customization = page.getByRole("radio", {
-          name: "Facility customization",
-          exact: true,
-        });
+        const separate = usageModeRadio(page, "Separate value set");
+        const customization = usageModeRadio(page, "Facility customization");
         const separateSlug = `local-${Date.now()}`;
 
         await separate.click();
@@ -304,15 +301,8 @@ test.describe("Facility value-set slug safeguards (mocked, no writes)", () => {
     const { mutations, catalogueQueries } = await mockSharedCatalogue(page);
     await page.goto(`/facility/${getFacilityId()}/settings/valuesets/create`);
 
-    await expect(
-      page.getByRole("radio", { name: "Separate value set", exact: true }),
-    ).toBeChecked();
-    await expect(
-      page.getByRole("radio", {
-        name: "Facility customization",
-        exact: true,
-      }),
-    ).toBeDisabled();
+    await expect(usageModeRadio(page, "Separate value set")).toBeChecked();
+    await expect(usageModeRadio(page, "Facility customization")).toBeDisabled();
     await page.getByRole("textbox", { name: "Name *" }).fill("Local options");
     const slug = page.getByRole("textbox", { name: "Slug *" });
     await slug.fill(RETIRED_SHARED_VALUE_SET.slug);

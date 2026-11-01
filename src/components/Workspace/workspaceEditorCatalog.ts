@@ -23,6 +23,7 @@ import {
   PanelsTopLeft,
   Pill,
   PillBottle,
+  Scissors,
   ShieldAlert,
   Sparkles,
   Star,
@@ -64,6 +65,13 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     labelKey: "symptoms",
     descriptionKey: "workspace_widget_symptoms_description",
     icon: Activity,
+    group: "clinical",
+  },
+  {
+    type: "procedures",
+    labelKey: "procedures",
+    descriptionKey: "workspace_widget_procedures_description",
+    icon: Scissors,
     group: "clinical",
   },
   {

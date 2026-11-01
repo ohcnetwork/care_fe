@@ -17,6 +17,7 @@ export const CLINICAL_HISTORY_TABS = [
   "diagnostic_reports",
   "symptoms",
   "diagnoses",
+  "procedures",
   "allergies",
   "medications",
 ] as const;
@@ -426,6 +427,7 @@ function clinicalHistorySchema(t: TFunction): JSONSchema2020 {
     diagnostic_reports: t("diagnostic_report_other", { count: 2 }),
     symptoms: t("past_symptoms"),
     diagnoses: t("past_diagnoses"),
+    procedures: t("past_procedures"),
     allergies: t("allergies"),
     medications: t("past_medications"),
   };
@@ -512,6 +514,7 @@ const coreConfigSchemas = {
   allergies: noConfigSchema,
   symptoms: noConfigSchema,
   diagnosis: noConfigSchema,
+  procedures: noConfigSchema,
   vitals: vitalsSchema,
   questionnaire_responses: responsesSchema,
   service_requests: serviceRequestsSchema,

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
+import { ProceduresList } from "@/components/Patient/procedures/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
@@ -448,6 +449,8 @@ function WorkspaceWidgetContent({
       return <SymptomsList {...props} />;
     case "diagnosis":
       return <DiagnosisList {...props} />;
+    case "procedures":
+      return <ProceduresList {...props} />;
   }
 
   if (!pluginWidget) return loading;

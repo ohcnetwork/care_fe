@@ -266,6 +266,8 @@ test.describe("Shared workspace navigation", () => {
       name: "Back to facility",
       exact: true,
     });
+    // A point inside the link that the sticky detail header also covers.
+    let sharedPoint = { x: 0, y: 0 };
 
     await test.step("Preview overlays the detail header without moving the page", async () => {
       await expect(heading).toBeVisible();
@@ -298,25 +300,30 @@ test.describe("Shared workspace navigation", () => {
       const linkBounds = await backLink.boundingBox();
       expect(headerBounds).not.toBeNull();
       expect(linkBounds).not.toBeNull();
-      const x = linkBounds!.x + linkBounds!.width / 2;
-      const y = linkBounds!.y + linkBounds!.height / 2;
       // This must exercise the shared screen area, not a lower link that
-      // would still work when the sticky detail header covers the preview.
+      // would still work when the sticky detail header covers the preview,
+      // so probe the middle of the band the link shares with the header.
+      const top = Math.max(linkBounds!.y, headerBounds!.y);
+      const bottom = Math.min(
+        linkBounds!.y + linkBounds!.height,
+        headerBounds!.y + headerBounds!.height,
+      );
+      expect(bottom).toBeGreaterThan(top);
+      const x = linkBounds!.x + linkBounds!.width / 2;
       expect(x).toBeGreaterThan(headerBounds!.x);
       expect(x).toBeLessThan(headerBounds!.x + headerBounds!.width);
-      expect(y).toBeGreaterThan(headerBounds!.y);
-      expect(y).toBeLessThan(headerBounds!.y + headerBounds!.height);
+      sharedPoint = {
+        x: linkBounds!.width / 2,
+        y: (top + bottom) / 2 - linkBounds!.y,
+      };
       await expect
         .poll(() =>
-          backLink.evaluate((element) => {
+          backLink.evaluate((element, point) => {
             const bounds = element.getBoundingClientRect();
             return element.contains(
-              document.elementFromPoint(
-                bounds.x + bounds.width / 2,
-                bounds.y + bounds.height / 2,
-              ),
+              document.elementFromPoint(bounds.x + point.x, bounds.y + point.y),
             );
-          }),
+          }, sharedPoint),
         )
         .toBe(true);
     });
@@ -335,7 +342,7 @@ test.describe("Shared workspace navigation", () => {
     });
 
     await test.step("An overlapping upper sidebar link navigates on a real click", async () => {
-      await backLink.click();
+      await backLink.click({ position: sharedPoint });
       await expect(page).toHaveURL(`${facilityPath}/overview`);
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(state).toHaveAttribute("data-app-sidebar-preview", "false");
@@ -705,6 +712,12 @@ test.describe("Shared workspace navigation", () => {
         ).toHaveCount(0);
         await expect(
           navigation.getByRole("button", { name: "Encounters", exact: true }),
+        ).toHaveCount(0);
+        await expect(
+          navigation.getByRole("link", {
+            name: "Search patients",
+            exact: true,
+          }),
         ).toHaveCount(0);
         await expect(
           navigation.getByRole("link", { name: "Settings", exact: true }),

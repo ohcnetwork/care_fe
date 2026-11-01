@@ -58,6 +58,7 @@ export const CORE_WIDGET_REQUIREMENTS = {
   allergies: clinical,
   symptoms: clinical,
   diagnosis: clinical,
+  procedures: clinical,
   vitals: clinical,
   questionnaire_responses: clinical,
   service_requests: clinical,

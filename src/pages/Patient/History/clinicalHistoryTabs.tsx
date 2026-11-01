@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
+import { ProceduresList } from "@/components/Patient/procedures/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
@@ -9,6 +10,7 @@ import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
 import { ImmunizationHistory } from "./ImmunizationHistory";
+import { ProceduresHistory } from "./ProceduresHistory";
 import { ResponsesHistory } from "./ResponsesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
 
@@ -69,6 +71,15 @@ export function useClinicalHistoryTabs({
         <DiagnosisList patientId={patientId} showTimeline readOnly />
       ) : (
         <DiagnosesHistory patientId={patientId} />
+      ),
+    },
+    procedures: {
+      visible: !access || access.clinicalData,
+      label: t("past_procedures"),
+      component: embedded ? (
+        <ProceduresList patientId={patientId} showTimeline readOnly />
+      ) : (
+        <ProceduresHistory patientId={patientId} />
       ),
     },
     allergies: {

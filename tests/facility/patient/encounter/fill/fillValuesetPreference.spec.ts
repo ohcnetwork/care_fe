@@ -7,11 +7,12 @@ import {
   pickValuesetFromAutocomplete,
   questionBlock,
 } from "tests/helper/questionnaireV2";
-import { closeAnyOpenPopovers, expectToast } from "tests/helper/ui";
+import { expectToast } from "tests/helper/ui";
 import {
   createFacilityOverride,
+  createInstanceValueSet,
   deleteFacilityValueSetsBySlug,
-  getInstanceValueSetIdBySlug,
+  deleteValueSet,
   resolveSlugForFacility,
 } from "tests/helper/valueSet";
 import { getEncounterId } from "tests/support/encounterId";
@@ -19,9 +20,6 @@ import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-const PARENT_SLUG = "system-ucum-units";
-const PARENT_NAME = "UCUM Units";
 
 /** Picks a question type by its cmdk data-value token. */
 async function pickType(page: Page, type: string): Promise<void> {
@@ -43,15 +41,22 @@ test.describe("Fill page: choosing between value-set variants", () => {
   }) => {
     const facilityId = getFacilityId();
     const stamp = Date.now();
-    const overrideName = `UCUM facility ${stamp}`;
+    // A facility override wins for every fill in the facility, so this spec
+    // overrides its own instance set, not one other specs are bound to.
+    const parentSlug = `e2e-preference-${stamp}`;
+    const parentName = `E2E Preference Units ${stamp}`;
+    const overrideName = `E2E Preference Override ${stamp}`;
     const questionTitle = `Dose unit ${stamp}`;
     let questionnaireId = "";
 
-    await deleteFacilityValueSetsBySlug(facilityId, PARENT_SLUG);
+    const parentId = await createInstanceValueSet({
+      slug: parentSlug,
+      name: parentName,
+    });
     const overrideId = await createFacilityOverride({
       facilityId,
-      parentId: await getInstanceValueSetIdBySlug(PARENT_SLUG),
-      parentSlug: PARENT_SLUG,
+      parentId,
+      parentSlug,
       name: overrideName,
     });
 
@@ -69,8 +74,8 @@ test.describe("Fill page: choosing between value-set variants", () => {
         await pickType(page, "choice");
         await page.getByRole("radio", { name: "Value Set" }).click();
         await pickValuesetFromAutocomplete(page, {
-          search: "UCUM",
-          optionName: `${PARENT_NAME} (Instance)`,
+          search: parentName,
+          optionName: `${parentName} (Instance)`,
         });
         await page.getByRole("button", { name: "Save Changes" }).click();
         await expectToast(page, "Questionnaire updated successfully");
@@ -113,7 +118,13 @@ test.describe("Fill page: choosing between value-set variants", () => {
       await expect(block).toHaveCount(1);
 
       const openPicker = async () => {
-        await closeAnyOpenPopovers(page);
+        // Close the picker a previous step left open: clicking the combobox
+        // would otherwise toggle it shut instead of reopening it.
+        const openDialog = page.getByRole("dialog").last();
+        if (await openDialog.isVisible().catch(() => false)) {
+          await page.keyboard.press("Escape");
+          await expect(openDialog).toBeHidden();
+        }
         await block.getByRole("combobox").click();
         const dialog = page.getByRole("dialog").last();
         const scope = (await dialog.isVisible().catch(() => false))
@@ -140,26 +151,27 @@ test.describe("Fill page: choosing between value-set variants", () => {
         await choose(scope, overrideName);
         await expect(scope.getByText(`Using ${overrideName}`)).toBeVisible();
         expect(
-          (await resolveSlugForFacility(PARENT_SLUG, facilityId)).name,
+          (await resolveSlugForFacility(parentSlug, facilityId)).name,
         ).toBe(overrideName);
       });
 
       await test.step("Pick the instance set; the preference persists across reopen", async () => {
         const scope = await openPicker();
-        await choose(scope, PARENT_NAME);
-        await expect(scope.getByText(`Using ${PARENT_NAME}`)).toBeVisible();
+        await choose(scope, parentName);
+        await expect(scope.getByText(`Using ${parentName}`)).toBeVisible();
         // Asserted server-side: reopening alone would only prove the
         // client's cache changed, and the toast from the previous pick can
         // still be on screen.
         expect(
-          (await resolveSlugForFacility(PARENT_SLUG, facilityId)).name,
-        ).toBe(PARENT_NAME);
+          (await resolveSlugForFacility(parentSlug, facilityId)).name,
+        ).toBe(parentName);
 
         const reopened = await openPicker();
-        await expect(reopened.getByText(`Using ${PARENT_NAME}`)).toBeVisible();
+        await expect(reopened.getByText(`Using ${parentName}`)).toBeVisible();
       });
     } finally {
-      await deleteFacilityValueSetsBySlug(facilityId, PARENT_SLUG);
+      await deleteFacilityValueSetsBySlug(facilityId, parentSlug);
+      await deleteValueSet(parentId);
     }
   });
 });
