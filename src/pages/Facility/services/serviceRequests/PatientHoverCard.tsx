@@ -5,7 +5,12 @@ import { Avatar } from "@/components/Common/Avatar";
 import { PatientAge } from "@/components/Patient/PatientAge";
 import { PatientInfoHoverCard } from "@/components/Patient/PatientInfoHoverCard";
 import { Badge } from "@/components/ui/badge";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -62,11 +67,13 @@ export function PatientHoverCard({
             presentation={presentation}
           />
         </DrawerTrigger>
-        <DrawerContent className="flex flex-col p-4 gap-4">
-          <PatientInfoHoverCard
-            patient={patient}
-            facilityId={facilityId || ""}
-          />
+        <DrawerContent>
+          <DrawerBody className="pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <PatientInfoHoverCard
+              patient={patient}
+              facilityId={facilityId || ""}
+            />
+          </DrawerBody>
         </DrawerContent>
       </Drawer>
 
@@ -86,7 +93,7 @@ export function PatientHoverCard({
           />
         </PopoverTrigger>
         <PopoverContent
-          className="flex flex-col border border-border shadow-lg p-4 rounded-md gap-4 w-100"
+          className="flex flex-col border border-border shadow-lg p-4 rounded-md w-100"
           side="bottom"
           align="start"
         >

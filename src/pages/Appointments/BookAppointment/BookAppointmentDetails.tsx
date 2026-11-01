@@ -119,7 +119,7 @@ export const BookAppointmentDetails = ({
     await createAppointment({
       patient: patientId,
       note: reason,
-      tags: selectedTags.map((tag) => tag.id),
+      tags: selectedTags.map((tag) => ({ tag: tag.id })),
     });
   };
 

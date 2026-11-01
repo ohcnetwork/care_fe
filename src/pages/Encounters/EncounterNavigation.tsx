@@ -57,7 +57,7 @@ export default function EncounterNavigation({
         />
         <TabsList
           aria-label={t("encounter_navigation")}
-          className="hidden h-auto w-full flex-col items-stretch justify-start gap-1 rounded-none bg-transparent p-0 lg:flex"
+          className="hidden h-auto w-full flex-col items-stretch justify-start gap-1 rounded-none bg-transparent p-0 ring-0 lg:flex"
         >
           {visibleTabs.map(([key, { label, icon: Icon, shortcutId }]) => (
             <TabsTrigger

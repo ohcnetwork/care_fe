@@ -165,15 +165,10 @@ export default function TagAssignmentSheet({
         : entityConfig.removeTagsApi;
 
     const createBodyPayload = (tags: string[]) => {
-      if (
-        entityType === "location" ||
-        entityType === "charge_item_definition"
-      ) {
-        return { tags: tags.map((tag) => ({ tag })) };
-      }
+      const tagRequests = tags.map((tag) => ({ tag }));
       return isFacilityPatientTag
-        ? { tags, facility: facilityId || null }
-        : { tags };
+        ? { tags: tagRequests, facility: facilityId || null }
+        : { tags: tagRequests };
     };
 
     return { apiEndpoint, createBodyPayload };
