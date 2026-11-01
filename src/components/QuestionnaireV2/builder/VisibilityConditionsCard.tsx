@@ -25,8 +25,7 @@ interface VisibilityConditionsCardProps {
   onChange: (patch: Partial<Question>) => void;
   /** Render the rule editor without the collapsible card shell — the
    *  studio inspector hosts it flat inside its Logic tab, adding the
-   *  reference design's "Always shown" empty state and gating the AND/OR
-   *  chips on rules existing. */
+   *  reference design's "Always shown" empty state. */
   bare?: boolean;
 }
 
