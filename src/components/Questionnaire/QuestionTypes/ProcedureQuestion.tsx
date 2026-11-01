@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -577,19 +577,19 @@ const ProcedureRow = React.memo(function ProcedureRow({
                         </Button>
                       )}
                       {/* Decorative: the whole card header is the toggle. */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                      <span
                         aria-hidden
-                        tabIndex={-1}
-                        className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none",
+                        )}
                       >
                         {isOpen ? (
                           <ChevronsDownUp className="size-5" />
                         ) : (
                           <ChevronsUpDown className="size-5" />
                         )}
-                      </Button>
+                      </span>
                     </div>
                   </div>
                   {!isOpen && (
