@@ -985,7 +985,10 @@ async function mockEncounterWorkspaceApi(
           const results = questionnaireResponses
             .filter(
               (item) =>
-                item.encounter === url.searchParams.get("encounter") &&
+                (!url.searchParams.has("encounter") ||
+                  item.encounter === url.searchParams.get("encounter")) &&
+                (!url.searchParams.has("created_by") ||
+                  item.created_by.id === url.searchParams.get("created_by")) &&
                 (!url.searchParams.has("questionnaire_slug") ||
                   item.questionnaire.slug ===
                     url.searchParams.get("questionnaire_slug")),
@@ -1115,68 +1118,6 @@ async function mockEncounterWorkspaceApi(
     basePath: `/facility/${facility.id}/patient/${patient.id}/encounter/${currentEncounter.id}`,
   };
 }
-
-test("limited observation timelines select measurement time across backend pages", async ({
-  page,
-}) => {
-  const fixture = await mockEncounterWorkspaceApi(page);
-  fixture.workspace.template = {
-    schema_version: 2,
-    surface: "encounter",
-    pages: [
-      {
-        kind: "custom",
-        key: "latest",
-        title: "Latest measurements",
-        columns: [
-          {
-            span: 12,
-            widgets: [{ type: "observations", config: { limit: 1 } }],
-          },
-        ],
-      },
-    ],
-  };
-  const readings = Array.from({ length: 21 }, (_, index) => ({
-    id: faker.string.uuid(),
-    encounter: fixture.currentEncounter.id,
-    effective_datetime:
-      index === 20 ? "2026-10-02T12:00:00Z" : "2026-10-01T12:00:00Z",
-    modified_date: "2026-10-03T12:00:00Z",
-    main_code: {
-      system: "test",
-      code: String(index),
-      display: index === 20 ? "Newest measurement" : "Backdated measurement",
-    },
-    value_type: "decimal",
-    value: { value: index === 20 ? 91 : 76 },
-  }));
-  const offsets: number[] = [];
-  await page.route(
-    (url) =>
-      url.pathname === `/api/v1/patient/${fixture.patient.id}/observation/`,
-    async (route) => {
-      const url = new URL(route.request().url());
-      const offset = Number(url.searchParams.get("offset"));
-      const limit = Number(url.searchParams.get("limit"));
-      offsets.push(offset);
-      await route.fulfill({
-        json: {
-          count: readings.length,
-          results: readings.slice(offset, offset + limit),
-        },
-      });
-    },
-  );
-  await page.goto(`${fixture.basePath}/latest`);
-  await expect(
-    page.getByText("Newest measurement", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("Backdated measurement", { exact: true }),
-  ).toHaveCount(0);
-  expect(offsets).toEqual([0, 20]);
-});
 
 test.describe("Encounter workspace rendering", () => {
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
@@ -3675,7 +3616,7 @@ test.describe("Encounter workspace rendering", () => {
   });
 });
 
-test("studio full response browsers and location history stay read-only on closed encounters", async ({
+test("studio response lists and location history stay read-only on closed encounters", async ({
   page,
 }) => {
   const fixture = await mockEncounterWorkspaceApi(page, {
@@ -3692,14 +3633,16 @@ test("studio full response browsers and location history stay read-only on close
         columns: [
           {
             span: 8,
-            widgets: [{ type: "responses", title: "Encounter forms" }],
+            widgets: [
+              {
+                type: "questionnaire_responses",
+                title: "Encounter forms",
+              },
+            ],
           },
           {
             span: 3,
-            widgets: [
-              { type: "locations", title: "Visit locations" },
-              { type: "history_diagnoses", title: "Patient diagnoses" },
-            ],
+            widgets: [{ type: "locations", title: "Visit locations" }],
           },
           {
             span: 1,
@@ -3749,15 +3692,6 @@ test("studio full response browsers and location history stay read-only on close
     sheet.getByRole("tab", { name: /assign location/i }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
-  await expect
-    .poll(() =>
-      fixture.clinicalReads.some(
-        (url) =>
-          url.pathname.endsWith("/diagnosis/") &&
-          !url.searchParams.has("encounter"),
-      ),
-    )
-    .toBe(true);
 
   await page.getByRole("tab", { name: "Responses", exact: true }).click();
   await expect(
@@ -3797,7 +3731,7 @@ test("studio history layouts work without an active encounter and remain separat
           columns: [
             {
               span: 12,
-              widgets: [{ type: "history_diagnoses", title: "All diagnoses" }],
+              widgets: [{ type: "diagnosis", title: "All diagnoses" }],
             },
           ],
         },
@@ -3891,112 +3825,90 @@ test("studio history layouts work without an active encounter and remain separat
   ).toBeVisible();
 });
 
-test("studio full service-request browsers keep filters local to each widget", async ({
+test("studio history pages can show only the forms the viewer submitted", async ({
   page,
 }) => {
   const fixture = await mockEncounterWorkspaceApi(page, {
     includeSectionData: true,
-    includeConfigData: true,
   });
-  fixture.workspace.template = {
-    schema_version: 2,
-    surface: "encounter",
-    pages: [
-      {
-        kind: "custom",
-        key: "rounds",
-        title: "Request boards",
-        columns: [
-          {
-            span: 6,
-            widgets: [
-              { type: "service_request_management", title: "First board" },
-            ],
-          },
-          {
-            span: 6,
-            widgets: [
-              { type: "service_request_management", title: "Second board" },
-            ],
-          },
-        ],
-      },
-    ],
+  const history: WorkspaceRead = {
+    ...fixture.workspace,
+    id: faker.string.uuid(),
+    name: `My forms ${faker.string.alphanumeric(8)}`,
+    template: {
+      schema_version: 2,
+      surface: "patient_history",
+      pages: [
+        {
+          kind: "custom",
+          key: "my_forms",
+          title: "My forms",
+          columns: [
+            {
+              span: 12,
+              widgets: [
+                {
+                  type: "questionnaire_responses",
+                  title: "Forms I submitted",
+                  config: { authored_by: "me" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   };
+  fixture.workspaces.push(history);
   await page.goto(
-    `${fixture.basePath}/rounds?selectedEncounter=${fixture.pastEncounter.id}`,
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
   );
-  const first = page.getByRole("region", { name: "First board", exact: true });
-  const second = page.getByRole("region", {
-    name: "Second board",
-    exact: true,
-  });
-  await first.getByRole("textbox").fill("potassium");
-  await second.getByRole("textbox").fill("hemoglobin");
-  await expect(first.getByRole("textbox")).toHaveValue("potassium");
-  await expect(second.getByRole("textbox")).toHaveValue("hemoglobin");
-  for (const title of ["potassium", "hemoglobin"]) {
-    await expect
-      .poll(() =>
-        fixture.sectionReads.some(
-          (url) =>
-            url.pathname.endsWith("/service_request/") &&
-            url.searchParams.get("title") === title &&
-            url.searchParams.get("encounter") === fixture.pastEncounter.id,
-        ),
-      )
-      .toBe(true);
-  }
-  await expect(page).toHaveURL(
-    (url) =>
-      url.searchParams.get("selectedEncounter") === fixture.pastEncounter.id &&
-      !url.searchParams.has("search") &&
-      !url.searchParams.has("page"),
+  await page
+    .getByRole("button", { name: "Clinical history workspace", exact: true })
+    .click();
+  await page.getByRole("option").filter({ hasText: history.name }).click();
+  await expect(page).toHaveURL((url) =>
+    url.pathname.endsWith("/history/my_forms"),
   );
+  await page.keyboard.press("Escape");
   await expect(
-    first.getByRole("link", { name: /create service request/i }),
+    page.getByRole("dialog", { name: "Clinical history workspace" }),
   ).toHaveCount(0);
-});
-
-test("studio medication entry returns to its custom workspace page", async ({
-  page,
-}) => {
-  const fixture = await mockEncounterWorkspaceApi(page);
-  fixture.workspace.template = {
-    schema_version: 2,
-    surface: "encounter",
-    pages: [
-      {
-        kind: "custom",
-        key: "rounds",
-        title: "Medication rounds",
-        columns: [
-          {
-            span: 12,
-            widgets: [{ type: "medications", title: "Current medicines" }],
-          },
-        ],
-      },
-    ],
-  };
-  await page.goto(`${fixture.basePath}/rounds`);
-  const medicines = page.getByRole("region", {
-    name: "Current medicines",
+  const forms = page.getByRole("region", {
+    name: "Forms I submitted",
     exact: true,
   });
-  const create = medicines.getByRole("link", { name: "Create", exact: true });
-  await expect(create).toHaveAttribute(
-    "href",
-    /questionnaire\/medication_request\?return_page=rounds$/,
-  );
-  await create.click();
-  await expect(page).toHaveURL(
-    (url) =>
-      url.pathname.endsWith("/questionnaire/medication_request") &&
-      url.searchParams.get("return_page") === "rounds",
-  );
-  await page.getByRole("button", { name: "Close", exact: true }).click();
-  await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
+  // History pages have no encounter, so the list spans every visit.
+  await expect(
+    forms.getByText("Current ward note", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    forms.getByText("Prior admission note", { exact: true }),
+  ).toBeVisible();
+  expect(
+    fixture.clinicalReads.some(
+      (url) =>
+        url.pathname.endsWith("/questionnaire_response/") &&
+        url.searchParams.get("created_by") === fixture.actor.id &&
+        !url.searchParams.has("encounter"),
+    ),
+  ).toBe(true);
+  // History pages are read-only: responses can be printed, not retracted.
+  await forms
+    .getByRole("button", { name: "More Actions", exact: true })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", {
+      name: "Mark as entered in error",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  expect(fixture.defaultWrites).toEqual([]);
 });
 
 test("studio summary widgets show latest vitals, outstanding orders, current medication, and care-team encounters", async ({
@@ -4051,11 +3963,6 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
                   groups: ["Pulse"],
                   height: 160,
                 },
-              },
-              {
-                type: "medications",
-                title: "Administration only",
-                config: { tabs: ["administration"] },
               },
               {
                 type: "encounter_summary",
@@ -4265,18 +4172,6 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   ).toBe(true);
 
   // Tab subsets render without a tab bar.
-  const administration = page.getByRole("region", {
-    name: "Administration only",
-    exact: true,
-  });
-  // The medication tab bar is gone; only the MAR's own product tabs remain.
-  await expect(
-    administration.getByRole("tab", { name: "Prescriptions", exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    administration.getByRole("tab", { name: "Dispense History", exact: true }),
-  ).toHaveCount(0);
-  await expect(administration).toContainText("Paracetamol 500 mg tablet");
   const reportsOnly = page.getByRole("region", {
     name: "Reports only",
     exact: true,

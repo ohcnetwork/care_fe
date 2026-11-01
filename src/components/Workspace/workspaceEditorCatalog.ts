@@ -3,7 +3,6 @@ import {
   Activity,
   BedDouble,
   CalendarClock,
-  ChartLine,
   ChartSpline,
   ClipboardCheck,
   ClipboardList,
@@ -18,10 +17,8 @@ import {
   History,
   Hospital,
   Layers,
-  ListChecks,
   MapPin,
   PanelsTopLeft,
-  Pill,
   PillBottle,
   ShieldAlert,
   Sparkles,
@@ -40,8 +37,6 @@ export interface WorkspaceWidgetCatalogItem {
   descriptionKey: string;
   icon: LucideIcon;
   group: "clinical" | "workflow" | "details" | "history";
-  /** Browsers with their own filters and master-detail panes need a full-width column. */
-  fullWidth?: boolean;
 }
 
 export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
@@ -200,67 +195,11 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     group: "details",
   },
   {
-    type: "responses",
-    labelKey: "workspace_response_browser",
-    descriptionKey: "workspace_response_browser_description",
-    icon: FileText,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
-    type: "observations",
-    labelKey: "observations",
-    descriptionKey: "workspace_observations_description",
-    icon: Activity,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
-    type: "medications",
-    labelKey: "medications",
-    descriptionKey: "workspace_medications_description",
-    icon: Pill,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
-    type: "service_request_management",
-    labelKey: "workspace_service_request_browser",
-    descriptionKey: "workspace_service_request_browser_description",
-    icon: ListChecks,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
-    type: "diagnostic_reports",
-    labelKey: "ENCOUNTER_TAB__diagnostic_reports",
-    descriptionKey: "workspace_diagnostic_reports_description",
-    icon: FileHeart,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
-    type: "plots",
-    labelKey: "ENCOUNTER_TAB__plots",
-    descriptionKey: "workspace_plots_description",
-    icon: ChartLine,
-    group: "clinical",
-    fullWidth: true,
-  },
-  {
     type: "observation_chart",
     labelKey: "workspace_observation_chart",
     descriptionKey: "workspace_observation_chart_description",
     icon: ChartSpline,
     group: "clinical",
-  },
-  {
-    type: "consents",
-    labelKey: "ENCOUNTER_TAB__consents",
-    descriptionKey: "workspace_consents_description",
-    icon: ClipboardCheck,
-    group: "details",
-    fullWidth: true,
   },
   {
     type: "account",
@@ -282,59 +221,6 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     descriptionKey: "workspace_encounter_extensions_description",
     icon: Layers,
     group: "clinical",
-  },
-  {
-    type: "clinical_history",
-    labelKey: "clinical_history",
-    descriptionKey: "workspace_clinical_history_description",
-    icon: History,
-    group: "history",
-    fullWidth: true,
-  },
-  {
-    type: "history_responses",
-    labelKey: "workspace_history_responses",
-    descriptionKey: "workspace_patient_history_description",
-    icon: FileText,
-    group: "history",
-    fullWidth: true,
-  },
-  {
-    type: "history_diagnostic_reports",
-    labelKey: "workspace_history_diagnostic_reports",
-    descriptionKey: "workspace_patient_history_description",
-    icon: FileHeart,
-    group: "history",
-    fullWidth: true,
-  },
-  {
-    type: "history_symptoms",
-    labelKey: "past_symptoms",
-    descriptionKey: "workspace_patient_history_description",
-    icon: Activity,
-    group: "history",
-  },
-  {
-    type: "history_diagnoses",
-    labelKey: "past_diagnoses",
-    descriptionKey: "workspace_patient_history_description",
-    icon: Stethoscope,
-    group: "history",
-  },
-  {
-    type: "history_allergies",
-    labelKey: "workspace_history_allergies",
-    descriptionKey: "workspace_patient_history_description",
-    icon: ShieldAlert,
-    group: "history",
-  },
-  {
-    type: "history_medications",
-    labelKey: "past_medications",
-    descriptionKey: "workspace_patient_history_description",
-    icon: Pill,
-    group: "history",
-    fullWidth: true,
   },
 ];
 

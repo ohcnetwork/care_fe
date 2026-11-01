@@ -13,7 +13,6 @@ import { VitalsList } from "@/components/Patient/vitals/list";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import type { Code } from "@/types/base/code/code";
 import {
   ObservationAnalyzeGroup,
@@ -26,19 +25,24 @@ import observationApi from "@/types/emr/observation/observationApi";
 import { vitalsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface EncounterVitalsWidgetProps {
+  patientId: string;
+  /** Omit on history pages to show the patient's latest readings. */
+  encounterId?: string;
+  canRead: boolean;
   title?: string;
   showEmpty?: boolean;
   config?: Record<string, unknown>;
 }
 
 export function EncounterVitalsWidget({
+  patientId,
+  encounterId,
+  canRead: canReadClinicalData,
   title,
   showEmpty = false,
   config = {},
 }: EncounterVitalsWidgetProps) {
   const { t } = useTranslation();
-  const { patientId, selectedEncounterId, canReadClinicalData } =
-    useEncounter();
   const parsedConfig = vitalsConfigSchema.safeParse(config);
   const codes = parsedConfig.data?.codes;
   const { data, isLoading, isError, isFetching, refetch } =
@@ -70,7 +74,7 @@ export function EncounterVitalsWidget({
     return (
       <LatestVitals
         patientId={patientId}
-        encounterId={selectedEncounterId}
+        encounterId={encounterId}
         codes={codes}
         title={heading}
         showEmpty={showEmpty}
@@ -96,7 +100,7 @@ export function EncounterVitalsWidget({
   return (
     <VitalsList
       patientId={patientId}
-      encounterId={selectedEncounterId}
+      encounterId={encounterId}
       codeGroups={
         data?.find((plot) => plot.id === "primary-parameters")?.groups ?? []
       }
@@ -181,7 +185,7 @@ function LatestVitals({
   showEmpty,
 }: {
   patientId: string;
-  encounterId: string;
+  encounterId?: string;
   codes: Code[];
   title: string;
   showEmpty: boolean;

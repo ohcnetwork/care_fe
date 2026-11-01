@@ -107,10 +107,7 @@ export function WorkspaceSectionSettings({
   );
   const Icon = catalogItem?.icon ?? Puzzle;
   const name = workspaceWidgetLabel(widget.type, t);
-  const requirements = getWidgetRequirements(
-    widget.type,
-    plugin?.requiresActiveEncounter,
-  );
+  const requirements = getWidgetRequirements(widget.type, plugin);
   const configText =
     configDraft &&
     (configDraft.committed === undefined ||
@@ -227,7 +224,7 @@ export function WorkspaceSectionSettings({
           </div>
           <WorkspaceWidgetAvailability
             type={widget.type}
-            requiresActiveEncounter={plugin?.requiresActiveEncounter}
+            capabilities={plugin}
           />
         </SheetHeader>
 

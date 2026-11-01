@@ -9,7 +9,6 @@ import {
   Plus,
   Puzzle,
   Settings2,
-  StretchHorizontal,
   Trash2,
 } from "lucide-react";
 import { useId, useRef, useState } from "react";
@@ -159,7 +158,7 @@ export function WorkspaceTabCanvas({
                   getWidgetAvailability(
                     widget,
                     previewContext,
-                    plugins.get(widget.type)?.requiresActiveEncounter,
+                    plugins.get(widget.type),
                   ).state === "hidden",
               );
             return (
@@ -210,16 +209,12 @@ export function WorkspaceTabCanvas({
                     const availability = getWidgetAvailability(
                       widget,
                       previewContext,
-                      plugin?.requiresActiveEncounter,
+                      plugin,
                     );
                     const hidden = availability.state === "hidden";
-                    const cramped =
-                      !!metadata?.fullWidth &&
-                      page.columns.length > 1 &&
-                      column.span < 8;
                     const requirements = getWidgetRequirements(
                       widget.type,
-                      plugin?.requiresActiveEncounter,
+                      plugin,
                     );
                     const selection = {
                       column: columnIndex,
@@ -435,7 +430,9 @@ export function WorkspaceTabCanvas({
                             unavailable={unavailable}
                             denied={availability.state === "denied"}
                             deniedMessage={t(
-                              requirements.encounter === "none"
+                              requirements.encounter === "none" ||
+                                (requirements.encounter === "optional" &&
+                                  !previewContext.selectedEncounter)
                                 ? "workspace_patient_history_access_denied"
                                 : "no_permission_to_view_clinical_data",
                             )}
@@ -452,15 +449,6 @@ export function WorkspaceTabCanvas({
                                 reason: t(availability.reason),
                               })}
                             </span>
-                          </p>
-                        )}
-                        {!hidden && cramped && (
-                          <p className="flex items-start gap-2 rounded-b-xl border-t border-border bg-soft-background px-3 py-2 text-xs text-muted-foreground">
-                            <StretchHorizontal
-                              className="mt-0.5 size-3.5 shrink-0"
-                              aria-hidden="true"
-                            />
-                            <span>{t("workspace_studio_full_width_hint")}</span>
                           </p>
                         )}
                       </article>

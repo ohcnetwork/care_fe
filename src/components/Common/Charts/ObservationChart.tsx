@@ -50,7 +50,8 @@ interface ObservationVisualizerProps {
   codeGroups: CodeGroup[];
   height?: number;
   gridCols?: number;
-  encounterId: string;
+  /** Omit to chart the patient's observations across encounters. */
+  encounterId?: string;
 }
 
 interface ChartData {

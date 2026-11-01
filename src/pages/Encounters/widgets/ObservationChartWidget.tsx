@@ -9,23 +9,27 @@ import { ObservationVisualizer } from "@/components/Common/Charts/ObservationCha
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 import { observationChartConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface ObservationChartWidgetProps {
+  patientId: string;
+  /** Omit on history pages to chart readings across encounters. */
+  encounterId?: string;
+  canRead: boolean;
   title?: string;
   config?: Record<string, unknown>;
 }
 
 /** One or more chart groups from the plots configuration, without the plot tabs. */
 export function ObservationChartWidget({
+  patientId,
+  encounterId,
+  canRead: canReadClinicalData,
   title,
   config = {},
 }: ObservationChartWidgetProps) {
   const { t } = useTranslation();
-  const { patientId, selectedEncounterId, canReadClinicalData } =
-    useEncounter();
   const parsedConfig = observationChartConfigSchema.safeParse(config);
   const {
     plot: plotId,
@@ -84,7 +88,7 @@ export function ObservationChartWidget({
           <div className="@container">
             <ObservationVisualizer
               patientId={patientId}
-              encounterId={selectedEncounterId}
+              encounterId={encounterId}
               codeGroups={groups}
               height={height}
               gridCols={columns ?? 1}

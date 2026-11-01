@@ -12,13 +12,12 @@ import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 
-import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
+import {
+  useCareAppEncounterWidgets,
+  type CareAppEncounterWidget,
+} from "@/hooks/useCareAppEncounterWidgets";
 import { useCareApps } from "@/hooks/useCareApps";
 import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
-import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
-import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
-import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/medicines";
-import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
 import { FavoriteFormsQuickActions } from "@/pages/Encounters/tabs/overview/FavoriteFormsQuickActions";
 import { FormSubmissionDrafts } from "@/pages/Encounters/tabs/overview/FormSubmissionDrafts";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -33,21 +32,12 @@ import { HospitalizationDetails } from "@/pages/Encounters/tabs/overview/summary
 import { Locations } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/locations";
 import { ManageCareTeam } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/manage-care-team";
 import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
-import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
-import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
-import { EncounterServiceRequestTab } from "@/pages/Encounters/tabs/service-requests";
 import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_WIDGET_TYPES,
   encounterPageKeySchema,
 } from "@/types/workspace/encounterWorkspace";
-import {
-  clinicalHistoryConfigSchema,
-  encounterSummaryConfigSchema,
-  medicationsConfigSchema,
-  observationsConfigSchema,
-  plotsConfigSchema,
-} from "@/types/workspace/widgetConfigSchemas";
+import { encounterSummaryConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 import { EncounterReferralsWidget } from "@/pages/Encounters/widgets/EncounterReferralsWidget";
 import { EncounterResponsesWidget } from "@/pages/Encounters/widgets/EncounterResponsesWidget";
@@ -62,7 +52,6 @@ import {
   type WorkspaceWidgetContext,
 } from "@/types/workspace/widgetAvailability";
 
-import { ClinicalHistoryWidget } from "./ClinicalHistoryWidget";
 import { CurrentMedicationsWidget } from "./CurrentMedicationsWidget";
 import { RecentEncountersWidget } from "./RecentEncountersWidget";
 import { workspaceWidgetLabel } from "./workspaceEditorCatalog";
@@ -135,12 +124,13 @@ function WorkspaceWidgetContent({
     );
   }
 
+  const requirements = getWidgetRequirements(type, pluginWidget);
   const noClinicalAccess = (
     <EmptyState
       icon={<ShieldAlert className="size-8 text-placeholder-foreground" />}
       title={t(
-        getWidgetRequirements(type, pluginWidget?.requiresActiveEncounter)
-          .encounter === "none"
+        requirements.encounter === "none" ||
+          (requirements.encounter === "optional" && !selectedEncounter)
           ? "workspace_patient_history_access_denied"
           : "no_permission_to_view_clinical_data",
       )}
@@ -151,7 +141,7 @@ function WorkspaceWidgetContent({
   const availability = getWidgetAvailability(
     { type, config },
     context,
-    pluginWidget?.requiresActiveEncounter,
+    pluginWidget,
   );
   if (availability.state === "hidden") return null;
   if (availability.state === "denied") return noClinicalAccess;
@@ -188,22 +178,6 @@ function WorkspaceWidgetContent({
     </Alert>,
   );
 
-  if (type === "clinical_history" || type.startsWith("history_")) {
-    const historyConfig = clinicalHistoryConfigSchema.safeParse(config);
-    // Single-section history widgets take no options; only the full widget does.
-    if (type === "clinical_history" && !historyConfig.success)
-      return invalidConfig;
-    return frame(
-      <ClinicalHistoryWidget
-        type={type}
-        patientId={patientId}
-        facilityId={facilityId}
-        access={patientHistoryAccess(context)}
-        tabs={historyConfig.data?.tabs}
-        defaultTab={historyConfig.data?.default_tab}
-      />,
-    );
-  }
   if (type === "current_medications") {
     return (
       <CurrentMedicationsWidget
@@ -225,6 +199,108 @@ function WorkspaceWidgetContent({
         showEmpty={showEmpty}
         config={config}
       />
+    );
+  }
+
+  // Scoped to the selected encounter when there is one; history pages have
+  // none, so these read across the patient's encounters instead.
+  const historyGrants = patientHistoryAccess(context);
+  const scope = {
+    patientId,
+    encounterId: selectedEncounterId,
+    canRead: selectedEncounter
+      ? canReadClinicalData
+      : historyGrants.clinicalData,
+  };
+  const readOnly = !selectedEncounter || !canWriteClinicalData;
+  const listProps = {
+    facilityId,
+    patientId,
+    encounterId: selectedEncounterId,
+    readOnly,
+    title,
+    showEmpty,
+    showViewEncounter: !selectedEncounter,
+    presentation: "panel" as const,
+  };
+  switch (type) {
+    case "vitals":
+      return (
+        <EncounterVitalsWidget
+          {...scope}
+          title={title}
+          showEmpty={showEmpty}
+          config={config}
+        />
+      );
+    case "observation_chart":
+      return (
+        <ObservationChartWidget {...scope} title={title} config={config} />
+      );
+    case "questionnaire_responses":
+      return (
+        <EncounterResponsesWidget
+          {...scope}
+          canRead={
+            selectedEncounter ? canReadClinicalData : historyGrants.responses
+          }
+          facilityId={
+            selectedEncounter && facilityId
+              ? selectedEncounter.facility.id
+              : facilityId
+          }
+          readOnly={readOnly}
+          title={title}
+          showEmpty={showEmpty}
+          config={config}
+        />
+      );
+    case "allergies":
+      return (
+        <AllergyList
+          {...listProps}
+          encounterStatus={selectedEncounter?.status}
+        />
+      );
+    case "symptoms":
+      return <SymptomsList {...listProps} />;
+    case "diagnosis":
+      return <DiagnosisList {...listProps} />;
+  }
+
+  const renderPlugin = (plugin: CareAppEncounterWidget, content: ReactNode) => (
+    <div className="min-w-0 @container/encounter-widget">
+      <PluginErrorBoundary
+        key={`${type}:${patientId}:${selectedEncounterId ?? ""}:${JSON.stringify(config)}`}
+        pluginName={plugin.pluginSlug}
+        resetKey={plugin.component}
+        fallback={
+          <Alert variant="destructive">
+            <AlertTitle>{title ?? type}</AlertTitle>
+            <AlertDescription>
+              {t("encounter_workspace_widget_error")}
+            </AlertDescription>
+          </Alert>
+        }
+      >
+        <Suspense fallback={loading}>{content}</Suspense>
+      </PluginErrorBoundary>
+    </div>
+  );
+
+  if (pluginWidget?.supportsPatientHistory) {
+    const Component = pluginWidget.component;
+    return renderPlugin(
+      pluginWidget,
+      <Component
+        patientId={patientId}
+        encounterId={selectedEncounterId}
+        encounter={selectedEncounter}
+        facilityId={facilityId}
+        title={title}
+        config={config}
+        readOnly={readOnly}
+      />,
     );
   }
 
@@ -282,8 +358,6 @@ function WorkspaceWidgetContent({
           />,
         );
       }
-      case "consents":
-        return frame(<EncounterConsentsTab />);
       case "referrals":
         // Referral access is granted separately from clinical data access.
         return (
@@ -300,56 +374,6 @@ function WorkspaceWidgetContent({
 
   const actionProps = { title, showEmpty, returnPage };
   switch (type) {
-    case "responses":
-      return frame(
-        <EncounterResponsesTab
-          patientId={patientId}
-          encounterId={selectedEncounterId}
-          canAccess={canReadClinicalData}
-          readOnly={!canWriteClinicalData}
-        />,
-      );
-    case "observations": {
-      const observationsConfig = observationsConfigSchema.safeParse(config);
-      if (!observationsConfig.success) return invalidConfig;
-      return frame(
-        <EncounterObservationsTab limit={observationsConfig.data.limit} />,
-      );
-    }
-    case "medications": {
-      const medicationsConfig = medicationsConfigSchema.safeParse(config);
-      if (!medicationsConfig.success) return invalidConfig;
-      return frame(
-        <EncounterMedicinesTab
-          returnPage={returnPage}
-          tabs={medicationsConfig.data.tabs?.map((tab) =>
-            tab === "statements" ? "ongoing" : tab,
-          )}
-          defaultTab={
-            medicationsConfig.data.default_tab === "statements"
-              ? "ongoing"
-              : medicationsConfig.data.default_tab
-          }
-        />,
-      );
-    }
-    case "service_request_management":
-      return frame(<EncounterServiceRequestTab returnPage={returnPage} />);
-    case "diagnostic_reports":
-      return frame(
-        <DiagnosticReportsTab
-          patientId={patientId}
-          encounterId={selectedEncounterId}
-          facilityId={facilityId ? selectedEncounter.facility.id : undefined}
-        />,
-      );
-    case "plots": {
-      const plotsConfig = plotsConfigSchema.safeParse(config);
-      if (!plotsConfig.success) return invalidConfig;
-      return frame(<EncounterPlotsTab defaultPlot={plotsConfig.data.plot} />);
-    }
-    case "observation_chart":
-      return <ObservationChartWidget title={title} config={config} />;
     case "encounter_extensions": {
       // An empty frame tells users nothing; wait for apps, then hide if none contribute.
       const contributes =
@@ -394,14 +418,6 @@ function WorkspaceWidgetContent({
       return (
         <SummaryPanelReportsTab title={title} activeTab="reports" embedded />
       );
-    case "vitals":
-      return (
-        <EncounterVitalsWidget
-          title={title}
-          showEmpty={showEmpty}
-          config={config}
-        />
-      );
     case "service_requests":
       return (
         <EncounterServiceRequestsWidget
@@ -418,68 +434,21 @@ function WorkspaceWidgetContent({
           config={config}
         />
       );
-    case "questionnaire_responses":
-      return (
-        <EncounterResponsesWidget
-          title={title}
-          showEmpty={showEmpty}
-          config={config}
-        />
-      );
-  }
-
-  const props = {
-    facilityId,
-    patientId,
-    encounterId: selectedEncounterId,
-    readOnly: !canWriteClinicalData,
-    title,
-    showEmpty,
-    showViewEncounter: false,
-    presentation: "panel" as const,
-  };
-
-  switch (type) {
-    case "allergies":
-      return (
-        <AllergyList {...props} encounterStatus={selectedEncounter.status} />
-      );
-    case "symptoms":
-      return <SymptomsList {...props} />;
-    case "diagnosis":
-      return <DiagnosisList {...props} />;
   }
 
   if (!pluginWidget) return loading;
 
   const Component = pluginWidget.component;
-  return (
-    <div className="min-w-0 @container/encounter-widget">
-      <PluginErrorBoundary
-        key={`${type}:${patientId}:${selectedEncounterId}:${JSON.stringify(config)}`}
-        pluginName={pluginWidget.pluginSlug}
-        resetKey={Component}
-        fallback={
-          <Alert variant="destructive">
-            <AlertTitle>{title ?? type}</AlertTitle>
-            <AlertDescription>
-              {t("encounter_workspace_widget_error")}
-            </AlertDescription>
-          </Alert>
-        }
-      >
-        <Suspense fallback={loading}>
-          <Component
-            patientId={patientId}
-            encounterId={selectedEncounterId}
-            encounter={selectedEncounter}
-            facilityId={facilityId}
-            title={title}
-            config={config}
-            readOnly={!canWriteClinicalData}
-          />
-        </Suspense>
-      </PluginErrorBoundary>
-    </div>
+  return renderPlugin(
+    pluginWidget,
+    <Component
+      patientId={patientId}
+      encounterId={selectedEncounterId}
+      encounter={selectedEncounter}
+      facilityId={facilityId}
+      title={title}
+      config={config}
+      readOnly={!canWriteClinicalData}
+    />,
   );
 }

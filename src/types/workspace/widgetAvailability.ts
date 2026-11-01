@@ -31,11 +31,15 @@ export interface WorkspaceWidgetContext extends WorkspaceAvailabilityContext {
 }
 
 export interface WidgetRequirements {
-  encounter: "none" | "any" | "active";
+  /**
+   * "optional" widgets scope to the selected encounter when there is one and
+   * show patient-wide data otherwise, so they also work on history pages.
+   */
+  encounter: "none" | "optional" | "any" | "active";
   /** "actions" also accepts referral creation, matching the quick actions strip. */
   access: "clinical" | "encounter" | "encounter-write" | "write" | "actions";
   /** Which patient-history grant a widget without an encounter needs. */
-  history?: "clinical" | "responses" | "any";
+  history?: "clinical" | "responses";
 }
 
 const clinical: WidgetRequirements = { encounter: "any", access: "clinical" };
@@ -50,16 +54,23 @@ const shortcuts: WidgetRequirements = {
   access: "actions",
 };
 const history: WidgetRequirements = { encounter: "none", access: "clinical" };
-const responses: WidgetRequirements = { ...history, history: "responses" };
-const anyHistory: WidgetRequirements = { ...history, history: "any" };
+const scoped: WidgetRequirements = {
+  encounter: "optional",
+  access: "clinical",
+  history: "clinical",
+};
+const scopedResponses: WidgetRequirements = {
+  ...scoped,
+  history: "responses",
+};
 const patient: WidgetRequirements = { encounter: "none", access: "encounter" };
 
 export const CORE_WIDGET_REQUIREMENTS = {
-  allergies: clinical,
-  symptoms: clinical,
-  diagnosis: clinical,
-  vitals: clinical,
-  questionnaire_responses: clinical,
+  allergies: scoped,
+  symptoms: scoped,
+  diagnosis: scoped,
+  vitals: scoped,
+  questionnaire_responses: scopedResponses,
   service_requests: clinical,
   referrals: details,
   outstanding_orders: clinical,
@@ -77,49 +88,49 @@ export const CORE_WIDGET_REQUIREMENTS = {
   discharge: details,
   audit_logs: details,
   reports: clinical,
-  responses: clinical,
-  observations: clinical,
-  medications: clinical,
-  service_request_management: clinical,
-  diagnostic_reports: clinical,
-  plots: clinical,
-  observation_chart: clinical,
-  consents: details,
+  observation_chart: scoped,
   account: details,
   encounter_summary: details,
   encounter_extensions: clinical,
-  clinical_history: anyHistory,
-  history_responses: responses,
-  history_diagnostic_reports: history,
-  history_symptoms: history,
-  history_diagnoses: history,
-  history_allergies: history,
-  history_medications: history,
 } satisfies Record<CoreWidgetConfigType, WidgetRequirements>;
+
+/** What a plugin widget declares about the encounters it can render for. */
+export interface WidgetCapabilities {
+  requiresActiveEncounter?: boolean;
+  supportsPatientHistory?: boolean;
+}
 
 export function getWidgetRequirements(
   type: string,
-  requiresActiveEncounter = false,
+  capabilities: WidgetCapabilities = {},
 ): WidgetRequirements {
   if (Object.hasOwn(CORE_WIDGET_REQUIREMENTS, type)) {
     return CORE_WIDGET_REQUIREMENTS[type as CoreWidgetConfigType];
   }
-  return requiresActiveEncounter
-    ? { encounter: "active", access: "clinical" }
-    : clinical;
+  if (capabilities.requiresActiveEncounter) {
+    return { encounter: "active", access: "clinical" };
+  }
+  return capabilities.supportsPatientHistory ? scoped : clinical;
+}
+
+/** Whether a widget can render on a page that has no selected encounter. */
+export function worksWithoutEncounter(requirements: WidgetRequirements) {
+  return (
+    requirements.encounter === "none" || requirements.encounter === "optional"
+  );
 }
 
 /** A summary narrowed to its actions tab renders only for editable encounters. */
 function widgetInstanceRequirements(
   widget: EncounterWorkspaceWidget,
-  requiresActiveEncounter: boolean,
+  capabilities: WidgetCapabilities,
 ): WidgetRequirements {
   if (widget.type === "encounter_summary") {
     const tabs = encounterSummaryConfigSchema.safeParse(widget.config).data
       ?.tabs;
     if (tabs?.length === 1 && tabs[0] === "actions") return encounterManagement;
   }
-  return getWidgetRequirements(widget.type, requiresActiveEncounter);
+  return getWidgetRequirements(widget.type, capabilities);
 }
 
 export type WidgetHiddenReason =
@@ -145,14 +156,11 @@ export type WidgetAvailability =
 export function getWidgetAvailability(
   widget: EncounterWorkspaceWidget,
   context: WorkspaceAvailabilityContext,
-  requiresActiveEncounter = false,
+  capabilities: WidgetCapabilities = {},
 ): WidgetAvailability {
   const encounter = context.selectedEncounter;
-  const requirements = widgetInstanceRequirements(
-    widget,
-    requiresActiveEncounter,
-  );
-  if (requirements.encounter !== "none" && !encounter) {
+  const requirements = widgetInstanceRequirements(widget, capabilities);
+  if (!worksWithoutEncounter(requirements) && !encounter) {
     return { state: "hidden", reason: "workspace_requires_encounter" };
   }
   // Referrals can still be raised from a closed encounter, so the shortcut
@@ -183,13 +191,12 @@ export function getWidgetAvailability(
   const historyRead =
     requirements.history === "responses"
       ? grants.responses
-      : requirements.history === "any"
-        ? grants.clinicalData || grants.responses
-        : grants.clinicalData;
+      : grants.clinicalData;
+  const patientWide =
+    requirements.encounter === "none" ||
+    (requirements.encounter === "optional" && !encounter);
   const canRead =
-    (requirements.encounter === "none"
-      ? historyRead
-      : context.canReadClinicalData) ||
+    (patientWide ? historyRead : context.canReadClinicalData) ||
     ((requirements.access === "encounter" ||
       requirements.access === "encounter-write") &&
       context.canReadSelectedEncounter);

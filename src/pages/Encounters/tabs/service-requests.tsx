@@ -22,9 +22,7 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
-export const EncounterServiceRequestTab = ({
-  returnPage,
-}: { returnPage?: string } = {}) => {
+export const EncounterServiceRequestTab = () => {
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -129,7 +127,7 @@ export const EncounterServiceRequestTab = ({
           {encounter && facilityId && canWriteClinicalData && (
             <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`}
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />

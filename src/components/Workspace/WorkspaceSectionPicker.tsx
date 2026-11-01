@@ -1,4 +1,4 @@
-import { Blocks, Plus, Search, StretchHorizontal } from "lucide-react";
+import { Blocks, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import type { WorkspaceSurface } from "@/types/workspace/encounterWorkspace";
-import { getWidgetRequirements } from "@/types/workspace/widgetAvailability";
+import {
+  getWidgetRequirements,
+  worksWithoutEncounter,
+  type WidgetCapabilities,
+} from "@/types/workspace/widgetAvailability";
 
 import { CORE_WIDGET_CATALOG } from "./workspaceEditorCatalog";
 import { WorkspaceWidgetAvailability } from "./WorkspaceWidgetAvailability";
@@ -46,7 +50,7 @@ export function WorkspaceSectionPicker({
       ...item,
       label: t(item.labelKey),
       description: t(item.descriptionKey),
-      requiresActiveEncounter: undefined as boolean | undefined,
+      capabilities: undefined as WidgetCapabilities | undefined,
     })),
     ...[...plugins.entries()].map(([type, plugin]) => ({
       type,
@@ -54,8 +58,7 @@ export function WorkspaceSectionPicker({
       description: t("workspace_builder_plugin_widget_hint"),
       icon: Blocks,
       group: "plugins" as const,
-      fullWidth: false,
-      requiresActiveEncounter: plugin.requiresActiveEncounter,
+      capabilities: plugin as WidgetCapabilities,
     })),
   ].filter((item) =>
     `${item.label} ${item.description} ${item.type}`
@@ -109,10 +112,9 @@ export function WorkspaceSectionPicker({
                     const Icon = item.icon;
                     const incompatible =
                       surface === "patient_history" &&
-                      getWidgetRequirements(
-                        item.type,
-                        item.requiresActiveEncounter,
-                      ).encounter !== "none";
+                      !worksWithoutEncounter(
+                        getWidgetRequirements(item.type, item.capabilities),
+                      );
                     return (
                       <Button
                         key={item.type}
@@ -141,19 +143,8 @@ export function WorkspaceSectionPicker({
                           <span className="mt-2 flex flex-wrap items-center gap-1.5">
                             <WorkspaceWidgetAvailability
                               type={item.type}
-                              requiresActiveEncounter={
-                                item.requiresActiveEncounter
-                              }
+                              capabilities={item.capabilities}
                             />
-                            {item.fullWidth && (
-                              <span className="inline-flex items-center gap-1 rounded bg-muted-background px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                <StretchHorizontal
-                                  className="size-3"
-                                  aria-hidden="true"
-                                />
-                                {t("workspace_studio_full_width")}
-                              </span>
-                            )}
                           </span>
                         </span>
                         <Plus className="size-4 shrink-0 text-placeholder-foreground" />

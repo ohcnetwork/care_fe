@@ -1,6 +1,7 @@
 import type { RenderColumn } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
 import {
   getWidgetAvailability,
+  type WidgetCapabilities,
   type WorkspaceAvailabilityContext,
 } from "@/types/workspace/widgetAvailability";
 
@@ -8,7 +9,8 @@ import {
 export function visibleWorkspaceColumns(
   columns: RenderColumn[],
   context: WorkspaceAvailabilityContext,
-  requiresActiveEncounter: (type: string) => boolean = () => false,
+  capabilities: (type: string) => WidgetCapabilities | undefined = () =>
+    undefined,
 ) {
   return columns
     .map((column) => ({
@@ -16,11 +18,8 @@ export function visibleWorkspaceColumns(
       widgets: column.widgets.filter(
         (widget) =>
           "error" in widget ||
-          getWidgetAvailability(
-            widget,
-            context,
-            requiresActiveEncounter(widget.type),
-          ).state !== "hidden",
+          getWidgetAvailability(widget, context, capabilities(widget.type))
+            .state !== "hidden",
       ),
     }))
     .filter((column) => column.invalid || column.widgets.length > 0);

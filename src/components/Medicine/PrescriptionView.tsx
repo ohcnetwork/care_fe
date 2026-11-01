@@ -22,7 +22,6 @@ interface PrescriptionViewProps {
   canWrite?: boolean;
   facilityId?: string;
   encounterId?: string;
-  returnPage?: string;
 }
 
 export default function PrescriptionView({
@@ -31,14 +30,9 @@ export default function PrescriptionView({
   canWrite = false,
   facilityId,
   encounterId,
-  returnPage,
 }: PrescriptionViewProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const questionnaireParams = new URLSearchParams();
-  if (prescriptionId) questionnaireParams.set("prescription", prescriptionId);
-  if (returnPage) questionnaireParams.set("return_page", returnPage);
-  const questionnaireQuery = questionnaireParams.toString();
 
   const { data: prescription, isLoading } = useQuery({
     queryKey: ["prescription", patientId, prescriptionId],
@@ -99,7 +93,11 @@ export default function PrescriptionView({
               className="text-gray-950 hover:text-gray-700 h-9"
             >
               <Link
-                href={`questionnaire/medication_request${questionnaireQuery ? `?${questionnaireQuery}` : ""}`}
+                href={
+                  prescriptionId
+                    ? `questionnaire/medication_request?prescription=${prescriptionId}`
+                    : `questionnaire/medication_request`
+                }
               >
                 {prescriptionId ? (
                   <>

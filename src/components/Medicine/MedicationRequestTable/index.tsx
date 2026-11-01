@@ -50,34 +50,8 @@ export const MedicationRequestEmptyState = ({
   );
 };
 
-export type MedicationRequestTab =
-  "prescriptions" | "ongoing" | "administration" | "dispense_history";
-
-const MEDICATION_REQUEST_TABS: MedicationRequestTab[] = [
-  "prescriptions",
-  "ongoing",
-  "administration",
-  "dispense_history",
-];
-
-export default function MedicationRequestTable({
-  returnPage,
-  tabs = MEDICATION_REQUEST_TABS,
-  defaultTab,
-}: {
-  returnPage?: string;
-  /** Workspace layouts can show a subset; a single tab hides the tab bar. */
-  tabs?: MedicationRequestTab[];
-  defaultTab?: MedicationRequestTab;
-} = {}) {
+export default function MedicationRequestTable() {
   const { t } = useTranslation();
-  const visibleTabs = MEDICATION_REQUEST_TABS.filter((tab) =>
-    tabs.includes(tab),
-  );
-  const initialTab =
-    defaultTab && visibleTabs.includes(defaultTab)
-      ? defaultTab
-      : (visibleTabs[0] ?? "prescriptions");
 
   const {
     patientId,
@@ -99,106 +73,95 @@ export default function MedicationRequestTable({
 
   return (
     <div className="space-y-2 h-full">
-      <Tabs key={initialTab} defaultValue={initialTab} className="h-full">
-        {visibleTabs.length > 1 && (
-          <ScrollArea className="w-full">
-            <TabsList>
-              {visibleTabs.map((tab) => (
-                <TabsTrigger key={tab} value={tab}>
-                  {t(
-                    {
-                      prescriptions: "prescriptions",
-                      ongoing: "medication_statements",
-                      administration: "medicine_administration",
-                      dispense_history: "dispense_history",
-                    }[tab],
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        )}
+      <Tabs defaultValue="prescriptions" className="h-full">
+        <ScrollArea className="w-full">
+          <TabsList>
+            <TabsTrigger value="prescriptions">
+              {t("prescriptions")}
+            </TabsTrigger>
+            <TabsTrigger value="ongoing">
+              {t("medication_statements")}
+            </TabsTrigger>
+            <TabsTrigger value="administration">
+              {t("medicine_administration")}
+            </TabsTrigger>
+            <TabsTrigger value="dispense_history">
+              {t("dispense_history")}
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
-        {visibleTabs.includes("prescriptions") && (
-          <TabsContent
-            value="prescriptions"
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
-              <PrescriptionListSelector
+        <TabsContent
+          value="prescriptions"
+          className="flex-1 flex flex-col overflow-hidden"
+        >
+          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+            <PrescriptionListSelector
+              patientId={patientId}
+              encounterId={encounterId}
+              facilityId={facilityId}
+              selectedPrescriptionId={selectedPrescriptionId}
+              onSelectPrescription={(prescription) => {
+                setSelectedPrescriptionId(prescription?.id);
+              }}
+            />
+
+            <div className="flex-1 w-full h-full overflow-auto">
+              <PrescriptionView
+                patientId={patientId}
+                prescriptionId={selectedPrescriptionId}
+                canWrite={canWrite}
+                facilityId={facilityId}
+                encounterId={encounterId}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ongoing">
+          <MedicationStatementList
+            patientId={patientId}
+            canAccess={canAccess}
+            encounterId={encounterId}
+          />
+        </TabsContent>
+
+        <TabsContent value="administration">
+          <AdministrationTab
+            patientId={patientId}
+            encounterId={encounterId}
+            canWrite={canWrite}
+            canAccess={canAccess}
+          />
+        </TabsContent>
+
+        <TabsContent
+          value="dispense_history"
+          className="flex-1 flex flex-col overflow-hidden"
+        >
+          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+            <DispenseOrderListSelector
+              patientId={patientId}
+              facilityId={facilityId}
+              selectedDispenseOrderId={selectedDispenseOrderId}
+              onSelectDispenseOrder={(dispenseOrder) => {
+                setSelectedDispenseOrderId(dispenseOrder?.id);
+              }}
+            />
+
+            <div className="flex-1 w-full h-full overflow-auto">
+              <DispenseHistory
                 patientId={patientId}
                 encounterId={encounterId}
+                canAccess={canAccess}
                 facilityId={facilityId}
-                selectedPrescriptionId={selectedPrescriptionId}
-                onSelectPrescription={(prescription) => {
-                  setSelectedPrescriptionId(prescription?.id);
-                }}
+                dispenseOrderId={selectedDispenseOrderId}
+                canWrite={canWrite}
               />
-
-              <div className="flex-1 w-full h-full overflow-auto">
-                <PrescriptionView
-                  returnPage={returnPage}
-                  patientId={patientId}
-                  prescriptionId={selectedPrescriptionId}
-                  canWrite={canWrite}
-                  facilityId={facilityId}
-                  encounterId={encounterId}
-                />
-              </div>
             </div>
-          </TabsContent>
-        )}
-
-        {visibleTabs.includes("ongoing") && (
-          <TabsContent value="ongoing">
-            <MedicationStatementList
-              patientId={patientId}
-              canAccess={canAccess}
-              encounterId={encounterId}
-            />
-          </TabsContent>
-        )}
-
-        {visibleTabs.includes("administration") && (
-          <TabsContent value="administration">
-            <AdministrationTab
-              patientId={patientId}
-              encounterId={encounterId}
-              canWrite={canWrite}
-              canAccess={canAccess}
-            />
-          </TabsContent>
-        )}
-
-        {visibleTabs.includes("dispense_history") && (
-          <TabsContent
-            value="dispense_history"
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
-              <DispenseOrderListSelector
-                patientId={patientId}
-                facilityId={facilityId}
-                selectedDispenseOrderId={selectedDispenseOrderId}
-                onSelectDispenseOrder={(dispenseOrder) => {
-                  setSelectedDispenseOrderId(dispenseOrder?.id);
-                }}
-              />
-
-              <div className="flex-1 w-full h-full overflow-auto">
-                <DispenseHistory
-                  patientId={patientId}
-                  encounterId={encounterId}
-                  canAccess={canAccess}
-                  facilityId={facilityId}
-                  dispenseOrderId={selectedDispenseOrderId}
-                  canWrite={canWrite}
-                />
-              </div>
-            </div>
-          </TabsContent>
-        )}
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );

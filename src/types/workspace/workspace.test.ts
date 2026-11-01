@@ -4,7 +4,10 @@ import { before, test } from "node:test";
 
 import { visibleWorkspaceColumns } from "@/components/Workspace/visibleWorkspaceColumns";
 import { CORE_WIDGET_CATALOG } from "@/components/Workspace/workspaceEditorCatalog";
-import { standardWorkspaceTemplate } from "@/components/Workspace/workspacePresets";
+import {
+  standardWorkspaceTemplate,
+  WORKSPACE_STARTERS,
+} from "@/components/Workspace/workspacePresets";
 import {
   widgetConfigConsistencyIssues,
   workspaceWidgetIssues,
@@ -12,12 +15,14 @@ import {
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
 
+import type { CareAppEncounterWidget } from "@/hooks/useCareAppEncounterWidgets";
 import {
   createEncounterWorkspaceSchema,
   SYSTEM_PAGE_KEYS,
 } from "./encounterWorkspace";
 import {
   getWidgetAvailability,
+  getWidgetRequirements,
   patientHistoryAccess,
   type WorkspaceAvailabilityContext,
 } from "./widgetAvailability";
@@ -166,7 +171,9 @@ test("active-only widgets hide for closed encounters without an explicit status 
     "visible",
   );
   assert.equal(
-    getWidgetAvailability({ type: "lab.widget" }, closed, true).state,
+    getWidgetAvailability({ type: "lab.widget" }, closed, {
+      requiresActiveEncounter: true,
+    }).state,
     "hidden",
   );
 });
@@ -272,30 +279,78 @@ test("read-only views and patient history have distinct requirements", () => {
     selectedEncounter: undefined,
     facilityId: undefined,
   };
+  // Clinical summaries read the whole history when no encounter is selected.
+  for (const type of ["diagnosis", "vitals", "observation_chart"]) {
+    assert.equal(
+      getWidgetAvailability({ type }, patientOnly).state,
+      "visible",
+      type,
+    );
+  }
   assert.equal(
-    getWidgetAvailability({ type: "history_diagnoses" }, patientOnly).state,
-    "visible",
-  );
-  assert.equal(
-    getWidgetAvailability({ type: "diagnosis" }, patientOnly).state,
+    getWidgetAvailability({ type: "service_requests" }, patientOnly).state,
     "hidden",
   );
   assert.equal(
     getWidgetAvailability(
-      { type: "history_diagnoses" },
+      { type: "diagnosis" },
       { ...patientOnly, canReadPatientHistory: false },
+    ).state,
+    "denied",
+  );
+  // Inside an encounter the same widget follows encounter access instead.
+  assert.equal(
+    getWidgetAvailability(
+      { type: "diagnosis" },
+      { ...active, canReadPatientHistory: false },
+    ).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability(
+      { type: "diagnosis" },
+      { ...active, canReadClinicalData: false },
     ).state,
     "denied",
   );
   assert.equal(
     getWidgetAvailability(
       {
-        type: "history_diagnoses",
+        type: "diagnosis",
         visible_when: { "encounter.status": [EncounterStatus.IN_PROGRESS] },
       },
       patientOnly,
     ).state,
     "hidden",
+  );
+});
+
+test("plugins opt in to history pages explicitly", () => {
+  assert.equal(getWidgetRequirements("lab.widget").encounter, "any");
+  assert.equal(
+    getWidgetRequirements("lab.widget", { supportsPatientHistory: true })
+      .encounter,
+    "optional",
+  );
+  assert.equal(
+    getWidgetRequirements("lab.widget", { requiresActiveEncounter: true })
+      .encounter,
+    "active",
+  );
+  const patientOnly = {
+    ...active,
+    selectedEncounter: undefined,
+    facilityId: undefined,
+  };
+  assert.equal(
+    getWidgetAvailability({ type: "lab.widget" }, patientOnly).state,
+    "hidden",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "lab.widget" }, patientOnly, {
+      supportsPatientHistory: true,
+    }).state,
+    "visible",
   );
 });
 
@@ -367,7 +422,7 @@ test("vitals codes and encounter filters validate their limits", () => {
   assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 6);
 });
 
-test("tab subsets, chart groups, and encounter filters validate their options", () => {
+test("tab subsets, chart groups, author and encounter filters validate their options", () => {
   const template = standardWorkspaceTemplate("encounter", i18next.t);
   template.pages.push({
     kind: "custom",
@@ -377,16 +432,17 @@ test("tab subsets, chart groups, and encounter filters validate their options", 
       {
         span: 1,
         widgets: [
-          { type: "medications", config: { tabs: ["administration"] } },
-          {
-            type: "medications",
-            config: { tabs: ["prescriptions"], default_tab: "statements" },
-          },
-          { type: "medications", config: { tabs: [] } },
-          { type: "medications", config: { tabs: ["ongoing"] } },
           { type: "encounter_summary", config: { default_tab: "reports" } },
           { type: "encounter_summary", config: { tabs: ["billing"] } },
-          { type: "clinical_history", config: { tabs: ["immunizations"] } },
+          {
+            type: "encounter_summary",
+            config: { tabs: ["reports"], default_tab: "actions" },
+          },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
+          {
+            type: "questionnaire_responses",
+            config: { authored_by: "someone" },
+          },
           {
             type: "observation_chart",
             config: {
@@ -398,8 +454,6 @@ test("tab subsets, chart groups, and encounter filters validate their options", 
           },
           { type: "observation_chart", config: { height: 100 } },
           { type: "observation_chart", config: { columns: 3 } },
-          { type: "observations", config: { limit: 5 } },
-          { type: "plots", config: { plot: " " } },
           {
             type: "recent_encounters",
             config: {
@@ -417,10 +471,7 @@ test("tab subsets, chart groups, and encounter filters validate their options", 
     ],
   });
   // A default tab outside the chosen subset is reported like any other invalid setting.
-  assert.equal(
-    workspaceWidgetIssues(template, new Map(), i18next.t).length,
-    10,
-  );
+  assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 7);
 });
 
 test("automatically hidden columns collapse and an all-hidden page has no tracks", () => {
@@ -449,15 +500,13 @@ test("questionnaire-response access admits only the history widgets that show re
     canReadPatientHistory: false,
     canReadPatientResponses: true,
   };
-  for (const type of ["history_responses", "clinical_history"]) {
-    assert.equal(
-      getWidgetAvailability({ type }, responsesOnly).state,
-      "visible",
-      type,
-    );
-  }
   assert.equal(
-    getWidgetAvailability({ type: "history_diagnoses" }, responsesOnly).state,
+    getWidgetAvailability({ type: "questionnaire_responses" }, responsesOnly)
+      .state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "diagnosis" }, responsesOnly).state,
     "denied",
   );
   assert.deepEqual(patientHistoryAccess(responsesOnly), {
@@ -471,7 +520,7 @@ test("questionnaire-response access admits only the history widgets that show re
   });
   assert.equal(
     getWidgetAvailability(
-      { type: "clinical_history" },
+      { type: "questionnaire_responses" },
       { ...responsesOnly, canReadPatientResponses: false },
     ).state,
     "denied",
@@ -519,12 +568,23 @@ test("encounter-only widgets cannot be published on the patient-history surface"
           { type: "quick_actions" },
           { type: "unavailable.widget" },
           { type: "legacy.tool" },
+          { type: "diagnosis" },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
+          { type: "lab.history" },
         ],
       },
     ],
   });
-  const plugins = new Map([
+  const plugins = new Map<string, CareAppEncounterWidget>([
     ["legacy.tool", { component: () => null, pluginSlug: "legacy" }],
+    [
+      "lab.history",
+      {
+        component: () => null,
+        pluginSlug: "lab",
+        supportsPatientHistory: true,
+      },
+    ],
   ]);
   assert.equal(workspaceWidgetIssues(template, plugins, i18next.t).length, 3);
 });
@@ -541,26 +601,16 @@ test("status filters and stray default tabs are reported before saving", () => {
         widgets: [
           // No encounter exists on history screens, so this hides for everyone.
           {
-            type: "history_diagnoses",
+            type: "diagnosis",
             visible_when: { "encounter.status": [EncounterStatus.IN_PROGRESS] },
           },
-          {
-            type: "clinical_history",
-            config: { tabs: ["responses"], default_tab: "allergies" },
-          },
-          {
-            type: "clinical_history",
-            config: {
-              tabs: ["responses", "allergies"],
-              default_tab: "allergies",
-            },
-          },
+          { type: "questionnaire_responses", config: { authored_by: "me" } },
         ],
       },
     ],
   });
   const issues = workspaceWidgetIssues(template, new Map(), i18next.t);
-  assert.equal(issues.length, 2);
+  assert.equal(issues.length, 1);
   assert.deepEqual(
     widgetConfigConsistencyIssues(
       { tabs: ["responses"], default_tab: "allergies" },
@@ -594,4 +644,41 @@ test("new system references and surface changes cannot bypass page compatibility
     }).success,
     false,
   );
+});
+
+test("every starter is valid and the My forms starter filters to the author", () => {
+  for (const starter of WORKSPACE_STARTERS) {
+    const template = starter.build(i18next.t, []);
+    assert.equal(template.surface, starter.surface, starter.id);
+    assert.equal(
+      createEncounterWorkspaceSchema().safeParse(template).success,
+      true,
+      starter.id,
+    );
+    assert.equal(
+      workspaceWidgetIssues(template, new Map(), i18next.t).length,
+      0,
+      starter.id,
+    );
+  }
+  const myForms = WORKSPACE_STARTERS.find(({ id }) => id === "my_forms")?.build(
+    i18next.t,
+    [],
+  );
+  const page = myForms?.pages[0];
+  assert.equal(page?.kind, "custom");
+  if (page?.kind === "custom") {
+    assert.deepEqual(page.columns[0].widgets[0].config, { authored_by: "me" });
+  }
+});
+
+test("standard pages stay system pages instead of full-page sections", () => {
+  for (const surface of ["encounter", "patient_history"] as const) {
+    const template = standardWorkspaceTemplate(surface, i18next.t);
+    const custom = template.pages.filter((page) => page.kind === "custom");
+    assert.deepEqual(
+      custom.map((page) => page.key),
+      surface === "encounter" ? ["updates"] : [],
+    );
+  }
 });

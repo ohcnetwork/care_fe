@@ -55,10 +55,8 @@ export function WorkspacePage({
 }: EncounterWorkspacePageProps & { context: WorkspaceWidgetContext }) {
   const { t } = useTranslation();
   const { widgets: plugins } = useCareAppEncounterWidgets();
-  const columns = visibleWorkspaceColumns(
-    page.columns,
-    context,
-    (type) => plugins.get(type)?.requiresActiveEncounter === true,
+  const columns = visibleWorkspaceColumns(page.columns, context, (type) =>
+    plugins.get(type),
   );
 
   return (

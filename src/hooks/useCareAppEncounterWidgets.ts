@@ -4,14 +4,48 @@ import type { JSONSchema2020 } from "@/Utils/schema/types";
 import type {
   PluginEncounterWidgetComponent,
   PluginEncounterWidgetDefinition,
+  PluginPatientWidgetComponent,
 } from "@/pluginTypes";
 import { PLUGIN_ENCOUNTER_WIDGET_TYPE_PATTERN } from "@/types/workspace/encounterWorkspace";
 
-export interface CareAppEncounterWidget {
-  component: PluginEncounterWidgetComponent;
+export type CareAppEncounterWidget = {
   pluginSlug: string;
   configSchema?: JSONSchema2020;
-  requiresActiveEncounter?: boolean;
+} & (
+  | {
+      component: PluginEncounterWidgetComponent;
+      supportsPatientHistory?: false;
+      requiresActiveEncounter?: boolean;
+    }
+  | {
+      component: PluginPatientWidgetComponent;
+      supportsPatientHistory: true;
+      requiresActiveEncounter?: undefined;
+    }
+);
+
+function toWidget(
+  pluginSlug: string,
+  definition: PluginEncounterWidgetDefinition | PluginEncounterWidgetComponent,
+): CareAppEncounterWidget {
+  if (!isWidgetDefinition(definition)) {
+    return { pluginSlug, component: definition };
+  }
+  // Manifests are untyped at runtime; only an explicit `true` opts in.
+  if (definition.supportsPatientHistory === true) {
+    return {
+      pluginSlug,
+      component: definition.component,
+      configSchema: definition.configSchema,
+      supportsPatientHistory: true,
+    };
+  }
+  return {
+    pluginSlug,
+    component: definition.component,
+    configSchema: definition.configSchema,
+    requiresActiveEncounter: definition.requiresActiveEncounter,
+  };
 }
 
 function isWidgetDefinition(
@@ -42,15 +76,7 @@ export function useCareAppEncounterWidgets() {
       // The loader's slug owns the namespace; a manifest supplies only local names.
       const type = `${app.slug}.${localName}`;
       if (!PLUGIN_ENCOUNTER_WIDGET_TYPE_PATTERN.test(type)) continue;
-      const isDefinition = isWidgetDefinition(definition);
-      widgets.set(type, {
-        component: isDefinition ? definition.component : definition,
-        pluginSlug: app.slug,
-        configSchema: isDefinition ? definition.configSchema : undefined,
-        requiresActiveEncounter: isDefinition
-          ? definition.requiresActiveEncounter
-          : undefined,
-      });
+      widgets.set(type, toWidget(app.slug, definition));
     }
   }
 

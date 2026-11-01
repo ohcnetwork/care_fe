@@ -2088,7 +2088,9 @@ test("studio shows what hides automatically without loading clinical records", a
           },
           {
             span: 8,
-            widgets: [{ type: "history_diagnoses", title: "Patient history" }],
+            widgets: [
+              { type: "current_medications", title: "Patient history" },
+            ],
           },
         ],
       },
@@ -2352,8 +2354,8 @@ test("studio customises supported built-in tabs and starts history screens from 
   record.data.template = {
     schema_version: 1,
     pages: [
+      { key: "updates", kind: "system" },
       { key: "medicines", kind: "system" },
-      { key: "files", kind: "system" },
     ],
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
@@ -2365,16 +2367,21 @@ test("studio customises supported built-in tabs and starts history screens from 
     .getByRole("button", { name: "Customise this tab", exact: true })
     .click();
   await expect(
-    page.getByRole("article", { name: "Medications", exact: true }),
+    page.getByRole("article", { name: "Quick Actions", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Tab settings", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Tab name", exact: true })
-    .fill("Medication studio");
+    .fill("Ward round");
   await page
     .getByRole("button", { name: "Apply changes", exact: true })
     .click();
-  await page.getByRole("button", { name: "Files", exact: true }).click();
+  // Full-page tabs such as medicines stay built in; only their order and
+  // visibility can change.
+  await page
+    .getByLabel("Tabs", { exact: true })
+    .getByRole("button", { name: "Medications", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Customise this tab", exact: true }),
   ).toHaveCount(0);
@@ -2393,12 +2400,15 @@ test("studio customises supported built-in tabs and starts history screens from 
       schema_version: 2,
       pages: [
         {
-          key: "medicines",
+          key: "updates",
           kind: "custom",
-          title: "Medication studio",
-          columns: [{ widgets: [{ type: "medications" }] }],
+          title: "Ward round",
+          columns: [
+            { widgets: expect.arrayContaining([{ type: "quick_actions" }]) },
+            { widgets: [{ type: "encounter_summary" }] },
+          ],
         },
-        { key: "files", kind: "system" },
+        { key: "medicines", kind: "system" },
       ],
     },
   });
@@ -2409,13 +2419,10 @@ test("studio customises supported built-in tabs and starts history screens from 
     .fill(`History ${faker.string.alphanumeric(8)}`);
   await page
     .getByRole("region", { name: "Patient history screen", exact: true })
-    .getByRole("button", { name: "Standard history", exact: true })
+    .getByRole("button", { name: "My forms", exact: true })
     .click();
   await expect(
-    page.getByRole("article", {
-      name: "Patient response history",
-      exact: true,
-    }),
+    page.getByRole("article", { name: "My forms", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Closed encounter", exact: true }),
@@ -2430,19 +2437,41 @@ test("studio customises supported built-in tabs and starts history screens from 
   await expect(
     picker.getByRole("button", { name: "Quick Actions", exact: true }),
   ).toBeDisabled();
-  await expect(
-    picker.getByRole("button", {
-      name: "Patient allergy history",
-      exact: true,
-    }),
-  ).toBeEnabled();
+  for (const name of ["Allergies", "Diagnoses", "Vitals"]) {
+    await expect(
+      picker.getByRole("button", { name, exact: true }),
+    ).toBeEnabled();
+  }
   await page.keyboard.press("Escape");
   await page
     .getByRole("button", { name: "Create workspace", exact: true })
     .click();
   await page.waitForURL(/\/admin\/workspaces\/[\da-f-]+\/edit$/);
   expect(api.writes.at(-1)?.body).toMatchObject({
-    template: { schema_version: 2, surface: "patient_history" },
+    template: {
+      schema_version: 2,
+      surface: "patient_history",
+      pages: expect.arrayContaining([
+        expect.objectContaining({
+          key: "my_forms",
+          kind: "custom",
+          columns: [
+            {
+              span: 8,
+              widgets: [
+                {
+                  type: "questionnaire_responses",
+                  title: "My forms",
+                  config: { authored_by: "me" },
+                },
+              ],
+            },
+            expect.anything(),
+          ],
+        }),
+        { key: "symptoms", kind: "system" },
+      ]),
+    },
   });
 });
 
@@ -2463,12 +2492,12 @@ test("history screens reject encounter status filters and offer to clear them", 
             span: 12,
             widgets: [
               {
-                type: "history_diagnoses",
+                type: "diagnosis",
                 title: "Past diagnoses",
                 // Written in JSON: history screens have no encounter to match.
                 visible_when: { "encounter.status": ["in_progress"] },
               },
-              { type: "history_allergies", title: "Allergy history" },
+              { type: "allergies", title: "Allergy history" },
             ],
           },
         ],
@@ -2552,8 +2581,8 @@ test("history screens reject encounter status filters and offer to clear them", 
           columns: [
             {
               widgets: [
-                { type: "history_diagnoses", title: "Past diagnoses" },
-                { type: "history_allergies", title: "Allergy history" },
+                { type: "diagnosis", title: "Past diagnoses" },
+                { type: "allergies", title: "Allergy history" },
               ],
             },
           ],
@@ -2915,7 +2944,9 @@ for (const limit of ["column", "workspace"] as const) {
       }
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.getByRole("button", { name: "Save Changes", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
     await expect.poll(() => api.writes.length).toBe(1);
     expect(api.writes[0].body).toMatchObject({
       template: {
@@ -2946,9 +2977,7 @@ for (const limit of ["column", "workspace"] as const) {
   });
 }
 
-test("studio flags full-width browsers in narrow columns and saves tab subsets as checkboxes", async ({
-  page,
-}) => {
+test("studio saves tab subsets as checkboxes", async ({ page }) => {
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
@@ -2960,31 +2989,18 @@ test("studio flags full-width browsers in narrow columns and saves tab subsets a
         title: "Ward",
         columns: [
           { span: 8, widgets: [{ type: "vitals", title: "Vitals" }] },
-          { span: 4, widgets: [{ type: "medications", title: "Medicines" }] },
+          {
+            span: 4,
+            widgets: [{ type: "encounter_summary", title: "Summary" }],
+          },
         ],
       },
     ],
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
   await page.goto(`/admin/workspaces/${record.data.id}/edit`);
-  const medicines = page.getByRole("article", {
-    name: "Medicines",
-    exact: true,
-  });
-  const hint =
-    "This section has its own filters and panes. It works best in a full-width column.";
-  await expect(medicines.getByText(hint)).toBeVisible();
-  await expect(
-    page.getByRole("article", { name: "Vitals", exact: true }).getByText(hint),
-  ).toHaveCount(0);
 
-  // Moving it into the wide column clears the hint. The [8, 4] preset labels
-  // its columns Main and Side.
-  await sectionAction(page, "Medicines", "Move to");
-  await page.getByRole("menuitem", { name: "Main", exact: true }).click();
-  await expect(medicines.getByText(hint)).toHaveCount(0);
-
-  await openSectionSettings(page, "Medicines");
+  await openSectionSettings(page, "Summary");
   const drawer = sectionSettings(page);
   const tabs = drawer.getByRole("group", { name: "Tabs to show", exact: true });
   for (const checkbox of await tabs.getByRole("checkbox").all()) {
@@ -2994,18 +3010,9 @@ test("studio flags full-width browsers in narrow columns and saves tab subsets a
     tabs.getByText("Select at least one tab. Clear restores all default tabs."),
   ).toBeVisible();
   // Narrow the inherited all-tabs default before choosing the opening tab.
-  await tabs.getByRole("checkbox").nth(1).uncheck();
-  await tabs.getByRole("checkbox").nth(3).uncheck();
-  await tabs
-    .getByRole("checkbox", { name: "Medicine Administration", exact: true })
-    .check();
-  await tabs
-    .getByRole("checkbox", { name: "Prescriptions", exact: true })
-    .check();
+  await tabs.getByRole("checkbox", { name: "Actions", exact: true }).uncheck();
   await drawer.getByRole("combobox", { name: "Open on", exact: true }).click();
-  await page
-    .getByRole("option", { name: "Medicine Administration", exact: true })
-    .click();
+  await page.getByRole("option", { name: "Reports", exact: true }).click();
   await closeSectionSettings(page);
 
   await page.getByRole("button", { name: "Save Changes", exact: true }).click();
@@ -3018,22 +3025,29 @@ test("studio flags full-width browsers in narrow columns and saves tab subsets a
       pages: [
         {
           columns: [
+            { widgets: [{ type: "vitals" }] },
             {
               widgets: [
-                { type: "vitals" },
                 {
-                  type: "medications",
+                  type: "encounter_summary",
                   config: {
-                    tabs: ["prescriptions", "administration"],
-                    default_tab: "administration",
+                    tabs: expect.arrayContaining(["details", "reports"]),
+                    default_tab: "reports",
                   },
                 },
               ],
             },
-            { widgets: [] },
           ],
         },
       ],
     },
   });
+  const [summary] = (
+    api.writes[0].body as {
+      template: {
+        pages: { columns: { widgets: { config?: { tabs?: string[] } }[] }[] }[];
+      };
+    }
+  ).template.pages[0].columns[1].widgets;
+  expect(summary.config?.tabs).toHaveLength(2);
 });

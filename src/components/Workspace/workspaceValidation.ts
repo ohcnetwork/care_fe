@@ -6,7 +6,10 @@ import {
   getWorkspaceSurface,
   type EncounterWorkspaceTemplate,
 } from "@/types/workspace/encounterWorkspace";
-import { getWidgetRequirements } from "@/types/workspace/widgetAvailability";
+import {
+  getWidgetRequirements,
+  worksWithoutEncounter,
+} from "@/types/workspace/widgetAvailability";
 import { getCoreWidgetConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 import { workspaceWidgetLabel } from "./workspaceEditorCatalog";
@@ -54,8 +57,7 @@ export function workspaceWidgetIssues(
         const name = `${page.title}: ${widget.title ?? workspaceWidgetLabel(widget.type, t)}`;
         if (getWorkspaceSurface(template) === "patient_history") {
           if (
-            getWidgetRequirements(widget.type, plugin?.requiresActiveEncounter)
-              .encounter !== "none"
+            !worksWithoutEncounter(getWidgetRequirements(widget.type, plugin))
           ) {
             issues.push(t("workspace_incompatible_widget", { name }));
           }

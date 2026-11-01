@@ -21,7 +21,8 @@ interface CodeGroup {
 }
 interface VitalsListProps {
   patientId: string;
-  encounterId: string;
+  /** Omit to list the patient's observations across encounters. */
+  encounterId?: string;
   className?: string;
   title?: string;
   showEmpty?: boolean;

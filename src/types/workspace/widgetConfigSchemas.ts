@@ -12,20 +12,6 @@ import type { JSONSchema2020, JSONSchemaProperty } from "@/Utils/schema/types";
 
 const widgetLimitSchema = z.number().int().min(1).max(100).optional();
 
-export const CLINICAL_HISTORY_TABS = [
-  "responses",
-  "diagnostic_reports",
-  "symptoms",
-  "diagnoses",
-  "allergies",
-  "medications",
-] as const;
-export const MEDICATION_TABS = [
-  "prescriptions",
-  "statements",
-  "administration",
-  "dispense_history",
-] as const;
 export const ENCOUNTER_SUMMARY_TABS = [
   "details",
   "actions",
@@ -74,14 +60,6 @@ export const recentEncountersConfigSchema = z.strictObject({
   limit: z.number().int().min(1).max(20).optional(),
 });
 
-export const observationsConfigSchema = z.strictObject({
-  limit: widgetLimitSchema,
-});
-
-export const plotsConfigSchema = z.strictObject({
-  plot: z.string().trim().min(1).meta({ pattern: "\\S" }).optional(),
-});
-
 export const observationChartConfigSchema = z.strictObject({
   plot: z.string().trim().min(1).meta({ pattern: "\\S" }).optional(),
   groups: z
@@ -93,8 +71,6 @@ export const observationChartConfigSchema = z.strictObject({
   columns: z.number().int().min(1).max(2).optional(),
 });
 
-export const clinicalHistoryConfigSchema = tabsSchema(CLINICAL_HISTORY_TABS);
-export const medicationsConfigSchema = tabsSchema(MEDICATION_TABS);
 export const encounterSummaryConfigSchema = tabsSchema(ENCOUNTER_SUMMARY_TABS);
 
 export const responsesConfigSchema = z.strictObject({
@@ -107,6 +83,7 @@ export const responsesConfigSchema = z.strictObject({
     .optional(),
   only_unstructured: z.boolean().optional(),
   role: z.uuid().optional(),
+  authored_by: z.enum(["anyone", "me"]).optional(),
   limit: widgetLimitSchema,
 });
 
@@ -138,11 +115,7 @@ const currentMedicationsJsonSchema = toJsonSchema(
   currentMedicationsConfigSchema,
 );
 const recentEncountersJsonSchema = toJsonSchema(recentEncountersConfigSchema);
-const observationsJsonSchema = toJsonSchema(observationsConfigSchema);
-const plotsJsonSchema = toJsonSchema(plotsConfigSchema);
 const observationChartJsonSchema = toJsonSchema(observationChartConfigSchema);
-const clinicalHistoryJsonSchema = toJsonSchema(clinicalHistoryConfigSchema);
-const medicationsJsonSchema = toJsonSchema(medicationsConfigSchema);
 const encounterSummaryJsonSchema = toJsonSchema(encounterSummaryConfigSchema);
 
 /** Replace a bare enum with titled options so the form shows labels. */
@@ -215,6 +188,13 @@ function responsesSchema(t: TFunction): JSONSchema2020 {
         ...properties.role,
         title: t("author_role"),
         description: t("author_role_filter_hint"),
+      },
+      authored_by: {
+        ...titledEnum(properties.authored_by, (value) =>
+          t(`workspace_widget_authored_by_${value}`),
+        ),
+        title: t("workspace_widget_authored_by"),
+        description: t("workspace_widget_authored_by_hint"),
       },
       limit: limitProperty(properties.limit, t),
     },
@@ -350,39 +330,6 @@ function recentEncountersSchema(t: TFunction): JSONSchema2020 {
   };
 }
 
-function observationsSchema(t: TFunction): JSONSchema2020 {
-  const properties = observationsJsonSchema.properties!;
-  return {
-    ...observationsJsonSchema,
-    title: t("observations"),
-    properties: {
-      limit: {
-        ...properties.limit,
-        title: t("workspace_widget_recent_limit"),
-        description: t("workspace_widget_observations_limit_hint", {
-          minimum: properties.limit.minimum,
-          maximum: properties.limit.maximum,
-        }),
-      },
-    },
-  };
-}
-
-function plotsSchema(t: TFunction): JSONSchema2020 {
-  const properties = plotsJsonSchema.properties!;
-  return {
-    ...plotsJsonSchema,
-    title: t("ENCOUNTER_TAB__plots"),
-    properties: {
-      plot: {
-        ...properties.plot,
-        title: t("workspace_widget_default_plot"),
-        description: t("workspace_widget_default_plot_hint"),
-      },
-    },
-  };
-}
-
 function observationChartSchema(t: TFunction): JSONSchema2020 {
   const properties = observationChartJsonSchema.properties!;
   return {
@@ -417,44 +364,6 @@ function observationChartSchema(t: TFunction): JSONSchema2020 {
         description: t("workspace_widget_chart_columns_hint"),
       },
     },
-  };
-}
-
-function clinicalHistorySchema(t: TFunction): JSONSchema2020 {
-  const labels: Record<string, string> = {
-    responses: t("responses"),
-    diagnostic_reports: t("diagnostic_report_other", { count: 2 }),
-    symptoms: t("past_symptoms"),
-    diagnoses: t("past_diagnoses"),
-    allergies: t("allergies"),
-    medications: t("past_medications"),
-  };
-  return {
-    ...clinicalHistoryJsonSchema,
-    title: t("clinical_history"),
-    properties: tabsProperties(
-      clinicalHistoryJsonSchema,
-      t,
-      (value) => labels[value] ?? value,
-    ),
-  };
-}
-
-function medicationsSchema(t: TFunction): JSONSchema2020 {
-  const labels: Record<string, string> = {
-    prescriptions: t("prescriptions"),
-    statements: t("medication_statements"),
-    administration: t("medicine_administration"),
-    dispense_history: t("dispense_history"),
-  };
-  return {
-    ...medicationsJsonSchema,
-    title: t("medications"),
-    properties: tabsProperties(
-      medicationsJsonSchema,
-      t,
-      (value) => labels[value] ?? value,
-    ),
   };
 }
 
@@ -531,24 +440,10 @@ const coreConfigSchemas = {
   audit_logs: noConfigSchema,
   encounter_actions: noConfigSchema,
   reports: noConfigSchema,
-  responses: noConfigSchema,
-  observations: observationsSchema,
-  medications: medicationsSchema,
-  service_request_management: noConfigSchema,
-  diagnostic_reports: noConfigSchema,
-  plots: plotsSchema,
   observation_chart: observationChartSchema,
-  consents: noConfigSchema,
   account: noConfigSchema,
   encounter_summary: encounterSummarySchema,
   encounter_extensions: noConfigSchema,
-  clinical_history: clinicalHistorySchema,
-  history_responses: noConfigSchema,
-  history_diagnostic_reports: noConfigSchema,
-  history_symptoms: noConfigSchema,
-  history_diagnoses: noConfigSchema,
-  history_allergies: noConfigSchema,
-  history_medications: noConfigSchema,
 } satisfies Record<string, (t: TFunction) => JSONSchema2020>;
 
 export type CoreWidgetConfigType = keyof typeof coreConfigSchemas;

@@ -2,7 +2,10 @@ import { History, LockKeyhole, PenLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { getWidgetRequirements } from "@/types/workspace/widgetAvailability";
+import {
+  getWidgetRequirements,
+  type WidgetCapabilities,
+} from "@/types/workspace/widgetAvailability";
 
 function Badge({
   tone,
@@ -31,13 +34,13 @@ function Badge({
 /** Only rules an author might not expect are labelled; needing an encounter is the norm. */
 export function WorkspaceWidgetAvailability({
   type,
-  requiresActiveEncounter,
+  capabilities,
 }: {
   type: string;
-  requiresActiveEncounter?: boolean;
+  capabilities?: WidgetCapabilities;
 }) {
   const { t } = useTranslation();
-  const requirement = getWidgetRequirements(type, requiresActiveEncounter);
+  const requirement = getWidgetRequirements(type, capabilities);
   const editorsOnly =
     requirement.access === "write" || requirement.access === "actions";
   if (requirement.encounter === "any" && !editorsOnly) return null;
@@ -51,6 +54,11 @@ export function WorkspaceWidgetAvailability({
       {requirement.encounter === "none" && (
         <Badge tone="muted" icon={History}>
           {t("workspace_patient_context")}
+        </Badge>
+      )}
+      {requirement.encounter === "optional" && (
+        <Badge tone="muted" icon={History}>
+          {t("workspace_works_on_history_pages")}
         </Badge>
       )}
       {editorsOnly && (

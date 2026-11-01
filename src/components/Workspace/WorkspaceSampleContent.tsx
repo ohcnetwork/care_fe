@@ -48,7 +48,7 @@ export function WorkspaceSampleContent({
       </div>
     );
   }
-  if (type === "plots" || type === "observation_chart") {
+  if (type === "observation_chart") {
     return (
       <svg
         viewBox="0 0 320 120"

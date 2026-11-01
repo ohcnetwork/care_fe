@@ -19,12 +19,7 @@ type QueryParams = {
 
 const fetchOptions = { cache: "no-store" as RequestCache };
 
-export const EncounterPlotsTab = ({
-  defaultPlot,
-}: {
-  /** Plot id from the plots configuration that opens first. */
-  defaultPlot?: string;
-} = {}) => {
+export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useScopedQueryParams<QueryParams>();
 
@@ -42,11 +37,7 @@ export const EncounterPlotsTab = ({
     return <Loading />;
   }
 
-  const currentTabId =
-    qParams.plot ||
-    (defaultPlot && data.some((tab) => tab.id === defaultPlot)
-      ? defaultPlot
-      : data[0]?.id);
+  const currentTabId = qParams.plot || data[0]?.id;
   const currentTab = data.find((tab) => tab.id === currentTabId);
 
   if (!currentTab) {

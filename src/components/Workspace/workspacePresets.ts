@@ -8,27 +8,7 @@ import {
 } from "@/types/workspace/encounterWorkspace";
 import type { CoreWidgetConfigType } from "@/types/workspace/widgetConfigSchemas";
 
-import { workspaceWidgetLabel } from "./workspaceEditorCatalog";
 import { systemPageLabel } from "./workspaceEditorUtils";
-
-const ENCOUNTER_PAGE_WIDGETS: Partial<Record<string, CoreWidgetConfigType>> = {
-  responses: "responses",
-  observations: "observations",
-  medicines: "medications",
-  service_requests: "service_request_management",
-  diagnostic_reports: "diagnostic_reports",
-  plots: "plots",
-  consents: "consents",
-};
-
-const HISTORY_PAGE_WIDGETS: Partial<Record<string, CoreWidgetConfigType>> = {
-  responses: "history_responses",
-  diagnostic_reports: "history_diagnostic_reports",
-  symptoms: "history_symptoms",
-  diagnoses: "history_diagnoses",
-  allergies: "history_allergies",
-  medications: "history_medications",
-};
 
 export function standardWorkspaceTemplate(
   surface: WorkspaceSurface,
@@ -39,10 +19,6 @@ export function standardWorkspaceTemplate(
     surface === "patient_history"
       ? HISTORY_PAGE_KEYS
       : [...new Set([...SYSTEM_PAGE_KEYS, ...pluginPageKeys])];
-  const types =
-    surface === "patient_history"
-      ? HISTORY_PAGE_WIDGETS
-      : ENCOUNTER_PAGE_WIDGETS;
   return {
     schema_version: 2,
     surface,
@@ -72,18 +48,7 @@ export function standardWorkspaceTemplate(
           ],
         };
       }
-      const type = types[key];
-      return type
-        ? {
-            key,
-            kind: "custom",
-            title:
-              surface === "patient_history"
-                ? workspaceWidgetLabel(type, t)
-                : systemPageLabel(key, t),
-            columns: [{ span: 12, widgets: [{ type }] }],
-          }
-        : { key, kind: "system" };
+      return { key, kind: "system" };
     }),
   };
 }
@@ -148,19 +113,7 @@ export const WORKSPACE_STARTERS: WorkspaceStarter[] = [
             },
           ],
         },
-        {
-          key: "medicines",
-          kind: "custom",
-          title: systemPageLabel("medicines", t),
-          columns: [{ span: 12, widgets: [section("medications")] }],
-        },
-        {
-          key: "history",
-          kind: "custom",
-          title: t("clinical_history"),
-          icon: "clipboard-list",
-          columns: [{ span: 12, widgets: [section("clinical_history")] }],
-        },
+        { key: "medicines", kind: "system" },
         { key: "notes", kind: "system" },
         { key: "files", kind: "system" },
       ],
@@ -189,19 +142,12 @@ export const WORKSPACE_STARTERS: WorkspaceStarter[] = [
                 section("vitals"),
                 section("diagnosis"),
                 section("questionnaire_responses"),
-                section("history_medications"),
+                section("current_medications"),
               ],
             },
           ],
         },
-        {
-          key: "orders",
-          kind: "custom",
-          title: systemPageLabel("service_requests", t),
-          columns: [
-            { span: 12, widgets: [section("service_request_management")] },
-          ],
-        },
+        { key: "service_requests", kind: "system" },
         { key: "notes", kind: "system" },
       ],
     }),
@@ -231,6 +177,44 @@ export const WORKSPACE_STARTERS: WorkspaceStarter[] = [
     descriptionKey: "workspace_starter_standard_history_description",
     recommended: true,
     build: (t) => standardWorkspaceTemplate("patient_history", t),
+  },
+  {
+    id: "my_forms",
+    surface: "patient_history",
+    titleKey: "workspace_starter_my_forms",
+    descriptionKey: "workspace_starter_my_forms_description",
+    build: (t) => ({
+      schema_version: 2,
+      surface: "patient_history",
+      pages: [
+        {
+          key: "my_forms",
+          kind: "custom",
+          title: t("workspace_starter_my_forms"),
+          icon: "clipboard-list",
+          columns: [
+            {
+              span: 8,
+              widgets: [
+                {
+                  type: "questionnaire_responses",
+                  title: t("workspace_starter_my_forms"),
+                  config: { authored_by: "me" },
+                },
+              ],
+            },
+            {
+              span: 4,
+              widgets: [
+                section("current_medications"),
+                section("recent_encounters"),
+              ],
+            },
+          ],
+        },
+        ...HISTORY_PAGE_KEYS.map((key) => ({ key, kind: "system" as const })),
+      ],
+    }),
   },
   {
     id: "blank_history",

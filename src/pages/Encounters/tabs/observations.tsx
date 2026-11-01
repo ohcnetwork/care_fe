@@ -69,18 +69,10 @@ function groupObservationsByDate(
   }, {});
 }
 
-const PAGE_SIZE = 20;
-
-export const EncounterObservationsTab = ({
-  limit,
-}: {
-  /** Show only the latest readings instead of the endless timeline. */
-  limit?: number;
-} = {}) => {
+export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
-  const pageSize = PAGE_SIZE;
 
   const {
     data,
@@ -92,42 +84,37 @@ export const EncounterObservationsTab = ({
     isFetching,
     refetch,
   } = useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
-      queryKey: ["infinite-observations", patientId, encounterId, limit],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(observationApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            ignore_group: true,
-            limit: pageSize,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<ObservationListRead>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * pageSize;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+    queryKey: ["infinite-observations", patientId, encounterId],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(observationApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          ignore_group: true,
+          limit: 20,
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<ObservationListRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 20;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+  });
 
   useEffect(() => {
-    if (
-      (limit !== undefined || inView) &&
-      hasNextPage &&
-      !isFetchingNextPage &&
-      !isError
-    ) {
+    if (inView && hasNextPage && !isFetchingNextPage && !isError) {
       fetchNextPage();
     }
-  }, [limit, inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
   if (isError) {
     return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
   }
 
-  if (isLoading || (limit !== undefined && hasNextPage)) {
+  if (isLoading) {
     return (
       <Card className="p-6">
         <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
@@ -135,19 +122,7 @@ export const EncounterObservationsTab = ({
     );
   }
 
-  const fetched = data?.pages.flatMap((page) => page.results) ?? [];
-  // The backend orders by modification time, not measurement time. A limited
-  // timeline must finish paging before selecting the newest measurements.
-  const observations =
-    limit === undefined
-      ? fetched
-      : [...fetched]
-          .sort(
-            (a, b) =>
-              Date.parse(b.effective_datetime) -
-              Date.parse(a.effective_datetime),
-          )
-          .slice(0, limit);
+  const observations = data?.pages.flatMap((page) => page.results) ?? [];
 
   if (observations.length === 0) {
     return (

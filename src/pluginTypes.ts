@@ -207,13 +207,43 @@ export type PluginEncounterWidgetComponent =
   | ComponentType<PluginEncounterWidgetProps>
   | LazyExoticComponent<ComponentType<PluginEncounterWidgetProps>>;
 
-export interface PluginEncounterWidgetDefinition {
+/** Patient history pages have no selected encounter, so both fields may be absent. */
+export interface PluginPatientWidgetProps extends Omit<
+  PluginEncounterWidgetProps,
+  "encounterId" | "encounter"
+> {
+  encounterId?: string;
+  encounter?: EncounterRead;
+}
+
+export type PluginPatientWidgetComponent =
+  | ComponentType<PluginPatientWidgetProps>
+  | LazyExoticComponent<ComponentType<PluginPatientWidgetProps>>;
+
+interface PluginEncounterOnlyWidgetDefinition {
   component: PluginEncounterWidgetComponent;
   /** Object schema used by the workspace configuration editor. */
   configSchema: JSONSchema2020;
+  supportsPatientHistory?: false;
   /** The host hides this widget before mounting it in a closed encounter. */
   requiresActiveEncounter?: boolean;
 }
+
+interface PluginPatientHistoryWidgetDefinition {
+  component: PluginPatientWidgetComponent;
+  /** Object schema used by the workspace configuration editor. */
+  configSchema: JSONSchema2020;
+  /**
+   * The widget can be added to patient history pages. It receives the
+   * selected encounter when there is one and must show patient-wide data
+   * otherwise.
+   */
+  supportsPatientHistory: true;
+  requiresActiveEncounter?: never;
+}
+
+export type PluginEncounterWidgetDefinition =
+  PluginEncounterOnlyWidgetDefinition | PluginPatientHistoryWidgetDefinition;
 
 /**
  * Plugin override definition for replacing registered components
