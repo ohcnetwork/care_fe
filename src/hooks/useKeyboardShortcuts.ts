@@ -179,11 +179,17 @@ export function useKeyboardShortcuts(
         target.tagName === "TEXTAREA" ||
         target.contentEditable === "true";
 
-      if (
-        isInputField &&
+      // Printable keys always belong to the field, even when shortcuts such as
+      // Shift+Enter are allowed to run from inside inputs.
+      const isTyping =
+        event.key?.length === 1 &&
         !event.ctrlKey &&
         !event.metaKey &&
-        !ignoreInputFields
+        !event.altKey;
+
+      if (
+        isInputField &&
+        (isTyping || (!event.ctrlKey && !event.metaKey && !ignoreInputFields))
       ) {
         return;
       }

@@ -850,7 +850,7 @@ export function ProcedureQuestion({
         (isMobile ? (
           <div>{rows}</div>
         ) : (
-          <div className="rounded-lg border border-gray-200">
+          <div>
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">

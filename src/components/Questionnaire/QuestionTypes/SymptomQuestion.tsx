@@ -923,7 +923,7 @@ export function SymptomQuestion({
         <>
           {/* Desktop View - Table */}
           {!isMobile && (
-            <div className="rounded-lg border border-gray-200">
+            <div>
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">

@@ -267,7 +267,7 @@ export default function ImmunizationPolicyList({
             </div>
           ) : (
             <>
-              <div className="hidden overflow-hidden rounded-lg border border-gray-200 bg-white lg:block">
+              <div className="hidden overflow-hidden rounded-md bg-white lg:block">
                 <Table className="table-fixed">
                   <TableHeader className="bg-gray-50">
                     <TableRow className="hover:bg-gray-50">

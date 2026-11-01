@@ -287,7 +287,7 @@ export function AnswerOptionsEditor({
             )}
             onValueChange={(index) => handleSetDefault(Number(index))}
             aria-label={t("default")}
-            className="overflow-hidden rounded-md border border-border bg-background"
+            className="overflow-hidden rounded-md bg-background"
           >
             <Table className="table-fixed">
               <TableHeader>

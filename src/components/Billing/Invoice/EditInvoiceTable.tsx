@@ -436,7 +436,7 @@ export function EditInvoiceTable({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <Table className="border">
+          <Table>
             <TableHeader>
               <TableRow className="divide-x font-semibold">
                 <TableHead className="w-12">#</TableHead>

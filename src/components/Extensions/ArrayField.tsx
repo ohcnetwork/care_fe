@@ -116,7 +116,7 @@ function ObjectArrayField<TFieldValues extends FieldValues>({
             {metadata.description}
           </p>
         )}
-        <div className="border rounded-md">
+        <div>
           <Table>
             <TableHeader>
               <TableRow>
