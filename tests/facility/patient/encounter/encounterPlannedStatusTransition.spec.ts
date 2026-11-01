@@ -220,7 +220,12 @@ test.describe("Planned Encounter Status Transition", () => {
       if (status === "discharged") {
         await test.step("Complete the discharged encounter without changing its end date", async () => {
           await page.getByRole("tab", { name: "Actions", exact: true }).click();
-          await page.getByRole("button", { name: "Mark as Completed" }).click();
+          // The page also renders an sr-only "Mark as Completed" button as
+          // its keyboard-shortcut target; click the one in the Actions tab.
+          await page
+            .getByRole("tabpanel", { name: "Actions", exact: true })
+            .getByRole("button", { name: "Mark as Completed" })
+            .click();
           await page
             .getByRole("alertdialog", { name: "Mark as Complete" })
             .getByRole("button", { name: /^Mark as Complete/ })
