@@ -4,13 +4,19 @@ import { useTranslation } from "react-i18next";
 
 import { TagExpiryOffsetInput } from "@/components/Tags/TagExpiryOffsetInput";
 import {
+  MAX_TAG_EXPIRY_DAYS,
   compactExpiryOffset,
   formatExpiryOffset,
   hasExpiryOffset,
+  isExpiryOffsetTooLong,
 } from "@/components/Tags/tagExpiry";
 
 import { Button } from "@/components/ui/button";
-import { FieldDescription, FieldGroup } from "@/components/ui/field";
+import {
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field";
 
 import { TagConfig, TagExpiryOffset } from "@/types/emr/tagConfig/tagConfig";
 
@@ -30,6 +36,7 @@ export function TagExpiryStep({ tag, onBack, onApply }: TagExpiryStepProps) {
   const defaultOffset = autoset_expiry ? expiry_offset : undefined;
   const [offset, setOffset] = useState<TagExpiryOffset>(defaultOffset ?? {});
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooLong = isExpiryOffsetTooLong(offset);
 
   // The menu refocuses its popup after the picked item is hidden, which wins
   // over autoFocus, so move focus to the first input once that has settled.
@@ -41,11 +48,14 @@ export function TagExpiryStep({ tag, onBack, onApply }: TagExpiryStepProps) {
   }, []);
 
   return (
-    // Keep typing and Tab inside the inputs instead of the menu's typeahead.
+    // Keep typing and Tab out of the menu's typeahead, but let Escape reach
+    // the menu or drawer so it still closes from here.
     <div
       ref={containerRef}
       className="flex flex-col gap-4 p-3"
-      onKeyDown={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key !== "Escape") e.stopPropagation();
+      }}
     >
       <div className="flex items-center gap-2">
         <Button
@@ -70,6 +80,11 @@ export function TagExpiryStep({ tag, onBack, onApply }: TagExpiryStepProps) {
               })
             : t("tag_expiry_leave_empty")}
         </FieldDescription>
+        {tooLong && (
+          <FieldError>
+            {t("tag_expiry_offset_too_long", { days: MAX_TAG_EXPIRY_DAYS })}
+          </FieldError>
+        )}
       </FieldGroup>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onBack}>
@@ -78,6 +93,7 @@ export function TagExpiryStep({ tag, onBack, onApply }: TagExpiryStepProps) {
         <Button
           type="button"
           size="sm"
+          disabled={tooLong}
           onClick={() =>
             onApply(
               hasExpiryOffset(offset) ? compactExpiryOffset(offset) : undefined,

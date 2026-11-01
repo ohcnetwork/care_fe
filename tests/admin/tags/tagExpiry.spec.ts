@@ -35,6 +35,11 @@ test.describe("Tag expiry", () => {
       await expect(
         page.getByText("Enter a duration greater than zero"),
       ).toBeVisible();
+      await page.getByRole("spinbutton", { name: "Days" }).fill("4000");
+      await page.getByRole("button", { name: "Create tag config" }).click();
+      await expect(
+        page.getByText("Expiry can't be longer than 3650 days"),
+      ).toBeVisible();
     });
 
     await test.step("Save the expiry rule", async () => {

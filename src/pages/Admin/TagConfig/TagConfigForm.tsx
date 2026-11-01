@@ -9,8 +9,10 @@ import { z } from "zod";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
 import {
+  MAX_TAG_EXPIRY_DAYS,
   compactExpiryOffset,
   hasExpiryOffset,
+  isExpiryOffsetTooLong,
 } from "@/components/Tags/tagExpiry";
 import { TagExpiryOffsetInput } from "@/components/Tags/TagExpiryOffsetInput";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
@@ -124,6 +126,14 @@ export default function TagConfigForm({
       {
         path: ["expiry_offset"],
         message: t("tag_expiry_offset_required"),
+      },
+    )
+    .refine(
+      (data) =>
+        !data.autoset_expiry || !isExpiryOffsetTooLong(data.expiry_offset),
+      {
+        path: ["expiry_offset"],
+        message: t("tag_expiry_offset_too_long", { days: MAX_TAG_EXPIRY_DAYS }),
       },
     );
 

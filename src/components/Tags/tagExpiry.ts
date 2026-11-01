@@ -38,6 +38,24 @@ export function hasExpiryOffset(offset?: TagExpiryOffset) {
   return TAG_EXPIRY_OFFSET_UNITS.some((unit) => (offset?.[unit] ?? 0) > 0);
 }
 
+const SECONDS_PER_UNIT = {
+  days: 86400,
+  hours: 3600,
+  minutes: 60,
+  seconds: 1,
+} as const;
+
+/** Longest accepted expiry; far longer offsets overflow the backend's date math. */
+export const MAX_TAG_EXPIRY_DAYS = 3650;
+
+export function isExpiryOffsetTooLong(offset?: TagExpiryOffset) {
+  const totalSeconds = TAG_EXPIRY_OFFSET_UNITS.reduce(
+    (sum, unit) => sum + (offset?.[unit] ?? 0) * SECONDS_PER_UNIT[unit],
+    0,
+  );
+  return totalSeconds > MAX_TAG_EXPIRY_DAYS * SECONDS_PER_UNIT.days;
+}
+
 /** Drops empty units so the payload only carries what the user entered. */
 export function compactExpiryOffset(offset: TagExpiryOffset) {
   const compact: TagExpiryOffset = {};

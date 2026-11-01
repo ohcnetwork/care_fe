@@ -7352,6 +7352,7 @@
   "tag_expiry_modification_allowed_help": "Let users set their own expiry when they apply this tag.",
   "tag_expiry_none": "Does not expire",
   "tag_expiry_offset_required": "Enter a duration greater than zero",
+  "tag_expiry_offset_too_long": "Expiry can't be longer than {{days}} days",
   "tag_expiry_set_when_applied": "Optional, chosen by the user when applying the tag",
   "tag_groups": "Tag Groups",
   "tags": "Tags",
