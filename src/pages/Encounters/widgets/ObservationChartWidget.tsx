@@ -32,11 +32,10 @@ export function ObservationChartWidget({
     height,
     columns,
   } = parsedConfig.data ?? {};
-  const { data, isLoading, isError, isFetching, refetch } =
-    useQuery({
-      ...plotsConfigQueryOptions,
-      enabled: canReadClinicalData && parsedConfig.success,
-    });
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    ...plotsConfigQueryOptions,
+    enabled: canReadClinicalData && parsedConfig.success,
+  });
 
   if (!canReadClinicalData) return null;
   const heading = title ?? t("workspace_observation_chart");

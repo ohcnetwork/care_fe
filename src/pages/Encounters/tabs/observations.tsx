@@ -96,25 +96,25 @@ export const EncounterObservationsTab = ({
     isFetching,
     refetch,
   } = useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
-      queryKey: ["infinite-observations", patientId, encounterId, limit],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(observationApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            ignore_group: true,
-            limit: pageSize,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<ObservationListRead>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * pageSize;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+    queryKey: ["infinite-observations", patientId, encounterId, limit],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(observationApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          ignore_group: true,
+          limit: pageSize,
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<ObservationListRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * pageSize;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+  });
 
   const pagesLoaded = data?.pages.length ?? 0;
   const isReadingAhead =

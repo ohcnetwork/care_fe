@@ -40,11 +40,10 @@ export function EncounterVitalsWidget({
     useEncounter();
   const parsedConfig = vitalsConfigSchema.safeParse(config);
   const codes = parsedConfig.data?.codes;
-  const { data, isLoading, isError, isFetching, refetch } =
-    useQuery({
-      ...plotsConfigQueryOptions,
-      enabled: canReadClinicalData && parsedConfig.success && !codes,
-    });
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    ...plotsConfigQueryOptions,
+    enabled: canReadClinicalData && parsedConfig.success && !codes,
+  });
 
   if (!canReadClinicalData) return null;
   const heading = title ?? t("vitals");
