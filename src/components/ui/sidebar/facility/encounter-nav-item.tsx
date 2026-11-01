@@ -59,6 +59,13 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
     if (isMobile) setOpenMobile(false);
   };
 
+  // Runs per item, not on value change, so the current default opens too.
+  const chooseDefault = (encounterClass: EncounterListClass) => {
+    if (encounterClass !== defaultClass) setDefaultClass(encounterClass);
+    navigate(listUrl(encounterClass));
+    closeMobileSidebar();
+  };
+
   return (
     <SidebarMenuItem className="flex items-center gap-1">
       <SidebarMenuButton
@@ -103,19 +110,13 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
                 <DropdownMenuLabel>
                   {t("set_default_encounter")}
                 </DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                  value={defaultClass}
-                  onValueChange={(encounterClass: EncounterListClass) => {
-                    setDefaultClass(encounterClass);
-                    navigate(listUrl(encounterClass));
-                    closeMobileSidebar();
-                  }}
-                >
+                <DropdownMenuRadioGroup value={defaultClass}>
                   {ENCOUNTER_LIST_CLASSES.map((encounterClass) => (
                     <DropdownMenuRadioItem
                       key={encounterClass}
                       value={encounterClass}
                       disabled={isSaving}
+                      onClick={() => chooseDefault(encounterClass)}
                     >
                       {listName(encounterClass)}
                     </DropdownMenuRadioItem>

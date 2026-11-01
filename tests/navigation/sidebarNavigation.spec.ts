@@ -267,6 +267,19 @@ test.describe("Shared workspace navigation", () => {
         await expect(encounterLink).not.toHaveAttribute("aria-current");
       });
 
+      await test.step("choosing the current default opens that list", async () => {
+        await encounterTypes.click();
+        await menu
+          .getByRole("menuitem", { name: "Set Default", exact: true })
+          .click();
+        await menu
+          .getByRole("menuitemradio", { name: "Emergency", exact: true })
+          .click();
+        await expect(page).toHaveURL(
+          (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
+        );
+      });
+
       await test.step("a failed save keeps the saved default", async () => {
         await page.route("**/api/v1/users/set_preferences/", (route) =>
           route.fulfill({ status: 500, json: {} }),
