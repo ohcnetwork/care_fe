@@ -89,7 +89,7 @@ test.describe("Specimen Definitions Create", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("textbox", { name: "Enter Retention Time" })
+      .getByRole("combobox", { name: "Enter Retention Time" })
       .fill(retentionTime.toString());
 
     const requirement = faker.lorem.sentence();

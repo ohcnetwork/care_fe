@@ -122,7 +122,8 @@ for (const action of ["Clear Cache", "Update Now"]) {
     await expect
       .poll(() => draftFormNoteText(page, questionnaireId))
       .toBe(savedNote);
-    await page.getByRole("button", { name: "Close", exact: true }).click();
+    // Close discards the session's drafts; minimizing keeps them for later.
+    await page.getByRole("button", { name: "Minimize", exact: true }).click();
     await page.waitForURL(/\/updates$/);
     const localRow = page.locator('[data-draft-source="local"]');
     await expect(localRow).toHaveCount(1);

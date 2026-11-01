@@ -34,7 +34,15 @@ test.describe("User Deletion Access Control", () => {
         .first();
       await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
       await firstFacilityLink.click();
-      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+      // The sidebar may already be expanded; only expand it when collapsed.
+      const sidebarToggle = page.getByRole("button", {
+        name: "Toggle Sidebar",
+        exact: true,
+      });
+      await expect(sidebarToggle).toBeVisible();
+      if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+        await sidebarToggle.click();
+      }
       await page.getByRole("link", { name: "Users" }).click();
 
       // Wait for users page to load by checking for See Details button
