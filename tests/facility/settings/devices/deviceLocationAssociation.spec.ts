@@ -110,8 +110,13 @@ test.describe("Device Location Association", () => {
       page.getByText("Location associated successfully"),
     ).toBeVisible();
 
-    // Close the sheet by clicking outside or pressing Escape
-    await page.keyboard.press("Escape");
+    // Close the sheet with its own control: Escape can be taken by the
+    // location picker popover inside it.
+    const associateSheet = page.getByRole("dialog", {
+      name: "Associate Location",
+    });
+    await associateSheet.getByRole("button", { name: "Close" }).click();
+    await expect(associateSheet).not.toBeVisible();
 
     // Open the sheet again
     await page
