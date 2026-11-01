@@ -119,19 +119,17 @@ export function ChargeItemDefinitionPicker({
 
       {showCreateButton && (
         <div className="flex items-center gap-2 self-end w-full sm:w-auto">
-          {showCreateButton && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setCreateDrawerOpen(true)}
-              className="h-9 px-2 w-full"
-              disabled={disabled}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              {t("create_charge_item_definition")}
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setCreateDrawerOpen(true)}
+            className="h-9 px-2 w-full"
+            disabled={disabled}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            {t("create_charge_item_definition")}
+          </Button>
         </div>
       )}
 

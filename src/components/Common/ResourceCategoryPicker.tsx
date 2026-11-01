@@ -279,12 +279,7 @@ export function ResourceCategoryPicker({
             )}
           </div>
           {value && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearSelection}
-              className=""
-            >
+            <Button variant="ghost" size="sm" onClick={handleClearSelection}>
               <X className="w-3 h-3 mr-1" />
               {t("clear")}
             </Button>
