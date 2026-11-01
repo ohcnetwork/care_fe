@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
+import { isAppleDevice } from "@/Utils/utils";
 
 export interface ShortcutHandlers {
   [action: string]: () => void;
@@ -117,6 +118,12 @@ export function useKeyboardShortcuts(
             requiredModifiers.ctrl = true;
             break;
           case "cmd":
+            if (isAppleDevice) {
+              requiredModifiers.meta = true;
+            } else {
+              requiredModifiers.ctrl = true;
+            }
+            break;
           case "meta":
             requiredModifiers.meta = true;
             break;

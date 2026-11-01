@@ -6,7 +6,6 @@
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action" },
     { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action" },
-    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input" },
     { "key": "e", "action": "edit-button", "description": "Edit" },
     { "key": "shift+1", "action": "tab-index-1", "description": "Switch to Tab 1" },
     { "key": "shift+2", "action": "tab-index-2", "description": "Switch to Tab 2" },
