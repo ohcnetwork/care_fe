@@ -499,8 +499,13 @@ test.describe("Shared workspace navigation", () => {
         await picker.click();
         const dialog = page.getByRole("dialog");
         await expect(dialog).toBeVisible();
+        // The location picker names the current location in a labelled
+        // breadcrumb under its "Select Location" title; the service picker
+        // names it in the title.
         await expect(
-          dialog.getByRole("group", { name: "Current Location" }),
+          workspace.name === "location"
+            ? dialog.getByRole("group", { name: "Current Location" })
+            : dialog.getByRole("heading"),
         ).toContainText(fixture.name);
         await dialog.hover();
         const searchResponse = page.waitForResponse((result) => {

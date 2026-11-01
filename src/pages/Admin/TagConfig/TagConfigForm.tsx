@@ -205,9 +205,11 @@ export default function TagConfigForm({
     enabled: open && isEditing,
   });
 
-  // Populate form when editing data is loaded
+  // Populate form when editing data is loaded. The form stays mounted while
+  // the sheet is closed, so opening it refetches the shared tag config query;
+  // don't let that refetch overwrite what the user has already typed.
   useEffect(() => {
-    if (existingConfig && isEditing) {
+    if (existingConfig && isEditing && !form.formState.isDirty) {
       form.reset({
         display: existingConfig.display,
         category: existingConfig.category,
