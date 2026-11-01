@@ -14,6 +14,7 @@ import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { formatExpiryOffset } from "@/components/Tags/tagExpiry";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -120,6 +121,20 @@ export default function TagConfigView({
 
   const handleArchiveChild = (child: TagConfig) => {
     archiveMutation.mutate(child);
+  };
+
+  const describeExpiry = () => {
+    const { autoset_expiry, expiry_offset, modification_allowed } =
+      tagConfig?.expiry_metadata ?? {};
+    if (autoset_expiry && expiry_offset) {
+      const duration = formatExpiryOffset(expiry_offset, t);
+      return modification_allowed
+        ? t("tag_expiry_after_duration_changeable", { duration })
+        : t("tag_expiry_after_duration", { duration });
+    }
+    return modification_allowed
+      ? t("tag_expiry_set_when_applied")
+      : t("tag_expiry_none");
   };
 
   if (isLoading) {
@@ -237,6 +252,12 @@ export default function TagConfigView({
                   </div>
                 </div>
               )}
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("expiry")}
+                </label>
+                <div className="mt-1 text-sm">{describeExpiry()}</div>
+              </div>
               <div>
                 <label className="text-sm font-medium text-gray-600">
                   {t("managing_organization")}

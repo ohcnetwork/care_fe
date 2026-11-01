@@ -1,6 +1,9 @@
+import { Clock } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { getTagColorStyles } from "@/components/Tags/tagColor";
+import { getTagExpiry, isTagExpired } from "@/components/Tags/tagExpiry";
 
 import {
   TagConfig,
@@ -9,6 +12,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/Utils/utils";
 
 interface TagBadgeProps extends Omit<
   React.ComponentProps<typeof Badge>,
@@ -26,16 +30,35 @@ export default function TagBadge({
   variant = "secondary",
   ...props
 }: TagBadgeProps) {
+  const { t } = useTranslation();
+  const expiry = getTagExpiry(tag);
+  const expired = isTagExpired(tag);
+
+  const title = [
+    tag.description,
+    expiry &&
+      t(expired ? "tag_expired_at" : "tag_expires_at", {
+        date: formatDateTime(expiry),
+      }),
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   return (
     <Badge
-      title={tag.description}
+      title={title || undefined}
       variant={variant}
       style={{
         ...getTagColorStyles(tag),
       }}
-      className={cn("capitalize", className)}
+      className={cn(
+        "capitalize",
+        expired && "line-through opacity-60",
+        className,
+      )}
       {...props}
     >
+      {expiry && <Clock data-icon="inline-start" aria-hidden />}
       {hierarchyDisplay ? getTagHierarchyDisplay(tag) : tag.display}
     </Badge>
   );
