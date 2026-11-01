@@ -5,6 +5,7 @@ import {
 import { PatientTagsDisplay } from "@/components/Patient/PatientTagsDisplay";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
+  ArrowLeft,
   Blocks,
   ChartLine,
   Eye,
@@ -25,7 +26,6 @@ import { EncounterReferralsTab } from "./tabs/referrals";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 import { ReferralEncounterContext } from "@/components/Referral/ReferralEncounterContext";
 import { appendReferralNativeContext } from "@/components/Referral/referralNativeNavigation";
@@ -51,6 +51,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { navigateBackFrom } from "@/Utils/navigationTrail";
 import { entriesOf, goBack } from "@/Utils/utils";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -104,16 +105,39 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPrimaryEncounterLoading, isPatientLoading]);
 
-  if (
-    isPrimaryEncounterLoading ||
-    !primaryEncounter ||
-    (!facilityId && !patient)
-  ) {
-    return <Loading />;
-  }
+  // Rendered while loading too: with no app sidebar or header on this route,
+  // it is the only way out if the encounter fails to load.
+  const backButton = (
+    <Button
+      type="button"
+      variant="ghost"
+      size="xs"
+      data-shortcut-id="go-back"
+      className="min-h-11 w-fit text-gray-700 md:min-h-8"
+      onClick={() =>
+        // Sections, forms and historical encounters (with their detail
+        // pages) are all this patient's chart; leave to the page it was
+        // opened from, else the patient.
+        navigateBackFrom(
+          (pathname) => !pathname.includes(`/patient/${patientId}/encounter/`),
+          facilityId
+            ? `/facility/${facilityId}/patient/${patientId}`
+            : `/patient/${patientId}`,
+        )
+      }
+    >
+      <ArrowLeft aria-hidden="true" />
+      {t("back")}
+    </Button>
+  );
 
-  if (!patient) {
-    return <Loading />;
+  if (isPrimaryEncounterLoading || !primaryEncounter || !patient) {
+    return (
+      <div className="flex flex-col gap-2 md:px-1">
+        {backButton}
+        <Loading />
+      </div>
+    );
   }
 
   const tabs: Record<string, EncounterTab> = {
@@ -246,69 +270,65 @@ export const EncounterShow = (props: Props) => {
           </Button>
         </>
       )}
-      <WorkspaceHeaderContent>
-        {/* The API returns an empty object when there is no appointment. */}
-        {primaryEncounter.appointment?.id ? (
-          <AppointmentEncounterHeader
-            canWritePrimaryEncounter={canWritePrimaryEncounter}
-            appointment={primaryEncounter.appointment}
-            encounter={primaryEncounter}
-          />
-        ) : (
-          <span className="text-sm font-medium">{t("encounter")}</span>
-        )}
-        <div className="ml-auto pl-2">
-          <EncounterWorkspaceSwitcher systemTabs={tabs} />
-        </div>
-      </WorkspaceHeaderContent>
-
       <div className="@container/encounter-header flex flex-col gap-2">
-        <Card className="grid gap-2 rounded-xl px-3 py-2 shadow-none @min-[28rem]/encounter-header:grid-cols-[minmax(0,1fr)_auto] @min-[28rem]/encounter-header:items-center">
-          <PatientHeader
-            patient={patient}
-            variant="encounter"
-            facilityId={facilityId}
-            className="p-0 bg-transparent shadow-none"
-          />
-          {selectedEncounter && (
-            <div className="order-3 flex min-w-0 flex-wrap items-center justify-end gap-2 @min-[28rem]/encounter-header:order-2">
-              <div className="w-full min-w-0 max-w-full empty:hidden @min-[28rem]/encounter-header:w-auto">
-                <PLUGIN_Component
-                  __name="PatientInfoCardQuickActions"
+        {backButton}
+        <div>
+          <Card className="grid gap-2 rounded-xl px-3 py-2 shadow-none @min-[28rem]/encounter-header:grid-cols-[minmax(0,1fr)_auto] @min-[28rem]/encounter-header:items-center">
+            <PatientHeader
+              patient={patient}
+              variant="encounter"
+              facilityId={facilityId}
+              className="p-0 bg-transparent shadow-none"
+            />
+            {selectedEncounter && (
+              <div className="order-3 flex min-w-0 flex-wrap items-center justify-end gap-2 @min-[28rem]/encounter-header:order-2">
+                <div className="w-full min-w-0 max-w-full empty:hidden @min-[28rem]/encounter-header:w-auto">
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
+                    encounter={selectedEncounter}
+                    className={cn(
+                      buttonVariants({ variant: "primary_gradient" }),
+                      "w-full rounded-md text-base font-semibold @min-[28rem]/encounter-header:w-auto",
+                    )}
+                  />
+                </div>
+
+                <EncounterWorkspaceSwitcher systemTabs={tabs} />
+                <EncounterCommandDialog
                   encounter={selectedEncounter}
-                  className={cn(
-                    buttonVariants({ variant: "primary_gradient" }),
-                    "w-full rounded-md text-base font-semibold @min-[28rem]/encounter-header:w-auto",
-                  )}
+                  open={actionsOpen}
+                  onOpenChange={setActionsOpen}
+                  trigger={
+                    <Button
+                      variant="primary_gradient"
+                      onClick={() => setActionsOpen(true)}
+                      className="h-auto min-h-11 min-w-0 flex-1 rounded-lg px-3 text-sm font-medium whitespace-normal shadow-none @min-[28rem]/encounter-header:min-h-9 @min-[28rem]/encounter-header:flex-none"
+                    >
+                      {t("encounter_actions")}
+                      <ShortcutBadge
+                        actionId="open-command-dialog"
+                        className="shrink-0"
+                        alwaysShow={false}
+                      />
+                    </Button>
+                  }
                 />
               </div>
-
-              <EncounterCommandDialog
-                encounter={selectedEncounter}
-                open={actionsOpen}
-                onOpenChange={setActionsOpen}
-                trigger={
-                  <Button
-                    variant="primary_gradient"
-                    onClick={() => setActionsOpen(true)}
-                    className="h-auto min-h-11 w-full rounded-lg px-3 text-sm font-medium whitespace-normal shadow-none @min-[28rem]/encounter-header:min-h-9 @min-[28rem]/encounter-header:w-auto"
-                  >
-                    {t("encounter_actions")}
-                    <ShortcutBadge
-                      actionId="open-command-dialog"
-                      className="shrink-0"
-                      alwaysShow={false}
-                    />
-                  </Button>
-                }
-              />
-            </div>
+            )}
+            <PatientTagsDisplay
+              patient={patient}
+              className="order-2 min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 @min-[28rem]/encounter-header:order-3 @min-[28rem]/encounter-header:col-span-2 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
+            />
+          </Card>
+          {/* The API returns an empty object when there is no appointment. */}
+          {primaryEncounter.appointment?.id && (
+            <AppointmentEncounterHeader
+              canWritePrimaryEncounter={canWritePrimaryEncounter}
+              appointment={primaryEncounter.appointment}
+              encounter={primaryEncounter}
+            />
           )}
-          <PatientTagsDisplay
-            patient={patient}
-            className="order-2 min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1 @min-[28rem]/encounter-header:order-3 @min-[28rem]/encounter-header:col-span-2 [&>span]:shrink-0 [&>span]:text-xs [&>span]:font-normal [&>span]:text-gray-500 [&>div]:min-w-0 [&>div]:flex-1 [&>div]:gap-1.5 [&_[data-slot=badge]]:max-w-full [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=badge]]:wrap-anywhere"
-          />
-        </Card>
+        </div>
         <PatientDeceasedInfo patient={patient} />
       </div>
       {selectedEncounterId === primaryEncounterId && (

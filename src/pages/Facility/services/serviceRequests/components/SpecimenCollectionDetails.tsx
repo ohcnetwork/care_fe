@@ -57,7 +57,7 @@ export function SpecimenCollectionDetails({
   );
   if (!rows.length) return null;
   return (
-    <Card className="min-w-0 rounded-xl overflow-hidden border-none shadow-md">
+    <Card className="min-w-0 rounded-xl overflow-hidden border-none shadow-md [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
       <Table className="table-fixed">
         <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
           <TableRow>

@@ -5,6 +5,7 @@ import { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import { ProcedureRequest } from "@/types/emr/procedure/procedure";
 import { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import { SymptomRequest } from "@/types/emr/symptom/symptom";
 import { FileUploadQuestion } from "@/types/files/file";
@@ -33,6 +34,7 @@ export type ResponseValue =
   | RV<"medication_statement", MedicationStatementRequest[]>
   | RV<"symptom", SymptomRequest[]>
   | RV<"diagnosis", DiagnosisRequest[]>
+  | RV<"procedure", ProcedureRequest[]>
   | RV<"encounter", EncounterEdit[]>
   | RV<"appointment", CreateAppointmentQuestion[]>
   | RV<"time_of_death", string[]>

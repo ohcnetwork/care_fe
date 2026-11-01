@@ -252,7 +252,7 @@ export function DiagnosticReportResultsTable({
   }
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="rounded-md overflow-hidden">
       <Table className="border-collapse bg-background shadow-sm cursor-default table-fixed w-full">
         <TableHeader className="bg-soft-background">
           <TableRow className="divide-x-1 divide-gray-300">
