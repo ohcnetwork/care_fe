@@ -9,8 +9,9 @@ test.describe("Sidebar Facility Switcher - Search", () => {
   }) => {
     await page.goto(`/facility/${getFacilityId()}/overview`);
 
-    //switcher
-    await page.getByRole("button", { name: "Select Facility" }).click();
+    // The switcher trigger is named after the selected facility.
+    const facilityName = "FACILITY WITH PATIENTS";
+    await page.getByRole("button", { name: facilityName, exact: true }).click();
     await expect(page.getByText(/view dashboard/i)).toBeVisible();
     await expect(page.getByText(/Facilities/i)).toBeVisible();
 
@@ -23,8 +24,6 @@ test.describe("Sidebar Facility Switcher - Search", () => {
     }
 
     await test.step("Search for a facility FACILITY WITH PATIENTS", async () => {
-      const facilityName = "FACILITY WITH PATIENTS";
-
       await searchInput.fill(facilityName);
 
       // Verify matching facility is still visible

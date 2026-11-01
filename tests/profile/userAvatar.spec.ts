@@ -42,7 +42,10 @@ test.describe("User Profile Avatar Modification", () => {
 
   // Helper function to save the avatar
   async function saveAvatar(page: Page): Promise<void> {
-    const uploadButton = page.getByRole("button", { name: "Upload" });
+    const uploadButton = page.getByRole("button", {
+      name: "Upload",
+      exact: true,
+    });
     const uploadResponse = page.waitForResponse(
       (response) =>
         new URL(response.url()).pathname ===

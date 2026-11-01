@@ -74,8 +74,8 @@ test.describe("Questionnaire v2 versions", () => {
       await page.getByRole("button", { name: "Back" }).click();
       await page.waitForURL(/\?tab=versions$/);
       await expect(page.getByRole("tab", { name: "Versions" })).toHaveAttribute(
-        "data-state",
-        "active",
+        "aria-selected",
+        "true",
       );
       await expect(
         page.getByRole("heading", { name: "Version history" }),

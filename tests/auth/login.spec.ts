@@ -35,14 +35,16 @@ test.describe("Login", () => {
     await expect(password).toHaveAttribute("type", "password");
 
     // Check for login button
-    await expect(page.getByRole("button", { name: /login/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^sign in$/i }),
+    ).toBeVisible();
   });
 
   test("should show validation errors for empty form", async ({ page }) => {
     await page.goto("/login");
 
     // Click login button without filling the form
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
 
     // Wait for and verify error messages appear
     await expect(
@@ -58,7 +60,7 @@ test.describe("Login", () => {
     await page.getByLabel(/^password$/i).fill("wrongpassword");
 
     // Submit the form
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
 
     // Wait for error notification
     await expect(page.getByText(/no active account found/i)).toBeVisible({

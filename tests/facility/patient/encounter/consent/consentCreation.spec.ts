@@ -63,6 +63,16 @@ function firstConsentCard(page: Page) {
     .first();
 }
 
+/**
+ * Saving shows its toast before the invalidated consents list has refetched,
+ * so right after a save the first card can still be the previous consent.
+ * Reload the tab to read the list fresh, then open the newest consent.
+ */
+async function openNewestConsentDetails(page: Page) {
+  await goToConsentsTab(page);
+  await page.getByRole("button", { name: "See Details" }).first().click();
+}
+
 /** Open the "Add Consent" sheet */
 async function openAddConsentSheet(page: Page) {
   await page.getByRole("button", { name: /add.*consent/i }).click();
@@ -104,7 +114,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Click See Details on the newest card
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
 
     // Verify each field renders its expected value (not merely that the text
     // appears somewhere on the page)
@@ -182,7 +192,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
 
     // Verify note is visible
     await expect(page.getByText(noteText)).toBeVisible();
@@ -199,7 +209,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
 
     // The Note heading should not be visible (it only shows when note exists)
     await expect(page.getByRole("heading", { name: "Note" })).not.toBeVisible();
@@ -228,7 +238,7 @@ test.describe("Consent Creation", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Go to detail page and verify both dates saved (rendered, not N/A)
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
 
     const validPeriod = detailFieldValue(page, "Valid Period");
     await expect(validPeriod).toContainText(format(validFrom, "MMMM d, yyyy"));
@@ -297,7 +307,7 @@ test.describe("Consent Editing", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail page
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
     await expect(page.getByText("Consent Details")).toBeVisible();
 
     // Click Edit
@@ -332,7 +342,7 @@ test.describe("Consent Editing", () => {
     await expectToast(page, /consent created successfully/i);
 
     // Navigate to detail
-    await page.getByRole("button", { name: "See Details" }).first().click();
+    await openNewestConsentDetails(page);
     await expect(page.getByText(originalNote)).toBeVisible();
 
     // Edit
@@ -366,7 +376,7 @@ test.describe("Consent Editing", () => {
       await expectToast(page, /consent created successfully/i);
 
       // Navigate to detail
-      await page.getByRole("button", { name: "See Details" }).first().click();
+      await openNewestConsentDetails(page);
       await expect(
         page.getByRole("heading", { name: "Consent Details" }),
       ).toBeVisible();

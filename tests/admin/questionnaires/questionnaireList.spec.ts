@@ -1,6 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { createQuestionnaire } from "tests/helper/questionnaireV2";
+import {
+  createQuestionnaire,
+  selectQuestionnaireStatusTab,
+} from "tests/helper/questionnaireV2";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -39,7 +42,7 @@ test.describe("Questionnaire v2 list", () => {
     });
 
     await test.step("Switching to the Draft tab reveals it (search still applied)", async () => {
-      await page.getByRole("radio", { name: "Draft" }).click();
+      await selectQuestionnaireStatusTab(page, "Draft");
       await expect(page.getByRole("radio", { name: "Draft" })).toHaveAttribute(
         "aria-checked",
         "true",
@@ -50,7 +53,7 @@ test.describe("Questionnaire v2 list", () => {
     });
 
     await test.step("Switching back to Active hides it again", async () => {
-      await page.getByRole("radio", { name: "Active" }).click();
+      await selectQuestionnaireStatusTab(page, "Active");
       await expect(page.getByText("No questionnaires found")).toBeVisible();
     });
   });

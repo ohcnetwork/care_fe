@@ -157,7 +157,7 @@ class ScheduleCardPage {
   async openEditForm(templateName: string): Promise<void> {
     const card = this.getScheduleCard(templateName);
     await card
-      .locator('button[data-slot="button"]')
+      .getByRole("button")
       .filter({ has: this.page.locator("svg.lucide-pen-line") })
       .first()
       .click();
