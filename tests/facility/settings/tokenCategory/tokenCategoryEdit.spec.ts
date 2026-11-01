@@ -10,7 +10,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
   let resourceType: string;
   let updatedName: string;
   let updatedShorthand: string;
-  let updatedResourceType: string;
   let facilityId: string;
 
   // Resource types available for token categories
@@ -25,7 +24,6 @@ test.describe("Token Category Edit - Permission Tests", () => {
     // Generate data for updates
     updatedName = faker.company.name();
     updatedShorthand = faker.string.alphanumeric(4).toUpperCase();
-    updatedResourceType = faker.helpers.arrayElement(resourceTypes);
     facilityId = getFacilityId();
   });
 
@@ -92,9 +90,9 @@ test.describe("Token Category Edit - Permission Tests", () => {
       ).toBeVisible();
 
       // Step 6: Update the token category
+      // The resource type is fixed at creation: the backend's update spec
+      // doesn't accept it, so only the name and shorthand are edited.
       await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
-      await page.getByRole("combobox", { name: "Resource Type" }).click();
-      await page.getByRole("option", { name: updatedResourceType }).click();
       await page
         .getByRole("textbox", { name: "Shorthand" })
         .fill(updatedShorthand);
@@ -115,7 +113,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
       const tableBody = page.locator("tbody");
       await expect(tableBody).toContainText(updatedName);
       await expect(tableBody).toContainText(updatedShorthand);
-      await expect(tableBody).toContainText(updatedResourceType);
+      await expect(tableBody).toContainText(resourceType);
     });
 
     test("Admin can access Set as default and Edit buttons after clicking View button", async ({
