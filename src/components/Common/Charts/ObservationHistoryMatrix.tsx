@@ -17,7 +17,11 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 
-import { ResolvedObservationEntry, unitLabel } from "./observationDetailUtils";
+import {
+  codeKey,
+  ResolvedObservationEntry,
+  unitLabel,
+} from "./observationDetailUtils";
 
 export const ObservationHistoryMatrix = ({
   codes,
@@ -71,7 +75,7 @@ export const ObservationHistoryMatrix = ({
     })).sort((a, b) => b.time - a.time || a.occurrence - b.occurrence);
 
     const rows = codes.map((code) => {
-      const codeEntries = entriesByCode[code.code] ?? [];
+      const codeEntries = entriesByCode[codeKey(code)] ?? [];
 
       const entriesByKey: Record<string, ResolvedObservationEntry> = {};
       for (const entry of codeEntries) {
@@ -79,7 +83,7 @@ export const ObservationHistoryMatrix = ({
       }
 
       return {
-        id: code.code,
+        id: codeKey(code),
         title: code.display || code.code,
         entriesByKey,
       };

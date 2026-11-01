@@ -37,6 +37,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 
 import { Button } from "@/components/ui/button";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationDetailSheet } from "./ObservationDetailSheet";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
@@ -129,6 +130,19 @@ export const ObservationVisualizer = ({
     }),
   });
 
+  // Deployed analyse endpoints may ignore list filters, so never chart
+  // invalidated readings or readings from another encounter.
+  const chartableReadings = (code: Code) =>
+    (
+      data?.results.find(
+        (rg) => rg.code.code === code.code && rg.code.system === code.system,
+      )?.results ?? []
+    ).filter(
+      (observation) =>
+        observation.status !== ObservationStatus.ENTERED_IN_ERROR &&
+        (!encounterId || observation.encounter === encounterId),
+    );
+
   if (isLoading) {
     return (
       <div
@@ -174,10 +188,7 @@ export const ObservationVisualizer = ({
     // First, collect all timestamps from all codes in the group
     const allTimestamps = new Set<string>();
     group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup) return;
-
-      resultGroup.results.forEach((observation) => {
+      chartableReadings(code).forEach((observation) => {
         if (observation.effective_datetime) {
           allTimestamps.add(observation.effective_datetime);
         }
@@ -195,10 +206,9 @@ export const ObservationVisualizer = ({
 
     // Then fill in the values for each code
     group.codes.forEach((code) => {
-      const resultGroup = data.results.find((rg) => rg.code.code === code.code);
-      if (!resultGroup || !code.display) return;
+      if (!code.display) return;
 
-      resultGroup.results.forEach((observation) => {
+      chartableReadings(code).forEach((observation) => {
         const timestamp = observation.effective_datetime;
         if (!timestamp || typeof timestamp !== "string") return;
 

@@ -165,15 +165,18 @@ export function SeverityMeta({
   );
 }
 
-export function OnsetMeta({
-  onset,
-}: {
-  onset?: {
-    onset_datetime?: string;
-    onset_age?: string;
-    onset_string?: string;
-  };
-}) {
+interface Onset {
+  onset_datetime?: string;
+  onset_age?: string;
+  onset_string?: string;
+}
+
+/** Callers skip empty onsets so the meta line never shows a stray separator. */
+export function hasOnset(onset?: Onset) {
+  return !!(onset?.onset_datetime || onset?.onset_string || onset?.onset_age);
+}
+
+export function OnsetMeta({ onset }: { onset?: Onset }) {
   const { t } = useTranslation();
   if (onset?.onset_datetime) {
     return (

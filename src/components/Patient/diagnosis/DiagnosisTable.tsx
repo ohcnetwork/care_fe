@@ -20,6 +20,7 @@ import ClinicalInformationRow, {
 } from "@/components/Patient/Common/ClinicalInformationRow";
 import {
   ClinicalSummaryGrid,
+  hasOnset,
   OnsetMeta,
   SeverityMeta,
 } from "@/components/Patient/Common/ClinicalSummaryGrid";
@@ -244,8 +245,12 @@ export const DiagnosisTable = ({
                 )
             : undefined,
           meta: [
-            <OnsetMeta key="onset" onset={diagnosis.onset} />,
-            <SeverityMeta key="severity" severity={diagnosis.severity} />,
+            hasOnset(diagnosis.onset) && (
+              <OnsetMeta key="onset" onset={diagnosis.onset} />
+            ),
+            diagnosis.severity && (
+              <SeverityMeta key="severity" severity={diagnosis.severity} />
+            ),
             diagnosis.category === "chronic_condition" && (
               <span key="category">{t("clinical_summary_chronic")}</span>
             ),

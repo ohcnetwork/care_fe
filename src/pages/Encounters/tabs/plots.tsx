@@ -17,12 +17,7 @@ type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
 };
 
-export const EncounterPlotsTab = ({
-  defaultPlot,
-}: {
-  /** Plot id from the plots configuration that opens first. */
-  defaultPlot?: string;
-} = {}) => {
+export const EncounterPlotsTab = () => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useScopedQueryParams<QueryParams>();
 
@@ -36,9 +31,7 @@ export const EncounterPlotsTab = ({
     return <Loading />;
   }
 
-  const requestedTabId = qParams.plot || defaultPlot;
-  const currentTab =
-    data.find((tab) => tab.id === requestedTabId) ?? data[0];
+  const currentTab = data.find((tab) => tab.id === qParams.plot) ?? data[0];
 
   if (!currentTab) {
     return <div>{t("no_plots_configured")}</div>;

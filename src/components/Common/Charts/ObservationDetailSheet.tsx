@@ -26,6 +26,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { FileExclamationPointIcon } from "lucide-react";
 import { ObservationDetailContent } from "./ObservationDetailContent";
 import {
+  codeKey,
   groupEntriesByUnit,
   resolveObservationEntries,
 } from "./observationDetailUtils";
@@ -108,7 +109,7 @@ export function ObservationDetailSheet({
 
   const allResults = historyData?.pages.flatMap((page) => page.results) ?? [];
 
-  const entriesByCode = resolveObservationEntries(allResults);
+  const entriesByCode = resolveObservationEntries(allResults, validCodes);
 
   const codeList = Object.values(entriesByCode).map((list) => list[0].code);
 
@@ -188,11 +189,11 @@ export function ObservationDetailSheet({
               <div className="flex flex-col gap-4">
                 {codeList.flatMap((code) => {
                   const unitGroups = groupEntriesByUnit(
-                    entriesByCode[code.code] ?? [],
+                    entriesByCode[codeKey(code)] ?? [],
                   );
                   return unitGroups.map((group) => (
                     <section
-                      key={`${code.code}|${group.key}`}
+                      key={`${codeKey(code)}|${group.key}`}
                       className="min-w-0"
                     >
                       <h3 className="mb-1 text-sm font-semibold text-foreground">

@@ -45,6 +45,8 @@ export const WORKSPACE_SURFACE_PAGES_KEY = {
 export function normalizeWorkspaceTemplate(
   template: WorkspaceTemplate,
 ): WorkspaceTemplate {
+  // Stored templates are untrusted; leave malformed ones for the parser to reject.
+  if (typeof template !== "object" || template === null) return template;
   const { surface, ...workspace } = template;
   if (surface === "patient_history") {
     return Object.hasOwn(template, "history_pages")

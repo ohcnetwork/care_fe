@@ -40,6 +40,7 @@ export function standardWorkspacePages(
               "allergies",
               "symptoms",
               "diagnosis",
+              "procedures",
               "vitals",
               "questionnaire_responses",
             ].map((type) => ({ type })),

@@ -18,8 +18,14 @@ import { EncounterStatus } from "@/types/emr/encounter/encounter";
 
 import type { CareAppEncounterWidget } from "@/hooks/useCareAppEncounterWidgets";
 import {
-  HISTORY_PAGE_KEYS,
+  findPreferredWorkspaceId,
+  LEGACY_ENCOUNTER_CLASS_ATTRIBUTE,
+  WORKSPACE_SCOPE_ALL,
+  WORKSPACE_SCOPE_ATTRIBUTE,
+} from "@/pages/Encounters/workspace/workspacePreferences";
+import {
   createEncounterWorkspaceSchema,
+  HISTORY_PAGE_KEYS,
   normalizeWorkspaceTemplate,
   SYSTEM_PAGE_KEYS,
 } from "./encounterWorkspace";
@@ -29,14 +35,8 @@ import {
   patientHistoryAccess,
   type WorkspaceAvailabilityContext,
 } from "./widgetAvailability";
-import {
-  findPreferredWorkspaceId,
-  LEGACY_ENCOUNTER_CLASS_ATTRIBUTE,
-  WORKSPACE_SCOPE_ALL,
-  WORKSPACE_SCOPE_ATTRIBUTE,
-} from "@/pages/Encounters/workspace/workspacePreferences";
-import type { WorkspaceUserDefaultAttributes } from "./workspace";
 import { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
+import type { WorkspaceUserDefaultAttributes } from "./workspace";
 
 before(async () => {
   await i18next.init({ lng: "en", resources: { en: { translation: {} } } });
@@ -70,7 +70,10 @@ test("every core widget has a library entry without expanding deferred features"
 
 test("version 2 presets are valid and preserve deferred system pages", () => {
   const template = standardWorkspaceTemplate(i18next.t);
-  assert.equal(createEncounterWorkspaceSchema().safeParse(template).success, true);
+  assert.equal(
+    createEncounterWorkspaceSchema().safeParse(template).success,
+    true,
+  );
   assert.equal(workspaceWidgetIssues(template, new Map(), i18next.t).length, 0);
   const overview = template.pages.find((page) => page.key === "updates");
   assert.equal(overview?.kind, "custom");
@@ -240,10 +243,10 @@ test("quick actions hide on closed encounters, including referral creation", () 
     ...closed,
     selectedEncounterPermissions: { canCreateReferral: true },
   };
-  assert.deepEqual(
-    getWidgetAvailability({ type: "quick_actions" }, referrer),
-    { state: "hidden", reason: "workspace_auto_hides_closed" },
-  );
+  assert.deepEqual(getWidgetAvailability({ type: "quick_actions" }, referrer), {
+    state: "hidden",
+    reason: "workspace_auto_hides_closed",
+  });
   assert.equal(
     getWidgetAvailability({ type: "favorite_forms" }, referrer).state,
     "hidden",
@@ -674,6 +677,17 @@ test("status filters and stray default tabs are reported before saving", () => {
   );
 });
 
+test("malformed stored templates pass through for the parser to reject", () => {
+  for (const template of [null, "pages", 2]) {
+    const malformed = template as unknown as Record<string, unknown>;
+    assert.equal(normalizeWorkspaceTemplate(malformed), malformed);
+    assert.equal(
+      parseEncounterWorkspace(malformed, SYSTEM_PAGE_KEYS).invalid,
+      true,
+    );
+  }
+});
+
 test("legacy history workspaces migrate without losing configured pages", () => {
   const legacy = {
     schema_version: 2,
@@ -692,7 +706,8 @@ test("legacy history workspaces migrate without losing configured pages", () => 
     SYSTEM_PAGE_KEYS.length,
   );
   assert.equal(
-    createEncounterWorkspaceSchema([], normalized).safeParse(normalized).success,
+    createEncounterWorkspaceSchema([], normalized).safeParse(normalized)
+      .success,
     true,
   );
   const parsedHistory = parseEncounterWorkspace(

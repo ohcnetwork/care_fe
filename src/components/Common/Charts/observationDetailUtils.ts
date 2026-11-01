@@ -33,8 +33,26 @@ export function unitLabel(unit?: Code) {
   return unit?.display || unit?.code || "";
 }
 
+/** Identifies a code by system and value; code systems may reuse values. */
+export function codeKey(code: Pick<Code, "system" | "code">) {
+  return `${code.system ?? ""}|${code.code}`;
+}
+
+// The list endpoint filters by code value alone, so drop observations whose
+// main code comes from a coding system that was not requested.
+function isRequested(code: Code | null | undefined, requested?: Code[]) {
+  if (!requested) return true;
+  return requested.some(
+    (wanted) =>
+      wanted.code === code?.code &&
+      (!wanted.system || wanted.system === code?.system),
+  );
+}
+
+/** Groups readings by {@link codeKey}. */
 export function resolveObservationEntries(
   results: ObservationListRead[],
+  requestedCodes?: Code[],
 ): Record<string, ResolvedObservationEntry[]> {
   const grouped: Record<string, ResolvedObservationEntry[]> = {};
   // Codes already placed in each slot, per effective time. Readings recorded at
@@ -44,6 +62,7 @@ export function resolveObservationEntries(
 
   for (const obs of results) {
     if (!obs.effective_datetime) continue;
+    if (!isRequested(obs.main_code, requestedCodes)) continue;
 
     const time = new Date(obs.effective_datetime).getTime();
     const enteredBy = formatName(obs.data_entered_by);
@@ -75,16 +94,17 @@ export function resolveObservationEntries(
 
     const slots = slotsByTime.get(time) ?? [];
     slotsByTime.set(time, slots);
-    const codes = new Set(entries.map((entry) => entry.code.code));
+    const codes = new Set(entries.map((entry) => codeKey(entry.code)));
     let slot = slots.findIndex((used) => [...codes].every((c) => !used.has(c)));
     if (slot === -1) slot = slots.push(new Set()) - 1;
 
     for (const entry of entries) {
+      const key = codeKey(entry.code);
       // A code repeated within one observation moves to the next free slot.
       let occurrence = slot;
-      while (slots[occurrence]?.has(entry.code.code)) occurrence++;
-      (slots[occurrence] ??= new Set()).add(entry.code.code);
-      (grouped[entry.code.code] ??= []).push({
+      while (slots[occurrence]?.has(key)) occurrence++;
+      (slots[occurrence] ??= new Set()).add(key);
+      (grouped[key] ??= []).push({
         ...entry,
         occurrence,
         key: `${time}#${occurrence}`,

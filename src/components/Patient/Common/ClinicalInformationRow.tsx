@@ -39,7 +39,9 @@ export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
       <Button
         variant="link"
         className="hover:text-gray-700"
-        aria-label={t("more_actions")}
+        aria-label={
+          note ? `${t("more_actions")}, ${t("has_note")}` : t("more_actions")
+        }
       >
         <span className="relative inline-flex">
           <BadgeInfo size={16} />

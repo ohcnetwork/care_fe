@@ -176,7 +176,9 @@ export function ObservationDetailContent({
     )
     .sort((firstEntry, secondEntry) => firstEntry.time - secondEntry.time);
 
-  const lastIndex = chartData.length - 1;
+  // History pages arrive in modified order, not effective time, so the newest
+  // reading may still be unloaded until every page is fetched.
+  const lastIndex = hasNextPage ? -1 : chartData.length - 1;
   const latestLabelWidth = Math.max(
     String(chartData[lastIndex]?.value ?? "").length * 10,
     t("latest").length * 11,

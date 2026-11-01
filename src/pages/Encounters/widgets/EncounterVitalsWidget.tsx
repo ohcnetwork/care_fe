@@ -113,9 +113,9 @@ export function EncounterVitalsWidget({
 
 // The analysis endpoint returns the most recently modified readings per code,
 // so one request fills the matrix regardless of how often other vitals were
-// charted. The status filter excludes entered-in-error records from its bounded
-// slice when the backend applies list filters; client filtering remains a
-// fallback. Extra rows leave room for back-dated entries.
+// charted. The status and encounter filters narrow its bounded slice when the
+// backend applies list filters; buildMatrix re-applies both because deployed
+// backends may ignore them. Extra rows leave room for back-dated entries.
 const READINGS_PER_CODE = 8;
 const VISIBLE_READINGS = 4;
 const VALID_READING_STATUSES = Object.values(ObservationStatus)
@@ -213,7 +213,11 @@ function rangeText(observation: ObservationListRead) {
   return normalRangeText(observation.reference_range);
 }
 
-function buildMatrix(groups: ObservationAnalyzeGroup[], specs: VitalRowSpec[]) {
+function buildMatrix(
+  groups: ObservationAnalyzeGroup[],
+  specs: VitalRowSpec[],
+  encounterId?: string,
+) {
   const columns = new Map<number, VitalColumn>();
   const rows: VitalRow[] = specs.map(({ code, codes }) => {
     const keys = new Set(codes.map(vitalCodeKey));
@@ -222,7 +226,8 @@ function buildMatrix(groups: ObservationAnalyzeGroup[], specs: VitalRowSpec[]) {
       .flatMap((group) => group.results)
       .filter(
         (observation) =>
-          observation.status !== ObservationStatus.ENTERED_IN_ERROR,
+          observation.status !== ObservationStatus.ENTERED_IN_ERROR &&
+          (!encounterId || observation.encounter === encounterId),
       )
       .sort(
         (a, b) =>
@@ -328,8 +333,8 @@ function VitalsMatrix({
     enabled: codes.length > 0,
   });
   const { rows, columns } = useMemo(
-    () => buildMatrix(data?.results ?? [], specs),
-    [specs, data?.results],
+    () => buildMatrix(data?.results ?? [], specs, encounterId),
+    [specs, data?.results, encounterId],
   );
   const visibleColumns = columns.slice(0, VISIBLE_READINGS);
   const isAbnormal = (row: VitalRow) =>

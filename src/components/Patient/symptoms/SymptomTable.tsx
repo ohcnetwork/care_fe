@@ -20,6 +20,7 @@ import ClinicalInformationRow, {
 } from "@/components/Patient/Common/ClinicalInformationRow";
 import {
   ClinicalSummaryGrid,
+  hasOnset,
   OnsetMeta,
   SeverityMeta,
 } from "@/components/Patient/Common/ClinicalSummaryGrid";
@@ -27,10 +28,10 @@ import {
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  Symptom,
   SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_VERIFICATION_STATUS_COLORS,
-  Symptom,
   SymptomClinicalStatus,
 } from "@/types/emr/symptom/symptom";
 
@@ -196,8 +197,12 @@ export const SymptomTable = ({
                 )
             : undefined,
           meta: [
-            <OnsetMeta key="onset" onset={symptom.onset} />,
-            <SeverityMeta key="severity" severity={symptom.severity} />,
+            hasOnset(symptom.onset) && (
+              <OnsetMeta key="onset" onset={symptom.onset} />
+            ),
+            symptom.severity && (
+              <SeverityMeta key="severity" severity={symptom.severity} />
+            ),
             symptom.verification_status !== "confirmed" && (
               <span key="verification">{t(symptom.verification_status)}</span>
             ),
