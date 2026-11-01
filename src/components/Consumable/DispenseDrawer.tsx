@@ -1,15 +1,16 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, Loader2, LocateFixed, Trash2, XIcon } from "lucide-react";
+import { Check, LocateFixed, Trash2, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -69,6 +70,7 @@ import {
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
+import { getExpirationDateThresholdForDispensing } from "@/pages/Facility/services/inventory/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   DispenseOrderBatchResponse,
@@ -88,9 +90,7 @@ import {
 import { isLotAllowedForDispensing } from "@/Utils/inventory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
-interface SelectedLocation {
-  id: string;
-  name: string;
+interface SelectedLocation extends LocationRead {
   path: string;
 }
 
@@ -146,21 +146,8 @@ export default function DispenseDrawer({
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
-  const [currentLocation, setCurrentLocation] = useState<LocationRead>(
-    () =>
-      ({
-        id: selectedLocation.id,
-        name: selectedLocation.name,
-        status: "active",
-        operational_status: "O",
-        has_children: false,
-        sort_index: 0,
-        description: "",
-        form: "ward",
-        mode: "instance",
-        parent: null,
-      }) as unknown as LocationRead,
-  );
+  const [currentLocation, setCurrentLocation] =
+    useState<LocationRead>(selectedLocation);
 
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState(false);
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);
@@ -208,7 +195,11 @@ export default function DispenseDrawer({
           queryParams: {
             limit: 100,
             product_knowledge: productKnowledgeId,
+            status: "active",
             net_content_gt: 0,
+            ordering: "product__expiration_date",
+            product_expiration_date_after:
+              getExpirationDateThresholdForDispensing().toISOString(),
           },
         })({ signal: new AbortController().signal });
 
@@ -232,7 +223,7 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
-  // Auto-select first valid (non-expired) lot by default
+  // Inventories are fetched earliest-expiry first (FEFO), so the first valid lot is the one to use
   useEffect(() => {
     fields.forEach((field, index) => {
       const inventories =
@@ -669,7 +660,7 @@ export default function DispenseDrawer({
                                     className="text-center"
                                   >
                                     <div className="flex items-center justify-center py-3 gap-2">
-                                      <Loader2 className="size-4 animate-spin" />
+                                      <Spinner className="size-4 animate-spin" />
                                       <span className="text-sm text-gray-500">
                                         {t("loading_stock")}
                                       </span>
@@ -961,18 +952,18 @@ export default function DispenseDrawer({
               />
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="border-t-0 pt-0">
             <Button
               variant="outline"
               onClick={handleDiscardAndSwitch}
-              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full"
+              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full sm:flex-1"
             >
               {t("discard_and_switch")}
             </Button>
             <Button
               variant="primary"
               onClick={() => setIsLocationWarningOpen(false)}
-              className="w-full"
+              className="w-full sm:flex-1"
             >
               {t("stay_here")}
             </Button>

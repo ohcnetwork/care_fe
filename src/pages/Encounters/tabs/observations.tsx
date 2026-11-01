@@ -125,7 +125,7 @@ export const EncounterObservationsTab = () => {
   const dates = Object.keys(groupedObservations).sort().reverse();
 
   return (
-    <div className="flex flex-col mt-4 w-full max-h-[85vh] gap-4 px-3">
+    <div className="flex flex-col mt-4 w-full gap-4 px-3">
       {dates.map((date, index) => (
         <div key={date}>
           <div className="mb-3 text-base font-semibold text-gray-700">

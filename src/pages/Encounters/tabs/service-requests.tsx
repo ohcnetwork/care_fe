@@ -109,7 +109,7 @@ export const EncounterServiceRequestTab = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4 md:ml-auto">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:ml-auto md:w-auto">
           <div className="relative w-full md:w-[300px]">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <CareIcon icon="l-search" className="size-5" />
@@ -125,7 +125,7 @@ export const EncounterServiceRequestTab = () => {
           </div>
 
           {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
-            <Button variant="primary">
+            <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
                 href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
                 className="flex items-center"

@@ -2,12 +2,13 @@ import BackButton from "@/components/Common/BackButton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Spinner } from "@/components/ui/spinner";
 import { BillMedicationLineItemSchemaType } from "@/pages/Facility/services/pharmacy/billMedications/formSchema";
 import { calculateTotalPriceWithQuantity } from "@/types/base/monetaryComponent/monetaryComponent";
 import { MAX_DISPENSES_PER_DISPENSE_ORDER } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { add } from "@/Utils/decimal";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { AlertTriangleIcon, ArrowRightIcon, Loader2 } from "lucide-react";
+import { AlertTriangleIcon, ArrowRightIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -90,7 +91,7 @@ export const BillMedicationsFooter = ({
             disabled={isBillingMedications || exceedsLimit}
           >
             {isBillingMedications && (
-              <Loader2 className="size-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
             )}
             {isBillingMedications ? t("billing") : t("bill_selected")}
             {!isBillingMedications && <ArrowRightIcon className="size-4" />}

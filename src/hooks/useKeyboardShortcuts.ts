@@ -158,8 +158,22 @@ export function useKeyboardShortcuts(
         setIsOptionPressed(event.altKey);
       }
 
-      // Skip if typing in input fields (unless explicitly allowed)
+      // Component handlers and focused actions own their activation keys.
+      if (event.defaultPrevented) return;
       const target = event.target as HTMLElement;
+      if (
+        (event.key === "Enter" || event.key === " ") &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        target instanceof Element &&
+        target.closest("button, a[href], [role='button'], [role='link']")
+      ) {
+        return;
+      }
+
+      // Skip if typing in input fields (unless explicitly allowed)
       const isInputField =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||

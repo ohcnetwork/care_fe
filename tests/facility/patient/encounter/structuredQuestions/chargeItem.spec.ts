@@ -39,7 +39,7 @@ test.describe("Charge Item Questionnaire", () => {
     await page.getByText("Medications").click();
     await page.getByText(randomMedicationsList).click();
 
-    await page.getByRole("button", { name: "Submit" }).click();
+    await page.getByRole("button", { name: "Save Changes" }).click();
     await expect(page.getByText("Questionnaire submitted")).toBeVisible();
   });
 });

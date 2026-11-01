@@ -7,6 +7,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Dialog,
   DialogContent,
@@ -411,8 +412,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                     }
                                   </TableCell>
                                   <TableCell>
-                                    <div
-                                      className="flex"
+                                    <ButtonGroup
+                                      aria-label={t("schedule_appointment")}
+                                      className="w-full rounded-md shadow-md"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <Button
@@ -421,7 +423,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           event.stopPropagation();
                                           handleScheduleAppointment(index);
                                         }}
-                                        className="flex-1 rounded-r-none border-r-0"
+                                        className="flex-1 shadow-none"
                                       >
                                         {t("schedule_appointment")}
                                       </Button>
@@ -433,7 +435,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                             onClick={(event) => {
                                               event.stopPropagation();
                                             }}
-                                            className="rounded-l-none"
+                                            aria-label={t("more_actions")}
+                                            className="shadow-none"
                                           >
                                             <ChevronDown className="size-4" />
                                           </Button>
@@ -468,7 +471,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           </DropdownMenuItem>
                                         </DropdownMenuContent>
                                       </DropdownMenu>
-                                    </div>
+                                    </ButtonGroup>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -547,8 +550,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                     }
                                   </TableCell>
                                   <TableCell>
-                                    <div
-                                      className="flex"
+                                    <ButtonGroup
+                                      aria-label={t("schedule_appointment")}
+                                      className="w-full rounded-md shadow-md"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <Button
@@ -561,7 +565,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                             "schedule",
                                           );
                                         }}
-                                        className="flex-1 rounded-r-none border-r-0"
+                                        className="flex-1 shadow-none"
                                       >
                                         {t("schedule_appointment")}
                                       </Button>
@@ -573,7 +577,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                             onClick={(event) => {
                                               event.stopPropagation();
                                             }}
-                                            className="rounded-l-none"
+                                            aria-label={t("more_actions")}
+                                            className="shadow-none"
                                           >
                                             <ChevronDown className="size-4" />
                                           </Button>
@@ -618,7 +623,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                           </DropdownMenuItem>
                                         </DropdownMenuContent>
                                       </DropdownMenu>
-                                    </div>
+                                    </ButtonGroup>
                                   </TableCell>
                                 </TableRow>
                               ))}

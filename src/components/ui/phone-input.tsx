@@ -1,3 +1,4 @@
+// CareUI phone-input composition with CARE country defaults and digit constraints.
 import careConfig from "@careConfig";
 import {
   CountryCode,
@@ -5,7 +6,7 @@ import {
   getExampleNumber,
 } from "libphonenumber-js";
 import examples from "libphonenumber-js/mobile/examples";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import * as RPNInput from "react-phone-number-input";
@@ -23,6 +24,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { InputGroup } from "@/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
@@ -75,13 +77,13 @@ function PhoneInput({
     <PhoneInputContext.Provider value={{ country, setCountry }}>
       <RPNInput.default
         className={cn(
-          "flex rounded-md focus-within:ring-1",
+          "PhoneInput",
           className,
-          props.value &&
-            !RPNInput.isValidPhoneNumber((props.value ?? "") as string)
-            ? "ring-red-500"
-            : "ring-primary-700",
+          value && !RPNInput.isValidPhoneNumber(value)
+            ? "ring-destructive"
+            : "ring-ring",
         )}
+        containerComponent={InputGroup}
         flagComponent={FlagComponent}
         countrySelectComponent={CountrySelect}
         inputComponent={InputComponent}
@@ -166,9 +168,10 @@ function InputComponent({
     <>
       <Input
         className={cn(
-          "rounded-e-md rounded-s-none focus-visible:ring-0 focus-visible:outline-hidden focus-visible:border-gray-200",
+          "PhoneInputInput h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 shadow-none focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
           className,
         )}
+        data-slot="input-group-control"
         onBeforeInput={handleBeforeInput}
         aria-describedby="phone-input-constraint"
         {...props}
@@ -219,8 +222,8 @@ const CountrySelect = ({
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 border-gray-200 shadow-xs px-3 focus:z-10 h-auto"
+          variant="ghost"
+          className="border-input flex shrink-0 gap-1.5 rounded-none! border-0 border-r px-2 text-sm no-underline shadow-none not-in-data-[slot=button-group]:rounded-none! focus-visible:ring-3 h-full"
           disabled={disabled}
         >
           <FlagComponent
@@ -229,14 +232,14 @@ const CountrySelect = ({
           />
           <ChevronsUpDown
             className={cn(
-              "-mr-2 size-4 opacity-50",
+              "size-4 opacity-50",
               disabled ? "hidden" : "opacity-100",
             )}
           />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-2 sm:p-0 w-[var(--radix-popover-trigger-width)] min-w-64"
+        className="p-2 sm:p-0 w-[var(--anchor-width)] min-w-64"
         align="start"
         sideOffset={5}
       >
@@ -248,7 +251,7 @@ const CountrySelect = ({
               setTimeout(() => {
                 if (scrollAreaRef.current) {
                   const viewportElement = scrollAreaRef.current.querySelector(
-                    "[data-radix-scroll-area-viewport]",
+                    '[data-slot="scroll-area-viewport"]',
                   );
                   if (viewportElement) {
                     viewportElement.scrollTop = 0;
@@ -257,10 +260,10 @@ const CountrySelect = ({
               }, 0);
             }}
             placeholder={t("search_country")}
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="border-none shadow-none outline-hidden ring-0"
           />
           <CommandList>
-            <ScrollArea ref={scrollAreaRef} className="h-72">
+            <ScrollArea ref={scrollAreaRef}>
               <CommandEmpty>{t("no_country_found")}</CommandEmpty>
               <CommandGroup>
                 {countryList.map(({ value, label }) =>
@@ -295,23 +298,25 @@ const CountrySelectOption = ({
   onChange,
 }: CountrySelectOptionProps) => {
   return (
-    <CommandItem className="gap-2" onSelect={() => onChange(country)}>
+    <CommandItem
+      className="gap-2"
+      data-checked={country === selectedCountry}
+      onSelect={() => onChange(country)}
+    >
       <FlagComponent country={country} countryName={countryName} />
       <span className="flex-1 text-sm">{countryName}</span>
       <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
-      <CheckIcon
-        className={`ml-auto size-4 ${country === selectedCountry ? "opacity-100" : "opacity-0"}`}
-      />
     </CommandItem>
   );
 };
 
 const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
   const Flag = flags[country];
+  const flagProps = { title: countryName, className: "size-full" };
 
   return (
-    <span className="flex h-4 w-6 overflow-hidden rounded-sm bg-foreground/20 [&_svg]:size-full">
-      {Flag && <Flag title={countryName} />}
+    <span className="flex h-4 w-6 overflow-hidden rounded bg-foreground/20 [&_svg]:size-full">
+      {Flag && <Flag {...flagProps} />}
     </span>
   );
 };

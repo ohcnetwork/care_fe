@@ -25,6 +25,16 @@ export type OperationalStatus = "C" | "H" | "O" | "U" | "K" | "I";
 
 export type LocationMode = "instance" | "kind";
 
+export const InventoryUsageOptions = [
+  "none",
+  "store",
+  "supplier",
+  "consumption",
+  "adjustment",
+] as const;
+
+export type InventoryUsage = (typeof InventoryUsageOptions)[number];
+
 export type LocationForm = (typeof LocationFormOptions)[number];
 
 export interface LocationBase {
@@ -35,11 +45,14 @@ export interface LocationBase {
   location_type?: Code;
   form: LocationForm;
   mode: LocationMode;
+  inventory_usage: InventoryUsage;
 }
 
 export interface LocationDetail extends LocationBase {
   id: string;
   has_children: boolean;
+  has_sub_locations: boolean;
+  has_beds: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
@@ -49,6 +62,8 @@ export interface LocationDetail extends LocationBase {
 export interface LocationRead extends LocationBase {
   id: string;
   has_children: boolean;
+  has_sub_locations: boolean;
+  has_beds: boolean;
   parent?: LocationRead;
   current_encounter?: EncounterRead;
   sort_index: number;
@@ -58,11 +73,12 @@ export interface LocationRead extends LocationBase {
 
 export type LocationMinSpec = Omit<LocationRead, "current_encounter">;
 
-export interface LocationWrite extends LocationBase {
+export interface LocationWrite extends Omit<LocationBase, "inventory_usage"> {
   id?: string;
   parent?: string;
   organizations: string[];
   mode: LocationMode;
+  inventory_usage?: InventoryUsage;
 }
 
 export interface LocationImport extends LocationBase {

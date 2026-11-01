@@ -1,8 +1,18 @@
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
+import {
+  PaginationButton,
+  PaginationContent,
+  PaginationItem,
+  Pagination as PaginationRoot,
+} from "@/components/ui/pagination";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 interface PaginationProps {
@@ -19,6 +29,7 @@ const Pagination = ({
   defaultPerPage,
   cPage,
 }: PaginationProps) => {
+  const { t } = useTranslation();
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -79,72 +90,82 @@ const Pagination = ({
   };
 
   return (
-    <div className={className}>
-      {/* Mobile view */}
-      <div className="flex flex-1 justify-between sm:hidden">
-        <NavButton
-          id="prev-page"
-          tooltip="Previous"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage - 1 <= 0}
-          children={<CareIcon icon="l-angle-left" className="text-lg" />}
-        />
-        <NavButton
-          id="next-page"
-          tooltip="Next"
-          children={<CareIcon icon="l-angle-right" className="text-lg" />}
-          onClick={() => goToPage(currentPage + 1)}
-          disabled={currentPage + 1 > totalPage}
-        />
-      </div>
-
-      {/* Desktop view */}
-      <nav className="relative hidden rounded-lg border border-secondary-300 bg-white sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
-        <NavButton
-          id="first-page"
-          tooltip="Jump to first page"
-          children={<CareIcon icon="l-angle-double-left" className="text-lg" />}
-          onClick={() => goToPage(1)}
-          disabled={currentPage === 1}
-        />
-        <NavButton
-          id="prev-pages"
-          tooltip="Previous"
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage - 1 <= 0}
-          children={<CareIcon icon="l-angle-left" className="text-lg" />}
-        />
-
-        {pageNumbers.map((page) => (
+    <PaginationRoot className={className}>
+      <PaginationContent className="w-full justify-between sm:w-auto sm:justify-center">
+        <PaginationItem className="hidden sm:block">
           <NavButton
-            id={`page-${page}`}
-            key={page}
-            onClick={() => goToPage(page)}
-            selected={currentPage === page}
-            tooltip={`Move to page ${page}`}
+            id="first-page"
+            tooltip={t("pagination_first_page")}
+            onClick={() => goToPage(1)}
+            disabled={currentPage === 1}
           >
-            {page}
+            <ChevronsLeft />
           </NavButton>
+        </PaginationItem>
+        <PaginationItem className="sm:hidden">
+          <NavButton
+            id="prev-page"
+            tooltip={t("pagination_previous_page")}
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft />
+          </NavButton>
+        </PaginationItem>
+        <PaginationItem className="hidden sm:block">
+          <NavButton
+            id="prev-pages"
+            tooltip={t("pagination_previous_page")}
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft />
+          </NavButton>
+        </PaginationItem>
+        {pageNumbers.map((page) => (
+          <PaginationItem key={page} className="hidden sm:block">
+            <NavButton
+              id={`page-${page}`}
+              onClick={() => goToPage(page)}
+              selected={currentPage === page}
+              tooltip={t("pagination_go_to_page", { page })}
+            >
+              {page}
+            </NavButton>
+          </PaginationItem>
         ))}
-
-        <NavButton
-          id="next-pages"
-          tooltip="Next"
-          children={<CareIcon icon="l-angle-right" className="text-lg" />}
-          onClick={() => goToPage(currentPage + 1)}
-          disabled={currentPage + 1 > totalPage}
-        />
-        <NavButton
-          id="last-page"
-          tooltip="Jump to last page"
-          children={
-            <CareIcon icon="l-angle-double-right" className="text-lg" />
-          }
-          onClick={() => goToPage(totalPage)}
-          disabled={totalPage === 0 || currentPage === totalPage}
-        />
-      </nav>
-    </div>
+        <PaginationItem className="sm:hidden">
+          <NavButton
+            id="next-page"
+            tooltip={t("pagination_next_page")}
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage >= totalPage}
+          >
+            <ChevronRight />
+          </NavButton>
+        </PaginationItem>
+        <PaginationItem className="hidden sm:block">
+          <NavButton
+            id="next-pages"
+            tooltip={t("pagination_next_page")}
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage >= totalPage}
+          >
+            <ChevronRight />
+          </NavButton>
+        </PaginationItem>
+        <PaginationItem className="hidden sm:block">
+          <NavButton
+            id="last-page"
+            tooltip={t("pagination_last_page")}
+            onClick={() => goToPage(totalPage)}
+            disabled={currentPage === totalPage}
+          >
+            <ChevronsRight />
+          </NavButton>
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationRoot>
   );
 };
 
@@ -162,15 +183,15 @@ interface NavButtonProps {
 const NavButton = (props: NavButtonProps) => {
   return (
     <TooltipComponent content={props.tooltip}>
-      <Button
+      <PaginationButton
         id={props.id}
         disabled={props.disabled}
         onClick={props.onClick}
-        variant={props.selected ? "primary" : "secondary"}
-        className="rounded-none text-sm font-bold"
+        isActive={props.selected}
+        aria-label={props.tooltip}
       >
         {props.children}
-      </Button>
+      </PaginationButton>
     </TooltipComponent>
   );
 };

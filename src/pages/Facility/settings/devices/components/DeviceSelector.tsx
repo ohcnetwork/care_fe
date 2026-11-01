@@ -1,5 +1,5 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -153,7 +153,7 @@ export function DeviceSearch({
       <PopoverTrigger asChild disabled={disabled}>
         {renderTriggerButton()}
       </PopoverTrigger>
-      <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--anchor-width)]">
         <DeviceCommandContent
           search={search}
           setSearch={setSearch}

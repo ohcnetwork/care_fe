@@ -246,7 +246,11 @@ test.describe("Activity Definition List", () => {
       `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
     );
 
-    const breadcrumb = page.locator('[data-slot="breadcrumb"]');
+    // The app header renders its own breadcrumb; scope to the page's
+    // resource-category breadcrumb.
+    const breadcrumb = page
+      .locator('[data-slot="breadcrumb"]')
+      .filter({ hasText: RESOURCE_CATEGORY_NAME });
 
     const resourceCategoryElement = breadcrumb.locator(
       'span[data-slot="breadcrumb-page"]',

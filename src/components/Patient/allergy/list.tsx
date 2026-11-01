@@ -4,18 +4,17 @@ import {
   BeakerIcon,
   CookingPotIcon,
   HeartPulseIcon,
-  History,
   LeafIcon,
 } from "lucide-react";
-import { Link, usePath } from "raviger";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
+import { ClinicalListPanel } from "@/components/Patient/Common/ClinicalListPanel";
 import EmptyState from "@/components/Patient/Common/EmptyState";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -33,6 +32,8 @@ import {
 import { AllergyTable } from "./AllergyTable";
 
 interface AllergyListProps {
+  title?: string;
+  showEmpty?: boolean;
   facilityId?: string;
   patientId: string;
   encounterId?: string;
@@ -41,6 +42,7 @@ interface AllergyListProps {
   encounterStatus?: EncounterStatus;
   showTimeline?: boolean;
   showViewEncounter?: boolean;
+  presentation?: "default" | "panel";
 }
 interface GroupedAllergies {
   [year: string]: {
@@ -58,6 +60,9 @@ export const CATEGORY_ICONS: Record<AllergyCategory, ReactNode> = {
 };
 
 export function AllergyList({
+  title,
+  showEmpty = false,
+  facilityId: providedFacilityId,
   patientId,
   encounterId,
   className = "",
@@ -65,46 +70,63 @@ export function AllergyList({
   encounterStatus,
   showTimeline = false,
   showViewEncounter = true,
+  presentation = "default",
 }: AllergyListProps) {
   const { t } = useTranslation();
 
   const LIMIT = showTimeline ? 30 : 14;
-  const { facilityId } = useCurrentFacilitySilently();
-  const sourceUrl = usePath();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(allergyIntoleranceApi.getAllergy, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter:
-              encounterStatus &&
-              completedEncounterStatus.includes(encounterStatus)
-                ? encounterId
-                : undefined,
-            limit: LIMIT,
-            offset: String(pageParam),
-            exclude_verification_status: "entered_in_error",
-          },
-        })({ signal });
-        return response as PaginatedResponse<AllergyIntolerance>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+  const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
+  const facilityId = providedFacilityId ?? currentFacilityId;
+  const queryState = useInfiniteQuery({
+    queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(allergyIntoleranceApi.getAllergy, {
+        pathParams: { patientId },
+        silent: true,
+        queryParams: {
+          encounter:
+            encounterStatus &&
+            completedEncounterStatus.includes(encounterStatus)
+              ? encounterId
+              : undefined,
+          limit: LIMIT,
+          offset: String(pageParam),
+          exclude_verification_status: "entered_in_error",
+        },
+      })({ signal });
+      return response as PaginatedResponse<AllergyIntolerance>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.reduce(
+        (count, page) => count + page.results.length,
+        0,
+      );
+      return lastPage.results.length > 0 && currentOffset < lastPage.count
+        ? currentOffset
+        : undefined;
+    },
+  });
+
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = queryState;
 
   const allergies = data?.pages.flatMap((page) => page.results) ?? [];
 
-  if (isLoading) {
-    return <TableSkeleton count={5} />;
-  }
-
-  if (!allergies?.length) {
-    if (showTimeline) {
+  if (showTimeline) {
+    if (isLoading) return <TableSkeleton count={5} />;
+    if (!allergies.length) {
+      if (isError) {
+        return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
+      }
       return (
         <EmptyState
           title={t("no_allergies")}
@@ -112,10 +134,6 @@ export function AllergyList({
         />
       );
     }
-    return null;
-  }
-
-  if (showTimeline) {
     const groupedByYear = allergies.reduce((acc, allergy) => {
       const dateStr = format(allergy.created_date, "dd MMMM, yyyy");
       const year = format(allergy.created_date, "yyyy");
@@ -127,6 +145,9 @@ export function AllergyList({
 
     return (
       <div className="space-y-8">
+        {isError && (
+          <ClinicalListError isFetching={isFetching} onRetry={refetch} />
+        )}
         {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
           return (
             <div key={year}>
@@ -176,47 +197,27 @@ export function AllergyList({
   }
 
   return (
-    <EncounterAccordionLayout
-      title={t("allergies")}
+    <ClinicalListPanel
+      title={title ?? t("allergies")}
+      facilityId={facilityId}
+      patientId={patientId}
+      encounterId={encounterId}
       readOnly={readOnly}
       className={className}
-      editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
-      actionButton={
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
-        >
-          <Link
-            href={
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
-                : `/patient/${patientId}/history/allergies?sourceUrl=${encodeURIComponent(sourceUrl ?? "")}`
-            }
-          >
-            <History className="size-4" />
-          </Link>
-        </Button>
-      }
+      presentation={presentation}
+      questionnaire="allergy_intolerance"
+      history="allergies"
+      emptyMessage={t("no_allergies_recorded_description")}
+      hasData={allergies.length > 0}
+      showEmpty={showEmpty}
+      queryState={queryState}
     >
       <AllergyTable
         allergies={allergies}
         patientId={patientId}
         showViewEncounter={showViewEncounter}
+        compact={presentation === "panel"}
       />
-      {hasNextPage && (
-        <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {t("load_more")}
-          </Button>
-        </div>
-      )}
-    </EncounterAccordionLayout>
+    </ClinicalListPanel>
   );
 }

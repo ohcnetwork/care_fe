@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -51,6 +52,7 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { slugValueSchema } from "@/types/base/slug/schema";
 import {
   MRP_CODE,
   PURCHASE_PRICE_CODE,
@@ -65,7 +67,8 @@ import facilityApi from "@/types/facility/facilityApi";
 import { round, zodDecimal } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug, goBack } from "@/Utils/utils";
+import { generateSlugValue } from "@/Utils/slug";
+import { goBack } from "@/Utils/utils";
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -126,18 +129,7 @@ export function ChargeItemDefinitionForm({
         .string()
         .trim()
         .min(1, { message: t("title_is_required") }),
-      slug_value: z
-        .string()
-        .trim()
-        .min(5, {
-          message: t("character_count_validation", { min: 5, max: 25 }),
-        })
-        .max(25, {
-          message: t("character_count_validation", { min: 5, max: 25 }),
-        })
-        .regex(/^[a-z0-9_-]+$/, {
-          message: t("slug_format_message"),
-        }),
+      slug_value: slugValueSchema(),
       category: z.string().min(1, { message: t("field_required") }),
       _categoryName: z.string().optional(),
       status: z.enum(ChargeItemDefinitionStatus),
@@ -262,15 +254,15 @@ export function ChargeItemDefinitionForm({
   useEffect(() => {
     if (isUpdate) return;
 
-    const subscription = form.watch((value, { name }) => {
-      if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+    return form.subscribe({
+      formState: { values: true },
+      name: "title",
+      callback: ({ values }) => {
+        form.setValue("slug_value", generateSlugValue(values.title), {
           shouldValidate: true,
         });
-      }
+      },
     });
-
-    return () => subscription.unsubscribe();
   }, [form, isUpdate]);
 
   // Get current form values
@@ -830,7 +822,7 @@ export function ChargeItemDefinitionForm({
           >
             {isPending ? (
               <>
-                <Loader2
+                <Spinner
                   className={`${minimal ? "mr-1" : "mr-2"} size-4 animate-spin`}
                 />
                 {t("saving")}

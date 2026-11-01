@@ -402,7 +402,7 @@ export default function RequirementsSelector({
         )}
       </div>
 
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="p-0 w-[var(--anchor-width)]">
         <div className="flex flex-col border-b px-3 py-2 mb-1.5">
           {description && <p className="mt-1.5 text-sm">{description}</p>}
         </div>

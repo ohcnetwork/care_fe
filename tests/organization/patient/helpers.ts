@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /**
  * Get the patient name from an encounter info card.
@@ -20,8 +20,16 @@ export async function navigateToOrganizationPatient(page: Page) {
     .first()
     .click();
 
-  await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-  await page.getByRole("button", { name: "Patients", exact: true }).click();
+  // The sidebar may already be expanded; only expand it when collapsed.
+  const sidebarToggle = page.getByRole("button", {
+    name: "Toggle Sidebar",
+    exact: true,
+  });
+  await expect(sidebarToggle).toBeVisible();
+  if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+    await sidebarToggle.click();
+  }
+  await page.getByRole("button", { name: "Encounters", exact: true }).click();
   await page.getByRole("link", { name: "All Encounters", exact: true }).click();
   const patientName = await getPatientNameFromCard(page);
 

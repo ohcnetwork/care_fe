@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { LoadingAnimationSvg } from "@/components/careui/loading-animation-svg";
+import { LoadingAnimationSvg } from "@/components/ui/loading-animation-svg";
 
 const Loading = () => {
   const containerRef = useRef<HTMLDivElement>(null);

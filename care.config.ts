@@ -225,7 +225,7 @@ const careConfig = {
     : [],
 
   appStore: {
-    indexUrl: env.REACT_APP_STORE_INDEX_URL,
+    apiUrl: env.REACT_APP_STORE_API_URL,
   },
 
   plotsConfigUrl:

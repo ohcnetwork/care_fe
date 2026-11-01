@@ -44,20 +44,16 @@ interface FacilityOverviewProps {
   facilityId: string;
 }
 
-function greetUserKey(date: Date = new Date()) {
-  const hour = date.getHours();
-  if (hour < 12) {
-    return "greet_user_morning";
-  }
-  if (hour < 18) {
-    return "greet_user_afternoon";
-  }
-  return "greet_user_evening";
-}
-
 export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12
+      ? "overview_greeting_morning"
+      : hour < 18
+        ? "overview_greeting_afternoon"
+        : "overview_greeting_evening";
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
@@ -124,10 +120,13 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   );
 
   return (
-    <Page title="">
-      <div className="container mx-auto space-y-8 max-w-6xl">
+    <Page title={t("overview")} hideTitleOnPage className="md:px-0">
+      <div className="space-y-8">
         {/* Welcome Header */}
-        <div className="relative overflow-hidden rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 text-gray-900">
+        <div
+          data-cy="facility-overview-greeting"
+          className="relative overflow-hidden rounded-xl border border-sky-100 bg-linear-to-r from-sky-50 to-emerald-100 text-gray-900"
+        >
           <img
             src="/images/home-banner.svg"
             aria-hidden="true"
@@ -137,11 +136,11 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           <div className="relative z-10 max-w-xl p-4 md:p-8">
             <h1 className="mb-2 text-xl/8 font-medium wrap-break-word text-gray-600">
               <Trans
-                i18nKey={greetUserKey()}
-                values={{ user: formatName(user) }}
+                i18nKey={greeting}
+                values={{ name: formatName(user) }}
                 components={{
-                  1: <span />,
-                  2: <span className="font-semibold text-gray-950" />,
+                  name: <span className="font-semibold text-gray-950" />,
+                  wave: <span aria-hidden="true" />,
                 }}
               />
             </h1>

@@ -1,4 +1,4 @@
-import { CheckedState } from "@radix-ui/react-checkbox";
+import { CheckedState } from "@/components/ui/checkbox";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightLeft,

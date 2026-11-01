@@ -798,7 +798,7 @@ export function EditInvoiceTable({
                                                       );
                                                     }}
                                                     disabled={isDisabled}
-                                                    className="data-[state=unchecked]:bg-gray-900"
+                                                    className="data-unchecked:bg-gray-900"
                                                   />
                                                 </FormControl>
                                                 <span className="text-sm text-gray-500">

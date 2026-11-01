@@ -8,10 +8,10 @@ setup("authenticate as staff", async ({ page }) => {
 
   // Fill in credentials for care-staff
   await page.getByRole("textbox", { name: /username/i }).fill("care-staff");
-  await page.getByLabel(/password/i).fill("Ohcn@123");
+  await page.getByLabel(/^password$/i).fill("Ohcn@123");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login
   await page.waitForURL(/(?!.*login)/, { timeout: 15000 });

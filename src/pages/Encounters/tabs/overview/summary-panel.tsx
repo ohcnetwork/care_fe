@@ -21,23 +21,13 @@ export const SummaryPanel = () => {
 
   return (
     <div className="@container">
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="@xs:bg-gray-100 @xs:border border-gray-200 p-1 xl:p-0 @xs:rounded-lg"
-      >
-        <TabsList className="w-full sm:w-72 bg-gray-100 @xs:bg-gray-200 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
-          <TabsTrigger value="details" className="w-full">
-            <span className="text-black">{t("details")}</span>
-          </TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-2">
+        <TabsList className="w-full sm:w-72">
+          <TabsTrigger value="details">{t("details")}</TabsTrigger>
           {canWriteSelectedEncounter && (
-            <TabsTrigger value="actions" className="w-full">
-              <span className="text-black">{t("actions")}</span>
-            </TabsTrigger>
+            <TabsTrigger value="actions">{t("actions")}</TabsTrigger>
           )}
-          <TabsTrigger value="reports" className="w-full">
-            <span className="text-black">{t("reports")}</span>
-          </TabsTrigger>
+          <TabsTrigger value="reports">{t("reports")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details">

@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   readonly REACT_APP_COVER_IMAGE_ALT: string;
   readonly REACT_PUBLIC_URL: string;
   readonly REACT_SBOM_BASE_URL?: string;
+  readonly REACT_APP_STORE_API_URL?: string;
   readonly REACT_CARE_API_URL?: string;
   readonly REACT_CARE_URL_MAP?: string;
   readonly REACT_GITHUB_URL?: string;
