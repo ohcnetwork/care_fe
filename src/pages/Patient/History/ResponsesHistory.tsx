@@ -14,7 +14,7 @@ export const ResponsesHistory = ({
   return (
     <div
       className={
-        embedded ? "min-w-0" : "h-[calc(100vh-12rem)] flex flex-col pb-10"
+        embedded ? "min-w-0" : "h-[calc(100vh-15rem)] flex flex-col pb-12"
       }
     >
       {!embedded && (

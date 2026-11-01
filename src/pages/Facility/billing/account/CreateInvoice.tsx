@@ -809,6 +809,7 @@ export function CreateInvoicePage({
                           },
                         }}
                         translationBaseKey="charge_item_definition"
+                        data-shortcut-id="enter-action"
                       />
                     </div>
                   )}

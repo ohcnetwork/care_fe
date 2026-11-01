@@ -79,7 +79,10 @@ export default function ServiceRequestTable({
             >
               {showPatientInfo && (
                 <TableCell
-                  className={cn("font-medium", onPatientClick)}
+                  className={cn(
+                    "font-medium",
+                    onPatientClick && "group-hover:underline cursor-pointer",
+                  )}
                   onClick={() => onPatientClick?.(request)}
                 >
                   <div className="font-semibold text-gray-900">
