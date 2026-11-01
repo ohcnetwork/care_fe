@@ -15,6 +15,7 @@ export interface WorkspaceAvailabilityContext {
   canReadClinicalData: boolean;
   canReadPatientHistory: boolean;
   canReadSelectedEncounter: boolean;
+  canWriteSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
   /** Response history can be granted separately from clinical history. */
   canReadPatientResponses?: boolean;
@@ -32,7 +33,7 @@ export interface WorkspaceWidgetContext extends WorkspaceAvailabilityContext {
 export interface WidgetRequirements {
   encounter: "none" | "any" | "active";
   /** "actions" also accepts referral creation, matching the quick actions strip. */
-  access: "clinical" | "encounter" | "write" | "actions";
+  access: "clinical" | "encounter" | "encounter-write" | "write" | "actions";
   /** Which patient-history grant a widget without an encounter needs. */
   history?: "clinical" | "responses" | "any";
 }
@@ -40,6 +41,10 @@ export interface WidgetRequirements {
 const clinical: WidgetRequirements = { encounter: "any", access: "clinical" };
 const details: WidgetRequirements = { encounter: "any", access: "encounter" };
 const action: WidgetRequirements = { encounter: "active", access: "write" };
+const encounterManagement: WidgetRequirements = {
+  encounter: "active",
+  access: "encounter-write",
+};
 const shortcuts: WidgetRequirements = {
   encounter: "active",
   access: "actions",
@@ -112,7 +117,7 @@ function widgetInstanceRequirements(
   if (widget.type === "encounter_summary") {
     const tabs = encounterSummaryConfigSchema.safeParse(widget.config).data
       ?.tabs;
-    if (tabs?.length === 1 && tabs[0] === "actions") return action;
+    if (tabs?.length === 1 && tabs[0] === "actions") return encounterManagement;
   }
   return getWidgetRequirements(widget.type, requiresActiveEncounter);
 }
@@ -185,14 +190,20 @@ export function getWidgetAvailability(
     (requirements.encounter === "none"
       ? historyRead
       : context.canReadClinicalData) ||
-    (requirements.access === "encounter" && context.canReadSelectedEncounter);
+    ((requirements.access === "encounter" ||
+      requirements.access === "encounter-write") &&
+      context.canReadSelectedEncounter);
   if (!canRead) return { state: "denied" };
   const canAct =
-    context.canWriteClinicalData ||
-    (requirements.access === "actions" &&
-      !!context.selectedEncounterPermissions?.canCreateReferral);
+    requirements.access === "encounter-write"
+      ? context.canWriteSelectedEncounter
+      : context.canWriteClinicalData ||
+        (requirements.access === "actions" &&
+          !!context.selectedEncounterPermissions?.canCreateReferral);
   if (
-    (requirements.access === "write" || requirements.access === "actions") &&
+    (requirements.access === "write" ||
+      requirements.access === "encounter-write" ||
+      requirements.access === "actions") &&
     (!context.facilityId || !canAct)
   ) {
     return {

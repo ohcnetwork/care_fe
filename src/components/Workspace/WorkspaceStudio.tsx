@@ -260,6 +260,7 @@ export function WorkspaceStudio({
           canReadClinicalData: true,
           canReadPatientHistory: true,
           canReadSelectedEncounter: false,
+          canWriteSelectedEncounter: false,
           canWriteClinicalData: false,
         }
       : {
@@ -274,6 +275,8 @@ export function WorkspaceStudio({
           canReadPatientHistory:
             previewAccess === "editing" || previewAccess === "readonly",
           canReadSelectedEncounter: true,
+          canWriteSelectedEncounter:
+            previewAccess === "editing" && previewEncounter === "active",
           canWriteClinicalData:
             previewAccess === "editing" && previewEncounter === "active",
           hasEncounterExtensions,

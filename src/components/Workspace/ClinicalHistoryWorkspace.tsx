@@ -78,6 +78,7 @@ export function ClinicalHistoryWorkspace({
     canReadPatientHistory: grants.clinicalData,
     canReadPatientResponses: grants.responses,
     canReadSelectedEncounter: false,
+    canWriteSelectedEncounter: false,
     canWriteClinicalData: false,
   };
   const systemTabs = useClinicalHistoryTabs({

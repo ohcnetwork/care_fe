@@ -33,11 +33,13 @@ const active: WorkspaceAvailabilityContext = {
   canReadClinicalData: true,
   canReadPatientHistory: true,
   canReadSelectedEncounter: true,
+  canWriteSelectedEncounter: true,
   canWriteClinicalData: true,
 };
 const closed: WorkspaceAvailabilityContext = {
   ...active,
   selectedEncounter: { status: EncounterStatus.COMPLETED },
+  canWriteSelectedEncounter: false,
   canWriteClinicalData: false,
 };
 
@@ -161,7 +163,7 @@ test("active-only widgets hide for closed encounters without an explicit status 
   );
 });
 
-test("an actions-only summary follows editable-encounter requirements", () => {
+test("an actions-only summary follows encounter-management requirements", () => {
   const actionsOnly = {
     type: "encounter_summary",
     config: { tabs: ["actions"] },
@@ -174,9 +176,38 @@ test("an actions-only summary follows editable-encounter requirements", () => {
   assert.deepEqual(
     getWidgetAvailability(actionsOnly, {
       ...active,
+      canWriteSelectedEncounter: false,
       canWriteClinicalData: false,
     }),
     { state: "hidden", reason: "workspace_requires_editable_encounter" },
+  );
+  const managementOnly = {
+    ...active,
+    canReadClinicalData: false,
+    canReadPatientHistory: false,
+    canWriteClinicalData: false,
+  };
+  assert.equal(
+    getWidgetAvailability(actionsOnly, managementOnly).state,
+    "visible",
+  );
+  assert.equal(
+    getWidgetAvailability({ type: "favorite_forms" }, managementOnly).state,
+    "denied",
+  );
+  assert.equal(
+    getWidgetAvailability(actionsOnly, {
+      ...managementOnly,
+      canReadSelectedEncounter: false,
+    }).state,
+    "denied",
+  );
+  assert.deepEqual(
+    getWidgetAvailability(actionsOnly, {
+      ...closed,
+      selectedEncounterPermissions: { canCreateReferral: true },
+    }),
+    { state: "hidden", reason: "workspace_auto_hides_closed" },
   );
   assert.equal(
     getWidgetAvailability(

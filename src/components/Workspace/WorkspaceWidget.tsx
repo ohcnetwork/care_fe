@@ -105,6 +105,7 @@ function WorkspaceWidgetContent({
     patientId,
     selectedEncounter,
     canReadSelectedEncounter,
+    canWriteSelectedEncounter,
     canReadClinicalData,
     canWriteClinicalData,
   } = context;
@@ -270,7 +271,7 @@ function WorkspaceWidgetContent({
             />
           );
         if (only === "actions")
-          return facilityId && canWriteClinicalData ? (
+          return facilityId && canWriteSelectedEncounter ? (
             <SummaryPanelActionsTab title={title} embedded />
           ) : null;
         return frame(
