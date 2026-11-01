@@ -57,6 +57,8 @@ interface FacilityOrganizationSelectorProps {
   ) => void;
   facilityId: string;
   currentOrganizations?: FacilityOrganizationRead[];
+  /** `currentOrganizations` are already linked, so they can't be picked again. */
+  lockCurrentOrganizations?: boolean;
   singleSelection?: boolean;
   optional?: boolean;
   favoriteList?: string;
@@ -71,6 +73,7 @@ export default function FacilityOrganizationSelector(
     onChange,
     facilityId,
     currentOrganizations,
+    lockCurrentOrganizations = false,
     singleSelection = false,
     favoriteList,
   } = props;
@@ -353,6 +356,11 @@ export default function FacilityOrganizationSelector(
     setFacilityOrgSearch("");
   };
 
+  const handleRemoveOrganization = (id: string) => {
+    removeOrganization(id);
+    if (currentSelection?.id === id) setCurrentSelection(null);
+  };
+
   const handleOrganizationViewChange = (value: string) => {
     setShowAllOrgs(value === "all");
     setNavigationLevels([]);
@@ -363,6 +371,10 @@ export default function FacilityOrganizationSelector(
     if (!isOpen) {
       setNavigationLevels([]);
       setFacilityOrgSearch("");
+      // A parent that was browsed but never confirmed isn't selected.
+      if (currentSelection && !selectedIds.includes(currentSelection.id)) {
+        setCurrentSelection(null);
+      }
     }
   };
 
@@ -525,7 +537,8 @@ export default function FacilityOrganizationSelector(
 
   const isDisabled =
     selectedIds.includes(currentSelection?.id ?? "") ||
-    !!currentOrganizations?.some((org) => org.id === currentSelection?.id);
+    (lockCurrentOrganizations &&
+      !!currentOrganizations?.some((org) => org.id === currentSelection?.id));
 
   const trigger = (
     <Button
@@ -650,7 +663,7 @@ export default function FacilityOrganizationSelector(
                     size="sm"
                     className="size-8 p-0 text-gray-500 hover:text-gray-900"
                     type="button"
-                    onClick={() => removeOrganization(org.id)}
+                    onClick={() => handleRemoveOrganization(org.id)}
                   >
                     <X className="size-4" />
                     <span className="sr-only">{t("remove_organization")}</span>
