@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { useMemo } from "react";
@@ -14,11 +13,11 @@ import { VitalsList } from "@/components/Patient/vitals/list";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, relativeTime } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 import type { Code } from "@/types/base/code/code";
 import {
   ObservationAnalyzeGroup,
   ObservationListRead,
-  ObservationPlotConfig,
   ObservationStatus,
   QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
@@ -42,14 +41,8 @@ export function EncounterVitalsWidget({
   const parsedConfig = vitalsConfigSchema.safeParse(config);
   const codes = parsedConfig.data?.codes;
   const { data, isLoading, isError, isFetching, refetch } =
-    useQuery<ObservationPlotConfig>({
-      queryKey: ["plots-config"],
-      queryFn: async ({ signal }) => {
-        const response = await fetch(careConfig.plotsConfigUrl, { signal });
-        if (!response.ok)
-          throw new Error("Unable to load vital signs configuration");
-        return response.json();
-      },
+    useQuery({
+      ...plotsConfigQueryOptions,
       enabled: canReadClinicalData && parsedConfig.success && !codes,
     });
 

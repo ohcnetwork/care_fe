@@ -1178,6 +1178,74 @@ test("limited observation timelines select measurement time across backend pages
   expect(offsets).toEqual([0, 20]);
 });
 
+test("limited observation timelines stop reading ahead after a bounded number of pages", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page);
+  fixture.workspace.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "latest",
+        title: "Latest measurements",
+        columns: [
+          {
+            span: 12,
+            widgets: [{ type: "observations", config: { limit: 1 } }],
+          },
+        ],
+      },
+    ],
+  };
+  const readings = Array.from({ length: 120 }, (_, index) => ({
+    id: faker.string.uuid(),
+    encounter: fixture.currentEncounter.id,
+    effective_datetime:
+      index === 119 ? "2026-10-02T12:00:00Z" : "2026-10-01T12:00:00Z",
+    modified_date: "2026-10-03T12:00:00Z",
+    main_code: {
+      system: "test",
+      code: String(index),
+      display: index === 119 ? "Oldest update" : "Recent update",
+    },
+    value_type: "decimal",
+    value: { value: index === 119 ? 91 : 76 },
+  }));
+  const offsets: number[] = [];
+  await page.route(
+    (url) =>
+      url.pathname === `/api/v1/patient/${fixture.patient.id}/observation/`,
+    async (route) => {
+      const url = new URL(route.request().url());
+      const offset = Number(url.searchParams.get("offset"));
+      const limit = Number(url.searchParams.get("limit"));
+      offsets.push(offset);
+      await route.fulfill({
+        json: {
+          count: readings.length,
+          results: readings.slice(offset, offset + limit),
+        },
+      });
+    },
+  );
+  await page.goto(`${fixture.basePath}/latest`);
+  await expect(page.getByText("Recent update", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      "Showing the latest readings among recently updated observations. Load more to include older updates.",
+    ),
+  ).toBeVisible();
+  expect(offsets).toEqual([0, 20, 40, 60, 80]);
+
+  await page.getByRole("button", { name: "Load More" }).click();
+  await expect(page.getByText("Oldest update", { exact: true })).toBeVisible();
+  await expect(page.getByText("Recent update", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Load More" })).toHaveCount(0);
+  expect(offsets).toEqual([0, 20, 40, 60, 80, 100]);
+});
+
 test.describe("Encounter workspace rendering", () => {
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
@@ -3730,12 +3798,16 @@ test("studio full response browsers and location history stay read-only on close
     .getByRole("button", { name: "More Actions", exact: true })
     .click();
   await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("menuitem", {
       name: "Mark as entered in error",
       exact: true,
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
 
   await page
     .getByRole("region", { name: "Visit locations", exact: true })
@@ -3765,12 +3837,16 @@ test("studio full response browsers and location history stay read-only on close
   ).toBeVisible();
   await page.getByRole("button", { name: "More Actions", exact: true }).click();
   await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("menuitem", {
       name: "Mark as entered in error",
       exact: true,
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
   expect(
     fixture.writes.filter(
       (request) => !request.endsWith("/account/default_account/"),

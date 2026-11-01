@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
@@ -70,6 +71,9 @@ function groupObservationsByDate(
 }
 
 const PAGE_SIZE = 20;
+// Limited timelines re-sort by measurement time, so they read ahead a bounded
+// number of pages instead of draining the whole encounter history.
+const LIMITED_MAX_PAGES = 5;
 
 export const EncounterObservationsTab = ({
   limit,
@@ -112,22 +116,33 @@ export const EncounterObservationsTab = ({
       },
     });
 
+  const pagesLoaded = data?.pages.length ?? 0;
+  const isReadingAhead =
+    limit !== undefined && hasNextPage && pagesLoaded < LIMITED_MAX_PAGES;
+
   useEffect(() => {
     if (
-      (limit !== undefined || inView) &&
+      (isReadingAhead || inView) &&
       hasNextPage &&
       !isFetchingNextPage &&
       !isError
     ) {
       fetchNextPage();
     }
-  }, [limit, inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
+  }, [
+    isReadingAhead,
+    inView,
+    hasNextPage,
+    isFetchingNextPage,
+    isError,
+    fetchNextPage,
+  ]);
 
   if (isError) {
     return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
   }
 
-  if (isLoading || (limit !== undefined && hasNextPage)) {
+  if (isLoading || isReadingAhead) {
     return (
       <Card className="p-6">
         <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
@@ -137,7 +152,7 @@ export const EncounterObservationsTab = ({
 
   const fetched = data?.pages.flatMap((page) => page.results) ?? [];
   // The backend orders by modification time, not measurement time. A limited
-  // timeline must finish paging before selecting the newest measurements.
+  // timeline reads ahead before selecting the newest measurements.
   const observations =
     limit === undefined
       ? fetched
@@ -218,7 +233,22 @@ export const EncounterObservationsTab = ({
           )}
         </div>
       ))}
-      {hasNextPage && (
+      {limit !== undefined && hasNextPage && (
+        <div className="flex flex-col items-center gap-2 p-4 text-center">
+          <p className="text-sm text-gray-500">
+            {t("workspace_observations_recent_only")}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? t("loading") : t("load_more")}
+          </Button>
+        </div>
+      )}
+      {limit === undefined && hasNextPage && (
         <div ref={ref} className="flex justify-center p-4">
           <div className="text-sm text-gray-500">
             {isFetchingNextPage ? t("loading") : t("load_more")}

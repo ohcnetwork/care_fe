@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -11,13 +10,12 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];
 };
-
-const fetchOptions = { cache: "no-store" as RequestCache };
 
 export const EncounterPlotsTab = ({
   defaultPlot,
@@ -32,11 +30,7 @@ export const EncounterPlotsTab = ({
 
   const plotColumns = useBreakpoints({ default: 1, lg: 2 });
 
-  const { data, isLoading } = useQuery<ObservationPlotConfig>({
-    queryKey: ["plots-config"],
-    queryFn: () =>
-      fetch(careConfig.plotsConfigUrl, fetchOptions).then((res) => res.json()),
-  });
+  const { data, isLoading } = useQuery(plotsConfigQueryOptions);
 
   if (isLoading || !data) {
     return <Loading />;

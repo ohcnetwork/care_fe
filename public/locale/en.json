@@ -8469,5 +8469,6 @@
   "workspace_studio_section_limit": "This column or workspace has reached its section limit (50 per column, 200 in total). Remove a section before adding another.",
   "workspace_history_patient_load_error": "Unable to load this patient's clinical history. Please try again.",
   "workspace_orders_none_in_recent": "No outstanding orders among the most recent requests. Load more to search older orders.",
-  "workspace_widget_tabs_selection_hint": "Select at least one tab. Clear restores all default tabs."
+  "workspace_widget_tabs_selection_hint": "Select at least one tab. Clear restores all default tabs.",
+  "workspace_observations_recent_only": "Showing the latest readings among recently updated observations. Load more to include older updates."
 }

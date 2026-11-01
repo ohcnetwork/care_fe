@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +9,7 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ObservationPlotConfig } from "@/types/emr/observation/observation";
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 import { observationChartConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface ObservationChartWidgetProps {
@@ -34,14 +33,8 @@ export function ObservationChartWidget({
     columns,
   } = parsedConfig.data ?? {};
   const { data, isLoading, isError, isFetching, refetch } =
-    useQuery<ObservationPlotConfig>({
-      queryKey: ["plots-config"],
-      queryFn: async ({ signal }) => {
-        const response = await fetch(careConfig.plotsConfigUrl, { signal });
-        if (!response.ok)
-          throw new Error("Unable to load vital signs configuration");
-        return response.json();
-      },
+    useQuery({
+      ...plotsConfigQueryOptions,
       enabled: canReadClinicalData && parsedConfig.success,
     });
 

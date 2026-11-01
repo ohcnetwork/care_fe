@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useId } from "react";
@@ -9,8 +8,8 @@ import { Label } from "@/components/ui/label";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 import type { Code } from "@/types/base/code/code";
-import type { ObservationPlotConfig } from "@/types/emr/observation/observation";
 import { VITALS_MAX_CODES } from "@/types/workspace/widgetConfigSchemas";
 
 interface VitalsCodePickerProps {
@@ -31,15 +30,7 @@ export function VitalsCodePicker({
 }: VitalsCodePickerProps) {
   const { t } = useTranslation();
   const id = useId();
-  const { data: plots } = useQuery<ObservationPlotConfig>({
-    queryKey: ["plots-config"],
-    queryFn: async ({ signal }) => {
-      const response = await fetch(careConfig.plotsConfigUrl, { signal });
-      if (!response.ok)
-        throw new Error("Unable to load vital signs configuration");
-      return response.json();
-    },
-  });
+  const { data: plots } = useQuery(plotsConfigQueryOptions);
   const presetGroups = (plots ?? [])
     .map((plot) => ({
       id: plot.id,
