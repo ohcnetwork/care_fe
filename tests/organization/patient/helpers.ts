@@ -30,7 +30,7 @@ export async function navigateToOrganizationPatient(page: Page) {
     await sidebarToggle.click();
   }
   await page.getByRole("button", { name: "Encounters", exact: true }).click();
-  await page.getByRole("link", { name: /all encounters/i }).click();
+  await page.getByRole("link", { name: "All Encounters", exact: true }).click();
   const patientName = await getPatientNameFromCard(page);
 
   // Navigate to organization
