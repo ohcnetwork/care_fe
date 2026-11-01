@@ -260,6 +260,8 @@ export default function UserForm({
   const {
     data: userData,
     isLoading: isLoadingUser,
+    isFetching: isFetchingUser,
+    isFetchedAfterMount: isUserFetchedAfterMount,
     isError: isUserError,
     refetch: refetchUser,
   } = useQuery({
@@ -268,9 +270,17 @@ export default function UserForm({
       pathParams: { username: existingUsername! },
     }),
     enabled: !!existingUsername,
+    refetchOnMount: "always",
   });
   useEffect(() => {
-    if (userData && isEditMode && initializedUsername !== existingUsername) {
+    if (
+      userData &&
+      isEditMode &&
+      isUserFetchedAfterMount &&
+      !isFetchingUser &&
+      !isUserError &&
+      initializedUsername !== existingUsername
+    ) {
       const formData: Partial<UserFormValues> = {
         first_name: userData.first_name,
         last_name: userData.last_name,
@@ -289,7 +299,16 @@ export default function UserForm({
       setInitializedUsername(existingUsername);
       setSelectedGeoOrg(userData.geo_organization || null);
     }
-  }, [userData, form, isEditMode, existingUsername, initializedUsername]);
+  }, [
+    userData,
+    form,
+    isEditMode,
+    existingUsername,
+    initializedUsername,
+    isUserFetchedAfterMount,
+    isFetchingUser,
+    isUserError,
+  ]);
 
   useEffect(() => {
     if (!initialSection || initializedUsername !== existingUsername) return;
@@ -500,7 +519,7 @@ export default function UserForm({
 
   const isSubmitting = updatePending || createPending;
 
-  if (isEditMode && isUserError && !userData) {
+  if (isEditMode && isUserError && initializedUsername !== existingUsername) {
     return (
       <div role="alert" className="space-y-3">
         <p>{t("something_went_wrong")}</p>

@@ -248,11 +248,36 @@ test("saves professional details, preserves credential metadata and clears remov
     await existingDegree.click();
     await page.getByRole("option", { name: degree.code, exact: true }).click();
     await expect(existingDegree).toContainText(degree.code);
+
+    // Reopening must refresh the cached editor before an unrelated edit is saved.
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    const refreshedPhone = `+919${faker.string.numeric(9)}`;
+    const externalUpdate = await request.put(url, {
+      headers,
+      data: {
+        first_name: persisted.first_name,
+        last_name: "Refreshed Test",
+        phone_number: refreshedPhone,
+        gender: "female",
+      },
+    });
+    expect(externalUpdate.ok(), await externalUpdate.text()).toBe(true);
+    await page.getByRole("button", { name: "Edit User", exact: true }).click();
+    await expect(
+      dialog.getByRole("textbox", { name: /^Last Name/ }),
+    ).toHaveValue("Refreshed Test");
     await dialog
       .getByRole("textbox", { name: /^First Name/ })
       .fill("Updated Profile");
     await save();
     const afterNameEdit = await readUser();
+    expect(afterNameEdit).toMatchObject({
+      first_name: "Updated Profile",
+      last_name: "Refreshed Test",
+      phone_number: refreshedPhone,
+      gender: "female",
+    });
     expect(afterNameEdit.communication).toEqual(persisted.communication);
     expect(afterNameEdit.qualification).toEqual(persisted.qualification);
     await page.unroute("**/api/v1/users/degrees/");
