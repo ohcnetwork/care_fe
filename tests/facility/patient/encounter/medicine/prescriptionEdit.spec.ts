@@ -89,15 +89,8 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Verify medication in All Prescriptions", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
+      // Saving returns to the tab the form was opened from
+      await page.waitForURL(/\/medicines$/);
       // Click "All Prescriptions" sidebar card to see all medicines
       await page
         .locator("[data-slot='card']")
@@ -146,15 +139,8 @@ test.describe("Edit Patient Prescription", () => {
     });
 
     await test.step("Verify medication in stopped medications via All Prescriptions", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
+      // Saving returns to the tab the form was opened from
+      await page.waitForURL(/\/medicines$/);
       // Click "All Prescriptions" sidebar card to see all medicines
       await page
         .locator("[data-slot='card']")
