@@ -60,6 +60,14 @@ export function MultiSelect({
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectAllId = React.useId();
 
+  // Re-sync the draft only when the contents of `value` change
+  const valueKey = JSON.stringify([...value].sort());
+  const [syncedValueKey, setSyncedValueKey] = React.useState(valueKey);
+  if (syncedValueKey !== valueKey) {
+    setSyncedValueKey(valueKey);
+    setSelectedValues(value);
+  }
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       setSelectedValues(value);
