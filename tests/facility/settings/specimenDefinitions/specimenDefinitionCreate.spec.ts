@@ -91,6 +91,10 @@ test.describe("Specimen Definitions Create", () => {
     await page
       .getByRole("combobox", { name: "Enter Retention Time" })
       .fill(retentionTime.toString());
+    // Pick the unit to commit the quantity and close the suggestions.
+    await page
+      .getByRole("option", { name: `${retentionTime} hours`, exact: true })
+      .click();
 
     const requirement = faker.lorem.sentence();
     await page.getByRole("textbox", { name: "Requirement" }).fill(requirement);

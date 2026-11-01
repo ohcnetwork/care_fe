@@ -15,7 +15,7 @@ test.describe("Clear Cache in profile successfully", () => {
     page,
   }) => {
     const facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/users/admin`);
+    await page.goto(`/facility/${facilityId}/users/admin/profile`);
 
     await expect(
       page.getByRole("button", { name: /clear cache/i }),
@@ -134,7 +134,7 @@ for (const action of ["Clear Cache", "Update Now"]) {
       draftKey!,
     );
 
-    await page.goto(`/facility/${getFacilityId()}/users/admin`);
+    await page.goto(`/facility/${getFacilityId()}/users/admin/profile`);
     await expect(
       page.getByRole("button", { name: "Clear Cache", exact: true }),
     ).toBeVisible();

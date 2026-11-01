@@ -74,7 +74,12 @@ test.describe("Edit Patient Prescription", () => {
         .click();
       await page.getByRole("option", { name: selectedInstruction }).click();
 
-      await page.getByPlaceholder("Notes").last().fill(notes);
+      // The medication's own notes field (as in prescriptionCreate.spec); a
+      // bare "Notes" placeholder also matches inputs inside the instructions
+      // picker, which then stays open over the Save button.
+      await page
+        .getByPlaceholder("Enter additional notes", { exact: true })
+        .fill(notes);
     });
 
     await test.step("Submit prescription", async () => {

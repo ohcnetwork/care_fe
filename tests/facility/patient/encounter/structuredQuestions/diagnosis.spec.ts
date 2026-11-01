@@ -234,13 +234,15 @@ test.describe("Diagnosis", () => {
     await addDiagnosis(page, "severe");
 
     // The encounter overview's Diagnoses panel lists each diagnosis as a card
-    // (the column-header table only renders in wide panels). The innermost div
-    // holding both the name and its details is that diagnosis' card.
+    // (the column-header table only renders in wide panels). The innermost
+    // visible div holding both the name and its details is that diagnosis'
+    // card; the hidden table layout comes later in the DOM.
     const diagnosisCard = page
       .getByRole("region", { name: "Diagnoses", exact: true })
       .locator("div")
       .filter({ hasText: diagnosisName })
       .filter({ hasText: "Severity" })
+      .filter({ visible: true })
       .last();
     await expect(diagnosisCard).toBeVisible();
     await expect(
