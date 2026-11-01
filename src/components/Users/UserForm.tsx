@@ -122,32 +122,16 @@ export default function UserForm({
       prefix: z.string().optional(),
       suffix: z.string().optional(),
       geo_organization: z.string().optional(),
-      communication: z
-        .array(
-          z.object({
-            language: z.object({
-              code: z
-                .string()
-                .regex(/^[a-z]{3}$/, t("profile_select_language")),
-              system: z.literal(USER_LANGUAGE_SYSTEM),
-            }),
-            preferred: z.boolean(),
-            proficiency: z.enum(CEFR_LEVELS).nullable().optional(),
+      communication: z.array(
+        z.object({
+          language: z.object({
+            code: z.string().regex(/^[a-z]{3}$/, t("profile_select_language")),
+            system: z.literal(USER_LANGUAGE_SYSTEM),
           }),
-        )
-        .superRefine((entries, context) => {
-          const languages = new Set<string>();
-          entries.forEach((entry, index) => {
-            if (languages.has(entry.language.code)) {
-              context.addIssue({
-                code: "custom",
-                message: t("profile_duplicate_language"),
-                path: [index, "language", "code"],
-              });
-            }
-            languages.add(entry.language.code);
-          });
+          preferred: z.boolean(),
+          proficiency: z.enum(CEFR_LEVELS).nullable().optional(),
         }),
+      ),
       qualification: z.array(
         z.object({
           degree: z
@@ -416,6 +400,23 @@ export default function UserForm({
   };
 
   const onSubmit = async (data: UserFormValues) => {
+    if (!isEditMode || form.formState.dirtyFields.communication) {
+      const languages = new Set<string>();
+      let hasDuplicates = false;
+      data.communication.forEach((entry, index) => {
+        if (languages.has(entry.language.code)) {
+          form.setError(
+            `communication.${index}.language.code`,
+            { type: "validate", message: t("profile_duplicate_language") },
+            { shouldFocus: !hasDuplicates },
+          );
+          hasDuplicates = true;
+        }
+        languages.add(entry.language.code);
+      });
+      if (hasDuplicates) return;
+    }
+
     if (
       (!isEditMode || form.formState.dirtyFields.qualification) &&
       data.qualification.length

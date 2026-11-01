@@ -272,6 +272,10 @@ test("saves professional details, preserves credential metadata and clears remov
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
     const refreshedPhone = `+919${faker.string.numeric(9)}`;
+    const historicalCommunication = [
+      ...persisted.communication,
+      persisted.communication[0],
+    ];
     const externalUpdate = await request.put(url, {
       headers,
       data: {
@@ -279,6 +283,7 @@ test("saves professional details, preserves credential metadata and clears remov
         last_name: "Refreshed Test",
         phone_number: refreshedPhone,
         gender: "female",
+        communication: historicalCommunication,
       },
     });
     expect(externalUpdate.ok(), await externalUpdate.text()).toBe(true);
@@ -289,7 +294,10 @@ test("saves professional details, preserves credential metadata and clears remov
     await dialog
       .getByRole("textbox", { name: /^First Name/ })
       .fill("Updated Profile");
-    await save();
+    await dialog
+      .getByRole("button", { name: "Update User", exact: true })
+      .click();
+    await expect(dialog).not.toBeVisible();
     const afterNameEdit = await readUser();
     expect(afterNameEdit).toMatchObject({
       first_name: "Updated Profile",
@@ -297,11 +305,14 @@ test("saves professional details, preserves credential metadata and clears remov
       phone_number: refreshedPhone,
       gender: "female",
     });
-    expect(afterNameEdit.communication).toEqual(persisted.communication);
+    expect(afterNameEdit.communication).toEqual(historicalCommunication);
     expect(afterNameEdit.qualification).toEqual(persisted.qualification);
     await page.unroute("**/api/v1/users/degrees/");
 
     await page.getByRole("button", { name: "Edit User", exact: true }).click();
+    await dialog
+      .getByRole("button", { name: "Remove language 3", exact: true })
+      .click();
     await dialog
       .getByRole("button", { name: "Remove language 2", exact: true })
       .click();
@@ -320,6 +331,9 @@ test("saves professional details, preserves credential metadata and clears remov
     await expect(
       dialog.getByRole("group", { name: "Language 2", exact: true }),
     ).toBeVisible();
+    await dialog
+      .getByRole("button", { name: "Remove language 3", exact: true })
+      .click();
     await dialog
       .getByRole("button", { name: "Remove language 2", exact: true })
       .click();
