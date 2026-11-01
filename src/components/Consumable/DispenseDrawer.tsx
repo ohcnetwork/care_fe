@@ -526,6 +526,7 @@ export default function DispenseDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
         aria-describedby={undefined}
+        data-base-ui-swipe-ignore={hasUndispensedItems ? "" : undefined}
         className="bg-gray-50 p-0 data-[swipe-axis=y]:h-[calc(90dvh+var(--drawer-keyboard-inset,0px))]"
       >
         <div className="shrink-0 border-b border-gray-200 bg-gray-50">

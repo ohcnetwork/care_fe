@@ -283,7 +283,8 @@ export function MultiFilterStyleTagSelector({
       variant="outline"
       className={cn(
         "h-10 w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none! px-2.5",
-        selected.length > 0 && "border-blue-300 bg-blue-50 h-auto",
+        selected.length > 0 &&
+          "border-blue-300 bg-blue-50 h-auto min-h-12 md:min-h-10",
         className,
       )}
       disabled={disabled || isTagMutationInProgress}

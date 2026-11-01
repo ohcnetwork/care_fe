@@ -442,7 +442,7 @@ export function ResourceCategoryPicker({
           height="fixed"
           className="px-0 pt-2 rounded-t-lg overflow-clip"
         >
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto">
+          <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-[env(safe-area-inset-bottom)]">
             {content}
           </div>
         </DrawerContent>

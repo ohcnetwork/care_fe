@@ -469,6 +469,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         placeholder={t(`search_${translationBaseKey}`)}
         value={searchQuery}
         onValueChange={setSearchQuery}
+        autoFocus={!isMobile}
       />
     </div>
   );
