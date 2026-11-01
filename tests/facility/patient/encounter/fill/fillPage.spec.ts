@@ -106,16 +106,22 @@ test.describe("Fill page shell", () => {
       page.getByRole("button", { name: "Close", exact: true }),
     ).toBeInViewport();
 
-    // Close returns to the encounter updates tab.
+    // Close returns to the encounter updates tab, which is fullscreen too.
     await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.waitForURL(/\/updates$/);
+    await expect(sidebar).toHaveCount(0);
+    await expect(workspaceHeader).toHaveCount(0);
     await expect(sidebarState).toHaveAttribute(
       "data-app-sidebar-pinned",
       "true",
     );
-    await expect(sidebar).toBeVisible();
 
-    await test.step("Return from fullscreen forms with the user's collapsed or expanded sidebar unchanged", async () => {
+    await test.step("Return from fullscreen pages with the user's collapsed or expanded sidebar unchanged", async () => {
+      const back = page.getByRole("button", { name: "Back", exact: true });
+      // The encounter was opened directly, so Back lands on the patient.
+      await back.click();
+      await expect(workspaceHeader).toBeVisible();
+      await expect(sidebar).toBeVisible();
       for (const pinned of [false, true]) {
         await sidebarToggle.click();
         await page.mouse.move(1100, 700);
@@ -123,6 +129,9 @@ test.describe("Fill page shell", () => {
           "data-app-sidebar-pinned",
           String(pinned),
         );
+        await page.goBack();
+        await page.waitForURL(/\/updates$/);
+        await expect(sidebar).toHaveCount(0);
         await page
           .getByRole("link", { name: "Edit encounter", exact: true })
           .click();
@@ -138,10 +147,13 @@ test.describe("Fill page shell", () => {
         );
         await page.getByRole("button", { name: "Close", exact: true }).click();
         await page.waitForURL(/\/updates$/);
+        await expect(sidebar).toHaveCount(0);
         await expect(sidebarState).toHaveAttribute(
           "data-app-sidebar-pinned",
           String(pinned),
         );
+        await back.click();
+        await expect(workspaceHeader).toBeVisible();
         if (pinned) await expect(sidebar).toBeVisible();
         else await expect(sidebar).not.toBeVisible();
       }

@@ -58,6 +58,7 @@ export const EncounterOverviewTab = () => {
                 <EncounterWidget type="allergies" />
                 <EncounterWidget type="symptoms" />
                 <EncounterWidget type="diagnosis" />
+                <EncounterWidget type="procedures" />
                 <EncounterWidget type="vitals" />
                 <EncounterWidget type="questionnaire_responses" showEmpty />
               </div>
