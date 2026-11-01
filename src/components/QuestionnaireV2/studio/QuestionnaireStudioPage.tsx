@@ -124,13 +124,16 @@ export function QuestionnaireStudioPage({
 
   // `?question=<id>` (the overview's per-question Edit) opens on that
   // question. The draft loads asynchronously, so apply it once the question
-  // exists, then never again so later selections aren't overridden.
+  // exists, then never again so later selections aren't overridden. This is
+  // a page load, so the title isn't focused (no keyboard popping on phones).
   const pendingQuestionIdRef = useRef<string | null>(questionParam ?? null);
   useEffect(() => {
     const pendingId = pendingQuestionIdRef.current;
     if (!pendingId || state.questions.length === 0) return;
     pendingQuestionIdRef.current = null;
-    if (findQuestion(state.questions, pendingId)) revealQuestion(pendingId);
+    if (findQuestion(state.questions, pendingId)) {
+      revealQuestion(pendingId, { focusTitle: false });
+    }
   }, [state.questions, revealQuestion]);
 
   useNavigationPrompt(dirty, t("unsaved_changes_warning"));
@@ -294,7 +297,7 @@ export function QuestionnaireStudioPage({
               actionsHaveIssues={actionIssues.length > 0}
               actionLinkIds={actionLinkIds}
               onSelectActions={() => setInspectorTarget("actions")}
-              onSelectQuestion={revealQuestion}
+              onSelectQuestion={(questionId) => revealQuestion(questionId)}
               dispatch={studioDispatch}
             />
           </aside>

@@ -258,7 +258,10 @@ export function AppSidebar({
         // Edge hover target that previews the collapsed sidebar, like the
         // header toggle. Leaving is handled by the Sidebar's onMouseLeave.
         // Starts below the header so it never overlaps the toggle's hit area.
+        // Pointer-only (not focusable), so it stays out of the accessibility
+        // tree and the header toggle remains the one "Toggle Sidebar" control.
         <SidebarRail
+          aria-hidden="true"
           onMouseEnter={handleToggleMouseEnter}
           className="fixed top-[calc(var(--app-sidebar-offset)+--spacing(2))] left-0 right-auto! visible items-center justify-center after:hidden hover:group-data-[collapsible=offcanvas]:bg-sidebar-accent group-data-[state=expanded]:hidden"
         >

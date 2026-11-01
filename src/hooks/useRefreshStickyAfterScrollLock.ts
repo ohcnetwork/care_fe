@@ -9,6 +9,9 @@ import { useEffect } from "react";
  */
 export function useRefreshStickyAfterScrollLock() {
   useEffect(() => {
+    // Only iOS WebKit (iPadOS included) has the stale sticky offset — the same
+    // check the drawer overlay uses.
+    if (!CSS.supports("-webkit-touch-callout", "none")) return;
     const { body } = document;
     const isLocked = () => body.style.overflow === "hidden";
     let wasLocked = isLocked();

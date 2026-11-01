@@ -499,7 +499,9 @@ test.describe("Shared workspace navigation", () => {
         await picker.click();
         const dialog = page.getByRole("dialog");
         await expect(dialog).toBeVisible();
-        await expect(dialog.getByRole("heading")).toContainText(fixture.name);
+        await expect(
+          dialog.getByRole("group", { name: "Current Location" }),
+        ).toContainText(fixture.name);
         await dialog.hover();
         const searchResponse = page.waitForResponse((result) => {
           const url = new URL(result.url());

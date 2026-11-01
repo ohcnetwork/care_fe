@@ -239,7 +239,11 @@ export function LocationSelectorDialog({
     const locationList = buildLocationPath(location);
 
     return (
-      <div className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap">
+      <div
+        role="group"
+        aria-label={t("current_location")}
+        className="flex flex-row items-center gap-1 text-sm font-normal flex-wrap"
+      >
         <span className="text-gray-500">{t("current_location")}:</span>
         <div className="flex flex-row gap-1 items-center p-2 rounded-md bg-gray-100 flex-wrap overflow-hidden">
           {locationList.map((loc, index) => (
