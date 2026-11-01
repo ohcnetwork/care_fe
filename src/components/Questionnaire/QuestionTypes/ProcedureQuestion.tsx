@@ -137,7 +137,7 @@ function StatusSelect({
   const { t } = useTranslation();
   return (
     <Select value={status} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger className="h-8 md:h-9" aria-label={t("status")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -172,7 +172,7 @@ function OutcomeSelect({
       }
       disabled={disabled}
     >
-      <SelectTrigger className="h-8 md:h-9">
+      <SelectTrigger className="h-8 md:h-9" aria-label={t("outcome")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -293,6 +293,7 @@ function ProcedureDetailsFields({
         <Input
           type="text"
           placeholder={t("approximate_date_placeholder")}
+          aria-label={t("approximate_date")}
           value={procedure.occurrence.occurrence_string ?? ""}
           onChange={(e) =>
             onUpdate({
@@ -351,6 +352,7 @@ function ProcedureDetailsFields({
         <Input
           type="text"
           placeholder={t("additional_notes")}
+          aria-label={t("note")}
           value={procedure.note || ""}
           onChange={(e) => onUpdate({ note: e.target.value })}
           disabled={disabled}
@@ -541,7 +543,7 @@ const ProcedureRow = React.memo(function ProcedureRow({
             onOpenChange={setIsOpen}
             key={procedure.id || `procedure-${procedure.code.code}-${index}`}
           >
-            <CollapsibleTrigger asChild>
+            <CollapsibleTrigger asChild nativeButton={false}>
               <CardHeader
                 className={cn(
                   "p-2 rounded-lg shadow-none bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors",
