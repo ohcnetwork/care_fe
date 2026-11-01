@@ -1,10 +1,16 @@
 import { Redirect, useRoutes } from "raviger";
 
+import { SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
+import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider";
+import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
+
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
+import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import DiagnosticReportDetail from "@/pages/Patient/DiagnosticReportDetail";
@@ -112,6 +118,8 @@ export default function PatientRouter() {
 
   const appointmentPages = useRoutes(AppointmentRoutes);
 
+  const sidebarOpen = useSidebarState();
+
   if (!pages) {
     if (appointmentPages) {
       return (
@@ -125,13 +133,23 @@ export default function PatientRouter() {
     return <PublicRouter />;
   }
 
-  // Each patient page owns its own chrome via PatientAppShell.
   return (
     <PatientUserProvider>
-      <BrowserWarning />
-      <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-        {pages}
-      </ErrorBoundary>
+      <AppSidebarProvider defaultOpen={sidebarOpen}>
+        <AppSidebar sidebarFor={SidebarFor.PATIENT} />
+        <SidebarInset
+          id="pages"
+          className="min-h-svh min-w-0 focus:outline-hidden md:min-h-[calc(100svh-1rem)]"
+        >
+          <BrowserWarning />
+          <WorkspaceHeader patient />
+          <div className="min-w-0 p-4" data-cui-page>
+            <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+              {pages}
+            </ErrorBoundary>
+          </div>
+        </SidebarInset>
+      </AppSidebarProvider>
     </PatientUserProvider>
   );
 }

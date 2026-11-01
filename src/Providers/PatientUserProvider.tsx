@@ -77,7 +77,7 @@ export default function PatientUserProvider({ children }: Props) {
   // the public landing page.
   useEffect(() => {
     if (!tokenData) {
-      navigate("/patient/login", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [tokenData]);
 

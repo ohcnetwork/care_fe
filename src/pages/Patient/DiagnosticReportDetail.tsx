@@ -48,7 +48,6 @@ export default function DiagnosticReportDetail({ id }: { id: string }) {
     <PatientAppShell
       title={report ? reportTitle(report, t) : t("diagnostic_report")}
       backTo="/patient/records?tab=reports"
-      hideTabs
     >
       <div className="flex flex-col gap-3 p-4">
         {isLoading || !report ? (

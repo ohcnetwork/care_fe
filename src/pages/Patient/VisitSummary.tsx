@@ -88,7 +88,6 @@ export default function VisitSummary({
     <PatientAppShell
       title={t("patient_visits__summary")}
       backTo="/patient/visits"
-      hideTabs
     >
       <div className="flex flex-1 flex-col gap-3 p-4">
         {isLoading ? (

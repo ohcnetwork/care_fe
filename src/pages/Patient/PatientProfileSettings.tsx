@@ -42,7 +42,7 @@ export default function PatientProfileSettings() {
     .join(" · ");
   const handleSignOut = async () => {
     await signOut();
-    navigate("/patient/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

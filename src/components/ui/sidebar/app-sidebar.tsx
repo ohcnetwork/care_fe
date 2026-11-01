@@ -22,13 +22,13 @@ import { LocationSwitcher } from "@/components/ui/sidebar/facility/location/loca
 import { ServiceNav } from "@/components/ui/sidebar/facility/service/service-nav";
 import { FacilitySettingsNav } from "@/components/ui/sidebar/facility/settings/facility-settings-nav";
 import { FacilitySettingsSidebarHeader } from "@/components/ui/sidebar/facility/settings/facility-settings-sidebar-header";
-import { FacilityNavUser } from "@/components/ui/sidebar/nav-user";
-import { OrgNav } from "@/components/ui/sidebar/org-nav";
-import { OrganizationSwitcher } from "@/components/ui/sidebar/organization-switcher";
 import {
-  ResponsibilityNav,
-  ResponsibilitySwitcher,
-} from "@/components/ui/sidebar/responsibility-switcher";
+  FacilityNavUser,
+  PatientNavUser,
+} from "@/components/ui/sidebar/nav-user";
+import { OrgNav } from "@/components/ui/sidebar/org-nav";
+import { PatientNav } from "@/components/ui/sidebar/patient-nav";
+import { ResponsibilityNav } from "@/components/ui/sidebar/responsibility-switcher";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 import { ServiceSwitcher } from "./facility/service/service-switcher";
@@ -50,6 +50,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export enum SidebarFor {
   FACILITY = "facility",
+  PATIENT = "patient",
   ADMIN = "admin",
 }
 
@@ -93,6 +94,7 @@ export function AppSidebar({
     !locationId &&
     sidebarFor === SidebarFor.FACILITY;
 
+  const patientSidebar = sidebarFor === SidebarFor.PATIENT;
   const adminSidebar = sidebarFor === SidebarFor.ADMIN;
 
   const { isMobile, setOpenMobile } = useSidebar();
@@ -230,6 +232,7 @@ export function AppSidebar({
         {selectedOrganization && !responsibilityId && (
           <OrgNav organizations={user?.organizations || []} />
         )}
+        {patientSidebar && <PatientNav />}
         {adminSidebar && <AdminNav />}
         {(facilitySidebar ||
           facilityLocationSidebar ||
@@ -239,13 +242,17 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="border-t">
-        <FacilityNavUser
-          selectedFacilityId={
-            facilitySidebar || facilitySettingsSidebar
-              ? selectedFacility?.id
-              : undefined
-          }
-        />
+        {patientSidebar ? (
+          <PatientNavUser />
+        ) : (
+          <FacilityNavUser
+            selectedFacilityId={
+              facilitySidebar || facilitySettingsSidebar
+                ? selectedFacility?.id
+                : undefined
+            }
+          />
+        )}
       </SidebarFooter>
       {!isMobile && (
         // Edge hover target that previews the collapsed sidebar, like the

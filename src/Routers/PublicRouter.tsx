@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Redirect, usePath, useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 
 import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
@@ -29,25 +29,19 @@ export const routes = {
     ) : (
       <FacilityDetailsPage id={id} />
     ),
-  "/patient/login": () =>
-    careConfig.disablePatientLogin ? (
-      <Redirect to="/login" />
-    ) : (
-      <PatientLogin />
-    ),
   "/facility/:facilityId/appointments/:staffId/otp/:page": ({
     facilityId,
     staffId,
+    page,
   }: {
     facilityId: string;
     staffId: string;
+    page: string;
   }) =>
     careConfig.disablePatientLogin ? (
       <Redirect to="/login" />
     ) : (
-      <PatientLogin
-        redirectTo={`/facility/${facilityId}/appointments/${staffId}/book-appointment`}
-      />
+      <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />
     ),
   "/login": () => <Login />,
   "/2fa": () => <Authenticate />,
@@ -62,16 +56,11 @@ export const routes = {
 
 export default function PublicRouter() {
   const routeResult = useRoutes(routes);
-  const path = usePath();
-
-  const isPatientPath =
-    !!path && path.startsWith("/patient") && path !== "/patient/login";
 
   return (
     <>
       <BrowserWarning />
-      {routeResult ||
-        (isPatientPath ? <Redirect to="/patient/login" /> : <Login />)}
+      {routeResult || <Login />}
     </>
   );
 }

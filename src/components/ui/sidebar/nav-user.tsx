@@ -25,6 +25,8 @@ import { SidebarUserAvatar } from "@/components/ui/sidebar/sidebar-user-avatar";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 import { useCareApps } from "@/hooks/useCareApps";
+import { usePatientSignOut } from "@/hooks/usePatientSignOut";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import { formatName } from "@/Utils/utils";
 
@@ -132,6 +134,83 @@ export function FacilityNavUser({
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={signOut}>
+              <LogOut />
+              {t("logout")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
+
+export function PatientNavUser() {
+  const { t } = useTranslation();
+  const { isMobile, open } = useSidebar();
+  const { handleMenuOpenChange } = useAppSidebar();
+  const signOut = usePatientSignOut();
+  const patientUserContext = usePatientContext();
+
+  const patient = patientUserContext?.selectedPatient;
+  const phoneNumber = patientUserContext?.tokenData.phoneNumber;
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu onOpenChange={handleMenuOpenChange}>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="bg-strong-background/60 shadow-sm data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+              tooltip={patient?.name || phoneNumber}
+              aria-label={patient?.name || phoneNumber}
+            >
+              {(open || isMobile) && (
+                <>
+                  <SidebarUserAvatar name={patient?.name || phoneNumber} />
+                  <div className="grid min-w-0 flex-1 gap-0.5 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
+                      {patient?.name || phoneNumber}
+                    </span>
+                    {patient && (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {phoneNumber}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4 opacity-60" />
+                </>
+              )}
+              {!open && !isMobile && (
+                <div className="flex flex-row items-center">
+                  <SidebarUserAvatar name={patient?.name || phoneNumber} />
+                </div>
+              )}
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-(--anchor-width) min-w-56 rounded-lg"
+            side={isMobile ? "top" : "right"}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <SidebarUserAvatar name={patient?.name || phoneNumber} />
+                <div className="grid min-w-0 flex-1 gap-0.5 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">
+                    {patient?.name || phoneNumber}
+                  </span>
+                  {patient && (
+                    <span className="truncate text-xs text-muted-foreground">
+                      {phoneNumber}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}>
               <LogOut />
