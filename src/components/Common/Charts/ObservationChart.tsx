@@ -32,14 +32,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { Code } from "@/types/base/code/code";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
 
 import { Button } from "@/components/ui/button";
 import { ObservationStatus } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationDetailSheet } from "./ObservationDetailSheet";
+import { codeKey } from "./observationDetailUtils";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
   codes: Code[];
@@ -116,7 +117,7 @@ export const ObservationVisualizer = ({
       "observations",
       patientId,
       encounterId,
-      allCodes.map((c) => c.code).join(","),
+      allCodes.map(codeKey).join(","),
     ],
 
     queryFn: query(observationApi.analyse, {

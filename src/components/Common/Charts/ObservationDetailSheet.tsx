@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -115,6 +115,16 @@ export function ObservationDetailSheet({
 
   const totalCount = historyData?.pages?.[0]?.count ?? 0;
 
+  // The list filter matches code values across systems, so loaded pages can
+  // hold no readings for the requested systems while later pages still might.
+  const awaitingMatches = codeList.length === 0 && !!hasNextPage && !isError;
+
+  useEffect(() => {
+    if (awaitingMatches && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [awaitingMatches, isFetchingNextPage, fetchNextPage]);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -157,7 +167,7 @@ export function ObservationDetailSheet({
           </div>
         )}
 
-        {isHistoryLoading ? (
+        {isHistoryLoading || awaitingMatches ? (
           <div className="flex flex-col gap-4 overflow-hidden p-4 flex-1 min-h-0">
             <TableSkeleton count={3} />
           </div>
