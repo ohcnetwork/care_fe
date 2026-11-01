@@ -116,9 +116,7 @@ test("fixed choice chips and dropdowns retain the selected option coding", async
   await questionBlock(page, "single_dropdown").getByRole("combobox").click();
   await page.getByRole("option", { name: "Option 1", exact: true }).click();
   await questionBlock(page, "multiple_dropdown").getByRole("combobox").click();
-  await page
-    .getByRole("option", { name: "Select Option 1", exact: true })
-    .click();
+  await page.getByRole("option", { name: "Option 1", exact: true }).click();
   await page.getByRole("button", { name: "Done", exact: true }).click();
 
   await expect

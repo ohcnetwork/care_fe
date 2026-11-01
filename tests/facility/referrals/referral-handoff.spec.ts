@@ -76,7 +76,7 @@ async function signInDoctor(
     (response) =>
       new URL(response.url()).pathname === "/api/v1/users/getcurrentuser/",
   );
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
   const login = await loginResponse;
   expect(login.ok()).toBeTruthy();
   const tokens = (await login.json()) as Login;
