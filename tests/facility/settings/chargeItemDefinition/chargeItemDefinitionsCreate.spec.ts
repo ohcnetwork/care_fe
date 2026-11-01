@@ -158,7 +158,9 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add Discount$/ })
       .first()
       .click();
-    await page.getByRole("checkbox").first().click();
+    // Pick the first discount in the opened picker (not a form checkbox
+    // behind its modal backdrop).
+    await page.getByRole("dialog").getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     const switchElement = page.getByRole("switch", {
       name: "Use facility global value",
