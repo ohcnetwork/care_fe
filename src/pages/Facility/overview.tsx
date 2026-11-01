@@ -58,7 +58,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
     useUserPreferences();
-  const [defaultEncounterClass] = useDefaultEncounterClass();
+  const { defaultClass: defaultEncounterClass } = useDefaultEncounterClass();
 
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],

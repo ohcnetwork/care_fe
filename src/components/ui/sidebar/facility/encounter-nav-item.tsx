@@ -39,7 +39,8 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
   const path = usePath();
   const { isMobile, setOpenMobile } = useSidebar();
   const { handleMenuOpenChange } = useAppSidebar();
-  const [defaultClass, setDefaultClass] = useDefaultEncounterClass();
+  const { defaultClass, setDefaultClass, isSaving } =
+    useDefaultEncounterClass();
   const [settingDefault, setSettingDefault] = useState(false);
 
   const listUrl = (encounterClass: EncounterListClass) =>
@@ -114,6 +115,7 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
                     <DropdownMenuRadioItem
                       key={encounterClass}
                       value={encounterClass}
+                      disabled={isSaving}
                     >
                       {listName(encounterClass)}
                     </DropdownMenuRadioItem>

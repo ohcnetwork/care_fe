@@ -158,9 +158,16 @@ function useUserPreferences() {
     mutationFn: mutate(userApi.setPreferences, {
       pathParams: { username: user.username },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-    },
+    // Stay pending until the refreshed user arrives, so callers can wait
+    // for one save to land before starting the next.
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] }),
+    // Drop the optimistic local change when the save fails.
+    onError: () =>
+      dispatch({
+        type: ActionType.RESET_PREFERENCES,
+        payload: user.preferences ?? {},
+      }),
   });
 
   // Sync reducer state when server state changes (after query invalidation)

@@ -266,6 +266,30 @@ test.describe("Shared workspace navigation", () => {
         );
         await expect(encounterLink).not.toHaveAttribute("aria-current");
       });
+
+      await test.step("a failed save keeps the saved default", async () => {
+        await page.route("**/api/v1/users/set_preferences/", (route) =>
+          route.fulfill({ status: 500, json: {} }),
+        );
+        await encounterTypes.click();
+        await menu
+          .getByRole("menuitem", { name: "Set Default", exact: true })
+          .click();
+        await menu
+          .getByRole("menuitemradio", { name: "Virtual", exact: true })
+          .click();
+        await expect(page).toHaveURL(
+          (url) => url.pathname === `${facilityPath}/encounters/patients/vr`,
+        );
+        // Navigate in-app so the default comes from client state, not a reload.
+        await navigation
+          .getByRole("link", { name: "Overview", exact: true })
+          .click();
+        await expect(
+          navigation.getByRole("link", { name: "Emergency", exact: true }),
+        ).toHaveAttribute("href", `${facilityPath}/encounters/patients/emer`);
+        await page.unroute("**/api/v1/users/set_preferences/");
+      });
     } finally {
       await clearSavedDefault();
     }
