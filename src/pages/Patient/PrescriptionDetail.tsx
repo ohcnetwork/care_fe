@@ -182,7 +182,6 @@ export default function PrescriptionDetail({ id }: { id: string }) {
     <PatientAppShell
       title={t("prescription")}
       backTo="/patient/records?tab=prescriptions"
-      hideTabs
     >
       <div className="flex flex-col gap-3 p-4">
         {!prescription ? (

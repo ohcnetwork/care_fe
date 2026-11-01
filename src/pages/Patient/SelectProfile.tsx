@@ -10,8 +10,13 @@ import { PatientProfileCard } from "@/components/Patient/PatientProfileCard";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import PatientAuthLayout from "@/pages/PublicAppointments/auth/PatientAuthLayout";
 import { PublicPatientRead } from "@/types/emr/patient/patient";
+
+function ProfileContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col">{children}</div>
+  );
+}
 
 export default function SelectProfile() {
   const { t } = useTranslation();
@@ -43,7 +48,7 @@ export default function SelectProfile() {
 
   if (isLoadingPatients || onlyPatient) {
     return (
-      <PatientAuthLayout className="px-6 pt-9">
+      <ProfileContainer>
         <Skeleton className="h-8 w-48" />
         <Skeleton className="mt-3 h-5 w-full" />
         <div className="mt-6 flex flex-col gap-2.5">
@@ -51,15 +56,15 @@ export default function SelectProfile() {
             <Skeleton key={index} className="h-19 w-full rounded-2xl" />
           ))}
         </div>
-      </PatientAuthLayout>
+      </ProfileContainer>
     );
   }
 
   // Nothing linked to this number yet — registering is the only way forward.
   if (!patients?.length) {
     return (
-      <PatientAuthLayout>
-        <div className="flex flex-col h-2/3 w-full items-center justify-center text-center px-8">
+      <ProfileContainer>
+        <div className="flex w-full flex-col items-center justify-center px-8 py-16 text-center">
           <h1 className="text-3xl font-semibold leading-tight tracking-tight text-gray-900">
             {t("patient_select__empty_heading")}
           </h1>
@@ -72,12 +77,12 @@ export default function SelectProfile() {
             </Link>
           </Button>
         </div>
-      </PatientAuthLayout>
+      </ProfileContainer>
     );
   }
 
   return (
-    <PatientAuthLayout>
+    <ProfileContainer>
       <h1 className="text-3xl font-normal leading-tight tracking-tight text-gray-900">
         {t("patient_select__heading")}
       </h1>
@@ -104,7 +109,7 @@ export default function SelectProfile() {
         </Link>
       </div>
 
-      <div className="sticky bottom-0 -mx-6 bg-white px-6 pb-4 pt-5">
+      <div className="sticky bottom-0 bg-background pb-4 pt-5">
         <Button
           size="lg"
           className="h-12 w-full text-base"
@@ -116,6 +121,6 @@ export default function SelectProfile() {
           })}
         </Button>
       </div>
-    </PatientAuthLayout>
+    </ProfileContainer>
   );
 }
