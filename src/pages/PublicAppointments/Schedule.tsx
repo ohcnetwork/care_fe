@@ -258,11 +258,6 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                     <p className="text-sm text-gray-500 truncate">
                       {userData.user_type}
                     </p>
-
-                    {/* <p className="text-xs mt-4">Education: </p>
-                    <p className="text-sm text-gray-500 truncate">
-                      {userData.qualification}
-                    </p> */}
                   </div>
                 </div>
 

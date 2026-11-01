@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+  Building2,
+  CalendarDays,
+  LucideIcon,
+  Palette,
+  ShieldCheck,
+  SlidersHorizontal,
+  UserRound,
+} from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useLayoutEffect, useRef } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,15 +21,19 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import UserAvailabilityTab from "@/components/Users/UserAvailabilityTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserDepartmentsTab from "@/components/Users/UserDepartmentsTab";
+import { UserProfileEditSection } from "@/components/Users/UserForm";
+import UserPreferencesTab from "@/components/Users/UserPreferencesTab";
+import UserSecurityTab from "@/components/Users/UserSecurityTab";
 import UserSummaryTab from "@/components/Users/UserSummary";
 import UserThemeTab from "@/components/Users/UserThemeTab";
+import EditUserSheet from "@/pages/Organization/components/EditUserSheet";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName, goBack, keysOf } from "@/Utils/utils";
+import { formatName, keysOf } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
 import userApi from "@/types/user/userApi";
@@ -33,59 +46,7 @@ export interface UserHomeProps {
 export interface TabChildProp {
   body: (childProps: userChildProps) => React.ReactNode | undefined;
   hidden?: boolean;
-}
-
-function ProfileTabsList({
-  activeTab,
-  children,
-}: {
-  activeTab: string;
-  children: ReactNode;
-}) {
-  const { t } = useTranslation();
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const viewport = viewportRef.current;
-    const list = listRef.current;
-    if (!viewport || !list) return;
-
-    const revealActiveTab = () => {
-      const active = list.querySelector<HTMLElement>(
-        '[role="tab"][aria-selected="true"]',
-      );
-      if (!active) return;
-      const viewportBounds = viewport.getBoundingClientRect();
-      const tabBounds = active.getBoundingClientRect();
-      const offset =
-        tabBounds.left < viewportBounds.left
-          ? tabBounds.left - viewportBounds.left
-          : Math.max(0, tabBounds.right - viewportBounds.right);
-      // Scroll only this strip; scrollIntoView can also move the page vertically.
-      viewport.scrollLeft += offset;
-    };
-
-    revealActiveTab();
-    const observer = new ResizeObserver(revealActiveTab);
-    observer.observe(viewport);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [activeTab]);
-
-  return (
-    <div ref={viewportRef} className="min-w-0 max-w-full overflow-x-auto pb-1">
-      <TabsList
-        ref={listRef}
-        variant="line"
-        id="usermanagement_tab_nav"
-        aria-label={t("manage_user")}
-        className="w-max min-w-full border-b border-border"
-      >
-        {children}
-      </TabsList>
-    </div>
-  );
+  icon: LucideIcon;
 }
 
 export default function UserHome(props: UserHomeProps) {
@@ -93,6 +54,12 @@ export default function UserHome(props: UserHomeProps) {
   let { username, facilityId } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const [editSection, setEditSection] = useState<UserProfileEditSection>();
+  const openEditUser = (section?: UserProfileEditSection) => {
+    setEditSection(section);
+    setShowEditUserSheet(true);
+  };
   if (!username) {
     username = authUser.username;
   }
@@ -111,7 +78,7 @@ export default function UserHome(props: UserHomeProps) {
     }),
   });
 
-  const { data: facilityData } = useQuery({
+  const { data: facilityData, isLoading: isLoadingFacility } = useQuery({
     queryKey: ["getFacilityDetails", props.facilityId],
     queryFn: query(facilityApi.get, {
       pathParams: { facilityId: facilityId ?? "" },
@@ -125,10 +92,10 @@ export default function UserHome(props: UserHomeProps) {
   );
 
   if (isError) {
-    goBack("/");
+    return <ErrorPage />;
   }
 
-  if (isLoading || !userData) {
+  if (isLoading || !userData || (facilityId && isLoadingFacility)) {
     return <Loading />;
   }
 
@@ -137,18 +104,34 @@ export default function UserHome(props: UserHomeProps) {
     PROFILE: {
       body: UserSummaryTab,
       hidden: false,
+      icon: UserRound,
     },
     DEPARTMENTS: {
       body: UserDepartmentsTab,
       hidden: !props.facilityId,
+      icon: Building2,
     },
     AVAILABILITY: {
       body: UserAvailabilityTab,
       hidden: !props.facilityId || !canViewSchedule,
+      icon: CalendarDays,
     },
     THEME: {
       body: UserThemeTab,
       hidden: !isOwnAccount,
+      icon: Palette,
+    },
+    SECURITY: {
+      body: UserSecurityTab,
+      hidden:
+        !authUser.is_superuser &&
+        (!isOwnAccount || userData.is_service_account),
+      icon: ShieldCheck,
+    },
+    PREFERENCES: {
+      body: UserPreferencesTab,
+      hidden: !isOwnAccount,
+      icon: SlidersHorizontal,
     },
   } satisfies Record<string, TabChildProp>;
 
@@ -157,7 +140,7 @@ export default function UserHome(props: UserHomeProps) {
     Object.keys(TABS).includes(tab as keyof typeof TABS);
   const currentTab = isValidTab(normalizedTab) ? normalizedTab : undefined;
 
-  if (!currentTab || (currentTab === "THEME" && !isOwnAccount)) {
+  if (!currentTab || TABS[currentTab].hidden) {
     return <ErrorPage />;
   }
 
@@ -170,25 +153,64 @@ export default function UserHome(props: UserHomeProps) {
     <Page
       title={formatName(userData) || userData.username || t("manage_user")}
       hideTitleOnPage
+      className="mx-auto w-full max-w-6xl px-4 pb-10"
     >
-      <UserBanner userData={userData} />
-      <Tabs value={currentTab} activationMode="manual" className="mt-4 w-full">
-        <ProfileTabsList activeTab={currentTab}>
-          {keysOf(TABS)
-            .filter((key) => !TABS[key].hidden)
-            .map((key) => (
-              <TabsTrigger key={key} value={key} id={key.toLowerCase()} asChild>
-                <Link basePath="/" href={`${userUrl}/${key.toLowerCase()}`}>
-                  {t(`USERMANAGEMENT_TAB__${key}`)}
-                </Link>
-              </TabsTrigger>
-            ))}
-        </ProfileTabsList>
+      {(authUser.is_superuser || isOwnAccount) && (
+        <EditUserSheet
+          existingUsername={username}
+          open={showEditUserSheet}
+          setOpen={setShowEditUserSheet}
+          initialSection={editSection}
+        />
+      )}
+      <Tabs value={currentTab} activationMode="manual" className="w-full gap-0">
+        <div className="border-b border-border pb-4">
+          <UserBanner
+            userData={userData}
+            onEdit={
+              authUser.is_superuser || isOwnAccount
+                ? () => openEditUser()
+                : undefined
+            }
+          />
+          <TabsList
+            id="usermanagement_tab_nav"
+            aria-label={t("manage_user")}
+            className="grid h-auto w-full grid-cols-2 gap-1 sm:flex sm:w-fit sm:flex-wrap sm:justify-start"
+          >
+            {keysOf(TABS)
+              .filter((key) => !TABS[key].hidden)
+              .map((key) => {
+                const Icon = TABS[key].icon;
+                return (
+                  <TabsTrigger
+                    key={key}
+                    value={key}
+                    id={key.toLowerCase()}
+                    className="min-h-11 min-w-0 whitespace-normal sm:flex-none sm:px-4"
+                    asChild
+                  >
+                    <Link basePath="/" href={`${userUrl}/${key.toLowerCase()}`}>
+                      <Icon
+                        className="size-4"
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                      {t(`USERMANAGEMENT_TAB__${key}`)}
+                    </Link>
+                  </TabsTrigger>
+                );
+              })}
+          </TabsList>
+        </div>
         <TabsContent value={currentTab}>
           <SelectedTab
             userData={userData}
             username={username}
             permissions={facilityData?.permissions ?? []}
+            onEdit={
+              authUser.is_superuser || isOwnAccount ? openEditUser : undefined
+            }
           />
         </TabsContent>
       </Tabs>

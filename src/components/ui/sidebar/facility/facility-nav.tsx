@@ -1,5 +1,6 @@
 import { TFunction } from "i18next";
 import {
+  Activity,
   ArrowUpRight,
   Box,
   CalendarDays,
@@ -68,18 +69,23 @@ function generateFacilityLinks(
       visibility: permissions.canViewAppointments,
     },
     {
-      name: t("patients"),
+      name: t("search_patients"),
       url: `${baseUrl}/patients`,
       icon: <Search />,
       visibility:
         permissions.canWriteAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
+    },
+    {
+      name: t("encounters"),
+      url: `${baseUrl}/encounters/patients/all`,
+      icon: <Activity />,
+      visibility:
+        permissions.canWriteAppointment ||
+        permissions.canListEncounters ||
+        permissions.canCreateEncounter,
       children: [
-        {
-          name: t("search_patients"),
-          url: `${baseUrl}/patients`,
-        },
         {
           name: t("all_encounters"),
           url: `${baseUrl}/encounters/patients/all`,

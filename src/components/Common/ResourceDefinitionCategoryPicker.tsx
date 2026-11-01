@@ -947,12 +947,6 @@ export function ResourceDefinitionCategoryPicker<T>({
                     setOpen(true);
                   }
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setOpen(true);
-                  }
-                }}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {getDisplayValue()}

@@ -76,7 +76,7 @@ async function signInDoctor(
     (response) =>
       new URL(response.url()).pathname === "/api/v1/users/getcurrentuser/",
   );
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
   const login = await loginResponse;
   expect(login.ok()).toBeTruthy();
   const tokens = (await login.json()) as Login;
@@ -299,16 +299,42 @@ async function completeReferralHandoff(
     const clinicalFinding = `Source consultation findings ${suffix}`;
     const referralNote = `Please review the source consultation ${suffix}`;
     const discussionMessage = `Please review the shared consultation ${suffix}`;
+    // The shared source evidence is an ordinary encounter response: referral
+    // forms can only be submitted through a referral.
+    const clinicalFormTitle = `Source consultation ${suffix}`;
+    const clinicalQuestionId = faker.string.uuid();
+    const clinicalForm = await api<{ id: string }>(
+      request,
+      "/api/v1/questionnaire/",
+      {
+        auth_context: "instance",
+        slug: `source-consultation-${suffix}`,
+        title: clinicalFormTitle,
+        description: "Source consultation shared with the referral",
+        status: "active",
+        subject_type: "encounter",
+        actions: [],
+        questions: [
+          {
+            id: clinicalQuestionId,
+            link_id: "assessment",
+            text: "Consultation findings",
+            type: "string",
+            required: true,
+          },
+        ],
+      },
+    );
     const clinical = await api<{ id: string }>(
       request,
-      `/api/v1/questionnaire/${configuration.requestFormId}/submit/`,
+      `/api/v1/questionnaire/${clinicalForm.id}/submit/`,
       {
         patient: patientId,
         encounter: encounterId,
         resource_id: encounterId,
         results: [
           {
-            question_id: configuration.requestQuestionId,
+            question_id: clinicalQuestionId,
             values: [{ value: clinicalFinding }],
           },
         ],
@@ -435,7 +461,7 @@ async function completeReferralHandoff(
           .click();
         await picker
           .getByRole("button", {
-            name: `Select ${configuration.requestFormTitle}`,
+            name: `Select ${clinicalFormTitle}`,
             exact: true,
           })
           .click();
@@ -611,7 +637,7 @@ async function completeReferralHandoff(
         .getByRole("region", { name: "Referral request", exact: true })
         .getByRole("region", { name: "Shared records", exact: true });
       const clinicalPreview = recipientRecords.getByRole("region", {
-        name: configuration.requestFormTitle,
+        name: clinicalFormTitle,
         exact: true,
       });
       await expect(

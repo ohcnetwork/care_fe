@@ -12,7 +12,7 @@ setup("authenticate", async ({ page }) => {
   await page.getByLabel(/^password$/i).fill("admin");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login - adjust based on your app's behavior
   // This could be checking for a redirect, a user menu, etc.

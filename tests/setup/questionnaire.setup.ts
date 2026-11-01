@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import { ensureQuestionnaireE2EFixtures } from "tests/support/questionnaireE2EFixtures";
 import { ensureEnableWhenQuestionnaire } from "tests/support/questionnaireId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -12,4 +13,13 @@ test.use({ storageState: "tests/.auth/user.json" });
  */
 test("ensure enable-when questionnaire exists", async () => {
   await ensureEnableWhenQuestionnaire();
+});
+
+/**
+ * Seeds the slug-addressed questionnaire fixtures (`e2e-*`,
+ * `respiratory_status-v3`, `patient_feedback`) — see
+ * `tests/support/questionnaireE2EFixtures.ts`.
+ */
+test("ensure questionnaire E2E fixtures exist", async () => {
+  await ensureQuestionnaireE2EFixtures();
 });

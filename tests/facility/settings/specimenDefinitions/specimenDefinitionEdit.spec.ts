@@ -112,8 +112,12 @@ test.describe("Specimen Definitions Edit", () => {
 
     const retentionTime = faker.number.int(INT_MAX);
     await page
-      .getByRole("textbox", { name: "Enter Retention Time" })
+      .getByRole("combobox", { name: "Enter Retention Time" })
       .fill(retentionTime.toString());
+    // Pick the unit to commit the quantity and close the suggestions.
+    await page
+      .getByRole("option", { name: `${retentionTime} hours`, exact: true })
+      .click();
 
     const requirement = faker.lorem.sentence();
     await page.getByRole("textbox", { name: "Requirement" }).fill(requirement);
