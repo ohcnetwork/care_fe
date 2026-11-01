@@ -105,16 +105,39 @@ export const EncounterShow = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPrimaryEncounterLoading, isPatientLoading]);
 
-  if (
-    isPrimaryEncounterLoading ||
-    !primaryEncounter ||
-    (!facilityId && !patient)
-  ) {
-    return <Loading />;
-  }
+  // Rendered while loading too: with no app sidebar or header on this route,
+  // it is the only way out if the encounter fails to load.
+  const backButton = (
+    <Button
+      type="button"
+      variant="ghost"
+      size="xs"
+      data-shortcut-id="go-back"
+      className="min-h-11 w-fit text-gray-700 md:min-h-8"
+      onClick={() =>
+        // Sections, forms and historical encounters (with their detail
+        // pages) are all this patient's chart; leave to the page it was
+        // opened from, else the patient.
+        navigateBackFrom(
+          (pathname) => !pathname.includes(`/patient/${patientId}/encounter/`),
+          facilityId
+            ? `/facility/${facilityId}/patient/${patientId}`
+            : `/patient/${patientId}`,
+        )
+      }
+    >
+      <ArrowLeft aria-hidden="true" />
+      {t("back")}
+    </Button>
+  );
 
-  if (!patient) {
-    return <Loading />;
+  if (isPrimaryEncounterLoading || !primaryEncounter || !patient) {
+    return (
+      <div className="flex flex-col gap-2 md:px-1">
+        {backButton}
+        <Loading />
+      </div>
+    );
   }
 
   const tabs: Record<string, EncounterTab> = {
@@ -248,28 +271,7 @@ export const EncounterShow = (props: Props) => {
         </>
       )}
       <div className="@container/encounter-header flex flex-col gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          data-shortcut-id="go-back"
-          className="min-h-11 w-fit text-gray-700 md:min-h-8"
-          onClick={() =>
-            // Sections, forms and historical encounters (with their detail
-            // pages) are all this patient's chart; leave to the page it was
-            // opened from, else the patient.
-            navigateBackFrom(
-              (pathname) =>
-                !pathname.includes(`/patient/${patientId}/encounter/`),
-              facilityId
-                ? `/facility/${facilityId}/patient/${patientId}`
-                : `/patient/${patientId}`,
-            )
-          }
-        >
-          <ArrowLeft aria-hidden="true" />
-          {t("back")}
-        </Button>
+        {backButton}
         <div>
           <Card className="grid gap-2 rounded-xl px-3 py-2 shadow-none @min-[28rem]/encounter-header:grid-cols-[minmax(0,1fr)_auto] @min-[28rem]/encounter-header:items-center">
             <PatientHeader

@@ -408,6 +408,23 @@ test.describe("Encounter navigation", () => {
         });
       });
 
+      test("keeps an exit when the encounter fails to load", async ({
+        page,
+      }) => {
+        const patientPath = `/facility/${getFacilityId()}/patient/${patientId}`;
+        await page.route(
+          (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
+          (route) =>
+            route.fulfill({ status: 500, json: { detail: "Server error" } }),
+        );
+        await page.goto(
+          `${patientPath}/encounter/${primaryEncounterId}/updates`,
+        );
+        // No sidebar or header on this route, so Back is the only way out.
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+        await expect(page).toHaveURL((url) => url.pathname === patientPath);
+      });
+
       test("shows appointment actions below the patient header and clears them after navigation", async ({
         page,
       }) => {
