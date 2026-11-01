@@ -1,0 +1,196 @@
+<svg width="1200" height="200" viewBox="0 0 1200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Soft wash across the banner; quieter on the left for text, denser on the right -->
+  <g opacity="0.22" filter="url(#hb_blur_mint_left)">
+    <circle cx="140" cy="110" r="150" fill="#6EE7B7"/>
+  </g>
+  <g opacity="0.2" filter="url(#hb_blur_yellow_left)">
+    <circle cx="60" cy="-40" r="120" fill="#FEF9C3"/>
+  </g>
+  <g opacity="0.15" filter="url(#hb_blur_cyan_mid)">
+    <circle cx="520" cy="30" r="90" fill="#22D3EE"/>
+  </g>
+  <g opacity="0.22" filter="url(#hb_blur_mint_right)">
+    <circle cx="920" cy="140" r="130" fill="#6EE7B7"/>
+  </g>
+  <g opacity="0.12" filter="url(#hb_blur_yellow_right)">
+    <circle cx="1040" cy="170" r="110" fill="#FDE047"/>
+  </g>
+  <g opacity="0.28" filter="url(#hb_blur_sky_right)">
+    <circle cx="1160" cy="70" r="120" fill="#7DD3FC"/>
+  </g>
+  <g opacity="0.22" filter="url(#hb_blur_indigo_right)">
+    <circle cx="1080" cy="-10" r="80" fill="#4F46E5"/>
+  </g>
+  <g opacity="0.2" filter="url(#hb_blur_cyan_right)">
+    <circle cx="980" cy="20" r="70" fill="#22D3EE"/>
+  </g>
+
+  <!-- Plus mark kept on the right third only -->
+  <g style="mix-blend-mode:color-dodge" opacity="0.75" transform="translate(820 10) scale(0.72)">
+    <path d="M231.028 103.435V31.6493H158.973V103.435H86.9182V164.868C86.9182 170.453 91.5669 175.084 97.1726 175.084H158.836V236.517C158.836 242.102 163.485 246.733 169.091 246.733H220.5C226.105 246.733 230.754 242.102 230.754 236.517V175.084H292.418C298.023 175.084 302.672 170.453 302.672 164.868V103.435H230.754H231.028Z" stroke="white"/>
+    <path d="M302.945 -29.7838V31.6493H230.891V-29.7838C230.891 -35.5049 235.539 -40 241.145 -40H292.554C298.16 -40 302.809 -35.3687 302.809 -29.7838H302.945ZM364.746 31.7855H303.082V103.571H364.746C370.351 103.571 375 98.9397 375 93.3548V42.1379C375 36.4168 370.351 31.9217 364.746 31.9217V31.7855ZM148.718 -40H97.3092C91.7034 -40 87.0547 -35.3687 87.0547 -29.7838V31.6493H159.109V-29.7838C159.109 -35.5049 154.461 -40 148.855 -40H148.718ZM15 42.0016V93.2186C15 98.8034 19.6487 103.435 25.2545 103.435H86.918V31.6493H25.2545C19.512 31.6493 15 36.2806 15 41.8654V42.0016Z" stroke="white"/>
+  </g>
+
+  <defs>
+    <filter id="hb_blur_mint_left" x="-160" y="-190" width="600" height="600" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="55" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_yellow_left" x="-160" y="-260" width="440" height="440" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="28" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_cyan_mid" x="280" y="-210" width="480" height="480" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="40" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_mint_right" x="640" y="-140" width="560" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="50" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_yellow_right" x="780" y="-90" width="520" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="45" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_sky_right" x="890" y="-200" width="540" height="540" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="50" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_indigo_right" x="850" y="-240" width="460" height="460" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="55" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+    <filter id="hb_blur_cyan_right" x="760" y="-200" width="440" height="440" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="42" result="blur"/>
+      <feTurbulence type="fractalNoise" baseFrequency="2 2" stitchTiles="stitch" numOctaves="3" result="noise" seed="5489"/>
+      <feComponentTransfer in="noise" result="coloredNoise">
+        <feFuncR type="linear" slope="2" intercept="-0.5"/>
+        <feFuncG type="linear" slope="2" intercept="-0.5"/>
+        <feFuncB type="linear" slope="2" intercept="-0.5"/>
+        <feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+      </feComponentTransfer>
+      <feComposite operator="in" in="coloredNoise" in2="blur" result="noiseClipped"/>
+      <feComponentTransfer in="noiseClipped" result="grain">
+        <feFuncA type="table" tableValues="0 0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="grain"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>

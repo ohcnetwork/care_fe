@@ -96,7 +96,7 @@ test.describe("Pin Page Shortcut (Shift+B)", () => {
       await page.goto(`/facility/${facilityId}/overview`);
 
       await expect(
-        page.getByRole("heading", { name: "Quick Actions" }),
+        page.getByRole("heading", { name: "Quick links", exact: true }),
       ).toBeVisible();
       await expect(page.getByRole("link", { name: title })).toHaveCount(0);
     });

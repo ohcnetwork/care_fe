@@ -167,7 +167,7 @@ export function QuestionnaireListPage({
           }
         />
       ) : (
-        <div className="hidden rounded-lg border md:block">
+        <div className="hidden md:block">
           <Table className="table-fixed">
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
