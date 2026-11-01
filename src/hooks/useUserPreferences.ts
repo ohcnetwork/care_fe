@@ -162,9 +162,6 @@ function useUserPreferences() {
   // Mutation to sync with backend
   const { mutate: syncPreferences } = useMutation({
     mutationKey: SET_PREFERENCES_MUTATION_KEY,
-    // The backend rewrites the whole preferences record on each save, so
-    // overlapping saves of different preferences could drop one; run in order.
-    scope: { id: "set-preferences" },
     mutationFn: mutate(userApi.setPreferences, {
       pathParams: { username: user.username },
     }),
