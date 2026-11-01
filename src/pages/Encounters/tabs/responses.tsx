@@ -249,7 +249,7 @@ export const EncounterResponsesTab = ({
               className="p-1.5"
               onCloseAutoFocus={(e) => e.preventDefault()}
             >
-              <div className="min-h-0 flex-1 pt-3 h-full pb-[env(safe-area-inset-bottom)]">
+              <div className="flex min-h-0 flex-1 flex-col pt-3 pb-[env(safe-area-inset-bottom)]">
                 <LeftPanel
                   encounterId={encounterId}
                   patientId={patientId}

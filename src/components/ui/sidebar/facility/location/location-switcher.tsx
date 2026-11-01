@@ -9,7 +9,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -282,114 +281,108 @@ export function LocationSelectorDialog({
       title={t("select_location")}
       description={t("select_location")}
       className="md:max-w-2xl"
+      shouldFilter={false}
     >
-      <Command shouldFilter={false}>
-        {location && (
-          <div className="shrink-0 overflow-hidden px-3 py-2">
-            {getCurrentLocation()}
-          </div>
-        )}
-        {locationLevel.length > 0 && (
-          <div className="flex shrink-0 flex-row justify-between gap-1 overflow-auto bg-gray-100 p-1">
-            <div className="flex flex-row gap-1 items-center">
-              {locationLevel.map((level, index) => (
-                <div
-                  key={level.id}
-                  className="flex flex-row gap-1 items-center"
-                >
-                  {level.has_sub_locations ? (
-                    <Button
-                      variant="link"
-                      className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
-                      onClick={() => handleLocationClick(level)}
-                    >
-                      {level.name}
-                    </Button>
-                  ) : (
-                    <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
-                      {level.name}
-                    </div>
-                  )}
-                  {index < locationLevel.length - 1 && (
-                    <CareIcon icon="l-arrow-right" />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-row gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setLocationLevel([]);
-                  setSearchValue("");
-                  setCurrentPage(1);
-                }}
-                aria-label={t("clear")}
-              >
-                <X />
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  handleConfirmSelection(
-                    locationLevel[locationLevel.length - 1],
-                  )
-                }
-              >
-                <span>{t("select")}</span>
-                <ShortcutBadge actionId="submit-action" />
-              </Button>
-            </div>
-          </div>
-        )}
-        <div className="shrink-0 border-b border-gray-100 shadow-xs">
-          <CommandInput
-            className="border-0 ring-0 sm:text-sm text-base"
-            placeholder={t("search")}
-            onValueChange={(value) => {
-              setSearchValue(value);
-              setCurrentPage(1);
-            }}
-            value={searchValue}
-            autoFocus
-          />
+      {location && (
+        <div className="shrink-0 overflow-hidden px-3 py-2">
+          {getCurrentLocation()}
         </div>
-        <CommandList
-          className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))] scrollbar-gutter-auto"
-          onWheel={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {isLoading ? (
-            <div className="gap-2 flex flex-col px-2 pt-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
-          )}
-          <CommandGroup className="px-2">
-            {locations?.results.map((location) => (
-              <LocationCommandItem
-                key={location.id}
-                location={location}
-                handleSelect={handleSelect}
-                handleConfirmSelection={handleConfirmSelection}
-                isSearching={!!searchValue}
-              />
+      )}
+      {locationLevel.length > 0 && (
+        <div className="flex shrink-0 flex-row justify-between gap-1 overflow-auto bg-gray-100 p-1">
+          <div className="flex flex-row gap-1 items-center">
+            {locationLevel.map((level, index) => (
+              <div key={level.id} className="flex flex-row gap-1 items-center">
+                {level.has_sub_locations ? (
+                  <Button
+                    variant="link"
+                    className="w-full text-nowrap text-xs border bg-gray-100 border-gray-200 rounded-md p-2"
+                    onClick={() => handleLocationClick(level)}
+                  >
+                    {level.name}
+                  </Button>
+                ) : (
+                  <div className="w-full text-xs border bg-gray-100 border-gray-200 rounded-md p-2">
+                    {level.name}
+                  </div>
+                )}
+                {index < locationLevel.length - 1 && (
+                  <CareIcon icon="l-arrow-right" />
+                )}
+              </div>
             ))}
-          </CommandGroup>
-        </CommandList>
-        <div className="flex w-full shrink-0 justify-center py-2">
-          <PaginationComponent
-            cPage={currentPage}
-            defaultPerPage={resultsPerPage}
-            data={{ totalCount: locations?.count || 0 }}
-            onChange={(page: number) => setCurrentPage(page)}
-          />
+          </div>
+          <div className="flex flex-row gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setLocationLevel([]);
+                setSearchValue("");
+                setCurrentPage(1);
+              }}
+              aria-label={t("clear")}
+            >
+              <X />
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() =>
+                handleConfirmSelection(locationLevel[locationLevel.length - 1])
+              }
+            >
+              <span>{t("select")}</span>
+              <ShortcutBadge actionId="submit-action" />
+            </Button>
+          </div>
         </div>
-      </Command>
+      )}
+      <div className="shrink-0 border-b border-gray-100 shadow-xs">
+        <CommandInput
+          className="border-0 ring-0 sm:text-sm text-base"
+          placeholder={t("search")}
+          onValueChange={(value) => {
+            setSearchValue(value);
+            setCurrentPage(1);
+          }}
+          value={searchValue}
+          autoFocus
+        />
+      </div>
+      <CommandList
+        className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))] scrollbar-gutter-auto"
+        onWheel={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {isLoading ? (
+          <div className="gap-2 flex flex-col px-2 pt-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+        )}
+        <CommandGroup className="px-2">
+          {locations?.results.map((location) => (
+            <LocationCommandItem
+              key={location.id}
+              location={location}
+              handleSelect={handleSelect}
+              handleConfirmSelection={handleConfirmSelection}
+              isSearching={!!searchValue}
+            />
+          ))}
+        </CommandGroup>
+      </CommandList>
+      <div className="flex w-full shrink-0 justify-center py-2">
+        <PaginationComponent
+          cPage={currentPage}
+          defaultPerPage={resultsPerPage}
+          data={{ totalCount: locations?.count || 0 }}
+          onChange={(page: number) => setCurrentPage(page)}
+        />
+      </div>
     </CommandDialog>
   );
 }

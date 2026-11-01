@@ -584,29 +584,31 @@ export default function DispenseDrawer({
                     title={t("no_items_added_yet")}
                     description={t("add_items_to_dispense_now_no_invoice")}
                     action={
-                      <ProductKnowledgeSelect
-                        onChange={(product) => {
-                          if (!product) return;
-                          append({
-                            reference_id: crypto.randomUUID(),
-                            productKnowledge: product,
-                            quantity: "1",
-                            lots: [
-                              {
-                                selectedInventoryId: "",
-                                quantity: "1",
-                              },
-                            ],
-                          });
+                      <div className="w-full">
+                        <ProductKnowledgeSelect
+                          onChange={(product) => {
+                            if (!product) return;
+                            append({
+                              reference_id: crypto.randomUUID(),
+                              productKnowledge: product,
+                              quantity: "1",
+                              lots: [
+                                {
+                                  selectedInventoryId: "",
+                                  quantity: "1",
+                                },
+                              ],
+                            });
 
-                          setProductKnowledgeInventoriesMap((prev) => ({
-                            [product.id]: undefined,
-                            ...prev,
-                          }));
-                        }}
-                        className="text-primary-800 border-primary-900"
-                        placeholder={t("add_item")}
-                      />
+                            setProductKnowledgeInventoriesMap((prev) => ({
+                              [product.id]: undefined,
+                              ...prev,
+                            }));
+                          }}
+                          className="text-primary-800 border-primary-900"
+                          placeholder={t("add_item")}
+                        />
+                      </div>
                     }
                   />
                 ) : (

@@ -116,6 +116,17 @@ export function MultiFilterStyleTagSelector({
 
   const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
 
+  // The search is sent to the server for the lists below, so selected tags,
+  // which come from the parent, are matched here on their own and group name.
+  const searchTerm = search.trim().toLowerCase();
+  const visibleSelected = searchTerm
+    ? selected.filter((tag) =>
+        [tag.display, tag.parent?.display].some((name) =>
+          name?.toLowerCase().includes(searchTerm),
+        ),
+      )
+    : selected;
+
   // Select/deselect tag
   const handleSelect = (tag: TagConfig) => {
     // If tag has a parent, enforce single selection per group
@@ -290,57 +301,59 @@ export function MultiFilterStyleTagSelector({
                 />
               </div>
               <div className="flex flex-col flex-1 overflow-hidden">
-                {isLoadingRoot ? (
-                  <div className="py-8 text-sm text-center text-gray-500">
-                    {t("loading")}
-                  </div>
-                ) : !rootTags?.results?.length ? (
-                  <div className="py-8 text-sm text-center text-gray-500">
-                    {t("no_tags_group")}
-                  </div>
-                ) : (
-                  <div className="flex-1 px-2 overflow-y-auto">
-                    {selected.length > 0 && (
-                      <div className="pt-2 pb-2">
-                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {t("selected_tags")}
-                        </div>
-                        {selected.map((tag) => (
-                          <Label
-                            key={tag.id}
-                            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
-                          >
-                            <Checkbox
-                              checked
-                              className="size-4"
-                              onCheckedChange={() => handleSelect(tag)}
-                            />
-                            {renderTagNameWithParent(tag)}
-                          </Label>
-                        ))}
+                <div className="flex-1 px-2 overflow-y-auto">
+                  {visibleSelected.length > 0 && (
+                    <div className="pt-2 pb-2">
+                      <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {t("selected_tags")}
                       </div>
-                    )}
-                    {/* Tag Groups */}
-                    {groupTags.length > 0 && (
-                      <div className="mb-4 pt-2">
-                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {t("tag_groups")}
+                      {visibleSelected.map((tag) => (
+                        <Label
+                          key={tag.id}
+                          className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
+                        >
+                          <Checkbox
+                            checked
+                            className="size-4"
+                            onCheckedChange={() => handleSelect(tag)}
+                          />
+                          {renderTagNameWithParent(tag)}
+                        </Label>
+                      ))}
+                    </div>
+                  )}
+                  {isLoadingRoot ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
+                      {t("loading")}
+                    </div>
+                  ) : !rootTags?.results?.length ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
+                      {t("no_tags_group")}
+                    </div>
+                  ) : (
+                    <>
+                      {/* Tag Groups */}
+                      {groupTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("tag_groups")}
+                          </div>
+                          {renderMobileTagList(groupTags)}
                         </div>
-                        {renderMobileTagList(groupTags)}
-                      </div>
-                    )}
+                      )}
 
-                    {/* Other Tags */}
-                    {otherTags.length > 0 && (
-                      <div className="mb-4 pt-2">
-                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {t("other_tags")}
+                      {/* Other Tags */}
+                      {otherTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("other_tags")}
+                          </div>
+                          {renderMobileTagList(otherTags)}
                         </div>
-                        {renderMobileTagList(otherTags)}
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </DrawerContent>
           </Drawer>
@@ -431,15 +444,15 @@ export function MultiFilterStyleTagSelector({
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 mb-2"
+                  onKeyDown={(e) => e.stopPropagation()}
                 />
                 {/* Selected Tags */}
-                {selected.length > 0 && (
+                {visibleSelected.length > 0 && (
                   <>
                     <div className="px-2 py-0.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
                       {t("selected_tags")}
                     </div>
-                    {selected.map((tag) => (
+                    {visibleSelected.map((tag) => (
                       <DropdownMenuCheckboxItem
                         key={tag.id}
                         className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"

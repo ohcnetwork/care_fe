@@ -63,6 +63,7 @@ function CommandDialog({
   className,
   open,
   onOpenChange,
+  shouldFilter,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, "children" | "onOpenChange"> & {
   title?: string;
@@ -71,6 +72,8 @@ function CommandDialog({
   className?: string;
   children?: React.ReactNode;
   onOpenChange?: (open: boolean) => void;
+  /** Forwarded to the dialog's own `Command` root. */
+  shouldFilter?: boolean;
 }) {
   const { t } = useTranslation();
   const isDesktop = !useIsMobile();
@@ -94,7 +97,7 @@ function CommandDialog({
             <DialogDescription>{resolvedDescription}</DialogDescription>
           </DialogHeader>
           <CommandDialogContext.Provider value={true}>
-            <Command>{children}</Command>
+            <Command shouldFilter={shouldFilter}>{children}</Command>
           </CommandDialogContext.Provider>
         </DialogContent>
       </Dialog>
@@ -111,7 +114,7 @@ function CommandDialog({
             {resolvedDescription}
           </DrawerDescription>
         </DrawerHeader>
-        <Command>{children}</Command>
+        <Command shouldFilter={shouldFilter}>{children}</Command>
       </DrawerContent>
     </Drawer>
   );
