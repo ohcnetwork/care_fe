@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { NotepadText, SquarePen } from "lucide-react";
-import { Link, useFullPath } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { withReturnTo } from "@/Utils/returnTo";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
@@ -25,7 +26,6 @@ interface DischargeDetailsProps {
 
 export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
   const { t } = useTranslation();
-  const returnPage = useFullPath().split("/").pop() ?? "updates";
   const { selectedEncounter: encounter, canWriteSelectedEncounter } =
     useEncounter();
 
@@ -47,7 +47,9 @@ export const DischargeDetails = ({ title }: DischargeDetailsProps = {}) => {
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?${new URLSearchParams({ return_page: returnPage })}`}
+              href={withReturnTo(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`,
+              )}
               aria-label={t("edit")}
             >
               <SquarePen

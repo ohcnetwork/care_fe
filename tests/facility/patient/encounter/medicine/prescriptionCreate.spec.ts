@@ -88,15 +88,8 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Verify medication in table", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
+      // Saving returns to the tab the form was opened from
+      await page.waitForURL(/\/medicines$/);
       // Click "All Prescriptions" sidebar card to see all medicines
       await page
         .locator("[data-slot='card']")
@@ -183,15 +176,8 @@ test.describe("Create Patient Prescription", () => {
     });
 
     await test.step("Verify medication is not highlighted in table", async () => {
-      // Wait for prescriptions API to respond after clicking tab
-      await Promise.all([
-        page.getByRole("tab", { name: "Medications" }).click(),
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("/medication/prescription/") &&
-            resp.status() === 200,
-        ),
-      ]);
+      // Saving returns to the tab the form was opened from
+      await page.waitForURL(/\/medicines$/);
       // Click "All Prescriptions" sidebar card to see all medicines
       await page
         .locator("[data-slot='card']")

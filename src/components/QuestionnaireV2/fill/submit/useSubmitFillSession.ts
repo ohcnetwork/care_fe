@@ -61,6 +61,10 @@ interface UseSubmitFillSessionArgs {
    *  having never been in the batch. */
   blockedFormLabels: string[];
   onSuccess: () => void;
+  /** Leaves the page after a save, once `onSuccess` has run. Unlike
+   *  `onSuccess` it is skipped if the page has unmounted, so a save that
+   *  finishes after the user has already left doesn't pull them back. */
+  onExit: () => void;
 }
 
 /**
@@ -147,6 +151,7 @@ export function useSubmitFillSession({
   continueDraftId,
   blockedFormLabels,
   onSuccess,
+  onExit,
 }: UseSubmitFillSessionArgs) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -414,6 +419,7 @@ export function useSubmitFillSession({
         referenceId: request.reference_id,
         body: request.body,
       })),
+      { onSuccess: onExit },
     );
   }, [
     forms,
@@ -422,6 +428,7 @@ export function useSubmitFillSession({
     continueDraftId,
     blockedFormLabels,
     submitBatch,
+    onExit,
     t,
   ]);
 

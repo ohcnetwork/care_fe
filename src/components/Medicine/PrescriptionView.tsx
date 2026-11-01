@@ -14,6 +14,7 @@ import { Markdown } from "@/components/ui/markdown";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface PrescriptionViewProps {
@@ -93,11 +94,11 @@ export default function PrescriptionView({
               className="text-gray-950 hover:text-gray-700 h-9"
             >
               <Link
-                href={
-                  prescriptionId
-                    ? `questionnaire/medication_request?prescription=${prescriptionId}`
-                    : `questionnaire/medication_request`
-                }
+                href={withReturnTo(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request${
+                    prescriptionId ? `?prescription=${prescriptionId}` : ""
+                  }`,
+                )}
               >
                 {prescriptionId ? (
                   <>

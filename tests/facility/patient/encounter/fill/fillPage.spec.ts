@@ -181,6 +181,76 @@ test.describe("Fill page shell", () => {
   });
 });
 
+test.describe("Fill page exit", () => {
+  let fillUrl: string;
+  let encounterUrl: string;
+
+  test.beforeEach(async () => {
+    const questionnaireId = await getQuestionnaireIdBySlug(
+      "respiratory_status-v3",
+    );
+    encounterUrl = `/facility/${getFacilityId()}/patient/${getPatientId()}/encounter/${getEncounterId()}`;
+    fillUrl = `${encounterUrl}/questionnaire/${questionnaireId}`;
+  });
+
+  test("leaving goes to the page the link named, unless it is outside CARE", async ({
+    page,
+  }) => {
+    const leaveWith = async (returnTo: string) => {
+      await page.goto(
+        `${fillUrl}?${new URLSearchParams({ return_to: returnTo })}`,
+      );
+      await expect(
+        questionBlock(page, "Is bilateral air entry present?"),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "Close", exact: true }).click();
+    };
+
+    await leaveWith(`${encounterUrl}/medicines`);
+    await page.waitForURL(/\/medicines$/);
+
+    for (const outside of [
+      "https://example.com/",
+      "//example.com/",
+      "/a/..//example.com/",
+    ]) {
+      await leaveWith(outside);
+      await page.waitForURL(/\/updates$/);
+    }
+  });
+
+  test("a save that finishes after the user has left does not pull them back", async ({
+    page,
+  }) => {
+    await page.goto(`${encounterUrl}/notes`);
+    await page
+      .getByRole("link", { name: "Edit encounter", exact: true })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "Form canvas", exact: true }),
+    ).toBeVisible();
+
+    let releaseSave = () => {};
+    const saveReleased = new Promise<void>((resolve) => {
+      releaseSave = resolve;
+    });
+    await page.route("**/api/v1/batch_requests/", async (route) => {
+      await saveReleased;
+      await route.continue();
+    });
+    await page.getByRole("button", { name: "Save Changes" }).click();
+
+    await page.goBack();
+    await page.waitForURL(/\/notes$/);
+    await page.getByRole("tab", { name: "Overview", exact: true }).click();
+    await page.waitForURL(/\/updates$/);
+
+    releaseSave();
+    await expectToast(page, "Questionnaire submitted successfully");
+    await expect(page).toHaveURL(/\/updates$/);
+  });
+});
+
 test.describe("Fill page value serialization", () => {
   test("a time answer submits as HH:mm:ss and the backend accepts it", async ({
     page,

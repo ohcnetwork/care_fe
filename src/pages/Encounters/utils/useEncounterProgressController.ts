@@ -11,6 +11,7 @@ import scheduleApi from "@/types/scheduling/scheduleApi";
 import { TokenActiveStatuses, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
+import { withReturnTo } from "@/Utils/returnTo";
 import { useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -113,7 +114,9 @@ export function useEncounterProgressController({
   const completeEverything = () => {
     if (encounterRequiresDischarge(encounter)) {
       navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        withReturnTo(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        ),
       );
       return;
     }
@@ -133,7 +136,9 @@ export function useEncounterProgressController({
   const completeEncounter = () => {
     if (encounterRequiresDischarge(encounter)) {
       navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        withReturnTo(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        ),
       );
       return;
     }

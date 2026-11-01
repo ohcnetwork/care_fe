@@ -21,6 +21,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 import { formatDateTime } from "@/Utils/utils";
 import type { FormSubmissionRead } from "@/types/questionnaire/formSubmission";
 import formSubmissionApi from "@/types/questionnaire/formSubmissionApi";
@@ -31,7 +32,6 @@ interface FormSubmissionDraftsProps {
   encounterId: string;
   title?: string;
   showEmpty?: boolean;
-  returnPage?: string;
 }
 
 interface DraftRowDetails {
@@ -74,7 +74,6 @@ export function FormSubmissionDrafts({
   encounterId,
   title,
   showEmpty = false,
-  returnPage,
 }: FormSubmissionDraftsProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
@@ -120,7 +119,6 @@ export function FormSubmissionDrafts({
   const rows: DraftRow[] = localDrafts.map((draft) => {
     const params = new URLSearchParams(draft.scope.contextKey);
     params.set("resume_local_draft", "true");
-    if (returnPage) params.set("return_page", returnPage);
     return {
       source: "local",
       id: draft.key,
@@ -128,7 +126,9 @@ export function FormSubmissionDrafts({
       savedAt: draft.savedAt,
       formCount: draft.formCount,
       url: appendReferralNativeContext(
-        `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}?${params}`,
+        withReturnTo(
+          `${fillBase}/${encodeURIComponent(draft.scope.entryQuestionnaireId)}?${params}`,
+        ),
         window.location.search,
       ),
       draft,
@@ -138,7 +138,6 @@ export function FormSubmissionDrafts({
     const questionnaire = serverQuestionnaire(draft);
     if (!questionnaire || draft.status !== "draft") continue;
     const params = new URLSearchParams({ continue_draft: draft.id });
-    if (returnPage) params.set("return_page", returnPage);
     rows.push({
       source: "server",
       id: draft.id,
@@ -146,7 +145,9 @@ export function FormSubmissionDrafts({
       savedAt: draft.modified_date || draft.created_date,
       formCount: 1,
       url: appendReferralNativeContext(
-        `${fillBase}/${encodeURIComponent(questionnaire.id)}?${params}`,
+        withReturnTo(
+          `${fillBase}/${encodeURIComponent(questionnaire.id)}?${params}`,
+        ),
         window.location.search,
       ),
       draft,

@@ -52,6 +52,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { navigateBackFrom } from "@/Utils/navigationTrail";
+import { withReturnTo } from "@/Utils/returnTo";
 import { entriesOf, goBack } from "@/Utils/utils";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -344,7 +345,9 @@ export const EncounterShow = (props: Props) => {
           editUrl={
             canWriteSelectedEncounter && facilityId
               ? appendReferralNativeContext(
-                  `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/encounter`,
+                  withReturnTo(
+                    `/facility/${facilityId}/patient/${patientId}/encounter/${selectedEncounterId}/questionnaire/encounter`,
+                  ),
                   window.location.search,
                 )
               : undefined

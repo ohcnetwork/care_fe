@@ -51,8 +51,12 @@ interface UseSaveServerDraftArgs {
    *  record instead of creating a second one. */
   continueDraftId?: string;
   /** The server copy is now authoritative: the host drops the local
-   *  autosave draft, flushes pristine and leaves the page. */
+   *  autosave draft and flushes pristine. */
   onSaved: () => void;
+  /** Leaves the page after a save, once `onSaved` has run. Unlike `onSaved`
+   *  it is skipped if the page has unmounted, so a save that finishes after
+   *  the user has already left doesn't pull them back. */
+  onExit: () => void;
 }
 
 /**
@@ -68,6 +72,7 @@ export function useSaveServerDraft({
   subject,
   continueDraftId,
   onSaved,
+  onExit,
 }: UseSaveServerDraftArgs) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -108,7 +113,7 @@ export function useSaveServerDraft({
         //
         // The cancel-with-revert trap this avoids: `query()` forwards the
         // query's AbortSignal to `fetch` (Utils/request/query.ts), and
-        // `onSaved` below navigates away in this same tick. If we instead
+        // `onExit` navigates away right after this. If we instead
         // called `invalidateQueries`, the resulting refetch would still be
         // in flight when this component's observer unmounts on navigate —
         // React Query v5 cancels that fetch and REVERTS the cache to
@@ -178,16 +183,19 @@ export function useSaveServerDraft({
     };
 
     if (continueDraftId) {
-      updateDraft({ status: "draft", response_dump });
+      updateDraft({ status: "draft", response_dump }, { onSuccess: onExit });
       return;
     }
-    createDraft({
-      patient: encounterBound.patientId,
-      questionnaire: primary.questionnaire.id,
-      encounter: encounterBound.encounterId,
-      status: "draft",
-      response_dump,
-    });
+    createDraft(
+      {
+        patient: encounterBound.patientId,
+        questionnaire: primary.questionnaire.id,
+        encounter: encounterBound.encounterId,
+        status: "draft",
+        response_dump,
+      },
+      { onSuccess: onExit },
+    );
   }, [
     canSaveDraft,
     primary,
@@ -196,6 +204,7 @@ export function useSaveServerDraft({
     continueDraftId,
     createDraft,
     updateDraft,
+    onExit,
   ]);
 
   return { canSaveDraft, saveDraft, isSavingDraft: isCreating || isUpdating };

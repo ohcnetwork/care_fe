@@ -104,6 +104,7 @@ export function FillPageBody({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const exit = () => navigate(exitTarget);
   const storesRef = useRef(new Map<string, FormStore>());
   const [storesVersion, setStoresVersion] = useState(0);
   const handleStore = useCallback((key: string, store: FormStore | null) => {
@@ -201,12 +202,10 @@ export function FillPageBody({
     subject,
     continueDraftId,
     blockedFormLabels,
-    onSuccess: () => {
-      // Order matters: finishDraft flushes the pristine state before the
-      // redirect so useNavigationPrompt doesn't block it.
-      autosave.finishDraft();
-      navigate(exitTarget);
-    },
+    // Order matters: finishDraft flushes the pristine state before the
+    // redirect so useNavigationPrompt doesn't block it.
+    onSuccess: autosave.finishDraft,
+    onExit: exit,
   });
 
   // The deliberate server draft (feature-flagged). Same exit as a
@@ -217,10 +216,8 @@ export function FillPageBody({
     getStore,
     subject,
     continueDraftId,
-    onSaved: () => {
-      autosave.finishDraft();
-      navigate(exitTarget);
-    },
+    onSaved: autosave.finishDraft,
+    onExit: exit,
   });
 
   const discardServerDraft = useMutation({
@@ -243,7 +240,6 @@ export function FillPageBody({
         discarded,
       );
       queryClient.invalidateQueries({ queryKey: formSubmissionKeys.lists() });
-      navigate(exitTarget);
     },
     onError: () => toast.error(t("form_submission_discard_failed")),
   });
@@ -313,9 +309,9 @@ export function FillPageBody({
   const closeSession = () => {
     if (frozen) return;
     if (serverDraft) {
-      discardServerDraft.mutate(serverDraft);
+      discardServerDraft.mutate(serverDraft, { onSuccess: exit });
     } else if (autosave.discardDraft()) {
-      navigate(exitTarget);
+      exit();
     }
   };
   const requestClose = () => {
@@ -331,7 +327,7 @@ export function FillPageBody({
     if (continueDraftId) {
       if (!contextRefreshFailed) serverDraftSave.saveDraft();
     } else if (autosave.minimizeDraft()) {
-      navigate(exitTarget);
+      exit();
     }
   };
 

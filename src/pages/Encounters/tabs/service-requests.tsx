@@ -18,6 +18,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
@@ -127,7 +128,9 @@ export const EncounterServiceRequestTab = () => {
           {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
             <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
+                href={withReturnTo(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`,
+                )}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />

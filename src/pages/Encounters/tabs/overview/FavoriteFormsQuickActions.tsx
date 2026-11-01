@@ -13,16 +13,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
+import { withReturnTo } from "@/Utils/returnTo";
 
 interface FavoriteFormsQuickActionsProps extends React.ComponentProps<"div"> {
   showEmpty?: boolean;
-  returnPage?: string;
 }
 
 export const FavoriteFormsQuickActions = ({
   title,
   showEmpty = false,
-  returnPage,
   ...props
 }: FavoriteFormsQuickActionsProps) => {
   const { t } = useTranslation();
@@ -80,7 +79,9 @@ export const FavoriteFormsQuickActions = ({
             <Link
               key={form.id}
               href={appendReferralNativeContext(
-                `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.id}${returnPage ? `?${new URLSearchParams({ return_page: returnPage })}` : ""}`,
+                withReturnTo(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${form.id}`,
+                ),
                 window.location.search,
               )}
               className="inline-flex min-w-0 w-auto items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors text-sm font-medium text-gray-700"

@@ -890,7 +890,7 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL(
         (url) =>
           url.pathname.endsWith("/questionnaire/symptom") &&
-          url.searchParams.get("return_page") === "rounds" &&
+          url.searchParams.get("return_to") === `${fixture.basePath}/rounds` &&
           !url.searchParams.has("workspace"),
       );
       await expect(
@@ -993,7 +993,7 @@ test.describe("Encounter workspace rendering", () => {
           region.getByRole("link", { name: "Edit", exact: true }),
         ).toHaveAttribute(
           "href",
-          `${fixture.basePath}/questionnaire/${questionnaire}?return_page=updates`,
+          `${fixture.basePath}/questionnaire/${questionnaire}?${new URLSearchParams({ return_to: `${fixture.basePath}/updates` })}`,
         );
       }
       await expect(
@@ -1665,7 +1665,7 @@ test.describe("Encounter workspace rendering", () => {
           }),
       ).toHaveAttribute(
         "href",
-        `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}?return_page=rounds`,
+        `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}?${new URLSearchParams({ return_to: `${fixture.basePath}/rounds` })}`,
       );
       await shortcuts
         .getByRole("link", { name: "Add Allergy", exact: true })
@@ -1674,7 +1674,7 @@ test.describe("Encounter workspace rendering", () => {
         (url) =>
           url.pathname ===
             `${fixture.basePath}/questionnaire/allergy_intolerance` &&
-          url.searchParams.get("return_page") === "rounds",
+          url.searchParams.get("return_to") === `${fixture.basePath}/rounds`,
       );
       await page.getByRole("button", { name: "Close", exact: true }).click();
       await expect(page).toHaveURL(
@@ -1704,7 +1704,7 @@ test.describe("Encounter workspace rendering", () => {
           url.pathname ===
             `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}` &&
           url.searchParams.get("continue_draft") === fixture.draft.id &&
-          url.searchParams.get("return_page") === "rounds",
+          url.searchParams.get("return_to") === `${fixture.basePath}/rounds`,
       );
       await page.goto(`${fixture.basePath}/rounds`);
     });
