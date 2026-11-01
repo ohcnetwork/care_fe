@@ -100,14 +100,20 @@ export function UserQualificationFields() {
                       options={options}
                       value={field.value.code ? degreeKey(field.value) : ""}
                       onChange={(value) => {
+                        if (!value) {
+                          field.onChange({ code: "", system: "" });
+                          return;
+                        }
+                        if (value === degreeKey(field.value)) return;
                         const degree = degrees?.find(
                           (degree) => degreeKey(degree) === value,
                         );
-                        field.onChange(
-                          degree
-                            ? { code: degree.code, system: degree.system }
-                            : { code: "", system: "" },
-                        );
+                        if (degree) {
+                          field.onChange({
+                            code: degree.code,
+                            system: degree.system,
+                          });
+                        }
                       }}
                       isLoading={isLoading}
                       disabled={isError}

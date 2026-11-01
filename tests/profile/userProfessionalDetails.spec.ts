@@ -222,12 +222,32 @@ test("saves professional details, preserves credential metadata and clears remov
       meta: {},
     });
 
+    // Saved credentials can outlive entries in the selectable degree catalogue.
+    await page.route("**/api/v1/users/degrees/", async (route) => {
+      const response = await route.fetch();
+      const catalogue: Code[] = await response.json();
+      await route.fulfill({
+        response,
+        json: catalogue.filter(
+          (entry) =>
+            entry.code !== degree.code || entry.system !== degree.system,
+        ),
+      });
+    });
+    await page.reload();
     await page
       .getByRole("button", { name: "Edit Personal Information", exact: true })
       .click();
     await expect(
       dialog.getByRole("group", { name: "Personal Information", exact: true }),
     ).toBeFocused();
+    const existingDegree = dialog
+      .getByRole("group", { name: "Qualification 1", exact: true })
+      .getByRole("combobox", { name: /^Degree/ });
+    await expect(existingDegree).toContainText(degree.code);
+    await existingDegree.click();
+    await page.getByRole("option", { name: degree.code, exact: true }).click();
+    await expect(existingDegree).toContainText(degree.code);
     await dialog
       .getByRole("textbox", { name: /^First Name/ })
       .fill("Updated Profile");
@@ -235,6 +255,7 @@ test("saves professional details, preserves credential metadata and clears remov
     const afterNameEdit = await readUser();
     expect(afterNameEdit.communication).toEqual(persisted.communication);
     expect(afterNameEdit.qualification).toEqual(persisted.qualification);
+    await page.unroute("**/api/v1/users/degrees/");
 
     await page.getByRole("button", { name: "Edit User", exact: true }).click();
     await dialog
