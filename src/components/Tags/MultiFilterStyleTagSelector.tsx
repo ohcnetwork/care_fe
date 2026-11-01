@@ -7,7 +7,6 @@ import {
   ArrowRight,
   ArrowUp,
   ChevronLeft,
-  Clock,
   Component,
   Plus,
   Space,
@@ -21,8 +20,8 @@ import { cn } from "@/lib/utils";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { TagExpiryLabel } from "@/components/Tags/TagExpiryLabel";
 import { TagExpiryStep } from "@/components/Tags/TagExpiryStep";
-import { getTagExpiry, isTagExpired } from "@/components/Tags/tagExpiry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -204,17 +203,6 @@ export function MultiFilterStyleTagSelector({
     ? rootTags.results.filter((tag) => tag.has_children)
     : [];
 
-  const renderExpiry = (tag: TagConfig) => {
-    const expiry = getTagExpiry(tag);
-    if (!expiry) return null;
-    return (
-      <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-        <Clock className="size-3" />
-        {isTagExpired(tag) ? t("expired") : expiry.fromNow()}
-      </span>
-    );
-  };
-
   const renderTagNameWithParent = (tag: TagConfig) => {
     return (
       <div className="flex items-center max-w-xs gap-2 truncate">
@@ -234,7 +222,7 @@ export function MultiFilterStyleTagSelector({
           />
           <span className="truncate">{tag.display}</span>
         </span>
-        {renderExpiry(tag)}
+        <TagExpiryLabel tag={tag} />
       </div>
     );
   };

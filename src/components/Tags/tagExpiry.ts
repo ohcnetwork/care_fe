@@ -1,3 +1,4 @@
+import type { Dayjs } from "dayjs";
 import type { TFunction } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
@@ -63,6 +64,27 @@ export function compactExpiryOffset(offset: TagExpiryOffset) {
     if (offset[unit]) compact[unit] = offset[unit];
   }
   return compact;
+}
+
+const RELATIVE_TIME_UNITS = [
+  ["day", 86400],
+  ["hour", 3600],
+  ["minute", 60],
+] as const;
+
+/**
+ * "in 3 days" in the active language. Day.js's `fromNow` is not localised in
+ * this app, so this uses `Intl.RelativeTimeFormat` instead.
+ */
+export function formatTimeUntil(date: Dayjs, locale: string) {
+  const seconds = date.diff(dayjs(), "second");
+  const format = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  for (const [unit, size] of RELATIVE_TIME_UNITS) {
+    if (Math.abs(seconds) >= size) {
+      return format.format(Math.round(seconds / size), unit);
+    }
+  }
+  return format.format(seconds, "second");
 }
 
 export function formatExpiryOffset(offset: TagExpiryOffset, t: TFunction) {
