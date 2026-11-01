@@ -84,6 +84,7 @@ export const EncounterShow = (props: Props) => {
     isPatientLoading,
     canWritePrimaryEncounter,
     canWriteSelectedEncounter,
+    canWriteClinicalData,
     canReadClinicalData,
     canReadSelectedEncounter,
     selectedEncounterPermissions,
@@ -157,6 +158,7 @@ export const EncounterShow = (props: Props) => {
           patientId={patientId}
           encounterId={selectedEncounterId}
           canAccess={canAccess}
+          readOnly={!canWriteClinicalData}
         />
       ),
       shortcutId: "responses",
@@ -271,7 +273,12 @@ export const EncounterShow = (props: Props) => {
         </>
       )}
       <div className="@container/encounter-header flex flex-col gap-2">
-        {backButton}
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          {backButton}
+          {selectedEncounter && (
+            <EncounterWorkspaceSwitcher systemTabs={tabs} />
+          )}
+        </div>
         <div>
           <Card className="grid gap-2 rounded-xl px-3 py-2 shadow-none @min-[28rem]/encounter-header:grid-cols-[minmax(0,1fr)_auto] @min-[28rem]/encounter-header:items-center">
             <PatientHeader
@@ -293,7 +300,6 @@ export const EncounterShow = (props: Props) => {
                   />
                 </div>
 
-                <EncounterWorkspaceSwitcher systemTabs={tabs} />
                 <EncounterCommandDialog
                   encounter={selectedEncounter}
                   open={actionsOpen}

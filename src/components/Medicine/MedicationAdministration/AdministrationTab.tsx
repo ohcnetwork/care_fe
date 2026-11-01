@@ -322,6 +322,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["medication_requests_stopped"],
       });
+      queryClient.invalidateQueries({ queryKey: ["medication_requests"] });
     },
   });
 

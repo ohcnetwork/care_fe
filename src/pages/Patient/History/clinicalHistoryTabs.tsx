@@ -1,5 +1,9 @@
 import { useTranslation } from "react-i18next";
 
+import { AllergyList } from "@/components/Patient/allergy/list";
+import { DiagnosisList } from "@/components/Patient/diagnosis/list";
+import { ProceduresList } from "@/components/Patient/procedures/list";
+import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { DiagnosticReportsTab } from "@/pages/Encounters/tabs/diagnostic-reports";
 import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 
@@ -54,27 +58,45 @@ export function useClinicalHistoryTabs({
     symptoms: {
       visible: !access || access.clinicalData,
       label: t("past_symptoms"),
-      component: <SymptomsHistory patientId={patientId} />,
+      component: embedded ? (
+        <SymptomsList patientId={patientId} showTimeline readOnly />
+      ) : (
+        <SymptomsHistory patientId={patientId} />
+      ),
     },
     diagnoses: {
       visible: !access || access.clinicalData,
       label: t("past_diagnoses"),
-      component: <DiagnosesHistory patientId={patientId} />,
+      component: embedded ? (
+        <DiagnosisList patientId={patientId} showTimeline readOnly />
+      ) : (
+        <DiagnosesHistory patientId={patientId} />
+      ),
     },
     procedures: {
       visible: !access || access.clinicalData,
       label: t("past_procedures"),
-      component: <ProceduresHistory patientId={patientId} />,
+      component: embedded ? (
+        <ProceduresList patientId={patientId} showTimeline readOnly />
+      ) : (
+        <ProceduresHistory patientId={patientId} />
+      ),
     },
     allergies: {
       visible: !access || access.clinicalData,
       label: t("allergies"),
-      component: <AllergyHistory patientId={patientId} />,
+      component: embedded ? (
+        <AllergyList patientId={patientId} showTimeline readOnly />
+      ) : (
+        <AllergyHistory patientId={patientId} />
+      ),
     },
     medications: {
       visible: !access || access.clinicalData,
       label: t("past_medications"),
-      component: <MedicationHistory patientId={patientId} />,
+      component: (
+        <MedicationHistory patientId={patientId} embedded={embedded} />
+      ),
     },
     immunizations: {
       visible: !access || access.clinicalData,

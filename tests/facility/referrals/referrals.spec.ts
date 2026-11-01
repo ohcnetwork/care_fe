@@ -745,8 +745,9 @@ test.describe("Referrals", () => {
         path: testInfo.outputPath("referral-clinical-history-390.png"),
       });
       if (historyViewport) await page.setViewportSize(historyViewport);
+      // Embedded history scopes card ids per instance (`<scope>-<responseId>`).
       await dialog
-        .locator(`#response-${clinicalResponseId}`)
+        .locator(`[id$="-${clinicalResponseId}"]`)
         .getByRole("button", { name: "More Actions", exact: true })
         .click();
       const printOpened = page.waitForEvent("popup");
