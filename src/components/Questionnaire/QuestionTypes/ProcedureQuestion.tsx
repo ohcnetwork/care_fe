@@ -103,6 +103,8 @@ const PROCEDURE_INITIAL_VALUE: Omit<ProcedureRequest, "encounter"> = {
 
 const NO_OUTCOME = "none";
 
+const noop = () => {};
+
 function hasDetails(procedure: ProcedureRequest) {
   return Boolean(
     procedure.note ||
@@ -441,7 +443,7 @@ const ProcedureRow = React.memo(function ProcedureRow({
 }: ProcedureRowProps) {
   const { t } = useTranslation();
 
-  const [showDetails, setShowDetails] = useState(hasDetails(procedure));
+  const [showDetails, setShowDetails] = useState(() => hasDetails(procedure));
   const [isOpen, setIsOpen] = useState(!procedure.id);
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -574,9 +576,12 @@ const ProcedureRow = React.memo(function ProcedureRow({
                           <MinusCircledIcon className="size-5" />
                         </Button>
                       )}
+                      {/* Decorative: the whole card header is the toggle. */}
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-hidden
+                        tabIndex={-1}
                         className="h-10 w-10 border border-gray-400 bg-white shadow p-4 pointer-events-none"
                       >
                         {isOpen ? (
@@ -812,6 +817,12 @@ export function ProcedureQuestion({
     );
   };
 
+  const handleUpdateNewProcedure = useCallback(
+    (_: number, updates: Partial<ProcedureRequest>) =>
+      setNewProcedure((prev) => ({ ...prev, ...updates })),
+    [],
+  );
+
   const addProcedurePlaceholder = t("add_procedure", {
     count: procedures.length + 1,
   });
@@ -866,10 +877,8 @@ export function ProcedureQuestion({
             procedure={newProcedure as ProcedureRequest}
             index={-1}
             disabled={disabled}
-            onUpdate={(_, updates) => {
-              setNewProcedure((prev) => ({ ...prev, ...updates }));
-            }}
-            onRemove={() => {}}
+            onUpdate={handleUpdateNewProcedure}
+            onRemove={noop}
           />
         </EntitySelectionDrawer>
       ) : (

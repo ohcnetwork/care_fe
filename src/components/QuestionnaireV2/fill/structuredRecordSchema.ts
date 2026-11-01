@@ -46,9 +46,16 @@ export const structuredRecordSchemas: Partial<Record<string, z.ZodType>> = {
     status: z.enum(PROCEDURE_STATUS),
     status_reason: code.nullish(),
     outcome: z.enum(PROCEDURE_OUTCOME).nullish(),
+    // The editor renders these as dates; reject anything unparseable here.
     occurrence: z
       .looseObject({
-        occurrence_datetime: z.string().nullish(),
+        occurrence_datetime: z.iso.datetime({ offset: true }).nullish(),
+        occurrence_period: z
+          .looseObject({
+            start: z.iso.datetime({ offset: true }).nullish(),
+            end: z.iso.datetime({ offset: true }).nullish(),
+          })
+          .nullish(),
         occurrence_string: z.string().nullish(),
       })
       .default({}),
