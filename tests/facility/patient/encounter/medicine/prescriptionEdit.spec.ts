@@ -120,7 +120,7 @@ test.describe("Edit Patient Prescription", () => {
         if (content?.includes(medicineName)) {
           foundCard = true;
           // Click Edit on this prescription card
-          await page.getByRole("link", { name: /Edit/i }).click();
+          await page.getByRole("link", { name: "Edit", exact: true }).click();
           break;
         }
       }

@@ -140,9 +140,9 @@ export async function createQuestionnaireAndOpenBuilder(
 
 /**
  * Picks a valueset in the builder's SelectOrCreateValueset autocomplete.
- * The search MUST be scoped to the opened popover/dialog — a bare
- * `[data-slot="command-input"]` first() can resolve to a different cmdk
- * input on the builder page and leave the list unfiltered (flake).
+ * The search box (Autocomplete's Base UI combobox input) only renders while
+ * the picker — a popover, or a drawer on mobile — is open, so the strict
+ * role + name locator can only resolve to the opened picker's input.
  */
 export async function pickValuesetFromAutocomplete(
   page: Page,
@@ -152,12 +152,10 @@ export async function pickValuesetFromAutocomplete(
     .getByRole("combobox")
     .filter({ hasText: "Select a value set" })
     .click();
-  const dialog = page.getByRole("dialog").last();
-  const scope = (await dialog.isVisible().catch(() => false))
-    ? dialog
-    : page.locator("[data-radix-popper-content-wrapper]").last();
-  await scope.locator('[data-slot="command-input"]').first().fill(search);
-  await scope.getByRole("option", { name: optionName }).click();
+  await page
+    .getByRole("combobox", { name: "Search option...", exact: true })
+    .fill(search);
+  await page.getByRole("option", { name: optionName }).click();
   await expect(
     page.getByRole("combobox").filter({ hasText: optionName }),
   ).toBeVisible();
