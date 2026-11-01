@@ -3,8 +3,8 @@ import {
   ArrowUp,
   Braces,
   ChevronDown,
+  ClipboardList,
   Columns2,
-  Columns3,
   EyeOff,
   LayoutDashboard,
   LockKeyhole,
@@ -14,9 +14,11 @@ import {
   PanelRight,
   Plus,
   Redo2,
+  RotateCcw,
   Settings2,
   Smartphone,
   Square,
+  Stethoscope,
   Trash2,
   Undo2,
   WandSparkles,
@@ -62,9 +64,11 @@ import {
   ENCOUNTER_WIDGET_TYPES,
   HISTORY_PAGE_KEYS,
   SYSTEM_PAGE_KEYS,
-  getWorkspaceSurface,
+  WORKSPACE_SURFACES,
+  WORKSPACE_SURFACE_PAGES_KEY,
   workspaceStructureSchema,
   type EncounterWorkspaceTemplate,
+  type WorkspaceSurface,
 } from "@/types/workspace/encounterWorkspace";
 import type { WorkspaceAvailabilityContext } from "@/types/workspace/widgetAvailability";
 
@@ -84,7 +88,11 @@ import {
   layoutColumnLabelKeys,
   type WorkspaceLayoutId,
 } from "./workspaceLayouts";
-import { standardWorkspaceTemplate } from "./workspacePresets";
+import {
+  HISTORY_STARTERS,
+  WORKSPACE_STARTERS,
+  standardWorkspacePages,
+} from "./workspacePresets";
 import { WorkspaceSectionPicker } from "./WorkspaceSectionPicker";
 import { WorkspaceSectionSettings } from "./WorkspaceSectionSettings";
 import { WorkspaceStarterPicker } from "./WorkspaceStarterPicker";
@@ -97,7 +105,6 @@ interface WorkspaceStudioProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   onValidityChange?: (valid: boolean) => void;
-  savedTemplate?: unknown;
 }
 
 interface TabTarget {
@@ -126,7 +133,11 @@ const LAYOUT_ICONS: Record<WorkspaceLayoutId, LucideIcon> = {
   main_side: PanelRight,
   side_main: PanelLeft,
   halves: Columns2,
-  thirds: Columns3,
+};
+
+const SURFACE_ICONS: Record<WorkspaceSurface, LucideIcon> = {
+  encounter: Stethoscope,
+  patient_history: ClipboardList,
 };
 
 const DEVICE_OPTIONS = [
@@ -146,7 +157,6 @@ export function WorkspaceStudio({
   onChange,
   disabled = false,
   onValidityChange,
-  savedTemplate,
 }: WorkspaceStudioProps) {
   const { t } = useTranslation();
   const id = useId();
@@ -159,6 +169,8 @@ export function WorkspaceStudio({
   const { widgets: pluginWidgets, loadingPlugins } =
     useCareAppEncounterWidgets();
   const [mode, setMode] = useState<"design" | "json">("design");
+  const [activeSurface, setActiveSurface] =
+    useState<WorkspaceSurface>("encounter");
   const [selectedTab, setSelectedTab] = useState<string>();
   const [settingsTarget, setSettingsTarget] = useState<SectionTarget | null>(
     null,
@@ -205,21 +217,28 @@ export function WorkspaceStudio({
   const template = parsed.success
     ? (raw as EncounterWorkspaceTemplate)
     : undefined;
-  const surface = getWorkspaceSurface(raw);
-  const systemKeys =
-    surface === "patient_history"
-      ? HISTORY_PAGE_KEYS
+  // Starters create encounter pages first; history is authored once a
+  // template exists.
+  const surface: WorkspaceSurface = template ? activeSurface : "encounter";
+  const sectionKey = WORKSPACE_SURFACE_PAGES_KEY[surface];
+  const surfaceSystemKeys = (target: WorkspaceSurface): string[] =>
+    target === "patient_history"
+      ? [...HISTORY_PAGE_KEYS]
       : [...new Set([...SYSTEM_PAGE_KEYS, ...Object.keys(pluginTabs)])];
+  const systemKeys = surfaceSystemKeys(surface);
   const empty =
     raw !== null &&
     typeof raw === "object" &&
     !Array.isArray(raw) &&
     Object.keys(raw).length === 0;
   const showJson = mode === "json" || (!template && !empty);
-  const pages = template?.pages ?? [];
+  const pages = template?.[sectionKey] ?? [];
+  const usesStandardHistory =
+    surface === "patient_history" && !template?.history_pages;
+  const allPages = [...(template?.pages ?? []), ...(template?.history_pages ?? [])];
   const unsupportedWidgets = [
     ...new Set(
-      pages.flatMap((page) =>
+      allPages.flatMap((page) =>
         page.kind === "custom"
           ? page.columns.flatMap((column) =>
               column.widgets.map((widget) => widget.type),
@@ -240,15 +259,22 @@ export function WorkspaceStudio({
   const tab = pages[tabIndex];
   const convertibleTab =
     tab?.kind === "system"
-      ? standardWorkspaceTemplate(surface, t).pages.find(
+      ? standardWorkspacePages(surface, t).find(
           (item) => item.key === tab.key && item.kind === "custom",
         )
       : undefined;
-  const availableSystemKeys = new Set(systemKeys);
-  const unavailableTabs = pages.filter(
-    (item) => item.kind === "system" && !availableSystemKeys.has(item.key),
+  const unavailableTabs = WORKSPACE_SURFACES.flatMap((target) => {
+    const available = new Set(surfaceSystemKeys(target));
+    return (template?.[WORKSPACE_SURFACE_PAGES_KEY[target]] ?? []).filter(
+      (item) => item.kind === "system" && !available.has(item.key),
+    );
+  });
+  // The section limit is shared by encounter and history pages.
+  const totalSections = allPages.reduce(
+    (sum, page) => sum + pageWidgetCount(page),
+    0,
   );
-  const totalSections = pages.reduce(
+  const surfaceSections = pages.reduce(
     (sum, page) => sum + pageWidgetCount(page),
     0,
   );
@@ -334,8 +360,25 @@ export function WorkspaceStudio({
   const write = (nextPages: WorkspacePage[]) =>
     writeTemplate({
       ...(template ?? { schema_version: 1 }),
-      pages: nextPages,
+      ...(sectionKey === "history_pages" && { schema_version: 2 }),
+      [sectionKey]: nextPages,
     } as EncounterWorkspaceTemplate);
+  const switchSurface = (next: WorkspaceSurface) => {
+    if (busy || next === surface) return;
+    setActiveSurface(next);
+    setSelectedTab(undefined);
+    setSettingsTarget(null);
+    setPickerTarget(null);
+    setTabDialog(null);
+    setRemoveTabTarget(null);
+  };
+  const resetHistoryPages = () => {
+    if (busy || !template?.history_pages) return;
+    const next = { ...template };
+    delete next.history_pages;
+    writeTemplate(next);
+    setSelectedTab(undefined);
+  };
   const updateTab = (next: WorkspacePage) =>
     write(pages.map((item, index) => (index === tabIndex ? next : item)));
   const addTab = (next: WorkspacePage) => {
@@ -396,22 +439,17 @@ export function WorkspaceStudio({
           <LayoutDashboard className="size-4" />
         </span>
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-semibold text-foreground">
-              {t("workspace_studio_title")}
-            </h2>
-            {template && (
-              <span className="rounded-full bg-muted-background px-2 py-0.5 text-[11px] font-medium text-soft-foreground">
-                {t(`workspace_studio_surface_${surface}`)}
-              </span>
-            )}
-          </div>
+          <h2 className="text-sm font-semibold text-foreground">
+            {t("workspace_studio_title")}
+          </h2>
           <p className="mt-0.5 text-xs text-soft-foreground">
             {template
-              ? t("workspace_studio_counts", {
-                  tabs: pages.length,
-                  sections: totalSections,
-                })
+              ? usesStandardHistory
+                ? t("workspace_studio_history_standard_title")
+                : t("workspace_studio_counts", {
+                    tabs: pages.length,
+                    sections: surfaceSections,
+                  })
               : t("workspace_studio_intro")}
           </p>
         </div>
@@ -523,6 +561,18 @@ export function WorkspaceStudio({
                 {t("workspace_studio_edit_json")}
               </DropdownMenuItem>
             )}
+            {template && !showJson && surface === "patient_history" && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={usesStandardHistory}
+                  onSelect={resetHistoryPages}
+                >
+                  <RotateCcw className="size-4" />
+                  {t("workspace_studio_use_standard_history")}
+                </DropdownMenuItem>
+              </>
+            )}
             {template && !showJson && surface === "encounter" && (
               <>
                 <DropdownMenuSeparator />
@@ -562,6 +612,57 @@ export function WorkspaceStudio({
       className="overflow-clip rounded-xl border border-border bg-background shadow-xs"
     >
       {toolbar}
+      {template && !showJson && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-soft-background/40 px-4 py-2.5 sm:px-5">
+          <div
+            role="group"
+            aria-label={t("workspace_studio_screen")}
+            className="flex rounded-lg bg-muted-background p-1"
+          >
+            {WORKSPACE_SURFACES.map((option) => {
+              const Icon = SURFACE_ICONS[option];
+              const optionPages = template[WORKSPACE_SURFACE_PAGES_KEY[option]];
+              const active = surface === option;
+              return (
+                <Button
+                  key={option}
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  aria-pressed={active}
+                  disabled={busy}
+                  onClick={() => switchSurface(option)}
+                  className={cn(
+                    "h-8 gap-2 px-3 text-xs font-medium text-soft-foreground",
+                    active && "bg-background text-foreground shadow-sm",
+                  )}
+                >
+                  <Icon
+                    className={cn("size-3.5", active && "text-primary-700")}
+                    aria-hidden="true"
+                  />
+                  {t(`workspace_studio_surface_${option}`)}
+                  <span
+                    className={cn(
+                      "rounded px-1.5 text-[11px] font-normal tabular-nums",
+                      active
+                        ? "bg-primary-50 text-primary-800"
+                        : "bg-background/70",
+                    )}
+                  >
+                    {optionPages
+                      ? optionPages.length
+                      : t("workspace_studio_standard")}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+          <p className="min-w-0 flex-1 text-xs leading-relaxed text-soft-foreground">
+            {t(`workspace_studio_surface_${surface}_hint`)}
+          </p>
+        </div>
+      )}
       {unsupportedWidgets.length > 0 && (
         <Alert className="rounded-none border-x-0 border-t-0">
           <AlertDescription>
@@ -580,15 +681,6 @@ export function WorkspaceStudio({
           </AlertDescription>
         </Alert>
       )}
-      {savedTemplate !== undefined &&
-        template &&
-        getWorkspaceSurface(savedTemplate) !== surface && (
-          <Alert className="rounded-none border-x-0 border-t-0">
-            <AlertDescription>
-              {t("workspace_surface_change_notice")}
-            </AlertDescription>
-          </Alert>
-        )}
 
       {showJson ? (
         <div className="space-y-4 p-4 sm:p-5">
@@ -649,12 +741,35 @@ export function WorkspaceStudio({
         </div>
       ) : !template ? (
         <WorkspaceStarterPicker
+          starters={WORKSPACE_STARTERS}
+          title={t("workspace_studio_starter_title")}
+          hint={t("workspace_studio_starter_hint")}
           disabled={busy}
           onPick={(starter) => {
             writeTemplate(starter.build(t, Object.keys(pluginTabs)));
             setSelectedTab(undefined);
           }}
           onUseJson={() => setMode("json")}
+        />
+      ) : usesStandardHistory ? (
+        <WorkspaceStarterPicker
+          starters={HISTORY_STARTERS}
+          title={t("workspace_studio_history_standard_title")}
+          hint={t("workspace_studio_history_standard_hint")}
+          disabled={busy}
+          onPick={(starter) => {
+            const nextPages = starter.build(t, []);
+            const added = nextPages.reduce(
+              (sum, page) => sum + pageWidgetCount(page),
+              0,
+            );
+            if (totalSections + added > 200) {
+              toast.error(t("workspace_studio_section_limit"));
+              return;
+            }
+            write(nextPages);
+            setSelectedTab(undefined);
+          }}
         />
       ) : (
         <div className="grid min-h-[560px] lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -988,8 +1103,7 @@ export function WorkspaceStudio({
                           writeTemplate({
                             ...template,
                             schema_version: 2,
-                            surface,
-                            pages: pages.map((item, index) =>
+                            [sectionKey]: pages.map((item, index) =>
                               index === tabIndex
                                 ? { ...convertibleTab, hidden: tab.hidden }
                                 : item,

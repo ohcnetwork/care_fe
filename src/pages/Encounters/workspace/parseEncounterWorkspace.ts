@@ -4,8 +4,10 @@ import {
   MAX_ENCOUNTER_WORKSPACE_COLUMNS,
   RESERVED_ROUTE_KEYS,
   SYSTEM_PAGE_KEYS,
+  WORKSPACE_SURFACE_PAGES_KEY,
+  normalizeWorkspaceTemplate,
+  type WorkspaceSurface,
   encounterPageKeySchema,
-  getWorkspaceSurface,
   titleSchema,
   widgetSchema,
 } from "@/types/workspace/encounterWorkspace";
@@ -50,6 +52,7 @@ function hasExtraFields(value: Record<string, unknown>, fields: string[]) {
 export function parseEncounterWorkspace(
   template: unknown,
   systemPageKeys: readonly string[],
+  surface: WorkspaceSurface = "encounter",
 ): RenderWorkspace {
   const result: RenderWorkspace = {
     pages: [],
@@ -57,25 +60,23 @@ export function parseEncounterWorkspace(
     invalid: false,
   };
   if (!isRecord(template)) return { ...result, invalid: true };
+  const workspace = normalizeWorkspaceTemplate(template);
 
   result.unsupportedVersion =
-    Object.hasOwn(template, "schema_version") &&
-    template.schema_version !== 1 &&
-    template.schema_version !== 2;
+    Object.hasOwn(workspace, "schema_version") &&
+    workspace.schema_version !== 1 &&
+    workspace.schema_version !== 2;
   result.invalid =
-    !Object.hasOwn(template, "schema_version") ||
-    hasExtraFields(template, ["schema_version", "pages", "surface"]) ||
-    (template.surface !== undefined &&
-      (template.schema_version !== 2 ||
-        !["encounter", "patient_history"].includes(String(template.surface))));
-  if (!Array.isArray(template.pages)) return { ...result, invalid: true };
-  if (template.pages.length > 50) result.invalid = true;
+    !Object.hasOwn(workspace, "schema_version") ||
+    hasExtraFields(workspace, ["schema_version", "pages", "history_pages"]) ||
+    (workspace.history_pages !== undefined && workspace.schema_version !== 2);
+  const rawPages = workspace[WORKSPACE_SURFACE_PAGES_KEY[surface]];
+  if (!Array.isArray(rawPages)) return { ...result, invalid: true };
+  if (rawPages.length > 50) result.invalid = true;
 
   const availableSystemKeys = new Set(systemPageKeys);
   const reservedSystemKeys = new Set([
-    ...(getWorkspaceSurface(template) === "patient_history"
-      ? HISTORY_PAGE_KEYS
-      : SYSTEM_PAGE_KEYS),
+    ...(surface === "patient_history" ? HISTORY_PAGE_KEYS : SYSTEM_PAGE_KEYS),
     ...systemPageKeys,
   ]);
   const pageKeys = new Set<string>();
@@ -120,7 +121,7 @@ export function parseEncounterWorkspace(
     return column;
   };
 
-  for (const value of template.pages.slice(0, 50)) {
+  for (const value of rawPages.slice(0, 50)) {
     if (!isRecord(value)) {
       result.invalid = true;
       continue;
@@ -139,7 +140,7 @@ export function parseEncounterWorkspace(
       key === undefined ||
       pageKeys.has(key) ||
       (value.kind === "custom" &&
-        template.schema_version !== 2 &&
+        workspace.schema_version !== 2 &&
         reservedSystemKeys.has(key))
     ) {
       result.invalid = true;

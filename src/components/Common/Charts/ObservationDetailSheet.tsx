@@ -151,48 +151,48 @@ export function ObservationDetailSheet({
             }
           />
         ) : (
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-4 mt-3">
-            {codeList.length > 1 ? (
-              <Tabs defaultValue={codeList[0].code} className="w-full">
-                <TabsList className="bg-muted-background max-w-full justify-start overflow-x-auto h-12 pb-1.5 pt-1">
-                  {codeList.map((code) => (
-                    <TabsTrigger
-                      key={code.code}
-                      value={code.code}
-                      className="shrink-0 whitespace-nowrap"
-                    >
-                      {code.display || code.code}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+          <Tabs
+            defaultValue="plot"
+            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          >
+            <TabsList className="mx-4 mt-3 w-fit shrink-0">
+              <TabsTrigger value="plot">{t("plots")}</TabsTrigger>
+              <TabsTrigger value="table">{t("table")}</TabsTrigger>
+            </TabsList>
+            <TabsContent
+              value="plot"
+              className="min-h-0 flex-1 overflow-y-auto p-4"
+            >
+              <div className="flex flex-col gap-4">
                 {codeList.map((code) => (
-                  <TabsContent key={code.code} value={code.code}>
+                  <section key={code.code} className="min-w-0">
+                    <h3 className="mb-1 text-sm font-semibold text-foreground">
+                      {code.display || code.code}
+                    </h3>
                     <ObservationDetailContent
                       entries={entriesByCode[code.code] ?? []}
                       hasNextPage={hasNextPage}
                       isFetchingNextPage={isFetchingNextPage}
                       fetchNextPage={fetchNextPage}
                     />
-                  </TabsContent>
+                  </section>
                 ))}
-              </Tabs>
-            ) : (
-              <ObservationDetailContent
-                entries={entriesByCode[codeList[0].code] ?? []}
+              </div>
+            </TabsContent>
+            <TabsContent
+              value="table"
+              className="min-h-0 flex-1 overflow-y-auto p-4"
+            >
+              <ObservationHistoryMatrix
+                codes={codeList}
+                entriesByCode={entriesByCode}
+                totalCount={totalCount}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 fetchNextPage={fetchNextPage}
               />
-            )}
-            <ObservationHistoryMatrix
-              codes={codeList}
-              entriesByCode={entriesByCode}
-              totalCount={totalCount}
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
-            />
-          </div>
+            </TabsContent>
+          </Tabs>
         )}
       </SheetContent>
     </Sheet>

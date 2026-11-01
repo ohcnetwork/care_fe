@@ -2450,8 +2450,7 @@ test("studio customises supported built-in tabs and starts history screens from 
   expect(api.writes.at(-1)?.body).toMatchObject({
     template: {
       schema_version: 2,
-      surface: "patient_history",
-      pages: expect.arrayContaining([
+      history_pages: expect.arrayContaining([
         expect.objectContaining({
           key: "my_forms",
           kind: "custom",
@@ -2481,8 +2480,8 @@ test("history screens reject encounter status filters and offer to clear them", 
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "patient_history",
-    pages: [
+    pages: [{ key: "updates", kind: "system" }],
+    history_pages: [
       {
         key: "background",
         kind: "custom",
@@ -2506,6 +2505,9 @@ test("history screens reject encounter status filters and offer to clear them", 
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
   await page.goto(`/admin/workspaces/${record.data.id}/edit`);
+  await page
+    .getByRole("button", { name: /Clinical history|Patient history/ })
+    .click();
   const save = page.getByRole("button", { name: "Save Changes", exact: true });
   await expect(
     page.getByRole("article", { name: "Past diagnoses", exact: true }),
@@ -2537,12 +2539,14 @@ test("history screens reject encounter status filters and offer to clear them", 
     exact: true,
   });
   const template = record.data.template as {
-    pages: { title: string }[];
+    history_pages: { title: string }[];
   };
   await json.fill(
     JSON.stringify({
       ...template,
-      pages: [{ ...template.pages[0], title: "Background notes" }],
+      history_pages: [
+        { ...template.history_pages[0], title: "Background notes" },
+      ],
     }),
   );
   await save.click();
@@ -2574,8 +2578,7 @@ test("history screens reject encounter status filters and offer to clear them", 
   expect(api.writes).toHaveLength(1);
   expect(api.writes[0].body).toMatchObject({
     template: {
-      surface: "patient_history",
-      pages: [
+      history_pages: [
         {
           title: "Background notes",
           columns: [
@@ -2593,9 +2596,9 @@ test("history screens reject encounter status filters and offer to clear them", 
   expect(
     (
       api.writes[0].body as {
-        template: { pages: { columns: { widgets: object[] }[] }[] };
+        template: { history_pages: { columns: { widgets: object[] }[] }[] };
       }
-    ).template.pages[0].columns[0].widgets[0],
+    ).template.history_pages[0].columns[0].widgets[0],
   ).not.toHaveProperty("visible_when");
 });
 

@@ -25,8 +25,6 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { EncounterClass } from "@/types/emr/encounter/encounter";
-import type { WorkspaceSurface } from "@/types/workspace/encounterWorkspace";
 import { WorkspaceRead } from "@/types/workspace/workspace";
 
 interface EncounterWorkspacePickerProps {
@@ -38,12 +36,8 @@ interface EncounterWorkspacePickerProps {
   onSelect: (workspace: WorkspaceRead) => void;
   isSaving: boolean;
   saveError: boolean;
-  encounterClass?: EncounterClass;
-  surface?: WorkspaceSurface;
-  /** Clears the saved choice so the standard layout applies again. */
+  /** Clears the saved choice so the standard screens apply again. */
   onUseStandard?: () => void;
-  /** Whether a saved choice exists to clear; defaults to an applied workspace. */
-  canUseStandard?: boolean;
 }
 
 export function EncounterWorkspacePicker({
@@ -55,29 +49,19 @@ export function EncounterWorkspacePicker({
   onSelect,
   isSaving,
   saveError,
-  encounterClass,
-  surface = "encounter",
   onUseStandard,
-  canUseStandard,
 }: EncounterWorkspacePickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const wasSaving = useRef(false);
   const currentWorkspace = workspaces.find(({ id }) => id === workspaceId);
-  const isHistory = surface === "patient_history";
-  const label = t(
-    isHistory ? "workspace_history_layout" : "encounter_workspace",
-  );
-  const standardLabel = t(
-    isHistory ? "workspace_history_standard" : "encounter_workspace_standard",
-  );
+  const label = t("encounter_workspace");
   const currentName = workspaceId
     ? (currentWorkspace?.name ?? t("encounter_workspace_unavailable"))
-    : standardLabel;
+    : t("encounter_workspace_standard");
   const currentLabel = t("encounter_workspace_current", { name: currentName });
   const busy = isLoading || isError || isSaving;
-  const showReset =
-    !!onUseStandard && (canUseStandard ?? workspaceId !== undefined);
+  const showReset = !!onUseStandard && workspaceId !== undefined;
   useEffect(() => {
     if (wasSaving.current && !isSaving && !saveError) setOpen(false);
     wasSaving.current = isSaving;
@@ -138,13 +122,7 @@ export function EncounterWorkspacePicker({
               {currentName}
             </h2>
             <p className="mt-1 text-xs text-gray-500">
-              {isHistory
-                ? t("workspace_history_browser_preference")
-                : t("encounter_workspace_picker_hint", {
-                    encounterClass: encounterClass
-                      ? t(`encounter_class__${encounterClass}`)
-                      : t("encounter"),
-                  })}
+              {t("workspace_picker_scope_hint")}
             </p>
           </div>
         </div>
@@ -244,11 +222,7 @@ export function EncounterWorkspacePicker({
               className="w-full justify-start font-medium text-gray-700"
             >
               <RotateCcw aria-hidden="true" />
-              {t(
-                isHistory
-                  ? "workspace_history_reset"
-                  : "encounter_workspace_reset",
-              )}
+              {t("encounter_workspace_reset")}
             </Button>
           </div>
         )}

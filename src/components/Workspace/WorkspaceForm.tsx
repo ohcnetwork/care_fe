@@ -55,7 +55,10 @@ import { useCareAppTabs } from "@/hooks/useCareApps";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import mutate from "@/Utils/request/mutate";
-import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
+import {
+  createEncounterWorkspaceSchema,
+  normalizeWorkspaceTemplate,
+} from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
   WORKSPACE_STATUS_COLORS,
@@ -98,9 +101,12 @@ export function WorkspaceForm({
   const user = useAuthUser();
   const pluginTabs = useCareAppTabs("encounterTabs");
   const { widgets: pluginWidgets } = useCareAppEncounterWidgets();
+  const existingTemplate = existing
+    ? normalizeWorkspaceTemplate(existing.template)
+    : undefined;
   const encounterSchema = createEncounterWorkspaceSchema(
     Object.keys(pluginTabs),
-    existing?.template,
+    existingTemplate,
   );
   const [isEditorValid, setIsEditorValid] = useState(true);
   const [invalidTemplateSnapshot, setInvalidTemplateSnapshot] = useState<
@@ -176,7 +182,7 @@ export function WorkspaceForm({
           description: existing.description,
           template:
             invalidTemplateSnapshot ??
-            JSON.stringify(existing.template, null, 2),
+            JSON.stringify(existingTemplate, null, 2),
           status: existing.status,
           authContext: scope.authContext,
           departmentId: "",
@@ -633,7 +639,6 @@ export function WorkspaceForm({
               render={({ field }) => (
                 <FormItem className="min-w-0">
                   <WorkspaceStudio
-                    savedTemplate={existing?.template}
                     value={field.value}
                     onChange={field.onChange}
                     disabled={busy}

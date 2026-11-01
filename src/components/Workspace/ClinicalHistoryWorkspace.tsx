@@ -12,17 +12,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ScopedQueryParamsProvider } from "@/hooks/useScopedQueryParams";
-import { useHistoryWorkspace } from "@/hooks/useWorkspaces";
 import { WorkspacePage } from "@/pages/Encounters/workspace/EncounterWorkspacePage";
-import { EncounterWorkspacePicker } from "@/pages/Encounters/workspace/EncounterWorkspacePicker";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
+import { useEncounterWorkspaces } from "@/pages/Encounters/workspace/useEncounterWorkspaces";
 import {
   useClinicalHistoryTabs,
   type ClinicalHistoryAccess,
 } from "@/pages/Patient/History/clinicalHistoryTabs";
 import patientApi from "@/types/emr/patient/patientApi";
+import { hasHistoryPages } from "@/types/workspace/encounterWorkspace";
 import type { WorkspaceWidgetContext } from "@/types/workspace/widgetAvailability";
-import type { WorkspaceTemplate } from "@/types/workspace/workspace";
 import query from "@/Utils/request/query";
 
 export function ClinicalHistoryWorkspace({
@@ -43,7 +42,9 @@ export function ClinicalHistoryWorkspace({
 }) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { list, preference, workspace, save } = useHistoryWorkspace();
+  // The workspace chosen for encounters also shapes clinical history; one
+  // that leaves history unconfigured keeps the standard tabs.
+  const { defaults, list, workspace } = useEncounterWorkspaces();
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
     xs: 2,
@@ -87,9 +88,14 @@ export function ClinicalHistoryWorkspace({
     embedded,
     access: grants,
   });
-  const parsed = workspace
-    ? parseEncounterWorkspace(workspace.template, Object.keys(systemTabs))
-    : undefined;
+  const parsed =
+    workspace && hasHistoryPages(workspace.template)
+      ? parseEncounterWorkspace(
+          workspace.template,
+          Object.keys(systemTabs),
+          "patient_history",
+        )
+      : undefined;
   const tabs: Record<
     string,
     {
@@ -173,33 +179,7 @@ export function ClinicalHistoryWorkspace({
     Object.hasOwn(tabs, currentTab) && tabs[currentTab].visible !== false
       ? currentTab
       : firstTab;
-  const loading = patient.isLoading || list.isLoading || preference.isLoading;
-  // Switching layouts can drop the current tab, so move to the first tab of
-  // the chosen layout as part of the same selection instead of afterwards.
-  const visibleTabKeys = (template?: WorkspaceTemplate) => {
-    const systemKeys = new Set(
-      Object.keys(systemTabs).filter(
-        (key) => systemTabs[key as keyof typeof systemTabs].visible,
-      ),
-    );
-    if (!template) return [...systemKeys];
-    return parseEncounterWorkspace(template, Object.keys(systemTabs))
-      .pages.filter(
-        (page) =>
-          !page.hidden && (page.kind !== "system" || systemKeys.has(page.key)),
-      )
-      .map((page) => page.key);
-  };
-  const choose = (id: string | null) => {
-    const keys = visibleTabKeys(
-      id ? list.data?.find((item) => item.id === id)?.template : undefined,
-    );
-    save.mutate(id, {
-      onSuccess: () => {
-        if (keys.length && !keys.includes(currentTab)) onTabChange(keys[0]);
-      },
-    });
-  };
+  const loading = patient.isLoading || defaults.isLoading || list.isLoading;
 
   if (patient.isError) {
     return (
@@ -230,35 +210,23 @@ export function ClinicalHistoryWorkspace({
 
   return (
     <div className="min-w-0 space-y-3">
-      <div className="flex items-center justify-end gap-2">
-        <EncounterWorkspacePicker
-          surface="patient_history"
-          workspaces={list.data ?? []}
-          workspaceId={workspace?.id}
-          isLoading={loading}
-          isError={list.isError || preference.isError}
-          onRetry={() => {
-            list.refetch();
-            preference.refetch();
-          }}
-          onSelect={(choice) => choose(choice.id)}
-          onUseStandard={() => choose(null)}
-          canUseStandard={!!preference.data}
-          isSaving={save.isPending}
-          saveError={save.isError}
-        />
-      </div>
-      {(list.isError || preference.isError) && (
+      {(defaults.isError || list.isError) && (
         <Alert>
-          <AlertDescription>
-            {t("workspace_history_load_error")}
-          </AlertDescription>
-        </Alert>
-      )}
-      {preference.data && list.isSuccess && !workspace && (
-        <Alert>
-          <AlertDescription>
-            {t("workspace_history_unavailable")}
+          <AlertDescription className="flex flex-wrap items-center gap-2">
+            <span className="min-w-0 flex-1">
+              {t("workspace_history_load_error")}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                defaults.refetch();
+                list.refetch();
+              }}
+            >
+              {t("try_again")}
+            </Button>
           </AlertDescription>
         </Alert>
       )}

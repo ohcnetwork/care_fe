@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { EncounterStatus } from "@/types/emr/encounter/encounter";
+import type { WorkspaceTemplate } from "@/types/workspace/workspace";
 
 export const SYSTEM_PAGE_KEYS = [
   "updates",
@@ -30,8 +31,34 @@ export const MAX_ENCOUNTER_WORKSPACE_COLUMNS = 4;
 
 export { ENCOUNTER_WIDGET_TYPES } from "./widgetConfigSchemas";
 
+/** Screens one workspace configures; each keeps its own ordered tabs. */
 export const WORKSPACE_SURFACES = ["encounter", "patient_history"] as const;
 export type WorkspaceSurface = (typeof WORKSPACE_SURFACES)[number];
+
+/** Template key holding each surface's tabs. */
+export const WORKSPACE_SURFACE_PAGES_KEY = {
+  encounter: "pages",
+  patient_history: "history_pages",
+} as const satisfies Record<WorkspaceSurface, string>;
+
+/** Migrates pre-unification templates while preserving their configured tabs. */
+export function normalizeWorkspaceTemplate(
+  template: WorkspaceTemplate,
+): WorkspaceTemplate {
+  const { surface, ...workspace } = template;
+  if (surface === "patient_history") {
+    return Object.hasOwn(template, "history_pages")
+      ? { ...workspace, schema_version: 2 }
+      : {
+          ...workspace,
+          schema_version: 2,
+          pages: SYSTEM_PAGE_KEYS.map((key) => ({ key, kind: "system" })),
+          history_pages: workspace.pages,
+        };
+  }
+  if (surface === "encounter") return workspace;
+  return template;
+}
 
 export const HISTORY_PAGE_KEYS = [
   "responses",
@@ -103,37 +130,42 @@ const systemPageSchema = z.strictObject({
   hidden: z.boolean().optional(),
 });
 
+const pagesSchema = z
+  .array(z.discriminatedUnion("kind", [customPageSchema, systemPageSchema]))
+  .min(1)
+  .max(50)
+  .refine(
+    (pages) => new Set(pages.map((page) => page.key)).size === pages.length,
+    {
+      message: "Page keys must be unique",
+    },
+  );
+
+const countWidgets = (pages: z.infer<typeof pagesSchema> = []) =>
+  pages.reduce(
+    (count, page) =>
+      count +
+      (page.kind === "custom"
+        ? page.columns.reduce((sum, column) => sum + column.widgets.length, 0)
+        : 0),
+    0,
+  );
+
 const workspaceSchema = z
   .strictObject({
     schema_version: z.union([z.literal(1), z.literal(2)]),
-    surface: z.enum(WORKSPACE_SURFACES).optional(),
-    pages: z
-      .array(z.discriminatedUnion("kind", [customPageSchema, systemPageSchema]))
-      .min(1)
-      .max(50),
+    pages: pagesSchema,
+    /** Absent means clinical history keeps its standard tabs. */
+    history_pages: pagesSchema.optional(),
   })
   .refine(
-    ({ schema_version, surface }) =>
-      schema_version === 2 || surface === undefined,
-    { message: "Workspace surfaces require schema version 2" },
+    ({ schema_version, history_pages }) =>
+      schema_version === 2 || history_pages === undefined,
+    { message: "Clinical history pages require schema version 2" },
   )
   .refine(
-    ({ pages }) => new Set(pages.map((page) => page.key)).size === pages.length,
-    { message: "Page keys must be unique" },
-  )
-  .refine(
-    ({ pages }) =>
-      pages.reduce(
-        (count, page) =>
-          count +
-          (page.kind === "custom"
-            ? page.columns.reduce(
-                (sum, column) => sum + column.widgets.length,
-                0,
-              )
-            : 0),
-        0,
-      ) <= 200,
+    ({ pages, history_pages }) =>
+      countWidgets(pages) + countWidgets(history_pages) <= 200,
     { message: "A workspace can contain at most 200 widgets" },
   );
 
@@ -142,13 +174,18 @@ export type EncounterWorkspaceCustomPage = z.infer<typeof customPageSchema>;
 export type EncounterWorkspaceTemplate = z.infer<typeof workspaceSchema>;
 export const workspaceStructureSchema = workspaceSchema;
 
-export function getWorkspaceSurface(template: unknown): WorkspaceSurface {
-  return template !== null &&
+export function hasHistoryPages(template: unknown): boolean {
+  return (
+    template !== null &&
     typeof template === "object" &&
-    "surface" in template &&
-    template.surface === "patient_history"
-    ? "patient_history"
-    : "encounter";
+    Object.hasOwn(template, "history_pages")
+  );
+}
+
+function savedSystemKeys(pages: { kind: string; key: string }[] = []) {
+  return new Set(
+    pages.filter((page) => page.kind === "system").map((page) => page.key),
+  );
 }
 
 /** Widget availability is a rendering concern; unknown widget types remain valid. */
@@ -157,30 +194,26 @@ export function createEncounterWorkspaceSchema(
   savedTemplate?: unknown,
 ) {
   const saved = workspaceSchema.safeParse(savedTemplate);
-  const savedKeys = new Set(
-    saved.success
-      ? saved.data.pages
-          .filter((page) => page.kind === "system")
-          .map((page) => page.key)
-      : [],
-  );
+  const savedEncounterKeys = savedSystemKeys(saved.data?.pages);
+  const savedHistoryKeys = savedSystemKeys(saved.data?.history_pages);
+  const encounterKeys = new Set([
+    ...SYSTEM_PAGE_KEYS,
+    ...additionalSystemPageKeys,
+  ]);
+  const historyKeys = new Set(HISTORY_PAGE_KEYS);
   return workspaceSchema.refine(
-    (template) => {
-      const surface = getWorkspaceSurface(template);
-      const systemKeys = new Set([
-        ...(surface === "patient_history"
-          ? HISTORY_PAGE_KEYS
-          : [...SYSTEM_PAGE_KEYS, ...additionalSystemPageKeys]),
-      ]);
-      const preserveUnavailable =
-        saved.success && getWorkspaceSurface(saved.data) === surface;
-      return template.pages.every((page) =>
+    (template) =>
+      template.pages.every((page) =>
         page.kind === "system"
-          ? systemKeys.has(page.key) ||
-            (preserveUnavailable && savedKeys.has(page.key))
-          : template.schema_version === 2 || !systemKeys.has(page.key),
-      );
-    },
+          ? encounterKeys.has(page.key) || savedEncounterKeys.has(page.key)
+          : template.schema_version === 2 || !encounterKeys.has(page.key),
+      ) &&
+      (template.history_pages ?? []).every(
+        (page) =>
+          page.kind !== "system" ||
+          historyKeys.has(page.key) ||
+          savedHistoryKeys.has(page.key),
+      ),
     { message: "Invalid system page or reserved legacy custom page" },
   );
 }

@@ -33,6 +33,12 @@ import {
   QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
+import {
+  standardVitalRows,
+  vitalCodeKey,
+  vitalRowsFromCodes,
+  type VitalRowSpec,
+} from "@/types/workspace/standardVitals";
 import { vitalsConfigSchema } from "@/types/workspace/widgetConfigSchemas";
 
 interface EncounterVitalsWidgetProps {
@@ -56,7 +62,7 @@ export function EncounterVitalsWidget({
   const { t } = useTranslation();
   const parsedConfig = vitalsConfigSchema.safeParse(config);
   const configuredCodes = parsedConfig.data?.codes;
-  const defaults = useDefaultVitalCodes(
+  const defaults = useDefaultVitalRows(
     canReadClinicalData && parsedConfig.success && !configuredCodes,
   );
 
@@ -94,7 +100,11 @@ export function EncounterVitalsWidget({
     <VitalsMatrix
       patientId={patientId}
       encounterId={encounterId}
-      codes={configuredCodes ?? defaults.data ?? []}
+      specs={
+        configuredCodes
+          ? vitalRowsFromCodes(configuredCodes)
+          : (defaults.data ?? [])
+      }
       title={heading}
       showEmpty={showEmpty}
     />
@@ -108,8 +118,6 @@ export function EncounterVitalsWidget({
 // fallback. Extra rows leave room for back-dated entries.
 const READINGS_PER_CODE = 8;
 const VISIBLE_READINGS = 4;
-// FiO2 is charted with the primary parameters but is a setting, not a vital.
-const EXCLUDED_DEFAULT_CODES = new Set(["3151-8"]);
 const VALID_READING_STATUSES = Object.values(ObservationStatus)
   .filter((status) => status !== ObservationStatus.ENTERED_IN_ERROR)
   .join(",");
@@ -126,6 +134,7 @@ interface VitalCell {
 
 interface VitalRow {
   code: Code;
+  codes: Code[];
   unit?: string;
   range?: string;
   cells: Map<number, VitalCell>;
@@ -134,10 +143,6 @@ interface VitalRow {
 interface VitalColumn {
   key: number;
   time: string;
-}
-
-function codeKey(code: Code) {
-  return `${code.system}|${code.code}`;
 }
 
 function minuteKey(observation: ObservationListRead) {
@@ -208,15 +213,13 @@ function rangeText(observation: ObservationListRead) {
   return normalRangeText(observation.reference_range);
 }
 
-function buildMatrix(groups: ObservationAnalyzeGroup[], codes: Code[]) {
+function buildMatrix(groups: ObservationAnalyzeGroup[], specs: VitalRowSpec[]) {
   const columns = new Map<number, VitalColumn>();
-  const rows: VitalRow[] = codes.map((code) => {
-    const readings = (
-      groups.find(
-        (group) =>
-          group.code.code === code.code && group.code.system === code.system,
-      )?.results ?? []
-    )
+  const rows: VitalRow[] = specs.map(({ code, codes }) => {
+    const keys = new Set(codes.map(vitalCodeKey));
+    const readings = groups
+      .filter((group) => keys.has(vitalCodeKey(group.code)))
+      .flatMap((group) => group.results)
       .filter(
         (observation) =>
           observation.status !== ObservationStatus.ENTERED_IN_ERROR,
@@ -240,6 +243,7 @@ function buildMatrix(groups: ObservationAnalyzeGroup[], codes: Code[]) {
     const latest = readings[0];
     return {
       code,
+      codes,
       unit: latest ? readingValue(latest).unit : undefined,
       range: latest ? rangeText(latest) : undefined,
       cells,
@@ -249,27 +253,10 @@ function buildMatrix(groups: ObservationAnalyzeGroup[], codes: Code[]) {
   return { rows, columns: sortedColumns };
 }
 
-function useDefaultVitalCodes(enabled: boolean) {
+function useDefaultVitalRows(enabled: boolean) {
   return useQuery({
     ...plotsConfigQueryOptions,
-    select: (plots) => {
-      const seen = new Set<string>();
-      return (
-        plots.find((plot) => plot.id === "primary-parameters")?.groups ?? []
-      )
-        .flatMap((group) => group.codes)
-        .filter((code) => {
-          const key = codeKey(code);
-          if (
-            !code.display ||
-            EXCLUDED_DEFAULT_CODES.has(code.code) ||
-            seen.has(key)
-          )
-            return false;
-          seen.add(key);
-          return true;
-        });
-    },
+    select: standardVitalRows,
     enabled,
   });
 }
@@ -300,25 +287,37 @@ function VitalsPanel({
 function VitalsMatrix({
   patientId,
   encounterId,
-  codes,
+  specs,
   title,
   showEmpty,
 }: {
   patientId: string;
   encounterId?: string;
-  codes: Code[];
+  specs: VitalRowSpec[];
   title: string;
   showEmpty: boolean;
 }) {
   const { t } = useTranslation();
   const [abnormalOnly, setAbnormalOnly] = useState(false);
+  const codes = useMemo(
+    () =>
+      specs
+        .flatMap((spec) => spec.codes)
+        .filter(
+          (code, index, all) =>
+            all.findIndex(
+              (other) => vitalCodeKey(other) === vitalCodeKey(code),
+            ) === index,
+        ),
+    [specs],
+  );
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: [
       "observations",
       patientId,
       encounterId,
       "latest",
-      codes.map(codeKey),
+      codes.map(vitalCodeKey),
     ],
     queryFn: query(observationApi.analyse, {
       pathParams: { patientId },
@@ -329,8 +328,8 @@ function VitalsMatrix({
     enabled: codes.length > 0,
   });
   const { rows, columns } = useMemo(
-    () => buildMatrix(data?.results ?? [], codes),
-    [codes, data?.results],
+    () => buildMatrix(data?.results ?? [], specs),
+    [specs, data?.results],
   );
   const visibleColumns = columns.slice(0, VISIBLE_READINGS);
   const isAbnormal = (row: VitalRow) =>
@@ -459,14 +458,14 @@ function VitalsMatrix({
               </thead>
               <tbody>
                 {shownRows.map((row) => (
-                  <tr key={codeKey(row.code)}>
+                  <tr key={vitalCodeKey(row.code)}>
                     <th
                       scope="row"
                       className="sticky left-0 z-10 border-b border-soft-border bg-card px-3 py-2 text-left font-normal"
                     >
                       <div className="flex min-w-36 items-baseline justify-between gap-3">
                         <ObservationDetailSheet
-                          codes={[row.code]}
+                          codes={row.codes}
                           title={row.code.display ?? row.code.code}
                           patientId={patientId}
                           encounterId={encounterId}

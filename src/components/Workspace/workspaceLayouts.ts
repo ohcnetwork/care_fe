@@ -12,7 +12,6 @@ export const WORKSPACE_LAYOUTS = [
   { id: "main_side", spans: [8, 4] },
   { id: "side_main", spans: [4, 8] },
   { id: "halves", spans: [6, 6] },
-  { id: "thirds", spans: [4, 4, 4] },
 ] as const;
 
 export type WorkspaceLayoutId = (typeof WORKSPACE_LAYOUTS)[number]["id"];
@@ -67,12 +66,6 @@ export function layoutColumnLabelKeys(layout: WorkspaceLayoutId | "custom") {
       return ["workspace_studio_column_side", "workspace_studio_column_main"];
     case "halves":
       return ["workspace_studio_column_left", "workspace_studio_column_right"];
-    case "thirds":
-      return [
-        "workspace_studio_column_left",
-        "workspace_studio_column_middle",
-        "workspace_studio_column_right",
-      ];
     default:
       return [];
   }

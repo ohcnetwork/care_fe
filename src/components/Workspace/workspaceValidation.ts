@@ -2,11 +2,9 @@ import type { TFunction } from "i18next";
 import type { z } from "zod";
 
 import type { CareAppEncounterWidget } from "@/hooks/useCareAppEncounterWidgets";
+import type { EncounterWorkspaceTemplate } from "@/types/workspace/encounterWorkspace";
 import {
-  getWorkspaceSurface,
-  type EncounterWorkspaceTemplate,
-} from "@/types/workspace/encounterWorkspace";
-import {
+  CORE_WIDGET_REQUIREMENTS,
   getWidgetRequirements,
   worksWithoutEncounter,
 } from "@/types/workspace/widgetAvailability";
@@ -47,7 +45,11 @@ export function workspaceWidgetIssues(
   t: TFunction,
 ) {
   const issues: string[] = [];
-  for (const page of template.pages) {
+  const pages = [
+    ...template.pages.map((page) => ({ page, history: false })),
+    ...(template.history_pages ?? []).map((page) => ({ page, history: true })),
+  ];
+  for (const { page, history } of pages) {
     if (page.kind !== "custom") continue;
     for (const column of page.columns) {
       for (const widget of column.widgets) {
@@ -55,8 +57,13 @@ export function workspaceWidgetIssues(
         const schema =
           getCoreWidgetConfigSchema(widget.type, t) ?? plugin?.configSchema;
         const name = `${page.title}: ${widget.title ?? workspaceWidgetLabel(widget.type, t)}`;
-        if (getWorkspaceSurface(template) === "patient_history") {
+        if (history) {
+          // Unknown or unloaded plugin widgets stay saveable; they already
+          // auto-hide wherever their requirements cannot be met.
+          const known =
+            !!plugin || Object.hasOwn(CORE_WIDGET_REQUIREMENTS, widget.type);
           if (
+            known &&
             !worksWithoutEncounter(getWidgetRequirements(widget.type, plugin))
           ) {
             issues.push(t("workspace_incompatible_widget", { name }));

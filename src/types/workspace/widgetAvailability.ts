@@ -164,17 +164,10 @@ export function getWidgetAvailability(
   if (!worksWithoutEncounter(requirements) && !encounter) {
     return { state: "hidden", reason: "workspace_requires_encounter" };
   }
-  // Referrals can still be raised from a closed encounter, so the shortcut
-  // strip stays for users who hold that permission.
-  const referralShortcut =
-    requirements.access === "actions" &&
-    !!context.facilityId &&
-    !!context.selectedEncounterPermissions?.canCreateReferral;
   if (
     requirements.encounter === "active" &&
     encounter &&
-    inactiveEncounterStatus.includes(encounter.status) &&
-    !referralShortcut
+    inactiveEncounterStatus.includes(encounter.status)
   ) {
     return { state: "hidden", reason: "workspace_auto_hides_closed" };
   }

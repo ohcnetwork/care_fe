@@ -210,7 +210,7 @@ export function ObservationDetailContent({
   }, [chartData.length]);
 
   return (
-    <div className="flex min-w-0 flex-col gap-8">
+    <div className="flex min-w-0 flex-col gap-4">
       {chartData.length > 0 ? (
         <div className="mt-2 min-w-0">
           <div className="flex justify-end">
@@ -232,7 +232,7 @@ export function ObservationDetailContent({
           </div>
 
           <div
-            className="h-105 w-full min-w-0 overflow-x-auto"
+            className="h-64 w-full min-w-0 overflow-x-auto"
             ref={scrollContainerRef}
             onScroll={(e) => {
               const el = e.currentTarget;
