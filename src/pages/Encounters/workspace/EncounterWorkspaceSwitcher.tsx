@@ -43,7 +43,8 @@ export function EncounterWorkspaceSwitcher({
       choice,
       encounterClass,
     }: {
-      choice: WorkspaceRead;
+      // null clears this class's saved choice so the standard layout applies.
+      choice: WorkspaceRead | null;
       encounterClass: EncounterClass;
       encounterId: string;
     }) => {
@@ -69,7 +70,7 @@ export function EncounterWorkspaceSwitcher({
       // an empty string makes the old rule inactive without changing the backend.
       for (const [id, classes] of classesByWorkspace) {
         if (
-          id === choice.id ||
+          id === choice?.id ||
           !accessibleIds.has(id) ||
           !classes.has(encounterClass)
         )
@@ -77,10 +78,12 @@ export function EncounterWorkspaceSwitcher({
         classes.delete(encounterClass);
         updates.push({ id, value: [...classes].join(",") });
       }
-      const selectedClasses =
-        classesByWorkspace.get(choice.id) ?? new Set<string>();
-      selectedClasses.add(encounterClass);
-      updates.push({ id: choice.id, value: [...selectedClasses].join(",") });
+      if (choice) {
+        const selectedClasses =
+          classesByWorkspace.get(choice.id) ?? new Set<string>();
+        selectedClasses.add(encounterClass);
+        updates.push({ id: choice.id, value: [...selectedClasses].join(",") });
+      }
       // Validate every value before making any changes to existing defaults.
       if (updates.some(({ value }) => value.length > 255))
         throw new Error(
@@ -103,11 +106,12 @@ export function EncounterWorkspaceSwitcher({
         currentEncounter.current !== `${encounterId}:${encounterClass}`
       )
         return;
-      const parsed = parseEncounterWorkspace(
-        choice.template,
-        Object.keys(systemTabs),
-      );
-      const firstPage = parsed.pages.find(
+      const firstPage = (
+        choice
+          ? parseEncounterWorkspace(choice.template, Object.keys(systemTabs))
+              .pages
+          : []
+      ).find(
         (page) =>
           !page.hidden &&
           (page.kind !== "system" || systemTabs[page.key]?.visible !== false),
@@ -133,6 +137,16 @@ export function EncounterWorkspaceSwitcher({
     },
   });
 
+  const select = (choice: WorkspaceRead | null) => {
+    if (!selectedEncounter || isSelectedEncounterLoading || save.isPending)
+      return;
+    save.mutate({
+      choice,
+      encounterClass: selectedEncounter.encounter_class,
+      encounterId: selectedEncounter.id,
+    });
+  };
+
   return (
     <EncounterWorkspacePicker
       key={selectedEncounter?.id}
@@ -147,15 +161,8 @@ export function EncounterWorkspaceSwitcher({
         defaults.refetch();
         list.refetch();
       }}
-      onSelect={(choice) => {
-        if (!selectedEncounter || isSelectedEncounterLoading || save.isPending)
-          return;
-        save.mutate({
-          choice,
-          encounterClass: selectedEncounter.encounter_class,
-          encounterId: selectedEncounter.id,
-        });
-      }}
+      onSelect={select}
+      onUseStandard={() => select(null)}
       isSaving={save.isPending}
       saveError={
         save.isError &&

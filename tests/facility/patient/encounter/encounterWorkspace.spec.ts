@@ -1524,9 +1524,7 @@ test.describe("Encounter workspace rendering", () => {
     fixture.workspaces.push(alternateWorkspace);
 
     const openPicker = async () => {
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -1545,12 +1543,18 @@ test.describe("Encounter workspace rendering", () => {
       ).toHaveCount(0);
       const picker = await openPicker();
       await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        picker.getByText("Use this workspace for your Inpatient encounters.", {
+        picker.getByRole("heading", {
+          name: "Standard encounter",
           exact: true,
         }),
+      ).toBeVisible();
+      await expect(
+        picker.getByText(
+          "Your choice applies to all your Inpatient encounters.",
+          {
+            exact: true,
+          },
+        ),
       ).toBeVisible();
       await picker
         .getByRole("combobox", {
@@ -1611,12 +1615,18 @@ test.describe("Encounter workspace rendering", () => {
       ).toHaveCount(0);
       const picker = await openPicker();
       await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        picker.getByText("Use this workspace for your Ambulatory encounters.", {
+        picker.getByRole("heading", {
+          name: "Standard encounter",
           exact: true,
         }),
+      ).toBeVisible();
+      await expect(
+        picker.getByText(
+          "Your choice applies to all your Ambulatory encounters.",
+          {
+            exact: true,
+          },
+        ),
       ).toBeVisible();
       await picker
         .getByRole("option")
@@ -1737,7 +1747,8 @@ test.describe("Encounter workspace rendering", () => {
         "Could not select this workspace. Please try again.",
       );
       await expect(
-        picker.getByText(`Workspace: ${fixture.workspace.name}`, {
+        picker.getByRole("heading", {
+          name: fixture.workspace.name,
           exact: true,
         }),
       ).toBeVisible();
@@ -1790,7 +1801,10 @@ test.describe("Encounter workspace rendering", () => {
         "Could not select this workspace. Please try again.",
       );
       await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
+        picker.getByRole("heading", {
+          name: "Standard encounter",
+          exact: true,
+        }),
       ).toBeVisible();
       await expect(
         page.getByRole("tab", { name: "Overview", exact: true }),
@@ -1839,6 +1853,55 @@ test.describe("Encounter workspace rendering", () => {
         ),
       ).toBe(true);
     });
+
+    await test.step("Reset returns this encounter class to the standard layout", async () => {
+      const writesBefore = fixture.defaultWrites.length;
+      const header = page.getByRole("button", { name: /^Workspace: / });
+      await expect(header).toHaveAccessibleName(
+        `Workspace: ${fixture.workspace.name}`,
+      );
+      const picker = await openPicker();
+      await picker
+        .getByRole("button", {
+          name: "Reset to standard encounter",
+          exact: true,
+        })
+        .click();
+      await expect(picker).not.toBeVisible();
+      await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
+      await expect(
+        page.getByRole("tab", { name: "Overview", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page.getByRole("tab", { name: "Ward rounds", exact: true }),
+      ).toHaveCount(0);
+      await expect(header).toHaveAccessibleName(
+        "Workspace: Standard encounter",
+      );
+      expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
+        {
+          workspaceId: fixture.workspace.id,
+          body: { attribute: "encounter_class", value: "" },
+        },
+      ]);
+      const standardPicker = await openPicker();
+      await expect(
+        standardPicker.getByRole("button", {
+          name: "Reset to standard encounter",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await page.reload();
+      await expect(
+        page.getByRole("tab", { name: "Ward rounds", exact: true }),
+      ).toHaveCount(0);
+      // Only this class is reset; the ambulatory choice is preserved.
+      await page.goto(`${outpatientPath}/updates`);
+      await expect(
+        page.getByRole("heading", { name: "Clinical review", exact: true }),
+      ).toBeVisible();
+    });
   });
 
   test("offers only active workspaces and ignores saved choices for archived ones", async ({
@@ -1868,10 +1931,13 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("tab", { name: "Ward rounds", exact: true }),
     ).toHaveCount(0);
-    await page.getByRole("button", { name: "Workspace", exact: true }).click();
+    await page.getByRole("button", { name: /^Workspace: / }).click();
     const picker = page.getByRole("dialog", { name: "Workspace", exact: true });
     await expect(
-      picker.getByText("Workspace: Standard encounter", { exact: true }),
+      picker.getByRole("heading", {
+        name: "Standard encounter",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
       picker.getByRole("option").filter({ hasText: activeWorkspace.name }),
@@ -2602,9 +2668,7 @@ test.describe("Encounter workspace rendering", () => {
 
     await test.step("Selecting a workspace also clears the previous page's filters", async () => {
       await page.goto(`${fixture.basePath}/service_requests?${filters}`);
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -3413,9 +3477,7 @@ test.describe("Encounter workspace rendering", () => {
       fixture.workspace.template = {};
       fixture.defaults.splice(0);
       await page.goto(`${fixture.basePath}/updates`);
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -3532,7 +3594,7 @@ test.describe("Encounter workspace rendering", () => {
     ).toHaveCount(0);
     expect(fixture.clinicalReads).toEqual([]);
     await expect(
-      page.getByRole("button", { name: "Workspace", exact: true }),
+      page.getByRole("button", { name: /^Workspace: / }),
     ).toBeVisible();
   });
 
@@ -3786,9 +3848,7 @@ test("studio history layouts work without an active encounter and remain separat
   await page.goto(
     `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
   );
-  await page
-    .getByRole("button", { name: "Clinical history workspace", exact: true })
-    .click();
+  await page.getByRole("button", { name: /^Workspace: / }).click();
   await expect(
     page.getByRole("option").filter({ hasText: fixture.workspace.name }),
   ).toHaveCount(0);
@@ -3819,11 +3879,12 @@ test("studio history layouts work without an active encounter and remain separat
   expect(fixture.defaultWrites).toEqual([]);
 
   await test.step("Standard history returns and clears the browser-local choice", async () => {
+    await page.getByRole("button", { name: /^Workspace: / }).click();
     await page
-      .getByRole("button", { name: "Clinical history workspace", exact: true })
-      .click();
-    await page
-      .getByRole("option", { name: "Standard clinical history", exact: true })
+      .getByRole("button", {
+        name: "Reset to standard clinical history",
+        exact: true,
+      })
       .click();
     await expect(page).toHaveURL((url) =>
       url.pathname.endsWith("/history/responses"),
@@ -3860,7 +3921,7 @@ test("studio history layouts work without an active encounter and remain separat
   });
 
   await page.goto(`${fixture.basePath}/rounds`);
-  await page.getByRole("button", { name: "Workspace", exact: true }).click();
+  await page.getByRole("button", { name: /^Workspace: / }).click();
   await expect(
     page.getByRole("option").filter({ hasText: history.name }),
   ).toHaveCount(0);
@@ -3907,9 +3968,7 @@ test("studio history pages can show only the forms the viewer submitted", async 
   await page.goto(
     `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
   );
-  await page
-    .getByRole("button", { name: "Clinical history workspace", exact: true })
-    .click();
+  await page.getByRole("button", { name: /^Workspace: / }).click();
   await page.getByRole("option").filter({ hasText: history.name }).click();
   await expect(page).toHaveURL((url) =>
     url.pathname.endsWith("/history/my_forms"),

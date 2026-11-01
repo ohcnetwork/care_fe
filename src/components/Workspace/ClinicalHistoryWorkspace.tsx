@@ -231,9 +231,6 @@ export function ClinicalHistoryWorkspace({
   return (
     <div className="min-w-0 space-y-3">
       <div className="flex items-center justify-end gap-2">
-        {workspace && (
-          <span className="text-sm text-soft-foreground">{workspace.name}</span>
-        )}
         <EncounterWorkspacePicker
           surface="patient_history"
           workspaces={list.data ?? []}
@@ -246,6 +243,7 @@ export function ClinicalHistoryWorkspace({
           }}
           onSelect={(choice) => choose(choice.id)}
           onUseStandard={() => choose(null)}
+          canUseStandard={!!preference.data}
           isSaving={save.isPending}
           saveError={save.isError}
         />

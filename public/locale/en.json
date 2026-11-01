@@ -2634,7 +2634,7 @@
   "encounter_workspace_page_error": "This page could not be displayed. Other workspace pages are still available.",
   "encounter_workspace_page_invalid": "Some parts of this page configuration are invalid. Valid widgets are still shown.",
   "encounter_workspace_page_unavailable": "This page is unavailable. Check its workspace configuration.",
-  "encounter_workspace_picker_hint": "Use this workspace for your {{encounterClass}} encounters.",
+  "encounter_workspace_picker_hint": "Your choice applies to all your {{encounterClass}} encounters.",
   "encounter_workspace_schema_unsupported": "This workspace uses an unsupported schema version. Compatible pages and widgets are still shown.",
   "encounter_workspace_select_error": "Could not select this workspace. Please try again.",
   "encounter_workspace_standard": "Standard encounter",
@@ -8477,5 +8477,7 @@
   "clinical_summary_chronic": "Chronic",
   "clinical_summary_high_criticality": "High criticality",
   "clinical_summary_low_criticality": "Low criticality",
-  "clinical_summary_last_seen": "Last seen"
+  "clinical_summary_last_seen": "Last seen",
+  "encounter_workspace_reset": "Reset to standard encounter",
+  "workspace_history_reset": "Reset to standard clinical history"
 }
