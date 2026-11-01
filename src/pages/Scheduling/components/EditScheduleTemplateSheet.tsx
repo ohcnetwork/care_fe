@@ -153,7 +153,7 @@ const ScheduleTemplateEditor = ({
 
   // The list response omits the encounter defaults; only the detail has them.
   // The key nests under the list's so saving refreshes both.
-  const { data: templateDetail, isLoading: isLoadingDetail } = useQuery({
+  const { data: templateDetail } = useQuery({
     queryKey: [
       "schedule",
       facilityId,
@@ -360,7 +360,8 @@ const ScheduleTemplateEditor = ({
             onCareTeamChange={(value) =>
               form.setValue("care_team", value, { shouldDirty: true })
             }
-            disabled={isProcessing || isLoadingDetail}
+            // Until the saved defaults load, an edit here would replace them.
+            disabled={isProcessing || !templateDetail}
           />
 
           <div className="flex justify-end gap-2">

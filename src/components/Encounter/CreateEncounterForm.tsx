@@ -149,6 +149,14 @@ export default function CreateEncounterForm({
     },
   });
 
+  // Re-read the schedule's departments on every reset: the appointment may
+  // have been refetched with different defaults since the form mounted.
+  const resetForm = () =>
+    form.reset({
+      ...form.formState.defaultValues,
+      organizations: defaultOrganizations.map(({ id }) => id),
+    });
+
   const selectedStatus = form.watch("status");
 
   const tagIds = form.watch("tags");
@@ -174,7 +182,7 @@ export default function CreateEncounterForm({
     onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
-      form.reset();
+      resetForm();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
@@ -210,7 +218,7 @@ export default function CreateEncounterForm({
       open={isOpen}
       onOpenChange={() => {
         setIsOpen(!isOpen);
-        form.reset();
+        resetForm();
       }}
     >
       <SheetTrigger asChild>
@@ -417,7 +425,11 @@ export default function CreateEncounterForm({
                     <FacilityOrganizationSelector
                       facilityId={facilityId}
                       value={field.value}
-                      currentOrganizations={defaultOrganizations}
+                      // The selector treats these as already chosen, so pass
+                      // only the ones still selected to allow re-adding.
+                      currentOrganizations={defaultOrganizations.filter(
+                        ({ id }) => field.value.includes(id),
+                      )}
                       onChange={(value) => {
                         if (value === null) {
                           form.setValue("organizations", []);
@@ -465,7 +477,7 @@ export default function CreateEncounterForm({
                 variant="outline"
                 onClick={() => {
                   setIsOpen(false);
-                  form.reset();
+                  resetForm();
                 }}
               >
                 {t("cancel")}

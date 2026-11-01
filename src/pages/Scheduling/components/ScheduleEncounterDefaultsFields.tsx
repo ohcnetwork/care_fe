@@ -41,7 +41,11 @@ export function ScheduleEncounterDefaultsFields({
         <FacilityOrganizationSelector
           facilityId={facilityId}
           value={organizations}
-          currentOrganizations={currentOrganizations}
+          // The selector treats these as already chosen, so pass only the
+          // ones still selected to allow re-adding a removed department.
+          currentOrganizations={currentOrganizations?.filter(({ id }) =>
+            organizations.includes(id),
+          )}
           onChange={(value) => onOrganizationsChange(value ?? [])}
           optional
         />
