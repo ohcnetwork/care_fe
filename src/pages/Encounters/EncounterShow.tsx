@@ -255,11 +255,12 @@ export const EncounterShow = (props: Props) => {
           data-shortcut-id="go-back"
           className="w-fit text-gray-700"
           onClick={() =>
-            // Section and historical-encounter views stay in this chart;
-            // leave to the page it was opened from, else the patient.
+            // Sections, forms and historical encounters (with their detail
+            // pages) are all this patient's chart; leave to the page it was
+            // opened from, else the patient.
             navigateBackFrom(
-              (location) =>
-                !location.includes(`/encounter/${primaryEncounterId}/`),
+              (pathname) =>
+                !pathname.includes(`/patient/${patientId}/encounter/`),
               facilityId
                 ? `/facility/${facilityId}/patient/${patientId}`
                 : `/patient/${patientId}`,

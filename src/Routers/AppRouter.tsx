@@ -1,10 +1,4 @@
-import {
-  Redirect,
-  useLocationChange,
-  usePath,
-  useRedirect,
-  useRoutes,
-} from "raviger";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
 
 import { cn } from "@/lib/utils";
 
@@ -34,7 +28,7 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
-import { recordLocation } from "@/Utils/navigationTrail";
+import { useNavigationTrail } from "@/Utils/navigationTrail";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
@@ -131,7 +125,7 @@ export default function AppRouter() {
   let routes = Routes;
 
   useRedirect("/user", "/users");
-  useLocationChange(recordLocation, { onInitial: true });
+  useNavigationTrail();
 
   // Merge in Plugin Routes
   routes = {

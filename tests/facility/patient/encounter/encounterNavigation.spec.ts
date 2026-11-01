@@ -727,7 +727,12 @@ test.describe("Encounter navigation", () => {
         });
 
         await test.step("Return to the appointments board with the back button", async () => {
+          // Leaving mid-request would cancel the mocked encounter refetch.
+          const refetched = page.waitForResponse(
+            (response) => new URL(response.url()).pathname === encounterPath,
+          );
           await page.goBack();
+          await refetched;
           await expect(bar).toBeVisible();
           await page.getByRole("button", { name: "Back", exact: true }).click();
           await expect(page).toHaveURL(
