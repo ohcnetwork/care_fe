@@ -310,6 +310,7 @@ export function ForgotPasswordPhone({
           type="submit"
           disabled={
             confirmPending ||
+            sendOtpPending ||
             otp.length !== OTP_LENGTH ||
             !passwordForm.password ||
             !passwordForm.confirm

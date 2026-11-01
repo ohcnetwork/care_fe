@@ -25,10 +25,10 @@ import { Spinner } from "@/components/ui/spinner";
 
 import { AuthCard } from "@/components/Auth/AuthCard";
 import { AuthLayout } from "@/components/Auth/AuthLayout";
+import { otpErrorMessages } from "@/components/Auth/otpErrorMessages";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
-import { HTTPError } from "@/Utils/request/types";
 import { MfaMethod, MfaOption } from "@/types/auth/auth";
 
 export const Authenticate = () => {
@@ -90,9 +90,8 @@ export const Authenticate = () => {
         temp_token,
       });
     } catch (err) {
-      if (err instanceof HTTPError && typeof err.cause?.detail === "string") {
-        setError(err.cause.detail);
-      }
+      const { error } = otpErrorMessages(err);
+      if (error) setError(error);
     }
   });
 

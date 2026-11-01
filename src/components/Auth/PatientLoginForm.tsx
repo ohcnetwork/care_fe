@@ -199,7 +199,7 @@ export function PatientLoginForm() {
           )}
         </Field>
         <div className="flex flex-col gap-4">
-          <Button type="submit" disabled={isVerifyingOtp}>
+          <Button type="submit" disabled={isVerifyingOtp || isSendingOtp}>
             {isVerifyingOtp && (
               <Spinner data-icon="inline-start" aria-hidden="true" />
             )}

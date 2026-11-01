@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { Globe } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useId } from "react";
+import { ReactNode, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -52,6 +52,12 @@ function LanguageSelect() {
   const { t, i18n } = useTranslation();
   const labelId = useId();
 
+  // Screen readers pick pronunciation from <html lang>, which index.html
+  // hard-codes to "en"; keep it in step with a saved or chosen language.
+  useEffect(() => {
+    document.documentElement.setAttribute("lang", i18n.language);
+  }, [i18n.language]);
+
   if (availableLocales.length < 2) return null;
 
   const current =
@@ -63,7 +69,6 @@ function LanguageSelect() {
   const changeLanguage = (locale: string) => {
     i18n.changeLanguage(locale);
     localStorage.setItem("i18nextLng", locale);
-    document.documentElement.setAttribute("lang", locale);
   };
 
   return (

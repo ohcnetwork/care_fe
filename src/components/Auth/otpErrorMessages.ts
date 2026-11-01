@@ -1,10 +1,11 @@
 import { HTTPError } from "@/Utils/request/types";
 
 /**
- * Flattens an OTP endpoint error into a field → message map. Validation
- * failures arrive as `{ errors: [{ msg: string | { [field]: message } }] }`;
- * a plain string `msg`, a throttling `detail` or a top-level `error` is
- * reported under `error`.
+ * Flattens an auth-code endpoint error (OTP login, OTP password reset, 2FA)
+ * into a field → message map. Validation failures arrive as
+ * `{ errors: [{ msg: string | { [field]: message } }] }`; a plain string
+ * `msg`, a throttling `detail` or a top-level `error` is reported under
+ * `error`.
  */
 export function otpErrorMessages(error: unknown): Record<string, string> {
   const messages: Record<string, string> = {};
