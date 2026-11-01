@@ -120,38 +120,41 @@ export function ProceduresList({
         {isError && (
           <ClinicalListError isFetching={isFetching} onRetry={refetch} />
         )}
-        {Object.entries(groupedByYear).map(([year, groupedByDate]) => {
-          return (
-            <div key={year}>
-              <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
-                {year}
-              </h2>
-              <div className="border-l border-gray-300 pt-5 ml-4">
-                {Object.entries(groupedByDate).map(([date, procedures]) => {
-                  return (
-                    <div key={date} className="pb-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex flex-col items-center h-full">
-                          <div className="size-3 bg-sky-300 ring-1 ring-sky-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
-                        </div>
+        {/* Integer-like year keys enumerate ascending; show newest first. */}
+        {Object.entries(groupedByYear)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .map(([year, groupedByDate]) => {
+            return (
+              <div key={year}>
+                <h2 className="text-sm font-medium text-indigo-700 border-y border-gray-300 py-2 w-fit pr-10">
+                  {year}
+                </h2>
+                <div className="border-l border-gray-300 pt-5 ml-4">
+                  {Object.entries(groupedByDate).map(([date, procedures]) => {
+                    return (
+                      <div key={date} className="pb-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex flex-col items-center h-full">
+                            <div className="size-3 bg-sky-300 ring-1 ring-sky-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                          </div>
 
-                        <div className="space-y-3 overflow-auto w-full">
-                          <h3 className="text-sm font-medium text-indigo-700">
-                            {format(parseISO(date), "dd MMMM, yyyy")}
-                          </h3>
-                          <ProcedureTable
-                            patientId={patientId}
-                            procedures={procedures}
-                          />
+                          <div className="space-y-3 overflow-auto w-full">
+                            <h3 className="text-sm font-medium text-indigo-700">
+                              {format(parseISO(date), "dd MMMM, yyyy")}
+                            </h3>
+                            <ProcedureTable
+                              patientId={patientId}
+                              procedures={procedures}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         {hasNextPage && (
           <div className="flex justify-center">
             <Button
