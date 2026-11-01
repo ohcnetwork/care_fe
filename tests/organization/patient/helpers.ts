@@ -29,8 +29,10 @@ export async function navigateToOrganizationPatient(page: Page) {
   if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
     await sidebarToggle.click();
   }
-  await page.getByRole("button", { name: "Encounters", exact: true }).click();
-  await page.getByRole("link", { name: /all encounters/i }).click();
+  await page
+    .getByRole("button", { name: "Encounter Types", exact: true })
+    .click();
+  await page.getByRole("menuitem", { name: "All Encounters" }).click();
   const patientName = await getPatientNameFromCard(page);
 
   // Navigate to organization

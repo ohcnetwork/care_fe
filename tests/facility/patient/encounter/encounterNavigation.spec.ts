@@ -537,7 +537,7 @@ test.describe("Encounter navigation", () => {
         const actionSurface =
           layout === "mobile"
             ? page.getByRole("menu", {
-                name: "More Actions",
+                name: "Encounter Actions",
                 exact: true,
               })
             : bar;

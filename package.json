@@ -62,7 +62,7 @@
     "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
-    "@base-ui/react": "1.6.0",
+    "@base-ui/react": "1.9.0",
     "@fontsource-variable/figtree": "5.2.10",
     "@fontsource-variable/geist-mono": "5.2.8",
     "@fontsource/libre-barcode-128-text": "^5.2.8",

@@ -18,6 +18,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -26,7 +27,6 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -111,10 +111,15 @@ export default function Autocomplete({
         popoverClassName,
       )}
     >
-      <span className={cn("truncate", !displayText && "text-muted-foreground")}>
+      <span
+        className={cn(
+          "w-0 min-w-0 flex-1 truncate text-left",
+          !displayText && "text-muted-foreground",
+        )}
+      >
         {displayText || placeholder || t("autocomplete_select_placeholder")}
       </span>
-      <span className="flex shrink-0 items-center gap-1">
+      <span className="flex items-center gap-1 shrink-0">
         {shortcutId && <ShortcutBadge actionId={shortcutId} />}
         {!clearVisible && (
           <ChevronDown className="size-4 text-muted-foreground" />
@@ -142,13 +147,14 @@ export default function Autocomplete({
 
   const content = (
     <>
-      <ComboboxInput
-        placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
-        aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
-        disabled={disabled}
-        showTrigger={false}
-        autoFocus={isMobile && !isIOSDevice}
-      />
+      <div className="p-2 border-b border-gray-100 shadow-xs">
+        <ComboboxInput
+          placeholder={inputPlaceholder || t("autocomplete_search_placeholder")}
+          aria-label={inputPlaceholder || t("autocomplete_search_placeholder")}
+          disabled={disabled}
+          showTrigger={false}
+        />
+      </div>
       {isLoading ? (
         <CardListSkeleton count={3} />
       ) : (
@@ -156,9 +162,13 @@ export default function Autocomplete({
           {noOptionsMessage || t("autocomplete_no_options")}
         </ComboboxEmpty>
       )}
-      <ComboboxList showScrollbar>
+      <ComboboxList showScrollbar className="flex-1 min-h-0">
         {(option: AutoCompleteOption) => (
-          <ComboboxItem key={option.value} value={option}>
+          <ComboboxItem
+            key={option.value}
+            value={option}
+            className={cn(isMobile && "min-h-11 py-2.5")}
+          >
             {option.label}
           </ComboboxItem>
         )}
@@ -205,31 +215,35 @@ export default function Autocomplete({
     >
       {isMobile ? (
         <Drawer open={open} onOpenChange={handleOpenChange}>
-          <ButtonGroup className="w-full">
+          <ButtonGroup className="w-full min-w-0">
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             {clearButton}
           </ButtonGroup>
           <DrawerContent
             aria-describedby={undefined}
-            className="min-h-[50vh] max-h-[85vh]"
+            height="fixed"
+            className="p-1.5"
           >
-            <DrawerTitle className="sr-only">
-              {t("autocomplete_options")}
-            </DrawerTitle>
-            <div className="group/combobox-content flex min-h-0 flex-col overflow-y-auto p-3 pb-[max(--spacing(3),env(safe-area-inset-bottom))]">
+            <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+              <DrawerTitle>{placeholder || t("search")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}
             </div>
           </DrawerContent>
         </Drawer>
       ) : (
         <>
-          <ButtonGroup className="w-full">
+          <ButtonGroup className="w-full min-w-0">
             <ComboboxTrigger render={triggerButton} showChevron={false} />
             {clearButton}
           </ButtonGroup>
           <ComboboxContent
             align={align}
-            className={cn("w-(--anchor-width)", popoverContentClassName)}
+            className={cn(
+              "flex w-(--anchor-width) min-h-40 flex-col",
+              popoverContentClassName,
+            )}
           >
             {content}
           </ComboboxContent>

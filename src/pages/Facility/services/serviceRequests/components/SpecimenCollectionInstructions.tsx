@@ -56,7 +56,7 @@ export function SpecimenCollectionInstructions({
           <p className="font-medium text-xs text-foreground uppercase tracking-wide">
             {t("specimen_collection")}
           </p>
-          <Card className="rounded-xl overflow-clip">
+          <Card className="rounded-xl overflow-clip [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
             <Table>
               <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                 <TableRow>
@@ -107,7 +107,7 @@ export function SpecimenCollectionInstructions({
             <p className="font-medium text-xs text-foreground uppercase tracking-wide">
               {t("required_container")}
             </p>
-            <Card className="rounded-xl overflow-clip">
+            <Card className="rounded-xl overflow-clip [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
               <Table>
                 <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                   <TableRow>
@@ -167,7 +167,7 @@ export function SpecimenCollectionInstructions({
           <p className="font-medium text-xs text-foreground uppercase tracking-wide">
             {t("required_processing_storage")}
           </p>
-          <Card className="rounded-xl overflow-clip border">
+          <Card className="rounded-xl overflow-clip border [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
             <Table>
               <TableHeader className="text-xs text-muted-foreground bg-muted uppercase tracking-wide">
                 <TableRow>

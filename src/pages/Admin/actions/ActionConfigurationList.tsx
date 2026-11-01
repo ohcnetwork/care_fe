@@ -84,7 +84,7 @@ export function ActionConfigurationList() {
             description={t("action_configurations_empty_hint")}
           />
         ) : (
-          <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <div className="overflow-hidden rounded-md bg-white">
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow className="bg-gray-50 hover:bg-gray-50">

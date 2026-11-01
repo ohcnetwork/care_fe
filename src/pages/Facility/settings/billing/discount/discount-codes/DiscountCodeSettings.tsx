@@ -102,7 +102,7 @@ export function DiscountCodeSettings() {
           <CreateDiscountCodeSheet />
         </div>
 
-        <div className="rounded-md border overflow-hidden mt-4">
+        <div className="rounded-md overflow-hidden mt-4">
           <Table>
             <TableHeader>
               <TableRow>
