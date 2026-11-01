@@ -120,6 +120,17 @@ export function AppSidebar({
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
 
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [
+    sidebarFor,
+    facilitySettingsSidebar,
+    facilityLocationSidebar,
+    facilityServiceSidebar,
+  ]);
+
   const userOrganizations = user?.organizations;
   const selectedOrganization = React.useMemo(() => {
     if (!userOrganizations || !organizationId) return undefined;
@@ -215,7 +226,7 @@ export function AppSidebar({
         )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent ref={contentRef}>
         {facilityLocationSidebar && <LocationNav />}
         {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
