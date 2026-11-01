@@ -10,7 +10,7 @@ import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test("creates a patient referral using a patient form without attaching an encounter", async ({
+test("creates a patient referral using a referral form without attaching an encounter", async ({
   page,
   request,
 }) => {
@@ -24,7 +24,6 @@ test("creates a patient referral using a patient form without attaching an encou
   const receivingFacilityName = `Receiving hospital ${suffix}`;
   const title = `Patient referral ${suffix}`;
   const patientQuestion = `Patient referral reason ${suffix}`;
-  const encounterQuestion = `Encounter findings ${suffix}`;
   const answer = `Patient requests specialist follow-up ${suffix}`;
   const patientQuestionId = faker.string.uuid();
   let patientFormId: string;
@@ -63,7 +62,7 @@ test("creates a patient referral using a patient form without attaching an encou
     return (await response.json()) as { id: string };
   };
 
-  await test.step("Publish patient and encounter request forms at distinct facilities", async () => {
+  await test.step("Publish a referral request form at distinct facilities", async () => {
     const receivingFacility = await postFixture("/api/v1/facility/", {
       name: receivingFacilityName,
       description: "Receiving facility for patient-only referrals",
@@ -76,34 +75,32 @@ test("creates a patient referral using a patient form without attaching an encou
       features: [],
     });
     receivingFacilityId = receivingFacility.id;
-    const questionnaires = [];
-    for (const subject of ["encounter", "patient"] as const) {
-      const form = await postFixture("/api/v1/questionnaire/", {
-        auth_context: "instance",
-        slug: `${subject}-${suffix}`,
-        title: `${subject} referral intake ${suffix}`,
-        description: "Patient referral context test",
-        status: "active",
-        subject_type: subject,
-        actions: [],
-        questions: [
-          {
-            id: subject === "patient" ? patientQuestionId : faker.string.uuid(),
-            link_id: "reason",
-            text: subject === "patient" ? patientQuestion : encounterQuestion,
-            type: "string",
-            required: true,
-          },
-        ],
-      });
-      if (subject === "patient") patientFormId = form.id;
-      questionnaires.push({
-        questionnaire: form.id,
-        questionnaire_type: "request",
-      });
-    }
+    // Referral forms must use the referral subject type; the create dialog
+    // offers them with or without an attached encounter.
+    const form = await postFixture("/api/v1/questionnaire/", {
+      auth_context: "instance",
+      slug: `patient-referral-${suffix}`,
+      title: `Patient referral intake ${suffix}`,
+      description: "Patient referral context test",
+      status: "active",
+      subject_type: "referral",
+      actions: [],
+      questions: [
+        {
+          id: patientQuestionId,
+          link_id: "reason",
+          text: patientQuestion,
+          type: "string",
+          required: true,
+        },
+      ],
+    });
+    patientFormId = form.id;
+    const questionnaires = [
+      { questionnaire: form.id, questionnaire_type: "request" },
+    ];
     const availabilityData = {
-      description: "Accepts patient and encounter referrals",
+      description: "Accepts patient referrals",
       status: "active",
       is_public: true,
       referral_type: "consultation",
@@ -124,7 +121,7 @@ test("creates a patient referral using a patient form without attaching an encou
     });
   });
 
-  await test.step("Submit from the patient's referrals tab with only a patient form", async () => {
+  await test.step("Submit from the patient's referrals tab without an encounter", async () => {
     await page.goto(patientUrl);
     await page
       .getByRole("button", { name: "New referral", exact: true })
@@ -168,7 +165,6 @@ test("creates a patient referral using a patient form without attaching an encou
     await expect(receivingUnit).toBeVisible();
     await receivingUnit.click();
     await expect(questionBlock(page, patientQuestion)).toBeVisible();
-    await expect(questionBlock(page, encounterQuestion)).toHaveCount(0);
     await expect(
       dialog.getByRole("combobox", { name: "Request form", exact: true }),
     ).toHaveCount(0);
@@ -292,7 +288,7 @@ test("creates a patient referral using a patient form without attaching an encou
       questionnaire_responses: [
         {
           questionnaire: patientFormId,
-          questionnaire_snapshot: { subject_type: "patient" },
+          questionnaire_snapshot: { subject_type: "referral" },
           questionnaire_response: {
             results: [
               { question_id: patientQuestionId, values: [{ value: answer }] },

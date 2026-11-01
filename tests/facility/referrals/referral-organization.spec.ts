@@ -42,7 +42,7 @@ test("configures an organization destination and receives its referral in the or
     title: formTitle,
     description: "Organization referral request",
     status: "active",
-    subject_type: "encounter",
+    subject_type: "referral",
     actions: [],
     questions: [
       {

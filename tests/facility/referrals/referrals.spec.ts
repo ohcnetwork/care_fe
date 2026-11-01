@@ -325,7 +325,7 @@ test.describe("Referrals", () => {
             title: questionnaireTitle,
             description: "Referral intake for the end-to-end workflow",
             status: "active",
-            subject_type: "encounter",
+            subject_type: "referral",
             actions: [],
             questions: [
               {
