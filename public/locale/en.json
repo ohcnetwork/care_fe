@@ -5055,7 +5055,7 @@
   "patient_instruction": "Patient Instruction",
   "patient_is_deceased": "Patient is deceased",
   "patient_location": "Patient Location",
-  "patient_login": "Sign in as Patient",
+  "patient_login": "Log in as Patient",
   "patient_login__back_to_login": "Back to login",
   "patient_login__consent": "I consent to the terms and conditions and agree to sign in securely to access my healthcare account.",
   "patient_login__consent_why": "Why we ask this",
