@@ -77,16 +77,29 @@ export function useClearStructuredRenderFailed(questionId: string) {
   return useAtom(clearAtom)[1];
 }
 
-/** link_id → question_id for enable_when lookups. */
+interface QuestionNode {
+  question: Question;
+  parent?: Question;
+}
+
+const questionNodes = new WeakMap<
+  Record<string, string>,
+  Map<string, QuestionNode>
+>();
+
+/** Index both links and ancestry so disabled controllers count as unanswered. */
 export function buildLinkIndex(questions: Question[]): Record<string, string> {
   const index: Record<string, string> = {};
-  const walk = (list: Question[]) => {
+  const nodes = new Map<string, QuestionNode>();
+  const walk = (list: Question[], parent?: Question) => {
     for (const question of list) {
       index[question.link_id] = question.id;
-      if (question.questions) walk(question.questions);
+      nodes.set(question.id, { question, parent });
+      if (question.questions) walk(question.questions, question);
     }
   };
   walk(questions);
+  questionNodes.set(index, nodes);
   return index;
 }
 
@@ -284,15 +297,47 @@ export function isQuestionEnabledInState(
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
 ): boolean {
+  return isEnabledByConditions(question, responses, linkIndex, new Set());
+}
+
+function isEnabledByConditions(
+  question: Question,
+  responses: Record<string, QuestionnaireResponse>,
+  linkIndex: Record<string, string>,
+  visiting: Set<string>,
+): boolean {
   if (!question.enable_when?.length) return true;
-  const results = question.enable_when.map((condition) =>
-    condition.question in linkIndex
-      ? evaluateEnableWhen(condition, responses[linkIndex[condition.question]])
-      : false,
-  );
-  return question.enable_behavior === "any"
-    ? results.some(Boolean)
-    : results.every(Boolean);
+  if (visiting.has(question.id)) return false;
+  visiting.add(question.id);
+  try {
+    const nodes = questionNodes.get(linkIndex);
+    const results = question.enable_when.map((condition) => {
+      const controllerId = linkIndex[condition.question];
+      if (!controllerId) return false;
+      let enabled = true;
+      for (
+        let controller = nodes?.get(controllerId)?.question;
+        controller && enabled;
+        controller = nodes?.get(controller.id)?.parent
+      ) {
+        enabled = isEnabledByConditions(
+          controller,
+          responses,
+          linkIndex,
+          visiting,
+        );
+      }
+      return evaluateEnableWhen(
+        condition,
+        enabled ? responses[controllerId] : undefined,
+      );
+    });
+    return question.enable_behavior === "any"
+      ? results.some(Boolean)
+      : results.every(Boolean);
+  } finally {
+    visiting.delete(question.id);
+  }
 }
 
 export function useQuestionEnabled(question: Question): boolean {

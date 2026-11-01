@@ -206,7 +206,11 @@ test.describe("Questionnaire v2 builder groups", () => {
       await dialog.getByRole("button", { name: "Move", exact: true }).click();
 
       // A2 is now the first top-level question in the tree nav.
-      await expect(nav.getByRole("button", { name: a2 })).toContainText("1.");
+      await expect(
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp([a2, groupA, groupB].join("|")) }),
+      ).toHaveText([a2, groupA, groupB]);
     });
   });
 

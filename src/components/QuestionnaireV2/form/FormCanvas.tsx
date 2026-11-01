@@ -168,7 +168,6 @@ function CanvasBody({
             index={index}
             siblingCount={questions.length}
             depth={0}
-            number={`${index + 1}.`}
           />
         ))}
         {AppendZone && <AppendZone parentId={null} />}

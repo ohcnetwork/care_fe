@@ -27,8 +27,8 @@ import { contextFieldInput } from "./contextFieldInput";
 import {
   ActionVariableSources,
   contextValueLabel,
-  numberedQuestionLabel,
   operatorLabel,
+  questionLabel,
   unusableReasonLabel,
 } from "./labels";
 
@@ -132,11 +132,7 @@ export function ActionConditionRow({
                           !!entry.unusable && entry.unusable !== "link_id"
                         }
                       >
-                        {numberedQuestionLabel(
-                          entry.question,
-                          sources.numbers,
-                          t,
-                        )}
+                        {questionLabel(entry.question, t)}
                         {entry.unusable && entry.unusable !== "link_id" && (
                           <span className="ml-1 text-xs text-gray-400">
                             · {unusableReasonLabel(entry.unusable, t)}

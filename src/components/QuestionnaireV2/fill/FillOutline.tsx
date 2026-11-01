@@ -11,7 +11,7 @@ import {
   useHiddenQuestionIds,
 } from "@/components/QuestionnaireV2/form/FormContext";
 import type { TreeItem } from "@/components/QuestionnaireV2/shared/questionTree";
-import { numberQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { buildQuestionTree } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -29,7 +29,7 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const answeredIds = useAnsweredQuestionIds();
   const { activeQuestionId, scrollToQuestion } = useFillOutlineNav();
 
-  const items = numberQuestions(questionnaire.questions).filter(
+  const items = buildQuestionTree(questionnaire.questions).filter(
     (item) => !hiddenIds.has(item.question.id),
   );
 
@@ -71,7 +71,6 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
         )}
       >
         <span className="min-w-0 flex-1">
-          <span className="mr-1">{item.number}</span>
           {item.question.text || (
             <span className="italic text-gray-400">
               {t("untitled_question")}
@@ -79,7 +78,7 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
           )}
         </span>
         {/* Decorative completion cue — aria-hidden keeps row accessible
-            names (number + title) unchanged. */}
+            names unchanged. */}
         <span aria-hidden className="flex shrink-0 items-center self-center">
           {stateIcon(item.question)}
         </span>

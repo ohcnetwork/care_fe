@@ -14,9 +14,7 @@ import {
 import { EditPreviewToggle } from "@/components/QuestionnaireV2/builder/EditPreviewToggle";
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import { SaveIssue } from "@/components/QuestionnaireV2/builder/saveValidation";
-import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
-import { Question } from "@/types/questionnaire/question";
 import {
   QUESTIONNAIRE_STATUS_COLORS,
   QuestionnaireRead,
@@ -26,7 +24,6 @@ import {
 
 export interface StudioTopBarProps {
   questionnaire: QuestionnaireRead;
-  questions: Question[];
   view: "edit" | "preview";
   onViewChange: (view: "edit" | "preview") => void;
   issues: SaveIssue[];
@@ -46,25 +43,15 @@ export interface StudioTopBarProps {
 function IssuesList({
   issues,
   actionIssues,
-  questions,
   onSelect,
   onSelectAction,
 }: {
   issues: SaveIssue[];
   actionIssues: ActionIssue[];
-  questions: Question[];
   onSelect: (questionId: string) => void;
   onSelectAction: (index: number) => void;
 }) {
   const { t } = useTranslation();
-  // One numbering pass for the whole list — findQuestionNumber would walk
-  // the tree once per issue.
-  const numbers = new Map(
-    flattenNumberedQuestions(questions).map(({ question, number }) => [
-      question.id,
-      number,
-    ]),
-  );
 
   return (
     <>
@@ -89,7 +76,6 @@ function IssuesList({
                 {t(messageKey)}
               </span>
               <span className="block truncate text-xs text-gray-500">
-                {numbers.get(question.id)}{" "}
                 {question.text || t("untitled_question")}
               </span>
             </span>
@@ -126,7 +112,6 @@ function IssuesList({
  *  Edit/Preview toggle and the Discard / Save Changes actions. */
 export function StudioTopBar({
   questionnaire,
-  questions,
   view,
   onViewChange,
   issues,
@@ -196,7 +181,6 @@ export function StudioTopBar({
               <IssuesList
                 issues={issues}
                 actionIssues={actionIssues}
-                questions={questions}
                 onSelect={(questionId) => {
                   setIssuesOpen(false);
                   onSelectIssue(questionId);

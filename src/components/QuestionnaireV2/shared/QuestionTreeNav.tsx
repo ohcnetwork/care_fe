@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { Question } from "@/types/questionnaire/question";
 
-import { TreeItem, numberQuestions } from "./questionTree";
+import { TreeItem, buildQuestionTree } from "./questionTree";
 import { QUESTION_TYPE_ICONS } from "./questionTypeIcons";
 
 export interface QuestionTreeNavProps {
@@ -17,10 +17,10 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Question ids currently hidden by enable_when; numbering stays stable. */
+  /** Question ids currently hidden by enable_when. */
   hiddenIds?: Set<string>;
   /** Decorative per-row trailing icons (the studio's logic/issue cues) —
-   *  rendered aria-hidden so row accessible names stay number + title. */
+   *  rendered aria-hidden so row accessible names stay title. */
   rowAdornment?: (question: Question) => React.ReactNode;
   /** Accessible name for the `nav` landmark when the consumer renders its
    *  own visible heading instead of passing `title`. Supply one of the two. */
@@ -39,7 +39,7 @@ export function QuestionTreeNav({
   ariaLabel,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
-  const items = numberQuestions(questions).filter(
+  const items = buildQuestionTree(questions).filter(
     (item) => !hiddenIds?.has(item.question.id),
   );
 
@@ -63,7 +63,6 @@ export function QuestionTreeNav({
           ),
         )}
       >
-        <span className="shrink-0">{item.number}</span>
         {/* Decorative type recognition cue; aria-hidden keeps row names unchanged. */}
         <span
           aria-hidden

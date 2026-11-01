@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate, parseISO } from "date-fns";
-import { Edit, EllipsisVertical, History } from "lucide-react";
+import { Edit, EllipsisVertical } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,11 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   ExtensionFieldWithName,
   getExtensionFieldsWithName,
@@ -93,7 +88,6 @@ interface SupplyDeliveryTableProps {
   onDeliverySelect?: (deliveryId: string, checked: boolean) => void;
   onSelectAll?: (checked: boolean) => void;
   internal?: boolean;
-  onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
   onEditDelivery?: (delivery: SupplyDeliveryRead) => void;
   editingDeliveryIds?: string[];
   deliveryOrderStatus?: DeliveryOrderStatus;
@@ -147,7 +141,6 @@ export function SupplyDeliveryTable({
   onDeliverySelect,
   onSelectAll,
   internal = false,
-  onDeliveryClick,
   onEditDelivery,
   editingDeliveryIds = [],
   deliveryOrderStatus,
@@ -415,23 +408,6 @@ export function SupplyDeliveryTable({
                     linkToProduct={linkToProduct}
                     facilityId={facilityId}
                   />
-                  {onDeliveryClick && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 shrink-0 text-gray-500"
-                          aria-label={t("view_history")}
-                          onClick={() => onDeliveryClick(delivery)}
-                        >
-                          <History className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("view_history")}</TooltipContent>
-                    </Tooltip>
-                  )}
                 </div>
                 {isEditing && (
                   <Badge

@@ -48,7 +48,6 @@ export function RegisteredGroupSlot(props: {
   question: Question;
   depth: number;
   disabled: boolean;
-  number?: string;
 }) {
   const { question, disabled } = props;
   const { t } = useTranslation();
@@ -203,7 +202,6 @@ export function RegisteredGroupSlot(props: {
         index={index}
         siblingCount={children.length}
         depth={props.depth + 1}
-        number={props.number ? `${props.number}${index + 1}.` : undefined}
       />
     ));
   const fallback = (
@@ -227,9 +225,7 @@ export function RegisteredGroupSlot(props: {
       data-response-path={JSON.stringify(path)}
       className="space-y-3 rounded-xl border border-border bg-background p-3.5"
     >
-      <h3 className="text-sm font-semibold">
-        {props.number} {question.text}
-      </h3>
+      <h3 className="text-sm font-semibold">{question.text}</h3>
       {question.description && (
         <p className="text-sm text-gray-600">{question.description}</p>
       )}

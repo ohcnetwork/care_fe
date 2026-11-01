@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { flattenQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -55,9 +55,9 @@ export function StudioMobileQuestionNav({
             <SelectValue placeholder={t("select_question")} />
           </SelectTrigger>
           <SelectContent>
-            {flattenNumberedQuestions(questions).map(({ question, number }) => (
+            {flattenQuestions(questions).map(({ question }) => (
               <SelectItem key={question.id} value={question.id}>
-                {number} {question.text || t("untitled_question")}
+                {question.text || t("untitled_question")}
               </SelectItem>
             ))}
           </SelectContent>

@@ -19,7 +19,6 @@ export function RepeatingGroup(props: {
   question: Question;
   depth: number;
   disabled: boolean;
-  number?: string;
 }) {
   const { question, disabled } = props;
   const { t } = useTranslation();
@@ -39,9 +38,7 @@ export function RepeatingGroup(props: {
       data-response-path={JSON.stringify(path)}
       className="space-y-3 rounded-xl border border-border bg-background p-3.5"
     >
-      <h3 className="text-sm font-semibold">
-        {props.number} {question.text}
-      </h3>
+      <h3 className="text-sm font-semibold">{question.text}</h3>
       {question.description && (
         <p className="text-sm text-gray-600">{question.description}</p>
       )}
@@ -52,11 +49,7 @@ export function RepeatingGroup(props: {
           className="space-y-2 rounded-lg border border-gray-200 p-2"
         >
           <ResponseRowProvider groupId={question.id} rowIndex={index}>
-            <SectionCard
-              {...props}
-              depth={props.depth + 1}
-              number={`${index + 1}.`}
-            />
+            <SectionCard {...props} depth={props.depth + 1} />
           </ResponseRowProvider>
           {mode !== "readonly" && (
             <Button

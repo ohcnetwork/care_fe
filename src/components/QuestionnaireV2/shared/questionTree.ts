@@ -8,29 +8,21 @@ import { EnableWhen, Question } from "@/types/questionnaire/question";
 
 export interface TreeItem {
   question: Question;
-  number: string;
   children: TreeItem[];
 }
 
-/** Stable dotted ordinals at every authored depth: 1., 1.1., 1.1.1., … */
-export function numberQuestions(questions: Question[]): TreeItem[] {
-  const numberLevel = (list: Question[], prefix: string): TreeItem[] =>
-    list.map((question, index) => {
-      const number = `${prefix}${index + 1}.`;
-      return {
-        question,
-        number,
-        children: numberLevel(question.questions ?? [], number),
-      };
-    });
-  return numberLevel(questions, "");
+export function buildQuestionTree(questions: Question[]): TreeItem[] {
+  return questions.map((question) => ({
+    question,
+    children: buildQuestionTree(question.questions ?? []),
+  }));
 }
 
-/** Pre-order numbered rows for flat selects, issue lists, and action labels. */
-export function flattenNumberedQuestions(questions: Question[]): TreeItem[] {
+/** Pre-order rows for question navigation and selects. */
+export function flattenQuestions(questions: Question[]): TreeItem[] {
   const flatten = (items: TreeItem[]): TreeItem[] =>
     items.flatMap((item) => [item, ...flatten(item.children)]);
-  return flatten(numberQuestions(questions));
+  return flatten(buildQuestionTree(questions));
 }
 
 /** Pre-order depth-first search for the first question matching `predicate`
@@ -82,19 +74,6 @@ export function findTopLevelIndex(
     containsQuestion(question, questionId),
   );
   return index === -1 ? 0 : index;
-}
-
-/**
- * Looks up `questionId`'s own dotted number at any depth, or undefined
- * when the question does not belong to this tree.
- */
-export function findQuestionNumber(
-  questions: Question[],
-  questionId: string,
-): string | undefined {
-  return flattenNumberedQuestions(questions).find(
-    (item) => item.question.id === questionId,
-  )?.number;
 }
 
 /** Questions that record answers (everything except `group` containers),

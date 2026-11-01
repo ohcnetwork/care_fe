@@ -27,7 +27,6 @@ import { questionOfRef } from "@/components/QuestionnaireV2/builder/actionVariab
 import {
   ActionVariableSources,
   contextValueLabel,
-  numberedQuestionLabel,
   questionLabel,
 } from "./labels";
 
@@ -81,7 +80,7 @@ function VariableSourceMenu({
                 onSelect={() => onPick(entry.ref)}
               >
                 <span className="truncate">
-                  {numberedQuestionLabel(entry.question, sources.numbers, t)}
+                  {questionLabel(entry.question, t)}
                 </span>
               </DropdownMenuItem>
             ))}

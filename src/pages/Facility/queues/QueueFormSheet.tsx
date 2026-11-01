@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,6 +58,8 @@ interface QueueFormSheetProps {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   initialDate?: Date;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function QueueFormSheet({
@@ -67,9 +70,13 @@ export default function QueueFormSheet({
   trigger,
   onSuccess,
   initialDate,
+  open,
+  onOpenChange,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = onOpenChange ?? setInternalOpen;
   const queryClient = useQueryClient();
 
   const isEditMode = Boolean(queueId);
@@ -98,7 +105,7 @@ export default function QueueFormSheet({
     if (queue && isEditMode) {
       form.reset({
         name: queue.name,
-        date: new Date(queue.date),
+        date: parseISO(queue.date),
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -166,14 +173,16 @@ export default function QueueFormSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="size-4 mr-2" />
-            {isEditMode ? t("edit") : t("create_queue")}
-          </Button>
-        )}
-      </SheetTrigger>
+      {(trigger || open === undefined) && (
+        <SheetTrigger asChild>
+          {trigger || (
+            <Button>
+              <Plus className="size-4 mr-2" />
+              {isEditMode ? t("edit") : t("create_queue")}
+            </Button>
+          )}
+        </SheetTrigger>
+      )}
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
