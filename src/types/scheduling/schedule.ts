@@ -5,14 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { CareTeamMember, CareTeamResponse } from "@/types/careTeam/careTeam";
 import { EncounterListRead } from "@/types/emr/encounter/encounter";
 import {
   PatientListRead,
   PatientRead,
   PublicPatientRead,
 } from "@/types/emr/patient/patient";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationRead } from "@/types/location/location";
 import { getLocationPath } from "@/types/location/utils";
@@ -43,7 +45,23 @@ export interface AvailabilityDateTime {
   end_time: Time;
 }
 
-export interface ScheduleTemplate {
+/**
+ * Departments and care team applied to encounters created from a schedule's
+ * appointments. Only detail responses (schedule and appointment retrieve)
+ * include them; list responses omit them.
+ */
+export interface ScheduleEncounterDefaults {
+  organizations?: FacilityOrganizationRead[];
+  care_team?: CareTeamResponse[];
+}
+
+/** Omitted fields keep the schedule's current defaults on update. */
+export interface ScheduleEncounterDefaultsRequest {
+  organizations?: string[];
+  care_team?: CareTeamMember[];
+}
+
+export interface ScheduleTemplate extends ScheduleEncounterDefaults {
   id: string;
   name: string;
   valid_from: string;
@@ -74,7 +92,7 @@ type ScheduleAvailabilityBase = {
     }
 );
 
-export interface ScheduleTemplateCreateRequest {
+export interface ScheduleTemplateCreateRequest extends ScheduleEncounterDefaultsRequest {
   name: string;
   valid_from: string; // datetime
   valid_to: string; // datetime
@@ -88,7 +106,7 @@ export interface ScheduleTemplateSetChargeItemDefinitionRequest {
   re_visit_allowed_days: number;
   re_visit_charge_item_definition: string | null;
 }
-export interface ScheduleTemplateUpdateRequest {
+export interface ScheduleTemplateUpdateRequest extends ScheduleEncounterDefaultsRequest {
   name: string;
   valid_from: string;
   valid_to: string;
@@ -128,7 +146,7 @@ export interface TokenSlot {
     schedule: {
       id: string;
       name: string;
-    };
+    } & ScheduleEncounterDefaults;
   };
   start_datetime: string; // ISO 8601 datetime with timezone offset
   end_datetime: string; // ISO 8601 datetime with timezone offset
@@ -262,7 +280,7 @@ export type AppointmentRead = Appointment & {
 export interface AppointmentCreateRequest {
   patient: string;
   note: string;
-  tags: string[];
+  tags: TagSetRequest[];
 }
 
 export interface AppointmentCreatePublicRequest {
@@ -290,7 +308,7 @@ export interface AppointmentRescheduleRequest {
   new_slot: string;
   previous_booking_note: string;
   new_booking_note: string;
-  tags: string[];
+  tags: TagSetRequest[];
 }
 
 export const storeUserInLocalStorage = (user: UserReadMinimal) => {

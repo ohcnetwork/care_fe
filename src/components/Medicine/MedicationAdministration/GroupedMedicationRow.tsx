@@ -232,12 +232,16 @@ const IndividualMedicationRow: React.FC<{
                   STATUS_COLORS[admin.status as keyof typeof STATUS_COLORS] ||
                   STATUS_COLORS.default;
                 return (
-                  <button
+                  <Button
+                    variant="ghost"
                     key={admin.id}
                     type="button"
                     className={cn(
-                      "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border cursor-pointer hover:opacity-80",
-                      colorClass,
+                      "h-auto",
+                      cn(
+                        "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border cursor-pointer hover:opacity-80",
+                        colorClass,
+                      ),
                     )}
                     onClick={() => onEditAdministration(medication, admin)}
                   >
@@ -246,7 +250,7 @@ const IndividualMedicationRow: React.FC<{
                       "en-US",
                       { hour: "numeric", minute: "2-digit", hour12: true },
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -284,13 +288,16 @@ const IndividualMedicationRow: React.FC<{
         )}
       >
         {isActive && canWrite && (
-          <div
-            className="flex flex-col p-1 rounded-md cursor-pointer items-center text-red-600 border-red-300 hover:bg-red-100 hover:text-red-700"
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="h-auto flex-col gap-1 p-1"
             onClick={() => onDiscontinue(medication)}
           >
             <CircleStop className="size-4" />
             <span className="text-xs">{t("stop")}</span>
-          </div>
+          </Button>
         )}
       </div>
     </React.Fragment>
@@ -358,16 +365,18 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           <div className="flex items-start gap-2">
             {hasMultipleRequests ? (
               <CollapsibleTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
-                  className="mt-0.5 p-0.5 rounded hover:bg-gray-200 transition-colors"
+                  aria-label={t(isExpanded ? "collapse" : "expand")}
+                  className="h-auto w-auto p-1 mt-0.5 p-0.5 rounded hover:bg-gray-200 transition-colors"
                 >
                   {isExpanded ? (
                     <ChevronDown className="size-4 text-gray-500" />
                   ) : (
                     <ChevronRight className="size-4 text-gray-500" />
                   )}
-                </button>
+                </Button>
               </CollapsibleTrigger>
             ) : (
               <div className="w-5" /> // Spacer for alignment
@@ -506,12 +515,16 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                         admin.status as keyof typeof STATUS_COLORS
                       ] || STATUS_COLORS.default;
                     return (
-                      <button
+                      <Button
+                        variant="ghost"
                         key={admin.id}
                         type="button"
                         className={cn(
-                          "rounded px-1.5 py-0.5 text-xs font-medium border cursor-pointer hover:opacity-80",
-                          colorClass,
+                          "h-auto",
+                          cn(
+                            "rounded px-1.5 py-0.5 text-xs font-medium border cursor-pointer hover:opacity-80",
+                            colorClass,
+                          ),
                         )}
                         onClick={() => {
                           const med = group.requests.find(
@@ -527,7 +540,7 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
                           minute: "2-digit",
                           hour12: true,
                         })}
-                      </button>
+                      </Button>
                     );
                   })}
                   {slotAdmins.length > 3 && (
@@ -571,12 +584,15 @@ export const GroupedMedicationRow: React.FC<GroupedMedicationRowProps> = ({
           {group.hasActiveRequests && canWrite && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <div
-                  className="p-2 rounded-md cursor-pointer text-red-600 border-red-300 hover:bg-red-100 hover:text-red-700"
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon-sm"
+                  aria-label={t("discontinue")}
                   onClick={() => onDiscontinueGroup(group)}
                 >
                   <CircleStop className="size-4" />
-                </div>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>{t("discontinue")}</TooltipContent>
             </Tooltip>

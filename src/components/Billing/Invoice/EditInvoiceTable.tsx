@@ -436,7 +436,7 @@ export function EditInvoiceTable({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <Table className="border">
+          <Table>
             <TableHeader>
               <TableRow className="divide-x font-semibold">
                 <TableHead className="w-12">#</TableHead>
@@ -798,7 +798,7 @@ export function EditInvoiceTable({
                                                       );
                                                     }}
                                                     disabled={isDisabled}
-                                                    className="data-[state=unchecked]:bg-gray-900"
+                                                    className="data-unchecked:bg-gray-900"
                                                   />
                                                 </FormControl>
                                                 <span className="text-sm text-gray-500">

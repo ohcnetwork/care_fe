@@ -4,6 +4,8 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
+import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
+
 import PatientUserProvider from "@/Providers/PatientUserProvider";
 import DiagnosticReportDetail from "@/pages/Patient/DiagnosticReportDetail";
 import PatientProfileSettings from "@/pages/Patient/PatientProfileSettings";
@@ -20,9 +22,11 @@ import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
 import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
+import ReferralRoutes from "./routes/ReferralRoutes";
 
 /** Routes available to a patient signed in with an OTP session. */
 const DashboardRoutes = {
+  ...ReferralRoutes,
   "/nearby_facilities": () => <BookFacility />,
   "/facility/:facilityId/appointments/:appointmentId/success": ({
     appointmentId,
@@ -103,6 +107,7 @@ const AppointmentRoutes = {
 };
 
 export default function PatientRouter() {
+  useRefreshStickyAfterScrollLock();
   const pages = useRoutes(DashboardRoutes);
 
   const appointmentPages = useRoutes(AppointmentRoutes);

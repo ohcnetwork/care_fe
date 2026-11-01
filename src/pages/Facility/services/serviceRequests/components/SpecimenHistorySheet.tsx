@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { EmptyState } from "@/components/ui/empty-state";
@@ -14,10 +15,29 @@ import {
 } from "@/components/ui/sheet";
 
 import {
+  ProcessingSpec,
   SPECIMEN_STATUS_COLORS,
   SpecimenRead,
 } from "@/types/emr/specimen/specimen";
 import { round } from "@/Utils/decimal";
+
+// Processing entries are embedded values without IDs. Count identical signatures
+// separately so duplicate events retain unique keys without depending on list order.
+function processingEventsWithKeys(processing: ProcessingSpec[]) {
+  const occurrences = new Map<string, number>();
+  return processing.map((event) => {
+    const signature = JSON.stringify([
+      event.time_date_time,
+      event.performer,
+      event.method?.system,
+      event.method?.code,
+      event.description,
+    ]);
+    const occurrence = occurrences.get(signature) ?? 0;
+    occurrences.set(signature, occurrence + 1);
+    return { event, key: `${signature}:${occurrence}` };
+  });
+}
 
 interface SpecimenHistorySheetProps {
   specimens: SpecimenRead[];
@@ -63,11 +83,15 @@ export function SpecimenHistorySheet({
 
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <p className="text-gray-500">{t("specimen_type")}</p>
+                        <p className="text-muted-foreground">
+                          {t("specimen_type")}
+                        </p>
                         <p>{specimen.specimen_type?.display || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("collected_at")}</p>
+                        <p className="text-muted-foreground">
+                          {t("collected_at")}
+                        </p>
                         <p>
                           {specimen.collection?.collected_date_time
                             ? new Date(
@@ -77,7 +101,7 @@ export function SpecimenHistorySheet({
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">{t("quantity")}</p>
+                        <p className="text-muted-foreground">{t("quantity")}</p>
                         <p>
                           {specimen.collection?.quantity
                             ? `${round(specimen.collection.quantity.value)} ${specimen.collection.quantity.unit.display}`
@@ -85,16 +109,55 @@ export function SpecimenHistorySheet({
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-muted-foreground">
                           {t("collection_method")}
                         </p>
                         <p>{specimen.collection?.method?.display || "-"}</p>
                       </div>
                     </div>
 
+                    {specimen.processing.length > 0 && (
+                      <div className="space-y-2 border-t pt-3">
+                        <h4 className="text-sm font-medium">
+                          {t("processing")}
+                        </h4>
+                        <ul className="space-y-2 text-sm">
+                          {processingEventsWithKeys(specimen.processing).map(
+                            ({ event: processing, key }) => (
+                              <li key={key} className="space-y-0.5">
+                                <p>
+                                  {processing.method?.display ||
+                                    processing.description ||
+                                    t("method")}
+                                </p>
+                                {processing.method?.display &&
+                                  processing.description !==
+                                    processing.method.display && (
+                                    <p className="text-muted-foreground">
+                                      {processing.description}
+                                    </p>
+                                  )}
+                                {processing.time_date_time && (
+                                  <time
+                                    className="block text-muted-foreground"
+                                    dateTime={processing.time_date_time}
+                                  >
+                                    {format(
+                                      new Date(processing.time_date_time),
+                                      "MMM d, yyyy, h:mm a",
+                                    )}
+                                  </time>
+                                )}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
                     {specimen.note && (
                       <div>
-                        <p className="text-gray-500">{t("notes")}</p>
+                        <p className="text-muted-foreground">{t("notes")}</p>
                         <p className="text-sm">{specimen.note}</p>
                       </div>
                     )}

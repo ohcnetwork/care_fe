@@ -5,6 +5,7 @@ import {
   openCreateEncounterDialog,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { expectToast } from "tests/helper/ui";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -55,8 +56,8 @@ function encounterStatusCombobox(page: Page) {
 }
 
 async function openEncounterUpdateForm(page: Page) {
-  await page.getByRole("tab", { name: "Details" }).click();
-  await page.getByRole("link", { name: "Update Encounter" }).click();
+  // The encounter header's edit link opens the encounter update form.
+  await page.getByRole("link", { name: "Edit encounter", exact: true }).click();
   await expect(encounterStatusCombobox(page)).toBeVisible();
 }
 
@@ -81,7 +82,7 @@ async function selectClosingStatus(page: Page, status: string) {
 }
 
 async function submitQuestionnaire(page: Page) {
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  await page.getByRole("button", { name: "Save Changes", exact: true }).click();
 }
 
 async function expectSubmissionSuccess(page: Page) {
@@ -219,7 +220,12 @@ test.describe("Planned Encounter Status Transition", () => {
       if (status === "discharged") {
         await test.step("Complete the discharged encounter without changing its end date", async () => {
           await page.getByRole("tab", { name: "Actions", exact: true }).click();
-          await page.getByRole("button", { name: "Mark as Completed" }).click();
+          // The page also renders an sr-only "Mark as Completed" button as
+          // its keyboard-shortcut target; click the one in the Actions tab.
+          await page
+            .getByRole("tabpanel", { name: "Actions", exact: true })
+            .getByRole("button", { name: "Mark as Completed" })
+            .click();
           await page
             .getByRole("alertdialog", { name: "Mark as Complete" })
             .getByRole("button", { name: /^Mark as Complete/ })
@@ -251,15 +257,21 @@ test.describe("Planned Encounter Status Transition", () => {
         await openEncounterUpdateForm(page);
         await selectClosingStatus(page, status);
         await submitQuestionnaire(page);
+        await expectToast(page, "Failed to submit questionnaire");
         await expect(
-          page.getByText("Failed to submit questionnaire"),
+          page.locator('[data-slot="alert"]').getByText(VALIDATION_ERROR_TEXT),
         ).toBeVisible();
-        await expect(page.getByText(VALIDATION_ERROR_TEXT)).toBeVisible();
       });
 
       await test.step("Cleanup: cancel the unchanged planned encounter", async () => {
-        // Discharged disables the status picker. Reload the unchanged backend state.
+        // Discharged disables the status picker. Reload the unchanged backend
+        // state, then discard the failed attempt's local draft: saving is
+        // blocked until a restored draft is resumed or discarded.
         await page.reload();
+        await page
+          .getByRole("button", { name: "Discard", exact: true })
+          .click();
+        await expect(page.getByText(/unsaved entry from/i)).not.toBeVisible();
         await expect(encounterStatusCombobox(page)).toContainText("Planned");
         await cancelEncounterFromCurrentForm(page);
       });

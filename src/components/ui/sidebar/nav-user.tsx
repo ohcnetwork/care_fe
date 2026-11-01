@@ -1,5 +1,4 @@
-import { CaretSortIcon } from "@radix-ui/react-icons";
-import { BadgeCheck, LogOut, RefreshCw } from "lucide-react";
+import { BadgeCheck, ChevronsUpDown, LogOut, RefreshCw } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -18,9 +17,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 
-import { Avatar } from "@/components/Common/Avatar";
+import { SidebarUserAvatar } from "@/components/ui/sidebar/sidebar-user-avatar";
 
 import { useAppVersion } from "@/hooks/useAppVersion";
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
@@ -36,6 +36,7 @@ export function FacilityNavUser({
   const { t } = useTranslation();
   const user = useAuthUser();
   const { isMobile, open } = useSidebar();
+  const { handleMenuOpenChange } = useAppSidebar();
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
   const { pendingUpdate, updateApp } = useAppVersion();
@@ -46,48 +47,52 @@ export function FacilityNavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={handleMenuOpenChange}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="bg-strong-background/60 shadow-sm data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+              tooltip={formatName(user)}
+              aria-label={formatName(user)}
             >
-              <Avatar
-                className="size-8 rounded-lg"
+              <SidebarUserAvatar
                 name={formatName(user, true)}
                 imageUrl={user.profile_picture_url}
               />
               {(open || isMobile) && (
                 <>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
+                  <div className="grid min-w-0 flex-1 gap-0.5 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
                       {formatName(user)}
                     </span>
-                    <span className="truncate text-xs">{user.username}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user.user_type ? t(user.user_type) : user.username}
+                    </span>
                   </div>
-                  <CaretSortIcon className="ml-auto size-4" />
+                  <ChevronsUpDown className="ml-auto size-4 opacity-60" />
                 </>
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            className="w-(--anchor-width) min-w-56 rounded-lg"
+            side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar
-                  className="size-8 rounded-lg"
+                <SidebarUserAvatar
                   name={formatName(user, true)}
                   imageUrl={user.profile_picture_url}
                 />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
+                <div className="grid min-w-0 flex-1 gap-0.5 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">
                     {formatName(user)}
                   </span>
-                  <span className="truncate text-xs">{user.username}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.username}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>

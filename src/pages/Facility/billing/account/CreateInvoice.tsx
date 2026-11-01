@@ -500,7 +500,7 @@ export function CreateInvoicePage({
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
+                <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -809,6 +809,7 @@ export function CreateInvoicePage({
                           },
                         }}
                         translationBaseKey="charge_item_definition"
+                        data-shortcut-id="enter-action"
                       />
                     </div>
                   )}
@@ -863,9 +864,10 @@ export function CreateInvoicePage({
               onOpenChange={setOptionalFieldsOpen}
             >
               <CollapsibleTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-950 transition-colors py-2 group"
+                  className="h-auto justify-start whitespace-normal px-0 flex items-center gap-2 text-sm text-gray-600 hover:text-gray-950 transition-colors py-2 group"
                 >
                   <ChevronRight
                     className={cn(
@@ -879,7 +881,7 @@ export function CreateInvoicePage({
                   <span className="text-xs text-gray-400 group-hover:text-gray-500">
                     ({t("optional")})
                   </span>
-                </button>
+                </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-4 pt-2 pb-4">

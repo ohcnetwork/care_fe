@@ -33,7 +33,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+
 import {
   ResourceCategoryCreate,
   ResourceCategoryRead,
@@ -42,6 +42,8 @@ import {
   ResourceCategoryUpdate,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
+import { slugValueSchema } from "@/types/base/slug/schema";
+import { generateSlugValue } from "@/Utils/slug";
 import { ResourceSubTypePicker } from "./ResourceSubTypePicker";
 
 interface ResourceCategoryFormProps {
@@ -69,10 +71,7 @@ export function ResourceCategoryForm({
 
   const formSchema = z.object({
     title: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    slug_value: slugValueSchema(),
     description: z.string().optional(),
     resource_sub_type: z.enum(ResourceCategorySubType),
   });
@@ -123,7 +122,7 @@ export function ResourceCategoryForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+        form.setValue("slug_value", generateSlugValue(value.title), {
           shouldValidate: true,
         });
       }
@@ -227,7 +226,7 @@ export function ResourceCategoryForm({
                         if (!isEditing) {
                           form.setValue(
                             "slug_value",
-                            generateSlug(e.target.value || "", 25),
+                            generateSlugValue(e.target.value),
                             {
                               shouldValidate: true,
                             },

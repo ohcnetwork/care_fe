@@ -15,6 +15,7 @@ export enum FileType {
   CONSENT = "consent",
   DIAGNOSTIC_REPORT = "diagnostic_report",
   SERVICE_REQUEST = "service_request",
+  REFERRAL = "referral",
 }
 
 export interface FileBase {

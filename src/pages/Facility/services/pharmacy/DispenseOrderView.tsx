@@ -51,8 +51,11 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceList, InvoiceStatus } from "@/types/billing/invoice/invoice";
-import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import {
+  InvoiceCreate,
+  InvoiceList,
+  InvoiceStatus,
+} from "@/types/billing/invoice/invoice";
 import {
   DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderStatus,
@@ -66,9 +69,9 @@ import {
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 
 import { AddDispenseMedicationRow } from "@/pages/Facility/services/pharmacy/components/AddDispenseMedicationRow";
+import { createAndIssueInvoice } from "@/pages/Facility/services/pharmacy/utils/createAndIssueInvoice";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import usePatientDefaultBillingAccount from "@/types/billing/account/hooks/useDefaultBillingAccount";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
@@ -113,6 +116,7 @@ export function DispenseOrderView({
 
   const [{ autoAdvanceStatus }, setQParams] = useQueryParams<{
     autoAdvanceStatus?: string;
+    collectPayment?: string;
   }>();
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
@@ -292,19 +296,26 @@ export function DispenseOrderView({
       dispenseOrder?.status === DispenseOrderStatus.draft
     ) {
       autoAdvanceTriggered.current = true;
-      setQParams({}, { replace: true });
+      const params = new URLSearchParams(window.location.search);
+      params.delete("autoAdvanceStatus");
+      setQParams(Object.fromEntries(params), { replace: true });
       updateStatus({ newStatus: DispenseOrderStatus.in_progress });
     }
   }, [autoAdvanceStatus, dispenseOrder?.status, setQParams, updateStatus]);
 
+  const invalidateBillingQueries = () =>
+    Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["medication_dispense", dispenseOrderId, locationId],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["accounts", dispenseOrder?.patient.id],
+      }),
+      queryClient.invalidateQueries({ queryKey: ["invoice"] }),
+    ]);
+
   const handlePaymentSuccess = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["medication_dispense", dispenseOrderId, locationId],
-    });
-    queryClient.invalidateQueries({
-      queryKey: ["accounts", dispenseOrder?.patient.id],
-    });
-    queryClient.invalidateQueries({ queryKey: ["invoice"] });
+    invalidateBillingQueries();
 
     // Any billing activity (create / issue invoice, collect payment) implies
     // the order is actively being worked on — bump it from draft to in_progress.
@@ -314,19 +325,24 @@ export function DispenseOrderView({
   };
 
   const { mutate: createInvoice, isPending: isCreatingInvoice } = useMutation({
-    mutationFn: mutate(invoiceApi.createInvoice, {
-      pathParams: { facilityId },
-    }),
-    onSuccess: () => {
-      toast.success(t("invoice_created_successfully"));
+    mutationFn: (data: Pick<InvoiceCreate, "account" | "charge_items">) =>
+      createAndIssueInvoice(facilityId, data),
+    onSuccess: (invoice) => {
+      toast.success(t("invoice_issued_successfully"));
+      setQParams(
+        { collectPayment: invoice.id },
+        { overwrite: false, replace: true },
+      );
       handlePaymentSuccess();
     },
+    // Creation may have succeeded even if issuance failed. Refetch the saved
+    // draft so the existing Issue Invoice action can retry without creating it again.
+    onError: invalidateBillingQueries,
   });
 
   const handleCreateInvoice = (items: ChargeItemRead[]) => {
     if (!account?.id) return;
     createInvoice({
-      status: InvoiceStatus.draft,
       account: account.id,
       charge_items: items.map((item) => item.id),
     });

@@ -84,6 +84,7 @@ const processRowLocations = (data: string[][]) => {
         name: location,
         form: locationForm,
         mode: locationForm === "bd" ? "instance" : "kind",
+        inventory_usage: "none",
         status: "active",
         operational_status: "U",
         description,
@@ -399,7 +400,7 @@ const HierarchicalLocationPreview = ({
           </CollapsibleTrigger>
 
           {hasChildren && (
-            <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+            <CollapsibleContent className="data-open:animate-collapsible-down data-closed:animate-collapsible-up overflow-hidden">
               <div className="ml-6 border-l-2 border-gray-200">
                 {location.children.map((child) =>
                   renderLocationItem(child, depth + 1),
@@ -542,6 +543,7 @@ export function useSaveLocations(facilityId: string) {
         location_type: n.location_type,
         form: n.form,
         mode: n.mode,
+        inventory_usage: n.inventory_usage,
       }));
 
     console.log("Saving locations:", toSave);

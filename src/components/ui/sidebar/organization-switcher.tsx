@@ -1,9 +1,9 @@
-import { CaretSortIcon, DashboardIcon } from "@radix-ui/react-icons";
-import { Globe } from "lucide-react";
+import { Check, ChevronsUpDown, LayoutDashboard } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 
 import {
   DropdownMenu,
@@ -13,12 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 
 import { Organization } from "@/types/organization/organization";
 
@@ -31,47 +26,44 @@ export function OrganizationSwitcher({
   organizations,
   selectedOrganization,
 }: Props) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const { handleMenuOpenChange } = useAppSidebar();
   const { t } = useTranslation();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleMenuOpenChange}>
       <DropdownMenuTrigger asChild>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-white"
-              tooltip={
-                selectedOrganization
-                  ? t("my_organizations")
-                  : t("select_organization")
-              }
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
-                <Globe className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {selectedOrganization
-                    ? t("my_organizations")
-                    : t("select_organization")}
-                </span>
-              </div>
-              <CaretSortIcon className="ml-auto" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <Button
+          variant="outline"
+          size="sm"
+          className="max-w-full gap-2 font-normal shadow-sm"
+          aria-label={
+            selectedOrganization
+              ? t("my_organizations")
+              : t("select_organization")
+          }
+        >
+          <span className="truncate">
+            {selectedOrganization
+              ? t("my_organizations")
+              : t("select_organization")}
+          </span>
+          <ChevronsUpDown className="ml-auto size-3.5 shrink-0 opacity-60" />
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-h-screen overflow-y-auto"
+        className="w-(--anchor-width) min-w-56"
         align="start"
-        side={isMobile ? "bottom" : "right"}
+        side="bottom"
         sideOffset={4}
       >
         <DropdownMenuItem asChild>
-          <Link className="flex items-center gap-2 cursor-pointer" href="/">
-            <DashboardIcon className="size-4" />
+          <Link
+            className="gap-2"
+            href="/"
+            onClick={() => isMobile && setOpenMobile(false)}
+          >
+            <LayoutDashboard className="size-4" />
             {t("view_dashboard")}
           </Link>
         </DropdownMenuItem>
@@ -80,16 +72,21 @@ export function OrganizationSwitcher({
         {organizations
           .filter((org) => org.org_type === "govt")
           .map((org) => (
-            <DropdownMenuItem
-              key={org.id}
-              asChild
-              className={cn(
-                "gap-2 p-2",
-                org?.id === selectedOrganization?.id &&
-                  "bg-primary-500 text-white focus:bg-primary-600 focus:text-white",
-              )}
-            >
-              <Link href={`/organization/${org.id}`}>{org.name}</Link>
+            <DropdownMenuItem key={org.id} asChild className="gap-2">
+              <Link
+                href={`/organization/${org.id}`}
+                aria-current={
+                  org.id === selectedOrganization?.id ? "true" : undefined
+                }
+                onClick={() => isMobile && setOpenMobile(false)}
+              >
+                {org.id === selectedOrganization?.id ? (
+                  <Check className="size-4 text-primary" />
+                ) : (
+                  <span className="size-4 shrink-0" aria-hidden="true" />
+                )}
+                {org.name}
+              </Link>
             </DropdownMenuItem>
           ))}
       </DropdownMenuContent>

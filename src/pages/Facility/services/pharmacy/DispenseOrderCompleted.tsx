@@ -17,8 +17,8 @@ import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDisp
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import { DottedDivider } from "@/components/careui/dotted-divider";
 import { Button } from "@/components/ui/button";
+import { DottedDivider } from "@/components/ui/dotted-divider";
 import { extractInvoicesFromDispenses } from "@/pages/Facility/services/pharmacy/utils/extractInvoicesFromDispenses";
 import { Link } from "raviger";
 
