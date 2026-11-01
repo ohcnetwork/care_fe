@@ -272,6 +272,12 @@ export default function UserForm({
     enabled: !!existingUsername,
     refetchOnMount: "always",
   });
+  const { data: availableDegrees } = useQuery({
+    queryKey: ["userDegrees"],
+    queryFn: query(userApi.degrees),
+    staleTime: 5 * 60 * 1000,
+    enabled: !isServiceAccount,
+  });
   useEffect(() => {
     if (
       userData &&
@@ -410,6 +416,33 @@ export default function UserForm({
   };
 
   const onSubmit = async (data: UserFormValues) => {
+    if (
+      (!isEditMode || form.formState.dirtyFields.qualification) &&
+      data.qualification.length
+    ) {
+      if (!availableDegrees) {
+        toast.error(t("profile_degrees_load_error"));
+        return;
+      }
+      const unavailable = data.qualification.flatMap(({ degree }, index) =>
+        availableDegrees.some(
+          (available) =>
+            available.code === degree.code &&
+            available.system === degree.system,
+        )
+          ? []
+          : [index],
+      );
+      unavailable.forEach((index, position) => {
+        form.setError(
+          `qualification.${index}.degree`,
+          { type: "validate", message: t("profile_degree_unavailable") },
+          { shouldFocus: position === 0 },
+        );
+      });
+      if (unavailable.length) return;
+    }
+
     if (isEditMode) {
       const updatePayload: UserUpdate = {
         first_name: data.first_name,

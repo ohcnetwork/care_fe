@@ -5399,6 +5399,7 @@
   "profile_communication": "Languages",
   "profile_communication_description": "Languages used to communicate with patients and colleagues.",
   "profile_degree": "Degree",
+  "profile_degree_unavailable": "This degree is no longer available. Choose an available degree or remove this qualification before updating qualifications.",
   "profile_degrees_load_error": "Could not load available degrees.",
   "profile_duplicate_language": "Each language can only be added once.",
   "profile_edit_section": "Edit {{section}}",

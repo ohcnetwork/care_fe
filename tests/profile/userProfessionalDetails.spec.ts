@@ -249,6 +249,25 @@ test("saves professional details, preserves credential metadata and clears remov
     await page.getByRole("option", { name: degree.code, exact: true }).click();
     await expect(existingDegree).toContainText(degree.code);
 
+    const historicalQualification = dialog.getByRole("group", {
+      name: "Qualification 1",
+      exact: true,
+    });
+    await historicalQualification
+      .getByRole("textbox", { name: "Issuing authority", exact: true })
+      .fill("Updated Council");
+    await dialog
+      .getByRole("button", { name: "Update User", exact: true })
+      .click();
+    await expect(existingDegree).toHaveAttribute("aria-invalid", "true");
+    await expect(
+      historicalQualification.getByText(
+        "This degree is no longer available. Choose an available degree or remove this qualification before updating qualifications.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    expect((await readUser()).qualification).toEqual(persisted.qualification);
+
     // Reopening must refresh the cached editor before an unrelated edit is saved.
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();

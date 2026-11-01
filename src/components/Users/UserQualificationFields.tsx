@@ -7,6 +7,7 @@ import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -74,11 +75,17 @@ export function UserQualificationFields() {
           <FormField
             control={control}
             name={`qualification.${index}.degree`}
-            render={({ field }) => {
+            render={({ field, fieldState }) => {
               const options = (degrees || []).map((degree) => ({
                 value: degreeKey(degree),
                 label: degree.display || degree.code,
               }));
+              const unavailable =
+                degrees &&
+                field.value.code &&
+                !options.some(
+                  (option) => option.value === degreeKey(field.value),
+                );
               // Existing credentials can refer to degrees removed from the catalogue.
               if (
                 field.value.code &&
@@ -122,6 +129,11 @@ export function UserQualificationFields() {
                       className="w-full"
                     />
                   </FormControl>
+                  {unavailable && !fieldState.error && (
+                    <FormDescription>
+                      {t("profile_degree_unavailable")}
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               );
