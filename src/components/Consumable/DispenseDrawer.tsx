@@ -939,7 +939,7 @@ export default function DispenseDrawer({
           onOpenChange={setIsLocationWarningOpen}
         >
           <DialogContent className="w-xs xl:w-sm">
-            <DialogHeader>
+            <DialogHeader className="border-0">
               <DialogTitle>{t("change_location_confirm")}</DialogTitle>
               <DialogDescription className="text-gray-700 mt-2">
                 <Trans
@@ -949,7 +949,7 @@ export default function DispenseDrawer({
                 />
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
+            <DialogFooter className="sm:flex-col-reverse">
               <Button
                 variant="outline"
                 onClick={handleDiscardAndSwitch}
