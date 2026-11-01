@@ -96,9 +96,25 @@ test.describe("Shortcuts and overlays", () => {
         expect(createRequests).toHaveLength(0);
       });
 
-      await test.step("submits once the calendar is closed", async () => {
+      await test.step("does not submit through an open dropdown", async () => {
+        await dialog.getByRole("combobox", { name: "Status" }).click();
+        const statusOption = page.getByRole("option").first();
+        await statusOption.hover();
+        // Off the options, focus sits on the popup and the key reaches the page
+        await page.mouse.move(0, 0);
+
         // Shortcuts debounce for 300ms, and the blocked press above counts
         await page.waitForTimeout(350);
+        await page.keyboard.press("Shift+Enter");
+
+        await page.keyboard.press("Escape");
+        await expect(statusOption).toBeHidden();
+      });
+
+      await test.step("submits once nothing covers it", async () => {
+        await page.waitForTimeout(350);
+        expect(createRequests).toHaveLength(0);
+
         await page.keyboard.press("Shift+Enter");
         await expect.poll(() => createRequests.length).toBe(1);
       });
