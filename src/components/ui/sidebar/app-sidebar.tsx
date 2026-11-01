@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { X } from "lucide-react";
 import { Link, useLocationChange, usePath } from "raviger";
 import * as React from "react";
@@ -38,16 +37,9 @@ import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
-const hasCustomLogo = [
-  careConfig.mainLogo?.dark,
-  careConfig.mainLogo?.light,
-].some((source) => source && source !== "/images/care_logo.svg");
-const logoOnLight = hasCustomLogo
-  ? (careConfig.mainLogo?.dark ?? careConfig.mainLogo?.light)
-  : "/images/care_logo_on_light.svg";
-const logoOnDark = hasCustomLogo
-  ? (careConfig.mainLogo?.light ?? careConfig.mainLogo?.dark)
-  : "/images/care_logo_on_dark.svg";
+// The sidebar always carries the Care wordmark, whatever REACT_MAIN_LOGO is.
+const logoOnLight = "/images/care_logo_on_light.svg";
+const logoOnDark = "/images/care_logo_on_dark.svg";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: CurrentUserRead;

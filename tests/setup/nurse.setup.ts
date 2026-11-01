@@ -12,7 +12,7 @@ setup("authenticate as nurse", async ({ page }) => {
   await page.getByLabel(/^password$/i).fill("Ohcn@123");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login - adjust based on your app's behavior
   await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
