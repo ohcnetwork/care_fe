@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -38,6 +42,8 @@ type PreferencesAction =
   | { type: ActionType.SET_CUSTOM_LINKS; payload: QuickLinksPreferences }
   | { type: ActionType.RESET_PREFERENCES; payload: Record<string, unknown> };
 export const MAX_QUICK_LINKS = 10;
+
+const SET_PREFERENCES_MUTATION_KEY = ["setPreferences"];
 
 function preferencesReducer(
   state: Record<string, unknown>,
@@ -154,7 +160,8 @@ function useUserPreferences() {
   const customLinks = facilityQuickLinks.custom_links ?? [];
 
   // Mutation to sync with backend
-  const { mutate: syncPreferences, isPending } = useMutation({
+  const { mutate: syncPreferences } = useMutation({
+    mutationKey: SET_PREFERENCES_MUTATION_KEY,
     mutationFn: mutate(userApi.setPreferences, {
       pathParams: { username: user.username },
     }),
@@ -169,6 +176,10 @@ function useUserPreferences() {
         payload: user.preferences ?? {},
       }),
   });
+  // Counted across hook instances, so a save started by a component that has
+  // since unmounted (e.g. the closed mobile sidebar) still counts as pending.
+  const isPending =
+    useIsMutating({ mutationKey: SET_PREFERENCES_MUTATION_KEY }) > 0;
 
   // Sync reducer state when server state changes (after query invalidation)
   useEffect(() => {
