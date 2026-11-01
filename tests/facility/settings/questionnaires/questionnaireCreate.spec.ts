@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { selectQuestionnaireStatusTab } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -71,10 +72,7 @@ test.describe("Questionnaire v2 create (facility)", () => {
 
     await test.step("List, scoped by search, shows it", async () => {
       await page.goto(`/facility/${facilityId}/settings/questionnaires`);
-      await page
-        .getByRole("radiogroup", { name: "Status" })
-        .getByRole("radio", { name: "Draft" })
-        .click();
+      await selectQuestionnaireStatusTab(page, "Draft");
       await page.getByPlaceholder("Search Questionnaires").fill(title);
       await expect(page.locator('[data-slot="table-body"]')).toContainText(
         title,
