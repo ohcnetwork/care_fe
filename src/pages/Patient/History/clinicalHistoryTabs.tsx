@@ -6,6 +6,7 @@ import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
 import { ImmunizationHistory } from "./ImmunizationHistory";
+import { ProceduresHistory } from "./ProceduresHistory";
 import { ResponsesHistory } from "./ResponsesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
 
@@ -59,6 +60,11 @@ export function useClinicalHistoryTabs({
       visible: !access || access.clinicalData,
       label: t("past_diagnoses"),
       component: <DiagnosesHistory patientId={patientId} />,
+    },
+    procedures: {
+      visible: !access || access.clinicalData,
+      label: t("past_procedures"),
+      component: <ProceduresHistory patientId={patientId} />,
     },
     allergies: {
       visible: !access || access.clinicalData,
