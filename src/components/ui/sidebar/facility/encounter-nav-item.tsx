@@ -30,6 +30,14 @@ import {
   useDefaultEncounterClass,
 } from "@/hooks/useDefaultEncounterClass";
 
+import careConfig from "@careConfig";
+
+// The all-classes list stays routable even when the menu leaves it out.
+const ROUTABLE_LIST_CLASSES: EncounterListClass[] = [
+  "all",
+  ...careConfig.encounterClasses,
+];
+
 /**
  * Links to the encounter list on screen, or else the user's default list,
  * with a menu beside it to open another list or change the default.
@@ -50,7 +58,7 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
       ? t("all_encounters")
       : t(`encounter_class__${encounterClass}`);
 
-  const viewing = ENCOUNTER_LIST_CLASSES.find((encounterClass) =>
+  const viewing = ROUTABLE_LIST_CLASSES.find((encounterClass) =>
     isNavigationActive(path, listUrl(encounterClass)),
   );
   const current = viewing ?? defaultClass;
