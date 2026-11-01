@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,11 +8,28 @@ import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
+import {
+  MAX_TAG_EXPIRY_DAYS,
+  compactExpiryOffset,
+  hasExpiryOffset,
+  isExpiryOffsetTooLong,
+} from "@/components/Tags/tagExpiry";
+import { TagExpiryOffsetInput } from "@/components/Tags/TagExpiryOffsetInput";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import {
   Form,
   FormControl,
@@ -40,6 +57,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 const TAG_COLORS = [
@@ -90,6 +108,7 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+  const expiryFieldId = useId();
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled =
@@ -104,23 +123,47 @@ export default function TagConfigForm({
     }
   };
 
-  const tagConfigSchema = z.object({
-    display: z.string().trim().min(1, t("field_required")),
-    category: z.enum(TagCategory, {
-      error: t("field_required"),
-    }),
-    description: z.string().trim().optional(),
-    priority: z.number().min(0, t("priority_non_negative")),
-    status: z.enum(TagStatus, {
-      error: t("field_required"),
-    }),
-    resource: z.enum(TagResource, {
-      error: t("field_required"),
-    }),
-    facility_organization: z.string().optional(),
-    organization: z.string().optional(),
-    color: z.string().optional(),
-  });
+  const tagConfigSchema = z
+    .object({
+      display: z.string().trim().min(1, t("field_required")),
+      category: z.enum(TagCategory, {
+        error: t("field_required"),
+      }),
+      description: z.string().trim().optional(),
+      priority: z.number().min(0, t("priority_non_negative")),
+      status: z.enum(TagStatus, {
+        error: t("field_required"),
+      }),
+      resource: z.enum(TagResource, {
+        error: t("field_required"),
+      }),
+      facility_organization: z.string().optional(),
+      organization: z.string().optional(),
+      color: z.string().optional(),
+      autoset_expiry: z.boolean(),
+      modification_allowed: z.boolean(),
+      expiry_offset: z.object({
+        days: z.number().int().min(0).optional(),
+        hours: z.number().int().min(0).optional(),
+        minutes: z.number().int().min(0).optional(),
+        seconds: z.number().int().min(0).optional(),
+      }),
+    })
+    .refine(
+      (data) => !data.autoset_expiry || hasExpiryOffset(data.expiry_offset),
+      {
+        path: ["expiry_offset"],
+        message: t("tag_expiry_offset_required"),
+      },
+    )
+    .refine(
+      (data) =>
+        !data.autoset_expiry || !isExpiryOffsetTooLong(data.expiry_offset),
+      {
+        path: ["expiry_offset"],
+        message: t("tag_expiry_offset_too_long", { days: MAX_TAG_EXPIRY_DAYS }),
+      },
+    );
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
 
@@ -146,6 +189,9 @@ export default function TagConfigForm({
       facility_organization: undefined,
       organization: undefined,
       color: "",
+      autoset_expiry: false,
+      modification_allowed: false,
+      expiry_offset: {},
     },
   });
 
@@ -175,6 +221,10 @@ export default function TagConfigForm({
           typeof existingConfig.metadata?.color === "string"
             ? existingConfig.metadata.color
             : "",
+        autoset_expiry: !!existingConfig.expiry_metadata?.autoset_expiry,
+        modification_allowed:
+          !!existingConfig.expiry_metadata?.modification_allowed,
+        expiry_offset: existingConfig.expiry_metadata?.expiry_offset ?? {},
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -192,6 +242,9 @@ export default function TagConfigForm({
         facility_organization: undefined,
         organization: undefined,
         color: "",
+        autoset_expiry: false,
+        modification_allowed: false,
+        expiry_offset: {},
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -239,6 +292,13 @@ export default function TagConfigForm({
       status: data.status,
       resource: data.resource,
       metadata: data.color ? { color: data.color } : {},
+      expiry_metadata: {
+        autoset_expiry: data.autoset_expiry,
+        modification_allowed: data.modification_allowed,
+        ...(data.autoset_expiry && {
+          expiry_offset: compactExpiryOffset(data.expiry_offset),
+        }),
+      },
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
       ...(data.facility_organization && {
@@ -492,6 +552,80 @@ export default function TagConfigForm({
                     </FormItem>
                   )}
                 />
+
+                <FieldSet>
+                  <FieldLegend>{t("expiry")}</FieldLegend>
+                  <FieldGroup className="gap-4">
+                    <FormField
+                      control={form.control}
+                      name="autoset_expiry"
+                      render={({ field }) => (
+                        <Field orientation="horizontal">
+                          <FieldContent>
+                            <FieldLabel htmlFor={`${expiryFieldId}-autoset`}>
+                              {t("tag_autoset_expiry")}
+                            </FieldLabel>
+                            <FieldDescription>
+                              {t("tag_autoset_expiry_help")}
+                            </FieldDescription>
+                          </FieldContent>
+                          <Switch
+                            id={`${expiryFieldId}-autoset`}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isLoading}
+                          />
+                        </Field>
+                      )}
+                    />
+                    {form.watch("autoset_expiry") && (
+                      <FormField
+                        control={form.control}
+                        name="expiry_offset"
+                        render={({ field, fieldState }) => (
+                          <FieldSet
+                            className="gap-2"
+                            data-invalid={!!fieldState.error}
+                          >
+                            <FieldLegend variant="label">
+                              {t("tag_expiry_after")}
+                            </FieldLegend>
+                            <TagExpiryOffsetInput
+                              value={field.value}
+                              onChange={field.onChange}
+                              disabled={isLoading}
+                            />
+                            <FieldError errors={[fieldState.error]} />
+                          </FieldSet>
+                        )}
+                      />
+                    )}
+                    <FormField
+                      control={form.control}
+                      name="modification_allowed"
+                      render={({ field }) => (
+                        <Field orientation="horizontal">
+                          <FieldContent>
+                            <FieldLabel
+                              htmlFor={`${expiryFieldId}-modification`}
+                            >
+                              {t("tag_expiry_modification_allowed")}
+                            </FieldLabel>
+                            <FieldDescription>
+                              {t("tag_expiry_modification_allowed_help")}
+                            </FieldDescription>
+                          </FieldContent>
+                          <Switch
+                            id={`${expiryFieldId}-modification`}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isLoading}
+                          />
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
 
                 {facilityId ? (
                   <FormField

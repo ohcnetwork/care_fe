@@ -1009,9 +1009,11 @@ async function completeReferralHandoff(
     });
 
     await test.step("Share the local clinical record and save a response that completes the referral", async () => {
+      // The respond page loads the referral, the receiving visit and the form
+      // one after another, which outlasts the default wait on a busy backend.
       await questionBlock(recipientPage, fixture.responseLabel)
         .getByRole("textbox")
-        .fill(recommendation);
+        .fill(recommendation, { timeout: 30000 });
       const visitResourceUrl = (url: URL) =>
         url.pathname ===
         (walkIn
@@ -1114,8 +1116,11 @@ async function completeReferralHandoff(
           exact: true,
         })
         .click();
+      // Saving submits the response, completes the referral and refreshes it
+      // before returning, several writes in sequence.
       await expect(recipientPage).toHaveURL(
         (url) => url.pathname === fixture.path,
+        { timeout: 30000 },
       );
       await recipientPage.reload();
       await expect(

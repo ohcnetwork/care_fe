@@ -135,6 +135,25 @@ const symptom_questionnaire: QuestionnaireRead = {
   ],
 };
 
+const procedure_questionnaire: QuestionnaireRead = {
+  id: "procedure",
+  slug: "procedure",
+  version: "0.0.1",
+  title: "Procedure",
+  status: "active",
+  subject_type: "encounter",
+  questions: [
+    {
+      id: "procedure",
+      text: "Procedure",
+      type: "structured",
+      structured_type: "procedure",
+      link_id: "1.1",
+      required: true,
+    },
+  ],
+};
+
 const files_questionnaire: QuestionnaireRead = {
   id: "files",
   slug: "files",
@@ -232,6 +251,11 @@ const structuredQuestionEntries = [
     value: "diagnosis",
     label: "Diagnosis",
     questionnaire: diagnosis_questionnaire,
+  },
+  {
+    value: "procedure",
+    label: "Procedure",
+    questionnaire: procedure_questionnaire,
   },
   {
     value: "encounter",

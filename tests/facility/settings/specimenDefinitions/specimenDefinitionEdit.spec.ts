@@ -128,13 +128,18 @@ test.describe("Specimen Definitions Edit", () => {
       .fill(containerDescription);
 
     const capOption = faker.helpers.arrayElement(capOptions);
-    await page.getByRole("combobox", { name: "Cap" }).click();
+    // Exact: the Capacity quantity input below is a combobox too.
+    await page.getByRole("combobox", { name: "Cap", exact: true }).click();
     await page.getByRole("option", { name: capOption }).click();
 
     const capacity = faker.number.int(INT_MAX);
     await page
-      .getByRole("textbox", { name: "Enter Capacity" })
+      .getByRole("combobox", { name: "Enter Capacity" })
       .fill(capacity.toString());
+    // Pick the unit to commit the quantity and close the suggestions.
+    await page
+      .getByRole("option", { name: `${capacity} milliliter`, exact: true })
+      .click();
 
     const minimumVolume = faker.number.int(INT_MAX);
     await page
