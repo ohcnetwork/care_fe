@@ -403,7 +403,7 @@ export default function AddMultipleChargeItemsSheet({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-0 pt-2 min-h-[55vh] max-h-[85vh] rounded-t-lg">
+        <DrawerContent height="fixed" className="px-0 pt-2 rounded-t-lg">
           <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto px-4">
             {content}
           </div>

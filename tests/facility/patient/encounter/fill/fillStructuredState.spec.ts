@@ -410,7 +410,7 @@ test("charge rows retain identity on removal and survive remount and local draft
   const addCharge = async () => {
     await section
       .getByRole("combobox")
-      .filter({ hasText: /Add charges/ })
+      .filter({ hasText: /Select charge item definition/ })
       .click();
     await page.getByRole("dialog").getByRole("combobox").fill(definition.title);
     await page

@@ -48,7 +48,9 @@ test.describe("Locations", () => {
       .and(page.locator('[aria-haspopup="dialog"]'))
       .click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("heading")).toContainText("Pharmacy");
+    await expect(
+      dialog.getByRole("group", { name: "Current Location" }),
+    ).toContainText("Pharmacy");
     await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
     await expect(dialog).not.toBeVisible();
@@ -83,7 +85,9 @@ test.describe("Locations", () => {
       .and(page.locator('[aria-haspopup="dialog"]'))
       .click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("heading")).toContainText("Pharmacy");
+    await expect(
+      dialog.getByRole("group", { name: "Current Location" }),
+    ).toContainText("Pharmacy");
     await dialog.getByPlaceholder("Search").fill("Bio-Chemistry Lab");
     await dialog.getByRole("option", { name: "Bio-Chemistry Lab" }).click();
     await expect(dialog).not.toBeVisible();
