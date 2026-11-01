@@ -952,18 +952,18 @@ export default function DispenseDrawer({
               />
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="border-t-0 pt-0">
             <Button
               variant="outline"
               onClick={handleDiscardAndSwitch}
-              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full"
+              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white w-full sm:flex-1"
             >
               {t("discard_and_switch")}
             </Button>
             <Button
               variant="primary"
               onClick={() => setIsLocationWarningOpen(false)}
-              className="w-full"
+              className="w-full sm:flex-1"
             >
               {t("stay_here")}
             </Button>

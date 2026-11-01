@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import type { TFunction } from "i18next";
@@ -24,11 +23,11 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 import type { Code } from "@/types/base/code/code";
 import {
   ObservationAnalyzeGroup,
   ObservationListRead,
-  ObservationPlotConfig,
   ObservationReferenceRange,
   ObservationStatus,
   QuestionnaireSubmitResultValue,
@@ -104,12 +103,16 @@ export function EncounterVitalsWidget({
 
 // The analysis endpoint returns the most recently modified readings per code,
 // so one request fills the matrix regardless of how often other vitals were
-// charted. It cannot exclude entered-in-error rows, and marking one bumps it to
-// the top, so extra rows leave room for corrections and back-dated entries.
+// charted. The status filter excludes entered-in-error records from its bounded
+// slice when the backend applies list filters; client filtering remains a
+// fallback. Extra rows leave room for back-dated entries.
 const READINGS_PER_CODE = 8;
 const VISIBLE_READINGS = 4;
 // FiO2 is charted with the primary parameters but is a setting, not a vital.
 const EXCLUDED_DEFAULT_CODES = new Set(["3151-8"]);
+const VALID_READING_STATUSES = Object.values(ObservationStatus)
+  .filter((status) => status !== ObservationStatus.ENTERED_IN_ERROR)
+  .join(",");
 
 type ReadingFlag = "high" | "low" | "abnormal";
 
@@ -247,14 +250,8 @@ function buildMatrix(groups: ObservationAnalyzeGroup[], codes: Code[]) {
 }
 
 function useDefaultVitalCodes(enabled: boolean) {
-  return useQuery<ObservationPlotConfig, Error, Code[]>({
-    queryKey: ["plots-config"],
-    queryFn: async ({ signal }) => {
-      const response = await fetch(careConfig.plotsConfigUrl, { signal });
-      if (!response.ok)
-        throw new Error("Unable to load vital signs configuration");
-      return response.json();
-    },
+  return useQuery({
+    ...plotsConfigQueryOptions,
     select: (plots) => {
       const seen = new Set<string>();
       return (
@@ -325,7 +322,7 @@ function VitalsMatrix({
     ],
     queryFn: query(observationApi.analyse, {
       pathParams: { patientId },
-      queryParams: { encounter: encounterId },
+      queryParams: { encounter: encounterId, status: VALID_READING_STATUSES },
       body: { codes, page_size: READINGS_PER_CODE },
       silent: true,
     }),

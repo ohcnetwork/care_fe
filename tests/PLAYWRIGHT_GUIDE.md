@@ -378,8 +378,14 @@ await page.goto(`/facility/${facilityId}/settings/locations`);
 ### Sidebar
 
 ```typescript
-await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-await page.getByRole("button", { name: "Encounters", exact: true }).click();
+// The sidebar may already be expanded; only expand it when collapsed.
+const sidebarToggle = page.getByRole("button", {
+  name: "Toggle Sidebar",
+  exact: true,
+});
+if ((await sidebarToggle.getAttribute("aria-expanded")) !== "true") {
+  await sidebarToggle.click();
+}
 await page.getByRole("link", { name: /search patients/i }).click();
 ```
 

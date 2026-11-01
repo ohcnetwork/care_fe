@@ -71,6 +71,7 @@ export const CORE_WIDGET_REQUIREMENTS = {
   diagnosis: scoped,
   vitals: scoped,
   questionnaire_responses: scopedResponses,
+  procedures: scoped,
   service_requests: clinical,
   referrals: details,
   outstanding_orders: clinical,

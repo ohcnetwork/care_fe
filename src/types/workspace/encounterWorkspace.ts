@@ -38,6 +38,7 @@ export const HISTORY_PAGE_KEYS = [
   "diagnostic_reports",
   "symptoms",
   "diagnoses",
+  "procedures",
   "allergies",
   "medications",
   "immunizations",

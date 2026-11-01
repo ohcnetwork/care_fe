@@ -238,6 +238,13 @@ cannot be published on a history layout; the section picker disables them with
 an explanation. Without an encounter, these widgets require the patient's
 clinical-data permission (or its response permission for forms), rather than an
 encounter-only clinical read grant.
+The clinical-history preset composes the six history widgets into pages and
+retains the existing immunizations and procedures system pages, which have no
+history widget yet. Individual history widgets can also be added to encounter
+layouts; they read the patient-wide history, not just the selected encounter.
+Patient-history access requires the patient's clinical-data permission (or its
+response permission for forms), rather than an encounter-only clinical read
+grant.
 
 The standalone clinical-history page and the questionnaire's embedded history
 tab use the same workspace renderer. With no chosen layout they retain the

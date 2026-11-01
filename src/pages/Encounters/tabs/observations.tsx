@@ -72,6 +72,8 @@ function groupObservationsByDate(
   }, {});
 }
 
+const PAGE_SIZE = 20;
+
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
@@ -94,7 +96,7 @@ export const EncounterObservationsTab = () => {
         queryParams: {
           encounter: encounterId,
           ignore_group: true,
-          limit: 20,
+          limit: PAGE_SIZE,
           offset: String(pageParam),
         },
       })({ signal });
@@ -102,7 +104,7 @@ export const EncounterObservationsTab = () => {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 20;
+      const currentOffset = allPages.length * PAGE_SIZE;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
   });

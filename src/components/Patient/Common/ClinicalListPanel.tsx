@@ -30,8 +30,8 @@ interface ClinicalListPanelProps {
   readOnly: boolean;
   className?: string;
   presentation: "default" | "panel";
-  questionnaire: "allergy_intolerance" | "symptom" | "diagnosis";
-  history: "allergies" | "symptoms" | "diagnoses";
+  questionnaire: "allergy_intolerance" | "symptom" | "diagnosis" | "procedure";
+  history: "allergies" | "symptoms" | "diagnoses" | "procedures";
   emptyMessage: string;
   summary?: ReactNode;
   hasData: boolean;

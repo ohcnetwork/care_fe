@@ -26,7 +26,7 @@ type Column = {
 interface RowProps {
   columns: Column[];
   note?: string;
-  createdBy: UserReadMinimal;
+  createdBy?: UserReadMinimal | null;
   onViewEncounter?: () => void;
 }
 
@@ -103,23 +103,25 @@ export default function ClinicalInformationRow({
               </DropdownMenuItem>
             )}
 
-            {(!!onViewEncounter || note) && (
+            {(!!onViewEncounter || note) && createdBy && (
               <div className="my-2 border-t border-dashed border-gray-300" />
             )}
 
-            <div className="p-1 text-sm">
-              <div className="text-gray-500">{t("reported_by")}:</div>
-              <div className="mt-1 flex items-center gap-2">
-                <Avatar
-                  name={formatName(createdBy, true)}
-                  className="size-6"
-                  imageUrl={createdBy.profile_picture_url}
-                />
-                <span className="font-semibold text-gray-900">
-                  {formatName(createdBy)}
-                </span>
+            {createdBy && (
+              <div className="p-1 text-sm">
+                <div className="text-gray-500">{t("reported_by")}:</div>
+                <div className="mt-1 flex items-center gap-2">
+                  <Avatar
+                    name={formatName(createdBy, true)}
+                    className="size-6"
+                    imageUrl={createdBy.profile_picture_url}
+                  />
+                  <span className="font-semibold text-gray-900">
+                    {formatName(createdBy)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

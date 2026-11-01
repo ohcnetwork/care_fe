@@ -47,7 +47,7 @@ export async function createReferralAvailabilityFixture(
       title,
       description: "Referral workflow form",
       status: "active",
-      subject_type: "encounter",
+      subject_type: "referral",
       actions: [],
       questions: [
         {

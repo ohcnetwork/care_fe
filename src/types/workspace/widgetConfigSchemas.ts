@@ -421,6 +421,7 @@ const coreConfigSchemas = {
   allergies: noConfigSchema,
   symptoms: noConfigSchema,
   diagnosis: noConfigSchema,
+  procedures: noConfigSchema,
   vitals: vitalsSchema,
   questionnaire_responses: responsesSchema,
   service_requests: serviceRequestsSchema,

@@ -1,0 +1,275 @@
+import { ExternalLink, File, X } from "lucide-react";
+import { navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ClinicalInformationRow, {
+  BadgeButtonDropdownTrigger,
+} from "@/components/Patient/Common/ClinicalInformationRow";
+
+import { formatName } from "@/Utils/utils";
+import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  PROCEDURE_OUTCOME_COLORS,
+  PROCEDURE_STATUS_COLORS,
+  Procedure,
+} from "@/types/emr/procedure/procedure";
+
+import { formatProcedureOccurrence } from "./utils";
+
+function OutcomeBadge({ procedure }: { procedure: Procedure }) {
+  const { t } = useTranslation();
+  if (!procedure.outcome) return "-";
+  return (
+    <Badge variant={PROCEDURE_OUTCOME_COLORS[procedure.outcome]}>
+      {t(`procedure_outcome__${procedure.outcome}`)}
+    </Badge>
+  );
+}
+
+const ProcedureCard = ({
+  procedure,
+  onViewEncounter,
+  compact = false,
+}: {
+  procedure: Procedure;
+  onViewEncounter?: () => void;
+  compact?: boolean;
+}) => {
+  const [showNote, setShowNote] = useState(false);
+  const { t } = useTranslation();
+  return (
+    <div className="border shadow rounded-md p-2 bg-white">
+      <div className="flex justify-between items-center flex-wrap gap-3">
+        <div className="flex-1 font-semibold text-gray-900 break-words">
+          {procedure.code.display}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Badge variant={PROCEDURE_STATUS_COLORS[procedure.status]}>
+            {t(procedure.status)}
+          </Badge>
+          <DropdownMenu>
+            <BadgeButtonDropdownTrigger note={procedure.note ?? undefined} />
+            <DropdownMenuContent className="mx-1 w-28 text-xs p-1" align="end">
+              {procedure.note && (
+                <DropdownMenuItem
+                  onClick={() => setShowNote(!showNote)}
+                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
+                >
+                  <File className="size-3.5" />
+                  <span>{showNote ? t("hide_note") : t("see_note")}</span>
+                </DropdownMenuItem>
+              )}
+
+              {!!onViewEncounter && (
+                <DropdownMenuItem
+                  onClick={onViewEncounter}
+                  className="flex items-center gap-1.5 px-2 py-1.5 font-medium text-xs"
+                >
+                  <ExternalLink className="size-3.5" />
+                  <span>{t("go_to_encounter")}</span>
+                </DropdownMenuItem>
+              )}
+
+              {(!!onViewEncounter || procedure.note) &&
+                procedure.created_by && (
+                  <div className="my-1 border-t border-dashed border-gray-300" />
+                )}
+
+              {procedure.created_by && (
+                <div className="p-1 text-xs">
+                  <div className="text-gray-500">{t("recorded_by")}:</div>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <Avatar
+                      name={formatName(procedure.created_by, true)}
+                      className="size-5"
+                      imageUrl={procedure.created_by.profile_picture_url}
+                    />
+                    <span className="font-medium text-gray-900 truncate">
+                      {formatName(procedure.created_by)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      <div
+        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-5")}
+      >
+        <div>
+          <div className="text-sm text-gray-600 mb-1">{t("outcome")}</div>
+          <OutcomeBadge procedure={procedure} />
+        </div>
+        <div>
+          <div className="text-sm text-gray-600 mb-1">
+            {t("date_performed")}
+          </div>
+          <div className="text-sm">
+            {formatProcedureOccurrence(procedure.occurrence) || "-"}
+          </div>
+        </div>
+        {procedure.body_site.length > 0 && (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">{t("body_site")}</div>
+            <div className="text-sm">
+              {procedure.body_site.map((site) => site.display).join(", ")}
+            </div>
+          </div>
+        )}
+      </div>
+      {showNote && procedure.note && (
+        <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded mt-2 rounded-t-none">
+          <div className="text-sm font-semibold text-gray-800">
+            {t("note")}
+            {":"}
+          </div>
+
+          <Button
+            variant="link"
+            className="absolute top-0 right-2 flex items-center gap-1 p-0 text-sm"
+            onClick={() => setShowNote(false)}
+          >
+            <X />
+            <span className="underline">{t("hide_note")}</span>
+          </Button>
+
+          <p className="text-sm text-gray-700 whitespace-pre-wrap pr-8 max-w-full break-words mt-2">
+            {procedure.note}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const ProcedureTable = ({
+  procedures,
+  patientId,
+  showViewEncounter = true,
+  compact = false,
+}: {
+  procedures: Procedure[];
+  patientId: string;
+  showViewEncounter?: boolean;
+  compact?: boolean;
+}) => {
+  const { t } = useTranslation();
+  const { facilityId } = useCurrentFacilitySilently();
+  const baseHeaderClasses =
+    "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+  const viewEncounter = (procedure: Procedure) =>
+    showViewEncounter
+      ? () =>
+          navigate(
+            facilityId
+              ? `/facility/${facilityId}/patient/${patientId}/encounter/${procedure.encounter}/updates`
+              : `/organization/organizationId/patient/${patientId}/encounter/${procedure.encounter}/updates`,
+          )
+      : undefined;
+  return (
+    <>
+      {/* Mobile: Card layout */}
+      <div
+        className={
+          compact
+            ? "block space-y-2 @3xl/clinical-widget:hidden"
+            : "block space-y-3 sm:hidden"
+        }
+      >
+        {procedures.map((procedure) => (
+          <ProcedureCard
+            key={procedure.id}
+            procedure={procedure}
+            compact={compact}
+            onViewEncounter={viewEncounter(procedure)}
+          />
+        ))}
+      </div>
+      {/* Desktop: Table layout */}
+      <div
+        className={cn(
+          "overflow-x-auto hidden",
+          compact ? "@3xl/clinical-widget:block" : "sm:block",
+        )}
+      >
+        <div className={cn("min-w-2xl", !compact && "pb-2")}>
+          <div
+            className={cn(
+              "grid grid-cols-[1fr_auto_auto_auto_auto]",
+              compact ? "gap-y-1" : "gap-y-2",
+            )}
+          >
+            <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
+              {t("procedure")}
+            </div>
+
+            <div className={cn(baseHeaderClasses)}>{t("status")}</div>
+
+            <div className={cn(baseHeaderClasses, "border-x")}>
+              {t("outcome")}
+            </div>
+
+            <div className={cn(baseHeaderClasses)}>{t("date_performed")}</div>
+
+            <div
+              className={cn(
+                "text-center border border-l-0 border-gray-200 rounded-tr-lg bg-gray-50",
+              )}
+            ></div>
+
+            {procedures.map((procedure) => (
+              <ClinicalInformationRow
+                  key={procedure.id}
+                note={procedure.note ?? undefined}
+                createdBy={procedure.created_by}
+                onViewEncounter={viewEncounter(procedure)}
+                columns={[
+                  {
+                    key: "display",
+                    className:
+                      "bg-gray-100 break-words whitespace-normal text-base font-semibold text-gray-900 rounded-l",
+                    render: () => procedure.code.display,
+                  },
+                  {
+                    key: "status",
+                    render: () => (
+                      <Badge
+                        variant={PROCEDURE_STATUS_COLORS[procedure.status]}
+                      >
+                        {t(procedure.status)}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    key: "outcome",
+                    render: () => <OutcomeBadge procedure={procedure} />,
+                  },
+                  {
+                    key: "date_performed",
+                    className: "bg-gray-100",
+                    render: () =>
+                      formatProcedureOccurrence(procedure.occurrence) || "-",
+                  },
+                ]}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

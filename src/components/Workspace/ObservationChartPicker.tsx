@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import type { ObservationPlotConfig } from "@/types/emr/observation/observation";
+import { plotsConfigQueryOptions } from "@/pages/Encounters/utils/plotsConfigQuery";
 
 interface ObservationChartPickerProps {
   plot?: string;
@@ -31,15 +30,7 @@ export function ObservationChartPicker({
 }: ObservationChartPickerProps) {
   const { t } = useTranslation();
   const id = useId();
-  const { data: plots, isLoading } = useQuery<ObservationPlotConfig>({
-    queryKey: ["plots-config"],
-    queryFn: async ({ signal }) => {
-      const response = await fetch(careConfig.plotsConfigUrl, { signal });
-      if (!response.ok)
-        throw new Error("Unable to load vital signs configuration");
-      return response.json();
-    },
-  });
+  const { data: plots, isLoading } = useQuery(plotsConfigQueryOptions);
   const selectedPlot =
     (plot ? plots?.find((candidate) => candidate.id === plot) : plots?.[0]) ??
     undefined;

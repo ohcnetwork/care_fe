@@ -228,7 +228,11 @@ async function mockEncounterWorkspaceApi(
   const workspaceReads: URL[] = [];
   const clinicalReads: URL[] = [];
   const sectionReads: URL[] = [];
-  const analyseRequests: { encounter: string | null; codes: string[] }[] = [];
+  const analyseRequests: {
+    encounter: string | null;
+    status: string | null;
+    codes: string[];
+  }[] = [];
   const writes: string[] = [];
   const questionId = faker.string.uuid();
   const questionnaire = {
@@ -315,6 +319,27 @@ async function mockEncounterWorkspaceApi(
         ]
       : []),
   ];
+  const enteredInErrorObservations = options.includeWidgetData
+    ? Array.from({ length: 8 }, (_, index) => ({
+        id: faker.string.uuid(),
+        encounter: currentEncounter.id,
+        status: "entered_in_error",
+        subject_type: "encounter",
+        main_code: {
+          system: "http://loinc.org",
+          code: "8867-4",
+          display: "Pulse",
+        },
+        effective_datetime: `2026-10-01T09:0${index}:00Z`,
+        value_type: "quantity",
+        value: {
+          value: "140",
+          unit: { system: "http://unitsofmeasure.org", code: "/min" },
+        },
+        created_by: pastCareTeamMember,
+        updated_by: pastCareTeamMember,
+      }))
+    : [];
   const questionnaireResponses = [currentEncounter, pastEncounter]
     .map((encounter, index) => ({
       id: faker.string.uuid(),
@@ -680,17 +705,23 @@ async function mockEncounterWorkspaceApi(
           };
           analyseRequests.push({
             encounter: url.searchParams.get("encounter"),
+            status: url.searchParams.get("status"),
             codes: body.codes.map((code) => code.code),
           });
+          const statuses = url.searchParams.get("status")?.split(",");
+          const analysedObservations = url.searchParams.has("status")
+            ? [...observations, ...enteredInErrorObservations]
+            : observations;
           await route.fulfill({
             json: {
               results: body.codes.map((code) => ({
                 code,
-                results: observations
+                results: analysedObservations
                   .filter(
                     (item) =>
                       item.main_code.code === code.code &&
-                      item.encounter === url.searchParams.get("encounter"),
+                      item.encounter === url.searchParams.get("encounter") &&
+                      (!statuses || statuses.includes(item.status)),
                   )
                   .sort(
                     (a, b) =>
@@ -3678,6 +3709,9 @@ test("studio response lists and location history stay read-only on closed encoun
     .click();
   await expect(page.getByRole("menu")).toBeVisible();
   await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("menuitem", {
       name: "Mark as entered in error",
       exact: true,
@@ -3705,12 +3739,16 @@ test("studio response lists and location history stay read-only on closed encoun
   ).toBeVisible();
   await page.getByRole("button", { name: "More Actions", exact: true }).click();
   await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("menuitem", {
       name: "Mark as entered in error",
       exact: true,
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
   expect(
     fixture.writes.filter(
       (request) => !request.endsWith("/account/default_account/"),
@@ -4066,12 +4104,14 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(temperature).toContainText("No reading");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
-  // The matrix asks the analysis endpoint for the latest readings per code,
-  // scoped to the current encounter, instead of listing every observation.
+  // The tiles ask the analysis endpoint for the latest valid readings per
+  // code, scoped to the current encounter, instead of listing every
+  // observation.
   expect(
     fixture.analyseRequests.some(
       (request) =>
         request.encounter === fixture.currentEncounter.id &&
+        request.status === "final,amended" &&
         request.codes.join(",") === "8867-4,2708-6,8310-5",
     ),
   ).toBe(true);

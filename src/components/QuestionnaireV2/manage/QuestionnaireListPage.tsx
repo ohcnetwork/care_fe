@@ -246,7 +246,7 @@ export function QuestionnaireListPage({
               asChild
               className="h-auto block rounded-lg p-4 text-left whitespace-normal"
             >
-              <Link href={`${scope.basePath}/${questionnaire.id}`}>
+              <Link href={`${scope.basePath}/${questionnaire.id}`} basePath="/">
                 <p className="font-medium">{questionnaire.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                   {questionnaire.description}

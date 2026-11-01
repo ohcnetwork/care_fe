@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { TagExpiryLabel } from "@/components/Tags/TagExpiryLabel";
+import { TagExpiryStep } from "@/components/Tags/TagExpiryStep";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +46,17 @@ import {
 import query from "@/Utils/request/query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 interface MultiFilterStyleTagSelectorProps {
   selected: TagConfig[];
-  onChange: (tags: TagConfig[]) => void;
+  /** `expiryOffset` is the custom expiry chosen for the tag being added. */
+  onChange: (tags: TagConfig[], expiryOffset?: TagExpiryOffset) => void;
   resource: TagResource;
   facilityId?: string;
   className?: string;
@@ -57,6 +64,8 @@ interface MultiFilterStyleTagSelectorProps {
   isTagMutationInProgress?: boolean;
   trigger?: React.ReactNode;
   align?: "start" | "end";
+  /** Ask for an expiry when adding tags whose config allows changing it. */
+  allowCustomExpiry?: boolean;
 }
 
 // Clean, minimal tag selector matching multi-filter design
@@ -70,6 +79,7 @@ export function MultiFilterStyleTagSelector({
   isTagMutationInProgress = false,
   trigger,
   align = "start",
+  allowCustomExpiry = false,
 }: MultiFilterStyleTagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [groupPopoverOpen, setGroupPopoverOpen] = useState<string | null>(null);
@@ -77,6 +87,7 @@ export function MultiFilterStyleTagSelector({
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [childDrawerOpen, setChildDrawerOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<TagConfig | null>(null);
+  const [expiryTag, setExpiryTag] = useState<TagConfig | null>(null);
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -117,8 +128,7 @@ export function MultiFilterStyleTagSelector({
 
   const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
 
-  // Select/deselect tag
-  const handleSelect = (tag: TagConfig) => {
+  const addTag = (tag: TagConfig, expiryOffset?: TagExpiryOffset) => {
     // If tag has a parent, enforce single selection per group
     const parentId =
       tag.parent && typeof tag.parent === "object" && "id" in tag.parent
@@ -133,15 +143,47 @@ export function MultiFilterStyleTagSelector({
         t.parent.id === parentId,
     );
 
+    onChange(
+      [...selected.filter((t) => t.id !== alreadySelectedInGroup?.id), tag],
+      expiryOffset,
+    );
+  };
+
+  // Select/deselect tag
+  const handleSelect = (tag: TagConfig) => {
     if (isSelected(tag)) {
       onChange(selected.filter((t) => t.id !== tag.id));
+    } else if (allowCustomExpiry && tag.expiry_metadata?.modification_allowed) {
+      // Pick the expiry in the main menu/drawer before applying the tag
+      setGroupPopoverOpen(null);
+      setChildDrawerOpen(false);
+      setSelectedGroup(null);
+      setExpiryTag(tag);
     } else {
-      onChange([
-        ...selected.filter((t) => t.id !== alreadySelectedInGroup?.id),
-        tag,
-      ]);
+      addTag(tag);
     }
   };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) setExpiryTag(null);
+    if (isMobile) {
+      setMobileDrawerOpen(isOpen);
+    } else {
+      setOpen(isOpen);
+    }
+  };
+
+  const expiryStep = expiryTag && (
+    <TagExpiryStep
+      key={expiryTag.id}
+      tag={expiryTag}
+      onBack={() => setExpiryTag(null)}
+      onApply={(expiryOffset) => {
+        addTag(expiryTag, expiryOffset);
+        setExpiryTag(null);
+      }}
+    />
+  );
 
   const handleMobileGroupClick = (group: TagConfig) => {
     setSelectedGroup(group);
@@ -180,6 +222,7 @@ export function MultiFilterStyleTagSelector({
           />
           <span className="truncate">{tag.display}</span>
         </span>
+        <TagExpiryLabel tag={tag} />
       </div>
     );
   };
@@ -274,7 +317,7 @@ export function MultiFilterStyleTagSelector({
       {/* Mobile Drawer */}
       {isMobile ? (
         <>
-          <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+          <Drawer open={mobileDrawerOpen} onOpenChange={handleOpenChange}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             <DrawerContent className="flex flex-col min-h-[50vh] max-h-[85vh]">
               <DrawerHeader className="pb-3">
@@ -283,7 +326,13 @@ export function MultiFilterStyleTagSelector({
                 </DrawerTitle>
               </DrawerHeader>
 
-              <div className="flex flex-col flex-1 overflow-hidden">
+              {expiryStep}
+              <div
+                className={cn(
+                  "flex flex-col flex-1 overflow-hidden",
+                  expiryTag && "hidden",
+                )}
+              >
                 {/* Search */}
                 <div className="px-4 pb-3">
                   <Input
@@ -413,13 +462,14 @@ export function MultiFilterStyleTagSelector({
         </>
       ) : (
         /* Desktop Dropdown */
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={open} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
             align={align}
           >
-            <div className="p-0">
+            {expiryStep}
+            <div className={cn("p-0", expiryTag && "hidden")}>
               {/* Header */}
               <div className="flex items-center gap-2 p-2 border-b border-gray-200">
                 <Button

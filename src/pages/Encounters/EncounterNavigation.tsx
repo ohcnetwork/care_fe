@@ -48,7 +48,7 @@ export default function EncounterNavigation({
       orientation="vertical"
       className="min-w-0 flex-col gap-3 lg:flex-row"
     >
-      <div className="min-w-0 shrink-0 space-y-2 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:w-56 lg:self-start lg:overflow-y-auto">
+      <div className="min-w-0 shrink-0 space-y-2 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:w-56 lg:self-start lg:overflow-y-auto">
         <EncounterHistorySelector />
         <EncounterSectionPicker
           visibleTabs={visibleTabs}

@@ -15,7 +15,7 @@ test.describe("Clear Cache in profile successfully", () => {
     page,
   }) => {
     const facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/users/admin`);
+    await page.goto(`/facility/${facilityId}/users/admin/profile`);
 
     await expect(
       page.getByRole("button", { name: /clear cache/i }),
@@ -122,7 +122,8 @@ for (const action of ["Clear Cache", "Update Now"]) {
     await expect
       .poll(() => draftFormNoteText(page, questionnaireId))
       .toBe(savedNote);
-    await page.getByRole("button", { name: "Close", exact: true }).click();
+    // Close discards the session's drafts; minimizing keeps them for later.
+    await page.getByRole("button", { name: "Minimize", exact: true }).click();
     await page.waitForURL(/\/updates$/);
     const localRow = page.locator('[data-draft-source="local"]');
     await expect(localRow).toHaveCount(1);
@@ -133,7 +134,7 @@ for (const action of ["Clear Cache", "Update Now"]) {
       draftKey!,
     );
 
-    await page.goto(`/facility/${getFacilityId()}/users/admin`);
+    await page.goto(`/facility/${getFacilityId()}/users/admin/profile`);
     await expect(
       page.getByRole("button", { name: "Clear Cache", exact: true }),
     ).toBeVisible();
