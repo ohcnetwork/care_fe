@@ -15,8 +15,6 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { WorkspaceHeaderProvider } from "@/context/WorkspaceHeaderContext";
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -295,44 +293,42 @@ export function AppSidebarProvider({
 
   return (
     <AppSidebarContext.Provider value={value}>
-      <WorkspaceHeaderProvider>
-        <SidebarProvider
-          {...props}
-          ref={scopeRef}
-          open={pinned || isOverlay}
-          onOpenChange={handleSidebarProviderOpenChange}
-          data-app-sidebar-pinned={pinned}
-          data-app-sidebar-preview={isOverlay}
-          data-app-sidebar-ready={overlayReady}
-          className={cn(
-            "bg-sidebar [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
-            pinningTransition &&
-              "[&_[data-collapsible]>div:last-child]:transition-[left,right,width,top,height,box-shadow,background-color,border-radius] [&>main]:transition-[margin] [&>main]:duration-100 [&>main]:motion-reduce:transition-none",
-            !isMobile &&
-              overlayReady &&
-              !pinned &&
-              "[&_[data-collapsible]>div:last-child]:top-(--app-sidebar-offset)! [&_[data-collapsible]>div:last-child]:h-[calc(100svh-var(--app-sidebar-offset))]!",
-            !isMobile &&
-              !pinned &&
-              !overlayOpen &&
-              overlayReady &&
-              "[&_[data-collapsible]>div:last-child]:invisible",
-            isOverlay &&
-              "[&_[data-collapsible]>div:first-child]:w-0! [&_[data-collapsible]>div:last-child]:border-t [&_[data-collapsible]>div:last-child]:border-r [&_[data-collapsible]>div:last-child]:border-border [&_[data-collapsible]>div:last-child]:rounded-r-md [&_[data-collapsible]>div:last-child]:bg-sidebar [&_[data-collapsible]>div:last-child]:shadow-xl",
-            isOverlay && (innerWorkspace ? "[&>main]:ml-0!" : "[&>main]:ml-2!"),
-            className,
-          )}
-          style={
-            {
-              "--sidebar-width": "15rem",
-              "--app-sidebar-offset": innerWorkspace ? "3rem" : "3.5rem",
-              ...style,
-            } as CSSProperties
-          }
-        >
-          {children}
-        </SidebarProvider>
-      </WorkspaceHeaderProvider>
+      <SidebarProvider
+        {...props}
+        ref={scopeRef}
+        open={pinned || isOverlay}
+        onOpenChange={handleSidebarProviderOpenChange}
+        data-app-sidebar-pinned={pinned}
+        data-app-sidebar-preview={isOverlay}
+        data-app-sidebar-ready={overlayReady}
+        className={cn(
+          "bg-sidebar [&_[data-collapsible]>div]:duration-100 [&_[data-collapsible]>div]:motion-reduce:transition-none",
+          pinningTransition &&
+            "[&_[data-collapsible]>div:last-child]:transition-[left,right,width,top,height,box-shadow,background-color,border-radius] [&>main]:transition-[margin] [&>main]:duration-100 [&>main]:motion-reduce:transition-none",
+          !isMobile &&
+            overlayReady &&
+            !pinned &&
+            "[&_[data-collapsible]>div:last-child]:top-(--app-sidebar-offset)! [&_[data-collapsible]>div:last-child]:h-[calc(100svh-var(--app-sidebar-offset))]!",
+          !isMobile &&
+            !pinned &&
+            !overlayOpen &&
+            overlayReady &&
+            "[&_[data-collapsible]>div:last-child]:invisible",
+          isOverlay &&
+            "[&_[data-collapsible]>div:first-child]:w-0! [&_[data-collapsible]>div:last-child]:border-t [&_[data-collapsible]>div:last-child]:border-r [&_[data-collapsible]>div:last-child]:border-border [&_[data-collapsible]>div:last-child]:rounded-r-md [&_[data-collapsible]>div:last-child]:bg-sidebar [&_[data-collapsible]>div:last-child]:shadow-xl",
+          isOverlay && (innerWorkspace ? "[&>main]:ml-0!" : "[&>main]:ml-2!"),
+          className,
+        )}
+        style={
+          {
+            "--sidebar-width": "15rem",
+            "--app-sidebar-offset": innerWorkspace ? "3rem" : "3.5rem",
+            ...style,
+          } as CSSProperties
+        }
+      >
+        {children}
+      </SidebarProvider>
     </AppSidebarContext.Provider>
   );
 }
