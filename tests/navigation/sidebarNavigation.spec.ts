@@ -714,6 +714,12 @@ test.describe("Shared workspace navigation", () => {
           navigation.getByRole("button", { name: "Encounters", exact: true }),
         ).toHaveCount(0);
         await expect(
+          navigation.getByRole("link", {
+            name: "Search patients",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+        await expect(
           navigation.getByRole("link", { name: "Settings", exact: true }),
         ).toBeVisible();
       });
