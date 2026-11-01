@@ -101,7 +101,7 @@ export const ObservationHistoryMatrix = ({
   }, [columns]);
 
   return (
-    <div className="rounded-xl border border-border bg-card mt-5 ml-3">
+    <div className="mt-5 ml-3 min-w-0 max-w-full rounded-xl border border-border bg-card">
       <div className="relative flex items-center gap-3 p-4">
         <span
           aria-hidden="true"
@@ -118,9 +118,9 @@ export const ObservationHistoryMatrix = ({
       </div>
 
       {/* Table */}
-      <div className="border-t border-border overflow-y-auto">
+      <div className="max-w-full overflow-x-auto overscroll-x-contain border-t border-border">
         <Table
-          className="border-separate border-spacing-0
+          className="min-w-max border-separate border-spacing-0
     [&_td]:border-b [&_td]:border-border
     [&_th]:border-b [&_th]:border-border
     [&_tbody_tr:last-child_td]:border-b-0"

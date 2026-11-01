@@ -238,20 +238,22 @@ export const ObservationVisualizer = ({
         <Card key={groupIndex} className="p-4">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center">
-              <ObservationDetailSheet
-                codes={group.codes}
-                title={group.title}
-                patientId={patientId}
-                encounterId={encounterId}
-                trigger={
-                  <Button
-                    variant="link"
-                    className="underline text-sm font-medium px-2"
-                  >
-                    {group.title}
-                  </Button>
-                }
-              />
+              <h3 className="text-sm font-medium">
+                <ObservationDetailSheet
+                  codes={group.codes}
+                  title={group.title}
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  trigger={
+                    <Button
+                      variant="link"
+                      className="underline text-sm font-medium px-2"
+                    >
+                      {group.title}
+                    </Button>
+                  }
+                />
+              </h3>
 
               <Popover>
                 <PopoverTrigger className="!px-0">

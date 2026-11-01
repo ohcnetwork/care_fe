@@ -133,7 +133,7 @@ export const QuickActions = ({
             "grid min-w-0 flex-1 gap-1.5",
             !canWriteClinicalData
               ? "grid-cols-1"
-              : "grid-cols-2 @min-[38rem]:grid-cols-[repeat(4,auto)]",
+              : "grid-cols-1 @min-[22rem]:grid-cols-2 @min-[38rem]:grid-cols-[repeat(4,auto)]",
           )}
         >
           {canWriteClinicalData && (
@@ -186,7 +186,7 @@ export const QuickActions = ({
           {canWriteClinicalData && (
             <CollapsibleContent
               className={cn(
-                "col-span-full grid grid-cols-2 gap-1.5 data-closed:hidden",
+                "col-span-full grid grid-cols-1 gap-1.5 data-closed:hidden @min-[22rem]:grid-cols-2",
                 canCreateReferral && "@min-[38rem]:grid-cols-3",
               )}
             >
@@ -257,7 +257,7 @@ export function QuickAction({
       >
         {icon}
       </span>
-      <span className="min-w-0 flex-1 leading-5">{title}</span>
+      <span className="min-w-0 flex-1 leading-5 wrap-break-word">{title}</span>
       {actionId && (
         <ShortcutBadge
           actionId={actionId}

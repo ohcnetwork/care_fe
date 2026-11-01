@@ -208,6 +208,10 @@ export function AllergyList({
       questionnaire="allergy_intolerance"
       history="allergies"
       emptyMessage={t("no_allergies_recorded_description")}
+      summary={
+        !!data?.pages[0]?.count &&
+        t("clinical_summary_recorded", { count: data.pages[0].count })
+      }
       hasData={allergies.length > 0}
       showEmpty={showEmpty}
       queryState={queryState}

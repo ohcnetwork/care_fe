@@ -2622,7 +2622,7 @@ test("studio picks vital sign codes from observation charts and saves them as se
   await openSectionSettings(page, "Latest vitals");
   const drawer = sectionSettings(page);
   await expect(
-    drawer.getByText("No codes selected: the standard vitals table is shown."),
+    drawer.getByText("No codes selected: the standard vital signs are shown."),
   ).toBeVisible();
   const quickAdd = drawer.getByRole("group", {
     name: "Primary Parameters",

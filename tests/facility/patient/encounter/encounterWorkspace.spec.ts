@@ -270,7 +270,7 @@ async function mockEncounterWorkspaceApi(
       created_by: actor,
       updated_by: actor,
     })),
-    // An earlier pulse and a saturation reading give the latest-vitals tiles
+    // An earlier pulse and a saturation reading give the latest-vitals matrix
     // a change to report and a second code to render.
     ...(options.includeWidgetData
       ? [
@@ -632,7 +632,7 @@ async function mockEncounterWorkspaceApi(
   await page.addInitScript(() => {
     localStorage.setItem("care_access_token", "encounter-workspace-test");
   });
-  if (options.includeSectionData) {
+  if (options.includeSectionData || options.includeOverview) {
     await page.route("**/config/plots.json", async (route) => {
       await route.fulfill({
         json: [
@@ -668,7 +668,7 @@ async function mockEncounterWorkspaceApi(
       if (request.method() !== "GET") {
         // Analysis is a read in disguise: the chart groups readings per code.
         if (
-          options.includeSectionData &&
+          (options.includeSectionData || options.includeOverview) &&
           request.method() === "POST" &&
           path === `/api/v1/patient/${patient.id}/observation/analyse/`
         ) {
@@ -950,7 +950,8 @@ async function mockEncounterWorkspaceApi(
           const codes = url.searchParams.get("codes")?.split(",");
           const results = observations.filter(
             (item) =>
-              item.encounter === url.searchParams.get("encounter") &&
+              (!url.searchParams.has("encounter") ||
+                item.encounter === url.searchParams.get("encounter")) &&
               (!codes || codes.includes(item.main_code.code)),
           );
           await route.fulfill({ json: { count: results.length, results } });
@@ -1448,10 +1449,13 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("tab", { name: "Ward rounds", exact: true }),
     ).toBeVisible();
-    // Overview also queries the default account through a POST endpoint.
+    // Analysis is a read despite using POST; Overview also queries the
+    // default account through a POST endpoint.
     expect(
       fixture.writes.filter(
-        (request) => !request.endsWith("/account/default_account/"),
+        (request) =>
+          !request.endsWith("/account/default_account/") &&
+          !request.endsWith("/observation/analyse/"),
       ),
     ).toEqual([]);
   });
@@ -3672,6 +3676,7 @@ test("studio response lists and location history stay read-only on closed encoun
   await forms
     .getByRole("button", { name: "More Actions", exact: true })
     .click();
+  await expect(page.getByRole("menu")).toBeVisible();
   await expect(
     page.getByRole("menuitem", {
       name: "Mark as entered in error",
@@ -3679,6 +3684,7 @@ test("studio response lists and location history stay read-only on closed encoun
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
 
   await page
     .getByRole("region", { name: "Visit locations", exact: true })
@@ -4016,19 +4022,51 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
 
   await page.goto(`${fixture.basePath}/summary`);
 
-  // Latest vitals: one tile per configured code with its change.
-  const pulse = vitals.getByRole("listitem", { name: "Pulse", exact: true });
-  await expect(pulse).toContainText("82");
-  await expect(pulse).toContainText("/min");
-  await expect(pulse).toContainText("+6");
+  // Latest vitals: a reading-time matrix with one row per configured code,
+  // latest reading first.
+  const vitalRow = (name: string) =>
+    vitals.getByRole("row").filter({
+      has: page.getByRole("button", { name, exact: true }),
+    });
+  const pulse = vitalRow("Pulse");
+  await expect(pulse.getByRole("cell").first()).toHaveText("82 /min");
   await expect(
-    vitals.getByRole("listitem", { name: "Oxygen saturation", exact: true }),
-  ).toContainText("97");
-  await expect(
-    vitals.getByRole("listitem", { name: "Body temperature", exact: true }),
-  ).toContainText("No reading");
+    pulse.getByRole("cell", { name: "76 /min", exact: true }),
+  ).toBeVisible();
+  await pulse.getByRole("button", { name: "Pulse", exact: true }).click();
+  const observationHistory = page.getByRole("dialog", { name: "Pulse" });
+  await expect(observationHistory).toBeVisible();
+  await expect(observationHistory).toContainText("All Encounters");
+  await expect(observationHistory).toContainText("3 recordings");
+  const historyMatrix = observationHistory.getByRole("table");
+  const pulseHistory = historyMatrix.getByRole("row").nth(1);
+  await expect(pulseHistory).toContainText("82");
+  await expect(pulseHistory).toContainText("76");
+  await expect(pulseHistory).toContainText("64");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      ),
+    )
+    .toBeLessThanOrEqual(0);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await observationHistory
+    .getByRole("checkbox", {
+      name: "Show current encounter recordings",
+    })
+    .click();
+  await expect(observationHistory).toContainText("2 recordings");
+  await expect(pulseHistory).not.toContainText("64");
+  await page.keyboard.press("Escape");
+  await expect(observationHistory).toHaveCount(0);
+  await expect(vitalRow("Oxygen saturation")).toContainText("97");
+  const temperature = vitalRow("Body temperature");
+  await expect(temperature).toContainText("No reading");
+  await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
-  // The tiles ask the analysis endpoint for the latest readings per code,
+  // The matrix asks the analysis endpoint for the latest readings per code,
   // scoped to the current encounter, instead of listing every observation.
   expect(
     fixture.analyseRequests.some(
@@ -4194,11 +4232,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/encounter/${fixture.pastEncounter.id}/summary`,
   );
   await expect(
-    vitals.getByRole("listitem", { name: "Pulse", exact: true }),
-  ).toContainText("64");
-  await expect(
-    vitals.getByRole("listitem", { name: "Pulse", exact: true }),
-  ).not.toContainText("+");
+    vitalRow("Pulse").getByRole("cell", { name: "64 /min", exact: true }),
+  ).toBeVisible();
+  await expect(vitalRow("Pulse")).not.toContainText("82");
   await expect(medication).toBeVisible();
   await expect(orders).toContainText("No service requests found");
   await expect(orders.getByRole("listitem")).toHaveCount(0);

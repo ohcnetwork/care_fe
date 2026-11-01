@@ -18,6 +18,11 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow, {
   BadgeButtonDropdownTrigger,
 } from "@/components/Patient/Common/ClinicalInformationRow";
+import {
+  ClinicalSummaryGrid,
+  OnsetMeta,
+  SeverityMeta,
+} from "@/components/Patient/Common/ClinicalSummaryGrid";
 
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -26,16 +31,21 @@ import {
   SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_VERIFICATION_STATUS_COLORS,
   Symptom,
+  SymptomClinicalStatus,
 } from "@/types/emr/symptom/symptom";
+
+const ACTIVE_SYMPTOM_CLINICAL_STATUS: SymptomClinicalStatus[] = [
+  "active",
+  "recurrence",
+  "relapse",
+];
 
 const SymptomCard = ({
   symptom,
   onViewEncounter,
-  compact = false,
 }: {
   symptom: Symptom;
   onViewEncounter?: () => void;
-  compact?: boolean;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -96,9 +106,7 @@ const SymptomCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div
-        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-5")}
-      >
+      <div className={"mt-4 flex flex-wrap gap-5"}>
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("verification")}</div>
           <Badge
@@ -167,21 +175,49 @@ export const SymptomTable = ({
   const { facilityId } = useCurrentFacilitySilently();
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
+
+  if (compact) {
+    return (
+      <ClinicalSummaryGrid
+        items={symptoms.map((symptom) => ({
+          id: symptom.id,
+          name: symptom.code.display || symptom.code.code,
+          dimmed: !ACTIVE_SYMPTOM_CLINICAL_STATUS.includes(
+            symptom.clinical_status,
+          ),
+          note: symptom.note,
+          createdBy: symptom.created_by,
+          onViewEncounter: showViewEncounter
+            ? () =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${symptom.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${symptom.encounter}/updates`,
+                )
+            : undefined,
+          meta: [
+            <OnsetMeta key="onset" onset={symptom.onset} />,
+            <SeverityMeta key="severity" severity={symptom.severity} />,
+            symptom.verification_status !== "confirmed" && (
+              <span key="verification">{t(symptom.verification_status)}</span>
+            ),
+            symptom.clinical_status !== "active" && (
+              <span key="status">{t(symptom.clinical_status)}</span>
+            ),
+          ],
+        }))}
+      />
+    );
+  }
+
   return (
     <>
       {/* Mobile: Card layout */}
-      <div
-        className={
-          compact
-            ? "block space-y-2 @3xl/clinical-widget:hidden"
-            : "block space-y-3 sm:hidden"
-        }
-      >
+      <div className="block space-y-3 sm:hidden">
         {symptoms.map((symptom) => (
           <SymptomCard
             key={symptom.id}
             symptom={symptom}
-            compact={compact}
             onViewEncounter={
               showViewEncounter
                 ? () =>
@@ -196,19 +232,9 @@ export const SymptomTable = ({
         ))}
       </div>
       {/* Desktop: Table layout */}
-      <div
-        className={cn(
-          "overflow-x-auto hidden",
-          compact ? "@3xl/clinical-widget:block" : "sm:block",
-        )}
-      >
-        <div className={cn("min-w-2xl", !compact && "pb-2")}>
-          <div
-            className={cn(
-              "grid grid-cols-[1fr_auto_auto_auto_auto_auto]",
-              compact ? "gap-y-1" : "gap-y-2",
-            )}
-          >
+      <div className="hidden overflow-x-auto sm:block">
+        <div className={"min-w-2xl pb-2"}>
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("symptom")}
             </div>
@@ -233,7 +259,6 @@ export const SymptomTable = ({
 
             {symptoms.map((symptom) => (
               <ClinicalInformationRow
-                compact={compact}
                 key={symptom.id}
                 note={symptom.note}
                 createdBy={symptom.created_by}

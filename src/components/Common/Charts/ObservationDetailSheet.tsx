@@ -151,7 +151,7 @@ export function ObservationDetailSheet({
             }
           />
         ) : (
-          <div className="flex flex-col gap-4 overflow-y-auto p-4 flex-1 min-h-0 mt-3">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-4 mt-3">
             {codeList.length > 1 ? (
               <Tabs defaultValue={codeList[0].code} className="w-full">
                 <TabsList className="bg-muted-background max-w-full justify-start overflow-x-auto h-12 pb-1.5 pt-1">

@@ -233,16 +233,16 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    const diagnosisRow = page
-      .locator("div")
-      .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
-      .nth(1);
-    await expect(diagnosisRow).toBeVisible();
-    await expect(diagnosisRow.getByText("Status")).toBeVisible();
-    await expect(diagnosisRow.getByText("Severity")).toBeVisible();
-    await expect(diagnosisRow.getByText("Verification")).toBeVisible();
-    await expect(diagnosisRow.getByText("Onset")).toBeVisible();
-
-    await expect(diagnosisRow.getByText(diagnosisName).first()).toBeVisible();
+    const diagnosisItem = page
+      .getByRole("region", { name: "Diagnoses", exact: true })
+      .getByRole("listitem")
+      .filter({ hasText: diagnosisName });
+    await expect(diagnosisItem).toBeVisible();
+    await expect(
+      diagnosisItem.getByText(diagnosisName, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      diagnosisItem.getByText("Severe", { exact: true }),
+    ).toBeVisible();
   });
 });

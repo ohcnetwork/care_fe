@@ -28,7 +28,6 @@ interface RowProps {
   note?: string;
   createdBy: UserReadMinimal;
   onViewEncounter?: () => void;
-  compact?: boolean;
 }
 
 export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
@@ -38,7 +37,7 @@ export function BadgeButtonDropdownTrigger({ note }: { note?: string }) {
       <Button
         variant="link"
         className="hover:text-gray-700"
-        aria-label={note ? t("has_note") : undefined}
+        aria-label={t("more_actions")}
       >
         <span className="relative inline-flex">
           <BadgeInfo size={16} />
@@ -59,7 +58,6 @@ export default function ClinicalInformationRow({
   note,
   createdBy,
   onViewEncounter,
-  compact = false,
 }: RowProps) {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -127,12 +125,7 @@ export default function ClinicalInformationRow({
       </div>
 
       {showNote && note && (
-        <div
-          className={cn(
-            "col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none",
-            compact ? "-mt-1.5" : "-mt-2.5",
-          )}
-        >
+        <div className="col-span-full relative -mt-2.5 border border-gray-200 p-2 pt-4 bg-gray-50 rounded rounded-t-none">
           <div className="text-sm font-semibold text-gray-800">
             {t("note")}
             {":"}

@@ -23,7 +23,7 @@ function sameCode(a: Code, b: Code) {
   return a.code === b.code && a.system === b.system;
 }
 
-/** Picks observation codes for the vitals tiles from the configured plots and the observation value set. */
+/** Picks observation codes for the vitals matrix rows from the configured plots and the observation value set. */
 export function VitalsCodePicker({
   value,
   disabled = false,

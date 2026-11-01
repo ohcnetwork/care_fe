@@ -20,6 +20,8 @@ interface EncounterAccordionLayoutProps {
   title: string;
   editLink?: string;
   actionButton?: ReactNode;
+  /** Short status shown beside the panel actions when there is room. */
+  summary?: ReactNode;
   presentation?: "default" | "panel";
 }
 
@@ -28,6 +30,7 @@ export function EncounterAccordionLayout({
   className,
   readOnly = false,
   actionButton,
+  summary,
   title,
   editLink,
   presentation = "default",
@@ -35,12 +38,29 @@ export function EncounterAccordionLayout({
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const isPanel = presentation === "panel";
+  const editAction = !readOnly && editLink && (
+    <div className="flex">
+      <Button
+        asChild
+        variant="ghost"
+        size="icon"
+        className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+      >
+        <Link href={editLink} aria-label={t("edit")}>
+          <SquarePen className="size-4" />
+        </Link>
+      </Button>
+    </div>
+  );
+  const extraAction = (
+    <div className="flex">{actionButton && actionButton}</div>
+  );
 
   return (
     <Card
       className={cn(
         isPanel
-          ? "rounded-xl border border-gray-200 bg-white shadow-none"
+          ? "@container/clinical-panel rounded-xl border border-gray-200 bg-white shadow-none"
           : "border-none rounded-md",
         className,
       )}
@@ -55,14 +75,16 @@ export function EncounterAccordionLayout({
         >
           <CardHeader
             className={cn(
-              "min-w-0 w-full flex flex-row items-center justify-between p-0",
-              isPanel ? "gap-3 space-y-0" : "pl-2",
+              "min-w-0 w-full p-0",
+              isPanel
+                ? "flex flex-row flex-wrap items-center gap-x-3 gap-y-1 space-y-0"
+                : "flex flex-row items-center justify-between pl-2",
             )}
           >
             <CardTitle
               className={
                 isPanel
-                  ? "min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600"
+                  ? "min-w-0 flex-[1_1_10rem] [overflow-wrap:break-word] text-sm font-bold uppercase tracking-wide text-gray-600"
                   : "min-w-0 [overflow-wrap:anywhere] text-base mt-1"
               }
             >
@@ -72,28 +94,29 @@ export function EncounterAccordionLayout({
             <div
               className={cn(
                 isPanel
-                  ? "flex shrink-0 items-center gap-1"
+                  ? "ml-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-1"
                   : "flex rounded-md border border-gray-500 lg:border-0 lg:divide-x-0 mt-1",
                 !isPanel &&
                   (editLink || actionButton) &&
                   "divide-x divide-gray-500",
               )}
             >
-              {!readOnly && editLink && (
-                <div className="flex">
-                  <Button
-                    asChild
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-transparent text-gray-500 hover:text-gray-500"
-                  >
-                    <Link href={editLink} aria-label={t("edit")}>
-                      <SquarePen className="size-4" />
-                    </Link>
-                  </Button>
-                </div>
+              {isPanel ? (
+                <>
+                  {summary && (
+                    <p className="mr-1 hidden whitespace-nowrap text-xs text-soft-foreground tabular-nums @sm/clinical-panel:block">
+                      {summary}
+                    </p>
+                  )}
+                  {extraAction}
+                  {editAction}
+                </>
+              ) : (
+                <>
+                  {editAction}
+                  {extraAction}
+                </>
               )}
-              <div className="flex">{actionButton && actionButton}</div>
               <div className="flex">
                 <CollapsibleTrigger asChild>
                   <Button
