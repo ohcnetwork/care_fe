@@ -171,7 +171,7 @@ function tabsProperties(
       ...properties.tabs,
       items: titledEnum(properties.tabs.items!, label),
       title: t("workspace_widget_tabs"),
-      description: t("workspace_widget_tabs_hint"),
+      description: t("workspace_widget_tabs_selection_hint"),
     },
     default_tab: {
       ...titledEnum(properties.default_tab, label),

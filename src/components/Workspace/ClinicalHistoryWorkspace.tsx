@@ -153,6 +153,7 @@ export function ClinicalHistoryWorkspace({
     ? systemTabs[currentTab as keyof typeof systemTabs]
     : undefined;
   if (
+    !embedded &&
     parsed &&
     requestedSystemTab?.visible &&
     tabs[currentTab]?.visible !== true

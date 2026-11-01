@@ -1116,6 +1116,68 @@ async function mockEncounterWorkspaceApi(
   };
 }
 
+test("limited observation timelines select measurement time across backend pages", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page);
+  fixture.workspace.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "latest",
+        title: "Latest measurements",
+        columns: [
+          {
+            span: 12,
+            widgets: [{ type: "observations", config: { limit: 1 } }],
+          },
+        ],
+      },
+    ],
+  };
+  const readings = Array.from({ length: 21 }, (_, index) => ({
+    id: faker.string.uuid(),
+    encounter: fixture.currentEncounter.id,
+    effective_datetime:
+      index === 20 ? "2026-10-02T12:00:00Z" : "2026-10-01T12:00:00Z",
+    modified_date: "2026-10-03T12:00:00Z",
+    main_code: {
+      system: "test",
+      code: String(index),
+      display: index === 20 ? "Newest measurement" : "Backdated measurement",
+    },
+    value_type: "decimal",
+    value: { value: index === 20 ? 91 : 76 },
+  }));
+  const offsets: number[] = [];
+  await page.route(
+    (url) =>
+      url.pathname === `/api/v1/patient/${fixture.patient.id}/observation/`,
+    async (route) => {
+      const url = new URL(route.request().url());
+      const offset = Number(url.searchParams.get("offset"));
+      const limit = Number(url.searchParams.get("limit"));
+      offsets.push(offset);
+      await route.fulfill({
+        json: {
+          count: readings.length,
+          results: readings.slice(offset, offset + limit),
+        },
+      });
+    },
+  );
+  await page.goto(`${fixture.basePath}/latest`);
+  await expect(
+    page.getByText("Newest measurement", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Backdated measurement", { exact: true }),
+  ).toHaveCount(0);
+  expect(offsets).toEqual([0, 20]);
+});
+
 test.describe("Encounter workspace rendering", () => {
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
@@ -3944,6 +4006,14 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     includeSectionData: true,
     includeWidgetData: true,
   });
+  fixture.widgetOrders[1].diagnostic_reports = [
+    {
+      ...fixture.imagingReport,
+      id: faker.string.uuid(),
+      status: "preliminary",
+      conclusion: "",
+    },
+  ];
   const loinc = (code: string, display: string) => ({
     system: "http://loinc.org",
     code,
@@ -4079,6 +4149,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     .filter({ hasText: "Creatinine" });
   await expect(creatinine).toContainText("Laboratory");
   await expect(creatinine).toContainText("No result yet");
+  await expect(
+    creatinine.getByRole("link", { name: "View Report", exact: true }),
+  ).toHaveCount(0);
   await expect(
     creatinine.getByRole("link", { name: "Check Status", exact: true }),
   ).toHaveAttribute(

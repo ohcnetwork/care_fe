@@ -44,19 +44,24 @@ const EXCLUDED_STATUSES: readonly Status[] = [
 
 type OrderOutcome = "ready" | "awaiting" | "on_hold";
 
+function hasAvailableResults(
+  report: ServiceRequestReadSpec["diagnostic_reports"][number],
+) {
+  return (
+    report.status === DiagnosticReportStatus.partial ||
+    report.status === DiagnosticReportStatus.modified ||
+    report.status === DiagnosticReportStatus.final
+  );
+}
+
 function orderOutcome(request: ServiceRequestReadSpec): OrderOutcome {
-  if (
-    request.diagnostic_reports.some(
-      (report) => report.status !== DiagnosticReportStatus.registered,
-    )
-  )
-    return "ready";
+  if (request.diagnostic_reports.some(hasAvailableResults)) return "ready";
   return request.status === Status.on_hold ? "on_hold" : "awaiting";
 }
 
 function latestReport(request: ServiceRequestReadSpec) {
   return [...request.diagnostic_reports]
-    .filter((report) => report.status !== DiagnosticReportStatus.registered)
+    .filter(hasAvailableResults)
     .sort(
       (a, b) => Date.parse(b.modified_date) - Date.parse(a.modified_date),
     )[0];
@@ -163,7 +168,6 @@ export function OutstandingOrdersWidget({
     eligible.length < limit &&
     !!hasNextPage &&
     pagesLoaded < MAX_PAGES &&
-    !isFetching &&
     !isError;
   // The automatic search stopped at MAX_PAGES but the server has more orders,
   // so an empty or short list is not the whole picture.
@@ -173,8 +177,9 @@ export function OutstandingOrdersWidget({
     pagesLoaded >= MAX_PAGES &&
     !isError;
   useEffect(() => {
-    if (canRead && parsedConfig.success && needsMore) fetchNextPage();
-  }, [canRead, parsedConfig.success, needsMore, fetchNextPage]);
+    if (canRead && parsedConfig.success && needsMore && !isFetching)
+      fetchNextPage();
+  }, [canRead, parsedConfig.success, needsMore, isFetching, fetchNextPage]);
 
   if (!canRead || !facilityId) return null;
   const heading = title ?? t("workspace_outstanding_orders");

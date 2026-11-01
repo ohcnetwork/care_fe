@@ -7,6 +7,7 @@ import { useInView } from "react-intersection-observer";
 import { Card } from "@/components/ui/card";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
@@ -79,10 +80,18 @@ export const EncounterObservationsTab = ({
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
-  const pageSize = limit === undefined ? PAGE_SIZE : Math.min(limit, PAGE_SIZE);
+  const pageSize = PAGE_SIZE;
 
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage,
+    isError,
+    isFetching,
+    refetch,
+  } = useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId, limit],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(observationApi.list, {
@@ -99,21 +108,26 @@ export const EncounterObservationsTab = ({
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
         const currentOffset = allPages.length * pageSize;
-        const total =
-          limit === undefined
-            ? lastPage.count
-            : Math.min(lastPage.count, limit);
-        return currentOffset < total ? currentOffset : null;
+        return currentOffset < lastPage.count ? currentOffset : null;
       },
     });
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    if (
+      (limit !== undefined || inView) &&
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !isError
+    ) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [limit, inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
-  if (isLoading) {
+  if (isError) {
+    return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
+  }
+
+  if (isLoading || (limit !== undefined && hasNextPage)) {
     return (
       <Card className="p-6">
         <div className="text-lg font-medium text-gray-500">{t("loading")}</div>
@@ -121,9 +135,19 @@ export const EncounterObservationsTab = ({
     );
   }
 
-  const observations = (
-    data?.pages.flatMap((page) => page.results) ?? []
-  ).slice(0, limit);
+  const fetched = data?.pages.flatMap((page) => page.results) ?? [];
+  // The backend orders by modification time, not measurement time. A limited
+  // timeline must finish paging before selecting the newest measurements.
+  const observations =
+    limit === undefined
+      ? fetched
+      : [...fetched]
+          .sort(
+            (a, b) =>
+              Date.parse(b.effective_datetime) -
+              Date.parse(a.effective_datetime),
+          )
+          .slice(0, limit);
 
   if (observations.length === 0) {
     return (

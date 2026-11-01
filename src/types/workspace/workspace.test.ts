@@ -66,6 +66,14 @@ test("version 2 presets are valid and preserve deferred system pages", () => {
     );
   }
   const template = standardWorkspaceTemplate("encounter", i18next.t);
+  const overview = template.pages.find((page) => page.key === "updates");
+  assert.equal(overview?.kind, "custom");
+  if (overview?.kind === "custom") {
+    const types = overview.columns.flatMap((column) =>
+      column.widgets.map((widget) => widget.type),
+    );
+    assert.equal(types[types.indexOf("draft_forms") + 1], "referrals");
+  }
   for (const key of ["notes", "devices", "immunizations", "files"]) {
     assert.equal(
       template.pages.find((page) => page.key === key)?.kind,

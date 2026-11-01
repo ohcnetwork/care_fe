@@ -60,6 +60,7 @@ export function standardWorkspaceTemplate(
                 "favorite_forms",
                 "encounter_extensions",
                 "draft_forms",
+                "referrals",
                 "allergies",
                 "symptoms",
                 "diagnosis",

@@ -127,7 +127,9 @@ export function WorkspaceSchemaFields({
                 value={
                   Array.isArray(config[field.name])
                     ? (config[field.name] as unknown[])
-                    : []
+                    : field.name === "tabs" && config[field.name] === undefined
+                      ? field.itemMetadata.options.map((option) => option.value)
+                      : []
                 }
                 disabled={disabled || field.readOnly}
                 // Keep an emptied selection so validation rejects it; omission

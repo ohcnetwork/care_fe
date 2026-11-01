@@ -2987,6 +2987,15 @@ test("studio flags full-width browsers in narrow columns and saves tab subsets a
   await openSectionSettings(page, "Medicines");
   const drawer = sectionSettings(page);
   const tabs = drawer.getByRole("group", { name: "Tabs to show", exact: true });
+  for (const checkbox of await tabs.getByRole("checkbox").all()) {
+    await expect(checkbox).toBeChecked();
+  }
+  await expect(
+    tabs.getByText("Select at least one tab. Clear restores all default tabs."),
+  ).toBeVisible();
+  // Narrow the inherited all-tabs default before choosing the opening tab.
+  await tabs.getByRole("checkbox").nth(1).uncheck();
+  await tabs.getByRole("checkbox").nth(3).uncheck();
   await tabs
     .getByRole("checkbox", { name: "Medicine Administration", exact: true })
     .check();
