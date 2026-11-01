@@ -46,7 +46,8 @@ function ruleText(
 
 /**
  * Short chip text for the canvas: the single rule spelled out, or a count
- * when there are several ("Shown when 2 rules match").
+ * when there are several ("Shown when 2 rules match" for AND, "Shown when
+ * any of 2 rules match" for OR).
  */
 export function shortConditionSummary(
   question: Question,
@@ -58,7 +59,12 @@ export function shortConditionSummary(
   if (rules.length === 1) {
     return t("shown_when", { summary: ruleText(rules[0], targets, t) });
   }
-  return t("shown_when_n_rules", { count: rules.length });
+  return t(
+    question.enable_behavior === "any"
+      ? "shown_when_any_n_rules"
+      : "shown_when_n_rules",
+    { count: rules.length },
+  );
 }
 
 /**

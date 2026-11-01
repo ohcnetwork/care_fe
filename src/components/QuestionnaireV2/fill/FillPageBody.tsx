@@ -442,7 +442,7 @@ export function FillPageBody({
             <section
               ref={setScrollHost}
               aria-label={t("form_canvas")}
-              className="min-w-0 flex-1 space-y-4 px-4 py-3 md:overflow-y-auto md:px-8 [&_[data-question-id]]:scroll-mt-[calc(var(--fill-shell-header-height)+var(--fill-actions-height)+0.75rem)] md:[&_[data-question-id]]:scroll-mt-[calc(var(--fill-actions-height)+0.75rem)]"
+              className="relative min-w-0 flex-1 space-y-4 px-4 py-3 md:overflow-y-auto md:px-8 [&_[data-question-id]]:scroll-mt-[calc(var(--fill-shell-header-height)+var(--fill-actions-height)+0.75rem)] md:[&_[data-question-id]]:scroll-mt-[calc(var(--fill-actions-height)+0.75rem)]"
               style={
                 {
                   "--fill-actions-height": `${actionsHeight}px`,

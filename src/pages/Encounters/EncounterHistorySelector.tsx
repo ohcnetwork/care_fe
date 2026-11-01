@@ -599,13 +599,13 @@ export default function EncounterHistorySelector() {
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="px-4" aria-describedby={undefined}>
-        <DrawerHeader className="py-3">
-          <DrawerTitle className="text-lg font-semibold">
+      <DrawerContent height="fixed" aria-describedby={undefined}>
+        <DrawerHeader showCloseButton className="py-2 border-b shadow-2xs">
+          <DrawerTitle className="text-lg font-semibold pl-2">
             {t("encounter_history")}
           </DrawerTitle>
         </DrawerHeader>
-        <div className="min-h-0 overflow-y-auto pb-4 pr-2">
+        <div className="min-h-0 overflow-y-auto pb-4 px-4">
           <EncounterHistoryList onSelect={() => setIsOpen(false)} />
         </div>
       </DrawerContent>

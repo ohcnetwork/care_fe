@@ -13,6 +13,15 @@ let pharmacybasePath: string;
 let isInitialized: boolean = false;
 
 test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
+  // The status buttons save with a PUT; navigating away before it lands
+  // cancels the request and leaves the order in its old status.
+  const waitForDeliveryOrderUpdate = (page: Page) =>
+    page.waitForResponse(
+      (response) =>
+        /\/order\/delivery\/[^/]+\/$/.test(new URL(response.url()).pathname) &&
+        response.request().method() === "PUT",
+    );
+
   async function addRequestedStock(page: Page) {
     await page.getByRole("button", { name: /^Load from order\b/ }).click();
     const requestPicker = page.getByRole("dialog", {
@@ -134,7 +143,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       page.getByRole("button", { name: "Load from order" }),
     ).toBeVisible();
     await addRequestedStock(page);
+    const approved = waitForDeliveryOrderUpdate(page);
     await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await approved;
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page
@@ -158,7 +169,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       page.getByRole("button", { name: "Load from order" }),
     ).toBeVisible();
     await addRequestedStock(page);
+    const approved = waitForDeliveryOrderUpdate(page);
     await page.getByRole("button", { name: "Mark as Approved" }).click();
+    await approved;
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
     await page.getByRole("tab", { name: "Outgoing Deliveries" }).click();
     const deliveryRow = page
@@ -190,7 +203,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       name: "Mark as Completed",
     });
     await expect(markAsCompletedButton).toBeEnabled();
+    const completed = waitForDeliveryOrderUpdate(page);
     await markAsCompletedButton.click();
+    await completed;
 
     await page.goto(bioChembasePath + "/inventory/internal/receive");
     await page.getByRole("tab", { name: "Incoming Deliveries" }).click();
