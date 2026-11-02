@@ -374,10 +374,11 @@ test.describe("Observation Definition Form with Interpretation", () => {
       page.getByText("Root-level observation interpretations exist"),
     ).toBeVisible();
 
-    // Verify Add Interpretation button is disabled or not visible in component section
+    // Only the root section keeps its "Add Interpretation" (it allows several);
+    // the component section offers none while root interpretations exist.
     await expect(
       page.getByRole("button", { name: "Add Interpretation" }),
-    ).toHaveCount(0);
+    ).toHaveCount(1);
 
     // Try to clear root-level interpretation
     await test.step("Clear root-level interpretation", async () => {
@@ -448,7 +449,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .first()
         .click();
 
-      page.getByRole("combobox", { name: "Unit" }).nth(1).click();
+      await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
       await page.waitForLoadState("networkidle");
       await page.getByRole("option").first().click();
 

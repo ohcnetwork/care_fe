@@ -16,6 +16,7 @@ import type { DiagnosisRequest } from "@/types/emr/diagnosis/diagnosis";
 import type { EncounterEdit } from "@/types/emr/encounter/encounter";
 import type { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import type { MedicationStatementRequest } from "@/types/emr/medicationStatement";
+import type { ProcedureRequest } from "@/types/emr/procedure/procedure";
 import type { ServiceRequestApplyActivityDefinitionForm } from "@/types/emr/serviceRequest/serviceRequest";
 import type { SymptomRequest } from "@/types/emr/symptom/symptom";
 import type { FileUploadQuestion } from "@/types/files/file";
@@ -31,6 +32,7 @@ export interface StructuredDataMap {
   medication_statement: MedicationStatementRequest;
   symptom: SymptomRequest;
   diagnosis: DiagnosisRequest;
+  procedure: ProcedureRequest;
   encounter: EncounterEdit;
   appointment: CreateAppointmentQuestion;
   files: FileUploadQuestion;

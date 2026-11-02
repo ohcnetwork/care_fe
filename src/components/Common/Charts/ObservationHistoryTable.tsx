@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 
 interface ObservationHistoryTableProps {
   patientId: string;
-  encounterId: string;
+  encounterId?: string;
   codes: Code[];
 }
 

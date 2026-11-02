@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -97,6 +97,23 @@ export function DiagnosisList({
   } = queryState;
 
   const diagnoses = data?.pages.flatMap((page) => page.results) ?? [];
+  const { data: resolvedDiagnoses } = useQuery({
+    queryKey: ["encounter_diagnosis_resolved_count", patientId, encounterId],
+    queryFn: query(diagnosisApi.listDiagnosis, {
+      pathParams: { patientId },
+      silent: true,
+      queryParams: {
+        category: "encounter_diagnosis,chronic_condition",
+        clinical_status: "inactive,remission,resolved",
+        exclude_verification_status: "entered_in_error",
+        ...(encounterId ? { encounter: encounterId } : {}),
+        limit: 1,
+      },
+    }),
+    enabled: !showTimeline && presentation === "panel",
+  });
+  const activeCount = data?.pages[0]?.count;
+  const resolvedCount = resolvedDiagnoses?.count ?? 0;
 
   if (showTimeline) {
     if (isLoading) return <TableSkeleton count={5} />;
@@ -185,6 +202,17 @@ export function DiagnosisList({
       questionnaire="diagnosis"
       history="diagnoses"
       emptyMessage={t("no_diagnoses_recorded_description")}
+      summary={
+        activeCount !== undefined &&
+        (activeCount > 0 || resolvedCount > 0) &&
+        [
+          t("clinical_summary_active", { count: activeCount }),
+          resolvedCount > 0 &&
+            t("clinical_summary_resolved", { count: resolvedCount }),
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      }
       hasData={diagnoses.length > 0}
       showEmpty={showEmpty}
       queryState={queryState}

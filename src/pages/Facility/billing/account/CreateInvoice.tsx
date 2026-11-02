@@ -500,7 +500,7 @@ export function CreateInvoicePage({
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
+                <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -809,6 +809,7 @@ export function CreateInvoicePage({
                           },
                         }}
                         translationBaseKey="charge_item_definition"
+                        data-shortcut-id="enter-action"
                       />
                     </div>
                   )}

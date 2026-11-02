@@ -235,7 +235,9 @@ async function expectOneLine(row: Locator, viewportWidth: number) {
       centers: children.map((child) => child.y + child.height / 2),
     };
   });
-  expect(geometry.height).toBeLessThanOrEqual(56);
+  // One line: the row's py-3 padding plus its tallest control, the h-9 `sm`
+  // Continue button (a wrapped row is ~30px taller).
+  expect(geometry.height).toBeLessThanOrEqual(60);
   expect(geometry.left).toBeGreaterThanOrEqual(0);
   expect(geometry.right).toBeLessThanOrEqual(viewportWidth);
   expect(

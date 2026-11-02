@@ -294,7 +294,7 @@ export default function AppointmentPrint(props: Props) {
                 {t("charges")}
               </div>
 
-              <div className="border rounded overflow-hidden">
+              <div className="rounded-md overflow-hidden">
                 <Table className="text-xs">
                   <TableHeader>
                     <TableRow className="bg-gray-50 divide-x">
@@ -371,7 +371,7 @@ export default function AppointmentPrint(props: Props) {
                 {t("payment_details")}
               </div>
 
-              <div className="border rounded overflow-hidden">
+              <div className="rounded-md overflow-hidden">
                 <Table className="text-xs">
                   <TableHeader>
                     <TableRow className="bg-gray-50 divide-x">

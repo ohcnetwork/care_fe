@@ -41,7 +41,7 @@
     "postinstall": "tsx scripts/install-platform-deps.ts",
     "postbuild": "tsx scripts/generate-headers.ts",
     "test": "snyk test",
-    "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\"",
+    "test:unit": "node --import tsx --test \"plugins/**/*.test.ts\" \"src/types/workspace/*.test.ts\"",
     "playwright:test": "playwright test",
     "playwright:test:ui": "playwright test --ui",
     "playwright:test:headed": "playwright test --headed",
@@ -62,7 +62,7 @@
     "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
-    "@base-ui/react": "1.6.0",
+    "@base-ui/react": "1.9.0",
     "@fontsource-variable/figtree": "5.2.10",
     "@fontsource-variable/geist-mono": "5.2.8",
     "@fontsource/libre-barcode-128-text": "^5.2.8",

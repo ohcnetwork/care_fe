@@ -55,7 +55,9 @@ async function openPatientForms(page: Page) {
   await page.goto(
     `/facility/${getFacilityId()}/patient/${getPatientId()}/questionnaire`,
   );
-  await page.getByRole("combobox", { name: /add forms/i }).click();
+  await page
+    .getByRole("combobox", { name: "Select a questionnaire to fill" })
+    .click();
 }
 
 async function expectFormListed(page: Page, title: string, listed: boolean) {

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/input-password";
-import { Label } from "@/components/ui/label";
 
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 
@@ -70,12 +70,13 @@ export function PasswordFields({
   const passwordHintsId = "new-password-hints";
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="new-password">{t("new_password")}</Label>
+    <>
+      <Field data-invalid={!!errors.password}>
+        <FieldLabel htmlFor="new-password">{t("new_password")}</FieldLabel>
         <PasswordInput
           id="new-password"
           name="password"
+          autoComplete="new-password"
           placeholder={t("new_password")}
           value={password}
           onChange={onChange}
@@ -92,21 +93,10 @@ export function PasswordFields({
           }
         />
         {errors.password && (
-          <div
-            id={passwordErrorId}
-            className="mt-1 text-red-500 text-xs"
-            data-input-error
-            role="alert"
-          >
-            {errors.password}
-          </div>
+          <FieldError id={passwordErrorId}>{errors.password}</FieldError>
         )}
         {isPasswordFieldFocused && (
-          <div
-            id={passwordHintsId}
-            className="text-small mt-2 pl-2 text-secondary-500"
-            aria-live="polite"
-          >
+          <div id={passwordHintsId} className="pl-2" aria-live="polite">
             <ValidationHelper
               isInputEmpty={!password}
               successMessage={t("password_success_message")}
@@ -131,13 +121,16 @@ export function PasswordFields({
             />
           </div>
         )}
-      </div>
+      </Field>
 
-      <div className="space-y-2">
-        <Label htmlFor="confirm-password">{t("confirm_password")}</Label>
+      <Field data-invalid={!!errors.confirm}>
+        <FieldLabel htmlFor="confirm-password">
+          {t("confirm_password")}
+        </FieldLabel>
         <PasswordInput
           id="confirm-password"
           name="confirm"
+          autoComplete="new-password"
           placeholder={t("confirm_password")}
           value={confirm}
           onChange={onChange}
@@ -145,16 +138,9 @@ export function PasswordFields({
           aria-describedby={errors.confirm ? confirmErrorId : undefined}
         />
         {errors.confirm && (
-          <div
-            id={confirmErrorId}
-            className="mt-1 text-red-500 text-xs"
-            data-input-error
-            role="alert"
-          >
-            {errors.confirm}
-          </div>
+          <FieldError id={confirmErrorId}>{errors.confirm}</FieldError>
         )}
-      </div>
-    </div>
+      </Field>
+    </>
   );
 }

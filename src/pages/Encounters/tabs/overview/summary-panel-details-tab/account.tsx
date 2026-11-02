@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
-export const Account = () => {
+export const Account = ({ title }: { title?: string } = {}) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const {
@@ -88,8 +88,8 @@ export const Account = () => {
   return (
     <div className="w-full rounded-xl border border-gray-200 bg-white">
       <div className="flex min-h-11 items-center justify-between gap-2 border-b border-gray-200 px-3 py-1">
-        <span className="text-sm font-bold uppercase tracking-wide text-gray-600">
-          {t("account")}:
+        <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold uppercase tracking-wide text-gray-600">
+          {title ?? `${t("account")}:`}
         </span>
         <AccountSheetButton
           encounter={encounter}

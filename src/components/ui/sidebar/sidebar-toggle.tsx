@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { PanelLeft } from "lucide-react";
 import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,16 +9,9 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-const hasCustomLogo = [
-  careConfig.mainLogo?.dark,
-  careConfig.mainLogo?.light,
-].some((source) => source && source !== "/images/care_logo.svg");
-const iconOnLight = hasCustomLogo
-  ? (careConfig.mainLogo?.dark ?? careConfig.mainLogo?.light)
-  : "/images/care_icon_on_light.svg";
-const iconOnDark = hasCustomLogo
-  ? (careConfig.mainLogo?.light ?? careConfig.mainLogo?.dark)
-  : "/images/care_icon_on_dark.svg";
+// Like the sidebar wordmark, the collapsed-rail icon is always Care's.
+const iconOnLight = "/images/care_icon_on_light.svg";
+const iconOnDark = "/images/care_icon_on_dark.svg";
 
 export function AppSidebarToggle({
   className,

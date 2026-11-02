@@ -521,6 +521,9 @@ export default function AppointmentDetail(props: Props) {
                           facilityId={facilityId}
                           patientName={appointment.patient.name}
                           appointment={appointment.id}
+                          scheduleDefaults={
+                            appointment.token_slot.availability.schedule
+                          }
                           redirectQueryParams={referralEncounterParams}
                           defaultOpen={from_queue === "true"}
                           defaultStatus={EncounterStatus.IN_PROGRESS}
@@ -547,6 +550,9 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        scheduleDefaults={
+                          appointment.token_slot.availability.schedule
+                        }
                         disableRedirectOnSuccess={true}
                         trigger={
                           <QuickAction
@@ -943,7 +949,7 @@ const AppointmentActions = ({
         new_slot: selectedSlotId || "",
         previous_booking_note: oldNote,
         new_booking_note: newNote,
-        tags: appointment.tags.map((tag) => tag.id),
+        tags: appointment.tags.map((tag) => ({ tag: tag.id })),
       },
     });
     if (
