@@ -198,27 +198,40 @@ function useUserPreferences() {
 
   // Wrapped dispatch that also syncs to backend
   const updatePreferences = useCallback(
-    (action: PreferencesAction) => {
+    (
+      action: PreferencesAction,
+      options?: Parameters<typeof syncPreferences>[1],
+    ) => {
       dispatch(action);
       const newState = preferencesReducer(preferences, action);
       const key = getAffectedPreferenceKey(action);
 
-      syncPreferences({
-        version: "0.0.1",
-        preference: key,
-        value: newState[key] as Record<string, unknown>,
-      });
+      syncPreferences(
+        {
+          version: "0.0.1",
+          preference: key,
+          value: newState[key] as Record<string, unknown>,
+        },
+        options,
+      );
     },
     [preferences, syncPreferences],
   );
 
   const setPreference = useCallback(
-    (key: string, value: Record<string, unknown>) => {
-      updatePreferences({
-        type: ActionType.SET_PREFERENCE,
-        key,
-        payload: value,
-      });
+    (
+      key: string,
+      value: Record<string, unknown>,
+      options?: Parameters<typeof syncPreferences>[1],
+    ) => {
+      updatePreferences(
+        {
+          type: ActionType.SET_PREFERENCE,
+          key,
+          payload: value,
+        },
+        options,
+      );
     },
     [updatePreferences],
   );

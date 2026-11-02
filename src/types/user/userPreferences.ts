@@ -16,6 +16,11 @@ export interface EncounterListPreferences {
   default_class?: string;
 }
 
+export interface PinnedFacilitiesPreferences {
+  /** Facility ids in the order they were pinned. */
+  facility_ids?: string[];
+}
+
 export interface UserPreferenceRequest {
   preference: string;
   version?: string;

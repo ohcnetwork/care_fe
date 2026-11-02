@@ -175,7 +175,11 @@ test.describe("Fill draft lifecycle at the login form", () => {
     await page.getByLabel(/^password$/i).fill("admin");
     await page.getByRole("button", { name: /^sign in$/i }).click();
     await page.waitForURL(loggedInUrl, { timeout: 15000 });
-    await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /^Good (Morning|Afternoon|Evening), .+/,
+      }),
+    ).toBeVisible();
 
     // The OTHER user's draft is gone — cleared as soon as credentials were
     // accepted.

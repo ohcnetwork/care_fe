@@ -3245,7 +3245,6 @@
   "helper_text": "Helper text",
   "helper_text_hint": "Shown under the question",
   "helper_text_placeholder": "Add guidance for the person filling this in",
-  "hey_user": "Hey {{user}} 👋",
   "hidden_by_conditions": "Hidden by conditions",
   "hide": "Hide",
   "hide_advanced_fields": "Hide Advanced Fields",
@@ -8480,5 +8479,9 @@
   "workspace_studio_use_standard_history": "Use standard clinical history",
   "workspace_picker_scope_hint": "Your choice applies to all your encounters and clinical history.",
   "plots": "Plots",
-  "table": "Table"
+  "table": "Table",
+  "pin_facility": "Pin facility",
+  "unpin_facility": "Unpin facility",
+  "facility_pinned": "{{name}} pinned",
+  "facility_unpinned": "{{name}} unpinned"
 }
