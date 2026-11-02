@@ -59,7 +59,7 @@ const PatientRoutes: AppRoutes = {
   ),
   ...[
     "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
-    "/organization/organizationId/patient/:patientId/encounter/:encounterId/consents/:consentId",
+    "/organization/:organizationId/patient/:patientId/encounter/:encounterId/consents/:consentId",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ facilityId, patientId, encounterId, consentId }) => {
       return (
