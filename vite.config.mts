@@ -18,6 +18,7 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
+import { federationHostBuild } from "./plugins/federationHostBuild";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import validateEnv from "./scripts/validate-env";
@@ -406,7 +407,7 @@ function getDescriptionHtml(description: string) {
   return JSON.stringify(sanitizedHtml);
 }
 
-export default defineConfig(async ({ mode }): Promise<UserConfig> => {
+export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
   const env = loadEnv(mode, process.cwd(), "");
 
   await validateEnv(env);
@@ -418,6 +419,21 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       "https://egov-s3-patient-data-10bedicu.s3.amazonaws.com",
       "http://localhost:4566",
     ].join(" ");
+
+  const remotes = { dummy: "" };
+  const federationPlugin = federation({
+    name: "core",
+    remotes,
+    shared: [
+      "react",
+      "react-dom",
+      "react-i18next",
+      "@tanstack/react-query",
+      "raviger",
+      "sonner",
+      "decimal.js",
+    ],
+  });
 
   return {
     envPrefix: "REACT_",
@@ -436,21 +452,9 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         ),
       }),
       tailwindcss(),
-      federation({
-        name: "core",
-        remotes: {
-          dummy: "",
-        },
-        shared: [
-          "react",
-          "react-dom",
-          "react-i18next",
-          "@tanstack/react-query",
-          "raviger",
-          "sonner",
-          "decimal.js",
-        ],
-      }),
+      command === "build"
+        ? federationHostBuild(federationPlugin, Object.keys(remotes))
+        : federationPlugin,
       react(),
       treeShakeCareIcons({
         iconWhitelist: ["default"],
