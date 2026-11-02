@@ -1,6 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import imageCompression from "browser-image-compression";
-import jsPDF from "jspdf";
 import {
   ChangeEvent,
   DetailedHTMLProps,
@@ -101,6 +99,8 @@ export default function useFileUpload(
   const generatePDF = async (files: File[]): Promise<File | null> => {
     try {
       toast.info(t("file_conversion_in_progress"));
+      // jspdf and its dependencies are large; load them only when combining files.
+      const { jsPDF } = await import("jspdf");
       const pdf = new jsPDF();
       const totalFiles = files.length;
 
@@ -144,11 +144,15 @@ export default function useFileUpload(
               initialQuality: 0.6,
               alwaysKeepResolution: true,
             };
-            imageCompression(file, options).then((compressedFile: File) => {
-              setFiles((prev) =>
-                prev.map((f) => (f.name === file.name ? compressedFile : f)),
-              );
-            });
+            import("browser-image-compression")
+              .then(({ default: imageCompression }) =>
+                imageCompression(file, options),
+              )
+              .then((compressedFile: File) => {
+                setFiles((prev) =>
+                  prev.map((f) => (f.name === file.name ? compressedFile : f)),
+                );
+              });
           }
         });
       }
