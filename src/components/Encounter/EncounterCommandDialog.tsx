@@ -30,7 +30,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
-import { useCareApps } from "@/hooks/useCareApps";
+import { useCareAppTabs, useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
@@ -84,14 +84,17 @@ export function EncounterCommandDialog({
   const { defaults, list, workspace } = useEncounterWorkspaces(
     encounter.encounter_class,
   );
+  const pluginTabKeys = Object.keys(
+    useCareAppTabs<object>("encounterTabs"),
+  ).join(",");
   const isWorkspaceLoading = defaults.isLoading || list.isLoading;
   // Pages a workspace omits or hides are not routable, so they must not be offered.
   const workspacePages = useMemo(() => {
     if (!workspace) return undefined;
-    const pages = parseEncounterWorkspace(
-      workspace.template,
-      SYSTEM_PAGE_KEYS,
-    ).pages.filter((page) => !page.hidden);
+    const pages = parseEncounterWorkspace(workspace.template, [
+      ...SYSTEM_PAGE_KEYS,
+      ...(pluginTabKeys ? pluginTabKeys.split(",") : []),
+    ]).pages.filter((page) => !page.hidden);
     return {
       systemKeys: new Set(
         pages.filter((page) => page.kind === "system").map((page) => page.key),
@@ -100,7 +103,7 @@ export function EncounterCommandDialog({
         page.kind === "custom" ? [{ key: page.key, title: page.title }] : [],
       ),
     };
-  }, [workspace]);
+  }, [workspace, pluginTabKeys]);
   const canNavigateToPage = useCallback(
     (pageKey: string) =>
       workspacePages
@@ -326,13 +329,15 @@ export function EncounterCommandDialog({
 
     // Add write actions only when user has write permission
     if (canWriteSelectedEncounter) {
-      actionItems.push(
-        {
+      if (canNavigateToPage("consents")) {
+        actionItems.push({
           id: "consents",
           label: t("manage_consents"),
           shortcut: getShortcutDisplay("consents"),
           icon: <NotebookPen />,
-        },
+        });
+      }
+      actionItems.push(
         {
           id: "mark-as-completed",
           label: encounterRequiresDischarge(encounter)
