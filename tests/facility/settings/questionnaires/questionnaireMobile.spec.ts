@@ -19,7 +19,7 @@ test.describe("Questionnaire v2 mobile layout", () => {
       .getByPlaceholder("Search Questionnaires")
       .fill("E2E Kitchen Sink");
 
-    const card = page.getByRole("button", {
+    const card = page.getByRole("link", {
       name: "E2E Kitchen Sink (Facility)",
     });
     await expect(card).toBeVisible();

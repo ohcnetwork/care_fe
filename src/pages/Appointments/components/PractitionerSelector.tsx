@@ -302,10 +302,10 @@ export const PractitionerSelector = ({
   );
 
   const content = (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Main Content */}
       {!currentOrganizationId && (
-        <div className="flex-1 flex flex-col">
+        <div className="flex min-h-0 flex-1 flex-col">
           {/* Header */}
           <div className="px-3 py-2 border-b border-border">
             <div className="flex items-center justify-between gap-2">
@@ -332,10 +332,11 @@ export const PractitionerSelector = ({
               aria-label={t("search_departments_and_practitioners")}
               value={searchQuery}
               onValueChange={setSearchQuery}
-              wrapperClassName="border-b border-border px-3 py-2 md:pt-2"
+              wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+              className="text-base sm:text-sm"
             />
 
-            <CommandList className="md:max-h-[30dvh] overflow-y-auto">
+            <CommandList className="scrollbar-gutter-auto md:max-h-[30dvh]">
               <CommandEmpty>
                 {searchQuery ? (
                   <div className="p-6 text-center text-gray-500">
@@ -483,7 +484,7 @@ export const PractitionerSelector = ({
 
       {/* Sidebar */}
       {currentOrganizationId && (
-        <div className="border-l border-gray-200 flex flex-col">
+        <div className="flex min-h-0 flex-1 flex-col border-l border-gray-200">
           {/* Sidebar Header */}
           <div className="px-4 py-3 border-b bg-gray-50">
             <div className="flex items-center justify-between">
@@ -520,7 +521,7 @@ export const PractitionerSelector = ({
           </div>
 
           {/* Sidebar Content */}
-          <div className="flex-1 overflow-y-auto max-h-[400px]">
+          <div className="min-h-0 flex-1 overflow-y-auto md:max-h-[400px]">
             {/* Show child organizations if current org has children */}
             {childOrganizations?.results?.length &&
             childOrganizations.results.length > 0 ? (
@@ -696,8 +697,8 @@ export const PractitionerSelector = ({
           }}
         >
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+          <DrawerContent aria-describedby={undefined} height="fixed">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
               {content}
             </div>
           </DrawerContent>

@@ -290,14 +290,18 @@ function ImmunizationRecordForm({
           }),
     onSuccess: async (_, body) => {
       const values = form.getValues();
+      // Complete the recommendation the record was saved against, not the live selection.
+      const submitted = recommendations.find(
+        (item) => item.id === body.recommendation,
+      );
       if (
         !record &&
-        linked &&
+        submitted &&
         body.status === "completed" &&
         values.complete_recommendation
       ) {
         try {
-          await completeRecommendation.mutateAsync(linked);
+          await completeRecommendation.mutateAsync(submitted);
         } catch {
           toast.error(t("immunization_recommendation_update_error"));
         }
@@ -364,6 +368,7 @@ function ImmunizationRecordForm({
                 <FormLabel>{t("immunization_for_recommendation")}</FormLabel>
                 <Select
                   value={field.value}
+                  disabled={isPending}
                   onValueChange={(value) => {
                     field.onChange(value);
                     const next = recommendations.find(
@@ -546,6 +551,7 @@ function ImmunizationRecordForm({
                 <FormControl>
                   <Checkbox
                     checked={field.value}
+                    disabled={isPending}
                     onCheckedChange={(checked) =>
                       field.onChange(checked === true)
                     }

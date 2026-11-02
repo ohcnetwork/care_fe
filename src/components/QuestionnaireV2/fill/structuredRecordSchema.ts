@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 import { CodeSchema } from "@/types/base/code/code";
+import {
+  PROCEDURE_OUTCOME,
+  PROCEDURE_STATUS,
+} from "@/types/emr/procedure/procedure";
 
 const text = z.string().min(1);
 const record = z.object({ note: z.string().nullish() }).loose();
@@ -36,6 +40,29 @@ export const structuredRecordSchemas: Partial<Record<string, z.ZodType>> = {
     .refine((value) => !!value.medication || !!value.requested_product, {
       message: "A medication code or requested product is required",
     }),
+  procedure: record.extend({
+    id: text.optional(),
+    code,
+    status: z.enum(PROCEDURE_STATUS),
+    status_reason: code.nullish(),
+    outcome: z.enum(PROCEDURE_OUTCOME).nullish(),
+    // The editor renders these as dates; reject anything unparseable here.
+    occurrence: z
+      .looseObject({
+        occurrence_datetime: z.iso.datetime({ offset: true }).nullish(),
+        occurrence_period: z
+          .looseObject({
+            start: z.iso.datetime({ offset: true }).nullish(),
+            end: z.iso.datetime({ offset: true }).nullish(),
+          })
+          .nullish(),
+        occurrence_string: z.string().nullish(),
+      })
+      .default({}),
+    category: z.array(code).default([]),
+    body_site: z.array(code).default([]),
+    reason: z.array(code).default([]),
+  }),
   encounter: record.extend({
     status: text,
     priority: text,

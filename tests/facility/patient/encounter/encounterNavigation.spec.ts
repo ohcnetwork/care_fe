@@ -134,9 +134,11 @@ test.describe("Encounter navigation", () => {
         await expect(
           page.getByRole("button", { name: /Encounter History/i }),
         ).toBeVisible();
-        const header = page.locator("[data-cui-app-header]");
+        // The encounter takes the full width and carries its own back button.
+        await expect(page.locator("[data-cui-app-header]")).toHaveCount(0);
+        await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
         await expect(
-          header.getByText("Encounter", { exact: true }),
+          page.getByRole("button", { name: "Back", exact: true }),
         ).toBeVisible();
         await expect(
           page.getByRole("group", { name: "Appointment", exact: true }),
@@ -346,13 +348,9 @@ test.describe("Encounter navigation", () => {
           ).toBeVisible();
         });
 
-        await test.step("Switch sections without the former header navigation", async () => {
-          const header = page.locator("[data-cui-app-header]");
+        await test.step("Switch sections without breadcrumb navigation", async () => {
           await expect(
-            header.getByRole("button", { name: "Back", exact: true }),
-          ).toHaveCount(0);
-          await expect(
-            header.getByRole("navigation", { name: "breadcrumb" }),
+            page.getByRole("navigation", { name: "breadcrumb" }),
           ).toHaveCount(0);
           await chooseSection("Overview");
           await expect(page).toHaveURL(
@@ -396,9 +394,38 @@ test.describe("Encounter navigation", () => {
           await expect(returnToCurrent).not.toBeVisible();
           await expect(updateEncounter).toBeVisible();
         });
+
+        await test.step("Fall back to the patient when the encounter was opened directly", async () => {
+          // Every page in this test so far belongs to the encounter, so Back
+          // skips the sections and historical encounter visited above.
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+          await expect(page).toHaveURL(
+            (url) =>
+              url.pathname ===
+              `/facility/${getFacilityId()}/patient/${patientId}`,
+          );
+          await expect(page.locator("[data-cui-app-header]")).toBeVisible();
+        });
       });
 
-      test("hosts appointment actions in the app header and clears them after navigation", async ({
+      test("keeps an exit when the encounter fails to load", async ({
+        page,
+      }) => {
+        const patientPath = `/facility/${getFacilityId()}/patient/${patientId}`;
+        await page.route(
+          (url) => url.pathname === `/api/v1/encounter/${primaryEncounterId}/`,
+          (route) =>
+            route.fulfill({ status: 500, json: { detail: "Server error" } }),
+        );
+        await page.goto(
+          `${patientPath}/encounter/${primaryEncounterId}/updates`,
+        );
+        // No sidebar or header on this route, so Back is the only way out.
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+        await expect(page).toHaveURL((url) => url.pathname === patientPath);
+      });
+
+      test("shows appointment actions below the patient header and clears them after navigation", async ({
         page,
       }) => {
         const facilityId = getFacilityId();
@@ -497,8 +524,8 @@ test.describe("Encounter navigation", () => {
         await page.goto(
           `/facility/${facilityId}/patient/${patientId}/encounter/${primaryEncounterId}/updates`,
         );
-        const header = page.locator("[data-cui-app-header]");
-        const appointmentGroup = header.getByRole("group", {
+        const bar = page.locator('[data-cy="encounter-appointment-bar"]');
+        const appointmentGroup = bar.getByRole("group", {
           name: "Appointment",
           exact: true,
         });
@@ -506,33 +533,28 @@ test.describe("Encounter navigation", () => {
         await expect(
           page.getByRole("group", { name: "Appointment", exact: true }),
         ).toHaveCount(1);
-        await expect(
-          header.getByRole("button", { name: "Back", exact: true }),
-        ).toHaveCount(0);
-        await expect(
-          header.getByRole("navigation", { name: "breadcrumb" }),
-        ).toHaveCount(0);
+        await expect(page.locator("[data-cui-app-header]")).toHaveCount(0);
         const actionSurface =
           layout === "mobile"
             ? page.getByRole("menu", {
-                name: "More Actions",
+                name: "Encounter Actions",
                 exact: true,
               })
-            : header;
+            : bar;
         if (layout === "mobile") {
-          await test.step("Keep the mobile header on one line", async () => {
+          await test.step("Keep the mobile appointment bar on one line", async () => {
             for (const mobileWidth of [390, 320]) {
               await page.setViewportSize({ width: mobileWidth, height: 900 });
               await expect
                 .poll(() =>
-                  header.evaluate(
+                  bar.evaluate(
                     (element) => element.getBoundingClientRect().height,
                   ),
                 )
                 .toBeLessThanOrEqual(64);
               await expect
                 .poll(() =>
-                  header.getByRole("button").evaluateAll((buttons) => {
+                  bar.getByRole("button").evaluateAll((buttons) => {
                     const centers = buttons.map((button) => {
                       const { y, height } = button.getBoundingClientRect();
                       return y + height / 2;
@@ -545,14 +567,14 @@ test.describe("Encounter navigation", () => {
                 .toBeLessThanOrEqual(4);
             }
           });
-          await header
+          await bar
             .getByRole("button", { name: "More Actions", exact: true })
             .click();
           await expect(actionSurface).toBeVisible();
         }
         await expect(
           actionSurface.getByRole(layout === "mobile" ? "menuitem" : "link", {
-            name: planned ? "View" : "View Appointment OP-007",
+            name: planned ? "View Appointment" : "View Appointment OP-007",
             exact: true,
           }),
         ).toHaveAttribute(
@@ -562,7 +584,7 @@ test.describe("Encounter navigation", () => {
         if (!planned) {
           await expect(
             actionSurface.getByRole(layout === "mobile" ? "menuitem" : "link", {
-              name: "Queue",
+              name: "Queue board",
               exact: true,
             }),
           ).toHaveAttribute(
@@ -583,9 +605,9 @@ test.describe("Encounter navigation", () => {
           await expect(actionSurface).not.toBeVisible();
         }
 
-        await test.step("Activate the portaled Scan control with Enter", async () => {
-          await header
-            .getByRole("button", { name: "Scan the QR code", exact: true })
+        await test.step("Activate the Scan control with Enter", async () => {
+          await bar
+            .getByRole("button", { name: "Scan QR", exact: true })
             .focus();
           await page.keyboard.press("Enter");
           await expect(
@@ -596,9 +618,9 @@ test.describe("Encounter navigation", () => {
           await expect(page.getByRole("dialog")).not.toBeVisible();
         });
 
-        await test.step("Send the header action to the intended request boundary", async () => {
+        await test.step("Send the appointment bar action to the intended request boundary", async () => {
           if (layout === "mobile") {
-            await header
+            await bar
               .getByRole("button", { name: "More Actions", exact: true })
               .focus();
             await page.keyboard.press("Enter");
@@ -629,7 +651,7 @@ test.describe("Encounter navigation", () => {
             await expect.poll(() => writes.length).toBe(1);
             if (layout === "mobile") {
               await expect(actionSurface).not.toBeVisible();
-              await header
+              await bar
                 .getByRole("button", { name: "More Actions", exact: true })
                 .focus();
               await page.keyboard.press("Enter");
@@ -637,7 +659,7 @@ test.describe("Encounter navigation", () => {
               await expect(action).toBeDisabled();
               await page.keyboard.press("Escape");
               await expect(actionSurface).not.toBeVisible();
-              await header
+              await bar
                 .getByRole("button", { name: "More Actions", exact: true })
                 .focus();
               await page.keyboard.press("Enter");
@@ -693,11 +715,11 @@ test.describe("Encounter navigation", () => {
           }
         });
 
-        await test.step("Open appointments and release the page header", async () => {
+        await test.step("Open the appointments board and restore the app header", async () => {
           const list = actionSurface.getByRole(
             layout === "mobile" ? "menuitem" : "link",
             {
-              name: layout === "mobile" ? "Appointments" : "List",
+              name: "Appointments board",
               exact: true,
             },
           );
@@ -713,15 +735,28 @@ test.describe("Encounter navigation", () => {
           await expect(
             page.getByRole("group", { name: "Appointment", exact: true }),
           ).toHaveCount(0);
+          await expect(bar).toHaveCount(0);
           await expect(
-            header.getByRole("group", {
-              name: "Encounter Actions",
-              exact: true,
-            }),
-          ).toHaveCount(0);
-          await expect(
-            header.getByText(facilityName, { exact: true }),
+            page
+              .locator("[data-cui-app-header]")
+              .getByText(facilityName, { exact: true }),
           ).toBeVisible();
+        });
+
+        await test.step("Return to the appointments board with the back button", async () => {
+          // Leaving mid-request would cancel the mocked encounter refetch.
+          const refetched = page.waitForResponse(
+            (response) => new URL(response.url()).pathname === encounterPath,
+          );
+          await page.goBack();
+          await refetched;
+          await expect(bar).toBeVisible();
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+          await expect(page).toHaveURL(
+            (url) =>
+              url.pathname === `/facility/${facilityId}/appointments` &&
+              url.searchParams.get("practitioners") === resourceId,
+          );
         });
       });
     });

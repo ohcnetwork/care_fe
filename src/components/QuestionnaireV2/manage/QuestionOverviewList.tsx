@@ -8,7 +8,7 @@ import {
   SquarePen,
   Upload,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,7 @@ interface QuestionOverviewListProps {
   /** When false, every mutation affordance (edit/import/reorder) is hidden. */
   canWrite: boolean;
   onReorder: (from: number, to: number) => void;
-  onEditQuestions: () => void;
+  onEditQuestions: (questionId?: string) => void;
   onImportQuestions: () => void;
 }
 
@@ -48,9 +48,9 @@ export function QuestionOverviewList({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   // Native HTML5 drag-and-drop reorder for top-level rows: the source index
-  // lives in a ref (dataTransfer as a fallback), the current hover target in
-  // state so the drop indicator re-renders.
-  const dragFromIndex = useRef<number | null>(null);
+  // (dataTransfer as a fallback) and hover target live in state so the drop
+  // indicator re-renders.
+  const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<number | null>(null);
 
   const toggleExpanded = (id: string) => {
@@ -66,7 +66,7 @@ export function QuestionOverviewList({
   };
 
   const clearDrag = () => {
-    dragFromIndex.current = null;
+    setDragFromIndex(null);
     setDropTarget(null);
   };
 
@@ -85,7 +85,7 @@ export function QuestionOverviewList({
               <Button
                 type="button"
                 variant="outline_primary"
-                onClick={onEditQuestions}
+                onClick={() => onEditQuestions()}
               >
                 <Plus className="size-4" />
                 {t("add_first_question")}
@@ -111,23 +111,22 @@ export function QuestionOverviewList({
             const isExpanded = expanded.has(question.id);
             const isDropTarget =
               dropTarget === index &&
-              dragFromIndex.current !== null &&
-              dragFromIndex.current !== index;
-            const dropBelow =
-              isDropTarget && (dragFromIndex.current ?? 0) < index;
+              dragFromIndex !== null &&
+              dragFromIndex !== index;
+            const dropBelow = isDropTarget && (dragFromIndex ?? 0) < index;
 
             return (
               <div
                 key={question.id}
                 draggable={canWrite && !isSaving}
                 onDragStart={(e) => {
-                  dragFromIndex.current = index;
+                  setDragFromIndex(index);
                   e.dataTransfer.effectAllowed = "move";
                   e.dataTransfer.setData("text/plain", String(index));
                 }}
                 onDragEnd={clearDrag}
                 onDragOver={(e) => {
-                  if (dragFromIndex.current === null) return;
+                  if (dragFromIndex === null) return;
                   e.preventDefault();
                   e.dataTransfer.dropEffect = "move";
                   if (dropTarget !== index) setDropTarget(index);
@@ -138,7 +137,7 @@ export function QuestionOverviewList({
                 onDrop={(e) => {
                   e.preventDefault();
                   const from =
-                    dragFromIndex.current ??
+                    dragFromIndex ??
                     Number(e.dataTransfer.getData("text/plain"));
                   clearDrag();
                   if (!Number.isInteger(from) || from === index) return;
@@ -236,7 +235,9 @@ export function QuestionOverviewList({
                           <ChevronDown className="size-4" />
                           {t("move_down")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={onEditQuestions}>
+                        <DropdownMenuItem
+                          onClick={() => onEditQuestions(question.id)}
+                        >
                           <SquarePen className="size-4" />
                           {t("edit")}
                         </DropdownMenuItem>
@@ -252,7 +253,7 @@ export function QuestionOverviewList({
               type="button"
               variant="outline_primary"
               className="w-full border-dashed"
-              onClick={onEditQuestions}
+              onClick={() => onEditQuestions()}
             >
               <Plus className="size-4" />
               {t("add_question")}

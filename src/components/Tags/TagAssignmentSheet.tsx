@@ -10,7 +10,11 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import locationApi from "@/types/location/locationApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -164,16 +168,17 @@ export default function TagAssignmentSheet({
         ? entityConfig.setTagsApi
         : entityConfig.removeTagsApi;
 
-    const createBodyPayload = (tags: string[]) => {
-      if (
-        entityType === "location" ||
-        entityType === "charge_item_definition"
-      ) {
-        return { tags: tags.map((tag) => ({ tag })) };
-      }
+    const createBodyPayload = (
+      tags: string[],
+      expiryOffset?: TagExpiryOffset,
+    ) => {
+      const tagRequests = tags.map((tag) => ({
+        tag,
+        ...(expiryOffset && { expiry_offset: expiryOffset }),
+      }));
       return isFacilityPatientTag
-        ? { tags, facility: facilityId || null }
-        : { tags };
+        ? { tags: tagRequests, facility: facilityId || null }
+        : { tags: tagRequests };
     };
 
     return { apiEndpoint, createBodyPayload };
@@ -181,7 +186,11 @@ export default function TagAssignmentSheet({
 
   // Set tags mutation
   const { mutateAsync: setTags, isPending: isSettingTags } = useMutation({
-    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+    mutationFn: async (payload: {
+      tags: string[];
+      tag: TagConfig;
+      expiryOffset?: TagExpiryOffset;
+    }) => {
       const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
         payload.tag,
         "set",
@@ -193,7 +202,7 @@ export default function TagAssignmentSheet({
           ...(facilityId && { facilityId }),
           ...(patientId && { patientId }),
         },
-      })(createBodyPayload(payload.tags));
+      })(createBodyPayload(payload.tags, payload.expiryOffset));
     },
     onError: (error: unknown) => {
       const errorMessage =
@@ -236,7 +245,10 @@ export default function TagAssignmentSheet({
   }
 
   // Handle tag changes with sequential API calls
-  const handleTagChange = async (newTags: TagConfig[]) => {
+  const handleTagChange = async (
+    newTags: TagConfig[],
+    expiryOffset?: TagExpiryOffset,
+  ) => {
     const prevTagIds = new Set(selectedTags.map((tag: TagConfig) => tag.id));
     const newTagIds = new Set(newTags.map((tag: TagConfig) => tag.id));
 
@@ -257,7 +269,7 @@ export default function TagAssignmentSheet({
       }
 
       for (const tag of tagsToAdd) {
-        await setTags({ tags: [tag.id!], tag });
+        await setTags({ tags: [tag.id!], tag, expiryOffset });
       }
 
       onUpdate();
@@ -281,6 +293,7 @@ export default function TagAssignmentSheet({
           resource={ENTITY_TO_RESOURCE_MAP[entityType]}
           isTagMutationInProgress={isTagMutationInProgress}
           trigger={trigger}
+          allowCustomExpiry
         />
       )}
     </>

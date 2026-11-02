@@ -93,7 +93,7 @@ export function LocationTable({
   });
 
   return (
-    <div className="rounded-lg border">
+    <div>
       <Table>
         <TableHeader>
           <TableRow>

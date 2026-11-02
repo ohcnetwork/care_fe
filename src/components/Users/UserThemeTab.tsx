@@ -113,11 +113,9 @@ export default function UserThemeTab() {
   ] as const;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-10 p-4 md:p-8">
+    <div className="max-w-3xl space-y-8 py-6">
       <div>
-        <SectionTitle className="text-3xl leading-9 font-bold">
-          {t("USERMANAGEMENT_TAB__THEME")}
-        </SectionTitle>
+        <SectionTitle>{t("USERMANAGEMENT_TAB__THEME")}</SectionTitle>
         <Lead className="mt-2">{t("appearance_preferences_description")}</Lead>
         <Muted className="mt-2">{t("appearance_autosave_help")}</Muted>
         <div

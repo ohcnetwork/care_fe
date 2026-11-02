@@ -59,8 +59,9 @@ export function useStudioSelection(
   );
 
   const revealQuestion = useCallback(
-    (questionId: string) => {
+    (questionId: string, { focusTitle = true } = {}) => {
       selectQuestion(questionId);
+      if (!focusTitle) setFocusTitle(false);
       setScrollRequest((previous) => ({
         id: questionId,
         nonce: (previous?.nonce ?? 0) + 1,

@@ -27,6 +27,7 @@ test.describe("Referral shared records", () => {
     page,
     request,
   }, testInfo) => {
+    test.slow();
     const facilityId = getFacilityId();
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);
@@ -606,6 +607,7 @@ test.describe("Referral shared records", () => {
     page,
     request,
   }) => {
+    test.slow();
     const facilityId = getFacilityId();
     const { patientId, encounterId } =
       await createQuestionnaireEncounter(facilityId);

@@ -150,7 +150,7 @@ const RenderTable = ({
 }: RowsProps) => {
   const { t } = useTranslation();
   return (
-    <div className="hidden overflow-hidden rounded-lg border border-gray-200 bg-white md:block">
+    <div className="hidden overflow-hidden rounded-lg border border-gray-200 bg-white md:block [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : valuesets.length === 0 ? (

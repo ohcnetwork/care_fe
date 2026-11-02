@@ -46,6 +46,12 @@ test.describe("Patient-subject questionnaire fill", () => {
         .getByRole("radiogroup", { name: "Subject Type" })
         .getByRole("radio", { name: "Patient", exact: true })
         .click();
+      // The form defaults to Draft, and only active questionnaires accept
+      // submissions.
+      await page
+        .getByRole("radiogroup", { name: "Status" })
+        .getByRole("radio", { name: "Active", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save Questionnaire" }).click();
       await expectToast(page, "Questionnaire created successfully");
       await page.waitForURL(/\/admin\/questionnaires\/[0-9a-f-]+$/);

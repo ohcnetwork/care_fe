@@ -195,7 +195,7 @@ export default function AddChargeItemSheet({
             {isLoading ? (
               <TableSkeleton count={5} />
             ) : (
-              <div className="rounded-md border">
+              <div>
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-100">

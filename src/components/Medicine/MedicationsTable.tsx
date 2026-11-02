@@ -63,7 +63,7 @@ export const MedicationsTable = ({
   }
 
   return (
-    <div className=" @container border border-gray-200 rounded-lg">
+    <div className="@container border border-gray-200 rounded-lg [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
       <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">

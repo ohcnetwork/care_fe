@@ -18,10 +18,17 @@ import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow, {
   BadgeButtonDropdownTrigger,
 } from "@/components/Patient/Common/ClinicalInformationRow";
+import {
+  ClinicalSummaryGrid,
+  hasOnset,
+  OnsetMeta,
+  SeverityMeta,
+} from "@/components/Patient/Common/ClinicalSummaryGrid";
 
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  ACTIVE_DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_CLINICAL_STATUS_COLORS,
   DIAGNOSIS_SEVERITY_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS_COLORS,
@@ -218,21 +225,55 @@ export const DiagnosisTable = ({
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
 
+  if (compact) {
+    return (
+      <ClinicalSummaryGrid
+        items={diagnoses.map((diagnosis) => ({
+          id: diagnosis.id,
+          name: diagnosis.code.display || diagnosis.code.code,
+          dimmed: !ACTIVE_DIAGNOSIS_CLINICAL_STATUS.includes(
+            diagnosis.clinical_status,
+          ),
+          note: diagnosis.note,
+          createdBy: diagnosis.created_by,
+          onViewEncounter: showViewEncounter
+            ? () =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                )
+            : undefined,
+          meta: [
+            hasOnset(diagnosis.onset) && (
+              <OnsetMeta key="onset" onset={diagnosis.onset} />
+            ),
+            diagnosis.severity && (
+              <SeverityMeta key="severity" severity={diagnosis.severity} />
+            ),
+            diagnosis.category === "chronic_condition" && (
+              <span key="category">{t("clinical_summary_chronic")}</span>
+            ),
+            diagnosis.verification_status !== "confirmed" && (
+              <span key="verification">{t(diagnosis.verification_status)}</span>
+            ),
+            diagnosis.clinical_status !== "active" && (
+              <span key="status">{t(diagnosis.clinical_status)}</span>
+            ),
+          ],
+        }))}
+      />
+    );
+  }
+
   return (
     <>
       {/* Mobile: Card layout */}
-      <div
-        className={
-          compact
-            ? "block space-y-2 @3xl/clinical-widget:hidden"
-            : "block space-y-3 sm:hidden"
-        }
-      >
+      <div className="block space-y-3 sm:hidden">
         {diagnoses.map((diagnosis) => (
           <DiagnosisCard
             key={diagnosis.id}
             diagnosis={diagnosis}
-            compact={compact}
             onViewEncounter={
               showViewEncounter
                 ? () =>
@@ -247,19 +288,9 @@ export const DiagnosisTable = ({
         ))}
       </div>
       {/* Desktop: Table layout */}
-      <div
-        className={cn(
-          "overflow-x-auto hidden",
-          compact ? "@3xl/clinical-widget:block" : "sm:block",
-        )}
-      >
-        <div className={cn("min-w-xl", !compact && "pb-2")}>
-          <div
-            className={cn(
-              "grid grid-cols-[1fr_auto_auto_auto_auto_auto]",
-              compact ? "gap-y-1" : "gap-y-2",
-            )}
-          >
+      <div className="hidden overflow-x-auto sm:block">
+        <div className={"min-w-xl pb-2"}>
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("diagnosis")}
             </div>
@@ -286,7 +317,6 @@ export const DiagnosisTable = ({
 
             {diagnoses.map((diagnosis) => (
               <ClinicalInformationRow
-                compact={compact}
                 key={diagnosis.id}
                 note={diagnosis.note}
                 createdBy={diagnosis.created_by}

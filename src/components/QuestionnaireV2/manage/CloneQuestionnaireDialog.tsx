@@ -29,6 +29,7 @@ import { questionnaireKeys } from "@/components/QuestionnaireV2/queryKeys";
 import { remapActionLinkIds } from "@/components/QuestionnaireV2/shared/actionExpression";
 import { regenerateQuestionIdsWithMap } from "@/components/QuestionnaireV2/shared/questionTree";
 
+import { SLUG_VALUE_MAX_LENGTH } from "@/types/base/slug/schema";
 import {
   QuestionnaireRead,
   QuestionnaireScope,
@@ -37,23 +38,20 @@ import {
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import mutate from "@/Utils/request/mutate";
 
-import {
-  SLUG_MAX_LENGTH,
-  questionnaireBasicSchema,
-} from "./questionnaireFormSchema";
+import { questionnaireBasicSchema } from "./questionnaireFormSchema";
 
 const COPY_SUFFIX = "-copy";
 
 /**
  * `{slug}-copy`, clamped so it still respects the shared slug length rule
- * even when the source slug is already near the SLUG_MAX_LENGTH ceiling —
+ * even when the source slug is already near the SLUG_VALUE_MAX_LENGTH ceiling —
  * truncates the base rather than the suffix so the result still reads as a
  * copy.
  */
 function defaultCloneSlug(slug: string): string {
   const base = slug
-    .slice(0, SLUG_MAX_LENGTH - COPY_SUFFIX.length)
-    .replace(/-+$/, "");
+    .slice(0, SLUG_VALUE_MAX_LENGTH - COPY_SUFFIX.length)
+    .replace(/[-_]+$/, "");
   return `${base}${COPY_SUFFIX}`;
 }
 

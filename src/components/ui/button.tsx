@@ -15,7 +15,7 @@ const responsiveButtonSize =
   "h-(--button-height) px-(--button-padding-x) [--button-height:--spacing(12)] [--button-padding-x:--spacing(4.5)] md:[--button-height:--spacing(10)] md:[--button-padding-x:--spacing(3.5)]";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 px-3 whitespace-nowrap rounded-md not-in-data-[slot=button-group]:rounded-squircle-lg border border-transparent bg-clip-padding text-sm font-semibold tracking-wide outline-0 select-none shrink-0 transition touch-action-manipulation [-webkit-tap-highlight-color:transparent] group/button [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 aria-invalid:outline-2 aria-invalid:outline-offset-2 aria-invalid:outline-destructive ",
+  "inline-flex items-center justify-center gap-1.5 px-3 whitespace-nowrap rounded-md not-in-data-[slot=button-group]:rounded-squircle-lg border border-transparent bg-clip-padding text-sm font-semibold tracking-wide outline-0 select-none shrink-0 transition touch-action-manipulation [-webkit-tap-highlight-color:transparent] group/button [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-invalid:outline-2 aria-invalid:outline-offset-2 aria-invalid:outline-destructive ",
   {
     variants: {
       variant: {

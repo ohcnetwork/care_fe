@@ -14,9 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import ClinicalInformationRow, {
   BadgeButtonDropdownTrigger,
 } from "@/components/Patient/Common/ClinicalInformationRow";
+import {
+  ClinicalSummaryGrid,
+  SeverityMeta,
+} from "@/components/Patient/Common/ClinicalSummaryGrid";
 
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -30,11 +35,9 @@ import {
 const AllergyCard = ({
   allergy,
   onViewEncounter,
-  compact = false,
 }: {
   allergy: AllergyIntolerance;
   onViewEncounter?: () => void;
-  compact?: boolean;
 }) => {
   const [showNote, setShowNote] = useState(false);
   const { t } = useTranslation();
@@ -98,9 +101,7 @@ const AllergyCard = ({
           </DropdownMenu>
         </div>
       </div>
-      <div
-        className={cn("flex flex-wrap", compact ? "mt-2 gap-3" : "mt-4 gap-8")}
-      >
+      <div className={"mt-4 flex flex-wrap gap-8"}>
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("criticality")}</div>
           <Badge variant={ALLERGY_CRITICALITY_COLORS[allergy.criticality]}>
@@ -158,22 +159,63 @@ export const AllergyTable = ({
   const baseHeaderClasses =
     "text-center border-y border-gray-200 bg-gray-50 p-1 text-gray-700 text-sm";
 
+  if (compact) {
+    return (
+      <ClinicalSummaryGrid
+        items={allergies.map((allergy) => ({
+          id: allergy.id,
+          name: allergy.code.display || allergy.code.code,
+          dimmed: allergy.clinical_status !== "active",
+          note: allergy.note,
+          createdBy: allergy.created_by,
+          onViewEncounter: showViewEncounter
+            ? () =>
+                navigate(
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${patientId}/encounter/${allergy.encounter}/updates`
+                    : `/organization/organizationId/patient/${patientId}/encounter/${allergy.encounter}/updates`,
+                )
+            : undefined,
+          meta: [
+            <span key="category">{t(allergy.category)}</span>,
+            allergy.criticality === "high" ? (
+              <SeverityMeta key="criticality" severity="severe">
+                {t("clinical_summary_high_criticality")}
+              </SeverityMeta>
+            ) : (
+              allergy.criticality === "low" && (
+                <span key="criticality">
+                  {t("clinical_summary_low_criticality")}
+                </span>
+              )
+            ),
+            allergy.last_occurrence && (
+              <span key="last">
+                {t("clinical_summary_last_seen")}{" "}
+                <RelativeDateTooltip date={allergy.last_occurrence} />
+              </span>
+            ),
+            allergy.verification_status !== "confirmed" && (
+              <span key="verification">{t(allergy.verification_status)}</span>
+            ),
+            allergy.clinical_status !== "active" && (
+              <span key="status">{t(allergy.clinical_status)}</span>
+            ),
+          ],
+        }))}
+      />
+    );
+  }
+
   return (
     <>
       {/* Mobile: Card layout */}
-      <div
-        className={
-          compact
-            ? "block space-y-2 @3xl/clinical-widget:hidden"
-            : "block space-y-3 sm:hidden"
-        }
-      >
+      <div className="block space-y-3 sm:hidden">
         {allergies.map((allergy) => {
           return (
             <AllergyCard
               key={allergy.id}
               allergy={allergy}
-              compact={compact}
               onViewEncounter={
                 showViewEncounter
                   ? () =>
@@ -189,19 +231,9 @@ export const AllergyTable = ({
         })}
       </div>
       {/* Desktop: Table layout */}
-      <div
-        className={cn(
-          "overflow-x-auto hidden",
-          compact ? "@3xl/clinical-widget:block" : "sm:block",
-        )}
-      >
-        <div className={cn("min-w-xl", !compact && "pb-2")}>
-          <div
-            className={cn(
-              "grid grid-cols-[1fr_auto_auto_auto_auto]",
-              compact ? "gap-y-1" : "gap-y-2",
-            )}
-          >
+      <div className="hidden overflow-x-auto sm:block">
+        <div className={"min-w-xl pb-2"}>
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("allergen")}
             </div>
@@ -221,7 +253,6 @@ export const AllergyTable = ({
             ></div>
             {allergies.map((allergy) => (
               <ClinicalInformationRow
-                compact={compact}
                 key={allergy.id}
                 onViewEncounter={
                   showViewEncounter
