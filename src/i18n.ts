@@ -5,10 +5,8 @@ import { callApi } from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import HttpApi from "i18next-http-backend";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
-import { z } from "zod";
 
 export const LANGUAGES = {
   en: "English",
@@ -20,6 +18,16 @@ export const LANGUAGES = {
 } as const;
 
 const DEFAULT_NAMESPACE = "care_fe";
+
+// Same check as `z.url()`, without pulling zod into the entry bundle.
+const isValidUrl = (value: string) => {
+  try {
+    new URL(value.trim());
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 let pluginConfigs: PlugConfig[] = [];
 
@@ -36,10 +44,7 @@ const namespaceToUrl = (namespace: string) => {
     return pluginConfig.meta.localPath;
   }
 
-  if (
-    pluginConfig?.meta?.url &&
-    z.url().safeParse(pluginConfig.meta.url).success
-  ) {
+  if (pluginConfig?.meta?.url && isValidUrl(pluginConfig.meta.url)) {
     const url = new URL(pluginConfig.meta.url);
     return url.origin.toString();
   }
@@ -72,8 +77,9 @@ export async function initI18n() {
     new Set([DEFAULT_NAMESPACE, ...pluginNamespaces]),
   );
 
+  // Translations are fetched by the resources-to-backend loader below; i18next
+  // keeps only one backend, so it is the sole one registered.
   i18n
-    .use(HttpApi)
     .use(initReactI18next)
     .use(LanguageDetector)
     .use(

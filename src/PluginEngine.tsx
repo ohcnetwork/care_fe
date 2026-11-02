@@ -26,7 +26,16 @@ import { deepFreeze } from "@/Utils/utils";
 import { t } from "i18next";
 
 import { localDevPluginManifests } from "virtual:care-local-plugins";
-import { z } from "zod";
+
+// Same check as `z.url()`, without pulling zod into the entry bundle.
+const isValidUrl = (value: string) => {
+  try {
+    new URL(value.trim());
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const getPluginManifest = async (config: PlugConfig) => {
   const localManifest = localDevPluginManifests[config.slug];
@@ -38,7 +47,7 @@ const getPluginManifest = async (config: PlugConfig) => {
     } as PluginManifestWithMeta;
   }
 
-  if (!config.meta.url || !z.url().safeParse(config.meta.url).success) {
+  if (!config.meta.url || !isValidUrl(config.meta.url)) {
     console.error(
       `Plugin ${config.slug} has an invalid URL (${config.meta.url}) in meta`,
     );

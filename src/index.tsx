@@ -1,8 +1,6 @@
 import "@/style/index.css";
 import "reactflow/dist/style.css";
 
-import * as Sentry from "@sentry/browser";
-
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
@@ -11,7 +9,8 @@ import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
-import { initZod } from "./lib/zod";
+
+import { LocalStorageKeys } from "@/common/constants";
 
 // Extend Window interface to include CARE_API_URL
 declare global {
@@ -32,13 +31,6 @@ if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
-if (import.meta.env.PROD) {
-  Sentry.init({
-    environment: import.meta.env.MODE,
-    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
-  });
-}
-
 function initApp() {
   const container = document.getElementById("root");
 
@@ -55,12 +47,21 @@ function initApp() {
   );
 }
 
-// Initialize i18n with namespaces from API before rendering the app
-initI18n()
+// zod is not needed to render the sign-in pages, so it is configured from its
+// own chunk. Signed-in views use zod right away, so only they wait for it.
+const zodReady = import("./lib/zod")
+  .then(({ initZod }) => initZod())
   .catch((error) => {
-    console.error("Failed to initialize i18n:", error);
-  })
-  .finally(() => {
-    initZod();
-    initApp();
+    console.error("Failed to configure zod:", error);
   });
+const isSignedIn =
+  !!localStorage.getItem(LocalStorageKeys.accessToken) ||
+  !!localStorage.getItem(LocalStorageKeys.patientTokenKey);
+
+// Initialize i18n with namespaces from API before rendering the app
+Promise.all([
+  initI18n().catch((error) => {
+    console.error("Failed to initialize i18n:", error);
+  }),
+  isSignedIn ? zodReady : undefined,
+]).finally(initApp);
