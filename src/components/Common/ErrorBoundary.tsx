@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/browser";
 import { Component, ErrorInfo, ReactNode } from "react";
 import { withTranslation, WithTranslation } from "react-i18next";
 
@@ -23,11 +22,14 @@ class ErrorBoundary extends Component<Props & WithTranslation, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
-    Sentry.captureException(error, {
-      extra: {
-        errorInfo,
-      },
-    });
+    // Loaded on demand to keep Sentry out of the critical path.
+    import("@sentry/browser").then((Sentry) =>
+      Sentry.captureException(error, {
+        extra: {
+          errorInfo,
+        },
+      }),
+    );
   }
 
   public render() {
