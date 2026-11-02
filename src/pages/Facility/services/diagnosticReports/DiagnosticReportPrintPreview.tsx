@@ -13,63 +13,17 @@ import query from "@/Utils/request/query";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useCallback, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import "@/lib/pdfWorker";
+import type { AttachmentRendererProps } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportPDFRenderer";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { Document, Page } from "react-pdf";
 
-// Fixed printable page width (px). The rendered PDF/image sizes the paper, not
-// the screen, so this must not depend on the (non-reactive) viewport width.
-const PRINT_PAGE_WIDTH = 600;
-
-interface AttachmentRendererProps {
-  fileUrl: string;
-  onReady: (fileUrl: string) => void;
-  onError: (fileUrl: string) => void;
-}
-
-// TODO: Replace with PDFViewer or extract this to a component
-function PDFRenderer({ fileUrl, onReady, onError }: AttachmentRendererProps) {
-  const [numPages, setNumPages] = useState<number>(0);
-  const renderedPages = useRef(new Set<number>());
-  const { t } = useTranslation();
-
-  return (
-    <div className="break-before-page">
-      <Document
-        file={fileUrl}
-        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-        onLoadError={() => onError(fileUrl)}
-        onSourceError={() => onError(fileUrl)}
-        error={<div className="text-red-500">{t("error_loading_pdf")}</div>}
-        loading={<div className="text-muted-foreground">{t("loading")}</div>}
-      >
-        <div className="flex flex-col justify-center w-full">
-          {Array.from(new Array(numPages), (_, index) => (
-            <Page
-              key={`page_${index + 1}`}
-              pageNumber={index + 1}
-              width={PRINT_PAGE_WIDTH}
-              scale={1.2}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-              onRenderSuccess={() => {
-                renderedPages.current.add(index);
-                if (renderedPages.current.size === numPages) {
-                  onReady(fileUrl);
-                }
-              }}
-              onLoadError={() => onError(fileUrl)}
-              onRenderError={() => onError(fileUrl)}
-            />
-          ))}
-        </div>
-      </Document>
-    </div>
-  );
-}
+// react-pdf and pdf.js are only needed when a report has PDF attachments.
+const PDFRenderer = lazy(
+  () =>
+    import("@/pages/Facility/services/diagnosticReports/components/DiagnosticReportPDFRenderer"),
+);
 
 function ImageRenderer({
   fileUrl,
@@ -392,17 +346,23 @@ const DiagnosticReportPreviewItem = ({
           <div className="mt-8">
             {pdfFiles.length > 0 && (
               <div className="mt-8">
-                <div className="space-y-12">
-                  {pdfFiles.map((file) => (
-                    <div key={`content-${file.id}-${fileUrls[file.id]}`}>
-                      <PDFRenderer
-                        fileUrl={fileUrls[file.id]}
-                        onReady={onAttachmentReady}
-                        onError={onAttachmentError}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <Suspense
+                  fallback={
+                    <div className="text-muted-foreground">{t("loading")}</div>
+                  }
+                >
+                  <div className="space-y-12">
+                    {pdfFiles.map((file) => (
+                      <div key={`content-${file.id}-${fileUrls[file.id]}`}>
+                        <PDFRenderer
+                          fileUrl={fileUrls[file.id]}
+                          onReady={onAttachmentReady}
+                          onError={onAttachmentError}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Suspense>
               </div>
             )}
             {imageFiles.length > 0 && (

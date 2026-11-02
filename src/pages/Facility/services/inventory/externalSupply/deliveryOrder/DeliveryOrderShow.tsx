@@ -39,10 +39,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getExtensionFieldsWithName,
   getExtensionValue,
+  isComputedExtensionField,
   NamespacedExtensionData,
+  useComputedExtensionFieldsReady,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
@@ -140,6 +143,7 @@ export function DeliveryOrderShow({
       ),
     [allExtensions],
   );
+  const computedFieldsReady = useComputedExtensionFieldsReady(extensionFields);
 
   const [selectedDeliveries, setSelectedDeliveries] = useState<string[]>([]);
   const [confirmDialog, setConfirmDialog] = useState({
@@ -688,6 +692,16 @@ export function DeliveryOrderShow({
               </div>
 
               {extensionFields.map((field) => {
+                if (!computedFieldsReady && isComputedExtensionField(field)) {
+                  return (
+                    <div key={`${field.extensionName}-${field.name}`}>
+                      <label className="text-sm font-medium text-gray-700">
+                        {field.label}
+                      </label>
+                      <Skeleton className="h-7 w-20" />
+                    </div>
+                  );
+                }
                 const value = getExtensionValue(
                   deliveryOrder.extensions as NamespacedExtensionData,
                   field,

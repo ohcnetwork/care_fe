@@ -19,10 +19,8 @@ import {
   useQuestionResponse,
 } from "@/components/QuestionnaireV2/form/engine/store";
 
-import {
-  resolveStructuredSlotState,
-  structuredTypeLabel,
-} from "@/components/QuestionnaireV2/structured/registry";
+import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/labels";
+import { resolveStructuredSlotState } from "@/components/QuestionnaireV2/structured/registry";
 
 import type { ResponseValue } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";

@@ -11,6 +11,8 @@ import { z } from "zod";
 import {
   ComputedFieldContext,
   evaluateComputedField,
+  isComputedFieldEvaluatorLoaded,
+  loadComputedFieldEvaluator,
 } from "@/Utils/schema/computedField";
 import {
   createExtensionValidationSchema,
@@ -55,8 +57,47 @@ export interface ProcessedExtension {
 // Reading Extension Data
 // ============================================================================
 
+/** Whether the field's value comes from a FHIRPath expression instead of stored data. */
+export function isComputedExtensionField(
+  field: Pick<ExtensionFieldMetadata, "uiControl">,
+): boolean {
+  return field.uiControl === "computed";
+}
+
+/**
+ * Loads the FHIRPath evaluator when any of `fields` is computed. Returns false
+ * until computed values can be read with `getExtensionValue`; render those
+ * fields as pending meanwhile. If loading fails it returns true and computed
+ * values read as undefined, like an expression that fails to evaluate.
+ */
+export function useComputedExtensionFieldsReady(
+  fields: readonly Pick<ExtensionFieldMetadata, "uiControl">[],
+): boolean {
+  const hasComputedFields = fields.some(isComputedExtensionField);
+  const [settled, setSettled] = useState(isComputedFieldEvaluatorLoaded);
+
+  useEffect(() => {
+    if (!hasComputedFields || settled) return;
+    let cancelled = false;
+    loadComputedFieldEvaluator()
+      .catch((error) =>
+        console.error("Failed to load the FHIRPath evaluator:", error),
+      )
+      .finally(() => {
+        if (!cancelled) setSettled(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasComputedFields, settled]);
+
+  return !hasComputedFields || settled;
+}
+
 /**
  * Evaluate a computed extension field using a FHIRPath expression.
+ * Returns undefined until the evaluator has loaded; components should gate on
+ * `useComputedExtensionFieldsReady`.
  */
 export function computeExtensionValue(
   field: { name: string; uiMetadata?: Record<string, unknown> },
@@ -64,6 +105,7 @@ export function computeExtensionValue(
 ): unknown {
   const expression = field.uiMetadata?.expression as string | undefined;
   if (!expression) return undefined;
+  if (!isComputedFieldEvaluatorLoaded()) return undefined;
 
   try {
     return evaluateComputedField(context, expression);
@@ -86,7 +128,7 @@ export function getExtensionValue(
   field: ExtensionFieldWithName,
   context?: ComputedFieldContext,
 ): unknown {
-  if (field.uiControl === "computed") {
+  if (isComputedExtensionField(field)) {
     return computeExtensionValue(field, context ?? {});
   }
 
