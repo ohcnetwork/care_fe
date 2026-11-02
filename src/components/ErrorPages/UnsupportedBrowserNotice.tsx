@@ -4,29 +4,19 @@ import { useTranslation } from "react-i18next";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import supportedBrowsers from "@/supportedBrowsers";
-
-const BrowserWarning = () => {
+const UnsupportedBrowserNotice = () => {
   const { t } = useTranslation();
 
   const notSupported = React.useMemo(() => {
-    const userAgent = window.navigator.userAgent;
-    if (!supportedBrowsers.test(userAgent)) {
-      const browser = bowser.getParser(userAgent).getBrowser();
-      return {
-        name: browser.name || "Unknown",
-        version: browser.version || "Unknown",
-      };
-    }
-    return null;
+    const browser = bowser.getParser(window.navigator.userAgent).getBrowser();
+    return {
+      name: browser.name || "Unknown",
+      version: browser.version || "Unknown",
+    };
   }, []);
 
   const [showUnsupportedBrowserDialog, setShowUnsupportedBrowserDialog] =
     useState(true);
-
-  if (!notSupported) {
-    return null;
-  }
 
   return (
     <>
@@ -52,4 +42,4 @@ const BrowserWarning = () => {
   );
 };
 
-export default BrowserWarning;
+export default UnsupportedBrowserNotice;
