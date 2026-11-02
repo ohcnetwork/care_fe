@@ -17,7 +17,11 @@ setup("authenticate as staff", async ({ page }) => {
   await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
   // Verify we're logged in by checking for user-specific elements
-  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: /^Good (Morning|Afternoon|Evening), .+/,
+    }),
+  ).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });
