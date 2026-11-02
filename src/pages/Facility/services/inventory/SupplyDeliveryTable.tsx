@@ -243,7 +243,7 @@ export function SupplyDeliveryTable({
     inProgressDeliveries.length > 0;
 
   const didAutoSelectRef = useRef(false);
-  const isEditingFromMenuRef = useRef(false);
+  const pendingEditDeliveryRef = useRef<SupplyDeliveryRead | null>(null);
   useEffect(() => {
     if (!autoSelectOnMount) return;
     if (!showAllCheckbox) return;
@@ -556,7 +556,14 @@ export function SupplyDeliveryTable({
                   )}
                 >
                   {delivery.status === SupplyDeliveryStatus.in_progress && (
-                    <DropdownMenu>
+                    <DropdownMenu
+                      onOpenChangeComplete={(open) => {
+                        const pendingDelivery = pendingEditDeliveryRef.current;
+                        if (open || pendingDelivery?.id !== delivery.id) return;
+                        pendingEditDeliveryRef.current = null;
+                        onEditDelivery?.(pendingDelivery);
+                      }}
+                    >
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
@@ -569,17 +576,19 @@ export function SupplyDeliveryTable({
                       <DropdownMenuContent
                         align="end"
                         onCloseAutoFocus={(event) => {
-                          if (isEditingFromMenuRef.current) {
+                          if (
+                            pendingEditDeliveryRef.current?.id === delivery.id
+                          ) {
                             event.preventDefault();
-                            isEditingFromMenuRef.current = false;
                           }
                         }}
                       >
                         {onEditDelivery && (
                           <DropdownMenuItem
                             onSelect={() => {
-                              isEditingFromMenuRef.current = true;
-                              onEditDelivery(delivery);
+                              // Wait for the menu's scroll lock to release before
+                              // focusing and scrolling the pending editor.
+                              pendingEditDeliveryRef.current = delivery;
                             }}
                           >
                             <Edit className="size-4" />
