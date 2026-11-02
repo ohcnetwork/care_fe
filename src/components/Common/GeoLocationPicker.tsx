@@ -1,16 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Map, Marker, ZoomControl } from "pigeon-maps";
-import { useCallback, useState } from "react";
+import { Suspense, lazy, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import query from "@/Utils/request/query";
 import { HttpMethod } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
+
+const GeoLocationMap = lazy(() => import("./GeoLocationMap"));
 
 interface LocationPickerProps {
   latitude?: number;
@@ -121,17 +123,13 @@ export default function GeoLocationPicker({
       </div>
 
       <div className="h-[25rem] w-full rounded-lg border border-gray-200 overflow-hidden">
-        <Map
-          height={400}
-          center={latitude && longitude ? [latitude, longitude] : undefined}
-          defaultZoom={16}
-          onClick={({ latLng: [lat, lng] }) => onLocationSelect(lat, lng)}
-        >
-          <ZoomControl />
-          {latitude && longitude && (
-            <Marker width={40} anchor={[latitude, longitude]} />
-          )}
-        </Map>
+        <Suspense fallback={<Skeleton className="size-full" />}>
+          <GeoLocationMap
+            latitude={latitude}
+            longitude={longitude}
+            onLocationSelect={onLocationSelect}
+          />
+        </Suspense>
       </div>
       <p className="text-sm text-gray-500">
         {t("click_on_map_to_select_location")}

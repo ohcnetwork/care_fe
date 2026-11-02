@@ -1,6 +1,6 @@
-import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
+import type { IDetectedBarcode } from "@yudiel/react-qr-scanner";
 import { Camera, QrCode, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -13,6 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
+
+const Scanner = lazy(() =>
+  import("@yudiel/react-qr-scanner").then((m) => ({ default: m.Scanner })),
+);
 
 interface GenericQRScanDialogProps {
   open: boolean;
@@ -119,17 +124,25 @@ function GenericQRScanDialog({
                   <div className="absolute inset-0 border border-primary/30 rounded-xl overflow-hidden" />
                 </div>
                 <div className="absolute inset-0 bg-black/5 rounded-xl overflow-hidden">
-                  <Scanner
-                    onScan={handleScan}
-                    onError={handleScanError}
-                    constraints={{
-                      facingMode: "environment",
-                    }}
-                    components={{
-                      finder: false,
-                    }}
-                    sound={false}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="flex size-full items-center justify-center">
+                        <Spinner />
+                      </div>
+                    }
+                  >
+                    <Scanner
+                      onScan={handleScan}
+                      onError={handleScanError}
+                      constraints={{
+                        facingMode: "environment",
+                      }}
+                      components={{
+                        finder: false,
+                      }}
+                      sound={false}
+                    />
+                  </Suspense>
                 </div>
                 <Button
                   variant="outline"

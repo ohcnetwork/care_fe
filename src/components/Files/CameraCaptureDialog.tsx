@@ -1,9 +1,16 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { Check, RotateCcw, SwitchCamera, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
-import Webcam from "react-webcam";
+import type WebcamType from "react-webcam";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -24,6 +31,8 @@ import { Spinner } from "@/components/ui/spinner";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { useMediaStream } from "@/hooks/useMediaStream";
+
+const Webcam = lazy(() => import("react-webcam"));
 
 export interface CameraCaptureDialogProps {
   open: boolean;
@@ -49,7 +58,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const [selectedDeviceId, setSelectedDeviceId] = useAtom(
     lastUsedCameraDeviceIdAtom,
   );
-  const webRef = useRef<Webcam>(null);
+  const webRef = useRef<WebcamType>(null);
 
   const videoConstraints =
     isLaptopScreen && selectedDeviceId
@@ -140,15 +149,23 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               {cameraPermission === "loading" && <CameraPermissionRequesting />}
               {cameraPermission === "denied" && <CameraPermissionDenied />}
               {cameraPermission === "accepted" && (
-                <Webcam
-                  className="h-full w-full object-cover"
-                  forceScreenshotSourceSize
-                  screenshotQuality={1}
-                  audio={false}
-                  screenshotFormat="image/jpeg"
-                  ref={webRef}
-                  videoConstraints={videoConstraints as MediaTrackConstraints}
-                />
+                <Suspense
+                  fallback={
+                    <div className="flex size-full items-center justify-center bg-gray-50 text-primary-500">
+                      <Spinner className="size-10" />
+                    </div>
+                  }
+                >
+                  <Webcam
+                    className="h-full w-full object-cover"
+                    forceScreenshotSourceSize
+                    screenshotQuality={1}
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    ref={webRef}
+                    videoConstraints={videoConstraints as MediaTrackConstraints}
+                  />
+                </Suspense>
               )}
 
               <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-4 h-20">
