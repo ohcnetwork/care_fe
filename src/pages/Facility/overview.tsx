@@ -138,7 +138,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         {/* Welcome Header */}
         <div
           data-cy="facility-overview-greeting"
-          className="relative overflow-hidden rounded-xl border border-inverse-border shadow-inner bg-linear-to-r from-sky-50 to-emerald-100 text-gray-900"
+          className="relative overflow-hidden rounded-xl border border-inverse-border shadow-inner bg-linear-to-r from-sky-50 to-emerald-100 text-foreground"
         >
           <img
             src="/images/home-banner.svg"
@@ -147,17 +147,17 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           />
 
           <div className="relative z-10 max-w-xl p-4 md:p-8">
-            <h1 className="text-xl/8 font-medium wrap-break-word text-gray-600">
+            <h1 className="text-xl/8 font-medium wrap-break-word text-soft-foreground">
               <Trans
                 i18nKey={greeting}
                 values={{ name: formatName(user) }}
                 components={{
-                  name: <span className="font-semibold text-gray-950" />,
+                  name: <span className="font-semibold text-foreground" />,
                   wave: <span aria-hidden="true" />,
                 }}
               />
             </h1>
-            <p className="text-gray-700">{t("welcome_back")}</p>
+            <p className="text-soft-foreground">{t("welcome_back")}</p>
           </div>
         </div>
 
