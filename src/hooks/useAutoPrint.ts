@@ -51,7 +51,7 @@ export default function useAutoPrint({
             clearInterval(countdownTimer);
           }
 
-          setCountdown(0);
+          setCountdown(null);
           setIsProcessing(false);
           printWindow.history.go(-1);
           return;
