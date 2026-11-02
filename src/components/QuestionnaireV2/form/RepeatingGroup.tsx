@@ -49,13 +49,18 @@ export function RepeatingGroup(props: {
           className="space-y-2 rounded-lg border border-gray-200 p-2"
         >
           <ResponseRowProvider groupId={question.id} rowIndex={index}>
-            <SectionCard {...props} depth={props.depth + 1} />
+            <SectionCard
+              {...props}
+              depth={props.depth + 1}
+              title={`${question.text} (${index + 1})`}
+            />
           </ResponseRowProvider>
           {mode !== "readonly" && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
+              aria-label={`${t("remove")} ${question.text} (${index + 1})`}
               disabled={disabled}
               onClick={() => {
                 setRowKeys((current) =>

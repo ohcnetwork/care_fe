@@ -18,10 +18,12 @@ export function SectionCard({
   question,
   depth,
   disabled,
+  title = question.text,
 }: {
   question: Question;
   depth: number;
   disabled: boolean;
+  title?: string;
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
@@ -69,7 +71,7 @@ export function SectionCard({
             className="h-4 w-1 shrink-0 rounded-full bg-primary-600"
           />
           <h3 className="text-sm font-semibold text-gray-900">
-            {question.text}
+            {title}
           </h3>
           <Badge variant="outline">{t("group")}</Badge>
           <span className="ml-auto text-xs text-gray-400">
@@ -109,7 +111,7 @@ export function SectionCard({
       )}
     >
       <h4 className="px-3 py-1.5 text-sm font-semibold text-gray-900">
-        {question.text}
+        {title}
       </h4>
       {question.description && (
         <p className="px-3 pb-1.5 text-xs text-gray-500">

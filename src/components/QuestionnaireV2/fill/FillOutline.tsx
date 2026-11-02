@@ -5,13 +5,17 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { questionLabel } from "@/components/QuestionnaireV2/builder/actions/labels";
 import {
   useAnsweredQuestionIds,
   useFormRenderer,
   useHiddenQuestionIds,
 } from "@/components/QuestionnaireV2/form/FormContext";
 import type { TreeItem } from "@/components/QuestionnaireV2/shared/questionTree";
-import { buildQuestionTree } from "@/components/QuestionnaireV2/shared/questionTree";
+import {
+  buildQuestionTree,
+  flattenQuestions,
+} from "@/components/QuestionnaireV2/shared/questionTree";
 
 import type { Question } from "@/types/questionnaire/question";
 
@@ -28,6 +32,9 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
   const hiddenIds = useHiddenQuestionIds();
   const answeredIds = useAnsweredQuestionIds();
   const { activeQuestionId, scrollToQuestion } = useFillOutlineNav();
+  const peers = flattenQuestions(questionnaire.questions).map(
+    (item) => item.question,
+  );
 
   const items = buildQuestionTree(questionnaire.questions).filter(
     (item) => !hiddenIds.has(item.question.id),
@@ -70,12 +77,13 @@ export function FillOutline({ ariaLabel }: { ariaLabel?: string }) {
           ),
         )}
       >
-        <span className="min-w-0 flex-1">
-          {item.question.text || (
-            <span className="italic text-gray-400">
-              {t("untitled_question")}
-            </span>
+        <span
+          className={cn(
+            "min-w-0 flex-1",
+            !item.question.text && "italic text-gray-400",
           )}
+        >
+          {questionLabel(item.question, t, peers)}
         </span>
         {/* Decorative completion cue — aria-hidden keeps row accessible
             names unchanged. */}

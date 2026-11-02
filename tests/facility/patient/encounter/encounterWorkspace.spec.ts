@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 
 import type { PlugConfig } from "../../../../src/types/plugConfig";
+import type { Question } from "../../../../src/types/questionnaire/question";
 import type { UserReadMinimal } from "../../../../src/types/user/user";
 import type {
   WorkspaceRead,
@@ -9,6 +10,10 @@ import type {
   WorkspaceUpdate,
   WorkspaceUserDefaultAttributes,
 } from "../../../../src/types/workspace/workspace";
+import {
+  draftFormCount,
+  draftFormNoteText,
+} from "../../../helper/fillDrafts";
 import { verifyLabelledValues } from "../../../helper/questionnaire";
 import { installEncounterWidgetRemote } from "../../../support/encounterWidgetRemote";
 
@@ -1184,6 +1189,260 @@ test("submitted boolean values stay paired with their exact question labels", as
     ["Consent", "Yes"],
     ["Consent details", "No"],
   ]);
+});
+
+test("a cyclic added form blocks the whole submission and retains both draft forms", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const cyclic = {
+    ...fixture.questionnaire,
+    id: faker.string.uuid(),
+    title: "Circular review",
+    questions: ["first", "second"].map((id, index) => ({
+      id,
+      link_id: id,
+      text: id,
+      type: "string",
+      enable_when: [
+        {
+          question: index === 0 ? "second" : "first",
+          operator: "equals",
+          answer: "yes",
+        },
+      ],
+    })),
+  };
+  await page.route("**/api/v1/questionnaire/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/v1/questionnaire/") {
+      await route.fulfill({ json: { count: 1, results: [cyclic] } });
+    } else if (path === `/api/v1/questionnaire/${cyclic.id}/`) {
+      await route.fulfill({ json: cyclic });
+    } else {
+      await route.fallback();
+    }
+  });
+  const batchPosts: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname === "/api/v1/batch_requests/"
+    ) {
+      batchPosts.push(request.url());
+    }
+  });
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  await page
+    .locator(`[data-question-id="${fixture.questionnaire.questions[0].id}"]`)
+    .getByRole("textbox")
+    .fill("Keep this clinical note");
+  await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await page.getByPlaceholder("Search Forms").fill(cyclic.title);
+  await page.getByRole("option", { name: cyclic.title }).click();
+  await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await expect.poll(() => draftFormCount(page)).toBe(2);
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect(
+    page.locator("[data-sonner-toast]").filter({
+      hasText: "This form has circular visibility conditions.",
+    }),
+  ).toBeVisible();
+  expect(batchPosts).toHaveLength(0);
+  expect(await draftFormCount(page)).toBe(2);
+  expect(await draftFormNoteText(page, fixture.questionnaire.id)).toBe(
+    "Keep this clinical note",
+  );
+});
+
+test("fill navigation distinguishes duplicate titles and repeated group controls identify their row", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    { id: "first", link_id: "first", text: "Shared title", type: "string" },
+    {
+      id: "group",
+      link_id: "group",
+      text: "Findings",
+      type: "group",
+      repeats: true,
+      questions: [
+        {
+          id: "second",
+          link_id: "second",
+          text: "Shared title",
+          type: "string",
+        },
+      ],
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) =>
+      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  const group = page.locator('[data-question-id="group"]').first();
+  await group.getByRole("button", { name: "Add Another" }).click();
+  await group.getByRole("button", { name: "Add Another" }).click();
+  await expect(
+    group.getByRole("heading", { name: "Findings (1)", exact: true }),
+  ).toBeVisible();
+  await expect(
+    group.getByRole("heading", { name: "Findings (2)", exact: true }),
+  ).toBeVisible();
+  await group
+    .locator("[data-group-row]")
+    .nth(0)
+    .getByRole("textbox")
+    .fill("First");
+  await group
+    .locator("[data-group-row]")
+    .nth(1)
+    .getByRole("textbox")
+    .fill("Second");
+  await group
+    .getByRole("button", { name: "Remove Findings (1)", exact: true })
+    .click();
+  await expect(group.getByRole("textbox")).toHaveValue("Second");
+  await expect(
+    group.getByRole("button", { name: "Remove Findings (1)", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Questions outline" }).focus();
+  const outline = page.getByRole("complementary", {
+    name: "Questions outline",
+  });
+  await expect(
+    outline.getByRole("button", { name: "Shared title (first)", exact: true }),
+  ).toBeVisible();
+  await expect(
+    outline.getByRole("button", { name: "Shared title (second)", exact: true }),
+  ).toBeVisible();
+});
+
+test("formatting-only optional appointment notes do not require a slot", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    { ...fixture.questionnaire.questions[0], type: "string" },
+    {
+      id: "appointment",
+      link_id: "appointment",
+      text: "Optional appointment",
+      type: "structured",
+      structured_type: "appointment",
+      required: false,
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) =>
+      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  const posts: string[] = [];
+  await page.route("**/api/v1/batch_requests/**", async (route) => {
+    posts.push(route.request().postData() ?? "");
+    await route.fulfill({ json: { results: [] } });
+  });
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  await page
+    .locator(`[data-question-id="${questions[0].id}"]`)
+    .getByRole("textbox")
+    .fill("Clinical note");
+  const editor = page
+    .locator('[data-question-id="appointment"]')
+    .getByRole("textbox", { name: /reason for visit/i });
+  await editor.fill("Needs a slot");
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect(
+    page.locator("[data-sonner-toast]").filter({ hasText: "Validation failed" }),
+  ).toBeVisible();
+  expect(posts).toHaveLength(0);
+  await editor.fill("");
+  await editor.pressSequentially("# ");
+  await expect(editor).toHaveText("");
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect.poll(() => posts.length).toBe(1);
+  const body = JSON.parse(posts[0]) as { requests: { url: string }[] };
+  expect(body.requests.map((request) => request.url)).toEqual([
+    `/api/v1/questionnaire/${fixture.questionnaire.id}/submit/`,
+  ]);
+});
+
+test("organization history filters use each primary encounter's facility scope", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page);
+  const otherFacility = { ...fixture.facility, id: faker.string.uuid() };
+  fixture.pastEncounter.facility = otherFacility;
+  const organizationId = faker.string.uuid();
+  await page.route(`**/api/v1/organization/${organizationId}/**`, (route) =>
+    route.fulfill({
+      json: {
+        id: organizationId,
+        name: "History scope",
+        org_type: "team",
+        permissions: ["can_list_patients", "can_view_patient"],
+      },
+    }),
+  );
+  await page.addInitScript(
+    ({ actorId, facilities }) => {
+      for (const [index, facility] of facilities.entries()) {
+        sessionStorage.setItem(
+          `encounter_history_filters:${actorId}:${facility.id}`,
+          JSON.stringify({
+            status: index === 0 ? "completed" : "in_progress",
+            selectedTags: [],
+            tagsBehavior: "any",
+          }),
+        );
+      }
+    },
+    { actorId: fixture.actor.id, facilities: [fixture.facility, otherFacility] },
+  );
+  const historyRequests: URL[] = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (
+      url.pathname === "/api/v1/encounter/" &&
+      url.searchParams.get("limit") === "14"
+    ) {
+      historyRequests.push(url);
+    }
+  });
+  const organizationPath = `/organization/${organizationId}/patient/${fixture.patient.id}/encounter`;
+  await page.goto(`${organizationPath}/${fixture.currentEncounter.id}/updates`);
+  const historyButton = page.getByRole("button", {
+    name: /^Encounter History/,
+  });
+  await historyButton.click();
+  await expect
+    .poll(() => historyRequests.at(-1)?.searchParams.get("status"))
+    .toBe("completed");
+  await historyButton.click();
+  await page.evaluate((path) => {
+    history.pushState({}, "", path);
+    dispatchEvent(new PopStateEvent("popstate"));
+  }, `${organizationPath}/${fixture.pastEncounter.id}/updates`);
+  await historyButton.click();
+  await expect
+    .poll(() => historyRequests.at(-1)?.searchParams.get("status"))
+    .toBe("in_progress");
 });
 
 test.describe("Encounter workspace rendering", () => {

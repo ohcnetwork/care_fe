@@ -39,6 +39,7 @@ import {
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import { hasMarkdownContent } from "@/Utils/markdown";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -73,7 +74,10 @@ export function validateAppointmentQuestion(
   return validateFields(value, questionId, {
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required || !!value?.note?.trim() || !!value?.tags?.length,
+      required:
+        required ||
+        hasMarkdownContent(value?.note ?? "") ||
+        !!value?.tags?.length,
     },
   });
 }
@@ -174,7 +178,7 @@ export function AppointmentQuestion({
     if (disabled) return;
     const updatedValue = { ...value, ...updates };
     if (
-      !updatedValue.note?.trim() &&
+      !hasMarkdownContent(updatedValue.note) &&
       !updatedValue.slot_id &&
       !updatedValue.tags?.length
     ) {

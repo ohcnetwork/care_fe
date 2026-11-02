@@ -231,9 +231,10 @@ function EncounterCard({
 
 interface Props {
   onSelect?: () => void;
+  filterScope: string;
 }
 
-const EncounterHistoryList = ({ onSelect }: Props) => {
+const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
@@ -246,8 +247,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     facilityId,
   } = useEncounter();
 
-  const user = useAuthUser();
-  const filterScope = `${user.id}:${facilityId}`;
   const storageKey = encounterFilterStorageKey("history", filterScope);
 
   // Use persisted filters from atom
@@ -544,6 +543,8 @@ export default function EncounterHistorySelector() {
   const isDesktop = useBreakpoints({ default: false, lg: true });
   const { t } = useTranslation();
   const { patientId, facilityId, primaryEncounter } = useEncounter();
+  const user = useAuthUser();
+  const filterScope = `${user.id}:${facilityId ?? primaryEncounter?.facility.id}`;
   const historyScope = getEncounterHistoryScope(
     patientId,
     facilityId,
@@ -592,7 +593,8 @@ export default function EncounterHistorySelector() {
           className="max-h-[min(36rem,var(--available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
         >
           <EncounterHistoryList
-            key={`${facilityId}:${patientId}`}
+            key={`${filterScope}:${patientId}`}
+            filterScope={filterScope}
             onSelect={() => setIsOpen(false)}
           />
         </PopoverContent>
@@ -611,7 +613,8 @@ export default function EncounterHistorySelector() {
         </DrawerHeader>
         <div className="min-h-0 overflow-y-auto pb-4 px-4">
           <EncounterHistoryList
-            key={`${facilityId}:${patientId}`}
+            key={`${filterScope}:${patientId}`}
+            filterScope={filterScope}
             onSelect={() => setIsOpen(false)}
           />
         </div>
