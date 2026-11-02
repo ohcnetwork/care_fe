@@ -26,6 +26,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -654,10 +655,9 @@ export function PaymentStatusBanner({
                   </Link>
                 </Button>
                 {accountId && (
-                  <div className="flex">
+                  <ButtonGroup>
                     <Button
                       variant="primary"
-                      className="rounded-r-none"
                       onClick={() => setPaymentSheetOpen(true)}
                     >
                       <BanknoteIcon className="size-4" />
@@ -666,11 +666,7 @@ export function PaymentStatusBanner({
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="primary"
-                          size="icon"
-                          className="rounded-l-none border-l border-l-white/20"
-                        >
+                        <Button variant="primary" size="icon">
                           <ChevronDown className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -711,7 +707,7 @@ export function PaymentStatusBanner({
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
+                  </ButtonGroup>
                 )}
               </>
             )}

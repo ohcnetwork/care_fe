@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -210,59 +211,50 @@ export function DispenseOrderViewFooter({
                 <ShortcutBadge actionId="put-on-hold-action" />
               </Button>
             )}
-            <div className="flex">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Button
-                      variant={
-                        canCompleteDispense ? "primary" : "outline_primary"
-                      }
-                      className="rounded-r-none"
-                      onClick={() =>
-                        updateStatus({
-                          newStatus: DispenseOrderStatus.completed,
-                        })
-                      }
-                      disabled={isUpdatingStatus || !canCompleteDispense}
-                    >
-                      {t("complete_dispense")}
-                      <ShortcutBadge actionId="submit-action" />
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                {!canCompleteDispense && (
-                  <TooltipContent>
-                    {t("settle_pending_invoices_before_completion")}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={
-                      canCompleteDispense ? "primary" : "outline_primary"
-                    }
-                    size="icon"
-                    className="rounded-l-none border-l border-l-white/20"
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={canCompleteDispense ? "primary" : "outline_primary"}
+                  onClick={() =>
+                    updateStatus({
+                      newStatus: DispenseOrderStatus.completed,
+                    })
+                  }
+                  disabled={isUpdatingStatus || !canCompleteDispense}
+                >
+                  {t("complete_dispense")}
+                  <ShortcutBadge actionId="submit-action" />
+                </Button>
+              </TooltipTrigger>
+              {!canCompleteDispense && (
+                <TooltipContent>
+                  {t("settle_pending_invoices_before_completion")}
+                </TooltipContent>
+              )}
+            </Tooltip>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={isUpdatingStatus}
+                  aria-label={t("more_actions")}
+                >
+                  <CareIcon icon="l-ellipsis-v" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {cancelStatusOptions.map((s) => (
+                  <DropdownMenuItem
+                    key={s}
+                    onClick={() => setConfirmStatusChange(s)}
                     disabled={isUpdatingStatus}
                   >
-                    <ChevronDown className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {cancelStatusOptions.map((s) => (
-                    <DropdownMenuItem
-                      key={s}
-                      onClick={() => setConfirmStatusChange(s)}
-                      disabled={isUpdatingStatus}
-                    >
-                      {t(`mark_as_${s}`)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                    {t(`mark_as_${s}`)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       )}
@@ -316,8 +308,8 @@ export function DispenseOrderViewFooter({
               {t("print")}
             </Button>
             {/* Next pharmacy actions — primary split button */}
-            <div className="flex">
-              <Button variant="primary" className="rounded-r-none" asChild>
+            <ButtonGroup>
+              <Button variant="primary" asChild>
                 <Link
                   href={`/facility/${facilityId}/locations/${locationId}/medication_requests`}
                   basePath="/"
@@ -331,7 +323,6 @@ export function DispenseOrderViewFooter({
                   <Button
                     variant="primary"
                     size="icon"
-                    className="rounded-l-none border-l border-l-white/20"
                     aria-label={t("next_pharmacy_action_question")}
                   >
                     <ChevronDown className="size-4" />
@@ -356,7 +347,7 @@ export function DispenseOrderViewFooter({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </ButtonGroup>
             {/* Cancel options */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
