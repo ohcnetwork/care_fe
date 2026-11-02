@@ -62,6 +62,8 @@ interface EncounterCommandDialogProps {
   trigger?: React.ReactNode;
 }
 
+const WORKSPACE_PAGE_ID_PREFIX = "workspace-page-";
+
 export function EncounterCommandDialog({
   encounter,
   open,
@@ -82,14 +84,31 @@ export function EncounterCommandDialog({
   const { defaults, list, workspace } = useEncounterWorkspaces(
     encounter.encounter_class,
   );
-  const canNavigateToReferrals =
-    !defaults.isLoading &&
-    !list.isLoading &&
-    (!workspace ||
-      parseEncounterWorkspace(workspace.template, SYSTEM_PAGE_KEYS).pages.some(
-        (page) =>
-          page.kind === "system" && page.key === "referrals" && !page.hidden,
-      ));
+  const isWorkspaceLoading = defaults.isLoading || list.isLoading;
+  // Pages a workspace omits or hides are not routable, so they must not be offered.
+  const workspacePages = useMemo(() => {
+    if (!workspace) return undefined;
+    const pages = parseEncounterWorkspace(
+      workspace.template,
+      SYSTEM_PAGE_KEYS,
+    ).pages.filter((page) => !page.hidden);
+    return {
+      systemKeys: new Set(
+        pages.filter((page) => page.kind === "system").map((page) => page.key),
+      ),
+      customPages: pages.flatMap((page) =>
+        page.kind === "custom" ? [{ key: page.key, title: page.title }] : [],
+      ),
+    };
+  }, [workspace]);
+  const canNavigateToPage = useCallback(
+    (pageKey: string) =>
+      workspacePages
+        ? workspacePages.systemKeys.has(pageKey)
+        : pageKey !== "referrals" || !isWorkspaceLoading,
+    [workspacePages, isWorkspaceLoading],
+  );
+  const canNavigateToReferrals = canNavigateToPage("referrals");
 
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
@@ -203,6 +222,15 @@ export function EncounterCommandDialog({
       const handler = actionHandlers[actionId];
       if (handler) {
         handler();
+        return;
+      }
+
+      if (actionId.startsWith(WORKSPACE_PAGE_ID_PREFIX)) {
+        navigate(
+          buildEncounterUrl(
+            `/${actionId.slice(WORKSPACE_PAGE_ID_PREFIX.length)}`,
+          ),
+        );
         return;
       }
 
@@ -366,82 +394,105 @@ export function EncounterCommandDialog({
       });
     }
 
-    // Go to navigation - always available
+    // Go to navigation - limited to pages the active workspace exposes
+    const goToItems = [
+      {
+        id: "encounter-overview",
+        pageKey: "updates",
+        label: t("ENCOUNTER_TAB__updates"),
+        shortcut: getShortcutDisplay("encounter-overview"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "plots",
+        pageKey: "plots",
+        label: t("ENCOUNTER_TAB__plots"),
+        shortcut: getShortcutDisplay("plots"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "observations",
+        pageKey: "observations",
+        label: t("observations"),
+        shortcut: getShortcutDisplay("observations"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "medicines",
+        pageKey: "medicines",
+        label: t("medicines"),
+        shortcut: getShortcutDisplay("medicines"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "immunizations",
+        pageKey: "immunizations",
+        label: t("immunizations"),
+        shortcut: getShortcutDisplay("immunizations"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "responses",
+        pageKey: "responses",
+        label: t("responses"),
+        shortcut: getShortcutDisplay("responses"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "files",
+        pageKey: "files",
+        label: t("files"),
+        shortcut: getShortcutDisplay("files"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "notes",
+        pageKey: "notes",
+        label: t("notes"),
+        shortcut: getShortcutDisplay("notes"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "devices",
+        pageKey: "devices",
+        label: t("devices"),
+        shortcut: getShortcutDisplay("devices"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "consents",
+        pageKey: "consents",
+        label: t("consents"),
+        shortcut: getShortcutDisplay("consents"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "service-requests",
+        pageKey: "service_requests",
+        label: t("service_requests"),
+        shortcut: getShortcutDisplay("service-requests"),
+        icon: <ArrowBigRight />,
+      },
+      {
+        id: "diagnostic-reports",
+        pageKey: "diagnostic_reports",
+        label: t("ENCOUNTER_TAB__diagnostic_reports"),
+        shortcut: getShortcutDisplay("diagnostic-reports"),
+        icon: <ArrowBigRight />,
+      },
+    ];
+
     groups.push({
       group: t("go_to"),
       items: [
-        {
-          id: "encounter-overview",
-          label: t("ENCOUNTER_TAB__updates"),
-          shortcut: getShortcutDisplay("encounter-overview"),
+        ...goToItems
+          .filter(({ pageKey }) => canNavigateToPage(pageKey))
+          .map(({ pageKey: _pageKey, ...item }) => item),
+        ...(workspacePages?.customPages ?? []).map((page) => ({
+          id: `${WORKSPACE_PAGE_ID_PREFIX}${page.key}`,
+          label: page.title,
           icon: <ArrowBigRight />,
-        },
-        {
-          id: "plots",
-          label: t("ENCOUNTER_TAB__plots"),
-          shortcut: getShortcutDisplay("plots"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "observations",
-          label: t("observations"),
-          shortcut: getShortcutDisplay("observations"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "medicines",
-          label: t("medicines"),
-          shortcut: getShortcutDisplay("medicines"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "immunizations",
-          label: t("immunizations"),
-          shortcut: getShortcutDisplay("immunizations"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "responses",
-          label: t("responses"),
-          shortcut: getShortcutDisplay("responses"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "files",
-          label: t("files"),
-          shortcut: getShortcutDisplay("files"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "notes",
-          label: t("notes"),
-          shortcut: getShortcutDisplay("notes"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "devices",
-          label: t("devices"),
-          shortcut: getShortcutDisplay("devices"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "consents",
-          label: t("consents"),
-          shortcut: getShortcutDisplay("consents"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "service-requests",
-          label: t("service_requests"),
-          shortcut: getShortcutDisplay("service-requests"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "diagnostic-reports",
-          label: t("ENCOUNTER_TAB__diagnostic_reports"),
-          shortcut: getShortcutDisplay("diagnostic-reports"),
-          icon: <ArrowBigRight />,
-        },
+        })),
       ],
     });
 
@@ -468,6 +519,8 @@ export function EncounterCommandDialog({
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
     canNavigateToReferrals,
+    canNavigateToPage,
+    workspacePages,
     encounter,
     selectedEncounterPermissions.canReadReferral,
     selectedEncounterPermissions.canCreateReferral,
