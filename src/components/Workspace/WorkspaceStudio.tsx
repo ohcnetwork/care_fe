@@ -620,7 +620,7 @@ export function WorkspaceStudio({
           <div
             role="group"
             aria-label={t("workspace_studio_screen")}
-            className="flex rounded-lg bg-muted-background p-1"
+            className="flex flex-wrap rounded-lg bg-muted-background p-1"
           >
             {WORKSPACE_SURFACES.map((option) => {
               const Icon = SURFACE_ICONS[option];
