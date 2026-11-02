@@ -26,6 +26,10 @@ import {
 } from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
+import {
   completedEncounterStatus,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
@@ -67,6 +71,7 @@ export function AllergyList({
   showViewEncounter = true,
 }: AllergyListProps) {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
@@ -180,7 +185,11 @@ export function AllergyList({
       title={t("allergies")}
       readOnly={readOnly}
       className={className}
-      editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
+      editLink={
+        !readOnly
+          ? withReturnTo("questionnaire/allergy_intolerance", returnTo)
+          : undefined
+      }
       actionButton={
         <Button
           variant="ghost"

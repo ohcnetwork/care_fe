@@ -21,6 +21,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import careConfig from "@careConfig";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 export const FormDialog = ({
   subjectType,
@@ -30,6 +34,7 @@ export const FormDialog = ({
   trigger?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -160,7 +165,10 @@ export const FormDialog = ({
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     onSelect={() => {
                       navigate(
-                        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}`,
+                        withReturnTo(
+                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}`,
+                          returnTo,
+                        ),
                       );
                       setOpen(false);
                     }}

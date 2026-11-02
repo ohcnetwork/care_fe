@@ -33,6 +33,10 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -73,6 +77,7 @@ export function EncounterCommandDialog({
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
@@ -128,23 +133,41 @@ export function EncounterCommandDialog({
     },
     [encounter, selectedEncounterId, primaryEncounterId],
   );
+  const buildEncounterQuestionnaireUrl = useCallback(
+    (path: string) => withReturnTo(buildEncounterUrl(path), returnTo),
+    [buildEncounterUrl, returnTo],
+  );
 
   // Handle action execution
   const handleAction = useCallback(
     (actionId: string) => {
       const actionHandlers: Record<string, () => void> = {
         "add-service-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/service_request")),
+          navigate(
+            buildEncounterQuestionnaireUrl("/questionnaire/service_request"),
+          ),
         "add-medication-request": () =>
-          navigate(buildEncounterUrl("/questionnaire/medication_request")),
+          navigate(
+            buildEncounterQuestionnaireUrl("/questionnaire/medication_request"),
+          ),
         "add-allergy": () =>
-          navigate(buildEncounterUrl("/questionnaire/allergy_intolerance")),
+          navigate(
+            buildEncounterQuestionnaireUrl(
+              "/questionnaire/allergy_intolerance",
+            ),
+          ),
         "add-symptoms": () =>
-          navigate(buildEncounterUrl("/questionnaire/symptom")),
+          navigate(
+            buildEncounterQuestionnaireUrl("/questionnaire/symptom"),
+          ),
         "add-diagnosis": () =>
-          navigate(buildEncounterUrl("/questionnaire/diagnosis")),
+          navigate(
+            buildEncounterQuestionnaireUrl("/questionnaire/diagnosis"),
+          ),
         "update-encounter": () =>
-          navigate(buildEncounterUrl("/questionnaire/encounter")),
+          navigate(
+            buildEncounterQuestionnaireUrl("/questionnaire/encounter"),
+          ),
         "service-requests": () =>
           navigate(buildEncounterUrl("/service_requests")),
         "diagnostic-reports": () =>
@@ -183,10 +206,16 @@ export function EncounterCommandDialog({
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
         const slug = actionId.replace("questionnaire-", "");
-        navigate(buildEncounterUrl(`/questionnaire/${slug}`));
+        navigate(buildEncounterQuestionnaireUrl(`/questionnaire/${slug}`));
       }
     },
-    [navigate, buildEncounterUrl, actions, encounter],
+    [
+      navigate,
+      buildEncounterUrl,
+      buildEncounterQuestionnaireUrl,
+      actions,
+      encounter,
+    ],
   );
 
   const addRecentAction = useCallback(

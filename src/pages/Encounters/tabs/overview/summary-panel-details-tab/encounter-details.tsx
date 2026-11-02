@@ -16,9 +16,14 @@ import {
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 export const EncounterDetails = () => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -36,7 +41,10 @@ export const EncounterDetails = () => {
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+              href={withReturnTo(
+                `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+                returnTo,
+              )}
             >
               <SquarePen className="text-gray-950" strokeWidth={1.5} />
             </Link>
@@ -114,7 +122,10 @@ export const EncounterDetails = () => {
         <>
           <Button variant="outline" className="w-full" asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+              href={withReturnTo(
+                `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+                returnTo,
+              )}
             >
               <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
               <span className="text-gray-950">{t("update_encounter")}</span>

@@ -1,7 +1,10 @@
 import { Button, ButtonSize, ButtonVariant } from "@/components/ui/button";
+import { navigate } from "raviger";
 
 type BackButtonProps = {
   children: React.ReactNode;
+  to?: string;
+  replace?: boolean;
   variant?: ButtonVariant;
   className?: string;
   size?: ButtonSize;
@@ -9,6 +12,8 @@ type BackButtonProps = {
 } & Omit<React.ComponentProps<"button">, "onClick">;
 export default function BackButton({
   children,
+  to,
+  replace = true,
   variant = "outline",
   className,
   size = "default",
@@ -20,7 +25,13 @@ export default function BackButton({
       {...props}
       type="button"
       variant={variant}
-      onClick={() => history.back()}
+      onClick={() => {
+        if (to) {
+          navigate(to, { replace });
+        } else {
+          history.back();
+        }
+      }}
       className={className}
       size={size}
       disabled={disabled}

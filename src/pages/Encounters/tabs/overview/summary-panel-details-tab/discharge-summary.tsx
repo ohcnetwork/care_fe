@@ -16,11 +16,16 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 import { SummaryPanelEmptyState as EmptyState } from "./empty-state";
 
 export const DischargeDetails = () => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const { selectedEncounter: encounter, canWriteSelectedEncounter } =
     useEncounter();
 
@@ -39,7 +44,10 @@ export const DischargeDetails = () => {
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`}
+              href={withReturnTo(
+                `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter`,
+                returnTo,
+              )}
             >
               <SquarePen
                 className="size-4 text-gray-950 cursor-pointer"
