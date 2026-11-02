@@ -60,27 +60,30 @@ test.describe("Questionnaire v2 builder navigation", () => {
 
     await test.step("Move question up via the floating toolbar", async () => {
       await page.getByRole("button", { name: "Move question up" }).click();
-      await expect(nav.getByRole("button", { name: titles[1] })).toContainText(
-        "1.",
-      );
-      await expect(nav.getByRole("button", { name: titles[0] })).toContainText(
-        "2.",
-      );
+      await expect(
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp(titles.join("|")) }),
+      ).toHaveText([titles[1], titles[0], titles[2]]);
     });
 
     await test.step("Move question down restores the order", async () => {
       await page.getByRole("button", { name: "Move question down" }).click();
-      await expect(nav.getByRole("button", { name: titles[0] })).toContainText(
-        "1.",
-      );
+      await expect(
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp(titles.join("|")) }),
+      ).toHaveText(titles);
     });
 
     await test.step("Duplicate creates a selected copy right after", async () => {
       await page.getByRole("button", { name: "Duplicate question" }).click();
       await expect(titleInput).toHaveValue(`${titles[1]} (Copy)`);
       await expect(
-        nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
-      ).toContainText("3.");
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp(titles.join("|")) }),
+      ).toHaveText([titles[0], titles[1], `${titles[1]} (Copy)`, titles[2]]);
     });
 
     await test.step("The duplicate persists through save and reload", async () => {
@@ -90,8 +93,10 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await expectToast(page, "Questionnaire updated successfully");
       await page.reload();
       await expect(
-        nav.getByRole("button", { name: `${titles[1]} (Copy)` }),
-      ).toContainText("3.");
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp(titles.join("|")) }),
+      ).toHaveText([titles[0], titles[1], `${titles[1]} (Copy)`, titles[2]]);
     });
 
     await test.step("Delete removes the copy via the toolbar", async () => {
@@ -135,10 +140,11 @@ test.describe("Questionnaire v2 builder navigation", () => {
       await expect(titleInput).toHaveValue("");
       const inserted = nav.getByRole("button", { name: "Untitled Question" });
       await expect(inserted).toBeVisible();
-      await expect(inserted).toContainText("2.");
-      await expect(nav.getByRole("button", { name: titles[1] })).toContainText(
-        "3.",
-      );
+      await expect(
+        nav.getByRole("button").filter({
+          hasText: new RegExp(`${titles.join("|")}|Untitled Question`),
+        }),
+      ).toHaveText([titles[0], "Untitled Question", titles[1]]);
     });
   });
 
@@ -165,10 +171,10 @@ test.describe("Questionnaire v2 builder navigation", () => {
       ).not.toBeVisible();
     });
 
-    await test.step("The survivor renumbers and the delete persists on save", async () => {
-      await expect(nav.getByRole("button", { name: titles[0] })).toContainText(
-        "1.",
-      );
+    await test.step("The survivor remains and the delete persists on save", async () => {
+      await expect(
+        nav.getByRole("button", { name: titles[0], exact: true }),
+      ).toBeVisible();
       await page.getByRole("button", { name: "Save Changes" }).click();
       await expectToast(page, "Questionnaire updated successfully");
       await page.reload();

@@ -88,7 +88,6 @@ export function QuestionnaireStudioPage({
     focusTitle,
     clearTitleFocus,
     selectedQuestion,
-    selectedNumber,
     panel,
     formSelected,
   } = useStudioSelection(state, dispatch);
@@ -239,7 +238,6 @@ export function QuestionnaireStudioPage({
         <header className="sticky top-0 z-10 shrink-0">
           <StudioTopBar
             questionnaire={questionnaire}
-            questions={state.questions}
             view={view}
             onViewChange={(next) => {
               if (next === "preview") clearTitleFocus();
@@ -343,7 +341,6 @@ export function QuestionnaireStudioPage({
                   key={selectedQuestion!.id}
                   question={selectedQuestion!}
                   autoFocusTitle={focusTitle}
-                  number={selectedNumber}
                   allQuestions={state.questions}
                   subjectType={questionnaire.subject_type}
                   valueSetScope={valueSetScope}

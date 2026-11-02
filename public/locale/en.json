@@ -4362,6 +4362,7 @@
   "no_deliveries_found_description": "No deliveries found for selected status or product.",
   "no_delivery_orders_found": "No Delivery Orders found",
   "no_departments_and_teams": "No Department and Teams",
+  "departments_load_failed": "Unable to load department memberships.",
   "no_departments_assigned": "No departments assigned",
   "no_departments_found": "No departments found",
   "no_departments_teams_found": "No Departments or Teams found",
@@ -6266,6 +6267,7 @@
   "resource_requests": "Requests",
   "resource_status": "Request Status",
   "resource_sub_type": "Resource Sub Type",
+  "category_sub_type_unavailable": "The saved category type is no longer available. Choose a category type before saving.",
   "resource_sub_type_help": "Choose the sub type for additional categorization",
   "resource_title": "Resource Title",
   "resource_type": "Resource Type",
@@ -7917,10 +7919,10 @@
   "valueset_preview_error_hint": "Try again. If the problem continues, check the rules and terminology systems in this definition.",
   "valueset_preview_limit_hint": "Preview shows up to {{limit}} matching concepts. Search to narrow the results.",
   "valueset_preview_no_definition_results": "No concepts match this definition. Review the inclusion and exclusion rules, then preview again.",
-  "valueset_preview_no_search_results": "Try a different concept name or code, or clear the search.",
+  "valueset_preview_no_search_results": "Try a different concept name, or clear the search.",
   "valueset_preview_result_count_one": "Showing {{count}} concept",
   "valueset_preview_result_count_other": "Showing {{count}} concepts",
-  "valueset_preview_search_placeholder": "Search by concept name or code",
+  "valueset_preview_search_placeholder": "Search by concept name",
   "valueset_remove_rule": "Remove {{rule}}",
   "valueset_rule_mode_hint": "Use either concepts or filters in each rule. To use both, add a separate rule.",
   "valueset_rule_removed": "Rule removed",
@@ -8479,5 +8481,6 @@
   "workspace_studio_use_standard_history": "Use standard clinical history",
   "workspace_picker_scope_hint": "Your choice applies to all your encounters and clinical history.",
   "plots": "Plots",
-  "table": "Table"
+  "table": "Table",
+  "questionnaire_circular_conditions": "This form has circular visibility conditions. The affected questions are disabled. Ask a form administrator to correct the conditions before using this form."
 }

@@ -9,7 +9,6 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
-import { getCompletedDeliveryQuantity } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
@@ -17,12 +16,10 @@ import {
   RequestOrderRetrieve,
 } from "@/types/inventory/requestOrder/requestOrder";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
-import { abs, add, isNegative, max, round, subtract } from "@/Utils/decimal";
+import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
-import Decimal from "decimal.js";
 
 interface DetailRowProps {
   label: string;
@@ -45,13 +42,11 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
 interface RequestOrderContentProps {
   requestOrder: RequestOrderRetrieve;
   supplyRequests: SupplyRequestRead[];
-  dispatchedQuantities: Record<string, Decimal>;
 }
 
 const RequestOrderContent = ({
   requestOrder,
   supplyRequests,
-  dispatchedQuantities,
 }: RequestOrderContentProps) => {
   const { t } = useTranslation();
 
@@ -75,30 +70,13 @@ const RequestOrderContent = ({
             headers={[
               { key: "product" },
               { key: "quantity" },
-              { key: "dispatched_quantity" },
-              { key: "remaining_quantity" },
               { key: "status" },
             ]}
-            rows={supplyRequests.map((request) => {
-              const dispatched =
-                dispatchedQuantities[request.item.id] || new Decimal(0);
-              const subtractedQuantity = subtract(request.quantity, dispatched);
-              const remaining = round(max(0, subtractedQuantity));
-
-              const remainingText = isNegative(subtractedQuantity)
-                ? `${remaining} (${t("extra_supplied_quantity", {
-                    quantity: round(abs(subtractedQuantity)),
-                  })})`
-                : remaining;
-
-              return {
-                product: request.item.name || "-",
-                quantity: String(round(request.quantity)),
-                dispatched_quantity: String(round(dispatched)),
-                remaining_quantity: remainingText,
-                status: t(request.status),
-              };
-            })}
+            rows={supplyRequests.map((request) => ({
+              product: request.item.name || "-",
+              quantity: String(round(request.quantity)),
+              status: t(request.status),
+            }))}
           />
         </div>
       )}
@@ -109,13 +87,11 @@ const RequestOrderContent = ({
 interface RequestOrderPreviewProps {
   requestOrder: RequestOrderRetrieve;
   supplyRequests: SupplyRequestRead[];
-  dispatchedQuantities: Record<string, Decimal>;
 }
 
 const RequestOrderPreview = ({
   requestOrder,
   supplyRequests,
-  dispatchedQuantities,
 }: RequestOrderPreviewProps) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
@@ -177,7 +153,6 @@ const RequestOrderPreview = ({
         <RequestOrderContent
           requestOrder={requestOrder}
           supplyRequests={supplyRequests}
-          dispatchedQuantities={dispatchedQuantities}
         />
 
         {/* Footer */}
@@ -197,8 +172,6 @@ interface PrintRequestOrderProps {
 export const PrintRequestOrder = ({
   facilityId,
   requestOrderId,
-  locationId,
-  internal,
 }: PrintRequestOrderProps) => {
   const { t } = useTranslation();
 
@@ -223,37 +196,7 @@ export const PrintRequestOrder = ({
     enabled: !!requestOrderId,
   });
 
-  const { data: allSupplyDeliveries, isLoading: isLoadingDeliveries } =
-    useQuery({
-      queryKey: ["allSupplyDeliveries", requestOrderId],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          facility: facilityId,
-          request_order: requestOrderId,
-        },
-      }),
-      enabled: !!requestOrderId && !!locationId,
-    });
-
-  // Calculate dispatched quantities per product
-  const dispatchedQuantities =
-    allSupplyDeliveries?.results?.reduce(
-      (acc, delivery) => {
-        const productId = internal
-          ? delivery.supplied_inventory_item?.product?.product_knowledge?.id
-          : delivery.supplied_item?.product_knowledge?.id;
-        if (productId) {
-          acc[productId] = add(
-            acc[productId] || 0,
-            getCompletedDeliveryQuantity(delivery),
-          );
-        }
-        return acc;
-      },
-      {} as Record<string, Decimal>,
-    ) || {};
-
-  if (isLoadingOrder || isLoadingRequests || isLoadingDeliveries) {
+  if (isLoadingOrder || isLoadingRequests) {
     return <Loading />;
   }
 
@@ -277,7 +220,6 @@ export const PrintRequestOrder = ({
     <RequestOrderPreview
       requestOrder={requestOrder}
       supplyRequests={supplyRequests.results}
-      dispatchedQuantities={dispatchedQuantities}
     />
   );
 };

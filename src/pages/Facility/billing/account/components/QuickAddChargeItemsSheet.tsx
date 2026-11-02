@@ -52,6 +52,7 @@ import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/charge
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 import { add } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -204,6 +205,7 @@ export default function QuickAddChargeItemsSheet({
 
   // Submit cart
   const handleSubmit = () => {
+    if (disabled || isSubmitting) return;
     if (cartItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
       return;
@@ -231,124 +233,136 @@ export default function QuickAddChargeItemsSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6">
-            {/* Groups Section */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-gray-500" />
-                <h3 className="font-semibold text-sm">{t("packages")}</h3>
-              </div>
-
-              {isLoadingGroups ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-20 rounded-xl" />
-                  ))}
+        <form
+          className="flex min-h-0 flex-1 flex-col"
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleSubmit();
+          }}
+        >
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="p-6 space-y-6">
+              {/* Groups Section */}
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-gray-500" />
+                  <h3 className="font-semibold text-sm">{t("packages")}</h3>
                 </div>
-              ) : groups.length === 0 ? (
-                <></>
-              ) : (
-                <div className="space-y-4">
-                  {groups.map((group) => (
-                    <GroupCard
-                      key={group.id}
-                      group={group}
-                      facilityId={facilityId}
-                      selectedPackages={selectedPackages}
-                      onPackageSelect={handlePackageSelect}
-                      onPackageDeselect={handlePackageDeselect}
-                      disabled={disabled}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
 
-            {/* Cart Section */}
-            {cartItems.length > 0 && (
-              <>
-                <Separator />
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-gray-500" />
-                      {t("items_to_add")}
-                      <Badge variant="secondary">{cartItems.length}</Badge>
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setCartItems([]);
-                        setSelectedPackages(new Set());
-                      }}
-                      className="text-destructive hover:text-destructive h-7 text-xs"
-                    >
-                      {t("clear_all")}
-                    </Button>
+                {isLoadingGroups ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-20 rounded-xl" />
+                    ))}
                   </div>
-
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {cartItems.map((item) => (
-                      <CartItemRow
-                        key={item.definition.slug}
-                        item={item}
-                        onQuantityChange={(q) =>
-                          updateQuantity(item.definition.slug, q)
-                        }
-                        onRemove={() => removeFromCart(item.definition.slug)}
+                ) : groups.length === 0 ? (
+                  <></>
+                ) : (
+                  <div className="space-y-4">
+                    {groups.map((group) => (
+                      <GroupCard
+                        key={group.id}
+                        group={group}
+                        facilityId={facilityId}
+                        selectedPackages={selectedPackages}
+                        onPackageSelect={handlePackageSelect}
+                        onPackageDeselect={handlePackageDeselect}
                         disabled={disabled}
                       />
                     ))}
                   </div>
-                </section>
-              </>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Footer */}
-        <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
-          <div className="w-full space-y-4">
-            {cartItems.length > 0 && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {t("estimated_total")}
-                </span>
-                <span className="text-xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={cartTotal} />
-                </span>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || cartItems.length === 0 || disabled}
-                variant="primary"
-                className="flex-1"
-              >
-                {isSubmitting ? (
-                  t("adding")
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("add_items")} ({cartItems.length})
-                  </>
                 )}
-              </Button>
+              </section>
+
+              {/* Cart Section */}
+              {cartItems.length > 0 && (
+                <>
+                  <Separator />
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        <ShoppingCart className="h-4 w-4 text-gray-500" />
+                        {t("items_to_add")}
+                        <Badge variant="secondary">{cartItems.length}</Badge>
+                      </h3>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setCartItems([]);
+                          setSelectedPackages(new Set());
+                        }}
+                        className="text-destructive hover:text-destructive h-7 text-xs"
+                      >
+                        {t("clear_all")}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {cartItems.map((item) => (
+                        <CartItemRow
+                          key={item.definition.slug}
+                          item={item}
+                          onQuantityChange={(q) =>
+                            updateQuantity(item.definition.slug, q)
+                          }
+                          onRemove={() => removeFromCart(item.definition.slug)}
+                          disabled={disabled}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
             </div>
-          </div>
-        </SheetFooter>
+          </ScrollArea>
+
+          {/* Footer */}
+          <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
+            <div className="w-full space-y-4">
+              {cartItems.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    {t("estimated_total")}
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">
+                    <MonetaryDisplay amount={cartTotal} />
+                  </span>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || cartItems.length === 0 || disabled}
+                  variant="primary"
+                  className="flex-1"
+                >
+                  {isSubmitting ? (
+                    t("adding")
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("add_items")} ({cartItems.length})
+                      {open && <ShortcutBadge actionId="submit-action" />}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );
@@ -682,6 +696,8 @@ function CartItemRow({
         <Input
           type="number"
           min={1}
+          required
+          aria-label={t("quantity")}
           value={item.quantity}
           onChange={(e) => onQuantityChange(Number(e.target.value) || 1)}
           className="w-12 h-7 text-center text-sm px-1"

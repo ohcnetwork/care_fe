@@ -296,7 +296,9 @@ export function ObservationInterpretation<
       setQualifiedRanges(newRanges);
 
       form.setValue(name as any, newRanges as any);
-      const isValid = await form.trigger();
+      const isValid = await form.trigger(
+        `${name}.${editingIndex}` as Parameters<typeof form.trigger>[0],
+      );
 
       if (!isValid) {
         return;

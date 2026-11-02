@@ -602,7 +602,12 @@ test.describe("Referrals", () => {
         name: "Quick Actions",
         exact: true,
       });
-      // Quick actions list every action, the referral entry included.
+      await expect(
+        quickActions.getByRole("button", {
+          name: "More Actions",
+          exact: true,
+        }),
+      ).toHaveCount(0);
       const newReferral = quickActions.getByRole("button", {
         name: "New referral",
         exact: true,

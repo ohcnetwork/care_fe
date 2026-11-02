@@ -73,7 +73,13 @@ export function ResourceCategoryForm({
     title: z.string().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     description: z.string().optional(),
-    resource_sub_type: z.enum(ResourceCategorySubType),
+    resource_sub_type: z
+      .enum(ResourceCategorySubType)
+      .refine(
+        (value) =>
+          value.startsWith(`${resourceType}:`) || value.startsWith("all:"),
+        t("category_sub_type_unavailable"),
+      ),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -165,6 +171,10 @@ export function ResourceCategoryForm({
       console.error("Update category error:", error);
     },
   });
+
+  const selectedSubType = form.watch("resource_sub_type");
+  const hasValidSubType =
+    formSchema.shape.resource_sub_type.safeParse(selectedSubType).success;
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const payload: ResourceCategoryCreate | ResourceCategoryUpdate = {
@@ -294,15 +304,20 @@ export function ResourceCategoryForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("resource_sub_type")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={hasValidSubType ? field.value : ""}
+                  >
                     <ResourceSubTypePicker
                       resourceType={resourceType}
                       onValueChange={field.onChange}
-                      value={field.value}
+                      value={hasValidSubType ? field.value : undefined}
                     />
                   </Select>
                   <FormDescription>
-                    {t("resource_sub_type_help")}
+                    {hasValidSubType
+                      ? t("resource_sub_type_help")
+                      : t("category_sub_type_unavailable")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -313,7 +328,7 @@ export function ResourceCategoryForm({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || !hasValidSubType}>
                 {isLoading && (
                   <CareIcon
                     icon="l-spinner"

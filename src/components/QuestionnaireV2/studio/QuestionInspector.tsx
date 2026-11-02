@@ -58,7 +58,6 @@ const UNIT_BEARING_TYPES: Question["type"][] = [...UNIT_ROW_TYPES, "quantity"];
 
 interface QuestionInspectorProps {
   question: Question;
-  number: string;
   allQuestions: Question[];
   subjectType: SubjectType;
   /** Auth context for valuesets authored from the options editor — the
@@ -78,7 +77,6 @@ interface QuestionInspectorProps {
  */
 export function QuestionInspector({
   question,
-  number,
   allQuestions,
   subjectType,
   valueSetScope,
@@ -176,9 +174,6 @@ export function QuestionInspector({
           </p>
         )}
         <div className="flex items-center gap-2 px-4 pt-4">
-          <span className="shrink-0 font-mono text-xs text-gray-400 tabular-nums">
-            {number}
-          </span>
           <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
             {question.text || (
               <span className="italic font-normal text-gray-400">
