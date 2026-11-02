@@ -153,7 +153,7 @@ export async function verifySubmittedValues(
 
 /**
  * Verifies that specific question labels have expected values on the overview page.
- * Scopes value assertion to the same table row as the label, avoiding false positives
+ * Scopes value assertion to the same definition as the label, avoiding false positives
  * from generic values like "Yes"/"No" appearing elsewhere on the page.
  */
 export async function verifyLabelledValues(
@@ -165,12 +165,12 @@ export async function verifyLabelledValues(
 
   for (const [label, value] of pairs) {
     const row = page
-      .locator("tr", {
-        has: page.locator("td", { hasText: label }),
-      })
+      .getByRole("term")
+      .filter({ has: page.getByText(label, { exact: true }) })
+      .locator("..")
       .first();
     await row.scrollIntoViewIfNeeded();
-    await expect(row.locator("td").nth(1)).toContainText(value);
+    await expect(row.getByRole("definition")).toHaveText(value);
   }
 }
 

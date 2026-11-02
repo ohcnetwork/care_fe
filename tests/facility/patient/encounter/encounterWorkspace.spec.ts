@@ -9,6 +9,7 @@ import type {
   WorkspaceUpdate,
   WorkspaceUserDefaultAttributes,
 } from "../../../../src/types/workspace/workspace";
+import { verifyLabelledValues } from "../../../helper/questionnaire";
 import { installEncounterWidgetRemote } from "../../../support/encounterWidgetRemote";
 
 test.use({
@@ -1151,6 +1152,40 @@ async function mockEncounterWorkspaceApi(
   };
 }
 
+test("submitted boolean values stay paired with their exact question labels", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeOverview: true,
+    includeSectionData: true,
+  });
+  fixture.defaults.length = 0;
+  const question = fixture.questionnaire.questions[0];
+  question.text = "Consent details";
+  question.type = "boolean";
+  const consentQuestion = {
+    ...question,
+    id: faker.string.uuid(),
+    link_id: "consent",
+    text: "Consent",
+  };
+  fixture.questionnaire.questions.push(consentQuestion);
+  for (const response of fixture.questionnaireResponses) {
+    response.responses[0].values = [{ type: "boolean", value: "false" }];
+    response.responses.push({
+      question_id: consentQuestion.id,
+      link_id: consentQuestion.link_id,
+      values: [{ type: "boolean", value: "true" }],
+    });
+  }
+
+  await page.goto(`${fixture.basePath}/updates`);
+  await verifyLabelledValues(page, [
+    ["Consent", "Yes"],
+    ["Consent details", "No"],
+  ]);
+});
+
 test.describe("Encounter workspace rendering", () => {
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
     page,
@@ -1522,6 +1557,17 @@ test.describe("Encounter workspace rendering", () => {
       },
     };
     fixture.workspaces.push(alternateWorkspace);
+    const unrelatedWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Unrelated ${faker.word.words(2)}`,
+    };
+    const inaccessibleWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Inaccessible ${faker.word.words(2)}`,
+    };
+    fixture.workspaces.push(unrelatedWorkspace);
 
     const openPicker = async () => {
       await page.getByRole("button", { name: /^Workspace: / }).click();
@@ -1544,7 +1590,7 @@ test.describe("Encounter workspace rendering", () => {
       const picker = await openPicker();
       await expect(
         picker.getByRole("heading", {
-          name: competingWorkspace.name,
+          name: "Standard encounter",
           exact: true,
         }),
       ).toBeVisible();
@@ -1617,23 +1663,12 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
     });
 
-    const unrelatedWorkspace: WorkspaceRead = {
-      ...fixture.workspace,
-      id: faker.string.uuid(),
-      name: `Unrelated ${faker.word.words(2)}`,
-    };
-    const inaccessibleWorkspace: WorkspaceRead = {
-      ...fixture.workspace,
-      id: faker.string.uuid(),
-      name: `Inaccessible ${faker.word.words(2)}`,
-    };
-    fixture.workspaces.push(unrelatedWorkspace);
+    fixture.defaults.push({
+      attribute: "encounter_class",
+      value: "obsenc",
+      workspace: unrelatedWorkspace,
+    });
     const protectedDefaults: WorkspaceUserDefaultAttributes[] = [
-      {
-        attribute: "encounter_class",
-        value: "obsenc",
-        workspace: unrelatedWorkspace,
-      },
       { attribute: "status", value: "amb", workspace: fixture.workspace },
       {
         attribute: "encounter_class",
@@ -1704,12 +1739,12 @@ test.describe("Encounter workspace rendering", () => {
       );
       await expect(
         picker.getByRole("heading", {
-          name: "Standard encounter",
+          name: competingWorkspace.name,
           exact: true,
         }),
       ).toBeVisible();
       await expect(
-        page.getByRole("tab", { name: "Overview", exact: true }),
+        page.getByRole("tab", { name: "Clinical review", exact: true }),
       ).toBeVisible();
       expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
         {
@@ -1797,11 +1832,9 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.defaults).toEqual(
         expect.arrayContaining(protectedDefaults),
       );
-      for (const workspace of [unrelatedWorkspace, inaccessibleWorkspace]) {
-        expect(fixture.writes).not.toContain(
-          `POST /api/v1/workspace/${workspace.id}/set_default_attributes/`,
-        );
-      }
+      expect(fixture.writes).not.toContain(
+        `POST /api/v1/workspace/${inaccessibleWorkspace.id}/set_default_attributes/`,
+      );
       expect(
         fixture.defaultWrites.every(({ body }) =>
           ["scope", "encounter_class"].includes(body.attribute),
@@ -1818,7 +1851,7 @@ test.describe("Encounter workspace rendering", () => {
       const picker = await openPicker();
       await picker
         .getByRole("button", {
-          name: "Reset to standard encounter",
+          name: "Reset to standard workspace",
           exact: true,
         })
         .click();
@@ -1842,7 +1875,7 @@ test.describe("Encounter workspace rendering", () => {
       const standardPicker = await openPicker();
       await expect(
         standardPicker.getByRole("button", {
-          name: "Reset to standard encounter",
+          name: "Reset to standard workspace",
           exact: true,
         }),
       ).toHaveCount(0);
@@ -1913,10 +1946,8 @@ test.describe("Encounter workspace rendering", () => {
     const fixture = await mockEncounterWorkspaceApi(page, {
       includeSectionData: true,
     });
-    // Referral creation remains authorized on this historical encounter while
-    // its clinical actions stay read-only.
-    fixture.pastEncounter.permissions = [
-      ...fixture.pastEncounter.permissions,
+    fixture.currentEncounter.permissions = [
+      ...fixture.currentEncounter.permissions,
       "can_create_referral",
     ];
     fixture.workspace.template = {
@@ -3464,7 +3495,7 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.defaultWrites).toEqual([
         {
           workspaceId: fixture.workspace.id,
-          body: { attribute: "encounter_class", value: "amb" },
+          body: { attribute: "scope", value: "all" },
         },
       ]);
     });
@@ -3804,14 +3835,17 @@ test("one workspace selection configures encounter and clinical history layouts"
   await page.getByRole("button", { name: /^Workspace: / }).click();
   await page.getByRole("option").filter({ hasText: history.name }).click();
   await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
-  expect(fixture.defaultWrites).toEqual([
+  await expect.poll(() => fixture.defaultWrites).toEqual([
     {
       workspaceId: history.id,
       body: { attribute: "scope", value: "all" },
     },
   ]);
+  await expect(
+    page.getByRole("dialog", { name: "Workspace", exact: true }),
+  ).not.toBeVisible();
   await page.goto(
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/background`,
   );
   await expect(
     page.getByRole("region", { name: "All diagnoses", exact: true }),
@@ -3839,10 +3873,13 @@ test("one workspace selection configures encounter and clinical history layouts"
     await page.getByRole("button", { name: /^Workspace: / }).click();
     await page
       .getByRole("button", {
-        name: "Reset to standard encounter",
+        name: "Reset to standard workspace",
         exact: true,
       })
       .click();
+    await expect(
+      page.getByRole("dialog", { name: "Workspace", exact: true }),
+    ).not.toBeVisible();
     await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
     expect(fixture.defaultWrites.at(-1)).toEqual({
       workspaceId: history.id,
@@ -3908,7 +3945,7 @@ test("studio history pages can show only the forms the viewer submitted", async 
     workspace: history,
   });
   await page.goto(
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/my_forms`,
   );
   await expect(page).toHaveURL((url) =>
     url.pathname.endsWith("/history/my_forms"),
@@ -3947,6 +3984,18 @@ test("studio history pages can show only the forms the viewer submitted", async 
     }),
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await test.step("Standard history deep links remain available alongside custom tabs", async () => {
+    await page.goto(
+      `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
+    );
+    await expect(
+      page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith("/history/diagnoses"),
+    );
+    await expect(forms).toHaveCount(0);
+  });
   expect(fixture.defaultWrites).toEqual([]);
 });
 
@@ -4071,6 +4120,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(observationHistory).toBeVisible();
   await expect(observationHistory).toContainText("All Encounters");
   await expect(observationHistory).toContainText("3 recordings");
+  await observationHistory
+    .getByRole("tab", { name: "Table", exact: true })
+    .click();
   const historyMatrix = observationHistory.getByRole("table");
   const pulseHistory = historyMatrix.getByRole("row").nth(1);
   await expect(pulseHistory).toContainText("82");
@@ -4091,6 +4143,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     })
     .click();
   await expect(observationHistory).toContainText("2 recordings");
+  await observationHistory
+    .getByRole("tab", { name: "Table", exact: true })
+    .click();
   await expect(pulseHistory).not.toContainText("64");
   await page.keyboard.press("Escape");
   await expect(observationHistory).toHaveCount(0);

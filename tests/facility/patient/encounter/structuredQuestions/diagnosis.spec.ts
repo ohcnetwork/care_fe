@@ -233,31 +233,25 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    // The encounter overview's Diagnoses panel lists each diagnosis as a card
-    // (the column-header table only renders in wide panels). The innermost
-    // visible div holding both the name and its details is that diagnosis'
-    // card; the hidden table layout comes later in the DOM.
-    const diagnosisCard = page
+    const diagnosisSummary = page
       .getByRole("region", { name: "Diagnoses", exact: true })
-      .locator("div")
-      .filter({ hasText: diagnosisName })
-      .filter({ hasText: "Severity" })
-      .filter({ visible: true })
-      .last();
-    await expect(diagnosisCard).toBeVisible();
+      .getByRole("listitem")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(diagnosisSummary).toBeVisible();
     await expect(
-      diagnosisCard.getByText("Verification", { exact: true }),
+      diagnosisSummary.getByText("Severe", { exact: true }),
     ).toBeVisible();
     await expect(
-      diagnosisCard.getByText("Severity", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      diagnosisCard.getByText("Severe", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      diagnosisCard.getByText("Onset", { exact: true }),
+      diagnosisSummary.getByText(/^Onset\b/),
     ).toBeVisible();
 
-    await expect(diagnosisCard.getByText(diagnosisName).first()).toBeVisible();
+    await page.goto(questionnaireUrl);
+    await page.getByRole("button", { name: "Diagnosis History" }).click();
+    const historyRow = page
+      .getByRole("dialog", { name: "Past Diagnoses" })
+      .getByRole("row")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
+    await expect(historyRow.getByText("Confirmed", { exact: true })).toBeVisible();
   });
 });

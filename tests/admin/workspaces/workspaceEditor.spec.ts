@@ -662,7 +662,6 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
   };
   const template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       { kind: "system", key: "immunizations", hidden: true },
       {
@@ -737,7 +736,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
       page.getByRole("heading", { name: "What would you like to design?" }),
     ).toBeVisible();
     await page
-      .getByRole("region", { name: "Encounter screen", exact: true })
+      .getByRole("region", { name: "Design", exact: true })
       .getByRole("button", { name: "Blank", exact: true })
       .click();
     await expect(
@@ -895,13 +894,26 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await closeSectionSettings(page);
 
     await page
-      .getByRole("button", { name: "Three columns", exact: true })
+      .getByRole("button", { name: "One column", exact: true })
       .click();
-    await expect(column("Middle")).toBeVisible();
+    await expect(
+      column("Main").getByRole("article", {
+        name: "Active requests",
+        exact: true,
+      }),
+    ).toBeVisible();
     await page
       .getByRole("button", { name: "Two columns", exact: true })
       .click();
     await expect(column("Middle")).toHaveCount(0);
+    await expect(
+      column("Left").getByRole("article", {
+        name: "Active requests",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await sectionAction(page, "Active requests", "Move to");
+    await page.getByRole("menuitem", { name: "Right", exact: true }).click();
     await expect(
       column("Right").getByRole("article", {
         name: "Active requests",
@@ -2075,7 +2087,6 @@ test("studio shows what hides automatically without loading clinical records", a
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         key: "rounds",
@@ -2304,7 +2315,6 @@ test("studio validates JSON section settings and preserves unavailable tabs on a
   await json.fill(
     JSON.stringify({
       schema_version: 2,
-      surface: "encounter",
       pages: [
         {
           kind: "custom",
@@ -2418,7 +2428,15 @@ test("studio customises supported built-in tabs and starts history screens from 
     .getByRole("textbox", { name: "Name", exact: true })
     .fill(`History ${faker.string.alphanumeric(8)}`);
   await page
-    .getByRole("region", { name: "Patient history screen", exact: true })
+    .getByRole("region", { name: "Design", exact: true })
+    .getByRole("button", { name: "Blank", exact: true })
+    .click();
+  await page
+    .getByRole("group", { name: "Screen being designed", exact: true })
+    .getByRole("button", { name: /^Clinical history\b/ })
+    .click();
+  await page
+    .getByRole("region", { name: "Design", exact: true })
     .getByRole("button", { name: "My forms", exact: true })
     .click();
   await expect(
@@ -2608,7 +2626,6 @@ test("studio picks vital sign codes from observation charts and saves them as se
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
@@ -2693,7 +2710,6 @@ test("studio picks a chart set and narrows its charts without emptying it", asyn
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
@@ -2817,7 +2833,6 @@ test("studio explains the tab limit beside Add tab and clears it after removal",
   }));
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages,
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
@@ -2903,7 +2918,6 @@ for (const limit of ["column", "workspace"] as const) {
     ];
     record.data.template = {
       schema_version: 2,
-      surface: "encounter",
       pages,
     };
     const api = await mockWorkspaceApi(page, { records: [record] });
@@ -2984,7 +2998,6 @@ test("studio saves tab subsets as checkboxes", async ({ page }) => {
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
