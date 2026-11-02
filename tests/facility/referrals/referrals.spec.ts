@@ -602,20 +602,11 @@ test.describe("Referrals", () => {
         name: "Quick Actions",
         exact: true,
       });
-      await expect(
-        quickActions.getByRole("button", {
-          name: "More Actions",
-          exact: true,
-        }),
-      ).toHaveAttribute("aria-expanded", "false");
+      // Quick actions list every action, the referral entry included.
       const newReferral = quickActions.getByRole("button", {
         name: "New referral",
         exact: true,
       });
-      await expect(newReferral).not.toBeVisible();
-      await quickActions
-        .getByRole("button", { name: "More Actions", exact: true })
-        .click();
       await expect(newReferral).toBeVisible();
       await captureResponsiveView(
         "referral-overview-empty",

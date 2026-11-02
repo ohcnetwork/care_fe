@@ -662,7 +662,6 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
   };
   const template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       { kind: "system", key: "immunizations", hidden: true },
       {
@@ -736,8 +735,10 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await expect(
       page.getByRole("heading", { name: "What would you like to design?" }),
     ).toBeVisible();
+    // New workspaces start on the encounter screen; clinical history keeps its
+    // standard tabs until it is designed separately.
     await page
-      .getByRole("region", { name: "Encounter screen", exact: true })
+      .getByRole("region", { name: "Design", exact: true })
       .getByRole("button", { name: "Blank", exact: true })
       .click();
     await expect(
@@ -895,13 +896,19 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await closeSectionSettings(page);
 
     await page
-      .getByRole("button", { name: "Three columns", exact: true })
+      .getByRole("button", { name: "Main + side", exact: true })
       .click();
-    await expect(column("Middle")).toBeVisible();
+    await expect(column("Left")).toHaveCount(0);
+    await expect(
+      column("Side").getByRole("article", {
+        name: "Active requests",
+        exact: true,
+      }),
+    ).toBeVisible();
     await page
       .getByRole("button", { name: "Two columns", exact: true })
       .click();
-    await expect(column("Middle")).toHaveCount(0);
+    await expect(column("Side")).toHaveCount(0);
     await expect(
       column("Right").getByRole("article", {
         name: "Active requests",
@@ -2304,7 +2311,6 @@ test("studio validates JSON section settings and preserves unavailable tabs on a
   await json.fill(
     JSON.stringify({
       schema_version: 2,
-      surface: "encounter",
       pages: [
         {
           kind: "custom",
@@ -2417,10 +2423,22 @@ test("studio customises supported built-in tabs and starts history screens from 
   await page
     .getByRole("textbox", { name: "Name", exact: true })
     .fill(`History ${faker.string.alphanumeric(8)}`);
-  await page
-    .getByRole("region", { name: "Patient history screen", exact: true })
-    .getByRole("button", { name: "My forms", exact: true })
+  const design = page.getByRole("region", { name: "Design", exact: true });
+  await design
+    .getByRole("button", { name: "Standard encounter", exact: true })
     .click();
+  // Clinical history keeps its standard tabs until its own screen is designed.
+  await design
+    .getByRole("group", { name: "Screen being designed", exact: true })
+    .getByRole("button", { name: /^Clinical history\b/ })
+    .click();
+  await expect(
+    design.getByRole("heading", {
+      name: "Clinical history uses the standard tabs",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await design.getByRole("button", { name: "My forms", exact: true }).click();
   await expect(
     page.getByRole("article", { name: "My forms", exact: true }),
   ).toBeVisible();

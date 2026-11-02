@@ -233,31 +233,18 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    // The encounter overview's Diagnoses panel lists each diagnosis as a card
-    // (the column-header table only renders in wide panels). The innermost
-    // visible div holding both the name and its details is that diagnosis'
-    // card; the hidden table layout comes later in the DOM.
-    const diagnosisCard = page
+    // The encounter overview's Diagnoses panel lists each diagnosis with its
+    // onset and a severity badge (verification shows only when unconfirmed).
+    const diagnosisItem = page
       .getByRole("region", { name: "Diagnoses", exact: true })
-      .locator("div")
-      .filter({ hasText: diagnosisName })
-      .filter({ hasText: "Severity" })
-      .filter({ visible: true })
-      .last();
-    await expect(diagnosisCard).toBeVisible();
+      .getByRole("listitem")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) })
+      .filter({ hasText: "Severe" })
+      .first();
+    await expect(diagnosisItem).toBeVisible();
     await expect(
-      diagnosisCard.getByText("Verification", { exact: true }),
+      diagnosisItem.getByText("Severe", { exact: true }),
     ).toBeVisible();
-    await expect(
-      diagnosisCard.getByText("Severity", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      diagnosisCard.getByText("Severe", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      diagnosisCard.getByText("Onset", { exact: true }),
-    ).toBeVisible();
-
-    await expect(diagnosisCard.getByText(diagnosisName).first()).toBeVisible();
+    await expect(diagnosisItem).toContainText("Onset");
   });
 });
