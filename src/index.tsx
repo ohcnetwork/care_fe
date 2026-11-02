@@ -1,5 +1,4 @@
 import "@/style/index.css";
-import "reactflow/dist/style.css";
 
 import * as Sentry from "@sentry/browser";
 

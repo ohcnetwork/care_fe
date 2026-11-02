@@ -1,8 +1,8 @@
 import careConfig from "@careConfig";
 import DOMPurify from "dompurify";
 import { Crop } from "lucide-react";
-import { ChangeEventHandler, useEffect, useState } from "react";
-import Cropper, { type Area } from "react-easy-crop";
+import { ChangeEventHandler, Suspense, lazy, useEffect, useState } from "react";
+import type { Area } from "react-easy-crop";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 
 import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
 
@@ -42,6 +43,8 @@ interface Props {
 
 const MAX_FILE_SIZE = careConfig.imageUploadMaxSizeInMB * 1024 * 1024; // 2MB
 const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
+
+const Cropper = lazy(() => import("react-easy-crop"));
 
 export default function AvatarEditModal({
   title,
@@ -253,26 +256,34 @@ export default function AvatarEditModal({
                     {!showCroppedPreview ? (
                       <>
                         <div className="relative w-full h-[400px]">
-                          <Cropper
-                            image={
-                              preview && preview.startsWith("blob:")
-                                ? DOMPurify.sanitize(preview)
-                                : preview
+                          <Suspense
+                            fallback={
+                              <div className="flex size-full items-center justify-center">
+                                <Spinner className="size-8" />
+                              </div>
                             }
-                            crop={crop}
-                            zoom={zoom}
-                            aspect={aspectRatio}
-                            onCropChange={setCrop}
-                            onCropComplete={(
-                              croppedArea: Area,
-                              croppedAreaPixels: Area,
-                            ) => {
-                              setCroppedAreaPixels(croppedAreaPixels);
-                            }}
-                            onZoomChange={setZoom}
-                            minZoom={0.1}
-                            maxZoom={3}
-                          />
+                          >
+                            <Cropper
+                              image={
+                                preview && preview.startsWith("blob:")
+                                  ? DOMPurify.sanitize(preview)
+                                  : preview
+                              }
+                              crop={crop}
+                              zoom={zoom}
+                              aspect={aspectRatio}
+                              onCropChange={setCrop}
+                              onCropComplete={(
+                                croppedArea: Area,
+                                croppedAreaPixels: Area,
+                              ) => {
+                                setCroppedAreaPixels(croppedAreaPixels);
+                              }}
+                              onZoomChange={setZoom}
+                              minZoom={0.1}
+                              maxZoom={3}
+                            />
+                          </Suspense>
                         </div>
                         <p className="text-center font-medium text-secondary-700 mt-2">
                           {showCameraPreview

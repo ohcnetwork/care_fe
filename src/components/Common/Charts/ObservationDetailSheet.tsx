@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -24,7 +24,6 @@ import query from "@/Utils/request/query";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileExclamationPointIcon } from "lucide-react";
-import { ObservationDetailContent } from "./ObservationDetailContent";
 import {
   codeKey,
   groupEntriesByUnit,
@@ -33,6 +32,12 @@ import {
 import { ObservationHistoryMatrix } from "./ObservationHistoryMatrix";
 
 // Amended results replace final ones, so history must include both.
+const ObservationDetailContent = lazy(() =>
+  import("./ObservationDetailContent").then((m) => ({
+    default: m.ObservationDetailContent,
+  })),
+);
+
 const RESULT_STATUSES = [
   ObservationStatus.FINAL,
   ObservationStatus.AMENDED,
@@ -214,12 +219,14 @@ export function ObservationDetailSheet({
                           </span>
                         )}
                       </h3>
-                      <ObservationDetailContent
-                        entries={group.entries}
-                        hasNextPage={hasNextPage}
-                        isFetchingNextPage={isFetchingNextPage}
-                        fetchNextPage={fetchNextPage}
-                      />
+                      <Suspense fallback={<TableSkeleton count={3} />}>
+                        <ObservationDetailContent
+                          entries={group.entries}
+                          hasNextPage={hasNextPage}
+                          isFetchingNextPage={isFetchingNextPage}
+                          fetchNextPage={fetchNextPage}
+                        />
+                      </Suspense>
                     </section>
                   ));
                 })}
