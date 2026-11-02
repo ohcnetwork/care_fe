@@ -39,8 +39,18 @@ export function operatorLabel(operator: ActionRuleOperator, t: TFunction) {
   return t(OPERATOR_LABEL_KEYS[operator]);
 }
 
-export function questionLabel(question: Question, t: TFunction): string {
-  return question.text || t("untitled_question");
+export function questionLabel(
+  question: Question,
+  t: TFunction,
+  peers: Question[] = [],
+): string {
+  const title = question.text || t("untitled_question");
+  const duplicated = peers.some(
+    (peer) =>
+      peer.id !== question.id &&
+      (peer.text || t("untitled_question")) === title,
+  );
+  return duplicated ? `${title} (${question.link_id})` : title;
 }
 
 /** "Patient › Age" */

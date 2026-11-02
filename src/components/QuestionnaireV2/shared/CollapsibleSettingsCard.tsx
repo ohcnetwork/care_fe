@@ -39,24 +39,28 @@ export function CollapsibleSettingsCard({
       className="rounded-lg border border-gray-200 bg-white"
     >
       <div className="flex items-center gap-2">
-        <CollapsibleTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            aria-label={title}
-            className="h-auto min-w-0 flex-1 justify-between whitespace-normal rounded-none p-4 text-left font-normal"
-          >
-            <div className="min-w-0">
-              <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
-              {subtitle && (
-                <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
-                  {subtitle}
-                </p>
-              )}
-            </div>
-            <ChevronsUpDown className="size-4 shrink-0" />
-          </Button>
-        </CollapsibleTrigger>
+        <h4 className="min-w-0 flex-1">
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              aria-label={title}
+              className="h-auto w-full min-w-0 justify-between whitespace-normal rounded-none p-4 text-left font-normal"
+            >
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-gray-900">
+                  {title}
+                </span>
+                {subtitle && (
+                  <span className="mt-0.5 line-clamp-2 text-sm text-gray-500">
+                    {subtitle}
+                  </span>
+                )}
+              </span>
+              <ChevronsUpDown className="size-4 shrink-0" />
+            </Button>
+          </CollapsibleTrigger>
+        </h4>
         {badge && <div className="shrink-0 pr-4">{badge}</div>}
       </div>
       <CollapsibleContent className="border-t border-gray-100 p-4">

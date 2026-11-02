@@ -186,6 +186,9 @@ test.describe("Questionnaire v2 actions authoring", () => {
       await page.reload();
       await page.getByRole("button", { name: /^Actions\b/ }).click();
       const card = page.getByRole("button", { name: "Action 1", exact: true });
+      await expect(
+        page.getByRole("heading", { name: "Action 1", level: 4, exact: true }),
+      ).toBeVisible();
       await expect(card).toBeVisible();
       await expect(
         page.getByText(`“${feverTitle}” equals “Yes”`),

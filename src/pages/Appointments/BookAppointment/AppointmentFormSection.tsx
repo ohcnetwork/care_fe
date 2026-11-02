@@ -13,6 +13,7 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface AppointmentFormSectionProps {
+  disabled?: boolean;
   facilityId: string;
   selectedTags: TagConfig[];
   setSelectedTags: (tags: TagConfig[]) => void;
@@ -22,6 +23,7 @@ interface AppointmentFormSectionProps {
   setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
 export const AppointmentFormSection = ({
+  disabled,
   facilityId,
   selectedTags,
   setSelectedTags,
@@ -82,6 +84,7 @@ export const AppointmentFormSection = ({
           <span className="font-normal italic">({t("optional")})</span>
         </Label>
         <RichTextEditor
+          disabled={disabled}
           label={`${t("reason_for_visit_label")} (${t("optional")})`}
           placeholder={t("reason_for_visit")}
           value={reason}

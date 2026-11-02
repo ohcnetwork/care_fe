@@ -118,7 +118,7 @@ function DepartmentRow({
 export default function UserDepartmentsTab({ userData }: userChildProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, resultsPerPage, updatePage } = useFilters({
     limit: 15,
     disableCache: true,
   });
@@ -172,6 +172,10 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
             {t("retry")}
           </Button>
         </div>
+      ) : departments.length === 0 && !!data?.count ? (
+        <Button variant="outline" onClick={() => updatePage(1)}>
+          {t("pagination_first_page")}
+        </Button>
       ) : departments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-gray-300 rounded-lg">
           <CareIcon icon="l-building" className="h-12 w-12 text-gray-400" />

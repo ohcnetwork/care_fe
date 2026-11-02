@@ -55,6 +55,7 @@ export function ActionConditionRow({
 }: ActionConditionRowProps) {
   const { t } = useTranslation();
   const { questions, contextValues } = sources;
+  const questionPeers = questions.map((entry) => entry.question);
   const target = questionOfRef(rule.ref, questions);
   const fieldInput = contextFieldInput(
     contextValues.find((value) => value.ref === rule.ref),
@@ -132,7 +133,7 @@ export function ActionConditionRow({
                           !!entry.unusable && entry.unusable !== "link_id"
                         }
                       >
-                        {questionLabel(entry.question, t)}
+                        {questionLabel(entry.question, t, questionPeers)}
                         {entry.unusable && entry.unusable !== "link_id" && (
                           <span className="ml-1 text-xs text-gray-400">
                             · {unusableReasonLabel(entry.unusable, t)}

@@ -80,4 +80,27 @@ test("all department memberships and their roles remain reachable beyond the fir
   await expect(
     lastMembership.getByRole("button", { name: "Edit Role", exact: true }),
   ).toBeVisible();
+
+  await page.route("**/organizations/?*", async (route) => {
+    const url = new URL(route.request().url());
+    if (
+      url.searchParams.get("containing_user") === user.id &&
+      url.searchParams.get("offset") === "15"
+    ) {
+      await route.fulfill({ json: { count: 15, results: [] } });
+      return;
+    }
+    await route.continue();
+  });
+  await page.reload();
+  await expect(
+    page.getByText("No departments assigned", { exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Go to first page", exact: true })
+    .click();
+  await expect(page).toHaveURL(/page=1/);
+  await expect(
+    page.getByRole("link", { name: /^Membership / }).first(),
+  ).toBeVisible();
 });

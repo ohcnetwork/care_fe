@@ -348,9 +348,10 @@ function isEnabledByConditions(
         enabled ? responses[controllerId] : undefined,
       );
     });
-    const enabled = question.enable_behavior === "any"
-      ? results.some(Boolean)
-      : results.every(Boolean);
+    const enabled =
+      question.enable_behavior === "any"
+        ? results.some(Boolean)
+        : results.every(Boolean);
     // A cycle's result depends on the active path and cannot be reused.
     if (evaluation.cycles === cyclesBefore) {
       evaluation.completed.set(question.id, enabled);

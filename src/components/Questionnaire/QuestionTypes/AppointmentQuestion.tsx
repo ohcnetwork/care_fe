@@ -219,6 +219,7 @@ export function AppointmentQuestion({
     <div className="space-y-4">
       <fieldset disabled={disabled} className="min-w-0 space-y-4">
         <AppointmentFormSection
+          disabled={disabled}
           facilityId={facilityId}
           selectedTags={selectedTags}
           setSelectedTags={(tags) =>

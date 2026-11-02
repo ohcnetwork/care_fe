@@ -48,6 +48,7 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import { hasMarkdownContent } from "@/Utils/markdown";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName, getReadableDuration, goBack } from "@/Utils/utils";
@@ -1109,7 +1110,7 @@ const AppointmentActions = ({
                       setIsRescheduleReasonOpen(false);
                       setIsRescheduleOpen(true);
                     }}
-                    disabled={!oldNote.trim()}
+                    disabled={!hasMarkdownContent(oldNote)}
                   >
                     {t("continue")}
                   </AlertDialogAction>
@@ -1252,7 +1253,7 @@ const AppointmentActions = ({
                   })
                 }
                 className={cn(buttonVariants({ variant: "destructive" }))}
-                disabled={!note.trim()}
+                disabled={!hasMarkdownContent(note)}
               >
                 {isUpdating ? (
                   <Spinner className="size-4 animate-spin mr-2" />
@@ -1291,7 +1292,7 @@ const AppointmentActions = ({
               <AlertDialogAction
                 onClick={() => addCancelAppointment("cancelled", note)}
                 className={cn(buttonVariants({ variant: "destructive" }))}
-                disabled={!note.trim()}
+                disabled={!hasMarkdownContent(note)}
               >
                 {isPending ? (
                   <Spinner className="size-4 animate-spin mr-2" />
