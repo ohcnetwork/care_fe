@@ -1,6 +1,7 @@
-import UserHome from "@/components/Users/UserHome";
-
 import { AppRoutes } from "@/Routers/AppRouter";
+import { lazyPage } from "@/Routers/lazyPage";
+
+const UserHome = lazyPage(() => import("@/components/Users/UserHome"));
 
 const UserRoutes: AppRoutes = {
   "/facility/:facilityId/users/:username": ({ facilityId, username }) => (

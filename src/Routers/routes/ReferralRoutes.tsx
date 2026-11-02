@@ -1,6 +1,14 @@
 import { AppRoutes } from "@/Routers/AppRouter";
-import { ReferralDetailsPage } from "@/pages/Referrals/ReferralDetailsPage";
-import { ReferralResponsePage } from "@/pages/Referrals/ReferralResponsePage";
+import { lazyPage } from "@/Routers/lazyPage";
+
+const ReferralDetailsPage = lazyPage(
+  () => import("@/pages/Referrals/ReferralDetailsPage"),
+  "ReferralDetailsPage",
+);
+const ReferralResponsePage = lazyPage(
+  () => import("@/pages/Referrals/ReferralResponsePage"),
+  "ReferralResponsePage",
+);
 
 const ReferralRoutes: AppRoutes = {
   "/referrals/:referralId/respond": ({ referralId }) => (

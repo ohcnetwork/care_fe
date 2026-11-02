@@ -1,12 +1,30 @@
 import { AppRoutes } from "@/Routers/AppRouter";
-import OrganizationFacilities from "@/pages/Organization/OrganizationFacilities";
-import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
-import OrganizationPatients from "@/pages/Organization/OrganizationPatients";
-import OrganizationReferralAvailability from "@/pages/Organization/OrganizationReferralAvailability";
-import OrganizationReferrals from "@/pages/Organization/OrganizationReferrals";
-import OrganizationUsers from "@/pages/Organization/OrganizationUsers";
-import OrganizationView from "@/pages/Organization/OrganizationView";
-import ResponsibilityLanding from "@/pages/Organization/ResponsibilityLanding";
+import { lazyPage } from "@/Routers/lazyPage";
+
+const OrganizationFacilities = lazyPage(
+  () => import("@/pages/Organization/OrganizationFacilities"),
+);
+const OrganizationIndex = lazyPage(
+  () => import("@/pages/Organization/OrganizationIndex"),
+);
+const OrganizationPatients = lazyPage(
+  () => import("@/pages/Organization/OrganizationPatients"),
+);
+const OrganizationReferralAvailability = lazyPage(
+  () => import("@/pages/Organization/OrganizationReferralAvailability"),
+);
+const OrganizationReferrals = lazyPage(
+  () => import("@/pages/Organization/OrganizationReferrals"),
+);
+const OrganizationUsers = lazyPage(
+  () => import("@/pages/Organization/OrganizationUsers"),
+);
+const OrganizationView = lazyPage(
+  () => import("@/pages/Organization/OrganizationView"),
+);
+const ResponsibilityLanding = lazyPage(
+  () => import("@/pages/Organization/ResponsibilityLanding"),
+);
 
 const OrganizationRoutes: AppRoutes = {
   "/organization": () => <OrganizationIndex />,

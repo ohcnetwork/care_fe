@@ -1,17 +1,33 @@
+import careConfig from "@careConfig";
 import { Redirect } from "raviger";
 
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import PatientIndex from "@/components/Patient/PatientIndex";
-import { PatientProfile } from "@/components/Patient/PatientProfile";
-
 import { AppRoutes } from "@/Routers/AppRouter";
-import { PatientRegistration } from "@/components/Patient/PatientRegistration";
-import { ConsentDetailPage } from "@/pages/Encounters/ConsentDetail";
-import EncountersOverview from "@/pages/Encounters/EncountersOverview";
-import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
-import ClinicalHistoryPage from "@/pages/Patient/History";
-import PatientHome from "@/pages/Patient/PatientHome";
-import careConfig from "@careConfig";
+import { lazyPage } from "@/Routers/lazyPage";
+
+const PatientIndex = lazyPage(
+  () => import("@/components/Patient/PatientIndex"),
+);
+const PatientProfile = lazyPage(
+  () => import("@/components/Patient/PatientProfile"),
+  "PatientProfile",
+);
+const PatientRegistration = lazyPage(
+  () => import("@/components/Patient/PatientRegistration"),
+  "PatientRegistration",
+);
+const EncountersOverview = lazyPage(
+  () => import("@/pages/Encounters/EncountersOverview"),
+);
+const ClinicalHistoryPage = lazyPage(() => import("@/pages/Patient/History"));
+const PatientHome = lazyPage(() => import("@/pages/Patient/PatientHome"));
+const ConsentDetailRoute = lazyPage(
+  () => import("@/Routers/pages/ConsentDetailRoute"),
+  "ConsentDetailRoute",
+);
+const PatientProfileTabRoute = lazyPage(
+  () => import("@/Routers/pages/PatientProfileTabRoute"),
+  "PatientProfileTabRoute",
+);
 
 const PatientRoutes: AppRoutes = {
   "/facility/:facilityId/patients": ({ facilityId }) => (
@@ -61,41 +77,34 @@ const PatientRoutes: AppRoutes = {
     "/facility/:facilityId/patient/:patientId/encounter/:encounterId/consents/:consentId",
     "/organization/organizationId/patient/:patientId/encounter/:encounterId/consents/:consentId",
   ].reduce((acc: AppRoutes, path) => {
-    acc[path] = ({ facilityId, patientId, encounterId, consentId }) => {
-      return (
-        <EncounterProvider
-          encounterId={encounterId}
-          patientId={patientId}
-          facilityId={facilityId}
-        >
-          <ConsentDetailPage consentId={consentId} />
-        </EncounterProvider>
-      );
-    };
+    acc[path] = ({ facilityId, patientId, encounterId, consentId }) => (
+      <ConsentDetailRoute
+        encounterId={encounterId}
+        patientId={patientId}
+        facilityId={facilityId}
+        consentId={consentId}
+      />
+    );
     return acc;
   }, {}),
 
   "/facility/:facilityId/patients/home": () => <PatientHome />,
   "/patient/:id": ({ id }) => <PatientProfile id={id} page="demography" />,
-  ...patientTabs.reduce((acc: AppRoutes, tab) => {
-    acc["/patient/:id/" + tab.route] = ({ id }) => (
-      <PatientProfile id={id} page={tab.route} />
-    );
-    return acc;
-  }, {}),
+  // Unknown tabs render the not-found page (see PatientProfileTabRoute).
+  "/patient/:id/:tab": ({ id, tab }) => (
+    <PatientProfileTabRoute id={id} tab={tab} />
+  ),
   "/facility/:facilityId/patient/create": () => <PatientRegistration />,
   "/facility/:facilityId/patient/:id": ({ facilityId, id }) => (
     <PatientProfile facilityId={facilityId} id={id} page="demography" />
   ),
-  ...patientTabs.reduce((acc: AppRoutes, tab) => {
-    acc["/facility/:facilityId/patient/:id/" + tab.route] = ({
-      facilityId,
-      id,
-    }) => <PatientProfile facilityId={facilityId} id={id} page={tab.route} />;
-    return acc;
-  }, {}),
+  // Before "/facility/:facilityId/patient/:id/:tab" — raviger matches routes
+  // in object order, and "update" would otherwise be captured as a :tab.
   "/facility/:facilityId/patient/:id/update": ({ id }) => (
     <PatientRegistration patientId={id} />
+  ),
+  "/facility/:facilityId/patient/:id/:tab": ({ facilityId, id, tab }) => (
+    <PatientProfileTabRoute facilityId={facilityId} id={id} tab={tab} />
   ),
   "/facility/:facilityId/patient/:patientId/history/:tab": ({
     facilityId,

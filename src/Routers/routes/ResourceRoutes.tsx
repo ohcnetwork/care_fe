@@ -1,9 +1,18 @@
-import PrintResourceLetter from "@/components/Resource/PrintResourceLetter";
-import ResourceDetails from "@/components/Resource/ResourceDetails";
-import ResourceForm from "@/components/Resource/ResourceForm";
-import ResourceList from "@/components/Resource/ResourceList";
-
 import { AppRoutes } from "@/Routers/AppRouter";
+import { lazyPage } from "@/Routers/lazyPage";
+
+const PrintResourceLetter = lazyPage(
+  () => import("@/components/Resource/PrintResourceLetter"),
+);
+const ResourceDetails = lazyPage(
+  () => import("@/components/Resource/ResourceDetails"),
+);
+const ResourceForm = lazyPage(
+  () => import("@/components/Resource/ResourceForm"),
+);
+const ResourceList = lazyPage(
+  () => import("@/components/Resource/ResourceList"),
+);
 
 const ResourceRoutes: AppRoutes = {
   "/facility/:facilityId/resource": ({ facilityId }) => (
