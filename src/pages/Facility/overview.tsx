@@ -167,7 +167,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             {t("quick_links")}
           </h2>
           <div
-            className="grid gap-3 sm:gap-4 mt-1"
+            className="grid auto-rows-fr gap-3 sm:gap-4 mt-1"
             style={{
               gridTemplateColumns:
                 "repeat(auto-fit, minmax(min(100%, max(14rem, 20%)), 1fr))",
@@ -183,11 +183,11 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 >
                   <Card className="flex h-full flex-col gap-1.5 overflow-hidden rounded-lg border-0 bg-card p-1 shadow-sm">
                     <CardContent className="flex flex-1 flex-col gap-1.5 p-0">
-                      <div className="min-h-25 rounded-t rounded-b-lg bg-muted-background px-3 py-2.5 sm:min-h-28 sm:px-4 sm:py-3">
+                      <div className="flex-1 rounded-t rounded-b-lg bg-muted-background p-3 pt-4 sm:p-4 sm:pt-5">
                         <div className="w-fit">
-                          <shortcut.icon className="size-7 sm:size-8" />
+                          <shortcut.icon className="size-7 sm:size-10" />
                         </div>
-                        <CardTitle className="text-sm mt-2 font-semibold text-foreground sm:text-base">
+                        <CardTitle className="text-sm mt-3 font-semibold text-foreground sm:text-base">
                           {shortcut.title}
                         </CardTitle>
                         <CardDescription className="truncate text-sm font-normal text-soft-foreground">
