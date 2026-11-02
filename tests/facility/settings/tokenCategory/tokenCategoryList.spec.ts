@@ -80,7 +80,9 @@ test.describe("Token Category List - Permission Tests", () => {
 
       // Verify we're logged in as volunteer
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
     });
 

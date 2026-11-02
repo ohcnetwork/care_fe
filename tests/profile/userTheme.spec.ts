@@ -242,7 +242,9 @@ test.describe("Own account appearance preferences", () => {
       ).toBeVisible();
       await page.goto("/");
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
       await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
       await expect(page.locator("html")).toHaveCSS("font-size", "18px");

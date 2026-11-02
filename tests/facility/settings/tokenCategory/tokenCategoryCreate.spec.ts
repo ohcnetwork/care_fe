@@ -168,7 +168,9 @@ test.describe("Token Category Create - Permission Tests", () => {
 
       // Verify we're logged in as nurse
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
     });
 
