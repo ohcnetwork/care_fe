@@ -178,7 +178,7 @@ export function AppointmentQuestion({
     if (disabled) return;
     const updatedValue = { ...value, ...updates };
     if (
-      !hasMarkdownContent(updatedValue.note) &&
+      !hasMarkdownContent(updatedValue.note ?? "") &&
       !updatedValue.slot_id &&
       !updatedValue.tags?.length
     ) {

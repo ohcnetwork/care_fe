@@ -1383,6 +1383,78 @@ test("formatting-only optional appointment notes do not require a slot", async (
   ]);
 });
 
+test("resumed appointments without notes can clear their slot when changing resource", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    {
+      id: "appointment",
+      link_id: "appointment",
+      text: "Optional appointment",
+      type: "structured",
+      structured_type: "appointment",
+      required: false,
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) =>
+      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  await page.route(
+    `**/api/v1/form_submission/${fixture.draft.id}/**`,
+    (route) =>
+      route.fulfill({
+        json: {
+          ...fixture.draft,
+          response_dump: {
+            questionnaireResponses: {
+              questionnaire: fixture.questionnaire,
+              responses: [
+                {
+                  question_id: "appointment",
+                  link_id: "appointment",
+                  structured_type: "appointment",
+                  values: [
+                    {
+                      type: "appointment",
+                      value: [{ slot_id: "existing-slot", tags: [] }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}?continue_draft=${fixture.draft.id}`,
+  );
+  const appointment = page.locator('[data-question-id="appointment"]');
+  await expect(
+    appointment.getByRole("combobox", { name: "Select Practitioner" }),
+  ).toBeVisible();
+  await appointment
+    .getByRole("radio", { name: "Location", exact: true })
+    .click();
+  await expect(
+    appointment.getByRole("combobox", { name: "Select Location" }),
+  ).toBeVisible();
+  await expect(
+    appointment.getByRole("button", {
+      name: "Select the resource",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  expect(errors).toEqual([]);
+});
+
 test("organization history filters use each primary encounter's facility scope", async ({
   page,
 }) => {

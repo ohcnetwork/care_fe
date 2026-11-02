@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { questionLabel } from "@/components/QuestionnaireV2/builder/actions/labels";
+
 import { Question } from "@/types/questionnaire/question";
 
-import { questionLabel } from "../builder/actions/labels";
 import { TreeItem, buildQuestionTree, flattenQuestions } from "./questionTree";
 import { QUESTION_TYPE_ICONS } from "./questionTypeIcons";
 

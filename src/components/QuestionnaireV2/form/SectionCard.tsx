@@ -70,9 +70,7 @@ export function SectionCard({
             aria-hidden
             className="h-4 w-1 shrink-0 rounded-full bg-primary-600"
           />
-          <h3 className="text-sm font-semibold text-gray-900">
-            {title}
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
           <Badge variant="outline">{t("group")}</Badge>
           <span className="ml-auto text-xs text-gray-400">
             {t("n_questions", { count: sectionQuestionCount })}
