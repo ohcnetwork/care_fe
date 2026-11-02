@@ -135,7 +135,7 @@
     { "key": "r", "action": "add-service-request", "description": "Add Service Request" },
     { "key": "k", "action": "add-medication-request", "description": "Add Medication" },
     { "key": "f", "action": "add-questionnaire", "description": "New Questionnaire/Form" },
-    { "key": "p", "action": "add-procedure", "description": "Add Procedure" },
+    { "key": "c", "action": "add-procedure", "description": "Add Procedure" },
     { "key": "shift+r", "action": "new-referral", "description": "New Referral" },
     { "key": "l", "action": "assign-location", "description": "Assign Location" },
     { "key": "shift+u", "action": "update-encounter", "description": "Update Encounter" },
