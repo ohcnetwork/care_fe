@@ -134,7 +134,9 @@ function CanvasBody({
               {questionnaire.title}
             </h2>
             {questionnaire.description && (
-              <p className="text-sm text-gray-500">{questionnaire.description}</p>
+              <p className="text-sm text-gray-500">
+                {questionnaire.description}
+              </p>
             )}
             {questions.length > 0 && (
               <p className="text-xs text-gray-400">{countLine}</p>
