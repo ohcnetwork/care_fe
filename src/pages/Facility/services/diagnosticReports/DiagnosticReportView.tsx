@@ -35,10 +35,12 @@ import { formatName } from "@/Utils/utils";
 
 export default function DiagnosticReportView({
   facilityId,
+  organizationId,
   patientId,
   diagnosticReportId,
 }: {
-  facilityId: string;
+  facilityId?: string;
+  organizationId?: string;
   patientId: string;
   diagnosticReportId: string;
 }) {
@@ -92,7 +94,11 @@ export default function DiagnosticReportView({
         </BackButton>
         <Button variant="outline" asChild>
           <Link
-            href={`/facility/${facilityId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`}
+            href={
+              organizationId
+                ? `/organization/${organizationId}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`
+                : `/facility/${facilityId || report.encounter.facility.id}/patient/${report.encounter.patient.id}/diagnostic_reports/${diagnosticReportId}/print`
+            }
             className="flex items-center gap-2"
           >
             <Printer className="size-4 mr-2" />

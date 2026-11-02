@@ -71,10 +71,16 @@ const FacilityRoutes: AppRoutes = {
     "/facility/:facilityId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
     "/organization/:organizationId/patient/:patientId/diagnostic_reports/:diagnosticReportId",
   ].reduce((acc: AppRoutes, path) => {
-    acc[path] = ({ facilityId, patientId, diagnosticReportId }) => (
+    acc[path] = ({
+      facilityId,
+      organizationId,
+      patientId,
+      diagnosticReportId,
+    }) => (
       <DiagnosticReportView
         patientId={patientId}
         facilityId={facilityId}
+        organizationId={organizationId}
         diagnosticReportId={diagnosticReportId}
       />
     );
