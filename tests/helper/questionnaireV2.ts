@@ -214,13 +214,16 @@ export async function addTopLevelQuestion(
   title: string,
 ): Promise<void> {
   const addFirst = page.getByRole("button", { name: "Add First Question" });
-  if (await addFirst.isVisible().catch(() => false)) {
+  const addNew = page
+    .getByRole("region", { name: "Form canvas" })
+    .getByRole("button", { name: "Add new question" });
+  // The studio is lazy-loaded, so wait for the canvas to settle on either
+  // state before choosing which control to use.
+  await expect(addFirst.or(addNew).first()).toBeVisible();
+  if (await addFirst.isVisible()) {
     await addFirst.click();
   } else {
-    await page
-      .getByRole("region", { name: "Form canvas" })
-      .getByRole("button", { name: "Add new question" })
-      .click();
+    await addNew.click();
   }
   await page
     .getByRole("textbox", { name: "Question Title" })
