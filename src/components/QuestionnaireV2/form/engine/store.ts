@@ -297,18 +297,34 @@ export function isQuestionEnabledInState(
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
 ): boolean {
-  return isEnabledByConditions(question, responses, linkIndex, new Set());
+  return isEnabledByConditions(question, responses, linkIndex, {
+    visiting: new Set(),
+    completed: new Map(),
+    cycles: 0,
+  });
+}
+
+interface VisibilityEvaluation {
+  visiting: Set<string>;
+  completed: Map<string, boolean>;
+  cycles: number;
 }
 
 function isEnabledByConditions(
   question: Question,
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
-  visiting: Set<string>,
+  evaluation: VisibilityEvaluation,
 ): boolean {
+  const cached = evaluation.completed.get(question.id);
+  if (cached !== undefined) return cached;
   if (!question.enable_when?.length) return true;
-  if (visiting.has(question.id)) return false;
-  visiting.add(question.id);
+  if (evaluation.visiting.has(question.id)) {
+    evaluation.cycles++;
+    return false;
+  }
+  const cyclesBefore = evaluation.cycles;
+  evaluation.visiting.add(question.id);
   try {
     const nodes = questionNodes.get(linkIndex);
     const results = question.enable_when.map((condition) => {
@@ -324,7 +340,7 @@ function isEnabledByConditions(
           controller,
           responses,
           linkIndex,
-          visiting,
+          evaluation,
         );
       }
       return evaluateEnableWhen(
@@ -332,11 +348,16 @@ function isEnabledByConditions(
         enabled ? responses[controllerId] : undefined,
       );
     });
-    return question.enable_behavior === "any"
+    const enabled = question.enable_behavior === "any"
       ? results.some(Boolean)
       : results.every(Boolean);
+    // A cycle's result depends on the active path and cannot be reused.
+    if (evaluation.cycles === cyclesBefore) {
+      evaluation.completed.set(question.id, enabled);
+    }
+    return enabled;
   } finally {
-    visiting.delete(question.id);
+    evaluation.visiting.delete(question.id);
   }
 }
 
