@@ -10,7 +10,6 @@ import { ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import * as RPNInput from "react-phone-number-input";
-import flags from "react-phone-number-input/flags";
 
 import { cn } from "@/lib/utils";
 
@@ -299,8 +298,35 @@ const CountrySelectOption = ({
   );
 };
 
+type Flags = typeof import("react-phone-number-input/flags").default;
+
+// The flag set (~230 KB) is fetched on first use instead of shipping with every
+// form that has a phone field; the grey placeholder shows until it arrives.
+let loadedFlags: Flags | undefined;
+let flagsPromise: Promise<Flags> | undefined;
+
+function loadFlags() {
+  flagsPromise ??= import("react-phone-number-input/flags").then(
+    (module) => (loadedFlags = module.default),
+    (error) => {
+      flagsPromise = undefined;
+      throw error;
+    },
+  );
+  return flagsPromise;
+}
+
+function useFlags() {
+  const [flags, setFlags] = React.useState(loadedFlags);
+  React.useEffect(() => {
+    if (!flags) loadFlags().then(setFlags, () => {});
+  }, [flags]);
+  return flags;
+}
+
 const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
-  const Flag = flags[country];
+  const flags = useFlags();
+  const Flag = flags?.[country];
   const flagProps = { title: countryName, className: "size-full" };
 
   return (

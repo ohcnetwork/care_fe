@@ -1,54 +1,23 @@
-import bowser from "bowser";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { lazy, Suspense } from "react";
 
 import supportedBrowsers from "@/supportedBrowsers";
 
+// bowser and the dialog are only needed on unsupported browsers.
+const UnsupportedBrowserNotice = lazy(
+  () => import("@/components/ErrorPages/UnsupportedBrowserNotice"),
+);
+
+const isSupported = supportedBrowsers.test(window.navigator.userAgent);
+
 const BrowserWarning = () => {
-  const { t } = useTranslation();
-
-  const notSupported = React.useMemo(() => {
-    const userAgent = window.navigator.userAgent;
-    if (!supportedBrowsers.test(userAgent)) {
-      const browser = bowser.getParser(userAgent).getBrowser();
-      return {
-        name: browser.name || "Unknown",
-        version: browser.version || "Unknown",
-      };
-    }
-    return null;
-  }, []);
-
-  const [showUnsupportedBrowserDialog, setShowUnsupportedBrowserDialog] =
-    useState(true);
-
-  if (!notSupported) {
+  if (isSupported) {
     return null;
   }
 
   return (
-    <>
-      <ConfirmActionDialog
-        open={showUnsupportedBrowserDialog}
-        onOpenChange={setShowUnsupportedBrowserDialog}
-        title={t("unsupported_browser")}
-        description={t("unsupported_browser_description", notSupported)}
-        onConfirm={() => setShowUnsupportedBrowserDialog(false)}
-        confirmText={t("close")}
-        hideCancel
-      />
-
-      <div className="sticky top-0 z-50 flex h-32 w-full items-center justify-center bg-gray-700/85 text-center text-gray-300">
-        <div>
-          <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
-          <p className="text-sm">
-            {t("unsupported_browser_description", notSupported)}
-          </p>
-        </div>
-      </div>
-    </>
+    <Suspense fallback={null}>
+      <UnsupportedBrowserNotice />
+    </Suspense>
   );
 };
 
