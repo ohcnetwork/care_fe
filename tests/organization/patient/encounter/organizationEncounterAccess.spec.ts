@@ -17,13 +17,15 @@ test.describe("Patient Encounter Access via Organization", () => {
     // Click "View Encounter" link
     await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    // Verify we can see the encounter page: the header shows its class
+    // Verify we can see the encounter page: the header shows its class. Its
+    // priority badge can also read "Emergency", so skip badges.
     await expect(
       page
         .getByRole("region", { name: "Encounter", exact: true })
         .getByText(
           /^(Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health)$/i,
-        ),
+        )
+        .and(page.locator(':not([data-slot="badge"])')),
     ).toBeVisible();
   });
 });
