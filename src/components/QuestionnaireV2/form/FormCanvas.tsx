@@ -2,8 +2,12 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { useHasVisibleTopLevelQuestions } from "@/components/QuestionnaireV2/form/engine/store";
+import {
+  useHasCircularConditions,
+  useHasVisibleTopLevelQuestions,
+} from "@/components/QuestionnaireV2/form/engine/store";
 import { countLeafQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
@@ -101,6 +105,7 @@ function CanvasBody({
   const { questionnaire, revealHidden } = useFormRenderer();
   const { AppendZone } = useFormChrome();
   const hasVisibleQuestions = useHasVisibleTopLevelQuestions();
+  const hasCircularConditions = useHasCircularConditions();
   const questions = questionnaire.questions;
 
   const sectionCount = questions.filter(
@@ -113,23 +118,36 @@ function CanvasBody({
     .filter(Boolean)
     .join(" · ");
 
-  const header = !hideHeader && (
-    <div className="flex items-baseline justify-between gap-3 pb-4">
-      <div className="min-w-0 space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight text-gray-900">
-          {questionnaire.title}
-        </h2>
-        {questionnaire.description && (
-          <p className="text-sm text-gray-500">{questionnaire.description}</p>
-        )}
-        {questions.length > 0 && (
-          <p className="text-xs text-gray-400">{countLine}</p>
-        )}
-      </div>
-      {headerHint && (
-        <div className="shrink-0 text-xs text-gray-400">{headerHint}</div>
+  const header = (
+    <>
+      {hasCircularConditions && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>
+            {t("questionnaire_circular_conditions")}
+          </AlertDescription>
+        </Alert>
       )}
-    </div>
+      {!hideHeader && (
+        <div className="flex items-baseline justify-between gap-3 pb-4">
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+              {questionnaire.title}
+            </h2>
+            {questionnaire.description && (
+              <p className="text-sm text-gray-500">
+                {questionnaire.description}
+              </p>
+            )}
+            {questions.length > 0 && (
+              <p className="text-xs text-gray-400">{countLine}</p>
+            )}
+          </div>
+          {headerHint && (
+            <div className="shrink-0 text-xs text-gray-400">{headerHint}</div>
+          )}
+        </div>
+      )}
+    </>
   );
 
   if (questions.length === 0) {
@@ -168,7 +186,6 @@ function CanvasBody({
             index={index}
             siblingCount={questions.length}
             depth={0}
-            number={`${index + 1}.`}
           />
         ))}
         {AppendZone && <AppendZone parentId={null} />}

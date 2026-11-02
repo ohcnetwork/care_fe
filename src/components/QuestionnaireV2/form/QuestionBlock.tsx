@@ -24,15 +24,13 @@ export interface QuestionBlockProps {
   index: number;
   siblingCount: number;
   depth: number;
-  /** Dotted ordinal matching the tree nav (e.g. "8." or "7.1."). */
-  number?: string;
 }
 
 /** One node of the questionnaire tree on the one-scroll canvas. */
 export const QuestionBlock = memo(function QuestionBlock(
   props: QuestionBlockProps,
 ) {
-  const { question, depth, number } = props;
+  const { question, depth } = props;
   const { mode, revealHidden, frozen } = useFormRenderer();
   const { QuestionShell } = useFormChrome();
   const enabled = useQuestionEnabled(question);
@@ -61,12 +59,7 @@ export const QuestionBlock = memo(function QuestionBlock(
         ? RepeatingGroup
         : SectionCard;
     return wrap(
-      <Group
-        question={question}
-        depth={depth}
-        disabled={effectiveDisabled}
-        number={number}
-      />,
+      <Group question={question} depth={depth} disabled={effectiveDisabled} />,
     );
   }
 
@@ -74,7 +67,6 @@ export const QuestionBlock = memo(function QuestionBlock(
     <LeafBlock
       question={question}
       depth={depth}
-      number={number}
       effectiveDisabled={effectiveDisabled}
       locked={locked}
     />,
@@ -84,13 +76,11 @@ export const QuestionBlock = memo(function QuestionBlock(
 function LeafBlock({
   question,
   depth,
-  number,
   effectiveDisabled,
   locked,
 }: {
   question: Question;
   depth: number;
-  number?: string;
   effectiveDisabled: boolean;
   locked: boolean;
 }) {
@@ -120,11 +110,6 @@ function LeafBlock({
         className={containerClassName}
       >
         <div className="flex items-start gap-2">
-          {number && (
-            <span className="shrink-0 text-sm font-medium text-gray-500 tabular-nums">
-              {number}
-            </span>
-          )}
           <p className="text-sm text-gray-800">{question.text}</p>
         </div>
         {question.description && (
@@ -146,11 +131,6 @@ function LeafBlock({
           aria-hidden
           className="mt-1 h-3.5 w-0.5 shrink-0 rounded-full bg-primary-600"
         />
-        {number && (
-          <span className="shrink-0 text-sm font-medium text-gray-500 tabular-nums">
-            {number}
-          </span>
-        )}
         <label
           id={labelId}
           htmlFor={inputId}

@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 
+import { RichTextEditor } from "@/components/Common/RichTextEditor";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
   ScheduleResourceFormState,
@@ -13,6 +13,7 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface AppointmentFormSectionProps {
+  disabled?: boolean;
   facilityId: string;
   selectedTags: TagConfig[];
   setSelectedTags: (tags: TagConfig[]) => void;
@@ -22,6 +23,7 @@ interface AppointmentFormSectionProps {
   setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
 export const AppointmentFormSection = ({
+  disabled,
   facilityId,
   selectedTags,
   setSelectedTags,
@@ -76,16 +78,17 @@ export const AppointmentFormSection = ({
           facilityId={facilityId}
         />
       </div>
-      <div className="w-full">
-        <Label className="mb-2 text-sm font-medium text-gray-950">
-          {t("reason_for_visit_label")}
+      <div className="w-full space-y-2">
+        <Label>
+          {t("reason_for_visit_label")}{" "}
           <span className="font-normal italic">({t("optional")})</span>
         </Label>
-        <Textarea
+        <RichTextEditor
+          disabled={disabled}
+          label={`${t("reason_for_visit_label")} (${t("optional")})`}
           placeholder={t("reason_for_visit")}
           value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          className="min-h-10 px-3 py-2"
+          onChange={setReason}
         />
       </div>
     </>

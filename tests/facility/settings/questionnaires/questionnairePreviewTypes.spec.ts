@@ -352,7 +352,7 @@ test.describe("Questionnaire v2 preview input types (kitchen sink fixture)", () 
       ).toBeVisible();
     });
 
-    await test.step("Nested children show dotted ordinals from the tree", async () => {
+    await test.step("Nested children are listed beneath their group", async () => {
       // The nav lists the group's children indented beneath it.
       const nav = page.getByRole("navigation");
       await expect(

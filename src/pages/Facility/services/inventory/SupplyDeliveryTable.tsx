@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate, parseISO } from "date-fns";
-import { Edit, EllipsisVertical, History } from "lucide-react";
+import { Edit, EllipsisVertical } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,11 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   ExtensionFieldWithName,
   getExtensionFieldsWithName,
@@ -93,7 +88,6 @@ interface SupplyDeliveryTableProps {
   onDeliverySelect?: (deliveryId: string, checked: boolean) => void;
   onSelectAll?: (checked: boolean) => void;
   internal?: boolean;
-  onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
   onEditDelivery?: (delivery: SupplyDeliveryRead) => void;
   editingDeliveryIds?: string[];
   deliveryOrderStatus?: DeliveryOrderStatus;
@@ -147,7 +141,6 @@ export function SupplyDeliveryTable({
   onDeliverySelect,
   onSelectAll,
   internal = false,
-  onDeliveryClick,
   onEditDelivery,
   editingDeliveryIds = [],
   deliveryOrderStatus,
@@ -250,7 +243,7 @@ export function SupplyDeliveryTable({
     inProgressDeliveries.length > 0;
 
   const didAutoSelectRef = useRef(false);
-  const isEditingFromMenuRef = useRef(false);
+  const pendingEditDeliveryRef = useRef<SupplyDeliveryRead | null>(null);
   useEffect(() => {
     if (!autoSelectOnMount) return;
     if (!showAllCheckbox) return;
@@ -415,23 +408,6 @@ export function SupplyDeliveryTable({
                     linkToProduct={linkToProduct}
                     facilityId={facilityId}
                   />
-                  {onDeliveryClick && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 shrink-0 text-gray-500"
-                          aria-label={t("view_history")}
-                          onClick={() => onDeliveryClick(delivery)}
-                        >
-                          <History className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("view_history")}</TooltipContent>
-                    </Tooltip>
-                  )}
                 </div>
                 {isEditing && (
                   <Badge
@@ -580,7 +556,14 @@ export function SupplyDeliveryTable({
                   )}
                 >
                   {delivery.status === SupplyDeliveryStatus.in_progress && (
-                    <DropdownMenu>
+                    <DropdownMenu
+                      onOpenChangeComplete={(open) => {
+                        const pendingDelivery = pendingEditDeliveryRef.current;
+                        if (open || pendingDelivery?.id !== delivery.id) return;
+                        pendingEditDeliveryRef.current = null;
+                        onEditDelivery?.(pendingDelivery);
+                      }}
+                    >
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
@@ -593,17 +576,19 @@ export function SupplyDeliveryTable({
                       <DropdownMenuContent
                         align="end"
                         onCloseAutoFocus={(event) => {
-                          if (isEditingFromMenuRef.current) {
+                          if (
+                            pendingEditDeliveryRef.current?.id === delivery.id
+                          ) {
                             event.preventDefault();
-                            isEditingFromMenuRef.current = false;
                           }
                         }}
                       >
                         {onEditDelivery && (
                           <DropdownMenuItem
                             onSelect={() => {
-                              isEditingFromMenuRef.current = true;
-                              onEditDelivery(delivery);
+                              // Wait for the menu's scroll lock to release before
+                              // focusing and scrolling the pending editor.
+                              pendingEditDeliveryRef.current = delivery;
                             }}
                           >
                             <Edit className="size-4" />

@@ -1030,7 +1030,35 @@ test.describe("External delivery draft items", () => {
       await savedRows
         .getByRole("button", { name: "Actions", exact: true })
         .click();
-      await page.getByRole("menuitem", { name: /^continue editing$/i }).click();
+      const [focusState] = await Promise.all([
+        editForm.evaluate(
+          (element) =>
+            new Promise<{ menuMounted: boolean; scrollLocked: boolean }>(
+              (resolve) => {
+                element.addEventListener("focusin", function onFocus(event) {
+                  if (
+                    !(event.target instanceof HTMLInputElement) ||
+                    !event.target.matches("[data-pending-item-quantity]")
+                  ) {
+                    return;
+                  }
+                  element.removeEventListener("focusin", onFocus);
+                  resolve({
+                    menuMounted: Boolean(
+                      document.querySelector(
+                        '[data-slot="dropdown-menu-content"]',
+                      ),
+                    ),
+                    scrollLocked:
+                      getComputedStyle(document.body).overflowY === "hidden",
+                  });
+                });
+              },
+            ),
+        ),
+        page.getByRole("menuitem", { name: /^continue editing$/i }).click(),
+      ]);
+      expect(focusState).toEqual({ menuMounted: false, scrollLocked: false });
       await expect(editForm.locator("tbody tr")).toHaveCount(1);
       await expect(editForm.getByRole("combobox")).toBeDisabled();
       await expect(editForm.getByRole("combobox")).toContainText(
