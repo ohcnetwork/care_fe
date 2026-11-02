@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
+import { openFacilityService } from "tests/facility/services/helpers";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -93,8 +94,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Main Pharmacy" }).click();
+    await openFacilityService(page, servicesUrl, "Main Pharmacy");
     await page.getByRole("link", { name: "Pharmacy" }).click();
     pharmacyLocationId =
       page
@@ -105,8 +105,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
           ),
         )?.[1] ?? "";
     pharmacybasePath = `/facility/${facilityId}/locations/${pharmacyLocationId}`;
-    await page.goto(servicesUrl);
-    await page.getByRole("link", { name: "Pathology Lab" }).click();
+    await openFacilityService(page, servicesUrl, "Pathology Lab");
     await page.getByRole("link", { name: "Bio-Chemistry" }).click();
     bioChemLabLocationId =
       page
@@ -129,6 +128,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   });
 
   test("switch location and create delivery order", async ({ page }) => {
+    // Order and delivery round trips (plus setup on a fresh worker) can
+    // outlast 60s on a busy backend.
+    test.slow();
     const orderRow = page
       .locator("table tbody tr")
       .filter({ hasText: orderName });
@@ -155,6 +157,9 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   });
 
   test("approve incoming delivery order", async ({ page }) => {
+    // Creates, approves, receives and completes a delivery: the longest
+    // journey here, and it overran 60s on a busy backend.
+    test.slow();
     const orderRow = page
       .locator("table tbody tr")
       .filter({ hasText: orderName });
