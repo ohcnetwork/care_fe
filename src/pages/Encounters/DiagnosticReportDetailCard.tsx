@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreVertical, Printer } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, usePathParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,8 @@ export function DiagnosticReportDetailCard({
   facilityId,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
+  const { organizationId } =
+    usePathParams("/organization/:organizationId/*") ?? {};
 
   const { data: report, isLoading: isReportLoading } = useQuery({
     queryKey: ["diagnosticReport", reportId],
@@ -113,6 +115,7 @@ export function DiagnosticReportDetailCard({
                         patientId,
                         `/diagnostic_reports/${report.id}/print`,
                         facilityId,
+                        organizationId,
                       ),
                     )
                   }
