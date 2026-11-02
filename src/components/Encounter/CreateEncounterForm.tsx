@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import { FieldDescription, FieldLegend, FieldSet } from "@/components/ui/field";
 import {
   Form,
   FormControl,
@@ -22,6 +23,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item";
 import {
   Select,
   SelectContent,
@@ -42,6 +50,8 @@ import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import { toCareTeamMembers } from "@/types/careTeam/careTeam";
+import careTeamApi from "@/types/careTeam/careTeamApi";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
@@ -52,14 +62,19 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { ScheduleEncounterDefaults } from "@/types/scheduling/schedule";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { formatName } from "@/Utils/utils";
 
 interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
   appointment?: string;
+  /** The appointment's schedule defaults: departments are prefilled and the
+   * care team is assigned once the encounter is created. */
+  scheduleDefaults?: ScheduleEncounterDefaults;
   trigger?: React.ReactNode;
   onSuccess?: (encounter: EncounterRead) => void;
   disableRedirectOnSuccess?: boolean;
@@ -76,6 +91,7 @@ export default function CreateEncounterForm({
   facilityId,
   patientName,
   appointment,
+  scheduleDefaults,
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
@@ -87,6 +103,8 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   useShortcutSubContext();
+  const defaultOrganizations = scheduleDefaults?.organizations ?? [];
+  const defaultCareTeam = scheduleDefaults?.care_team ?? [];
 
   const encounterFormSchema = z
     .object({
@@ -125,11 +143,19 @@ export default function CreateEncounterForm({
       status: defaultStatus,
       encounter_class: careConfig.defaultEncounterType,
       priority: "routine",
-      organizations: [],
+      organizations: defaultOrganizations.map(({ id }) => id),
       start_date: new Date().toISOString(),
       tags: [],
     },
   });
+
+  // Re-read the schedule's departments on every reset: the appointment may
+  // have been refetched with different defaults since the form mounted.
+  const resetForm = () =>
+    form.reset({
+      ...form.formState.defaultValues,
+      organizations: defaultOrganizations.map(({ id }) => id),
+    });
 
   const selectedStatus = form.watch("status");
 
@@ -140,11 +166,23 @@ export default function CreateEncounterForm({
     .filter(Boolean) as TagConfig[];
 
   const { mutate: createEncounter, isPending } = useMutation({
-    mutationFn: mutate(encounterApi.create),
+    mutationFn: async (request: EncounterCreate) => {
+      const encounter = await mutate(encounterApi.create)(request);
+      if (defaultCareTeam.length) {
+        // The encounter already exists, so a failure here must not block the
+        // redirect; tell the user the care team still needs to be added.
+        await mutate(careTeamApi.setCareTeam, {
+          pathParams: { encounterId: encounter.id },
+        })({ members: toCareTeamMembers(defaultCareTeam) }).catch(() =>
+          toast.error(t("encounter_schedule_care_team_failed")),
+        );
+      }
+      return encounter;
+    },
     onSuccess: (data: EncounterRead) => {
       toast.success(t("encounter_created"));
       setIsOpen(false);
-      form.reset();
+      resetForm();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.(data);
       if (!disableRedirectOnSuccess) {
@@ -168,7 +206,7 @@ export default function CreateEncounterForm({
       period: {
         start: data.start_date,
       },
-      tags: data.tags,
+      tags: data.tags.map((tag) => ({ tag })),
       appointment: appointment,
     };
 
@@ -180,21 +218,21 @@ export default function CreateEncounterForm({
       open={isOpen}
       onOpenChange={() => {
         setIsOpen(!isOpen);
-        form.reset();
+        resetForm();
       }}
     >
       <SheetTrigger asChild>
         {trigger || (
           <Button
             variant="secondary"
-            className="h-14 w-full justify-start text-lg"
+            className="justify-start w-full text-lg h-14"
           >
             <Stethoscope className="mr-4 size-6" />
             {t("create_encounter")}
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent size="md" className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
@@ -221,7 +259,7 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 md:flex-row ">
                         <DatePicker
                           date={date}
                           disabled={(date) =>
@@ -239,7 +277,7 @@ export default function CreateEncounterForm({
                         />
                         <Input
                           type="time"
-                          className="border-gray-400 text-sm sm:py-px shadow-sm"
+                          className="text-sm border-gray-400 shadow-sm sm:py-px"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -288,7 +326,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="whitespace-normal wrap-break-word text-center text-xs text-gray-500">
+                              <div className="text-xs text-center text-gray-500 whitespace-normal wrap-break-word">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
@@ -387,6 +425,11 @@ export default function CreateEncounterForm({
                     <FacilityOrganizationSelector
                       facilityId={facilityId}
                       value={field.value}
+                      // The selector treats these as already chosen, so pass
+                      // only the ones still selected to allow re-adding.
+                      currentOrganizations={defaultOrganizations.filter(
+                        ({ id }) => field.value.includes(id),
+                      )}
                       onChange={(value) => {
                         if (value === null) {
                           form.setValue("organizations", []);
@@ -400,25 +443,53 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
+              {defaultCareTeam.length > 0 && (
+                <FieldSet className="gap-2">
+                  <FieldLegend variant="label">{t("care_team")}</FieldLegend>
+                  <FieldDescription>
+                    {t("encounter_schedule_care_team_help")}
+                  </FieldDescription>
+                  <ItemGroup>
+                    {defaultCareTeam.map(({ member, role }) => (
+                      <Item
+                        key={member.id}
+                        role="listitem"
+                        size="sm"
+                        variant="outline"
+                      >
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="line-clamp-none break-words">
+                            {formatName(member)}
+                          </ItemTitle>
+                          <ItemDescription>
+                            {role.display || role.code}
+                          </ItemDescription>
+                        </ItemContent>
+                      </Item>
+                    ))}
+                  </ItemGroup>
+                </FieldSet>
+              )}
             </div>
-            <div className="flex justify-end mt-6 space-x-2">
+            <div className="flex justify-end mt-6 space-x-4">
               <Button
                 type="button"
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
-                  form.reset();
+                  resetForm();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 type="submit"
+                className="flex-1 md:flex-none"
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge actionId="submit-action" variant="primary" />
               </Button>
             </div>
           </form>

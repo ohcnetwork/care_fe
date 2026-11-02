@@ -1,10 +1,7 @@
 import { Search } from "lucide-react";
-import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-
-import { WorkspaceHeaderSlot } from "@/components/Common/WorkspaceHeaderSlot";
 
 import { Button } from "@/components/ui/button";
 import { InputGroup } from "@/components/ui/input-group";
@@ -18,8 +15,6 @@ import { AppSidebarToggle } from "@/components/ui/sidebar/sidebar-toggle";
 
 import { useRouteParams } from "@/hooks/useRouteParams";
 
-import { useWorkspaceHeader } from "@/context/WorkspaceHeaderContext";
-
 import { CurrentUserRead } from "@/types/user/user";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -28,19 +23,15 @@ interface WorkspaceHeaderProps {
   user?: CurrentUserRead;
   patient?: boolean;
   onSearch?: () => void;
-  children?: ReactNode;
 }
 
 export function WorkspaceHeader({
   user,
   patient,
   onSearch,
-  children,
 }: WorkspaceHeaderProps) {
   const { t } = useTranslation();
   const { innerWorkspace } = useAppSidebar();
-  const { hasContent } = useWorkspaceHeader();
-  const hasCustomContent = hasContent || children != null;
   const { facilityId } = useRouteParams("/facility/:facilityId");
   const { organizationId } = useRouteParams("/organization/:organizationId");
   const { responsibilityId } = useRouteParams(
@@ -60,36 +51,26 @@ export function WorkspaceHeader({
       )}
     >
       <AppSidebarToggle />
-      <WorkspaceHeaderSlot>
-        {children ?? (
-          <>
-            <Separator orientation="vertical" />
-            <div className="min-w-0 max-w-[min(20rem,65vw)]">
-              {patient ? (
-                <PatientSwitcher />
-              ) : responsibilityId ? (
-                <ResponsibilitySwitcher
-                  selectedResponsibilityId={responsibilityId}
-                />
-              ) : organization ? (
-                <OrganizationSwitcher
-                  organizations={user?.organizations ?? []}
-                  selectedOrganization={organization}
-                />
-              ) : facility ? (
-                <FacilitySwitcher
-                  facilities={user?.facilities ?? []}
-                  selectedFacility={facility}
-                />
-              ) : (
-                <span className="truncate text-sm font-medium">
-                  {t("care")}
-                </span>
-              )}
-            </div>
-          </>
+      <Separator orientation="vertical" />
+      <div className="min-w-0 max-w-[min(20rem,65vw)]">
+        {patient ? (
+          <PatientSwitcher />
+        ) : responsibilityId ? (
+          <ResponsibilitySwitcher selectedResponsibilityId={responsibilityId} />
+        ) : organization ? (
+          <OrganizationSwitcher
+            organizations={user?.organizations ?? []}
+            selectedOrganization={organization}
+          />
+        ) : facility ? (
+          <FacilitySwitcher
+            facilities={user?.facilities ?? []}
+            selectedFacility={facility}
+          />
+        ) : (
+          <span className="truncate text-sm font-medium">{t("care")}</span>
         )}
-      </WorkspaceHeaderSlot>
+      </div>
       {onSearch && (
         <div className="ml-auto flex shrink-0 items-center">
           <Button
@@ -98,16 +79,11 @@ export function WorkspaceHeader({
             onClick={onSearch}
             aria-label={t("search_page_actions")}
             aria-haspopup="dialog"
-            className={hasCustomContent ? "2xl:hidden" : "md:hidden"}
+            className="md:hidden"
           >
             <Search className="size-4" aria-hidden="true" />
           </Button>
-          <InputGroup
-            className={cn(
-              "hidden h-9 w-52 text-sm",
-              hasCustomContent ? "2xl:flex" : "md:flex",
-            )}
-          >
+          <InputGroup className="hidden h-9 w-52 text-sm md:flex">
             <Button
               variant="ghost"
               size="sm"

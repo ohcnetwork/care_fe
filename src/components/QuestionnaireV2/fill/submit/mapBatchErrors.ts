@@ -105,7 +105,9 @@ export function mapBatchErrors(
           .join(", ");
       }
     } else if (result.data?.errors?.length) {
-      message = locatedErrorMessage(result.data.errors[0], fallbackMessage);
+      message = result.data.errors
+        .map((error) => locatedErrorMessage(error, fallbackMessage))
+        .join(", ");
     }
 
     serverErrors.push({

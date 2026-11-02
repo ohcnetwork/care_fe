@@ -111,7 +111,7 @@ export const CardGridSkeleton = ({ count }: { count: number }) =>
   ));
 
 export const FormSkeleton = ({ rows }: { rows: number }) => (
-  <div className="flex flex-col gap-4">
+  <div className="flex flex-col gap-2">
     {Array.from({ length: rows }).map((_, index) => (
       <Skeleton key={index} className="h-10 w-full" />
     ))}

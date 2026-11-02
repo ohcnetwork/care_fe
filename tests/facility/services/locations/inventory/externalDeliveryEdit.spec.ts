@@ -486,6 +486,8 @@ test.describe("External delivery draft items", () => {
   test("selects and saves multiple purchase request items together", async ({
     page,
   }) => {
+    // Two delivery drafts are seeded through the API before the UI flow.
+    test.slow();
     const fixture = await createExternalDeliveryDraft(page);
     const secondFixture = await createExternalDeliveryDraft(page);
     const requestPayload = {
@@ -649,6 +651,9 @@ test.describe("External delivery draft items", () => {
   test("preserves cancelled history and replaces an item only when an edit is saved", async ({
     page,
   }, testInfo) => {
+    // A long journey through many saves and reloads; 60s is too tight for it
+    // on a busy CI backend.
+    test.slow();
     const {
       facilityId,
       apiUrl,

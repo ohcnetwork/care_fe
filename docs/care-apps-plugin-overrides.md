@@ -69,7 +69,7 @@ Use `REACT_MFE_REGISTERED_COMPONENTS` to limit which exported components are
 auto-registered.
 
 ```env
-REACT_MFE_REGISTERED_COMPONENTS=BookAppointmentDetails,Login,AuthHero
+REACT_MFE_REGISTERED_COMPONENTS=BookAppointmentDetails,Login,AuthLayout
 ```
 
 Behavior:

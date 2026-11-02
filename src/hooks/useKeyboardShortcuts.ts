@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
+import { isAppleDevice } from "@/Utils/utils";
 
 export interface ShortcutHandlers {
   [action: string]: () => void;
@@ -117,6 +118,12 @@ export function useKeyboardShortcuts(
             requiredModifiers.ctrl = true;
             break;
           case "cmd":
+            if (isAppleDevice) {
+              requiredModifiers.meta = true;
+            } else {
+              requiredModifiers.ctrl = true;
+            }
+            break;
           case "meta":
             requiredModifiers.meta = true;
             break;
@@ -179,11 +186,17 @@ export function useKeyboardShortcuts(
         target.tagName === "TEXTAREA" ||
         target.contentEditable === "true";
 
-      if (
-        isInputField &&
+      // Printable keys always belong to the field, even when shortcuts such as
+      // Shift+Enter are allowed to run from inside inputs.
+      const isTyping =
+        event.key?.length === 1 &&
         !event.ctrlKey &&
         !event.metaKey &&
-        !ignoreInputFields
+        !event.altKey;
+
+      if (
+        isInputField &&
+        (isTyping || (!event.ctrlKey && !event.metaKey && !ignoreInputFields))
       ) {
         return;
       }

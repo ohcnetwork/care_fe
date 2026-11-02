@@ -11,13 +11,17 @@ setup("authenticate as facility admin", async ({ page }) => {
   await page.getByLabel(/^password$/i).fill("Ohcn@123");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login
   await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
   // Verify we're logged in by checking for user-specific elements
-  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: /^Good (Morning|Afternoon|Evening), .+/,
+    }),
+  ).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });

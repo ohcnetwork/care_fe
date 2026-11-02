@@ -17,6 +17,8 @@ const kbdVariants = cva(
           "bg-muted bg-radial-[at_50%_75%] from-muted-background via-soft-background to-strong-background to-90% border-strong-border text-soft-foreground dark:text-muted-foreground",
         primary:
           "bg-primary bg-radial-[at_50%_75%] from-green-500/40 via-green-500/20 to-green-500/10 to-90% border-primary-950/60 dark:border-primary-700 text-primary-foreground",
+        destructive:
+          "bg-red-50 bg-radial-[at_50%_75%] from-destructive/5 via-destructive/10 to-destructive/20 to-90% border-destructive/40 text-red-700 text-shadow-none dark:bg-red-950 dark:border-destructive/50 dark:text-red-400",
       },
     },
     defaultVariants: {

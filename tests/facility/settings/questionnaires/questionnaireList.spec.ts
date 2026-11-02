@@ -12,8 +12,9 @@ test.describe("Questionnaire v2 list (facility)", () => {
     await expect(
       page.getByRole("heading", { name: "Questionnaires" }),
     ).toBeVisible();
+    // An empty list repeats the create action in its empty state.
     await expect(
-      page.getByRole("button", { name: "Create Questionnaire" }),
+      page.getByRole("button", { name: "Create Questionnaire" }).first(),
     ).toBeVisible();
     await expect(
       page.getByRole("radiogroup", { name: "Status" }),

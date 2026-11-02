@@ -100,6 +100,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
+      forceRender
       className={cn(
         "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 isolate z-50 bg-black/50 duration-100 supports-backdrop-filter:backdrop-blur-xs",
         className,
@@ -166,7 +167,7 @@ function DialogContent({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 z-20"
+                className="absolute z-20 top-2 right-2"
               >
                 <XIcon />
                 <span className="sr-only">{t("close")}</span>
@@ -246,7 +247,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-base leading-none font-semibold", className)}
       {...props}
     />
   );

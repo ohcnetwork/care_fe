@@ -27,6 +27,23 @@ export function StudioMobileQuestionNav({
   onAddQuestion,
 }: StudioMobileQuestionNavProps) {
   const { t } = useTranslation();
+
+  if (questions.length === 0) {
+    return (
+      <div className="shrink-0 border-b border-gray-200 px-3 py-2 md:hidden">
+        <Button
+          type="button"
+          variant="outline_primary"
+          className="w-full"
+          onClick={onAddQuestion}
+        >
+          <Plus className="size-4" />
+          {t("add_first_question")}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex shrink-0 items-center gap-2 border-b border-gray-200 px-3 py-2 md:hidden">
       <div className="min-w-0 flex-1">

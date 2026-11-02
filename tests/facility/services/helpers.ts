@@ -37,3 +37,22 @@ export async function toggleSidebar(page: Page, expand: boolean) {
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
   }
 }
+
+/**
+ * Opens a facility service from the services list. Services created by other
+ * specs can push fixtures off the list's first page, so search by name first.
+ */
+export async function openFacilityService(
+  page: Page,
+  servicesUrl: string,
+  name: string,
+) {
+  await page.goto(servicesUrl);
+  await page
+    .getByRole("textbox", {
+      name: "Search healthcare services...",
+      exact: true,
+    })
+    .fill(name);
+  await page.getByRole("link", { name }).click();
+}

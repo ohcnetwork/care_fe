@@ -42,7 +42,7 @@ test.describe("Shared workspace navigation", () => {
       { name: "sidebar:state", value: "true", url: baseURL! },
     ]);
     await page.addInitScript(() => {
-      for (const name of ["Patients", "Billing", "RBAC", "Organizations"]) {
+      for (const name of ["Billing", "RBAC", "Organizations"]) {
         localStorage.removeItem(`nav-expansion-state--${name}`);
       }
     });
@@ -68,11 +68,18 @@ test.describe("Shared workspace navigation", () => {
       await page.goto(`${facilityPath}/overview`);
       await expect(
         navigation.locator('[data-sidebar="group-label"]'),
-      ).toHaveText(["Patient Management", "Services", "Administration"]);
+      ).toHaveText([
+        "Patient Management",
+        "Encounters & Locations",
+        "Services",
+        "Administration",
+      ]);
       for (const [name, path] of [
         ["Overview", "/overview"],
         ["Appointments", "/appointments"],
         ["Queues", "/queues"],
+        ["Search patients", "/patients"],
+        ["Search by Location", "/encounters/locations"],
         ["Services", "/services"],
         ["Resource", "/resource"],
         ["Users", "/users"],
@@ -85,16 +92,6 @@ test.describe("Shared workspace navigation", () => {
       await expect(
         navigation.getByRole("link", { name: "Overview", exact: true }),
       ).toHaveAttribute("aria-current", "page");
-
-      await navigation
-        .getByRole("button", { name: "Patients", exact: true })
-        .click();
-      await expect(
-        navigation.getByRole("link", { name: "Search patients", exact: true }),
-      ).toHaveAttribute("href", `${facilityPath}/patients`);
-      await expect(
-        navigation.getByRole("link", { name: "Locations", exact: true }),
-      ).toHaveAttribute("href", `${facilityPath}/encounters/locations`);
     });
 
     await test.step("the header facility selector keeps every available facility and dashboard link", async () => {
@@ -176,6 +173,145 @@ test.describe("Shared workspace navigation", () => {
       await page.reload();
       await expect(invoices).toHaveAttribute("aria-current", "page");
     });
+  });
+
+  test("encounter navigation opens any encounter list and saves a default", async ({
+    page,
+  }) => {
+    // Keep the default in this page: parallel tests save other preferences to
+    // the same admin account, and each save rewrites all of its preferences.
+    const saves: unknown[] = [];
+    let savedEncounterList: unknown = {};
+    let failSaves = false;
+    await page.route("**/api/v1/users/getcurrentuser/", async (route) => {
+      const response = await route.fetch();
+      const user = await response.json();
+      await route.fulfill({
+        response,
+        json: {
+          ...user,
+          preferences: {
+            ...user.preferences,
+            encounter_list: savedEncounterList,
+          },
+        },
+      });
+    });
+    await page.route("**/api/v1/users/set_preferences/", async (route) => {
+      const { preference, value } = route.request().postDataJSON();
+      if (preference !== "encounter_list") return route.continue();
+      if (failSaves) return route.fulfill({ status: 500, json: {} });
+      saves.push(value);
+      savedEncounterList = value;
+      await route.fulfill({ status: 201 });
+    });
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const navigation = sidebar(page);
+    const encounterTypes = navigation.getByRole("button", {
+      name: "Encounter Types",
+      exact: true,
+    });
+    const menu = page.getByRole("menu");
+
+    await test.step("without a saved default the link opens all encounters", async () => {
+      await page.goto(`${facilityPath}/overview`);
+      await expect(
+        navigation.getByRole("link", { name: "All Encounters", exact: true }),
+      ).toHaveAttribute("href", `${facilityPath}/encounters/patients/all`);
+    });
+
+    await test.step("the menu opens another list and the link follows it", async () => {
+      await encounterTypes.click();
+      await expect(menu.getByRole("menuitem")).toHaveText([
+        "All Encounters",
+        "Inpatient",
+        "Ambulatory",
+        "Observation",
+        "Emergency",
+        "Virtual",
+        "Home Health",
+        "Set Default",
+      ]);
+      await menu
+        .getByRole("menuitem", { name: "Inpatient", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/imp`,
+      );
+      await expect(menu).toHaveCount(0);
+      await expect(
+        navigation.getByRole("link", { name: "Inpatient", exact: true }),
+      ).toHaveAttribute("aria-current", "page");
+    });
+
+    await test.step("set default saves the choice and opens that list", async () => {
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await expect(
+        menu.getByRole("menuitemradio", { name: "All Encounters" }),
+      ).toHaveAttribute("aria-checked", "true");
+      await menu
+        .getByRole("menuitemradio", { name: "Emergency", exact: true })
+        .click();
+      await expect.poll(() => saves).toEqual([{ default_class: "emer" }]);
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
+      );
+      await expect(menu).toHaveCount(0);
+    });
+
+    await test.step("the saved default is used after a reload", async () => {
+      await page.goto(`${facilityPath}/overview`);
+      const encounterLink = navigation.getByRole("link", {
+        name: "Emergency",
+        exact: true,
+      });
+      await expect(encounterLink).toHaveAttribute(
+        "href",
+        `${facilityPath}/encounters/patients/emer`,
+      );
+      await expect(encounterLink).not.toHaveAttribute("aria-current");
+    });
+
+    await test.step("choosing the current default opens that list", async () => {
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await menu
+        .getByRole("menuitemradio", { name: "Emergency", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/emer`,
+      );
+    });
+
+    await test.step("a failed save keeps the saved default", async () => {
+      failSaves = true;
+      await encounterTypes.click();
+      await menu
+        .getByRole("menuitem", { name: "Set Default", exact: true })
+        .click();
+      await menu
+        .getByRole("menuitemradio", { name: "Virtual", exact: true })
+        .click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `${facilityPath}/encounters/patients/vr`,
+      );
+      // Navigate in-app so the default comes from client state, not a reload.
+      await navigation
+        .getByRole("link", { name: "Overview", exact: true })
+        .click();
+      await expect(
+        navigation.getByRole("link", { name: "Emergency", exact: true }),
+      ).toHaveAttribute("href", `${facilityPath}/encounters/patients/emer`);
+    });
+
+    // Re-choosing the current default and the failed save stored nothing.
+    expect(saves).toEqual([{ default_class: "emer" }]);
   });
 
   test("desktop navigation hides fully, previews without moving content, and pins from the header", async ({
@@ -268,6 +404,8 @@ test.describe("Shared workspace navigation", () => {
       name: "Back to facility",
       exact: true,
     });
+    // A point inside the link that the sticky detail header also covers.
+    let sharedPoint = { x: 0, y: 0 };
 
     await test.step("Preview overlays the detail header without moving the page", async () => {
       await expect(heading).toBeVisible();
@@ -300,25 +438,30 @@ test.describe("Shared workspace navigation", () => {
       const linkBounds = await backLink.boundingBox();
       expect(headerBounds).not.toBeNull();
       expect(linkBounds).not.toBeNull();
-      const x = linkBounds!.x + linkBounds!.width / 2;
-      const y = linkBounds!.y + linkBounds!.height / 2;
       // This must exercise the shared screen area, not a lower link that
-      // would still work when the sticky detail header covers the preview.
+      // would still work when the sticky detail header covers the preview,
+      // so probe the middle of the band the link shares with the header.
+      const top = Math.max(linkBounds!.y, headerBounds!.y);
+      const bottom = Math.min(
+        linkBounds!.y + linkBounds!.height,
+        headerBounds!.y + headerBounds!.height,
+      );
+      expect(bottom).toBeGreaterThan(top);
+      const x = linkBounds!.x + linkBounds!.width / 2;
       expect(x).toBeGreaterThan(headerBounds!.x);
       expect(x).toBeLessThan(headerBounds!.x + headerBounds!.width);
-      expect(y).toBeGreaterThan(headerBounds!.y);
-      expect(y).toBeLessThan(headerBounds!.y + headerBounds!.height);
+      sharedPoint = {
+        x: linkBounds!.width / 2,
+        y: (top + bottom) / 2 - linkBounds!.y,
+      };
       await expect
         .poll(() =>
-          backLink.evaluate((element) => {
+          backLink.evaluate((element, point) => {
             const bounds = element.getBoundingClientRect();
             return element.contains(
-              document.elementFromPoint(
-                bounds.x + bounds.width / 2,
-                bounds.y + bounds.height / 2,
-              ),
+              document.elementFromPoint(bounds.x + point.x, bounds.y + point.y),
             );
-          }),
+          }, sharedPoint),
         )
         .toBe(true);
     });
@@ -337,7 +480,7 @@ test.describe("Shared workspace navigation", () => {
     });
 
     await test.step("An overlapping upper sidebar link navigates on a real click", async () => {
-      await backLink.click();
+      await backLink.click({ position: sharedPoint });
       await expect(page).toHaveURL(`${facilityPath}/overview`);
       await expect(state).toHaveAttribute("data-app-sidebar-pinned", "false");
       await expect(state).toHaveAttribute("data-app-sidebar-preview", "false");
@@ -494,7 +637,14 @@ test.describe("Shared workspace navigation", () => {
         await picker.click();
         const dialog = page.getByRole("dialog");
         await expect(dialog).toBeVisible();
-        await expect(dialog.getByRole("heading")).toContainText(fixture.name);
+        // The location picker names the current location in a labelled
+        // breadcrumb under its "Select Location" title; the service picker
+        // names it in the title.
+        await expect(
+          workspace.name === "location"
+            ? dialog.getByRole("group", { name: "Current Location" })
+            : dialog.getByRole("heading"),
+        ).toContainText(fixture.name);
         await dialog.hover();
         const searchResponse = page.waitForResponse((result) => {
           const url = new URL(result.url());
@@ -706,7 +856,21 @@ test.describe("Shared workspace navigation", () => {
           navigation.getByRole("link", { name: "Queues", exact: true }),
         ).toHaveCount(0);
         await expect(
-          navigation.getByRole("button", { name: "Patients", exact: true }),
+          navigation
+            .locator('[data-sidebar="group-label"]')
+            .filter({ hasText: "Encounters & Locations" }),
+        ).toHaveCount(0);
+        await expect(
+          navigation.getByRole("button", {
+            name: "Encounter Types",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+        await expect(
+          navigation.getByRole("link", {
+            name: "Search patients",
+            exact: true,
+          }),
         ).toHaveCount(0);
         await expect(
           navigation.getByRole("link", { name: "Settings", exact: true }),

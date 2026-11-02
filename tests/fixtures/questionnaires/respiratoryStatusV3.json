@@ -1,0 +1,180 @@
+{
+  "id": "3081bed6-b694-42ec-87a8-666c3fd0ae36",
+  "slug": "respiratory_status-v3",
+  "version": "",
+  "title": "Respiratory Status",
+  "description": "A form to document respiratory status, including bilateral air entry and respiratory support details.",
+  "status": "active",
+  "subject_type": "encounter",
+  "styling_metadata": {},
+  "questions": [
+    {
+      "id": "31f02e46-7d14-4a68-9c94-de009b54fb54",
+      "text": "Bilateral Air Entry",
+      "type": "group",
+      "link_id": "1.1",
+      "required": false,
+      "questions": [
+        {
+          "id": "9358475e-b6f3-4a59-a88d-4b4e66222879",
+          "text": "Is bilateral air entry present?",
+          "type": "choice",
+          "link_id": "1.1.1",
+          "required": true,
+          "answer_option": [
+            {
+              "value": "yes"
+            },
+            {
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "id": "63631f8f-0880-4758-891b-8ad7ac663be8",
+          "text": "Note on Bilateral Air Entry",
+          "type": "text",
+          "link_id": "1.1.2",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "80130e9a-e15c-4181-a32e-73dc68bd8755",
+      "text": "Respiratory Support",
+      "type": "group",
+      "link_id": "1.2",
+      "required": true,
+      "questions": [
+        {
+          "id": "56634d0c-5321-41ff-8f0e-a6a4525be6ff",
+          "text": "Select Modality",
+          "type": "choice",
+          "link_id": "1.2.1",
+          "required": true,
+          "answer_option": [
+            {
+              "value": "oxygen_support"
+            },
+            {
+              "value": "non_invasive"
+            },
+            {
+              "value": "invasive"
+            }
+          ]
+        },
+        {
+          "id": "d9bd1fa1-38ba-48ca-afdd-b0ff0623568e",
+          "text": "Select Oxygen Support Device",
+          "type": "choice",
+          "link_id": "1.2.2",
+          "required": false,
+          "answer_option": [
+            {
+              "value": "nasal_prongs"
+            },
+            {
+              "value": "simple_face_mask"
+            },
+            {
+              "value": "nrm"
+            },
+            {
+              "value": "hfnc"
+            }
+          ]
+        },
+        {
+          "id": "0493d006-af74-42c3-bb4a-c03ee735b05d",
+          "text": "Oxygen Flow Rate (L/min)",
+          "type": "decimal",
+          "link_id": "1.2.3",
+          "required": false
+        },
+        {
+          "id": "54a458e2-4ea0-4f0e-ad1c-c7e8cf9c0a12",
+          "text": "Select Ventilator Mode (Non-invasive)",
+          "type": "choice",
+          "link_id": "1.2.4",
+          "required": false,
+          "answer_option": [
+            {
+              "value": "cmv"
+            },
+            {
+              "value": "simv"
+            },
+            {
+              "value": "cpap_psv"
+            }
+          ]
+        }
+      ],
+      "styling_metadata": {
+        "containerClasses": "grid-2-col"
+      }
+    },
+    {
+      "id": "c0f9e113-57e5-4167-a326-f86c6b457b62",
+      "text": "Ventilation Parameters",
+      "type": "group",
+      "link_id": "1.3",
+      "required": false,
+      "questions": [
+        {
+          "id": "8fdaf3ab-3fa2-475e-a605-b05654f22ec7",
+          "text": "PEEP (cm H2O)",
+          "type": "decimal",
+          "link_id": "1.3.1",
+          "required": false
+        },
+        {
+          "id": "9b922018-5468-418e-a205-e3c1f9bb6847",
+          "text": "PIP (cm H2O)",
+          "type": "decimal",
+          "link_id": "1.3.2",
+          "required": false
+        },
+        {
+          "id": "e5661139-58b2-4773-96a8-cf9ec51e0320",
+          "text": "MAP (cm H2O)",
+          "type": "decimal",
+          "link_id": "1.3.3",
+          "required": false
+        },
+        {
+          "id": "65d21913-c59a-4b4d-99ea-3411b0fcdce1",
+          "text": "Ventilator RR (breaths per minute)",
+          "type": "integer",
+          "link_id": "1.3.4",
+          "required": false
+        },
+        {
+          "id": "0e5391e3-a6b3-44ab-8f20-9050aa279680",
+          "text": "Pressure Support (cm H2O)",
+          "type": "decimal",
+          "link_id": "1.3.5",
+          "required": false
+        },
+        {
+          "id": "46c70bd9-7dd8-47d9-80d3-4de7fc4d77c4",
+          "text": "Tidal Volume (mL)",
+          "type": "integer",
+          "link_id": "1.3.6",
+          "required": false
+        },
+        {
+          "id": "286afbde-9ac1-4717-964e-17453fa0ea01",
+          "text": "FiO2 (%)",
+          "type": "decimal",
+          "link_id": "1.3.7",
+          "required": false
+        }
+      ],
+      "styling_metadata": {
+        "containerClasses": "grid-2-col"
+      }
+    }
+  ]
+}

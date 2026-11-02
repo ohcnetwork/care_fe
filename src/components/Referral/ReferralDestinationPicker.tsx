@@ -18,6 +18,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -127,7 +128,12 @@ function DestinationCombobox<T extends DestinationOption>({
       disabled={disabled}
       className="w-full min-w-0 justify-between font-normal tracking-normal shadow-none"
     >
-      <span className={cn("truncate", !selected && "text-muted-foreground")}>
+      <span
+        className={cn(
+          "w-0 min-w-0 flex-1 truncate text-left",
+          !selected && "text-muted-foreground",
+        )}
+      >
         {selected?.name ?? placeholder}
       </span>
       <ChevronsUpDown className="size-4 opacity-50" aria-hidden="true" />
@@ -140,10 +146,11 @@ function DestinationCombobox<T extends DestinationOption>({
         placeholder={searchPlaceholder}
         value={search}
         onValueChange={setSearch}
-        className="h-9 rounded-none border-0 px-0 py-0 text-base shadow-none focus:ring-0 sm:text-sm"
+        wrapperClassName="border-b border-gray-100 md:p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
       />
       <CommandList
-        className="max-h-[min(320px,45dvh)]"
+        className="scrollbar-gutter-auto sm:max-h-[min(320px,45dvh)]"
         aria-busy={optionsQuery.isFetching}
       >
         {optionsQuery.isPending ? (
@@ -242,13 +249,16 @@ function DestinationCombobox<T extends DestinationOption>({
         <Drawer open={open} onOpenChange={handleOpenChange}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent
-            className="bg-background text-foreground pb-4"
             aria-describedby={undefined}
+            height="fixed"
+            className="p-1.5"
           >
-            <DrawerTitle className="px-4 pt-4 pb-2 text-foreground">
-              {label}
-            </DrawerTitle>
-            {content}
+            <DrawerHeader showCloseButton>
+              <DrawerTitle>{label}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex min-h-0 flex-1 flex-col pb-[env(safe-area-inset-bottom)]">
+              {content}
+            </div>
           </DrawerContent>
         </Drawer>
       ) : (

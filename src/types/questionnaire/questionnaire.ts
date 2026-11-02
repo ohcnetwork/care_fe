@@ -9,6 +9,7 @@ import { Question } from "./question";
 export const SUBJECT_TYPES = [
   "patient",
   "encounter",
+  "referral",
   "location",
   "device",
   "facility",
@@ -69,10 +70,23 @@ export const SUBJECT_TYPES_FOR_CONTEXT: Record<
   QuestionnaireAuthContext,
   SubjectType[]
 > = {
-  instance: ["patient", "encounter", "location", "device", "facility"],
-  facility: ["encounter", "location", "device", "facility"],
-  facility_organization: ["encounter", "location", "device", "facility"],
-  user: ["encounter", "location", "device", "facility"],
+  instance: [
+    "patient",
+    "encounter",
+    "referral",
+    "location",
+    "device",
+    "facility",
+  ],
+  facility: ["encounter", "referral", "location", "device", "facility"],
+  facility_organization: [
+    "encounter",
+    "referral",
+    "location",
+    "device",
+    "facility",
+  ],
+  user: ["encounter", "referral", "location", "device", "facility"],
 };
 
 /**

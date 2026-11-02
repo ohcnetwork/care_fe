@@ -6,7 +6,12 @@ import { useInView } from "react-intersection-observer";
 
 import { Card } from "@/components/ui/card";
 
+import { cn } from "@/lib/utils";
+
+import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDetailSheet";
+
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
@@ -14,6 +19,7 @@ import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
+import { ArrowRight } from "lucide-react";
 
 interface GroupedObservations {
   [key: string]: ObservationListRead[];
@@ -68,38 +74,52 @@ function groupObservationsByDate(
   }, {});
 }
 
+const PAGE_SIZE = 20;
+
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
-      queryKey: ["infinite-observations", patientId, encounterId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(observationApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            encounter: encounterId,
-            ignore_group: true,
-            limit: 20,
-            offset: String(pageParam),
-          },
-        })({ signal });
-        return response as PaginatedResponse<ObservationListRead>;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 20;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
-    });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage,
+    isError,
+    isFetching,
+    refetch,
+  } = useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
+    queryKey: ["infinite-observations", patientId, encounterId],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(observationApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          encounter: encounterId,
+          ignore_group: true,
+          limit: PAGE_SIZE,
+          offset: String(pageParam),
+        },
+      })({ signal });
+      return response as PaginatedResponse<ObservationListRead>;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_SIZE;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+  });
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
+    if (inView && hasNextPage && !isFetchingNextPage && !isError) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
+
+  if (isError) {
+    return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
+  }
 
   if (isLoading) {
     return (
@@ -138,42 +158,72 @@ export const EncounterObservationsTab = () => {
                   new Date(b.effective_datetime).getTime() -
                   new Date(a.effective_datetime).getTime(),
               )
-              .map((item: ObservationListRead) => (
-                <div key={item.id} className="flex gap-4">
-                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
-                    {formatDisplayTime(item.effective_datetime)}:
-                  </div>
-                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        {item.value.value && (
-                          <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
-                            {formatValue(item.value.value, item.value_type)}
-                          </div>
-                        )}
-                      </div>
-                      {item.note && (
-                        <div className="mt-1 text-sm text-gray-500">
-                          {item.note}
-                        </div>
-                      )}
-                      <div className="font-medium text-sm text-gray-600">
-                        {item.main_code?.display ||
-                          item.main_code?.code ||
-                          t("unknown")}
-                      </div>
-                      {item.data_entered_by && (
-                        <div className="text-gray-600 text-sm">
-                          {t("filed_by")}{" "}
-                          <span className="font-medium text-gray-800">
-                            {formatName(item.data_entered_by)}
-                          </span>
+              .map((item: ObservationListRead) => {
+                const summary = (
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {item.value.value && (
+                        <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
+                          {formatValue(item.value.value, item.value_type)}
                         </div>
                       )}
                     </div>
-                  </Card>
-                </div>
-              ))}
+                    {item.note && (
+                      <div className="mt-1 text-sm text-gray-500">
+                        {item.note}
+                      </div>
+                    )}
+                    <div className="font-medium text-sm text-gray-600">
+                      {item.main_code?.display ||
+                        item.main_code?.code ||
+                        t("unknown")}
+                    </div>
+                    {item.data_entered_by && (
+                      <div className="text-gray-600 text-sm">
+                        {t("filed_by")}{" "}
+                        <span className="font-medium text-gray-800">
+                          {formatName(item.data_entered_by)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+                const cardClassName =
+                  "flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 text-left";
+                return (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium text-nowrap">
+                      {formatDisplayTime(item.effective_datetime)}:
+                    </div>
+                    {item.main_code?.code ? (
+                      <ObservationDetailSheet
+                        codes={[item.main_code]}
+                        title={item.main_code.display || item.main_code.code}
+                        patientId={patientId}
+                        encounterId={encounterId}
+                        trigger={
+                          <button
+                            type="button"
+                            className={cn(
+                              cardClassName,
+                              "cursor-pointer hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            )}
+                          >
+                            {summary}
+                            <ArrowRight
+                              aria-hidden="true"
+                              className="size-5 shrink-0 text-gray-700"
+                            />
+                          </button>
+                        }
+                      />
+                    ) : (
+                      // Uncoded observations have no history to chart, so show them as-is.
+                      <div className={cardClassName}>{summary}</div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
           {index < dates.length - 1 && (
             <div className="my-4 border-b border-dashed border-gray-200" />

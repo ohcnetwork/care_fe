@@ -214,7 +214,6 @@ export function ReferralResponseEditor({
   });
   const choices = (forms.data?.results ?? []).filter(
     (form) =>
-      (!!referral.encounter || form.subject_type === "patient") &&
       form.questionnaire_type === (responseOnly ? "response" : "request"),
   );
   const selected =

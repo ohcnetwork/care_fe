@@ -233,16 +233,18 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    const diagnosisRow = page
-      .locator("div")
-      .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
-      .nth(1);
-    await expect(diagnosisRow).toBeVisible();
-    await expect(diagnosisRow.getByText("Status")).toBeVisible();
-    await expect(diagnosisRow.getByText("Severity")).toBeVisible();
-    await expect(diagnosisRow.getByText("Verification")).toBeVisible();
-    await expect(diagnosisRow.getByText("Onset")).toBeVisible();
-
-    await expect(diagnosisRow.getByText(diagnosisName).first()).toBeVisible();
+    // The encounter overview's Diagnoses panel lists each diagnosis with its
+    // onset and a severity badge (verification shows only when unconfirmed).
+    const diagnosisItem = page
+      .getByRole("region", { name: "Diagnoses", exact: true })
+      .getByRole("listitem")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) })
+      .filter({ hasText: "Severe" })
+      .first();
+    await expect(diagnosisItem).toBeVisible();
+    await expect(
+      diagnosisItem.getByText("Severe", { exact: true }),
+    ).toBeVisible();
+    await expect(diagnosisItem).toContainText("Onset");
   });
 });

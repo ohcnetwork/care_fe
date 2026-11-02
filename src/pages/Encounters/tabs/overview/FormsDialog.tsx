@@ -138,6 +138,7 @@ export const FormDialog = ({
         className="md:max-w-2xl"
         open={open}
         onOpenChange={handleOpenChange}
+        title={t("forms")}
       >
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
@@ -147,7 +148,7 @@ export const FormDialog = ({
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="max-h-[80vh] w-full">
+        <CommandList className="w-full md:max-h-[min(24rem,calc(75dvh-8rem))]">
           {isLoading ? (
             <CardListSkeleton count={10} />
           ) : questionnaireList.length === 0 ? (
@@ -159,7 +160,7 @@ export const FormDialog = ({
                   <CommandItem
                     key={questionnaire.id}
                     value={`${questionnaire.slug} - ${questionnaire.title}`}
-                    className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
+                    className="flex justify-between rounded-md cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100 [&>svg:last-child]:hidden"
                     onSelect={() => {
                       navigate(
                         appendReferralNativeContext(

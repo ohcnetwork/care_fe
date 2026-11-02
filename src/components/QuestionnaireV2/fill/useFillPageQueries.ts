@@ -75,14 +75,14 @@ export function useFillPageQueries({
   // absent from this list regardless of their subject and cannot be recovered.
   const subjectDraftsQuery = useQuery({
     queryKey: formSubmissionKeys.subjectDrafts(subjectKeyOf(subject)),
-    queryFn: query(formSubmissionApi.list, {
+    queryFn: query.paginated(formSubmissionApi.list, {
       queryParams: {
         ...(encounterId
           ? { encounter: encounterId }
           : { patient: patientBound?.patientId ?? "" }),
         status: "draft",
-        limit: 200,
       },
+      pageSize: 200,
     }),
     enabled: !!continueDraftId && !!patientBound,
   });

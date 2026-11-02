@@ -30,9 +30,10 @@ interface ClinicalListPanelProps {
   readOnly: boolean;
   className?: string;
   presentation: "default" | "panel";
-  questionnaire: "allergy_intolerance" | "symptom" | "diagnosis";
-  history: "allergies" | "symptoms" | "diagnoses";
+  questionnaire: "allergy_intolerance" | "symptom" | "diagnosis" | "procedure";
+  history: "allergies" | "symptoms" | "diagnoses" | "procedures";
   emptyMessage: string;
+  summary?: ReactNode;
   hasData: boolean;
   showEmpty: boolean;
   queryState: ClinicalListQueryState;
@@ -51,6 +52,7 @@ export function ClinicalListPanel({
   questionnaire,
   history,
   emptyMessage,
+  summary,
   hasData,
   showEmpty,
   queryState,
@@ -64,6 +66,7 @@ export function ClinicalListPanel({
   const editSearch = new URLSearchParams({
     return_page: fullPath.split("/").pop() ?? "updates",
   });
+  const isPanel = presentation === "panel";
   const patientPath = facilityId
     ? `/facility/${facilityId}/patient/${patientId}`
     : `/patient/${patientId}`;
@@ -78,6 +81,7 @@ export function ClinicalListPanel({
         title={title}
         readOnly={readOnly}
         presentation={presentation}
+        summary={summary}
         className={cn("min-w-0 overflow-hidden", className)}
         editLink={
           !readOnly && encounterId
@@ -87,15 +91,24 @@ export function ClinicalListPanel({
         actionButton={
           <Button
             variant="ghost"
-            size="icon"
+            size={isPanel ? "xs" : "icon"}
             asChild
-            className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+            className={
+              isPanel
+                ? "px-2 text-soft-foreground hover:text-foreground"
+                : "hover:bg-transparent text-soft-foreground hover:text-soft-foreground"
+            }
           >
             <Link
               href={`${patientPath}/history/${history}?sourceUrl=${encodeURIComponent(sourceUrl)}`}
               aria-label={t("view_history")}
             >
               <History className="size-4" aria-hidden="true" />
+              {isPanel && (
+                <span className="hidden @sm/clinical-panel:inline">
+                  {t("history")}
+                </span>
+              )}
             </Link>
           </Button>
         }
@@ -121,7 +134,7 @@ export function ClinicalListPanel({
               <div className="@container/clinical-widget">{children}</div>
             ) : (
               !queryState.isError && (
-                <p className="px-2 py-5 text-sm text-gray-500">
+                <p className="px-2 py-5 text-sm text-soft-foreground">
                   {emptyMessage}
                 </p>
               )
