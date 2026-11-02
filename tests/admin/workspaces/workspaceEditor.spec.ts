@@ -735,6 +735,8 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await expect(
       page.getByRole("heading", { name: "What would you like to design?" }),
     ).toBeVisible();
+    // New workspaces start on the encounter screen; clinical history keeps its
+    // standard tabs until it is designed separately.
     await page
       .getByRole("region", { name: "Design", exact: true })
       .getByRole("button", { name: "Blank", exact: true })
@@ -905,7 +907,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await page
       .getByRole("button", { name: "Two columns", exact: true })
       .click();
-    await expect(column("Middle")).toHaveCount(0);
+    await expect(column("Side")).toHaveCount(0);
     await expect(
       column("Left").getByRole("article", {
         name: "Active requests",
@@ -2427,18 +2429,22 @@ test("studio customises supported built-in tabs and starts history screens from 
   await page
     .getByRole("textbox", { name: "Name", exact: true })
     .fill(`History ${faker.string.alphanumeric(8)}`);
-  await page
-    .getByRole("region", { name: "Design", exact: true })
-    .getByRole("button", { name: "Blank", exact: true })
+  const design = page.getByRole("region", { name: "Design", exact: true });
+  await design
+    .getByRole("button", { name: "Standard encounter", exact: true })
     .click();
-  await page
+  // Clinical history keeps its standard tabs until its own screen is designed.
+  await design
     .getByRole("group", { name: "Screen being designed", exact: true })
     .getByRole("button", { name: /^Clinical history\b/ })
     .click();
-  await page
-    .getByRole("region", { name: "Design", exact: true })
-    .getByRole("button", { name: "My forms", exact: true })
-    .click();
+  await expect(
+    design.getByRole("heading", {
+      name: "Clinical history uses the standard tabs",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await design.getByRole("button", { name: "My forms", exact: true }).click();
   await expect(
     page.getByRole("article", { name: "My forms", exact: true }),
   ).toBeVisible();

@@ -1663,11 +1663,13 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
     });
 
-    fixture.defaults.push({
+    // The next selection retires accessible legacy class choices; other
+    // attributes and choices for inaccessible workspaces stay untouched.
+    const legacyDefault: WorkspaceUserDefaultAttributes = {
       attribute: "encounter_class",
       value: "obsenc",
       workspace: unrelatedWorkspace,
-    });
+    };
     const protectedDefaults: WorkspaceUserDefaultAttributes[] = [
       { attribute: "status", value: "amb", workspace: fixture.workspace },
       {
@@ -1676,7 +1678,7 @@ test.describe("Encounter workspace rendering", () => {
         workspace: inaccessibleWorkspace,
       },
     ];
-    fixture.defaults.push(...protectedDefaults);
+    fixture.defaults.push(legacyDefault, ...protectedDefaults);
 
     await test.step("Replace the shared workspace and retire accessible legacy choices", async () => {
       const picker = await openPicker();
@@ -1737,6 +1739,7 @@ test.describe("Encounter workspace rendering", () => {
       await expect(picker.getByRole("alert")).toHaveText(
         "Could not select this workspace. Please try again.",
       );
+      // The competing choice whose cleanup failed is still the saved one.
       await expect(
         picker.getByRole("heading", {
           name: competingWorkspace.name,
@@ -1744,7 +1747,7 @@ test.describe("Encounter workspace rendering", () => {
         }),
       ).toBeVisible();
       await expect(
-        page.getByRole("tab", { name: "Clinical review", exact: true }),
+        page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
       expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
         {
@@ -1835,6 +1838,18 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.writes).not.toContain(
         `POST /api/v1/workspace/${inaccessibleWorkspace.id}/set_default_attributes/`,
       );
+      // The retired legacy choice was cleared once and stays inactive.
+      expect(
+        fixture.defaultWrites.filter(
+          ({ workspaceId }) => workspaceId === unrelatedWorkspace.id,
+        ),
+      ).toEqual([
+        {
+          workspaceId: unrelatedWorkspace.id,
+          body: { attribute: "encounter_class", value: "" },
+        },
+      ]);
+      expect(fixture.defaults).toContainEqual({ ...legacyDefault, value: "" });
       expect(
         fixture.defaultWrites.every(({ body }) =>
           ["scope", "encounter_class"].includes(body.attribute),
@@ -1946,10 +1961,11 @@ test.describe("Encounter workspace rendering", () => {
     const fixture = await mockEncounterWorkspaceApi(page, {
       includeSectionData: true,
     });
-    fixture.currentEncounter.permissions = [
-      ...fixture.currentEncounter.permissions,
-      "can_create_referral",
-    ];
+    // Both encounters authorize referral creation: the active encounter offers
+    // it beside the clinical actions, while the closed one hides every action.
+    for (const encounter of [fixture.currentEncounter, fixture.pastEncounter]) {
+      encounter.permissions = [...encounter.permissions, "can_create_referral"];
+    }
     fixture.workspace.template = {
       schema_version: 1,
       pages: [
@@ -3831,9 +3847,19 @@ test("one workspace selection configures encounter and clinical history layouts"
   };
   fixture.workspaces.push(history);
   fixture.defaults.splice(0);
+  const header = page.getByRole("button", { name: /^Workspace: / });
+  const picker = page.getByRole("dialog", { name: "Workspace", exact: true });
+  const historyPath = `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history`;
+  const diagnoses = page.getByRole("region", {
+    name: "All diagnoses",
+    exact: true,
+  });
   await page.goto(`${fixture.basePath}/updates`);
-  await page.getByRole("button", { name: /^Workspace: / }).click();
-  await page.getByRole("option").filter({ hasText: history.name }).click();
+  await header.click();
+  await picker.getByRole("option").filter({ hasText: history.name }).click();
+  // The picker closes once the choice is saved.
+  await expect(picker).not.toBeVisible();
+  await expect(header).toHaveAccessibleName(`Workspace: ${history.name}`);
   await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
   await expect.poll(() => fixture.defaultWrites).toEqual([
     {
@@ -3841,15 +3867,23 @@ test("one workspace selection configures encounter and clinical history layouts"
       body: { attribute: "scope", value: "all" },
     },
   ]);
+  // A deep link keeps its standard history tab reachable beside the chosen
+  // layout's own history pages.
+  await page.goto(`${historyPath}/diagnoses`);
   await expect(
-    page.getByRole("dialog", { name: "Workspace", exact: true }),
-  ).not.toBeVisible();
-  await page.goto(
-    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/background`,
+    page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await page
+    .getByRole("tab", { name: "Medical background", exact: true })
+    .click();
+  await expect(page).toHaveURL((url) =>
+    url.pathname.endsWith("/history/background"),
   );
-  await expect(
-    page.getByRole("region", { name: "All diagnoses", exact: true }),
-  ).toBeVisible();
+  await expect(diagnoses).toBeVisible();
+  // After a reload only the layout's widget reads diagnoses.
+  fixture.clinicalReads.length = 0;
+  await page.reload();
+  await expect(diagnoses).toBeVisible();
   await expect
     .poll(() =>
       fixture.clinicalReads.some(
@@ -3859,10 +3893,6 @@ test("one workspace selection configures encounter and clinical history layouts"
       ),
     )
     .toBe(true);
-  await page.reload();
-  await expect(
-    page.getByRole("region", { name: "All diagnoses", exact: true }),
-  ).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("clinical-history-workspace.png"),
     fullPage: true,
@@ -3870,36 +3900,34 @@ test("one workspace selection configures encounter and clinical history layouts"
 
   await test.step("Resetting the shared choice restores standard encounter and history pages", async () => {
     await page.goto(`${fixture.basePath}/updates`);
-    await page.getByRole("button", { name: /^Workspace: / }).click();
-    await page
+    await header.click();
+    await picker
       .getByRole("button", {
         name: "Reset to standard workspace",
         exact: true,
       })
       .click();
-    await expect(
-      page.getByRole("dialog", { name: "Workspace", exact: true }),
-    ).not.toBeVisible();
+    await expect(picker).not.toBeVisible();
+    await expect(header).toHaveAccessibleName("Workspace: Standard encounter");
     await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
     expect(fixture.defaultWrites.at(-1)).toEqual({
       workspaceId: history.id,
       body: { attribute: "scope", value: "" },
     });
-    await page.goto(
-      `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
-    );
-    await expect(
-      page.getByRole("region", { name: "All diagnoses", exact: true }),
-    ).toHaveCount(0);
+    await page.goto(`${historyPath}/diagnoses`);
+    await expect(diagnoses).toHaveCount(0);
     await expect(
       page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Medical background", exact: true }),
+    ).toHaveCount(0);
   });
 
   await page.goto(`${fixture.basePath}/updates`);
-  await page.getByRole("button", { name: /^Workspace: / }).click();
+  await header.click();
   await expect(
-    page.getByRole("option").filter({ hasText: history.name }),
+    picker.getByRole("option").filter({ hasText: history.name }),
   ).toBeVisible();
 });
 
@@ -3947,6 +3975,8 @@ test("studio history pages can show only the forms the viewer submitted", async 
   await page.goto(
     `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/my_forms`,
   );
+  // The deep-linked standard tab stays open; the layout adds its own page.
+  await page.getByRole("tab", { name: "My forms", exact: true }).click();
   await expect(page).toHaveURL((url) =>
     url.pathname.endsWith("/history/my_forms"),
   );
@@ -4120,9 +4150,12 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(observationHistory).toBeVisible();
   await expect(observationHistory).toContainText("All Encounters");
   await expect(observationHistory).toContainText("3 recordings");
-  await observationHistory
-    .getByRole("tab", { name: "Table", exact: true })
-    .click();
+  // The sheet opens on its plots; the reading-time matrix is the Table tab.
+  const historyTable = observationHistory.getByRole("tab", {
+    name: "Table",
+    exact: true,
+  });
+  await historyTable.click();
   const historyMatrix = observationHistory.getByRole("table");
   const pulseHistory = historyMatrix.getByRole("row").nth(1);
   await expect(pulseHistory).toContainText("82");
@@ -4143,9 +4176,9 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
     })
     .click();
   await expect(observationHistory).toContainText("2 recordings");
-  await observationHistory
-    .getByRole("tab", { name: "Table", exact: true })
-    .click();
+  // The refreshed readings open on the plots again.
+  await historyTable.click();
+  await expect(pulseHistory).toContainText("82");
   await expect(pulseHistory).not.toContainText("64");
   await page.keyboard.press("Escape");
   await expect(observationHistory).toHaveCount(0);
