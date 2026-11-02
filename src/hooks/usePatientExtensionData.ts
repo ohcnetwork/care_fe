@@ -5,6 +5,8 @@ import {
   NamespacedExtensionData,
   getExtensionFieldsWithName,
   getExtensionValue,
+  isComputedExtensionField,
+  useComputedExtensionFieldsReady,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas, {
   ExtensionSchemaType,
@@ -30,9 +32,15 @@ export default function usePatientExtensionData(
     [allExtensions, context],
   );
 
+  const computedFieldsReady = useComputedExtensionFieldsReady(extensionFields);
+
   return useMemo(
     () =>
       extensionFields
+        // Computed fields are left out until the FHIRPath evaluator has loaded.
+        .filter(
+          (field) => computedFieldsReady || !isComputedExtensionField(field),
+        )
         .map((field) => {
           const value = getExtensionValue(extensions, field);
           return {
@@ -41,6 +49,6 @@ export default function usePatientExtensionData(
           };
         })
         .filter((field) => field.value !== ""),
-    [extensionFields, extensions],
+    [extensionFields, extensions, computedFieldsReady],
   );
 }

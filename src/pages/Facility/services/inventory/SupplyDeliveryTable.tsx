@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,9 @@ import {
   getExtensionFieldsWithName,
   getExtensionValue,
   groupFieldsByAnchor,
+  isComputedExtensionField,
   NamespacedExtensionData,
+  useComputedExtensionFieldsReady,
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
@@ -162,17 +165,24 @@ export function SupplyDeliveryTable({
     [getExtensions],
   );
 
+  const extensionFields = useMemo(
+    () =>
+      getExtensionFieldsWithName(
+        allExtensions,
+        ExtensionContexts.supply_delivery_table,
+      ),
+    [allExtensions],
+  );
+  const computedFieldsReady = useComputedExtensionFieldsReady(extensionFields);
+
   // Extension columns grouped by the core column they follow (x-ui.placement)
   const extensionColumns = useMemo(
     () =>
       groupFieldsByAnchor(
-        getExtensionFieldsWithName(
-          allExtensions,
-          ExtensionContexts.supply_delivery_table,
-        ),
+        extensionFields,
         internal ? INTERNAL_EXTENSION_ANCHORS : EXTENSION_ANCHORS,
       ),
-    [allExtensions, internal],
+    [extensionFields, internal],
   );
 
   const renderExtensionHeads = (fields: ExtensionFieldWithName[]) =>
@@ -190,6 +200,13 @@ export function SupplyDeliveryTable({
     fields: ExtensionFieldWithName[],
   ) =>
     fields.map((field) => {
+      if (!computedFieldsReady && isComputedExtensionField(field)) {
+        return (
+          <TableCell key={`${field.extensionName}-${field.name}`}>
+            <Skeleton className="h-4 w-12" />
+          </TableCell>
+        );
+      }
       const value = getExtensionValue(
         delivery.extensions as NamespacedExtensionData,
         field,
