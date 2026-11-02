@@ -1,4 +1,5 @@
 import { useRoutes } from "raviger";
+import { Suspense } from "react";
 
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
@@ -6,24 +7,42 @@ import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider
 import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { patientTabs } from "@/components/Patient/PatientDetailsTab";
-import { PatientProfile } from "@/components/Patient/PatientProfile";
 
 import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
-import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
-import PatientIndex from "@/pages/Patient/index";
-import PublicPatientRegistration from "@/pages/PublicAppointments/PatientRegistration";
-import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
-import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
-import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
 import PublicRouter from "./PublicRouter";
+import { lazyPage } from "./lazyPage";
 import ReferralRoutes from "./routes/ReferralRoutes";
+
+const FacilitiesPage = lazyPage(
+  () => import("@/pages/Facility/FacilitiesPage"),
+  "FacilitiesPage",
+);
+const PatientIndex = lazyPage(() => import("@/pages/Patient/index"));
+const PatientProfile = lazyPage(
+  () => import("@/components/Patient/PatientProfile"),
+  "PatientProfile",
+);
+const PublicPatientRegistration = lazyPage(
+  () => import("@/pages/PublicAppointments/PatientRegistration"),
+);
+const PatientSelect = lazyPage(
+  () => import("@/pages/PublicAppointments/PatientSelect"),
+);
+const ScheduleAppointment = lazyPage(
+  () => import("@/pages/PublicAppointments/Schedule"),
+  "ScheduleAppointment",
+);
+const AppointmentSuccess = lazyPage(
+  () => import("@/pages/PublicAppointments/Success"),
+  "AppointmentSuccess",
+);
 
 const DashboardRoutes = {
   ...ReferralRoutes,
@@ -37,13 +56,9 @@ const DashboardRoutes = {
   "/patient/:id": ({ id }: { id: string }) => (
     <PatientProfile id={id} page="demography" />
   ),
-  "/patient/:id/:tab": ({
-    id,
-    tab,
-  }: {
-    id: string;
-    tab: (typeof patientTabs)[number]["route"];
-  }) => <PatientProfile id={id} page={tab} />,
+  "/patient/:id/:tab": ({ id, tab }: { id: string; tab: string }) => (
+    <PatientProfile id={id} page={tab} />
+  ),
 };
 
 const AppointmentRoutes = {
@@ -95,7 +110,11 @@ export default function PatientRouter() {
 
   if (!pages) {
     if (appointmentPages) {
-      return <PatientUserProvider>{appointmentPages}</PatientUserProvider>;
+      return (
+        <PatientUserProvider>
+          <Suspense fallback={<Loading />}>{appointmentPages}</Suspense>
+        </PatientUserProvider>
+      );
     }
     return <PublicRouter />;
   }
@@ -112,7 +131,7 @@ export default function PatientRouter() {
           <WorkspaceHeader patient />
           <div className="min-w-0 p-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
+              <Suspense fallback={<Loading />}>{pages}</Suspense>
             </ErrorBoundary>
           </div>
         </SidebarInset>

@@ -1,13 +1,33 @@
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
-import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
-import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
-import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
-import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
-import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect, useRoutes } from "raviger";
-import HealthcareServiceShow from "./HealthcareServiceShow";
+import { Suspense } from "react";
+
+import Loading from "@/components/Common/Loading";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+
+import { lazyPage } from "@/Routers/lazyPage";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
+
+const ScheduleHome = lazyPage(
+  () => import("@/components/Schedule/ScheduleHome"),
+  "ScheduleHome",
+);
+const AppointmentDetail = lazyPage(
+  () => import("@/pages/Appointments/AppointmentDetail"),
+);
+const AppointmentsPage = lazyPage(
+  () => import("@/pages/Appointments/AppointmentsPage"),
+);
+const PrintAppointments = lazyPage(
+  () => import("@/pages/Appointments/components/PrintAppointments"),
+);
+const ManageQueuePage = lazyPage(
+  () => import("@/pages/Facility/queues/ManageQueue"),
+  "ManageQueuePage",
+);
+const QueuesIndex = lazyPage(
+  () => import("@/pages/Facility/queues/QueuesIndex"),
+);
+const HealthcareServiceShow = lazyPage(() => import("./HealthcareServiceShow"));
 
 interface ServiceLayoutProps {
   facilityId: string;
@@ -94,5 +114,9 @@ export function ServiceLayout({ facilityId, serviceId }: ServiceLayoutProps) {
     },
   });
 
-  return <div>{routeResult}</div>;
+  return (
+    <div>
+      <Suspense fallback={<Loading />}>{routeResult}</Suspense>
+    </div>
+  );
 }

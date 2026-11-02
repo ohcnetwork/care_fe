@@ -1,44 +1,138 @@
 import { Redirect, useRoutes } from "raviger";
+import { Suspense } from "react";
 
+import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
-import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
-import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
-import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
-import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
-import BedsList from "@/pages/Facility/locations/BedsList";
-import { LocationOverview } from "@/pages/Facility/locations/LocationOverview";
-import LocationResponses from "@/pages/Facility/locations/LocationResponses";
-import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
-import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
-import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
-
-import { ExternalPurchasesList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/ExternalPurchasesList";
-import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
-import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow";
-
-import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
-import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
-import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
-import { PrintDeliveryOrder } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/PrintDeliveryOrder";
-import { PrintRequestOrder } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder";
-import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
-import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
-import BillMedicationsByNewDispense from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense";
-import BillMedicationsByPrescriptions from "@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions";
-import DispenseOrderCompleted from "@/pages/Facility/services/pharmacy/DispenseOrderCompleted";
-import { DispenseOrderView } from "@/pages/Facility/services/pharmacy/DispenseOrderView";
-import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
-import MedicationReturnList from "@/pages/Facility/services/pharmacy/MedicationReturnList";
-import MedicationReturnShow from "@/pages/Facility/services/pharmacy/MedicationReturnShow";
-import PrescriptionQueue from "@/pages/Facility/services/pharmacy/PrescriptionQueue";
-import PrescriptionsPreviewPage from "@/pages/Facility/services/pharmacy/PrescriptionsPreviewPage";
-import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
-import { PrintMedicationReturn } from "@/pages/Facility/services/pharmacy/PrintMedicationReturn";
-import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
-import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
+import { lazyPage } from "@/Routers/lazyPage";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
+
+const QuestionnaireFillPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/fill/QuestionnaireFillPage"),
+  "QuestionnaireFillPage",
+);
+const ScheduleHome = lazyPage(
+  () => import("@/components/Schedule/ScheduleHome"),
+  "ScheduleHome",
+);
+const AppointmentDetail = lazyPage(
+  () => import("@/pages/Appointments/AppointmentDetail"),
+);
+const AppointmentsPage = lazyPage(
+  () => import("@/pages/Appointments/AppointmentsPage"),
+);
+const PrintAppointments = lazyPage(
+  () => import("@/pages/Appointments/components/PrintAppointments"),
+);
+const BedsList = lazyPage(() => import("@/pages/Facility/locations/BedsList"));
+const LocationOverview = lazyPage(
+  () => import("@/pages/Facility/locations/LocationOverview"),
+  "LocationOverview",
+);
+const LocationResponses = lazyPage(
+  () => import("@/pages/Facility/locations/LocationResponses"),
+);
+const ManageQueuePage = lazyPage(
+  () => import("@/pages/Facility/queues/ManageQueue"),
+  "ManageQueuePage",
+);
+const QueuesIndex = lazyPage(
+  () => import("@/pages/Facility/queues/QueuesIndex"),
+);
+const InventoryList = lazyPage(
+  () => import("@/pages/Facility/services/inventory/InventoryList"),
+  "InventoryList",
+);
+const ExternalPurchasesList = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/requestOrder/ExternalPurchasesList"),
+  "ExternalPurchasesList",
+);
+const RequestOrderForm = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm"),
+);
+const RequestOrderShow = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow"),
+  "RequestOrderShow",
+);
+const DeliveryOrderForm = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm"),
+);
+const DeliveryOrderList = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList"),
+  "DeliveryOrderList",
+);
+const DeliveryOrderShow = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow"),
+  "DeliveryOrderShow",
+);
+const PrintDeliveryOrder = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/deliveryOrder/PrintDeliveryOrder"),
+  "PrintDeliveryOrder",
+);
+const PrintRequestOrder = lazyPage(
+  () =>
+    import("@/pages/Facility/services/inventory/externalSupply/requestOrder/PrintRequestOrder"),
+  "PrintRequestOrder",
+);
+const ToDispatch = lazyPage(
+  () => import("@/pages/Facility/services/inventory/ToDispatch"),
+  "ToDispatch",
+);
+const ToReceive = lazyPage(
+  () => import("@/pages/Facility/services/inventory/ToReceive"),
+  "ToReceive",
+);
+const BillMedicationsByNewDispense = lazyPage(
+  () =>
+    import("@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByNewDispense"),
+);
+const BillMedicationsByPrescriptions = lazyPage(
+  () =>
+    import("@/pages/Facility/services/pharmacy/billMedications/BillMedicationsByPrescriptions"),
+);
+const DispenseOrderCompleted = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/DispenseOrderCompleted"),
+);
+const DispenseOrderView = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/DispenseOrderView"),
+  "DispenseOrderView",
+);
+const MedicationDispenseHistory = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/MedicationDispenseHistory"),
+);
+const MedicationReturnList = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/MedicationReturnList"),
+);
+const MedicationReturnShow = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/MedicationReturnShow"),
+);
+const PrescriptionQueue = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/PrescriptionQueue"),
+);
+const PrescriptionsPreviewPage = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/PrescriptionsPreviewPage"),
+);
+const PrintDispenseOrder = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/PrintDispenseOrder"),
+  "PrintDispenseOrder",
+);
+const PrintMedicationReturn = lazyPage(
+  () => import("@/pages/Facility/services/pharmacy/PrintMedicationReturn"),
+  "PrintMedicationReturn",
+);
+const ServiceRequestList = lazyPage(
+  () => import("@/pages/Facility/services/serviceRequests/ServiceRequestList"),
+);
+const ServiceRequestShow = lazyPage(
+  () => import("@/pages/Facility/services/serviceRequests/ServiceRequestShow"),
+);
 
 interface LocationLayoutProps {
   facilityId: string;
@@ -488,5 +582,9 @@ export function LocationLayout({
     },
   });
 
-  return <div>{routeResult}</div>;
+  return (
+    <div>
+      <Suspense fallback={<Loading />}>{routeResult}</Suspense>
+    </div>
+  );
 }

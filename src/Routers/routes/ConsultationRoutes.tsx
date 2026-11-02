@@ -1,16 +1,40 @@
-import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
-import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
-import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
-import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";
-import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
-
 import { AppRoutes } from "@/Routers/AppRouter";
-import { EncounterShow } from "@/pages/Encounters/EncounterShow";
-import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
-import ReportViewer from "@/pages/Encounters/ReportViewer";
-import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { lazyPage } from "@/Routers/lazyPage";
 import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
+
+const PrintAllQuestionnaireResponses = lazyPage(
+  () =>
+    import("@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses"),
+  "PrintAllQuestionnaireResponses",
+);
+const PrintQuestionnaireResponse = lazyPage(
+  () =>
+    import("@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse"),
+  "PrintQuestionnaireResponse",
+);
+const QuestionnaireResponseView = lazyPage(
+  () =>
+    import("@/components/Facility/ConsultationDetails/QuestionnaireResponseView"),
+);
+const PrintMedicationAdministration = lazyPage(
+  () =>
+    import("@/components/Medicine/MedicationAdministration/PrintMedicationAdministration"),
+  "PrintMedicationAdministration",
+);
+const QuestionnaireFillPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/fill/QuestionnaireFillPage"),
+  "QuestionnaireFillPage",
+);
+const EncounterShowRoute = lazyPage(
+  () => import("@/Routers/pages/EncounterShowRoute"),
+  "EncounterShowRoute",
+);
+const PrintPrescription = lazyPage(
+  () => import("@/pages/Encounters/PrintPrescription"),
+  "PrintPrescription",
+);
+const ReportViewer = lazyPage(() => import("@/pages/Encounters/ReportViewer"));
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
@@ -115,13 +139,12 @@ const consultationRoutes: AppRoutes = {
   ...["facility", "organization"].reduce((acc: AppRoutes, identifier) => {
     acc[`/${identifier}/:id/patient/:patientId/encounter/:encounterId/:tab`] =
       ({ id, encounterId, tab, patientId }) => (
-        <EncounterProvider
+        <EncounterShowRoute
           encounterId={encounterId}
           patientId={patientId}
           facilityId={identifier === "facility" ? id : undefined}
-        >
-          <EncounterShow tab={tab} />
-        </EncounterProvider>
+          tab={tab}
+        />
       );
     return acc;
   }, {}),

@@ -1,8 +1,7 @@
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { Suspense } from "react";
 
 import { cn } from "@/lib/utils";
-
-import IconIndex from "@/CAREUI/icons/Index";
 
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
@@ -10,6 +9,7 @@ import { AppSidebarProvider } from "@/components/ui/sidebar/app-sidebar-provider
 import { WorkspaceHeader } from "@/components/ui/sidebar/workspace-header";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
@@ -20,6 +20,7 @@ import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterSc
 import useSidebarState from "@/hooks/useSidebarState";
 
 import { routes as publicRoutes } from "@/Routers/PublicRouter";
+import { lazyPage } from "@/Routers/lazyPage";
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
 import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
@@ -36,8 +37,13 @@ import { useShortcuts } from "@/context/ShortcutContext";
 import { LocationPageHeader } from "@/pages/Facility/locations/components/LocationPageHeader";
 import { FacilitySettingsPageHeader } from "@/pages/Facility/settings/FacilitySettingsPageHeader";
 import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
-import { LicensesPage } from "@/pages/Licenses/Licenses";
-import UserDashboard from "@/pages/UserDashboard";
+
+const IconIndex = lazyPage(() => import("@/CAREUI/icons/Index"));
+const LicensesPage = lazyPage(
+  () => import("@/pages/Licenses/Licenses"),
+  "LicensesPage",
+);
+const UserDashboard = lazyPage(() => import("@/pages/UserDashboard"));
 
 // List of paths and patterns where the sidebar should be hidden
 const PATHS_WITHOUT_SIDEBAR = [
@@ -207,7 +213,7 @@ export default function AppRouter() {
           ) : null}
           <div className={"min-w-0 p-4"} data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
-              {pages}
+              <Suspense fallback={<Loading />}>{pages}</Suspense>
             </ErrorBoundary>
           </div>
         </SidebarInset>
