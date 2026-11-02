@@ -18,6 +18,7 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { autoRegisterComponents } from "./plugins/autoRegisterComponents";
 import { careConsoleArt } from "./plugins/careConsoleArt";
+import { chunkGroups } from "./plugins/chunkGroups";
 import { federationHostBuild } from "./plugins/federationHostBuild";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -532,6 +533,13 @@ export default defineConfig(async ({ command, mode }): Promise<UserConfig> => {
       target: "es2022",
       outDir: "build",
       sourcemap: true,
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: chunkGroups,
+          },
+        },
+      },
     },
     esbuild: {
       target: "es2022",
