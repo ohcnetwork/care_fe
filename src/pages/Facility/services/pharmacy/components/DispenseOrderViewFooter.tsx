@@ -31,11 +31,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import useUpdateDispenseOrderStatus from "@/pages/Facility/services/pharmacy/hooks/useUpdateDispenseOrderStatus";
 import { MedicationReturnSheet } from "@/pages/Facility/services/pharmacy/MedicationReturnSheet";
@@ -211,27 +206,18 @@ export function DispenseOrderViewFooter({
                 <ShortcutBadge actionId="put-on-hold-action" />
               </Button>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={canCompleteDispense ? "primary" : "outline_primary"}
-                  onClick={() =>
-                    updateStatus({
-                      newStatus: DispenseOrderStatus.completed,
-                    })
-                  }
-                  disabled={isUpdatingStatus || !canCompleteDispense}
-                >
-                  {t("complete_dispense")}
-                  <ShortcutBadge actionId="submit-action" />
-                </Button>
-              </TooltipTrigger>
-              {!canCompleteDispense && (
-                <TooltipContent>
-                  {t("settle_pending_invoices_before_completion")}
-                </TooltipContent>
-              )}
-            </Tooltip>
+            <Button
+              variant={canCompleteDispense ? "primary" : "outline_primary"}
+              onClick={() =>
+                updateStatus({
+                  newStatus: DispenseOrderStatus.completed,
+                })
+              }
+              disabled={isUpdatingStatus || !canCompleteDispense}
+            >
+              {t("complete_dispense")}
+              <ShortcutBadge actionId="submit-action" />
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
