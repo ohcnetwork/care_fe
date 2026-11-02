@@ -24,7 +24,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -304,6 +307,7 @@ export function DispenseOrderViewFooter({
                   <ShortcutBadge actionId="cancel-action" />
                 </Link>
               </Button>
+              <ButtonGroupSeparator />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

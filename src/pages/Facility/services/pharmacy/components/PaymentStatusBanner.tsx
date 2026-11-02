@@ -26,7 +26,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -664,6 +667,7 @@ export function PaymentStatusBanner({
                       {t("collect_payment")}
                       <ShortcutBadge actionId="enter-action" />
                     </Button>
+                    <ButtonGroupSeparator />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="primary" size="icon">
