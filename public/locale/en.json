@@ -6367,8 +6367,6 @@
         "placeholder": "Block type"
       },
       "moreFormatting": "More formatting options"
-    ,
-      "questionnaire_circular_conditions": "This form has circular visibility conditions. The affected questions are disabled. Ask a form administrator to correct the conditions before using this form."
     }
   },
   "rich_text_plain_text_fallback": "Formatting could not be loaded. You can still edit the text below.",
@@ -8483,5 +8481,6 @@
   "workspace_studio_use_standard_history": "Use standard clinical history",
   "workspace_picker_scope_hint": "Your choice applies to all your encounters and clinical history.",
   "plots": "Plots",
-  "table": "Table"
+  "table": "Table",
+  "questionnaire_circular_conditions": "This form has circular visibility conditions. The affected questions are disabled. Ask a form administrator to correct the conditions before using this form."
 }
