@@ -6368,6 +6368,8 @@
         "placeholder": "Block type"
       },
       "moreFormatting": "More formatting options"
+    ,
+      "questionnaire_circular_conditions": "This form has circular visibility conditions. The affected questions are disabled. Ask a form administrator to correct the conditions before using this form."
     }
   },
   "rich_text_plain_text_fallback": "Formatting could not be loaded. You can still edit the text below.",

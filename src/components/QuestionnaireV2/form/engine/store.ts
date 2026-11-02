@@ -3,6 +3,7 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { selectAtom } from "jotai/utils";
 import { useMemo } from "react";
 
+import { circularConditionQuestionIds } from "@/components/QuestionnaireV2/shared/circularConditions";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -84,7 +85,7 @@ interface QuestionNode {
 
 const questionNodes = new WeakMap<
   Record<string, string>,
-  Map<string, QuestionNode>
+  { nodes: Map<string, QuestionNode>; circularIds: Set<string> }
 >();
 
 /** Index both links and ancestry so disabled controllers count as unanswered. */
@@ -99,7 +100,10 @@ export function buildLinkIndex(questions: Question[]): Record<string, string> {
     }
   };
   walk(questions);
-  questionNodes.set(index, nodes);
+  questionNodes.set(index, {
+    nodes,
+    circularIds: circularConditionQuestionIds(questions),
+  });
   return index;
 }
 
@@ -107,6 +111,15 @@ const questionIdByLinkIdAtom = atom((get) => {
   const questionnaire = get(questionnaireAtom);
   return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
 });
+
+const hasCircularConditionsAtom = atom(
+  (get) =>
+    (questionNodes.get(get(questionIdByLinkIdAtom))?.circularIds.size ?? 0) > 0,
+);
+
+export function useHasCircularConditions(): boolean {
+  return useAtomValue(hasCircularConditionsAtom);
+}
 
 /** Flatten ordinary groups, seed choice defaults, and keep repeating groups
  *  as containers whose child answers are created separately for each row. */
@@ -300,14 +313,12 @@ export function isQuestionEnabledInState(
   return isEnabledByConditions(question, responses, linkIndex, {
     visiting: new Set(),
     completed: new Map(),
-    cycles: 0,
   });
 }
 
 interface VisibilityEvaluation {
   visiting: Set<string>;
   completed: Map<string, boolean>;
-  cycles: number;
 }
 
 function isEnabledByConditions(
@@ -318,15 +329,15 @@ function isEnabledByConditions(
 ): boolean {
   const cached = evaluation.completed.get(question.id);
   if (cached !== undefined) return cached;
+  const metadata = questionNodes.get(linkIndex);
+  if (metadata?.circularIds.has(question.id)) return false;
   if (!question.enable_when?.length) return true;
   if (evaluation.visiting.has(question.id)) {
-    evaluation.cycles++;
     return false;
   }
-  const cyclesBefore = evaluation.cycles;
   evaluation.visiting.add(question.id);
   try {
-    const nodes = questionNodes.get(linkIndex);
+    const nodes = metadata?.nodes;
     const results = question.enable_when.map((condition) => {
       const controllerId = linkIndex[condition.question];
       if (!controllerId) return false;
@@ -352,10 +363,7 @@ function isEnabledByConditions(
       question.enable_behavior === "any"
         ? results.some(Boolean)
         : results.every(Boolean);
-    // A cycle's result depends on the active path and cannot be reused.
-    if (evaluation.cycles === cyclesBefore) {
-      evaluation.completed.set(question.id, enabled);
-    }
+    evaluation.completed.set(question.id, enabled);
     return enabled;
   } finally {
     evaluation.visiting.delete(question.id);
