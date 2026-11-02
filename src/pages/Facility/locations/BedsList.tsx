@@ -42,7 +42,7 @@ export default function BedsList({
   }, [locationDetail, setSelectedLocation]);
 
   return (
-    <div className="flex px-4 space-x-4 min-h-[calc(100vh-10rem)]">
+    <div className="flex p-4 space-x-4 min-h-[calc(100vh-10rem)]">
       <LocationContent
         facilityId={facilityId}
         selectedLocationId={selectedLocationId}

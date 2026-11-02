@@ -17,7 +17,10 @@ export default function Page(props: PageProps) {
   useShortcutSubContext(props.shortCutContext);
 
   return (
-    <div className={cn("md:px-6 py-0", props.className)} style={props.style}>
+    <div
+      className={cn("px-4 md:px-6 py-4", props.className)}
+      style={props.style}
+    >
       <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
