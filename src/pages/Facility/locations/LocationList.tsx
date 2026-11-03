@@ -49,7 +49,7 @@ export default function LocationList({
   }, [locationDetail, setSelectedLocation]);
 
   return (
-    <div className="flex p-4 space-x-4 min-h-[calc(100vh-10rem)]">
+    <div className="flex py-4 space-x-4 min-h-[calc(100vh-10rem)]">
       <LocationNavbar
         facilityId={facilityId}
         selectedLocationId={selectedLocationId}

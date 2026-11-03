@@ -316,7 +316,7 @@ export default function QueuesIndex({
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto">
         {/* Header Section - Date, Practitioner, Create Queue */}
         <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
           {/* Date Filter */}

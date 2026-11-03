@@ -207,7 +207,7 @@ export default function AppRouter() {
           ) : null}
           <div
             className={
-              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4"
+              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 md:px-6 pb-4"
             }
             data-cui-page
           >
