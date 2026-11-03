@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -46,7 +47,7 @@ import {
   Tags,
   Users,
 } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -63,7 +64,10 @@ import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
-import { encounterHistoryFiltersAtom } from "@/atoms/encounterFilterAtom";
+import {
+  encounterFilterStorageKey,
+  encounterHistoryFiltersAtom,
+} from "@/atoms/encounterFilterAtom";
 
 function getEncounterHistoryScope(
   patientId: string,
@@ -227,14 +231,28 @@ function EncounterCard({
 
 interface Props {
   onSelect?: () => void;
+  filterScope: string;
 }
 
-const EncounterHistoryList = ({ onSelect }: Props) => {
+const EncounterHistoryList = ({ onSelect, filterScope }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
 
+  const {
+    primaryEncounter,
+    primaryEncounterId,
+    selectedEncounterId,
+    setSelectedEncounter,
+    patientId,
+    facilityId,
+  } = useEncounter();
+
+  const storageKey = encounterFilterStorageKey("history", filterScope);
+
   // Use persisted filters from atom
-  const [filters, setFilters] = useAtom(encounterHistoryFiltersAtom);
+  const [filters, setFilters] = useAtom(
+    encounterHistoryFiltersAtom(filterScope),
+  );
 
   // Memoize date objects from ISO strings
   const dateFrom = useMemo(
@@ -247,9 +265,9 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   );
 
   // Read directly from sessionStorage on mount to avoid Jotai hydration delay
-  const initialQueryParamsRef = useRef(() => {
+  const initialQueryParams = useMemo(() => {
     try {
-      const stored = sessionStorage.getItem("encounter_history_filters");
+      const stored = sessionStorage.getItem(storageKey);
       if (stored) {
         const parsed = JSON.parse(stored);
         const selectedTags = parsed.selectedTags ?? [];
@@ -271,25 +289,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       // Ignore parsing errors
     }
     return {};
-  });
-
-  // Compute initial params once
-  const initialQueryParams = useMemo(
-    () =>
-      typeof initialQueryParamsRef.current === "function"
-        ? initialQueryParamsRef.current()
-        : initialQueryParamsRef.current,
-    [],
-  );
-
-  const {
-    primaryEncounter,
-    primaryEncounterId,
-    selectedEncounterId,
-    setSelectedEncounter,
-    patientId,
-    facilityId,
-  } = useEncounter();
+  }, [storageKey]);
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
@@ -543,6 +543,8 @@ export default function EncounterHistorySelector() {
   const isDesktop = useBreakpoints({ default: false, lg: true });
   const { t } = useTranslation();
   const { patientId, facilityId, primaryEncounter } = useEncounter();
+  const user = useAuthUser();
+  const filterScope = `${user.id}:${facilityId ?? primaryEncounter?.facility.id}`;
   const historyScope = getEncounterHistoryScope(
     patientId,
     facilityId,
@@ -590,7 +592,11 @@ export default function EncounterHistorySelector() {
           aria-label={t("encounter_history")}
           className="max-h-[min(36rem,var(--available-height))] w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
         >
-          <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+          <EncounterHistoryList
+            key={`${filterScope}:${patientId}`}
+            filterScope={filterScope}
+            onSelect={() => setIsOpen(false)}
+          />
         </PopoverContent>
       </Popover>
     );
@@ -599,14 +605,18 @@ export default function EncounterHistorySelector() {
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="px-4" aria-describedby={undefined}>
-        <DrawerHeader className="py-3">
-          <DrawerTitle className="text-lg font-semibold">
+      <DrawerContent height="fixed" aria-describedby={undefined}>
+        <DrawerHeader showCloseButton className="py-2 border-b shadow-2xs">
+          <DrawerTitle className="text-lg font-semibold pl-2">
             {t("encounter_history")}
           </DrawerTitle>
         </DrawerHeader>
-        <div className="min-h-0 overflow-y-auto pb-4 pr-2">
-          <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+        <div className="min-h-0 overflow-y-auto pb-4 px-4">
+          <EncounterHistoryList
+            key={`${filterScope}:${patientId}`}
+            filterScope={filterScope}
+            onSelect={() => setIsOpen(false)}
+          />
         </div>
       </DrawerContent>
     </Drawer>

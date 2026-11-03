@@ -119,7 +119,7 @@ export const BookAppointmentDetails = ({
     await createAppointment({
       patient: patientId,
       note: reason,
-      tags: selectedTags.map((tag) => tag.id),
+      tags: selectedTags.map((tag) => ({ tag: tag.id })),
     });
   };
 
@@ -231,17 +231,23 @@ export const BookAppointmentDetails = ({
             <ArrowRight size={16} />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="w-full p-4 space-y-4">
-          <div className="flex flex-col gap-3 overflow-y-auto -mx-2">
+        <DrawerContent
+          aria-describedby={undefined}
+          height="fixed"
+          className="p-1.5"
+        >
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-1 pt-2 pb-[env(safe-area-inset-bottom)]">
             {currentStep === 1 && (
               <>
-                <AppointmentDateSelection
-                  facilityId={facilityId}
-                  resourceId={selectedResource.resource?.id}
-                  resourceType={selectedResource.resource_type}
-                  setSelectedDate={handleDateChange}
-                  selectedDate={selectedDate}
-                />
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <AppointmentDateSelection
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id}
+                    resourceType={selectedResource.resource_type}
+                    setSelectedDate={handleDateChange}
+                    selectedDate={selectedDate}
+                  />
+                </div>
                 <Button
                   className="w-full"
                   disabled={!selectedDate}
@@ -252,41 +258,40 @@ export const BookAppointmentDetails = ({
                 </Button>
               </>
             )}
+            {currentStep === 2 && (
+              <>
+                <AppointmentSlotPicker
+                  facilityId={facilityId}
+                  resourceId={selectedResource.resource?.id}
+                  resourceType={selectedResource.resource_type}
+                  selectedSlotId={selectedSlotId}
+                  onSlotSelect={setSelectedSlotId}
+                  selectedDate={selectedDate}
+                />
+                <div className="sm:hidden flex flex-row gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    className="min-w-0 flex-auto"
+                    onClick={() => {
+                      setCurrentStep(1);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    <ArrowLeft />
+                    {t("back")}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="min-w-0 flex-auto"
+                    onClick={handleSubmit}
+                    disabled={!selectedSlotId || isCreating || referralBlocked}
+                  >
+                    {t("confirm_appointment")}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-
-          {currentStep === 2 && (
-            <>
-              <AppointmentSlotPicker
-                facilityId={facilityId}
-                resourceId={selectedResource.resource?.id}
-                resourceType={selectedResource.resource_type}
-                selectedSlotId={selectedSlotId}
-                onSlotSelect={setSelectedSlotId}
-                selectedDate={selectedDate}
-              />
-              <div className="sm:hidden flex flex-row gap-2 items-center justify-around">
-                <Button
-                  variant="outline"
-                  className="w-fit"
-                  onClick={() => {
-                    setCurrentStep(1);
-                    setSelectedSlotId(undefined);
-                  }}
-                >
-                  <ArrowLeft />
-                  {t("back")}
-                </Button>
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  onClick={handleSubmit}
-                  disabled={!selectedSlotId || isCreating || referralBlocked}
-                >
-                  {t("confirm_appointment")}
-                </Button>
-              </div>
-            </>
-          )}
         </DrawerContent>
       </Drawer>
     </div>

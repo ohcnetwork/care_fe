@@ -28,6 +28,9 @@ test.describe("Queue Creation & Editing", () => {
   test("should create a new queue", async ({ page }) => {
     const uniqueQueueName = faker.lorem.words(3);
     await createQueue(page, uniqueQueueName);
+    await expect(
+      page.getByRole("row").filter({ hasText: uniqueQueueName }),
+    ).toBeVisible();
   });
 
   test("should edit queue name", async ({ page }) => {
@@ -35,11 +38,10 @@ test.describe("Queue Creation & Editing", () => {
     const modifiedQueueName = faker.lorem.words(4);
     await createQueue(page, uniqueQueueName);
     await openQueueEditMenu(page, uniqueQueueName);
-    const queueNameInput = page.getByRole("textbox", { name: /queue name/i });
-    await queueNameInput.fill("");
-    // fill() bypasses key events; typing with spaces covers the menu stealing keystrokes
-    await queueNameInput.pressSequentially(modifiedQueueName);
-    await expect(queueNameInput).toHaveValue(modifiedQueueName);
+    const name = page.getByRole("textbox", { name: /queue name/i });
+    await name.clear();
+    await name.pressSequentially(modifiedQueueName);
+    await expect(name).toHaveValue(modifiedQueueName);
     await page.getByRole("button", { name: /update queue/i }).click();
     await expectToast(page, /queue updated successfully/i);
     await expect(

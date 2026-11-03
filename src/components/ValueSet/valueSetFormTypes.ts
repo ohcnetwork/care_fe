@@ -24,6 +24,3 @@ export interface ValueSetFormData extends Omit<ValueSetBase, "compose"> {
   parent?: string;
   inherited: boolean;
 }
-
-export const SLUG_MIN = 5;
-export const SLUG_MAX = 25;

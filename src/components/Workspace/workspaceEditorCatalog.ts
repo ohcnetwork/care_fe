@@ -2,17 +2,25 @@ import type { TFunction } from "i18next";
 import {
   Activity,
   BedDouble,
+  CalendarClock,
+  ChartSpline,
   ClipboardCheck,
   ClipboardList,
+  CreditCard,
   DoorOpen,
   FileClock,
   FileHeart,
   FileText,
+  FlaskConical,
   GitPullRequestArrow,
   HeartPulse,
   History,
   Hospital,
+  Layers,
   MapPin,
+  PanelsTopLeft,
+  PillBottle,
+  Scissors,
   ShieldAlert,
   Sparkles,
   Star,
@@ -29,7 +37,7 @@ export interface WorkspaceWidgetCatalogItem {
   labelKey: string;
   descriptionKey: string;
   icon: LucideIcon;
-  group: "clinical" | "workflow" | "details";
+  group: "clinical" | "workflow" | "details" | "history";
 }
 
 export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
@@ -55,6 +63,13 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     group: "clinical",
   },
   {
+    type: "procedures",
+    labelKey: "procedures",
+    descriptionKey: "workspace_widget_procedures_description",
+    icon: Scissors,
+    group: "clinical",
+  },
+  {
     type: "allergies",
     labelKey: "allergies",
     descriptionKey: "workspace_widget_allergies_description",
@@ -74,6 +89,27 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     descriptionKey: "workspace_widget_requests_description",
     icon: ClipboardList,
     group: "clinical",
+  },
+  {
+    type: "outstanding_orders",
+    labelKey: "workspace_outstanding_orders",
+    descriptionKey: "workspace_outstanding_orders_description",
+    icon: FlaskConical,
+    group: "clinical",
+  },
+  {
+    type: "current_medications",
+    labelKey: "workspace_current_medications",
+    descriptionKey: "workspace_current_medications_description",
+    icon: PillBottle,
+    group: "clinical",
+  },
+  {
+    type: "recent_encounters",
+    labelKey: "workspace_recent_encounters",
+    descriptionKey: "workspace_recent_encounters_description",
+    icon: CalendarClock,
+    group: "history",
   },
   {
     type: "referrals",
@@ -165,6 +201,34 @@ export const CORE_WIDGET_CATALOG: WorkspaceWidgetCatalogItem[] = [
     descriptionKey: "workspace_widget_audit_logs_description",
     icon: History,
     group: "details",
+  },
+  {
+    type: "observation_chart",
+    labelKey: "workspace_observation_chart",
+    descriptionKey: "workspace_observation_chart_description",
+    icon: ChartSpline,
+    group: "clinical",
+  },
+  {
+    type: "account",
+    labelKey: "account",
+    descriptionKey: "workspace_account_description",
+    icon: CreditCard,
+    group: "details",
+  },
+  {
+    type: "encounter_summary",
+    labelKey: "workspace_encounter_summary",
+    descriptionKey: "workspace_encounter_summary_description",
+    icon: PanelsTopLeft,
+    group: "details",
+  },
+  {
+    type: "encounter_extensions",
+    labelKey: "workspace_encounter_extensions",
+    descriptionKey: "workspace_encounter_extensions_description",
+    icon: Layers,
+    group: "clinical",
   },
 ];
 

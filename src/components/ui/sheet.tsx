@@ -238,6 +238,9 @@ function SheetContent({
       const update = () => {
         cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
+          // A nested drawer/dialog covers the sheet and handles the keyboard
+          // itself; resizing the sheet underneath only makes it reflow behind.
+          if (el.hasAttribute("data-nested-dialog-open")) return;
           if (side === "left" || side === "right") {
             el.style.height = `${vv.height}px`;
             el.style.top = `${vv.offsetTop}px`;
@@ -333,7 +336,7 @@ function SheetContent({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 z-20"
+                  className="absolute z-20 top-2 right-2"
                 >
                   <XIcon />
                   <span className="sr-only">{t("close")}</span>

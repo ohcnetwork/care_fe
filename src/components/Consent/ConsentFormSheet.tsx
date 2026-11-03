@@ -574,11 +574,7 @@ export default function ConsentFormSheet({
               >
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                className="bg-primary-600 hover:bg-primary-700"
-                disabled={isPending}
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}
               </Button>
             </div>

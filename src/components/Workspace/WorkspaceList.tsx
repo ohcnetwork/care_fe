@@ -182,7 +182,7 @@ export function WorkspaceList({ scope }: WorkspaceListProps) {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-hidden rounded-md bg-white">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">

@@ -4,18 +4,16 @@ import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { NavTabs } from "@/components/ui/nav-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Page from "@/components/Common/Page";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { ClinicalHistoryWorkspace } from "@/components/Workspace/ClinicalHistoryWorkspace";
 
 import query from "@/Utils/request/query";
 import patientApi from "@/types/emr/patient/patientApi";
 
 import { Separator } from "@/components/ui/separator";
-import { useClinicalHistoryTabs } from "./clinicalHistoryTabs";
 
 function ClinicalHistoryPage({
   patientId,
@@ -32,9 +30,10 @@ function ClinicalHistoryPage({
   const [{ sourceUrl }] = useQueryParams();
 
   const { data: patient } = useQuery({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", patientId, facilityId],
     queryFn: query(patientApi.get, {
       pathParams: { id: patientId },
+      queryParams: { facility: facilityId },
     }),
   });
 
@@ -48,16 +47,6 @@ function ClinicalHistoryPage({
     });
   };
 
-  const showMoreAfterIndex = useBreakpoints({
-    default: 1,
-    xs: 2,
-    sm: 6,
-    xl: 9,
-    "2xl": 12,
-  });
-
-  const tabs = useClinicalHistoryTabs({ patientId, facilityId });
-
   return (
     <Page
       title={
@@ -67,7 +56,7 @@ function ClinicalHistoryPage({
       }
       hideTitleOnPage
     >
-      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
+      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-3 md:-mx-8 px-3 md:px-6 pb-3 pt-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="outline" onClick={handleClose} size="icon">
@@ -97,14 +86,11 @@ function ClinicalHistoryPage({
         </div>
       </div>
       <section>
-        <NavTabs
-          className="w-full mt-4"
-          tabContentClassName="mt-8"
-          tabs={tabs}
+        <ClinicalHistoryWorkspace
+          patientId={patientId}
+          facilityId={facilityId}
           currentTab={tab}
           onTabChange={handleTabChange}
-          setPageTitle={false}
-          showMoreAfterIndex={showMoreAfterIndex}
         />
       </section>
     </Page>

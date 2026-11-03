@@ -27,7 +27,6 @@ import { questionOfRef } from "@/components/QuestionnaireV2/builder/actionVariab
 import {
   ActionVariableSources,
   contextValueLabel,
-  numberedQuestionLabel,
   questionLabel,
 } from "./labels";
 
@@ -53,6 +52,7 @@ function VariableSourceMenu({
 }) {
   const { t } = useTranslation();
   const questions = sources.questions.filter((entry) => !entry.unusable);
+  const questionPeers = questions.map((entry) => entry.question);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -81,7 +81,7 @@ function VariableSourceMenu({
                 onSelect={() => onPick(entry.ref)}
               >
                 <span className="truncate">
-                  {numberedQuestionLabel(entry.question, sources.numbers, t)}
+                  {questionLabel(entry.question, t, questionPeers)}
                 </span>
               </DropdownMenuItem>
             ))}
@@ -216,7 +216,11 @@ function MessagePreview({
             className="rounded bg-primary-50 px-1 font-medium text-primary-800"
           >
             {question
-              ? questionLabel(question.question, t)
+              ? questionLabel(
+                  question.question,
+                  t,
+                  sources.questions.map((entry) => entry.question),
+                )
               : contextValue
                 ? contextValueLabel(contextValue)
                 : ref}
@@ -267,7 +271,11 @@ export function ParamValueInput({
       );
       const label = question
         ? t("action_param_answer_of", {
-            question: questionLabel(question.question, t),
+            question: questionLabel(
+              question.question,
+              t,
+              sources.questions.map((entry) => entry.question),
+            ),
           })
         : contextValue
           ? contextValueLabel(contextValue)

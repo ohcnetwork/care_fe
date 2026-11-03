@@ -1,6 +1,6 @@
-import { faker } from "@faker-js/faker";
 import { type Page, expect } from "@playwright/test";
 import { setTimeout as delay } from "node:timers/promises";
+import { createTestPatient } from "tests/helper/patient";
 import {
   adminApiHeaders,
   apiBaseUrl,
@@ -25,75 +25,40 @@ export async function createQuestionnaireEncounter(
   facilityId: string,
 ): Promise<{ patientId: string; encounterId: string }> {
   const headers = adminApiHeaders();
-  const organizationsResponse = await fetch(
-    `${apiBaseUrl()}/api/v1/organization/?org_type=govt&limit=1`,
-    { headers },
-  );
-  if (!organizationsResponse.ok) {
-    throw new Error(
-      `Failed to fetch questionnaire patient organizations: ${organizationsResponse.status}`,
-    );
-  }
-  const organizations = (await organizationsResponse.json()) as {
-    results: { id: string }[];
-  };
-  const geoOrganization = organizations.results[0]?.id;
-  if (!geoOrganization) {
-    throw new Error("No government organization for questionnaire patient");
-  }
-  const patientBody = JSON.stringify({
-    name: `Questionnaire Test ${faker.string.alphanumeric(12)}`,
-    gender: "male",
-    phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
-    date_of_birth: "1990-01-15",
-    geo_organization: geoOrganization,
-    identifiers: [],
+  const patientId = await createTestPatient("Questionnaire Test");
+  const encounterBody = JSON.stringify({
+    patient: patientId,
+    facility: facilityId,
+    status: "in_progress",
+    encounter_class: "amb",
+    period: { start: new Date().toISOString() },
+    priority: "routine",
+    organizations: [],
   });
-  let patientId: string;
   for (let attempt = 0; ; attempt++) {
-    const patientResponse = await fetch(`${apiBaseUrl()}/api/v1/patient/`, {
+    const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
       method: "POST",
       headers,
-      body: patientBody,
+      body: encounterBody,
     });
-    if (patientResponse.ok) {
-      patientId = ((await patientResponse.json()) as { id: string }).id;
-      break;
+    if (response.ok) {
+      const encounterId = ((await response.json()) as { id: string }).id;
+      return { patientId, encounterId };
     }
-    const error = await patientResponse.text();
-    // The backend serializes patient creation with a global lock. Only
-    // retry its explicit pre-create rejection, never an ambiguous failure.
+    const error = await response.text();
+    // The backend serializes encounter creation per facility with a lock
+    // (the rejected create is rolled back), so retry only that rejection.
     if (
       attempt >= 4 ||
-      patientResponse.status !== 400 ||
-      !error.includes("Patient creation failed, try again after a while")
+      response.status !== 400 ||
+      !error.includes("Encounter creation failed, try again after a while")
     ) {
       throw new Error(
-        `Failed to create questionnaire patient: ${patientResponse.status} — ${error}`,
+        `Failed to create questionnaire encounter: ${response.status} — ${error}`,
       );
     }
     await delay(250 * (attempt + 1));
   }
-  const response = await fetch(`${apiBaseUrl()}/api/v1/encounter/`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      patient: patientId,
-      facility: facilityId,
-      status: "in_progress",
-      encounter_class: "amb",
-      period: { start: new Date().toISOString() },
-      priority: "routine",
-      organizations: [],
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to create questionnaire encounter: ${response.status} — ${await response.text()}`,
-    );
-  }
-  const encounterId = ((await response.json()) as { id: string }).id;
-  return { patientId, encounterId };
 }
 
 /**
@@ -188,8 +153,9 @@ export async function verifySubmittedValues(
 
 /**
  * Verifies that specific question labels have expected values on the overview page.
- * Scopes value assertion to the same table row as the label, avoiding false positives
- * from generic values like "Yes"/"No" appearing elsewhere on the page.
+ * Scopes value assertion to the same row as the label, avoiding false positives
+ * from generic values like "Yes"/"No" appearing elsewhere on the page. Answers
+ * render as table rows, or as term/definition pairs in workspace panels.
  */
 export async function verifyLabelledValues(
   page: Page,
@@ -200,12 +166,11 @@ export async function verifyLabelledValues(
 
   for (const [label, value] of pairs) {
     const row = page
-      .locator("tr", {
-        has: page.locator("td", { hasText: label }),
-      })
+      .locator("tr, dl > div")
+      .filter({ has: page.getByText(label, { exact: true }) })
       .first();
     await row.scrollIntoViewIfNeeded();
-    await expect(row.locator("td").nth(1)).toContainText(value);
+    await expect(row.locator("td, dd").last()).toHaveText(value);
   }
 }
 

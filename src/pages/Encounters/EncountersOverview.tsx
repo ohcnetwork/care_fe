@@ -30,7 +30,7 @@ export default function EncountersOverview({
       >
         <TabsContent value="patients">
           <EncounterList
-            key={encounterClass ?? "all"}
+            key={`${facilityId}:${encounterClass ?? "all"}`}
             facilityId={facilityId}
             encounterClass={encounterClass}
           />

@@ -4,6 +4,7 @@ import {
   openMultiFilter,
   selectedMultiFilterBar,
 } from "tests/helper/multiFilter";
+import { genderLabel } from "tests/helper/patient";
 import { createQuestionnaireEncounter } from "tests/helper/questionnaire";
 import {
   adminApiHeaders,
@@ -325,7 +326,7 @@ test.describe("Referrals", () => {
             title: questionnaireTitle,
             description: "Referral intake for the end-to-end workflow",
             status: "active",
-            subject_type: "encounter",
+            subject_type: "referral",
             actions: [],
             questions: [
               {
@@ -368,8 +369,36 @@ test.describe("Referrals", () => {
         questions: { id: string; link_id: string }[];
       };
       questionnaireId = form.id;
+      // The prior assessment is an ordinary encounter response: referral
+      // forms can only be submitted through a referral.
+      const assessmentQuestionId = faker.string.uuid();
+      const clinicalForm = await request.post(
+        `${apiBaseUrl()}/api/v1/questionnaire/`,
+        {
+          headers: adminApiHeaders(),
+          data: {
+            auth_context: "instance",
+            slug: `referral-history-${suffix}`,
+            title: `Clinical assessment ${suffix}`,
+            description: "Prior assessment shown in the referral history",
+            status: "active",
+            subject_type: "encounter",
+            actions: [],
+            questions: [
+              {
+                id: assessmentQuestionId,
+                link_id: "assessment",
+                text: "Prior assessment",
+                type: "string",
+                required: true,
+              },
+            ],
+          },
+        },
+      );
+      expect(clinicalForm.ok(), await clinicalForm.text()).toBeTruthy();
       const clinical = await request.post(
-        `${apiBaseUrl()}/api/v1/questionnaire/${form.id}/submit/`,
+        `${apiBaseUrl()}/api/v1/questionnaire/${(await clinicalForm.json()).id}/submit/`,
         {
           headers: adminApiHeaders(),
           data: {
@@ -378,17 +407,8 @@ test.describe("Referrals", () => {
             resource_id: encounterId,
             results: [
               {
-                question_id: form.questions.find(
-                  (question) => question.link_id === "clinical-reason",
-                )!.id,
+                question_id: assessmentQuestionId,
                 values: [{ value: priorAssessment }],
-              },
-              {
-                question_id: form.questions.find(
-                  (question) =>
-                    question.link_id === "previous-specialist-review",
-                )!.id,
-                values: [{ value: "false" }],
               },
             ],
           },
@@ -587,15 +607,11 @@ test.describe("Referrals", () => {
           name: "More Actions",
           exact: true,
         }),
-      ).toHaveAttribute("aria-expanded", "false");
+      ).toHaveCount(0);
       const newReferral = quickActions.getByRole("button", {
         name: "New referral",
         exact: true,
       });
-      await expect(newReferral).not.toBeVisible();
-      await quickActions
-        .getByRole("button", { name: "More Actions", exact: true })
-        .click();
       await expect(newReferral).toBeVisible();
       await captureResponsiveView(
         "referral-overview-empty",
@@ -612,8 +628,7 @@ test.describe("Referrals", () => {
       });
       await expect(patientDetails).toContainText(originPatient.name);
       await expect(patientDetails).toContainText(
-        originPatient.gender.charAt(0).toUpperCase() +
-          originPatient.gender.slice(1),
+        genderLabel(originPatient.gender),
       );
       await patientDetails
         .getByRole("button", { name: originPatient.name, exact: true })
@@ -726,8 +741,9 @@ test.describe("Referrals", () => {
         path: testInfo.outputPath("referral-clinical-history-390.png"),
       });
       if (historyViewport) await page.setViewportSize(historyViewport);
+      // Embedded history scopes card ids per instance (`<scope>-<responseId>`).
       await dialog
-        .locator(`#response-${clinicalResponseId}`)
+        .locator(`[id$="-${clinicalResponseId}"]`)
         .getByRole("button", { name: "More Actions", exact: true })
         .click();
       const printOpened = page.waitForEvent("popup");

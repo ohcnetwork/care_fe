@@ -233,16 +233,25 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    const diagnosisRow = page
-      .locator("div")
-      .filter({ hasText: /^DiagnosisStatusSeverityVerificationOnset/ })
-      .nth(1);
-    await expect(diagnosisRow).toBeVisible();
-    await expect(diagnosisRow.getByText("Status")).toBeVisible();
-    await expect(diagnosisRow.getByText("Severity")).toBeVisible();
-    await expect(diagnosisRow.getByText("Verification")).toBeVisible();
-    await expect(diagnosisRow.getByText("Onset")).toBeVisible();
+    const diagnosisSummary = page
+      .getByRole("region", { name: "Diagnoses", exact: true })
+      .getByRole("listitem")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(diagnosisSummary).toBeVisible();
+    await expect(
+      diagnosisSummary.getByText("Severe", { exact: true }),
+    ).toBeVisible();
+    await expect(diagnosisSummary.getByText(/^Onset\b/)).toBeVisible();
 
-    await expect(diagnosisRow.getByText(diagnosisName).first()).toBeVisible();
+    await page.goto(questionnaireUrl);
+    await page.getByRole("button", { name: "Diagnosis History" }).click();
+    const historyRow = page
+      .getByRole("dialog", { name: "Past Diagnoses" })
+      .getByRole("row")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
+    await expect(
+      historyRow.getByText("Confirmed", { exact: true }),
+    ).toBeVisible();
   });
 });

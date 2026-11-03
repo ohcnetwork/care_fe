@@ -182,7 +182,7 @@ export function PrintAppointments({
           <div className="mt-6 border-t border-gray-200 pt-6">
             {/* Appointments Table */}
             <div className="overflow-x-auto">
-              <Table className="w-full border">
+              <Table className="w-full">
                 <TableHeader>
                   <TableRow className="divide-x">
                     <TableHead className="p-2 font-medium text-gray-500">

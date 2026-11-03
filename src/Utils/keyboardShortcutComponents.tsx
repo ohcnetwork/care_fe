@@ -12,6 +12,7 @@ const keyboardShortcutBadgeVariants = cva("", {
       primary: "",
       classic_primary: "",
       secondary: "",
+      destructive: "",
     },
     position: {
       "top-right": "absolute top-1 right-1",
@@ -60,7 +61,9 @@ export function KeyboardShortcutBadge({
       variant={
         variant === "primary" || variant === "classic_primary"
           ? "primary"
-          : "default"
+          : variant === "destructive"
+            ? "destructive"
+            : "default"
       }
       data-shortcut-id={actionId}
       className={cn(

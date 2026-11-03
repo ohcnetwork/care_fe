@@ -99,12 +99,9 @@ test.describe("Studio value-set picker (facility scope)", () => {
           .getByRole("combobox")
           .filter({ hasText: "Select a value set" })
           .click();
-        const popover = page
-          .locator("[data-radix-popper-content-wrapper]")
-          .last();
+        const popover = page.locator('[data-slot="combobox-content"]').last();
         await popover
-          .locator('[data-slot="command-input"]')
-          .first()
+          .getByRole("combobox", { name: "Search option...", exact: true })
           .fill("Route");
         await expect(
           popover.getByRole("option", {
@@ -145,12 +142,9 @@ test.describe("Studio value-set picker (facility scope)", () => {
           .getByRole("combobox")
           .filter({ hasText: `${overrideName} (This facility)` })
           .click();
-        const popover = page
-          .locator("[data-radix-popper-content-wrapper]")
-          .last();
+        const popover = page.locator('[data-slot="combobox-content"]').last();
         await popover
-          .locator('[data-slot="command-input"]')
-          .first()
+          .getByRole("combobox", { name: "Search option...", exact: true })
           .fill("Route");
         await popover
           .getByRole("option", { name: `${PARENT_NAME} (Instance)` })

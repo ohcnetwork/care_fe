@@ -61,6 +61,8 @@ interface Props {
   canAccess?: boolean;
   questionnaireSlug?: string;
   authorRoleId?: string;
+  /** Only show responses submitted by this user. */
+  createdBy?: string;
   /** Maximum total responses to show, newest first. Omit for infinite scrolling. */
   limit?: number;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
@@ -104,26 +106,196 @@ export function formatValue(
   }
 }
 
+const hasResponseValue = (value: ResponseValue) =>
+  (value.value != null && value.value !== "") || !!value.coding;
+
+function ResponseRows({
+  questions,
+  responses,
+  className,
+  presentation,
+}: {
+  questions: Question[];
+  responses: QuestionnaireResponse["responses"];
+  className?: string;
+  presentation: "default" | "panel";
+}) {
+  const { t } = useTranslation();
+  const rows = questions.flatMap((question) => {
+    const response = responses.find((r) => r.question_id === question.id);
+    const values = response?.values ?? [];
+    return response && values.some(hasResponseValue)
+      ? [{ question, response, values }]
+      : [];
+  });
+  if (!rows.length) return null;
+
+  if (presentation === "default") {
+    return (
+      <Table className={className}>
+        <TableBody>
+          {rows.map(({ question, response, values }) => (
+            <TableRow key={question.id}>
+              <TableCell className="w-2/5 align-top text-sm text-gray-600">
+                {question.text}
+              </TableCell>
+              <TableCell className="align-top text-sm font-medium whitespace-pre-wrap text-gray-900">
+                {values.map((val, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && ", "}
+                    {formatValue(val.value, question.type)}
+                    {val.unit && (
+                      <span className="ml-1 font-normal text-gray-600">
+                        {val.unit.code}
+                      </span>
+                    )}
+                    {val.coding && (
+                      <span className="ml-1 font-normal text-gray-600">
+                        {val.coding.display} ({val.coding.code})
+                      </span>
+                    )}
+                  </React.Fragment>
+                ))}
+                {response.note && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 h-6 px-2 text-xs"
+                      >
+                        {t("see_note")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="max-w-[90vw] p-3">
+                      <p className="text-xs whitespace-pre-wrap text-gray-700">
+                        {response.note}
+                      </p>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  }
+
+  return (
+    <dl className={cn("min-w-0 divide-y divide-gray-100", className)}>
+      {rows.map(({ question, response, values }) => (
+        <div
+          key={question.id}
+          className="grid gap-x-4 gap-y-0.5 py-1.5 @md/response-card:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+        >
+          <dt className="text-sm leading-5 break-words text-gray-600">
+            {question.text}
+          </dt>
+          <dd className="flex min-w-0 items-start justify-between gap-2">
+            <span className="min-w-0 text-sm leading-5 font-medium wrap-break-word whitespace-pre-wrap text-gray-900">
+              {values.map((val, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && ", "}
+                  {formatValue(val.value, question.type)}
+                  {val.unit && (
+                    <span className="ml-1 font-normal text-gray-600">
+                      {val.unit.code}
+                    </span>
+                  )}
+                  {val.coding && (
+                    <span className="ml-1 font-normal text-gray-600">
+                      {val.coding.display} ({val.coding.code})
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </span>
+            {response.note && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 shrink-0 px-2 text-xs"
+                  >
+                    {t("see_note")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="max-w-[90vw] p-3">
+                  <p className="text-xs whitespace-pre-wrap text-gray-700">
+                    {response.note}
+                  </p>
+                </PopoverContent>
+              </Popover>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+const groupHasAnswer = (
+  question: Question,
+  responses: QuestionnaireResponse["responses"],
+): boolean =>
+  question.type === "group"
+    ? question.repeats
+      ? !!responses.find((answer) => answer.question_id === question.id)
+          ?.sub_results?.length
+      : (question.questions?.some((sub) => groupHasAnswer(sub, responses)) ??
+        false)
+    : responses.some((response) => response.question_id === question.id);
+
+/** Groups read as headed sections of the card; nested groups keep the parent's value column. */
+function GroupFrame({
+  title,
+  depth,
+  children,
+}: {
+  title: string;
+  depth: number;
+  children: React.ReactNode;
+}) {
+  if (depth === 0) {
+    return (
+      <section className="min-w-0 pt-2">
+        <h3 className="pb-0.5 text-sm font-semibold text-gray-900">{title}</h3>
+        {children}
+      </section>
+    );
+  }
+  return (
+    <section className="min-w-0 border-t border-gray-100 pt-2">
+      <h4 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+        {title}
+      </h4>
+      {children}
+    </section>
+  );
+}
+
 function QuestionGroup({
   group,
   responses,
-  parentTitle = "",
+  depth = 0,
   isSingleGroup = false,
+  presentation,
 }: {
   group: Question;
   responses: QuestionnaireResponse["responses"];
-  parentTitle?: string;
+  depth?: number;
   isSingleGroup?: boolean;
+  presentation: "default" | "panel";
 }) {
-  const { t } = useTranslation();
   if (group.repeats) {
     const rows =
       responses.find((answer) => answer.question_id === group.id)
         ?.sub_results ?? [];
     if (!rows.length) return null;
     return (
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold">{group.text}</h3>
+      <GroupFrame title={group.text} depth={depth}>
         <RegisteredGroupAnswerView
           question={group}
           responses={responses}
@@ -137,192 +309,90 @@ function QuestionGroup({
                 text: `${group.text} (${index + 1})`,
               }}
               responses={row}
-              parentTitle={parentTitle}
-              isSingleGroup={isSingleGroup}
+              depth={depth + 1}
+              presentation={presentation}
             />
           ))}
         />
-      </div>
+      </GroupFrame>
     );
   }
-  const hasAnswer = (question: Question): boolean =>
-    question.type === "group"
-      ? question.repeats
-        ? !!responses.find((answer) => answer.question_id === question.id)
-            ?.sub_results?.length
-        : (question.questions?.some(hasAnswer) ?? false)
-      : responses.some((response) => response.question_id === question.id);
-  if (!hasAnswer(group)) return null;
+  if (!groupHasAnswer(group, responses)) return null;
 
-  const currentTitle = parentTitle
-    ? `${parentTitle} - ${group.text}`
-    : group.text;
-
-  // Filter out questions with responses and split them for two-column layout
   const questionsWithResponses =
-    group.questions?.reduce((acc: Question[], question) => {
-      if (question.type === "structured") return acc;
-      if (question.type === "group") return acc;
+    group.questions?.filter((question) => {
+      if (question.type === "structured" || question.type === "group")
+        return false;
+      return !!responses
+        .find((r) => r.question_id === question.id)
+        ?.values?.some(hasResponseValue);
+    }) ?? [];
 
-      const response = responses.find((r) => r.question_id === question.id);
-      if (!response) return acc;
-
-      if (
-        !response.values?.some(
-          (entry) =>
-            (entry.value != null && entry.value !== "") || entry.coding,
-        )
-      )
-        return acc;
-
-      acc.push(question);
-      return acc;
-    }, []) || [];
-
-  // Check if any response has long text (>100 chars)
+  // Long answers read better in a single column.
   const hasLongText = questionsWithResponses.some((question) => {
     const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return false;
-
-    const value = response.values?.[0]?.value;
-    const coding = response.values?.[0]?.coding;
+    const value = response?.values?.[0]?.value;
+    const coding = response?.values?.[0]?.coding;
     const text = [
       value?.toString() || "",
       coding?.display || "",
       coding?.code || "",
     ].join(" ");
-
     return text.length > 50;
   });
 
-  // Use single column if any response has long text
   const shouldUseTwoColumns = isSingleGroup && !hasLongText;
   const midPoint = shouldUseTwoColumns
     ? Math.ceil(questionsWithResponses.length / 2)
     : questionsWithResponses.length;
   const leftQuestions = questionsWithResponses.slice(0, midPoint);
-  const rightQuestions = shouldUseTwoColumns
-    ? questionsWithResponses.slice(midPoint)
-    : [];
-
-  const renderQuestionRow = (question: Question) => {
-    const response = responses.find((r) => r.question_id === question.id);
-    if (!response) return null;
-
-    const values = response.values ?? [];
-    if (!values?.length) return null;
-
-    const hasAnyValue = values.some(
-      (v) => (v.value != null && v.value !== "") || v.coding,
-    );
-    if (!hasAnyValue) return null;
-
-    return (
-      <TableRow
-        key={question.id}
-        className="flex flex-col @md/response-card:table-row"
-      >
-        <TableCell className="py-1 pl-0 align-top">
-          <div className="text-sm text-gray-600 break-words whitespace-normal">
-            {question.text}
-          </div>
-        </TableCell>
-        <TableCell
-          className="py-1 pr-0 align-top"
-          colSpan={response.note ? 1 : 2}
-        >
-          <div className="text-sm font-medium break-words whitespace-pre-wrap">
-            {values.map((val, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && ", "}
-                {formatValue(val.value, question.type)}
-                {val.unit && (
-                  <span className="ml-1 text-gray-600">{val.unit.code}</span>
-                )}
-                {val.coding && (
-                  <span className="ml-1 text-gray-600">
-                    {val.coding.display} ({val.coding.code})
-                  </span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </TableCell>
-        {response.note && (
-          <TableCell className="py-1 pr-0 align-top text-right @md/response-card:table-cell">
-            <div className="flex justify-end">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-6 text-xs shrink-0 px-2"
-                  >
-                    {t("see_note")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="max-w-[90vw] p-3">
-                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                    {response.note}
-                  </p>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </TableCell>
-        )}
-      </TableRow>
-    );
-  };
+  const rightQuestions = questionsWithResponses.slice(midPoint);
 
   return (
-    <div className="border border-gray-200 rounded-md px-3 py-1.5">
-      <h3 className="text-sm font-semibold text-gray-900 border-b border-gray-200 pb-1 mb-1">
-        {group.text}
-      </h3>
+    <GroupFrame title={group.text} depth={depth}>
       <RegisteredGroupAnswerView
         question={group}
         responses={responses}
         fallback={
-          <div
-            className={cn("w-full", {
-              "grid @3xl/response-card:grid-cols-2 grid-cols-1 gap-4":
-                shouldUseTwoColumns,
-            })}
-          >
-            {leftQuestions.length > 0 && (
-              <div className="w-full">
-                <Table className="w-full">
-                  <TableBody>{leftQuestions.map(renderQuestionRow)}</TableBody>
-                </Table>
+          <>
+            {questionsWithResponses.length > 0 && (
+              <div
+                className={cn(
+                  "min-w-0",
+                  shouldUseTwoColumns &&
+                    "grid gap-x-6 @3xl/response-card:grid-cols-2",
+                )}
+              >
+                <ResponseRows
+                  questions={leftQuestions}
+                  responses={responses}
+                  presentation={presentation}
+                />
+                {rightQuestions.length > 0 && (
+                  <ResponseRows
+                    questions={rightQuestions}
+                    responses={responses}
+                    className="border-t border-gray-100 @3xl/response-card:border-t-0"
+                    presentation={presentation}
+                  />
+                )}
               </div>
             )}
-
-            {shouldUseTwoColumns && rightQuestions.length > 0 && (
-              <div className="w-full">
-                <Table className="w-full">
-                  <TableBody>{rightQuestions.map(renderQuestionRow)}</TableBody>
-                </Table>
-              </div>
-            )}
-
-            {group.questions?.map((subQuestion, idx) => {
-              if (subQuestion.type === "structured" || !subQuestion.type)
-                return null;
-              if (subQuestion.type !== "group") return null;
-
-              return (
+            {group.questions?.map((subQuestion, idx) =>
+              subQuestion.type === "group" ? (
                 <QuestionGroup
                   key={idx}
                   group={subQuestion}
                   responses={responses}
-                  parentTitle={currentTitle}
+                  depth={depth + 1}
+                  presentation={presentation}
                 />
-              );
-            })}
-          </div>
+              ) : null,
+            )}
+          </>
         }
       />
-    </div>
+    </GroupFrame>
   );
 }
 
@@ -445,7 +515,13 @@ function ResponseActionsMenu({
   );
 }
 
-function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
+function ResponseCardContent({
+  item,
+  presentation,
+}: {
+  item: QuestionnaireResponse;
+  presentation: "default" | "panel";
+}) {
   const { t } = useTranslation();
   const groups =
     item.questionnaire?.questions.filter(
@@ -464,114 +540,52 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
 
   // Helper function to render a column of questions
   const renderColumn = (questions: Question[]) => {
-    const result: React.ReactElement[] = [];
+    const result: { kind: "rows" | "group"; element: React.ReactElement }[] =
+      [];
     let currentNonGroupQuestions: Question[] = [];
 
     const flushNonGroupQuestions = () => {
-      if (currentNonGroupQuestions.length > 0) {
-        result.push(
-          <div
-            key={`group-${result.length}`}
-            className="border border-gray-200 rounded-md px-3 py-1.5"
-          >
-            <div className="w-full">
-              <Table className="table-fixed w-full">
-                <TableBody>
-                  {currentNonGroupQuestions.map((question) => {
-                    const response = item.responses.find(
-                      (r) => r.question_id === question.id,
-                    );
-                    if (!response) return null;
-
-                    const values = response.values ?? [];
-                    if (!values?.length) return null;
-
-                    const hasAnyValue = values.some(
-                      (v) => (v.value != null && v.value !== "") || v.coding,
-                    );
-                    if (!hasAnyValue) return null;
-
-                    return (
-                      <TableRow
-                        key={question.id}
-                        className="flex flex-col @md/response-card:table-row"
-                      >
-                        <TableCell className="py-1 pl-0 align-top">
-                          <div className="text-sm text-gray-600 break-words whitespace-normal">
-                            {question.text}
-                          </div>
-                        </TableCell>
-                        <TableCell
-                          className="py-1 pr-0 align-top"
-                          colSpan={response.note ? 1 : 2}
-                        >
-                          <div className="text-sm font-medium break-words whitespace-pre-wrap">
-                            {values.map((val, idx) => (
-                              <React.Fragment key={idx}>
-                                {idx > 0 && ", "}
-                                {formatValue(val.value, question.type)}
-                                {val.unit && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.unit.code}
-                                  </span>
-                                )}
-                                {val.coding && (
-                                  <span className="ml-1 text-gray-600">
-                                    {val.coding.display} ({val.coding.code})
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </TableCell>
-                        {response.note && (
-                          <TableCell className="py-1 pr-0 align-top text-right @md/response-card:table-cell">
-                            <div className="flex justify-end">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-6 text-xs shrink-0 px-2"
-                                  >
-                                    {t("see_note")}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="max-w-[90vw] p-3">
-                                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                                    {response.note}
-                                  </p>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>,
-        );
-        currentNonGroupQuestions = [];
+      const answered = currentNonGroupQuestions.some(
+        (question) =>
+          !!item.responses
+            .find((r) => r.question_id === question.id)
+            ?.values?.some(hasResponseValue),
+      );
+      if (answered) {
+        result.push({
+          kind: "rows",
+          element: (
+            <ResponseRows
+              key={`rows-${result.length}`}
+              questions={currentNonGroupQuestions}
+              responses={item.responses}
+              presentation={presentation}
+            />
+          ),
+        });
       }
+      currentNonGroupQuestions = [];
     };
 
     questions.forEach((question, index) => {
       if (question.type === "structured") return;
 
       if (question.type === "group") {
+        // Unanswered groups render nothing, so they must not split the rows around them.
+        if (!groupHasAnswer(question, item.responses)) return;
         flushNonGroupQuestions();
-        result.push(
-          <React.Fragment key={`group-${index}`}>
+        result.push({
+          kind: "group",
+          element: (
             <QuestionGroup
+              key={`group-${index}`}
               group={question}
               responses={item.responses}
-              isSingleGroup={groups.length === 1 && question.type === "group"}
+              isSingleGroup={groups.length === 1}
+              presentation={presentation}
             />
-          </React.Fragment>,
-        );
+          ),
+        });
       } else {
         currentNonGroupQuestions.push(question);
       }
@@ -581,26 +595,38 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
     return result;
   };
 
+  const leftSegments = renderColumn(leftGroups);
+  const rightSegments = renderColumn(rightGroups);
+  // When the columns stack, a split inside a run of rows must read as one list, not a new section.
+  const rightContinuesRows =
+    leftSegments.at(-1)?.kind === "rows" && rightSegments[0]?.kind === "rows";
+
   return (
     <div className="w-full">
       <div
         className={cn(
-          "grid gap-3",
+          "grid gap-x-6",
           shouldUseTwoColumns
             ? "grid-cols-1 @3xl/response-card:grid-cols-2"
             : "grid-cols-1",
         )}
       >
-        {/* Left Column */}
-        <div className="space-y-2">{renderColumn(leftGroups)}</div>
-
-        {/* Right Column */}
-        {shouldUseTwoColumns && (
-          <div className="space-y-2">{renderColumn(rightGroups)}</div>
+        <div className="flex min-w-0 flex-col divide-y divide-gray-200">
+          {leftSegments.map((segment) => segment.element)}
+        </div>
+        {rightSegments.length > 0 && (
+          <div
+            className={cn(
+              "flex min-w-0 flex-col divide-y divide-gray-200 border-t @3xl/response-card:border-t-0",
+              rightContinuesRows ? "border-gray-100" : "border-gray-200",
+            )}
+          >
+            {rightSegments.map((segment) => segment.element)}
+          </div>
         )}
       </div>
 
-      <div className="flex flex-col @md/response-card:flex-row @md/response-card:items-center @md/response-card:justify-between border-gray-200 pt-2 text-xs text-gray-500">
+      <div className="mt-2 flex flex-col border-t border-gray-100 pt-2 text-xs text-gray-500 @md/response-card:flex-row @md/response-card:items-center @md/response-card:justify-between">
         <div>
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
@@ -733,9 +759,11 @@ export function ResponseCard({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent
-            className={presentation === "panel" ? "p-2" : "px-3 pb-3 pt-0"}
+            className={
+              presentation === "panel" ? "px-3 pt-1 pb-2" : "px-3 pb-3 pt-0"
+            }
           >
-            <ResponseCardContent item={item} />
+            <ResponseCardContent item={item} presentation={presentation} />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
@@ -757,6 +785,7 @@ export default function QuestionnaireResponsesList({
   canAccess = true,
   questionnaireSlug,
   authorRoleId,
+  createdBy,
   limit,
   renderItem,
   subjectType = "encounter",
@@ -781,6 +810,7 @@ export default function QuestionnaireResponsesList({
       questionnaireSlug,
       encounterId,
       authorRoleId,
+      createdBy,
       { onlyUnstructured, subjectType, isPrintPreview, limit },
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
@@ -796,6 +826,7 @@ export default function QuestionnaireResponsesList({
           }),
           encounter: encounterId,
           role: authorRoleId,
+          created_by: createdBy,
           // The backend treats presence of this parameter as true.
           only_unstructured: onlyUnstructured ? true : undefined,
           subject_type: subjectType,

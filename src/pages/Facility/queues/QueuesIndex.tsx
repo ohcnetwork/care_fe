@@ -55,7 +55,7 @@ import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { startOfDay } from "date-fns";
+import { parseISO } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
@@ -78,7 +78,7 @@ function QueueRow({
   index,
 }: QueueRowProps) {
   const { t } = useTranslation();
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
@@ -152,7 +152,7 @@ function QueueRow({
                 {t("open_queue_board")}
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+            <DropdownMenuItem onSelect={() => setEditOpen(true)}>
               <Pencil className="size-4 mr-2" />
               {t("edit_queue_name")}
             </DropdownMenuItem>
@@ -170,8 +170,8 @@ function QueueRow({
           resourceType={resourceType}
           resourceId={resourceId}
           queueId={queue.id}
-          open={isEditOpen}
-          onOpenChange={setIsEditOpen}
+          open={editOpen}
+          onOpenChange={setEditOpen}
         />
       </TableCell>
     </TableRow>
@@ -325,7 +325,7 @@ export default function QueuesIndex({
               {t("date")}
             </label>
             <DatePicker
-              date={qParams.date ? new Date(qParams.date) : undefined}
+              date={qParams.date ? parseISO(qParams.date) : undefined}
               onChange={handleDateChange}
             />
           </div>
@@ -351,7 +351,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={startOfDay(qParams.date)}
+              initialDate={qParams.date ? parseISO(qParams.date) : undefined}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="size-4 mr-2" />
@@ -385,7 +385,9 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={startOfDay(qParams.date)}
+                    initialDate={
+                      qParams.date ? parseISO(qParams.date) : undefined
+                    }
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="size-4 mr-2" />

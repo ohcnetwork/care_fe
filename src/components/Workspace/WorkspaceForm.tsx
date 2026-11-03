@@ -50,11 +50,15 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useCareAppEncounterWidgets } from "@/hooks/useCareAppEncounterWidgets";
 import { useCareAppTabs } from "@/hooks/useCareApps";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import mutate from "@/Utils/request/mutate";
-import { createEncounterWorkspaceSchema } from "@/types/workspace/encounterWorkspace";
+import {
+  createEncounterWorkspaceSchema,
+  normalizeWorkspaceTemplate,
+} from "@/types/workspace/encounterWorkspace";
 import {
   WORKSPACE_AUTH_CONTEXTS,
   WORKSPACE_STATUS_COLORS,
@@ -66,9 +70,10 @@ import {
 } from "@/types/workspace/workspace";
 import workspaceApi from "@/types/workspace/workspaceApi";
 
-import { EncounterWorkspaceEditor } from "./EncounterWorkspaceEditor";
 import { WorkspaceOrganizationsField } from "./WorkspaceOrganizationsField";
+import { WorkspaceStudio } from "./WorkspaceStudio";
 import { parseWorkspaceJson } from "./workspaceEditorUtils";
+import { workspaceWidgetIssues } from "./workspaceValidation";
 
 interface WorkspaceFormValues {
   name: string;
@@ -95,8 +100,13 @@ export function WorkspaceForm({
   const queryClient = useQueryClient();
   const user = useAuthUser();
   const pluginTabs = useCareAppTabs("encounterTabs");
+  const { widgets: pluginWidgets } = useCareAppEncounterWidgets();
+  const existingTemplate = existing
+    ? normalizeWorkspaceTemplate(existing.template)
+    : undefined;
   const encounterSchema = createEncounterWorkspaceSchema(
     Object.keys(pluginTabs),
+    existingTemplate,
   );
   const [isEditorValid, setIsEditorValid] = useState(true);
   const [invalidTemplateSnapshot, setInvalidTemplateSnapshot] = useState<
@@ -124,8 +134,20 @@ export function WorkspaceForm({
             if (!parsed.success) {
               ctx.addIssue({
                 code: "custom",
-                message: t("encounter_workspace_template_invalid"),
+                message: t(
+                  template.schema_version === 1
+                    ? "encounter_workspace_template_invalid"
+                    : "workspace_template_structure_error",
+                ),
               });
+            } else {
+              for (const message of workspaceWidgetIssues(
+                parsed.data,
+                pluginWidgets,
+                t,
+              )) {
+                ctx.addIssue({ code: "custom", message });
+              }
             }
           }
         } catch {
@@ -160,7 +182,7 @@ export function WorkspaceForm({
           description: existing.description,
           template:
             invalidTemplateSnapshot ??
-            JSON.stringify(existing.template, null, 2),
+            JSON.stringify(existingTemplate, null, 2),
           status: existing.status,
           authContext: scope.authContext,
           departmentId: "",
@@ -615,8 +637,8 @@ export function WorkspaceForm({
               control={form.control}
               name="template"
               render={({ field }) => (
-                <FormItem className="min-w-0">
-                  <EncounterWorkspaceEditor
+                <FormItem className="min-w-0 grid-cols-1">
+                  <WorkspaceStudio
                     value={field.value}
                     onChange={field.onChange}
                     disabled={busy}

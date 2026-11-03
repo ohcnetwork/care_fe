@@ -243,7 +243,7 @@ export function AddMedicationReturnItemForm({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                <div className="rounded-md bg-white shadow overflow-hidden">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader className="bg-gray-100">
@@ -511,7 +511,7 @@ export function AddMedicationReturnItemForm({
                   className="rounded-md shadow-none border-solid"
                 />
               ) : (
-                <div className="border rounded-md overflow-hidden">
+                <div className="rounded-md overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow>

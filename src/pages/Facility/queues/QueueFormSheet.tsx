@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,10 +56,10 @@ interface QueueFormSheetProps {
   resourceId: string;
   queueId?: string; // If provided, we're in edit mode
   trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
   onSuccess?: () => void;
   initialDate?: Date;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function QueueFormSheet({
@@ -67,19 +68,15 @@ export default function QueueFormSheet({
   resourceId,
   queueId,
   trigger,
-  open,
-  onOpenChange,
   onSuccess,
   initialDate,
+  open,
+  onOpenChange,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
-  const isControlled = open !== undefined;
   const isOpen = open ?? internalOpen;
-  const setIsOpen = (value: boolean) => {
-    if (!isControlled) setInternalOpen(value);
-    onOpenChange?.(value);
-  };
+  const setIsOpen = onOpenChange ?? setInternalOpen;
   const queryClient = useQueryClient();
 
   const isEditMode = Boolean(queueId);
@@ -108,7 +105,7 @@ export default function QueueFormSheet({
     if (queue && isEditMode) {
       form.reset({
         name: queue.name,
-        date: new Date(queue.date),
+        date: parseISO(queue.date),
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -176,7 +173,7 @@ export default function QueueFormSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      {!isControlled && (
+      {(trigger || open === undefined) && (
         <SheetTrigger asChild>
           {trigger || (
             <Button>
