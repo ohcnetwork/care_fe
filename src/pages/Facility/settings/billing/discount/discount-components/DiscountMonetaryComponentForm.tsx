@@ -64,12 +64,15 @@ export function DiscountMonetaryComponentForm({
           code: CodeSchema.optional(),
           factor: zodDecimal({ min: 0, max: 100 }).optional().nullable(),
           amount: zodDecimal({ min: 0 }).optional().nullable(),
-          title: z.string().min(1, { message: t("field_required") }),
+          title: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
         .refine((data) => data.factor != null || data.amount != null, {
-          message: t("either_amount_or_factor_required"),
-          path: ["factor", "amount"],
+          message: t("field_required"),
+          path: [valueType],
         })
         .refine(
           (data) => {
@@ -81,7 +84,7 @@ export function DiscountMonetaryComponentForm({
             path: ["code"],
           },
         ),
-    [t],
+    [t, valueType],
   );
 
   const { facility } = useCurrentFacility();
