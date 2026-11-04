@@ -43,6 +43,7 @@ export function MarkEncounterAsCompletedDialog({
 
   const shouldShowCompletionWarning =
     completeEverythingToMark &&
+    Boolean(encounter.appointment?.id || encounter.appointment?.token?.id) &&
     !encounterRequiresDischarge(encounter) &&
     (willCloseAppointment || willCloseToken);
 
@@ -51,12 +52,13 @@ export function MarkEncounterAsCompletedDialog({
       ? "appointment_and_token_will_be_closed_warning"
       : "appointment_will_be_closed_warning"
     : "token_will_be_closed_warning";
+
   return (
     <AlertDialog {...props}>
       <AlertDialogContent>
         <AlertDialogHeader className="pb-0 md:pb-0">
           <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-          <AlertDialogDescription className="flex flex-col gap-2">
+          <AlertDialogDescription className="flex flex-col gap-1">
             <span>{t("mark_encounter_as_complete_confirmation")}</span>
             {shouldShowCompletionWarning && (
               <div className="bg-yellow-50 flex gap-2 items-center justify-start rounded-md p-1">
