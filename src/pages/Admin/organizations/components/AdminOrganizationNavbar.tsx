@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+
+const LIMIT = 30;
 
 interface OrganizationTreeNodeProps {
   organization: Organization;
@@ -30,18 +34,41 @@ function OrganizationTreeNode({
 }: OrganizationTreeNodeProps) {
   const isExpanded = expandedOrganizations.has(organization.id);
   const isSelected = organization.id === selectedOrganizationId;
+  const { ref, inView } = useInView();
 
-  const { data: children, isLoading } = useQuery({
+  const {
+    data: children = [],
+    isLoading,
+    isError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: ["organization", "list", organizationType, organization.id],
-    queryFn: query(organizationApi.list, {
-      pathParams: { id: organization.id },
-      queryParams: {
-        parent: organization.id || "",
-        org_type: organizationType,
-      },
-    }),
+    queryFn: ({ pageParam, signal }) =>
+      query(organizationApi.list, {
+        pathParams: { id: organization.id },
+        queryParams: {
+          parent: organization.id || "",
+          org_type: organizationType,
+          limit: LIMIT,
+          offset: pageParam,
+        },
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => data.pages.flatMap((page) => page.results),
     enabled: isExpanded,
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage && !isError) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
   return (
     <div className="space-y-1">
@@ -84,9 +111,9 @@ function OrganizationTreeNode({
           <span className="truncate">{organization.name}</span>
         </Button>
       </div>
-      {isExpanded && children?.results && children.results.length > 0 && (
+      {isExpanded && children.length > 0 && (
         <div className="pl-2">
-          {children.results.map((child) => (
+          {children.map((child) => (
             <OrganizationTreeNode
               key={child.id}
               organization={child}
@@ -98,6 +125,8 @@ function OrganizationTreeNode({
               organizationType={organizationType}
             />
           ))}
+          {hasNextPage && <div ref={ref} />}
+          {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
         </div>
       )}
     </div>
@@ -119,44 +148,69 @@ export default function AdminOrganizationNavbar({
   onToggleExpand,
   onOrganizationSelect,
 }: AdminOrganizationNavbarProps) {
-  const { data: allOrganizations, isLoading: isLoadingOrganizations } =
-    useQuery({
-      queryKey: ["organization", "list", organizationType],
-      queryFn: query(organizationApi.list, {
+  const { ref, inView } = useInView();
+
+  const {
+    data: topLevelOrganizations = [],
+    isLoading: isLoadingOrganizations,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["organization", "list", organizationType],
+    queryFn: ({ pageParam, signal }) =>
+      query(organizationApi.list, {
         queryParams: {
           parent: "",
           org_type: organizationType,
-          limit: 100,
+          limit: LIMIT,
+          offset: pageParam,
         },
-      }),
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    });
+      })({ signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    // The API orders by creation date, so loaded pages are sorted by name here.
+    select: (data) =>
+      data.pages
+        .flatMap((page) => page.results)
+        .sort((left, right) => left.name.localeCompare(right.name)),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-  const topLevelOrganizations = (allOrganizations?.results || [])
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name));
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">
-      <ScrollArea className="h-full min-h-[calc(100vh-14rem)]">
+      <ScrollArea className="h-full">
         <div className="p-4">
           {isLoadingOrganizations ? (
             <div className="p-4">
               <Skeleton className="h-8 w-full" />
             </div>
           ) : (
-            topLevelOrganizations.map((organization) => (
-              <OrganizationTreeNode
-                key={organization.id}
-                organization={organization}
-                selectedOrganizationId={selectedOrganizationId}
-                onSelect={onOrganizationSelect}
-                expandedOrganizations={expandedOrganizations}
-                onToggleExpand={onToggleExpand}
-                organizationType={organizationType}
-              />
-            ))
+            <>
+              {topLevelOrganizations.map((organization) => (
+                <OrganizationTreeNode
+                  key={organization.id}
+                  organization={organization}
+                  selectedOrganizationId={selectedOrganizationId}
+                  onSelect={onOrganizationSelect}
+                  expandedOrganizations={expandedOrganizations}
+                  onToggleExpand={onToggleExpand}
+                  organizationType={organizationType}
+                />
+              ))}
+              {hasNextPage && <div ref={ref} />}
+              {isFetchingNextPage && <Skeleton className="h-8 w-full" />}
+            </>
           )}
         </div>
       </ScrollArea>
