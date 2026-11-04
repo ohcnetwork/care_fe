@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  createEncounterTestPatient,
   getEncounterCreateDialog,
   openCalendarAndGetNextMonthButton,
   openCreateEncounterDialog,
@@ -18,7 +19,7 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page);
+  await openCreateEncounterDialog(page, await createEncounterTestPatient());
   const dialog = getEncounterCreateDialog(page);
   await dialog
     .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
@@ -130,21 +131,8 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Tests share a patient with a limit of five live encounters.
-  test.describe.configure({ mode: "serial" });
-
-  test.afterEach(async ({ page }, testInfo) => {
-    if (testInfo.status === testInfo.expectedStatus) return;
-    try {
-      await page.reload();
-      if (!(await encounterStatusCombobox(page).isVisible())) {
-        await openEncounterUpdateForm(page);
-      }
-      await cancelEncounterFromCurrentForm(page);
-    } catch {
-      // The encounter may already be terminal or creation may have failed.
-    }
-  });
+  // Encounter creation takes a facility-wide lock, so create them one at a time.
+  test.describe.configure({ mode: "default" });
 
   for (const [label, status] of [
     ["Cancelled", "cancelled"],

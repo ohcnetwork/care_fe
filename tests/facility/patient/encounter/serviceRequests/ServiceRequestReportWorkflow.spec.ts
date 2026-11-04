@@ -4,6 +4,8 @@ import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
+import { reportTypeCombobox } from "./serviceRequest";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 interface ReportWorkflowOptions {
@@ -147,10 +149,7 @@ test.describe("Service request report workflow", () => {
     await expect(
       page.getByRole("button", { name: "Test Results Entry", exact: true }),
     ).toBeVisible();
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
-      .click();
+    await reportTypeCombobox(page).click();
     await page
       .getByRole("option", {
         name: `${fixture.report.code.display} (${fixture.report.code.code})`,
@@ -188,7 +187,7 @@ test.describe("Service request report workflow", () => {
     ).toHaveCount(0);
   });
 
-  test("shows updates within the creation minute in collapsed and expanded report headers", async ({
+  test("shows updates within the creation minute in expanded report details", async ({
     page,
   }) => {
     const fixture = await mockReportWorkflow(page, {
@@ -196,29 +195,24 @@ test.describe("Service request report workflow", () => {
       reportStatus: "final",
     });
     await page.goto(fixture.url);
-    const expand = page.getByRole("button", {
-      name: `Expand ${fixture.report.code.display}`,
-      exact: true,
-    });
-    await expect(expand).toContainText("Updated:");
-    await expect(expand.locator("time")).toHaveAttribute(
-      "datetime",
-      fixture.report.modified_date,
-    );
-    await expand.click();
+    const review = page.locator("#service-request-section-review");
+    await review
+      .getByRole("button", {
+        name: `Expand ${fixture.report.code.display}`,
+        exact: true,
+      })
+      .click();
 
-    const collapse = page.getByRole("button", {
-      name: `Collapse ${fixture.report.code.display}`,
-      exact: true,
-    });
-    await expect(collapse).toContainText("Created:");
-    await expect(collapse).toContainText("Last Updated:");
-    await expect(collapse.locator("time")).toHaveCount(2);
-    await expect(collapse.locator("time").first()).toHaveAttribute(
+    // Timestamps render below the expanded report, not in its header.
+    await expect(review).toContainText("Created:");
+    await expect(review).toContainText("Last Updated:");
+    const timestamps = review.locator("time");
+    await expect(timestamps).toHaveCount(2);
+    await expect(timestamps.first()).toHaveAttribute(
       "datetime",
       fixture.report.created_date,
     );
-    await expect(collapse.locator("time").last()).toHaveAttribute(
+    await expect(timestamps.last()).toHaveAttribute(
       "datetime",
       fixture.report.modified_date,
     );

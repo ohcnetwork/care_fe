@@ -1,12 +1,62 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page } from "@playwright/test";
 import { ENCOUNTER_CLASSES } from "tests/facility/patient/encounter/encounterClasses";
+import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 
-export async function openCreateEncounterDialog(page: Page) {
+/**
+ * Create a patient through the API.
+ *
+ * A patient can have only five active encounters in a facility. Tests that
+ * create encounters use their own patient, so they do not fill up the shared one.
+ */
+export async function createEncounterTestPatient(): Promise<string> {
+  const headers = getApiHeaders();
+  const organizations = await fetch(
+    `${getApiUrl()}/api/v1/organization/?org_type=govt&limit=1`,
+    { headers },
+  );
+  if (!organizations.ok) {
+    throw new Error(`Failed to fetch organizations: ${organizations.status}`);
+  }
+  const { results } = (await organizations.json()) as {
+    results: { id: string }[];
+  };
+  const geoOrganizationId = results[0]?.id;
+  if (!geoOrganizationId) throw new Error("No govt organization found");
+
+  // Patient creation takes a global lock, so parallel workers can collide.
+  for (let attempt = 1; ; attempt++) {
+    const response = await fetch(`${getApiUrl()}/api/v1/patient/`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        name: `Encounter Test ${faker.string.alphanumeric(6)}`,
+        gender: "male",
+        phone_number: `+91${faker.helpers.fromRegExp(/[6-9][0-9]{9}/)}`,
+        date_of_birth: "1990-01-15",
+        geo_organization: geoOrganizationId,
+        identifiers: [],
+      }),
+    });
+    if (response.ok) return ((await response.json()) as { id: string }).id;
+
+    const error = await response.text();
+    if (attempt >= 5 || !error.includes("try again after a while")) {
+      throw new Error(
+        `Failed to create patient: ${response.status} — ${error}`,
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+  }
+}
+
+export async function openCreateEncounterDialog(
+  page: Page,
+  patientId = getPatientId(),
+) {
   const facilityId = getFacilityId();
-  const patientId = getPatientId();
 
   await page.goto(`/facility/${facilityId}/patient/${patientId}`);
   await page.getByRole("link", { name: "Patient Home" }).first().click();

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  createEncounterTestPatient,
   dischargeDispositionCombobox,
   encounterStatusCombobox,
   getEncounterCreateDialog,
@@ -16,7 +17,7 @@ async function createEncounter(
   page: Page,
   encounterClass: "Ambulatory" | "Inpatient",
 ) {
-  await openCreateEncounterDialog(page);
+  await openCreateEncounterDialog(page, await createEncounterTestPatient());
   const dialog = getEncounterCreateDialog(page);
   await dialog
     .getByRole("button", { name: new RegExp(`^${encounterClass}`) })
@@ -219,6 +220,9 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     expect(response.ok()).toBeTruthy();
     expect((await response.json()).status).toBe("discharged");
 
+    // Reload so the shortcut reads the discharged encounter.
+    await page.reload();
+    await expect(page.getByText("Discharged").nth(1)).toBeVisible();
     await markEncounterAsComplete(page);
   });
 });

@@ -15,7 +15,7 @@ import type {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -44,10 +44,7 @@ function getObservationGroup(
 }
 
 async function createReport(page: Page, reportType: string) {
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: "Select Diagnostic Report Type" })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option", { name: reportType }).click();
   const created = page.waitForResponse(
     (response) =>
@@ -80,10 +77,18 @@ async function addObservation(
     .getByRole("combobox", { name: "Search observations", exact: true })
     .fill(definition.title);
   await page.getByRole("option", { name: definition.title }).click();
-  await expect(
-    page.getByRole("combobox", { name: "Search observations", exact: true }),
-  ).toHaveCount(0);
   await expect(getObservationGroup(entry, definition)).toBeVisible();
+  await closeObservationPicker(page);
+}
+
+/** The picker stays open after a selection, so more definitions can be added. */
+async function closeObservationPicker(page: Page) {
+  const search = page.getByRole("combobox", {
+    name: "Search observations",
+    exact: true,
+  });
+  await search.press("Escape");
+  await expect(search).toHaveCount(0);
 }
 
 async function selectResultAction(
@@ -321,7 +326,8 @@ test.describe("Additional diagnostic report observations", () => {
         path: testInfo.outputPath("extra-observations-picker.png"),
       });
       await page.getByRole("option", { name: numericDefinition.title }).click();
-      await expect(search).toHaveCount(0);
+      await expect(numericCard).toBeVisible();
+      await closeObservationPicker(page);
       await numericCard.getByPlaceholder("Result value").fill("108.5");
       await addObservation(page, firstEntry, textDefinition);
       await textCard
@@ -333,7 +339,7 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
 
       await addObservation(page, secondEntry, componentDefinition);
-      await componentCard.getByPlaceholder("Component value").fill("96.5");
+      await componentCard.getByPlaceholder("Result value").fill("96.5");
       await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
         0,
       );
@@ -345,9 +351,9 @@ test.describe("Additional diagnostic report observations", () => {
 
     await test.step("Saving one report preserves the other's added draft", async () => {
       await saveResults(page, firstEntry);
-      await expect(
-        componentCard.getByPlaceholder("Component value"),
-      ).toHaveValue("96.5");
+      await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
+        "96.5",
+      );
       await saveResults(page, secondEntry);
       const firstResults = await readObservations(firstReportId);
       expect(firstResults).toHaveLength(2);
@@ -382,9 +388,9 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(textCard.getByPlaceholder("Result value")).toHaveValue(
         "No growth detected",
       );
-      await expect(
-        componentCard.getByPlaceholder("Component value"),
-      ).toHaveValue("96.5");
+      await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
+        "96.5",
+      );
 
       await page.screenshot({
         path: testInfo.outputPath("extra-observations-saved.png"),
@@ -400,12 +406,12 @@ test.describe("Additional diagnostic report observations", () => {
         .fill("Reviewed sample");
       await selectResultAction(page, componentCard, "Add Another Result");
       await componentCard
-        .getByPlaceholder("Component value")
+        .getByPlaceholder("Result value")
         .nth(1)
         .fill("101.25");
       await saveResults(page, firstEntry);
       await expect(
-        componentCard.getByPlaceholder("Component value").nth(1),
+        componentCard.getByPlaceholder("Result value").nth(1),
       ).toHaveValue("101.25");
       await saveResults(page, secondEntry);
 

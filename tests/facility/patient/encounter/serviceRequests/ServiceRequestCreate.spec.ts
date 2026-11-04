@@ -3,7 +3,7 @@ import { clickTabOrMenuItem, expectToast } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
-import { createServiceRequest } from "./serviceRequest";
+import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
 test.use({
   storageState: "tests/.auth/user.json",
@@ -156,7 +156,7 @@ test.describe("Patient Service Request Tab", () => {
       .getByRole("textbox", { name: "Type your Notes" })
       .fill("Test Notes");
     const collectButton = page.getByRole("button", {
-      name: "Collect ⇧ + ENTER",
+      name: "Mark as collected",
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
@@ -171,9 +171,7 @@ test.describe("Patient Service Request Tab", () => {
       specimenResponse,
       specimenCollectedToast,
     ]);
-    const reportTypeSelect = page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" });
+    const reportTypeSelect = reportTypeCombobox(page);
 
     if (!(await reportTypeSelect.isVisible())) {
       await page.getByText("Test Results Entry").click();
@@ -225,17 +223,14 @@ test("should fill result value, capture a photo and save results", async ({
     .getByRole("textbox", { name: "Type your Notes" })
     .fill("Test Notes");
   const collectButton = page.getByRole("button", {
-    name: "Collect ⇧ + ENTER",
+    name: "Mark as collected",
   });
   await expect(collectButton).toBeEnabled();
   const specimenCollectedToast = expectToast(page, /specimen collected/i);
   await Promise.all([collectButton.click(), specimenCollectedToast]);
 
   // Create the diagnostic report
-  await page
-    .getByRole("combobox")
-    .filter({ hasText: "Select Diagnostic Report Type" })
-    .click();
+  await reportTypeCombobox(page).click();
   await page.getByRole("option").first().click();
   await page.getByRole("button", { name: "Create Report" }).click();
 
