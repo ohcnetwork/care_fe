@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Request } from "@playwright/test";
-import * as fs from "fs";
 import { getApiHeaders, getApiUrl } from "tests/helper/utils";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
@@ -35,14 +34,13 @@ test.describe("Encounter Files Pagination", () => {
     const patientId = getPatientId();
     const encounterId = getEncounterId();
     const namePrefix = `pagination-${faker.string.alphanumeric(8)}`;
-    const fileData = fs
-      .readFileSync("tests/fixtures/images/sample_img1.png")
-      .toString("base64");
 
     // Create more files than one page holds, so that a second page exists.
+    // The list only shows records with a completed upload, so mark each
+    // record complete. The test does not need the file content.
     for (let i = 0; i < FILES_TO_CREATE; i++) {
-      const response = await request.post(
-        `${getApiUrl()}/api/v1/files/upload-file/`,
+      const createResponse = await request.post(
+        `${getApiUrl()}/api/v1/files/`,
         {
           headers: getApiHeaders(),
           data: {
@@ -51,11 +49,18 @@ test.describe("Encounter Files Pagination", () => {
             file_type: "encounter",
             file_category: "unspecified",
             associating_id: encounterId,
-            file_data: fileData,
+            mime_type: "image/png",
           },
         },
       );
-      expect(response.ok()).toBeTruthy();
+      expect(createResponse.ok()).toBeTruthy();
+      const { id } = await createResponse.json();
+
+      const completeResponse = await request.post(
+        `${getApiUrl()}/api/v1/files/${id}/mark_upload_completed/`,
+        { headers: getApiHeaders() },
+      );
+      expect(completeResponse.ok()).toBeTruthy();
     }
 
     // Record every list request so that no request can send a bad offset.
@@ -84,7 +89,9 @@ test.describe("Encounter Files Pagination", () => {
     expect(firstPage.count).toBeGreaterThanOrEqual(FILES_TO_CREATE);
     expect(firstPage.results).toHaveLength(PAGE_SIZE);
     await expect(
-      page.getByRole("row").filter({ hasText: fileLabel(firstPage.results[0]) }),
+      page
+        .getByRole("row")
+        .filter({ hasText: fileLabel(firstPage.results[0]) }),
     ).toBeVisible();
 
     // Page 2
@@ -114,7 +121,9 @@ test.describe("Encounter Files Pagination", () => {
       expect(firstPageIds.has(file.id)).toBe(false);
     }
     await expect(
-      page.getByRole("row").filter({ hasText: fileLabel(secondPage.results[0]) }),
+      page
+        .getByRole("row")
+        .filter({ hasText: fileLabel(secondPage.results[0]) }),
     ).toBeVisible();
 
     // No list request can send a missing or non-numeric offset.
