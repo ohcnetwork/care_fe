@@ -39,7 +39,6 @@ function OrganizationTreeNode({
   const {
     data: children = [],
     isLoading,
-    isError,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -65,10 +64,10 @@ function OrganizationTreeNode({
   });
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage && !isError) {
+    if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-1">

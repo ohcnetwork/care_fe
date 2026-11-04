@@ -386,7 +386,6 @@ function FlatOrgSidebar({
       const currentOffset = allPages.length * LIMIT;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    // The API orders by creation date, so loaded pages are sorted by name here.
     select: (data) =>
       data.pages
         .flatMap((page) => page.results)
