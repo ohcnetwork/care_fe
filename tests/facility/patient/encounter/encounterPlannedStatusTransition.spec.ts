@@ -131,7 +131,7 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Tests share a patient with a limit of five live encounters.
+  // Encounter creation takes a facility-wide lock, so run these one at a time.
   test.describe.configure({ mode: "serial" });
 
   test.afterEach(async ({ page }, testInfo) => {
