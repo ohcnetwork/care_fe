@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
@@ -63,11 +63,15 @@ function OrganizationTreeNode({
     enabled: isExpanded,
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
+  const loadMore = useEffectEvent(() => {
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  });
+
+  useEffect(() => {
+    if (inView) loadMore();
+  }, [inView, hasNextPage]);
 
   return (
     <div className="space-y-1">
@@ -180,11 +184,15 @@ export default function AdminOrganizationNavbar({
     refetchOnMount: false,
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
+  const loadMore = useEffectEvent(() => {
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  });
+
+  useEffect(() => {
+    if (inView) loadMore();
+  }, [inView, hasNextPage]);
 
   return (
     <div className="h-full bg-white rounded-lg shadow-lg min-w-64 hidden md:block">

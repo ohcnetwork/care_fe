@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
@@ -393,11 +393,15 @@ function FlatOrgSidebar({
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
+  const loadMore = useEffectEvent(() => {
+    if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage]);
+  });
+
+  useEffect(() => {
+    if (inView) loadMore();
+  }, [inView, hasNextPage]);
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-lg">
