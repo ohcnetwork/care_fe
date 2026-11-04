@@ -95,16 +95,11 @@ export default function ChargeItemActionsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            asChild
             disabled={item.status !== ChargeItemStatus.billable}
+            onSelect={() => onEdit(item)}
           >
-            <div
-              className="flex items-center cursor-pointer"
-              onClick={() => onEdit(item)}
-            >
-              <PencilIcon className="mr-2 size-4" />
-              <span>{t("edit")}</span>
-            </div>
+            <PencilIcon className="mr-2 size-4" />
+            <span>{t("edit")}</span>
           </DropdownMenuItem>
           {onChangeAccount && (
             <DropdownMenuItem

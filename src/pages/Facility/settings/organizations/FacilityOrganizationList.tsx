@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
@@ -172,7 +173,13 @@ export default function FacilityOrganizationList({
                             )
                           }
                         >
-                          <button type="button">{t("departments")}</button>
+                          <Button
+                            variant="link"
+                            type="button"
+                            className="h-auto p-0"
+                          >
+                            {t("departments")}
+                          </Button>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
@@ -184,7 +191,13 @@ export default function FacilityOrganizationList({
                               className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
                               onClick={() => handleParentClick(parent.id)}
                             >
-                              <button type="button">{parent.name}</button>
+                              <Button
+                                variant="link"
+                                type="button"
+                                className="h-auto p-0"
+                              >
+                                {parent.name}
+                              </Button>
                             </BreadcrumbLink>
                           </BreadcrumbItem>
                           <BreadcrumbSeparator />
@@ -226,17 +239,18 @@ export default function FacilityOrganizationList({
                         value={currentTab}
                         onValueChange={handleTabChange}
                       >
-                        <TabsList className="w-full justify-start border-b border-gray-300 bg-transparent p-0 h-auto rounded-none">
-                          {navItems.map((item) => (
-                            <TabsTrigger
-                              key={item.value}
-                              value={item.value}
-                              className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                            >
-                              {item.title}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
+                        <div className="w-full overflow-x-auto pb-1">
+                          <TabsList
+                            variant="line"
+                            className="w-full border-b border-border"
+                          >
+                            {navItems.map((item) => (
+                              <TabsTrigger key={item.value} value={item.value}>
+                                {item.title}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </div>
                       </Tabs>
                     </div>
                   </>

@@ -6,7 +6,6 @@
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action" },
     { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action" },
-    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input" },
     { "key": "e", "action": "edit-button", "description": "Edit" },
     { "key": "shift+1", "action": "tab-index-1", "description": "Switch to Tab 1" },
     { "key": "shift+2", "action": "tab-index-2", "description": "Switch to Tab 2" },
@@ -17,8 +16,7 @@
     { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7" },
     { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8" },
     { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9" },
-    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code" },
-    { "key": "arrowDown", "action": "keydown-action", "description": "Move Down" }
+    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code" }
   ],
 
   "facility": [
@@ -147,6 +145,7 @@
     { "key": "g p", "action": "plots", "description": "Go to Plots Tab" },
     { "key": "g o", "action": "observations", "description": "Go to Observations Tab" },
     { "key": "g m", "action": "medicines", "description": "Go to Medicines Tab" },
+    { "key": "g i", "action": "immunizations", "description": "Go to Immunizations Tab" },
     { "key": "g r", "action": "responses", "description": "Go to Responses Tab" },
     { "key": "g s", "action": "service-requests", "description": "Go to Service Requests Tab" },
     { "key": "g d", "action": "diagnostic-reports", "description": "Go to Diagnostic Reports Tab" },
