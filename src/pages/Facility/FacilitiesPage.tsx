@@ -9,6 +9,7 @@ import { LoginHeader } from "@/components/Common/LoginHeader";
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
@@ -26,6 +27,7 @@ export function FacilitiesPage() {
   });
 
   const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
@@ -73,6 +75,7 @@ export function FacilitiesPage() {
           ]}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
+          autoFocus={!isMobile}
         />
       </div>
 

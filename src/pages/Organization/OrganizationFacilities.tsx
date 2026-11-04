@@ -21,6 +21,7 @@ import { FacilityListRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { Settings } from "lucide-react";
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
@@ -38,6 +39,7 @@ export default function OrganizationFacilities({
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { isGeoAdmin } = getPermissions(
     hasPermission,
@@ -104,6 +106,7 @@ export default function OrganizationFacilities({
                   })
                 }
                 className="w-full max-w-sm"
+                autoFocus={!isMobile}
               />
             </div>
 
