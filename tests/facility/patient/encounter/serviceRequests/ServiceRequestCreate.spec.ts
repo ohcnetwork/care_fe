@@ -179,14 +179,12 @@ test.describe("Patient Service Request Tab", () => {
     await reportTypeSelect.click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: "Create Report" }).click();
-    const observationCombobox = page
+    // The unit is shown as text beside the result input and describes it.
+    const observationInput = page
       .getByRole("group", { name: observationDefinitionTitle, exact: true })
-      .getByRole("combobox", {
-        name: `${observationDefinitionTitle} Unit`,
-        exact: true,
-      });
-    await observationCombobox.scrollIntoViewIfNeeded();
-    await expect(observationCombobox).toContainText("mg");
+      .getByRole("textbox", { name: observationDefinitionTitle, exact: true });
+    await observationInput.scrollIntoViewIfNeeded();
+    await expect(observationInput).toHaveAccessibleDescription("mg");
   });
 });
 

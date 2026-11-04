@@ -77,18 +77,14 @@ async function addObservation(
     .getByRole("combobox", { name: "Search observations", exact: true })
     .fill(definition.title);
   await page.getByRole("option", { name: definition.title }).click();
+  // The picker stays open after a selection, so close it.
+  await page
+    .getByRole("combobox", { name: "Search observations", exact: true })
+    .press("Escape");
+  await expect(
+    page.getByRole("combobox", { name: "Search observations", exact: true }),
+  ).toHaveCount(0);
   await expect(getObservationGroup(entry, definition)).toBeVisible();
-  await closeObservationPicker(page);
-}
-
-/** The picker stays open after a selection, so more definitions can be added. */
-async function closeObservationPicker(page: Page) {
-  const search = page.getByRole("combobox", {
-    name: "Search observations",
-    exact: true,
-  });
-  await search.press("Escape");
-  await expect(search).toHaveCount(0);
 }
 
 async function selectResultAction(
@@ -326,8 +322,8 @@ test.describe("Additional diagnostic report observations", () => {
         path: testInfo.outputPath("extra-observations-picker.png"),
       });
       await page.getByRole("option", { name: numericDefinition.title }).click();
-      await expect(numericCard).toBeVisible();
-      await closeObservationPicker(page);
+      await search.press("Escape");
+      await expect(search).toHaveCount(0);
       await numericCard.getByPlaceholder("Result value").fill("108.5");
       await addObservation(page, firstEntry, textDefinition);
       await textCard

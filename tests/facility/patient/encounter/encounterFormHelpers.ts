@@ -27,7 +27,10 @@ export async function createEncounterTestPatient(): Promise<string> {
   if (!geoOrganizationId) throw new Error("No govt organization found");
 
   // Patient creation takes a global lock, so parallel workers can collide.
-  for (let attempt = 1; ; attempt++) {
+  // The backend reports this as a 400, like a validation error, so match the
+  // lock message to decide whether to retry.
+  let error = "";
+  for (let attempt = 1; attempt <= 5; attempt++) {
     const response = await fetch(`${getApiUrl()}/api/v1/patient/`, {
       method: "POST",
       headers,
@@ -42,14 +45,11 @@ export async function createEncounterTestPatient(): Promise<string> {
     });
     if (response.ok) return ((await response.json()) as { id: string }).id;
 
-    const error = await response.text();
-    if (attempt >= 5 || !error.includes("try again after a while")) {
-      throw new Error(
-        `Failed to create patient: ${response.status} — ${error}`,
-      );
-    }
+    error = `${response.status} — ${await response.text()}`;
+    if (!error.includes("try again after a while")) break;
     await new Promise((resolve) => setTimeout(resolve, attempt * 500));
   }
+  throw new Error(`Failed to create patient: ${error}`);
 }
 
 export async function openCreateEncounterDialog(

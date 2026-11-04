@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import {
-  createEncounterTestPatient,
   getEncounterCreateDialog as getEncounterDialog,
   getFutureDateButtonFromCalendar,
   openCalendarAndGetNextMonthButton,
@@ -12,7 +11,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter Future Date Restriction", () => {
   test.beforeEach(async ({ page }) => {
-    await openCreateEncounterDialog(page, await createEncounterTestPatient());
+    await openCreateEncounterDialog(page);
   });
 
   test("should disable future dates when status is In Progress", async ({

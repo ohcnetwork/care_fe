@@ -195,24 +195,21 @@ test.describe("Service request report workflow", () => {
       reportStatus: "final",
     });
     await page.goto(fixture.url);
-    const review = page.locator("#service-request-section-review");
-    await review
-      .getByRole("button", {
-        name: `Expand ${fixture.report.code.display}`,
-        exact: true,
-      })
-      .click();
+    const expand = page.getByRole("button", {
+      name: `Expand ${fixture.report.code.display}`,
+      exact: true,
+    });
+    await expand.click();
 
-    // Timestamps render below the expanded report, not in its header.
-    await expect(review).toContainText("Created:");
-    await expect(review).toContainText("Last Updated:");
-    const timestamps = review.locator("time");
-    await expect(timestamps).toHaveCount(2);
-    await expect(timestamps.first()).toHaveAttribute(
+    const details = page.locator("#service-request-section-review");
+    await expect(details).toContainText("Created:");
+    await expect(details).toContainText("Last Updated:");
+    await expect(details.locator("time")).toHaveCount(2);
+    await expect(details.locator("time").first()).toHaveAttribute(
       "datetime",
       fixture.report.created_date,
     );
-    await expect(timestamps.last()).toHaveAttribute(
+    await expect(details.locator("time").last()).toHaveAttribute(
       "datetime",
       fixture.report.modified_date,
     );

@@ -131,8 +131,21 @@ async function expectPersistedPeriod(
 }
 
 test.describe("Planned Encounter Status Transition", () => {
-  // Encounter creation takes a facility-wide lock, so create them one at a time.
-  test.describe.configure({ mode: "default" });
+  // Tests share a patient with a limit of five live encounters.
+  test.describe.configure({ mode: "serial" });
+
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status === testInfo.expectedStatus) return;
+    try {
+      await page.reload();
+      if (!(await encounterStatusCombobox(page).isVisible())) {
+        await openEncounterUpdateForm(page);
+      }
+      await cancelEncounterFromCurrentForm(page);
+    } catch {
+      // The encounter may already be terminal or creation may have failed.
+    }
+  });
 
   for (const [label, status] of [
     ["Cancelled", "cancelled"],

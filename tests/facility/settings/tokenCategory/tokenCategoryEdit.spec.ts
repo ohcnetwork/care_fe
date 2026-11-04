@@ -89,8 +89,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
         page.getByRole("heading", { name: "Edit Token Category" }),
       ).toBeVisible();
 
-      // Step 6: Update the token category. The backend does not change the
-      // resource type of an existing category, so keep it as created.
+      // Step 6: Update the token category
       await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
       await page
         .getByRole("textbox", { name: "Shorthand" })

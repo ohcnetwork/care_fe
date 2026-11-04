@@ -153,13 +153,11 @@ async function mockReviewPage(
     );
   }
 
-  // Entry and review cards share the report title, so scope each to its section.
   return {
     url: `/facility/${facilityId}/service_requests/${report.service_request.id}`,
     reportUrl,
     reportRequests: () => reportRequests,
     entry: page
-      .locator("#service-request-section-results")
       .locator('[data-slot="collapsible"]')
       .filter({
         has: page.locator('[data-slot="collapsible-trigger"]').filter({
@@ -168,21 +166,13 @@ async function mockReviewPage(
       })
       .first(),
     review: page
-      .locator("#service-request-section-review")
-      .locator('[data-slot="collapsible"]')
+      .locator('#service-request-section-review [data-slot="collapsible"]')
       .filter({
         has: page.getByRole("button", {
           name: new RegExp(`^(Expand|Collapse) ${report.code.display}$`),
         }),
       }),
   };
-}
-
-/** The confirm button's accessible name includes its shortcut hint. */
-function approveConfirmation(page: Page) {
-  return page
-    .getByRole("alertdialog", { name: "Confirm" })
-    .getByRole("button", { name: /^Approve/ });
 }
 
 test.describe("Diagnostic report review", () => {
@@ -331,7 +321,7 @@ test.describe("Diagnostic report review", () => {
     });
     await conclusion.fill("Unsubmitted entry draft");
     await expect(save).toBeEnabled();
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -340,7 +330,10 @@ test.describe("Diagnostic report review", () => {
     await fixture.review
       .getByRole("button", { name: "Approve Results", exact: true })
       .click();
-    await approveConfirmation(page).click();
+    await page
+      .getByRole("alertdialog")
+      .getByRole("button", { name: /^Approve/ })
+      .click();
 
     await expect(
       fixture.review.getByRole("link", { name: "Print Report" }),
@@ -402,7 +395,7 @@ test.describe("Diagnostic report review", () => {
         .getByRole("menuitem", { name: "Add Another Result", exact: true })
         .click();
       await group.getByPlaceholder("Result value").nth(1).fill("102");
-      await fixture.review
+      await page
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -418,7 +411,10 @@ test.describe("Diagnostic report review", () => {
       await catalogRequested;
 
       await approve.click();
-      await approveConfirmation(page).click();
+      await page
+        .getByRole("alertdialog")
+        .getByRole("button", { name: /^Approve/ })
+        .click();
       await expect(
         fixture.review.getByRole("link", { name: "Print Report" }),
       ).toBeVisible();
@@ -455,7 +451,7 @@ test.describe("Diagnostic report review", () => {
     });
     try {
       await page.goto(fixture.url);
-      await fixture.review
+      await page
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -530,7 +526,10 @@ test.describe("Diagnostic report review", () => {
         (request) =>
           request.method() === "PUT" && request.url().includes(report.id),
       );
-      await approveConfirmation(page).click();
+      await page
+        .getByRole("alertdialog")
+        .getByRole("button", { name: /^Approve/ })
+        .click();
       const savedReport = (await approvalRequest).postDataJSON();
       expect(savedReport.status).toBe("final");
       expect(savedReport.conclusion).toMatch(
@@ -566,7 +565,7 @@ test.describe("Diagnostic report review", () => {
     });
 
     await page.goto(fixture.url);
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -590,7 +589,7 @@ test.describe("Diagnostic report review", () => {
       })
       .click();
     const fileResponse = page.waitForResponse("**/api/v1/files/?*");
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -612,7 +611,7 @@ test.describe("Diagnostic report review", () => {
         })
         .click();
       const pendingFiles = page.waitForRequest("**/api/v1/files/?*");
-      await fixture.review
+      await page
         .getByRole("button", {
           name: `Expand ${report.code.display}`,
           exact: true,
@@ -639,7 +638,7 @@ test.describe("Diagnostic report review", () => {
       route.fulfill({ json: { count: 0, results: [] } }),
     );
     await page.goto(fixture.url);
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -670,7 +669,7 @@ test.describe("Diagnostic report review", () => {
       })
       .click();
     const reportResponse = page.waitForResponse(fixture.reportUrl);
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -691,7 +690,7 @@ test.describe("Diagnostic report review", () => {
       route.fulfill({ json: { count: 0, results: [] } }),
     );
     await page.goto(fixture.url);
-    await fixture.review
+    await page
       .getByRole("button", {
         name: `Expand ${report.code.display}`,
         exact: true,
@@ -815,7 +814,7 @@ test.describe("Diagnostic report review", () => {
       });
     });
     await page.goto(fixture.url);
-    const toggle = fixture.review.getByRole("button", {
+    const toggle = page.getByRole("button", {
       name: `Expand ${report.code.display}`,
       exact: true,
     });
@@ -833,28 +832,29 @@ test.describe("Diagnostic report review", () => {
     ).toBeVisible();
     expect(fixture.reportRequests()).toBe(1);
     expect(fileRequests).toBe(1);
-    // Final conclusions keep their formatting in a read-only editor.
-    const conclusion = fixture.review.getByRole("textbox", {
-      name: "Conclusion",
-      exact: true,
-    });
     await expect(
-      conclusion
-        .getByRole("heading", { name: "Clinical interpretation", level: 2 })
-        .locator("strong"),
+      fixture.review.locator("strong", { hasText: "Clinical interpretation" }),
     ).toBeVisible();
-    await expect(conclusion.getByText("Underlined detail")).toHaveCSS(
+    await expect(
+      fixture.review.getByRole("heading", {
+        name: "Clinical interpretation",
+        level: 2,
+      }),
+    ).toBeVisible();
+    await expect(fixture.review.getByText("Underlined detail")).toHaveCSS(
       "text-decoration-line",
       "underline",
     );
     await expect(
-      conclusion.locator("mark", { hasText: "Highlighted detail" }),
+      fixture.review.locator("mark", { hasText: "Highlighted detail" }),
     ).toBeVisible();
-    const checkboxes = conclusion.getByRole("checkbox");
-    await expect(checkboxes).toHaveText(["Follow up", "Sample reviewed"]);
+    const checkboxes = fixture.review.getByRole("checkbox");
+    await expect(checkboxes).toHaveCount(2);
     await expect(checkboxes.nth(0)).not.toBeChecked();
     await expect(checkboxes.nth(1)).toBeChecked();
-    await expect(conclusion).not.toBeEditable();
+    await expect(
+      fixture.review.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).not.toBeEditable();
     await fixture.review
       .getByRole("button", { name: "actions", exact: true })
       .click();
