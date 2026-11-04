@@ -147,8 +147,6 @@ export function DiagnosticReportObservationPicker({
                       value={definition.id}
                       onSelect={() => {
                         onSelect(definition);
-                        setOpen(false);
-                        setSearch("");
                       }}
                     >
                       <div className="min-w-0">

@@ -249,6 +249,7 @@ export function TokenCategoryFormContent({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isEditMode}
                   >
                     <FormControl>
                       <SelectTrigger>

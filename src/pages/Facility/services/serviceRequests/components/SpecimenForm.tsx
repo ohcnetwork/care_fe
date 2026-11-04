@@ -46,7 +46,6 @@ import {
   type SpecimenDefinitionRead,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { isNegative, round } from "@/Utils/decimal";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
@@ -597,7 +596,6 @@ export function SpecimenForm({
               <Button type="submit" disabled={disableEdit || isPending}>
                 <CheckIcon className="size-4" />
                 {t("mark_as_collected")}
-                <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
           </div>
