@@ -156,7 +156,7 @@ test.describe("Patient Service Request Tab", () => {
       .getByRole("textbox", { name: "Type your Notes" })
       .fill("Test Notes");
     const collectButton = page.getByRole("button", {
-      name: "Mark as collected",
+      name: "Mark as collected ⇧ + ENTER",
     });
     await expect(collectButton).toBeEnabled();
     const specimenResponse = page.waitForResponse(
@@ -221,7 +221,7 @@ test("should fill result value, capture a photo and save results", async ({
     .getByRole("textbox", { name: "Type your Notes" })
     .fill("Test Notes");
   const collectButton = page.getByRole("button", {
-    name: "Mark as collected",
+    name: "Mark as collected ⇧ + ENTER",
   });
   await expect(collectButton).toBeEnabled();
   const specimenCollectedToast = expectToast(page, /specimen collected/i);

@@ -54,6 +54,11 @@ export function DiagnosticReportHeader({
             type="button"
             aria-label={`${t(isExpanded ? "collapse" : "expand")} ${title ?? t("diagnostic_report")}`}
             className="flex flex-1 items-center justify-between gap-2 min-w-0 text-left cursor-pointer"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.stopPropagation();
+              }
+            }}
           >
             <div className="flex flex-1 items-center gap-2 min-w-0">
               <CardTitle className="min-w-0 w-full">

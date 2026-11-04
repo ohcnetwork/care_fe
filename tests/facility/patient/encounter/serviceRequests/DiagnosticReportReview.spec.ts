@@ -822,8 +822,7 @@ test.describe("Diagnostic report review", () => {
     expect(fixture.reportRequests()).toBe(0);
     expect(fileRequests).toBe(0);
     await toggle.focus();
-    // Enter is bound to a global shortcut, so expand the card with Space.
-    await toggle.press("Space");
+    await toggle.press("Enter");
     await expect(
       fixture.review.getByRole("link", { name: "Print Report" }),
     ).toBeVisible();

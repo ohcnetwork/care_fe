@@ -114,6 +114,49 @@ test.describe("Token Category Edit - Permission Tests", () => {
       await expect(tableBody).toContainText(resourceType);
     });
 
+    test("Admin cannot change the resource type of an existing token category", async ({
+      page,
+    }) => {
+      const otherResourceType = faker.helpers.arrayElement(
+        resourceTypes.filter((type) => type !== resourceType),
+      );
+      const categoryRow = page
+        .locator("tbody tr")
+        .filter({ hasText: tokenCategoryName });
+      const searchBox = page.getByRole("textbox", {
+        name: "Search Token Categories",
+      });
+
+      // Create a token category with the original resource type
+      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
+      await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
+      await page.getByRole("combobox", { name: "Resource Type" }).click();
+      await page.getByRole("option", { name: resourceType }).click();
+      await page.getByRole("textbox", { name: "Shorthand" }).fill(shorthand);
+      await page.getByRole("button", { name: "Create" }).click();
+      await page.waitForURL(
+        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
+      );
+
+      // Try to change the resource type while editing
+      await searchBox.fill(tokenCategoryName);
+      await categoryRow.getByRole("link", { name: "Edit" }).click();
+      await expect(
+        page.getByRole("heading", { name: "Edit Token Category" }),
+      ).toBeVisible();
+      await page.getByRole("combobox", { name: "Resource Type" }).click();
+      await page.getByRole("option", { name: otherResourceType }).click();
+      await page.getByRole("button", { name: "Update" }).click();
+      await page.waitForURL(
+        /\/facility\/[^/]+\/settings\/token_category(?!\/.*\/edit)/,
+      );
+
+      // The resource type stays locked to the value set at creation
+      await searchBox.fill(tokenCategoryName);
+      await expect(categoryRow).toContainText(resourceType);
+      await expect(categoryRow).not.toContainText(otherResourceType);
+    });
+
     test("Admin can access Set as default and Edit buttons after clicking View button", async ({
       page,
     }) => {

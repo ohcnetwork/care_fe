@@ -1,11 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
-  createEncounterTestPatient,
   getEncounterCreateDialog,
   openCalendarAndGetNextMonthButton,
   openCreateEncounterDialog,
   selectStatusInCreateDialog,
 } from "tests/facility/patient/encounter/encounterFormHelpers";
+import { createPatient } from "tests/helper/patient";
 
 import type { EncounterRead } from "@/types/emr/encounter/encounter";
 
@@ -19,7 +19,7 @@ async function createPlannedEncounter(
   start: "past" | "future",
   encounterClass: "Ambulatory" | "Inpatient" = "Ambulatory",
 ) {
-  await openCreateEncounterDialog(page, await createEncounterTestPatient());
+  await openCreateEncounterDialog(page, await createPatient("Encounter Test"));
   const dialog = getEncounterCreateDialog(page);
   await dialog
     .getByRole("button", { name: new RegExp(`^${encounterClass}`) })

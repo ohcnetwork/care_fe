@@ -17,6 +17,8 @@ import type {
 
 import { createServiceRequest, reportTypeCombobox } from "./serviceRequest";
 
+const COMPONENT_RESULT = "96.5";
+
 test.use({
   storageState: "tests/.auth/user.json",
   viewport: { width: 1440, height: 1000 },
@@ -77,10 +79,6 @@ async function addObservation(
     .getByRole("combobox", { name: "Search observations", exact: true })
     .fill(definition.title);
   await page.getByRole("option", { name: definition.title }).click();
-  // The picker stays open after a selection, so close it.
-  await page
-    .getByRole("combobox", { name: "Search observations", exact: true })
-    .press("Escape");
   await expect(
     page.getByRole("combobox", { name: "Search observations", exact: true }),
   ).toHaveCount(0);
@@ -322,7 +320,6 @@ test.describe("Additional diagnostic report observations", () => {
         path: testInfo.outputPath("extra-observations-picker.png"),
       });
       await page.getByRole("option", { name: numericDefinition.title }).click();
-      await search.press("Escape");
       await expect(search).toHaveCount(0);
       await numericCard.getByPlaceholder("Result value").fill("108.5");
       await addObservation(page, firstEntry, textDefinition);
@@ -335,7 +332,9 @@ test.describe("Additional diagnostic report observations", () => {
       await expect(secondEntry.getByText(textDefinition.title)).toHaveCount(0);
 
       await addObservation(page, secondEntry, componentDefinition);
-      await componentCard.getByPlaceholder("Result value").fill("96.5");
+      await componentCard
+        .getByPlaceholder("Result value")
+        .fill(COMPONENT_RESULT);
       await expect(firstEntry.getByText(componentDefinition.title)).toHaveCount(
         0,
       );
@@ -348,7 +347,7 @@ test.describe("Additional diagnostic report observations", () => {
     await test.step("Saving one report preserves the other's added draft", async () => {
       await saveResults(page, firstEntry);
       await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
-        "96.5",
+        COMPONENT_RESULT,
       );
       await saveResults(page, secondEntry);
       const firstResults = await readObservations(firstReportId);
@@ -368,7 +367,7 @@ test.describe("Additional diagnostic report observations", () => {
           {
             code: componentDefinition.component![0].code,
             value: {
-              value: "96.5",
+              value: COMPONENT_RESULT,
               unit: componentDefinition.component![0].permitted_unit,
             },
           },
@@ -385,7 +384,7 @@ test.describe("Additional diagnostic report observations", () => {
         "No growth detected",
       );
       await expect(componentCard.getByPlaceholder("Result value")).toHaveValue(
-        "96.5",
+        COMPONENT_RESULT,
       );
 
       await page.screenshot({
