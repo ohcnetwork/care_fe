@@ -9,8 +9,6 @@ import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 
-import { LocalStorageKeys } from "@/common/constants";
-
 // Extend Window interface to include CARE_API_URL
 declare global {
   interface Window {
@@ -49,21 +47,9 @@ function initApp() {
   );
 }
 
-// zod is not needed to render the sign-in pages, so it is configured from its
-// own chunk. Signed-in views use zod right away, so only they wait for it.
-const zodReady = import("./lib/zod")
-  .then(({ initZod }) => initZod())
-  .catch((error) => {
-    console.error("Failed to configure zod:", error);
-  });
-const isSignedIn =
-  !!localStorage.getItem(LocalStorageKeys.accessToken) ||
-  !!localStorage.getItem(LocalStorageKeys.patientTokenKey);
-
 // Initialize i18n with namespaces from API before rendering the app
-Promise.all([
-  initI18n().catch((error) => {
+initI18n()
+  .catch((error) => {
     console.error("Failed to initialize i18n:", error);
-  }),
-  isSignedIn ? zodReady : undefined,
-]).finally(initApp);
+  })
+  .finally(initApp);

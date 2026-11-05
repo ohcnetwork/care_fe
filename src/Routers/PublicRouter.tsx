@@ -2,6 +2,8 @@ import careConfig from "@careConfig";
 import { Redirect, useRoutes } from "raviger";
 import { lazy, Suspense } from "react";
 
+import { withZod } from "@/lib/zodReady";
+
 import Login from "@/components/Auth/Login";
 import Loading from "@/components/Common/Loading";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
@@ -11,7 +13,10 @@ import { LocalStorageKeys } from "@/common/constants";
 // Only the login form ships with the entry; every other public page is split
 // out so a cold load of /login stays small.
 const loadLandingPage = () => import("@/pages/Landing/LandingPage");
-const loadAuthenticate = () => import("@/components/Auth/Authenticate");
+// The 2FA and patient OTP pages build zod schemas, so they wait for zod.
+const loadAuthenticate = withZod(
+  () => import("@/components/Auth/Authenticate"),
+);
 
 const LandingPage = lazy(() =>
   loadLandingPage().then((m) => ({ default: m.LandingPage })),
@@ -35,7 +40,7 @@ const LicensesPage = lazy(() =>
   })),
 );
 const PatientLogin = lazy(
-  () => import("@/pages/PublicAppointments/auth/PatientLogin"),
+  withZod(() => import("@/pages/PublicAppointments/auth/PatientLogin")),
 );
 const ResetPassword = lazy(() => import("@/components/Auth/ResetPassword"));
 const InvalidReset = lazy(() => import("@/components/ErrorPages/InvalidReset"));
