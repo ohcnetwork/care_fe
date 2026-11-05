@@ -74,6 +74,7 @@ export function FilterSelect({
           type="button"
           variant="outline"
           size="icon"
+          className="border-input! shadow-xs"
           onClick={onClear}
           aria-label={t("remove_filter")}
           aria-description={label}
