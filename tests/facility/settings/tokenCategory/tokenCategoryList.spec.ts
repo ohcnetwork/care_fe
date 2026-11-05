@@ -75,12 +75,14 @@ test.describe("Token Category List - Permission Tests", () => {
         .getByRole("textbox", { name: /username/i })
         .fill("care-volunteer");
       await page.getByLabel(/^password$/i).fill("Ohcn@123");
-      await page.getByRole("button", { name: /login/i }).click();
+      await page.getByRole("button", { name: /^sign in$/i }).click();
       await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
 
       // Verify we're logged in as volunteer
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
     });
 

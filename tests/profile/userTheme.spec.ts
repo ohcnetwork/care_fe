@@ -242,7 +242,9 @@ test.describe("Own account appearance preferences", () => {
       ).toBeVisible();
       await page.goto("/");
       await expect(
-        page.getByRole("heading", { name: /^Hey .+/ }),
+        page.getByRole("heading", {
+          name: /^Good (Morning|Afternoon|Evening), .+/,
+        }),
       ).toBeVisible();
       await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
       await expect(page.locator("html")).toHaveCSS("font-size", "18px");
@@ -430,7 +432,7 @@ test.describe("Own account appearance preferences", () => {
 test.describe("Another user's appearance preferences", () => {
   test.use({ storageState: "tests/.auth/user.json" });
 
-  test("does not expose Theme or change either account when an admin views another profile", async ({
+  test("allows administrative deletion without exposing another user's account settings", async ({
     page,
     context,
     request,
@@ -450,11 +452,30 @@ test.describe("Another user's appearance preferences", () => {
     ]) {
       await page.goto(profile);
       await expect(
-        page.getByRole("tab", { name: "User Information" }),
+        page.getByRole("tab", { name: "Profile", exact: true }),
       ).toHaveAttribute("aria-selected", "true");
       await expect(page.locator("#username")).toHaveText("care-staff");
       await expect(
         page.getByRole("tab", { name: "Theme", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Delete Account", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Clear Cache", exact: true }),
+      ).toHaveCount(0);
+      await page.getByRole("tab", { name: "Security", exact: true }).click();
+      await expect(
+        page.getByRole("button", { name: "Delete Account", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Update Password", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", {
+          name: "Two Factor Authentication",
+          exact: true,
+        }),
       ).toHaveCount(0);
       await page.goto(`${profile}/theme`);
       await expect(

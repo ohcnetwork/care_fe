@@ -122,15 +122,17 @@ const ScheduleTemplateItem = ({
 
   return (
     <div className="rounded-lg bg-white py-2 shadow-sm">
-      <div className="flex items-center justify-between py-2 pr-4">
-        <div className="flex">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 py-2 pr-4">
+        <div className="flex min-w-0 flex-1">
           <ColoredIndicator
             className="my-1 mr-2.5 h-5 w-1.5 rounded-r"
             id={template.id}
           />
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold">{template.name}</span>
+          <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="min-w-0 break-words text-lg font-semibold">
+                {template.name}
+              </span>
 
               {!template.is_public && (
                 <Tooltip>
@@ -156,7 +158,7 @@ const ScheduleTemplateItem = ({
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="ml-auto flex shrink-0 flex-wrap gap-2">
           {canSetChargeItemDefinition && canWriteSchedule && (
             <ScheduleChargeItemDefinitionSelector
               facilityId={facilityId}
@@ -182,7 +184,11 @@ const ScheduleTemplateItem = ({
                 setQParams({ ...qParams, edit: open ? template.id : null })
               }
               trigger={
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("edit_schedule_template")}
+                >
                   <Edit3Icon className="size-4" />
                 </Button>
               }

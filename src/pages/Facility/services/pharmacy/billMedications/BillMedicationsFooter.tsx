@@ -86,6 +86,7 @@ export const BillMedicationsFooter = ({
             {t("cancel")}
           </BackButton>
           <Button
+            type="submit"
             variant="primary"
             size="lg"
             disabled={isBillingMedications || exceedsLimit}

@@ -345,7 +345,10 @@ function ActionConfigurationEditor({
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => remove(undefined)}>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => remove(undefined)}
+                    >
                       {t("delete")}
                     </AlertDialogAction>
                   </AlertDialogFooter>

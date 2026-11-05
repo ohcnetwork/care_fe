@@ -27,7 +27,14 @@ import {
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -148,25 +155,17 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
     props.optional,
   ]);
 
-  const renderOrganizationCommand = (className?: string) => {
+  const renderOrganizationCommand = () => {
     return (
-      <Command className={className}>
-        <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
-          <span className="font-semibold text-base text-gray-900">
-            {t("select_organization")}
-          </span>
-          <span className="text-sm text-gray-500 mt-0.5">
-            {t("select_organization_description")}
-          </span>
-        </div>
-        <div className="flex items-center border-b px-3 sticky top-[48px] bg-white z-10">
-          <CommandInput
-            placeholder={t("search_organizations")}
-            onValueChange={setOrgSearchQuery}
-            value={orgSearchQuery}
-            className="border-none focus:ring-0 text-base sm:text-sm"
-          />
-        </div>
+      <Command>
+        <CommandInput
+          placeholder={t("search_organizations")}
+          aria-label={t("search_organizations")}
+          onValueChange={setOrgSearchQuery}
+          value={orgSearchQuery}
+          wrapperClassName="border-b border-gray-100 shadow-xs"
+          className="text-base sm:text-sm"
+        />
         <CommandList onWheel={(e) => e.stopPropagation()}>
           <CommandEmpty>
             {isLoadingAvailableOrganizations ? (
@@ -209,7 +208,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
           </CommandGroup>
         </CommandList>
         {currentSelection && (
-          <div className="md:m-0 m-2 flex items-center justify-between px-3 py-2 bg-sky-50/50 border-sky-200 rounded-md">
+          <div className="m-2 flex shrink-0 items-center justify-between rounded-md border-sky-200 bg-sky-50/50 px-3 py-2 md:m-0">
             <div className="flex flex-col">
               <span className="text-xs text-gray-500 mb-0.5">
                 {t("selected")}
@@ -291,7 +290,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
               (singleSelection && selectedOrganizations.length < 1)) &&
               (isMobile ? (
                 <>
-                  <Drawer open={open} onOpenChange={setOpen}>
+                  <Drawer open={open} onOpenChange={handleOpenChange}>
                     <DrawerTrigger asChild>
                       <Button
                         variant="outline"
@@ -309,8 +308,16 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </DrawerTrigger>
-                    <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-                      {renderOrganizationCommand()}
+                    <DrawerContent height="fixed" className="p-1.5">
+                      <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+                        <DrawerTitle>{t("select_organization")}</DrawerTitle>
+                        <DrawerDescription className="text-sm">
+                          {t("select_organization_description")}
+                        </DrawerDescription>
+                      </DrawerHeader>
+                      <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+                        {renderOrganizationCommand()}
+                      </div>
                     </DrawerContent>
                   </Drawer>
                 </>
@@ -334,7 +341,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                   <PopoverContent
                     align="start"
                     sideOffset={4}
-                    className="p-0 w-[var(--anchor-width)] max-h-[80vh] overflow-auto"
+                    className="w-[var(--anchor-width)] gap-0 p-0 overflow-clip"
                   >
                     {renderOrganizationCommand()}
                   </PopoverContent>

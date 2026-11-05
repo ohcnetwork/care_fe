@@ -12,7 +12,7 @@ setup("authenticate", async ({ page }) => {
   await page.getByLabel(/^password$/i).fill("admin");
 
   // Click login button
-  await page.getByRole("button", { name: /login/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for successful login - adjust based on your app's behavior
   // This could be checking for a redirect, a user menu, etc.
@@ -20,7 +20,11 @@ setup("authenticate", async ({ page }) => {
 
   // Verify we're logged in by checking for user-specific elements
   // Adjust this selector based on your application
-  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: /^Good (Morning|Afternoon|Evening), .+/,
+    }),
+  ).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });

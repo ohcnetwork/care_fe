@@ -225,6 +225,9 @@ test.describe("Questionnaire v2 enable_when matrix (kitchen sink fixture)", () =
 
     await test.step("Preview explains that every question is hidden", async () => {
       await page.getByRole("button", { name: "Preview" }).click();
+      await expect(page.getByRole("alert")).toContainText(
+        "This form has circular visibility conditions.",
+      );
       await expect(
         page.getByText(
           "No questions to show — every question in this form is hidden by its visibility conditions.",

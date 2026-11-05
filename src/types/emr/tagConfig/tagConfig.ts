@@ -43,6 +43,21 @@ export enum TagResource {
   LOCATION = "location",
 }
 
+export interface TagExpiryOffset {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}
+
+export interface TagConfigExpiryMetadata {
+  /** Apply `expiry_offset` automatically whenever the tag is set. */
+  autoset_expiry?: boolean;
+  expiry_offset?: TagExpiryOffset;
+  /** Let users pick their own expiry offset when setting the tag. */
+  modification_allowed?: boolean;
+}
+
 export interface TagConfigBase {
   id: string;
   parent?: TagConfigBase;
@@ -61,6 +76,10 @@ export interface TagConfig extends TagConfigBase {
   has_children: boolean;
   resource: TagResource;
   facility?: string;
+  expiry_metadata?: TagConfigExpiryMetadata;
+  /** Present on tags rendered on a resource that were set with an expiry. */
+  expiry?: string;
+  expired?: boolean;
 }
 
 export interface TagConfigRead extends TagConfig {
@@ -80,10 +99,12 @@ export interface TagConfigRequest {
   facility?: string;
   facility_organization: string | null;
   metadata?: TagConfigMeta;
+  expiry_metadata?: TagConfigExpiryMetadata;
 }
 
 export interface TagSetRequest {
   tag: string;
+  expiry_offset?: TagExpiryOffset;
 }
 
 export function getTagHierarchyDisplay(

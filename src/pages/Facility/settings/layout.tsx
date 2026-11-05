@@ -411,5 +411,5 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  return <div className="min-w-0 p-4">{routeResult}</div>;
+  return <div className="min-w-0 px-4 pb-4">{routeResult}</div>;
 }

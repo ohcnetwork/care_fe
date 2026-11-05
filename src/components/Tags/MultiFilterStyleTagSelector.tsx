@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  ChevronLeft,
   Component,
   Plus,
   Space,
@@ -20,6 +19,8 @@ import { cn } from "@/lib/utils";
 
 import TagBadge from "@/components/Tags/TagBadge";
 import TagColorDot from "@/components/Tags/TagColorDot";
+import { TagExpiryLabel } from "@/components/Tags/TagExpiryLabel";
+import { TagExpiryStep } from "@/components/Tags/TagExpiryStep";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +45,17 @@ import {
 import query from "@/Utils/request/query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import {
+  TagConfig,
+  TagExpiryOffset,
+  TagResource,
+} from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
 interface MultiFilterStyleTagSelectorProps {
   selected: TagConfig[];
-  onChange: (tags: TagConfig[]) => void;
+  /** `expiryOffset` is the custom expiry chosen for the tag being added. */
+  onChange: (tags: TagConfig[], expiryOffset?: TagExpiryOffset) => void;
   resource: TagResource;
   facilityId?: string;
   className?: string;
@@ -57,6 +63,8 @@ interface MultiFilterStyleTagSelectorProps {
   isTagMutationInProgress?: boolean;
   trigger?: React.ReactNode;
   align?: "start" | "end";
+  /** Ask for an expiry when adding tags whose config allows changing it. */
+  allowCustomExpiry?: boolean;
 }
 
 // Clean, minimal tag selector matching multi-filter design
@@ -70,6 +78,7 @@ export function MultiFilterStyleTagSelector({
   isTagMutationInProgress = false,
   trigger,
   align = "start",
+  allowCustomExpiry = false,
 }: MultiFilterStyleTagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [groupPopoverOpen, setGroupPopoverOpen] = useState<string | null>(null);
@@ -77,6 +86,7 @@ export function MultiFilterStyleTagSelector({
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [childDrawerOpen, setChildDrawerOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<TagConfig | null>(null);
+  const [expiryTag, setExpiryTag] = useState<TagConfig | null>(null);
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -117,8 +127,18 @@ export function MultiFilterStyleTagSelector({
 
   const isSelected = (tag: TagConfig) => selected.some((t) => t.id === tag.id);
 
-  // Select/deselect tag
-  const handleSelect = (tag: TagConfig) => {
+  // The search is sent to the server for the lists below, so selected tags,
+  // which come from the parent, are matched here on their own and group name.
+  const searchTerm = search.trim().toLowerCase();
+  const visibleSelected = searchTerm
+    ? selected.filter((tag) =>
+        [tag.display, tag.parent?.display].some((name) =>
+          name?.toLowerCase().includes(searchTerm),
+        ),
+      )
+    : selected;
+
+  const addTag = (tag: TagConfig, expiryOffset?: TagExpiryOffset) => {
     // If tag has a parent, enforce single selection per group
     const parentId =
       tag.parent && typeof tag.parent === "object" && "id" in tag.parent
@@ -133,15 +153,47 @@ export function MultiFilterStyleTagSelector({
         t.parent.id === parentId,
     );
 
+    onChange(
+      [...selected.filter((t) => t.id !== alreadySelectedInGroup?.id), tag],
+      expiryOffset,
+    );
+  };
+
+  // Select/deselect tag
+  const handleSelect = (tag: TagConfig) => {
     if (isSelected(tag)) {
       onChange(selected.filter((t) => t.id !== tag.id));
+    } else if (allowCustomExpiry && tag.expiry_metadata?.modification_allowed) {
+      // Pick the expiry in the main menu/drawer before applying the tag
+      setGroupPopoverOpen(null);
+      setChildDrawerOpen(false);
+      setSelectedGroup(null);
+      setExpiryTag(tag);
     } else {
-      onChange([
-        ...selected.filter((t) => t.id !== alreadySelectedInGroup?.id),
-        tag,
-      ]);
+      addTag(tag);
     }
   };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) setExpiryTag(null);
+    if (isMobile) {
+      setMobileDrawerOpen(isOpen);
+    } else {
+      setOpen(isOpen);
+    }
+  };
+
+  const expiryStep = expiryTag && (
+    <TagExpiryStep
+      key={expiryTag.id}
+      tag={expiryTag}
+      onBack={() => setExpiryTag(null)}
+      onApply={(expiryOffset) => {
+        addTag(expiryTag, expiryOffset);
+        setExpiryTag(null);
+      }}
+    />
+  );
 
   const handleMobileGroupClick = (group: TagConfig) => {
     setSelectedGroup(group);
@@ -180,6 +232,7 @@ export function MultiFilterStyleTagSelector({
           />
           <span className="truncate">{tag.display}</span>
         </span>
+        <TagExpiryLabel tag={tag} />
       </div>
     );
   };
@@ -229,7 +282,9 @@ export function MultiFilterStyleTagSelector({
     <Button
       variant="outline"
       className={cn(
-        "w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none!",
+        "h-10 w-full border border-strong-border text-placeholder-foreground font-normal shadow-none! inset-shadow-none! px-2.5",
+        selected.length > 0 &&
+          "border-blue-300 bg-blue-50 h-auto min-h-12 md:min-h-10",
         className,
       )}
       disabled={disabled || isTagMutationInProgress}
@@ -274,95 +329,92 @@ export function MultiFilterStyleTagSelector({
       {/* Mobile Drawer */}
       {isMobile ? (
         <>
-          <Drawer open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+          <Drawer open={mobileDrawerOpen} onOpenChange={handleOpenChange}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-            <DrawerContent className="flex flex-col min-h-[50vh] max-h-[85vh]">
-              <DrawerHeader className="pb-3">
-                <DrawerTitle className="flex items-center gap-2">
-                  {t("manage_tags")}
-                </DrawerTitle>
+            <DrawerContent height="fixed">
+              <DrawerHeader showCloseButton>
+                <DrawerTitle>{t("manage_tags")}</DrawerTitle>
               </DrawerHeader>
-
-              <div className="flex flex-col flex-1 overflow-hidden">
+              {expiryStep}
+              <div
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col",
+                  expiryTag && "hidden",
+                )}
+              >
                 {/* Search */}
-                <div className="px-4 pb-3">
+                <div className="p-2 border-b border-gray-100 shadow-xs">
                   <Input
+                    data-autofocus
                     placeholder={t("search_tags")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-8"
                   />
                 </div>
-
-                {/* Content */}
-                {/* Selected Tags */}
-                {selected.length > 0 && (
-                  <div className="mb-4">
-                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {t("selected_tags")}
+                <div className="flex-1 px-2 overflow-y-auto">
+                  {visibleSelected.length > 0 && (
+                    <div className="pt-2 pb-2">
+                      <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {t("selected_tags")}
+                      </div>
+                      {visibleSelected.map((tag) => (
+                        <Label
+                          key={tag.id}
+                          className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
+                        >
+                          <Checkbox
+                            checked
+                            className="size-4"
+                            onCheckedChange={() => handleSelect(tag)}
+                          />
+                          {renderTagNameWithParent(tag)}
+                        </Label>
+                      ))}
                     </div>
-                    {selected.map((tag) => (
-                      <Label
-                        key={tag.id}
-                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50"
-                      >
-                        <Checkbox
-                          checked
-                          className="size-4"
-                          onCheckedChange={() => handleSelect(tag)}
-                        />
-                        {renderTagNameWithParent(tag)}
-                      </Label>
-                    ))}
-                  </div>
-                )}
-                {isLoadingRoot ? (
-                  <div className="py-8 text-sm text-center text-gray-500">
-                    {t("loading")}
-                  </div>
-                ) : !rootTags?.results?.length ? (
-                  <div className="py-8 text-sm text-center text-gray-500">
-                    {t("no_tags_group")}
-                  </div>
-                ) : (
-                  <div className="flex-1 px-4 overflow-y-auto">
-                    {/* Tag Groups */}
-                    {groupTags.length > 0 && (
-                      <div className="mb-4">
-                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {t("tag_groups")}
+                  )}
+                  {isLoadingRoot ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
+                      {t("loading")}
+                    </div>
+                  ) : !rootTags?.results?.length ? (
+                    <div className="py-8 text-sm text-center text-gray-500">
+                      {t("no_tags_group")}
+                    </div>
+                  ) : (
+                    <>
+                      {/* Tag Groups */}
+                      {groupTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("tag_groups")}
+                          </div>
+                          {renderMobileTagList(groupTags)}
                         </div>
-                        {renderMobileTagList(groupTags)}
-                      </div>
-                    )}
+                      )}
 
-                    {/* Other Tags */}
-                    {otherTags.length > 0 && (
-                      <div className="mb-4">
-                        <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {t("other_tags")}
+                      {/* Other Tags */}
+                      {otherTags.length > 0 && (
+                        <div className="mb-4 pt-2">
+                          <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {t("other_tags")}
+                          </div>
+                          {renderMobileTagList(otherTags)}
                         </div>
-                        {renderMobileTagList(otherTags)}
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </DrawerContent>
           </Drawer>
 
           {/* Child Tags Drawer */}
           <Drawer open={childDrawerOpen} onOpenChange={setChildDrawerOpen}>
-            <DrawerContent className="flex flex-col max-h-[85vh]">
-              <DrawerHeader className="pb-3">
+            <DrawerContent height="child">
+              <DrawerHeader className="p-2 border-b border-gray-100 shadow-xs">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleMobileBack}
-                    className="p-1 size-8"
-                  >
-                    <ChevronLeft className="size-4" />
+                  <Button variant="ghost" onClick={handleMobileBack}>
+                    <ArrowLeft className="size-4" />
                   </Button>
                   <DrawerTitle className="flex items-center gap-2">
                     <Component className="size-4" />
@@ -413,13 +465,14 @@ export function MultiFilterStyleTagSelector({
         </>
       ) : (
         /* Desktop Dropdown */
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={open} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[calc(100vw)] max-w-[calc(100vw-3rem)] sm:max-w-xs p-0"
             align={align}
           >
-            <div className="p-0">
+            {expiryStep}
+            <div className={cn("p-0", expiryTag && "hidden")}>
               {/* Header */}
               <div className="flex items-center gap-2 p-2 border-b border-gray-200">
                 <Button
@@ -442,15 +495,15 @@ export function MultiFilterStyleTagSelector({
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 mb-2"
+                  onKeyDown={(e) => e.stopPropagation()}
                 />
                 {/* Selected Tags */}
-                {selected.length > 0 && (
+                {visibleSelected.length > 0 && (
                   <>
                     <div className="px-2 py-0.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
                       {t("selected_tags")}
                     </div>
-                    {selected.map((tag) => (
+                    {visibleSelected.map((tag) => (
                       <DropdownMenuCheckboxItem
                         key={tag.id}
                         className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"

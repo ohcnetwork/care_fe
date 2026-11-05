@@ -11,6 +11,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientProfile } from "@/components/Patient/PatientProfile";
 
+import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import PatientUserProvider from "@/Providers/PatientUserProvider";
@@ -85,6 +86,7 @@ const AppointmentRoutes = {
 };
 
 export default function PatientRouter() {
+  useRefreshStickyAfterScrollLock();
   const pages = useRoutes(DashboardRoutes);
 
   const appointmentPages = useRoutes(AppointmentRoutes);
@@ -108,7 +110,7 @@ export default function PatientRouter() {
         >
           <BrowserWarning />
           <WorkspaceHeader patient />
-          <div className="min-w-0 p-4" data-cui-page>
+          <div className="min-w-0 px-4 pb-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

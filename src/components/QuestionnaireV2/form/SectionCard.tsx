@@ -18,13 +18,12 @@ export function SectionCard({
   question,
   depth,
   disabled,
-  number,
+  title = question.text,
 }: {
   question: Question;
   depth: number;
   disabled: boolean;
-  /** Dotted ordinal matching the tree nav (e.g. "7."). */
-  number?: string;
+  title?: string;
 }) {
   const { t } = useTranslation();
   const { inert } = useFormRenderer();
@@ -45,9 +44,6 @@ export function SectionCard({
     question.styling_metadata?.containerClasses,
   );
 
-  const childNumber = (index: number) =>
-    number ? `${number}${index + 1}.` : undefined;
-
   const renderChildren = () =>
     children.map((child, index) => (
       <QuestionBlock
@@ -57,7 +53,6 @@ export function SectionCard({
         index={index}
         siblingCount={children.length}
         depth={depth + 1}
-        number={childNumber(index)}
       />
     ));
 
@@ -75,10 +70,7 @@ export function SectionCard({
             aria-hidden
             className="h-4 w-1 shrink-0 rounded-full bg-primary-600"
           />
-          <h3 className="text-sm font-semibold text-gray-900">
-            {number && <span className="mr-1 tabular-nums">{number}</span>}
-            {question.text}
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
           <Badge variant="outline">{t("group")}</Badge>
           <span className="ml-auto text-xs text-gray-400">
             {t("n_questions", { count: sectionQuestionCount })}
@@ -117,8 +109,7 @@ export function SectionCard({
       )}
     >
       <h4 className="px-3 py-1.5 text-sm font-semibold text-gray-900">
-        {number && <span className="mr-1 tabular-nums">{number}</span>}
-        {question.text}
+        {title}
       </h4>
       {question.description && (
         <p className="px-3 pb-1.5 text-xs text-gray-500">

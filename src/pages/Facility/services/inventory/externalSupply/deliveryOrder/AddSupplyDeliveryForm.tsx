@@ -1034,7 +1034,7 @@ export function AddSupplyDeliveryForm({
                     </div>
                   )}
 
-                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                  <div className="rounded-md bg-white shadow overflow-hidden">
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader className="bg-gray-100">

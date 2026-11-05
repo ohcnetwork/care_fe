@@ -16,6 +16,7 @@ import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
+import { useRefreshStickyAfterScrollLock } from "@/hooks/useRefreshStickyAfterScrollLock";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import { routes as publicRoutes } from "@/Routers/PublicRouter";
@@ -28,6 +29,7 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
+import { useNavigationTrail } from "@/Utils/navigationTrail";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
@@ -56,6 +58,8 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
   /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
+  // Encounter pages give the full width to the chart and carry their own back button
+  /^\/(?:facility|organization)\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/[^/]+$/,
   // Questionnaire fill routes (fullscreen v2 fill experience)
   /^\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+\/questionnaire(\/[^/]+)?$/,
   /^\/facility\/[^/]+\/patient\/[^/]+\/questionnaire(\/[^/]+)?$/,
@@ -117,11 +121,13 @@ const publicRedirects = Object.fromEntries(
 );
 
 export default function AppRouter() {
+  useRefreshStickyAfterScrollLock();
   const pluginRoutes = usePluginRoutes();
   const organizationRoutes = useOrganizationRoutes();
   let routes = Routes;
 
   useRedirect("/user", "/users");
+  useNavigationTrail();
 
   // Merge in Plugin Routes
   routes = {
@@ -180,8 +186,8 @@ export default function AppRouter() {
         <SidebarInset
           id="pages"
           className={cn(
-            "min-h-svh min-w-0 max-w-full focus:outline-hidden",
-            !isInnerWorkspace && "md:min-h-[calc(100svh-1rem)]",
+            "h-svh min-w-0 max-w-full focus:outline-hidden",
+            !isInnerWorkspace && "md:h-[calc(100svh-1rem)]",
           )}
         >
           <ShortcutCommandDialog
@@ -199,7 +205,12 @@ export default function AppRouter() {
               onSearch={() => setCommandDialogOpen(true)}
             />
           ) : null}
-          <div className={"min-w-0 p-4"} data-cui-page>
+          <div
+            className={
+              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 md:px-6 pb-4"
+            }
+            data-cui-page
+          >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

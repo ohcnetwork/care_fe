@@ -16,7 +16,10 @@ export function GeneralSettings({ facilityId }: GeneralSettingsProps) {
   useShortcutSubContext(undefined);
 
   return (
-    <div className="space-y-6 text-neutral-950" data-cy="facility-general-page">
+    <div
+      className="space-y-6 text-foreground pt-4"
+      data-cy="facility-general-page"
+    >
       <PageHeadTitle title={t("general")} />
       <h1 className="text-3xl leading-9 font-bold tracking-tight">
         {t("general")}

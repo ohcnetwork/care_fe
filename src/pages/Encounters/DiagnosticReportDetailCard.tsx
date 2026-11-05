@@ -40,6 +40,8 @@ interface DiagnosticReportDetailCardProps {
   patientId: string;
   facilityId?: string;
   embedded?: boolean;
+  encounterId?: string;
+  showObservationHistory?: boolean;
 }
 
 export function DiagnosticReportDetailCard({
@@ -47,6 +49,8 @@ export function DiagnosticReportDetailCard({
   patientId,
   facilityId,
   embedded = false,
+  encounterId,
+  showObservationHistory = false,
 }: DiagnosticReportDetailCardProps) {
   const { t } = useTranslation();
 
@@ -168,7 +172,12 @@ export function DiagnosticReportDetailCard({
             <h4 className="text-sm font-semibold text-muted-foreground">
               {t("test_results")}
             </h4>
-            <DiagnosticReportResultsTable observations={filteredObservations} />
+            <DiagnosticReportResultsTable
+              observations={filteredObservations}
+              showObservationHistory={showObservationHistory}
+              patientId={patientId}
+              encounterId={encounterId}
+            />
           </div>
         )}
 

@@ -79,14 +79,15 @@ export function EncounterSectionPicker({
         <DrawerContent
           initialFocus={selectedRowRef}
           aria-describedby={undefined}
-          className="max-h-[85dvh]"
+          height="fixed"
+          className="p-1.5"
         >
-          <DrawerHeader showCloseButton className="border-b border-border">
-            <DrawerTitle className="text-lg leading-6 font-semibold">
+          <DrawerHeader className="border-b shadow-2xs" showCloseButton>
+            <DrawerTitle className="text-lg font-semibold pl-2">
               {t("encounter_sections")}
             </DrawerTitle>
           </DrawerHeader>
-          <DrawerBody className="py-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <DrawerBody className="p-0 pb-[env(safe-area-inset-bottom)]">
             <nav
               aria-label={t("encounter_sections")}
               className="flex min-w-0 flex-col gap-1"

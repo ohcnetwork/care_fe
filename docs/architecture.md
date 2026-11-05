@@ -82,26 +82,10 @@ CareUI composites also supply Combobox, Filters, Pagination, Kbd, Spinner, and E
 
 The imported Filters component exposes custom-renderer open state so clinical pickers open after adding a filter, plus per-field clear permissions and layout classes. Its select fields use single selection and multiselect fields use multiple selection. Preserve these adaptations when refreshing registry source. Questionnaire ChoiceChipGroup similarly supplies one shared RadioGroup for keyboard navigation while retaining optional-answer clearing.
 
+Questionnaire visibility evaluates root answers and controller ancestry. Circular dependencies (including a group depending on its own descendant) are configuration errors: the builder blocks saving them, and previously saved forms display an alert and disable the circular questions. Submission is blocked for the entire fill session if any form has circular conditions, preserving every form's draft rather than silently omitting affected answers. Cycle detection runs when the link index is built; per-evaluation memoization then keeps overlapping conditional dependencies bounded without reusing stale answers.
+
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
-
-### Page content in the workspace header
-
-Pages can render controls in the shared header using `WorkspaceHeaderContent`:
-
-```tsx
-import { WorkspaceHeaderContent } from "@/components/Common/WorkspaceHeaderContent";
-
-<WorkspaceHeaderContent>
-  <PageActions />
-</WorkspaceHeaderContent>;
-```
-
-The content replaces the default header label or breadcrumbs while mounted and
-is removed automatically when the page unmounts. It is rendered through a portal,
-so controls retain the page's React context, permissions, and state. Both the
-workspace header and inner workspace headers support this slot. Mount only the
-controls needed for the current page; they can update normally as page data changes.
 
 ## Plugin System (Module Federation)
 

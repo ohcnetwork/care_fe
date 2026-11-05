@@ -123,6 +123,18 @@ test.describe("Questionnaire v2 actions authoring", () => {
       await expect(
         page.getByText("Runs on every submission").first(),
       ).toBeVisible();
+      const heading = page.getByRole("heading", {
+        name: "Action 1",
+        exact: true,
+      });
+      const addCondition = page.getByRole("button", {
+        name: "Add a condition",
+      });
+      await expect(addCondition).toBeVisible();
+      await heading.click();
+      await expect(addCondition).toBeHidden();
+      await heading.click();
+      await expect(addCondition).toBeVisible();
     });
 
     await test.step("Pick the message instruction for the Then step", async () => {
@@ -141,7 +153,7 @@ test.describe("Questionnaire v2 actions authoring", () => {
       await page
         .getByRole("button", { name: "Insert an answer or patient detail" })
         .click();
-      await page.getByRole("menuitem", { name: `2. ${tempTitle}` }).click();
+      await page.getByRole("menuitem", { name: tempTitle }).click();
       await expect(messageInput).toHaveValue(/^Temp is \{q_Q_[0-9a-f]{8}\}$/);
       tempRef = (await messageInput.inputValue()).match(/\{(q_\w+)\}/)![1];
       await expect(page.getByText("Preview:")).toBeVisible();
@@ -174,6 +186,9 @@ test.describe("Questionnaire v2 actions authoring", () => {
       await page.reload();
       await page.getByRole("button", { name: /^Actions\b/ }).click();
       const card = page.getByRole("button", { name: "Action 1", exact: true });
+      await expect(
+        page.getByRole("heading", { name: "Action 1", level: 4, exact: true }),
+      ).toBeVisible();
       await expect(card).toBeVisible();
       await expect(
         page.getByText(`“${feverTitle}” equals “Yes”`),

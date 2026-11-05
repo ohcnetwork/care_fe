@@ -112,6 +112,49 @@ export async function createFacilityOverride({
 }
 
 /**
+ * Creates an instance value set (the admin is a superuser) and returns its
+ * id. Specs that override a slug use their own instance set, so their
+ * facility override never redirects other specs bound to a shared one.
+ */
+export async function createInstanceValueSet({
+  slug,
+  name,
+  include = UCUM_MILLIGRAM,
+}: {
+  slug: string;
+  name: string;
+  include?: typeof UCUM_MILLIGRAM;
+}): Promise<string> {
+  const res = await fetch(`${apiBaseUrl()}/api/v1/valueset/`, {
+    method: "POST",
+    headers: adminApiHeaders(),
+    body: JSON.stringify({
+      auth_context: "instance",
+      inherited: false,
+      disable_composition: false,
+      name,
+      slug,
+      description: "Playwright instance value set",
+      status: "active",
+      compose: { include: [include], exclude: [] },
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(
+      `valueset create failed: ${res.status} ${await res.text()}`,
+    );
+  }
+  return ((await res.json()) as { id: string }).id;
+}
+
+export async function deleteValueSet(id: string): Promise<void> {
+  await fetch(`${apiBaseUrl()}/api/v1/valueset/${id}/`, {
+    method: "DELETE",
+    headers: adminApiHeaders(),
+  });
+}
+
+/**
  * What `slug` currently resolves to for the calling user inside `facility`
  * — i.e. what `get_closest_valueset` picks after the user's preference.
  * Asserting on this proves a preference reached the backend, which a
