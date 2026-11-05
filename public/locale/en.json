@@ -7737,7 +7737,7 @@
   "unsubscribe_failed": "Unsubscribe failed.",
   "unsubscribed_successfully": "Unsubscribed Successfully.",
   "unsupported_browser": "Unsupported Browser",
-  "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience.",
+  "unsupported_browser_features_description": "Your browser does not support some features this application needs, so parts of it may not work correctly. Please update your browser to the latest version or switch to a supported browser.",
   "unsupported_question_type": "This question type is not supported yet",
   "until": "Until",
   "untitled_question": "Untitled Question",
