@@ -215,9 +215,9 @@ export function ProductKnowledgeListContent({
   return (
     <div>
       {/* Header with filters and view toggle */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-6 justify-between">
         {/* Search */}
-        <div className="relative w-full">
+        <div className="relative min-w-42 flex-1 lg:max-w-xs">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <CareIcon icon="l-search" className="size-5" />
           </span>
@@ -227,29 +227,29 @@ export function ProductKnowledgeListContent({
             onChange={(e) =>
               updateQuery({ search: e.target.value || undefined })
             }
-            className="w-full lg:w-[300px] pl-10"
+            className="w-full pl-10"
           />
         </div>
 
-        {/* Status Filter */}
-        <div className="w-full sm:w-auto">
+        <div className="flex flex-row gap-4 flex-wrap overflow-x-auto">
+          {/* Status Filter */}
           <FilterSelect
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(ProductKnowledgeStatus)}
             label={t("status")}
             onClear={() => updateQuery({ status: undefined })}
+            className="w-full sm:w-auto"
           />
-        </div>
 
-        {/* Product Type Filter */}
-        <div className="w-full sm:w-auto">
+          {/* Product Type Filter */}
           <FilterSelect
             value={qParams.product_type || ""}
             onValueChange={(value) => updateQuery({ product_type: value })}
             options={Object.values(ProductKnowledgeType)}
             label={t("product_type")}
             onClear={() => updateQuery({ product_type: undefined })}
+            className="w-full sm:w-auto"
           />
         </div>
       </div>

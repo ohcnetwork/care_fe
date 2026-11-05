@@ -109,4 +109,62 @@ test.describe("Product Knowledge list with long values", () => {
     );
     expect(hasPageHorizontalScroll).toBe(false);
   });
+
+  for (const width of [320, 390, 768, 1024, 1280, 1920]) {
+    test(`filters stay within the page at ${width}px with selected values`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openCategory(page);
+      await expect(page.getByPlaceholder("Search products")).toBeVisible();
+
+      const url = new URL(page.url());
+      url.searchParams.set("status", "active");
+      url.searchParams.set("product_type", "nutritional_product");
+      await page.goto(url.toString());
+
+      const search = page.getByPlaceholder("Search products");
+      await expect(search).toBeVisible();
+      const filterRow = search.locator("xpath=../..");
+      const clearButtons = filterRow.getByRole("button", {
+        name: "Remove filter",
+      });
+      await expect(clearButtons).toHaveCount(2);
+      // On narrow screens the filter group scrolls sideways instead of
+      // overflowing the page, so every clear button must stay reachable.
+      for (const button of await clearButtons.all()) {
+        await button.scrollIntoViewIfNeeded();
+        await expect(button).toBeInViewport();
+      }
+
+      const { rowRight, groupRight, filtersRight } = await filterRow.evaluate(
+        (row) => {
+          const group = row.lastElementChild!;
+          return {
+            rowRight: row.getBoundingClientRect().right,
+            groupRight: group.getBoundingClientRect().right,
+            filtersRight: group.lastElementChild!.getBoundingClientRect().right,
+          };
+        },
+      );
+      expect(groupRight).toBeLessThanOrEqual(rowRight + 1);
+
+      if (width >= 1280) {
+        const searchBox = await search.boundingBox();
+        for (const button of await clearButtons.all()) {
+          const buttonBox = await button.boundingBox();
+          expect(Math.abs(buttonBox!.y - searchBox!.y)).toBeLessThanOrEqual(2);
+        }
+        // Search stays first and the filters are pushed to the end.
+        expect(Math.abs(rowRight - filtersRight)).toBeLessThanOrEqual(1);
+      }
+
+      const hasPageHorizontalScroll = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth,
+      );
+      expect(hasPageHorizontalScroll).toBe(false);
+    });
+  }
 });
