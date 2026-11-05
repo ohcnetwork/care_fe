@@ -132,9 +132,9 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <Page
       title={t("overview")}
       hideTitleOnPage
-      className="md:px-0 max-w-5xl xl:max-w-10/12 mx-auto"
+      className="flex max-w-5xl xl:max-w-10/12 mx-auto w-full"
     >
-      <div className="space-y-8">
+      <div className="space-y-8 flex-1">
         {/* Welcome Header */}
         <div
           data-cy="facility-overview-greeting"
