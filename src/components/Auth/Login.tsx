@@ -18,6 +18,10 @@ const loadPatientLoginForm = () => import("@/components/Auth/PatientLoginForm");
 const PatientLoginForm = lazy(() =>
   loadPatientLoginForm().then((m) => ({ default: m.PatientLoginForm })),
 );
+// Best-effort warm-up on hover/focus; `lazy()` retries the import on render.
+const prefetchPatientLoginForm = () => {
+  loadPatientLoginForm().catch(() => {});
+};
 
 type LoginMode = "staff" | "patient";
 
@@ -77,8 +81,8 @@ const Login = ({ forgot = false }: LoginProps) => {
             <TabsTrigger
               value="patient"
               className="min-h-11 text-base"
-              onPointerEnter={loadPatientLoginForm}
-              onFocus={loadPatientLoginForm}
+              onPointerEnter={prefetchPatientLoginForm}
+              onFocus={prefetchPatientLoginForm}
             >
               {t("patient_sign_in")}
             </TabsTrigger>

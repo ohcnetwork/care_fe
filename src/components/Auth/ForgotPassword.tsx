@@ -21,6 +21,10 @@ const loadForgotPasswordPhone = () =>
 const ForgotPasswordPhone = lazy(() =>
   loadForgotPasswordPhone().then((m) => ({ default: m.ForgotPasswordPhone })),
 );
+// Best-effort warm-up on hover/focus; `lazy()` retries the import on render.
+const prefetchForgotPasswordPhone = () => {
+  loadForgotPasswordPhone().catch(() => {});
+};
 
 interface ForgotPasswordProps {
   username: string;
@@ -114,8 +118,8 @@ export function ForgotPassword({
         <Button
           type="button"
           variant="link"
-          onPointerEnter={loadForgotPasswordPhone}
-          onFocus={loadForgotPasswordPhone}
+          onPointerEnter={prefetchForgotPasswordPhone}
+          onFocus={prefetchForgotPasswordPhone}
           onClick={() => setUsePhone(true)}
         >
           {t("reset_using_phone_number")}

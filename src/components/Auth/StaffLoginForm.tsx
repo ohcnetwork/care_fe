@@ -57,8 +57,8 @@ export function StaffLoginForm({
     invalidateAllPaymentReconcilationLocationCaches();
     clearQueuePractitionerCache();
     clearQueryPersistenceCache();
-    // Warm the 2FA step while credentials are being checked.
-    import("@/components/Auth/Authenticate");
+    // Warm the 2FA step while credentials are being checked (best effort).
+    import("@/components/Auth/Authenticate").catch(() => {});
     try {
       await signIn({
         username,
