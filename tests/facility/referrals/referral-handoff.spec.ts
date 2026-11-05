@@ -355,7 +355,7 @@ async function completeReferralHandoff(
           `/facility/${sourceFacilityId}/patient/${patientId}/encounter/${encounterId}/referrals`,
         );
         await senderPage
-          .getByRole("button", { name: "New referral", exact: true })
+          .getByRole("button", { name: "New Referral", exact: true })
           .click();
         const creation = senderPage.getByRole("dialog", {
           name: "Request form",

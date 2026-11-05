@@ -2,9 +2,25 @@ import { useEffect, useRef, useState } from "react";
 
 import { LoadingAnimationSvg } from "@/components/ui/loading-animation-svg";
 
-const Loading = () => {
+interface LoadingProps {
+  /**
+   * Keep the pre-React loading screen up while this loader is mounted. Turn
+   * it off where the loader shares the page with controls that must stay
+   * reachable: the screen covers the whole page until every hold is released.
+   */
+  holdLoadingScreen?: boolean;
+}
+
+const Loading = ({ holdLoadingScreen = true }: LoadingProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [offsetTop, setOffsetTop] = useState(0);
+
+  // Keep the pre-React loading screen up while React is only showing this
+  // loader, so the user sees one continuous animation.
+  useEffect(
+    () => (holdLoadingScreen ? window.__holdLoadingScreen?.() : undefined),
+    [holdLoadingScreen],
+  );
 
   useEffect(() => {
     const calculateOffset = () => {

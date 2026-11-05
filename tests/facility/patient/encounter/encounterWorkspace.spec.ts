@@ -723,7 +723,8 @@ async function mockEncounterWorkspaceApi(
                   .filter(
                     (item) =>
                       item.main_code.code === code.code &&
-                      item.encounter === url.searchParams.get("encounter") &&
+                      (!url.searchParams.has("encounter") ||
+                        item.encounter === url.searchParams.get("encounter")) &&
                       (!statuses || statuses.includes(item.status)),
                   )
                   .sort(
@@ -731,7 +732,8 @@ async function mockEncounterWorkspaceApi(
                       Date.parse(b.effective_datetime) -
                       Date.parse(a.effective_datetime),
                   )
-                  .slice(0, body.page_size ?? 10),
+                  .slice(0, body.page_size ?? 10)
+                  .map((item) => ({ ...item, encounter: null })),
               })),
             },
           });
@@ -2428,7 +2430,7 @@ test.describe("Encounter workspace rendering", () => {
         shortcuts.getByRole("link", { name: /Add Procedure/i }),
       ).toBeVisible();
       await expect(
-        shortcuts.getByRole("button", { name: "New referral", exact: true }),
+        shortcuts.getByRole("button", { name: "New Referral", exact: true }),
       ).toBeVisible();
       await expect(
         shortcuts.getByRole("button", { name: /More Actions|Show less/i }),
@@ -4519,6 +4521,11 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(temperature).toContainText("No reading");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
+  await expect(
+    page
+      .getByRole("region", { name: "Pulse trend", exact: true })
+      .locator(".recharts-line-curve"),
+  ).toBeVisible();
   // The tiles ask the analysis endpoint for the latest valid readings per
   // code, scoped to the current encounter, instead of listing every
   // observation.

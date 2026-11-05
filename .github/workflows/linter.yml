@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate supported browsers
-        run: npm run supported-browsers
-
       - name: Run type check
         run: npm run typecheck
 

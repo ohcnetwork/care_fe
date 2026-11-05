@@ -76,6 +76,7 @@ export const QuickActions = ({
           <GitPullRequestArrow className="text-primary-700" strokeWidth={1.5} />
         }
         title={t("referral_new")}
+        actionId="new-referral"
       />
     </CreateReferralDialog>
   );
@@ -159,6 +160,7 @@ export const QuickActions = ({
               title={t("procedures")}
               aria-label={t("add_procedure")}
               href={formLink("procedure")}
+              actionId="add-procedure"
             />
           </>
         )}
