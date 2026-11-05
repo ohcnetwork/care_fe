@@ -31,7 +31,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
-import { useCareApps } from "@/hooks/useCareApps";
+import { useCareAppTabs, useCareApps } from "@/hooks/useCareApps";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { encounterRequiresDischarge } from "@/pages/Encounters/utils/useEncounterProgressController";
 import { parseEncounterWorkspace } from "@/pages/Encounters/workspace/parseEncounterWorkspace";
@@ -63,6 +63,8 @@ interface EncounterCommandDialogProps {
   trigger?: React.ReactNode;
 }
 
+const WORKSPACE_PAGE_PREFIX = "workspace-page-";
+
 export function EncounterCommandDialog({
   encounter,
   open,
@@ -83,14 +85,33 @@ export function EncounterCommandDialog({
   const { defaults, list, workspace } = useEncounterWorkspaces(
     encounter.encounter_class,
   );
+  // Serialized so the memos below compare plugin tab keys by value.
+  const pluginTabKeys = JSON.stringify(
+    Object.keys(useCareAppTabs<object>("encounterTabs")),
+  );
+  // Without a workspace the standard tabs apply, so every page is offered.
+  const visiblePages = useMemo(() => {
+    if (!workspace) return undefined;
+    const pages = parseEncounterWorkspace(workspace.template, [
+      ...SYSTEM_PAGE_KEYS,
+      ...(JSON.parse(pluginTabKeys) as string[]),
+    ]).pages.filter((page) => !page.hidden);
+    return {
+      systemKeys: new Set(
+        pages.flatMap((page) => (page.kind === "system" ? [page.key] : [])),
+      ),
+      customPages: pages.flatMap((page) =>
+        page.kind === "custom" ? [{ key: page.key, title: page.title }] : [],
+      ),
+    };
+  }, [workspace, pluginTabKeys]);
+  const isPageVisible = useCallback(
+    (pageKey: string) => !visiblePages || visiblePages.systemKeys.has(pageKey),
+    [visiblePages],
+  );
+  // Referrals depends on the workspace, so wait for it instead of offering a dead end.
   const canNavigateToReferrals =
-    !defaults.isLoading &&
-    !list.isLoading &&
-    (!workspace ||
-      parseEncounterWorkspace(workspace.template, SYSTEM_PAGE_KEYS).pages.some(
-        (page) =>
-          page.kind === "system" && page.key === "referrals" && !page.hidden,
-      ));
+    !defaults.isLoading && !list.isLoading && isPageVisible("referrals");
 
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, "encounter"],
@@ -209,6 +230,13 @@ export function EncounterCommandDialog({
         return;
       }
 
+      if (actionId.startsWith(WORKSPACE_PAGE_PREFIX)) {
+        navigate(
+          buildEncounterUrl(`/${actionId.slice(WORKSPACE_PAGE_PREFIX.length)}`),
+        );
+        return;
+      }
+
       // Handle dynamic questionnaire actions
       if (actionId.startsWith("questionnaire-")) {
         const questionnaireId = actionId.replace("questionnaire-", "");
@@ -309,12 +337,6 @@ export function EncounterCommandDialog({
     if (canWriteSelectedEncounter) {
       actionItems.push(
         {
-          id: "consents",
-          label: t("manage_consents"),
-          shortcut: getShortcutDisplay("consents"),
-          icon: <NotebookPen />,
-        },
-        {
           id: "mark-as-completed",
           label: encounterRequiresDischarge(encounter)
             ? t("mark_for_discharge")
@@ -375,83 +397,67 @@ export function EncounterCommandDialog({
       });
     }
 
-    // Go to navigation - always available
+    // Go to navigation - limited to pages visible in the active workspace
+    const goToItems: (ActionItem & { pageKey: string })[] = [
+      {
+        id: "encounter-overview",
+        pageKey: "updates",
+        label: t("ENCOUNTER_TAB__updates"),
+      },
+      { id: "plots", pageKey: "plots", label: t("ENCOUNTER_TAB__plots") },
+      {
+        id: "observations",
+        pageKey: "observations",
+        label: t("observations"),
+      },
+      { id: "medicines", pageKey: "medicines", label: t("medicines") },
+      {
+        id: "immunizations",
+        pageKey: "immunizations",
+        label: t("immunizations"),
+      },
+      { id: "responses", pageKey: "responses", label: t("responses") },
+      { id: "files", pageKey: "files", label: t("files") },
+      { id: "notes", pageKey: "notes", label: t("notes") },
+      { id: "devices", pageKey: "devices", label: t("devices") },
+      { id: "consents", pageKey: "consents", label: t("consents") },
+      {
+        id: "service-requests",
+        pageKey: "service_requests",
+        label: t("service_requests"),
+      },
+      {
+        id: "diagnostic-reports",
+        pageKey: "diagnostic_reports",
+        label: t("ENCOUNTER_TAB__diagnostic_reports"),
+      },
+    ];
+
     groups.push({
       group: t("go_to"),
-      items: [
-        {
-          id: "encounter-overview",
-          label: t("ENCOUNTER_TAB__updates"),
-          shortcut: getShortcutDisplay("encounter-overview"),
+      items: goToItems
+        .filter(({ pageKey }) => isPageVisible(pageKey))
+        .map(({ pageKey: _pageKey, ...item }) => ({
+          ...item,
+          shortcut: getShortcutDisplay(item.id),
           icon: <ArrowBigRight />,
-        },
-        {
-          id: "plots",
-          label: t("ENCOUNTER_TAB__plots"),
-          shortcut: getShortcutDisplay("plots"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "observations",
-          label: t("observations"),
-          shortcut: getShortcutDisplay("observations"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "medicines",
-          label: t("medicines"),
-          shortcut: getShortcutDisplay("medicines"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "immunizations",
-          label: t("immunizations"),
-          shortcut: getShortcutDisplay("immunizations"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "responses",
-          label: t("responses"),
-          shortcut: getShortcutDisplay("responses"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "files",
-          label: t("files"),
-          shortcut: getShortcutDisplay("files"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "notes",
-          label: t("notes"),
-          shortcut: getShortcutDisplay("notes"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "devices",
-          label: t("devices"),
-          shortcut: getShortcutDisplay("devices"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "consents",
-          label: t("consents"),
-          shortcut: getShortcutDisplay("consents"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "service-requests",
-          label: t("service_requests"),
-          shortcut: getShortcutDisplay("service-requests"),
-          icon: <ArrowBigRight />,
-        },
-        {
-          id: "diagnostic-reports",
-          label: t("ENCOUNTER_TAB__diagnostic_reports"),
-          shortcut: getShortcutDisplay("diagnostic-reports"),
-          icon: <ArrowBigRight />,
-        },
-      ],
+        }))
+        .concat(
+          (JSON.parse(pluginTabKeys) as string[])
+            .filter(isPageVisible)
+            .map((key) => ({
+              id: `${WORKSPACE_PAGE_PREFIX}${key}`,
+              label: t(`ENCOUNTER_TAB__${key}`),
+              shortcut: undefined,
+              icon: <ArrowBigRight />,
+            })),
+          (visiblePages?.customPages ?? []).map((page) => ({
+            id: `${WORKSPACE_PAGE_PREFIX}${page.key}`,
+            label: page.title,
+            shortcut: undefined,
+            icon: <ArrowBigRight />,
+          })),
+        ),
     });
 
     // Questionnaires - only show when user has write permission
@@ -477,6 +483,9 @@ export function EncounterCommandDialog({
     canWriteSelectedEncounter,
     canRestartSelectedEncounter,
     canNavigateToReferrals,
+    isPageVisible,
+    visiblePages,
+    pluginTabKeys,
     encounter,
     selectedEncounterPermissions.canReadReferral,
     selectedEncounterPermissions.canCreateReferral,
@@ -558,7 +567,9 @@ export function EncounterCommandDialog({
                     disabled={action.disabled}
                   >
                     {action.icon}
-                    <span className="flex-1">{action.label}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {action.label}
+                    </span>
                     {action.shortcut && (
                       <CommandShortcut className="ml-2 tracking-normal">
                         <Kbd>{action.shortcut}</Kbd>
