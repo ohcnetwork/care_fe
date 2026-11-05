@@ -32,6 +32,7 @@ const ScrollToTop = () => {
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
+    window.__removeLoadingScreen?.();
   }, []);
 
   return (

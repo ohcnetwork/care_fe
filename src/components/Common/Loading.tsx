@@ -6,6 +6,10 @@ const Loading = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [offsetTop, setOffsetTop] = useState(0);
 
+  // Keep the pre-React loading screen up while React is only showing this
+  // loader, so the user sees one continuous animation.
+  useEffect(() => window.__holdLoadingScreen?.(), []);
+
   useEffect(() => {
     const calculateOffset = () => {
       if (containerRef.current) {
