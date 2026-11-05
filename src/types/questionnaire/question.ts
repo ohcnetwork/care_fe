@@ -116,9 +116,25 @@ type EnableWhenString = {
   answer: string;
 };
 
+/** Value-set choice targets are matched by `answer.system` and `answer.code`;
+ *  `display` is kept so the builder can label the rule. Fixed answer options
+ *  stay value-based: the backend does not persist their coding. */
+type EnableWhenCoding = {
+  operator: "equals" | "not_equals";
+  answer: Code;
+};
+
 export type EnableWhen = {
   question: string;
-} & (EnableWhenNumeric | EnableWhenBoolean | EnableWhenString);
+} & (
+  EnableWhenNumeric | EnableWhenBoolean | EnableWhenString | EnableWhenCoding
+);
+
+export function isCodedEnableWhenAnswer(
+  answer: EnableWhen["answer"] | null | undefined,
+): answer is Code {
+  return typeof answer === "object" && answer !== null;
+}
 
 export interface AnswerOption {
   value: string;
