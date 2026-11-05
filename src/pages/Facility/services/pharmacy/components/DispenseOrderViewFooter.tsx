@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   BadgeCheck,
   ChevronDown,
+  EllipsisVerticalIcon,
   PauseCircle,
   PrinterIcon,
   RotateCcw,
@@ -347,7 +348,7 @@ export function DispenseOrderViewFooter({
                   disabled={isUpdatingStatus}
                   aria-label={t("more_actions")}
                 >
-                  <CareIcon icon="l-ellipsis-v" />
+                  <EllipsisVerticalIcon />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
