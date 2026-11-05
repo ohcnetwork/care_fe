@@ -57,7 +57,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         : "overview_greeting_evening";
   const { hasPermission } = usePermissions();
   const { customLinks, resetCustomLinks, removeCustomLink } =
-    useUserPreferences();
+    useUserPreferences({ facilityId });
   const { defaultClass: defaultEncounterClass } = useDefaultEncounterClass();
 
   const { data: facilityData } = useQuery({
@@ -123,10 +123,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
 
   // Combine default and custom dashboard links
   const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
-  // Filter pinned links for this facility (or show all if no facilityId specified)
-  const pinnedLinks = customLinks.filter(
-    (link) => !link.facilityId || link.facilityId === facilityId,
-  );
 
   return (
     <Page
@@ -208,7 +204,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
         </div>
 
         {/* Pinned Links Section */}
-        {pinnedLinks.length > 0 && (
+        {customLinks.length > 0 && (
           <div className="group/pinned-links">
             <div className="flex items-center justify-between">
               <h2 className="text-base/9 font-semibold text-foreground">
@@ -226,7 +222,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={resetCustomLinks}>
+                  <DropdownMenuItem onClick={() => resetCustomLinks()}>
                     <RotateCcw className="size-4" />
                     {t("reset_pinned_links")}
                   </DropdownMenuItem>
@@ -234,7 +230,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
               </DropdownMenu>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {pinnedLinks.map((link) => (
+              {customLinks.map((link) => (
                 <div key={link.link} className="relative group block h-full">
                   <Button
                     variant="ghost"
