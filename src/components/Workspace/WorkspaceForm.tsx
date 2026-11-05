@@ -637,7 +637,7 @@ export function WorkspaceForm({
               control={form.control}
               name="template"
               render={({ field }) => (
-                <FormItem className="min-w-0">
+                <FormItem className="min-w-0 grid-cols-1">
                   <WorkspaceStudio
                     value={field.value}
                     onChange={field.onChange}

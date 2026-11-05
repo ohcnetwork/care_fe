@@ -67,7 +67,11 @@ export function ActionExpressionEditor({
       .filter((entry) => !entry.unusable)
       .map((entry) => ({
         key: entry.question.id,
-        label: questionLabel(entry.question, t),
+        label: questionLabel(
+          entry.question,
+          t,
+          sources.questions.map((item) => item.question),
+        ),
         insert: compileRef(entry.ref),
       })),
     ...sources.contextValues.map((entry) => ({

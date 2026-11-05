@@ -1,7 +1,8 @@
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
+import { questionLabel } from "@/components/QuestionnaireV2/builder/actions/labels";
+import { flattenQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -27,6 +28,8 @@ export function StudioMobileQuestionNav({
   onAddQuestion,
 }: StudioMobileQuestionNavProps) {
   const { t } = useTranslation();
+  const entries = flattenQuestions(questions);
+  const questionPeers = entries.map((entry) => entry.question);
 
   if (questions.length === 0) {
     return (
@@ -55,9 +58,9 @@ export function StudioMobileQuestionNav({
             <SelectValue placeholder={t("select_question")} />
           </SelectTrigger>
           <SelectContent>
-            {flattenNumberedQuestions(questions).map(({ question, number }) => (
+            {entries.map(({ question }) => (
               <SelectItem key={question.id} value={question.id}>
-                {number} {question.text || t("untitled_question")}
+                {questionLabel(question, t, questionPeers)}
               </SelectItem>
             ))}
           </SelectContent>

@@ -162,8 +162,8 @@ export function SelectOrCreateValueset({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center gap-2 flex-col sm:flex-row">
-        <div className="w-full">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-[1_1_14rem]">
           <Autocomplete
             options={mergeAutocompleteOptions(
               valueSetOptions,
@@ -200,7 +200,10 @@ export function SelectOrCreateValueset({
         </div>
         <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
           <SheetTrigger asChild>
-            <Button variant="outline" className="gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="w-full shrink-0 gap-2 sm:w-auto"
+            >
               <CareIcon icon="l-plus" />
               {t("create_valueset")}
             </Button>

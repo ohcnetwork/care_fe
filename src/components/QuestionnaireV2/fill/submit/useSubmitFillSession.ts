@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { scrollFillQuestionIntoView } from "@/components/QuestionnaireV2/fill/scrollFillQuestionIntoView";
 import { formSubmissionKeys } from "@/components/QuestionnaireV2/queryKeys";
+import { circularConditionQuestionIds } from "@/components/QuestionnaireV2/shared/circularConditions";
 
 import {
   errorsAtom,
@@ -215,6 +216,16 @@ export function useSubmitFillSession({
   });
 
   const runSubmit = useCallback(async () => {
+    if (
+      forms.some(
+        (form) =>
+          circularConditionQuestionIds(form.questionnaire.questions).size > 0,
+      )
+    ) {
+      toast.error(t("questionnaire_circular_conditions"));
+      return;
+    }
+
     // 0) Every session form must have a live store to read responses from,
     //    and nothing may be sitting in the draft as a retained-but-
     //    unmounted snapshot (`blockedFormLabels` — a resume whose re-fetch

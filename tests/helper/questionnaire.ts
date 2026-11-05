@@ -167,10 +167,10 @@ export async function verifyLabelledValues(
   for (const [label, value] of pairs) {
     const row = page
       .locator("tr, dl > div")
-      .filter({ has: page.locator("td, dt", { hasText: label }) })
+      .filter({ has: page.getByText(label, { exact: true }) })
       .first();
     await row.scrollIntoViewIfNeeded();
-    await expect(row.locator("td, dd").last()).toContainText(value);
+    await expect(row.locator("td, dd").last()).toHaveText(value);
   }
 }
 
