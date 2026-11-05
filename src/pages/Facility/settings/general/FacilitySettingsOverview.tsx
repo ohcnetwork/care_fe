@@ -41,7 +41,7 @@ export function FacilitySettingsOverview({
     ) ?? [];
 
   return (
-    <div className="space-y-6 text-neutral-950">
+    <div className="space-y-6 text-foreground pt-4">
       <section
         aria-label={facility.name}
         className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-200 pb-6"

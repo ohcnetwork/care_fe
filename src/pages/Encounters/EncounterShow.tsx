@@ -136,7 +136,9 @@ export const EncounterShow = (props: Props) => {
     return (
       <div className="flex flex-col gap-2 md:px-1">
         {backButton}
-        <Loading />
+        {/* Not only a loader: the boot screen must not cover the Back button,
+            which stays the way out if the encounter never loads. */}
+        <Loading holdLoadingScreen={false} />
       </div>
     );
   }

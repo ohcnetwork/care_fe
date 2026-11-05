@@ -124,7 +124,7 @@ test("creates a patient referral using a referral form without attaching an enco
   await test.step("Submit from the patient's referrals tab without an encounter", async () => {
     await page.goto(patientUrl);
     await page
-      .getByRole("button", { name: "New referral", exact: true })
+      .getByRole("button", { name: "New Referral", exact: true })
       .click();
     const dialog = page.getByRole("dialog", {
       name: "Request form",

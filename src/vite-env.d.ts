@@ -1,37 +1,39 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 interface ImportMetaEnv {
-  readonly CARE_CDN_URL?: string;
-
   readonly REACT_APP_TITLE: string;
   readonly REACT_APP_META_DESCRIPTION: string;
   readonly REACT_APP_COVER_IMAGE: string;
-  readonly REACT_APP_COVER_IMAGE_ALT: string;
   readonly REACT_PUBLIC_URL: string;
   readonly REACT_SBOM_BASE_URL?: string;
   readonly REACT_APP_STORE_API_URL?: string;
   readonly REACT_CARE_API_URL?: string;
   readonly REACT_CARE_URL_MAP?: string;
-  readonly REACT_GITHUB_URL?: string;
   readonly REACT_OHCN_URL?: string;
   readonly REACT_MAIN_LOGO?: string;
   readonly REACT_STATE_LOGO?: string;
   readonly REACT_CUSTOM_LOGO?: string;
   readonly REACT_CUSTOM_LOGO_ALT?: string;
-  readonly REACT_CUSTOM_DESCRIPTION?: string;
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
   readonly REACT_DEFAULT_DISCHARGE_DISPOSITION?: string;
   readonly REACT_ENCOUNTER_DEFAULT_DATE_FILTER?: string;
   readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
+  readonly REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API?: string;
   readonly REACT_PAYMENT_LOCATION_REQUIRED?: string;
+  readonly REACT_DEFAULT_PAYMENT_METHOD?: string;
+  readonly REACT_TOAST_POSITION?: string;
   readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_DEFAULT_PAYMENT_TERMS?: string;
+  readonly REACT_OBSERVATION_PLOTS_CONFIG_URL?: string;
+  readonly REACT_APP_RESEND_OTP_TIMEOUT?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_PAGINATION_LIMIT_OFFSET_MAX_LIMIT?: string;
+  readonly REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED?: string;
+  readonly REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_PATIENT_GLOBAL_EDIT_ACCESS_ENABLED?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
@@ -40,6 +42,7 @@ interface ImportMetaEnv {
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
   readonly REACT_ENABLE_TOKEN_GENERATION_IN_PATIENT_HOME?: string;
   readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;
+  readonly REACT_INVENTORY_EXPIRY_MONTH_OFFSET?: string;
   readonly REACT_OPEN_SCHEDULE_AFTER_PATIENT_REGISTRATION?: string;
   readonly REACT_AUTO_REFRESH_INTERVAL?: string;
   readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
@@ -55,6 +58,7 @@ interface ImportMetaEnv {
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;
   readonly REACT_DEFAULT_COUNTRY?: string;
+  readonly REACT_DEFAULT_COUNTRY_NAME?: string;
   readonly REACT_MAPS_FALLBACK_URL_TEMPLATE?: string;
   readonly REACT_CUSTOM_SHORTCUTS?: string;
 }

@@ -10,10 +10,7 @@ import type {
   WorkspaceUpdate,
   WorkspaceUserDefaultAttributes,
 } from "../../../../src/types/workspace/workspace";
-import {
-  draftFormCount,
-  draftFormNoteText,
-} from "../../../helper/fillDrafts";
+import { draftFormCount, draftFormNoteText } from "../../../helper/fillDrafts";
 import { verifyLabelledValues } from "../../../helper/questionnaire";
 import { installEncounterWidgetRemote } from "../../../support/encounterWidgetRemote";
 
@@ -726,7 +723,8 @@ async function mockEncounterWorkspaceApi(
                   .filter(
                     (item) =>
                       item.main_code.code === code.code &&
-                      item.encounter === url.searchParams.get("encounter") &&
+                      (!url.searchParams.has("encounter") ||
+                        item.encounter === url.searchParams.get("encounter")) &&
                       (!statuses || statuses.includes(item.status)),
                   )
                   .sort(
@@ -734,7 +732,8 @@ async function mockEncounterWorkspaceApi(
                       Date.parse(b.effective_datetime) -
                       Date.parse(a.effective_datetime),
                   )
-                  .slice(0, body.page_size ?? 10),
+                  .slice(0, body.page_size ?? 10)
+                  .map((item) => ({ ...item, encounter: null })),
               })),
             },
           });
@@ -1285,8 +1284,7 @@ test("fill navigation distinguishes duplicate titles and repeated group controls
   ];
   await page.route(
     `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
-    (route) =>
-      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
   );
   await page.goto(
     `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
@@ -1348,8 +1346,7 @@ test("formatting-only optional appointment notes do not require a slot", async (
   ];
   await page.route(
     `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
-    (route) =>
-      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
   );
   const posts: string[] = [];
   await page.route("**/api/v1/batch_requests/**", async (route) => {
@@ -1369,7 +1366,9 @@ test("formatting-only optional appointment notes do not require a slot", async (
   await editor.fill("Needs a slot");
   await page.getByRole("button", { name: "Save Changes" }).click();
   await expect(
-    page.locator("[data-sonner-toast]").filter({ hasText: "Validation failed" }),
+    page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "Validation failed" }),
   ).toBeVisible();
   expect(posts).toHaveLength(0);
   await editor.fill("");
@@ -1401,8 +1400,7 @@ test("resumed appointments without notes can clear their slot when changing reso
   ];
   await page.route(
     `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
-    (route) =>
-      route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
   );
   await page.route(
     `**/api/v1/form_submission/${fixture.draft.id}/**`,
@@ -1485,7 +1483,10 @@ test("organization history filters use each primary encounter's facility scope",
         );
       }
     },
-    { actorId: fixture.actor.id, facilities: [fixture.facility, otherFacility] },
+    {
+      actorId: fixture.actor.id,
+      facilities: [fixture.facility, otherFacility],
+    },
   );
   const historyRequests: URL[] = [];
   page.on("request", (request) => {
@@ -2429,7 +2430,7 @@ test.describe("Encounter workspace rendering", () => {
         shortcuts.getByRole("link", { name: /Add Procedure/i }),
       ).toBeVisible();
       await expect(
-        shortcuts.getByRole("button", { name: "New referral", exact: true }),
+        shortcuts.getByRole("button", { name: "New Referral", exact: true }),
       ).toBeVisible();
       await expect(
         shortcuts.getByRole("button", { name: /More Actions|Show less/i }),
@@ -4192,12 +4193,14 @@ test("one workspace selection configures encounter and clinical history layouts"
   await expect(picker).not.toBeVisible();
   await expect(header).toHaveAccessibleName(`Workspace: ${history.name}`);
   await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
-  await expect.poll(() => fixture.defaultWrites).toEqual([
-    {
-      workspaceId: history.id,
-      body: { attribute: "scope", value: "all" },
-    },
-  ]);
+  await expect
+    .poll(() => fixture.defaultWrites)
+    .toEqual([
+      {
+        workspaceId: history.id,
+        body: { attribute: "scope", value: "all" },
+      },
+    ]);
   // A deep link keeps its standard history tab reachable beside the chosen
   // layout's own history pages.
   await page.goto(`${historyPath}/diagnoses`);
@@ -4518,6 +4521,11 @@ test("studio summary widgets show latest vitals, outstanding orders, current med
   await expect(temperature).toContainText("No reading");
   await expect(temperature).not.toContainText(/\d/);
   await expect(vitals).toContainText(`by ${actorName}`);
+  await expect(
+    page
+      .getByRole("region", { name: "Pulse trend", exact: true })
+      .locator(".recharts-line-curve"),
+  ).toBeVisible();
   // The tiles ask the analysis endpoint for the latest valid readings per
   // code, scoped to the current encounter, instead of listing every
   // observation.
