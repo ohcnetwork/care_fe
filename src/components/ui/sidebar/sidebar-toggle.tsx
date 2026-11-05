@@ -9,6 +9,8 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+
 // Like the sidebar wordmark, the collapsed-rail icon is always Care's.
 const iconOnLight = "/images/care_icon_on_light.svg";
 const iconOnDark = "/images/care_icon_on_dark.svg";
@@ -88,13 +90,22 @@ export function AppSidebarToggle({
       ) : (
         <PanelLeft className="size-4" aria-hidden="true" />
       )}
+      <ShortcutBadge actionId="toggle-sidebar" alwaysShow={false} />
     </Button>
   );
 
   if (isMobile) return button;
 
   return (
-    <TooltipComponent content={t("toggle_sidebar")} side="left">
+    <TooltipComponent
+      content={
+        <span className="flex items-center gap-2">
+          {t("toggle_sidebar")}
+          <ShortcutBadge actionId="toggle-sidebar" />
+        </span>
+      }
+      side="left"
+    >
       {button}
     </TooltipComponent>
   );
