@@ -1,16 +1,27 @@
 import careConfig from "@careConfig";
 import { useQueryParams } from "raviger";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { AuthFormFallback } from "@/components/Auth/AuthFormFallback";
 import { AuthLayout } from "@/components/Auth/AuthLayout";
 import { ForgotPassword } from "@/components/Auth/ForgotPassword";
-import { PatientLoginForm } from "@/components/Auth/PatientLoginForm";
 import { StaffLoginForm } from "@/components/Auth/StaffLoginForm";
 
 import { LocalStorageKeys } from "@/common/constants";
+
+// The patient form pulls in the phone input (libphonenumber, country flags),
+// so it is only fetched once the patient tab is wanted.
+const loadPatientLoginForm = () => import("@/components/Auth/PatientLoginForm");
+const PatientLoginForm = lazy(() =>
+  loadPatientLoginForm().then((m) => ({ default: m.PatientLoginForm })),
+);
+// Best-effort warm-up on hover/focus; `lazy()` retries the import on render.
+const prefetchPatientLoginForm = () => {
+  loadPatientLoginForm().catch(() => {});
+};
 
 type LoginMode = "staff" | "patient";
 
@@ -67,7 +78,12 @@ const Login = ({ forgot = false }: LoginProps) => {
             <TabsTrigger value="staff" className="min-h-11 text-base">
               {t("staff_sign_in")}
             </TabsTrigger>
-            <TabsTrigger value="patient" className="min-h-11 text-base">
+            <TabsTrigger
+              value="patient"
+              className="min-h-11 text-base"
+              onPointerEnter={prefetchPatientLoginForm}
+              onFocus={prefetchPatientLoginForm}
+            >
               {t("patient_sign_in")}
             </TabsTrigger>
           </TabsList>
@@ -75,7 +91,16 @@ const Login = ({ forgot = false }: LoginProps) => {
             {staffPanel}
           </TabsContent>
           <TabsContent value="patient" className="flex-none">
-            <PatientLoginForm />
+            <Suspense
+              fallback={
+                <AuthFormFallback
+                  title={t("patient_sign_in")}
+                  description={t("patient_sign_in_description")}
+                />
+              }
+            >
+              <PatientLoginForm />
+            </Suspense>
           </TabsContent>
         </Tabs>
       )}

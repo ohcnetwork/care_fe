@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -9,10 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
 import { AuthCard } from "@/components/Auth/AuthCard";
-import { ForgotPasswordPhone } from "@/components/Auth/ForgotPasswordPhone";
+import { AuthFormFallback } from "@/components/Auth/AuthFormFallback";
 
 import mutate from "@/Utils/request/mutate";
 import authApi from "@/types/auth/authApi";
+
+// Phone reset pulls in the phone input (libphonenumber, country flags), so it
+// is only fetched once the user asks for it.
+const loadForgotPasswordPhone = () =>
+  import("@/components/Auth/ForgotPasswordPhone");
+const ForgotPasswordPhone = lazy(() =>
+  loadForgotPasswordPhone().then((m) => ({ default: m.ForgotPasswordPhone })),
+);
+// Best-effort warm-up on hover/focus; `lazy()` retries the import on render.
+const prefetchForgotPasswordPhone = () => {
+  loadForgotPasswordPhone().catch(() => {});
+};
 
 interface ForgotPasswordProps {
   username: string;
@@ -36,10 +48,23 @@ export function ForgotPassword({
 
   if (usePhone) {
     return (
-      <ForgotPasswordPhone
-        onBackToEmail={() => setUsePhone(false)}
-        onSuccess={onBack}
-      />
+      <Suspense
+        fallback={
+          <AuthFormFallback
+            back={{
+              label: t("back_to_email_reset"),
+              onClick: () => setUsePhone(false),
+            }}
+            title={t("reset_using_phone_number")}
+            description={t("forget_password_phone_instruction")}
+          />
+        }
+      >
+        <ForgotPasswordPhone
+          onBackToEmail={() => setUsePhone(false)}
+          onSuccess={onBack}
+        />
+      </Suspense>
     );
   }
 
@@ -90,7 +115,13 @@ export function ForgotPassword({
         <p className="text-sm text-muted-foreground">
           {t("cant_access_email")}
         </p>
-        <Button type="button" variant="link" onClick={() => setUsePhone(true)}>
+        <Button
+          type="button"
+          variant="link"
+          onPointerEnter={prefetchForgotPasswordPhone}
+          onFocus={prefetchForgotPasswordPhone}
+          onClick={() => setUsePhone(true)}
+        >
           {t("reset_using_phone_number")}
         </Button>
       </div>

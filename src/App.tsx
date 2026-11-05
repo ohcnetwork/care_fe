@@ -6,8 +6,10 @@ import { AppearanceProvider } from "@/context/AppearanceContext";
 import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
+import { withZod } from "@/lib/zodReady";
 import PluginEngine from "@/PluginEngine";
 import AuthUserProvider from "@/Providers/AuthUserProvider";
+import { lazyPage } from "@/Routers/lazyPage";
 import PublicRouter from "@/Routers/PublicRouter";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
@@ -15,11 +17,15 @@ import careConfig from "@careConfig";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLocationChange } from "raviger";
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
-const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
-const AppRouter = lazy(() => import("@/Routers/AppRouter"));
+// Both routers render zod forms right away, including for users who sign in
+// during this page load, so they wait for zod to be configured.
+const PatientRouter = lazyPage(
+  withZod(() => import("@/Routers/PatientRouter")),
+);
+const AppRouter = lazyPage(withZod(() => import("@/Routers/AppRouter")));
 
 const ScrollToTop = () => {
   useLocationChange(() => {

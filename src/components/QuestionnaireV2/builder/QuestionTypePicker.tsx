@@ -28,10 +28,8 @@ import {
   subscribeToQuestionGroups,
 } from "@/components/QuestionnaireV2/groups/registry";
 import { QUESTION_TYPE_ICONS } from "@/components/QuestionnaireV2/shared/questionTypeIcons";
-import {
-  structuredDefinitionFor,
-  structuredTypeLabel,
-} from "@/components/QuestionnaireV2/structured/registry";
+import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/labels";
+import { structuredDefinitionFor } from "@/components/QuestionnaireV2/structured/registry";
 
 import {
   Question,

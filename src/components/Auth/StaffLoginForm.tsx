@@ -1,6 +1,5 @@
 import careConfig from "@careConfig";
-import { useState } from "react";
-import ReCaptcha from "react-google-recaptcha";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,9 @@ import { clearQueryPersistenceCache } from "@/Utils/request/queryClient";
 import { HTTPError } from "@/Utils/request/types";
 import { invalidateAllPaymentReconcilationLocationCaches } from "@/atoms/paymentReconcilationLocationAtom";
 import { clearQueuePractitionerCache } from "@/atoms/queuePractitionerAtom";
+
+// Only shown after repeated failed attempts (HTTP 429).
+const ReCaptcha = lazy(() => import("react-google-recaptcha"));
 
 interface StaffLoginFormProps {
   username: string;
@@ -55,6 +57,8 @@ export function StaffLoginForm({
     invalidateAllPaymentReconcilationLocationCaches();
     clearQueuePractitionerCache();
     clearQueryPersistenceCache();
+    // Warm the 2FA step while credentials are being checked (best effort).
+    import("@/components/Auth/Authenticate").catch(() => {});
     try {
       await signIn({
         username,
@@ -122,10 +126,12 @@ export function StaffLoginForm({
         </Field>
 
         {captchaRequired && careConfig.reCaptchaSiteKey && (
-          <ReCaptcha
-            sitekey={careConfig.reCaptchaSiteKey}
-            onChange={setCaptchaResponse}
-          />
+          <Suspense fallback={null}>
+            <ReCaptcha
+              sitekey={careConfig.reCaptchaSiteKey}
+              onChange={setCaptchaResponse}
+            />
+          </Suspense>
         )}
 
         <div className="flex flex-col gap-4">

@@ -1,13 +1,31 @@
 import { AppRoutes } from "@/Routers/AppRouter";
-import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
-import AppointmentPrint from "@/pages/Appointments/AppointmentPrint";
-import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
-import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
-import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
-import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
-import TokenEncounterRedirect from "@/pages/Facility/queues/TokenEncounterRedirect";
+import { lazyPage } from "@/Routers/lazyPage";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
+
+const AppointmentDetail = lazyPage(
+  () => import("@/pages/Appointments/AppointmentDetail"),
+);
+const AppointmentPrint = lazyPage(
+  () => import("@/pages/Appointments/AppointmentPrint"),
+);
+const AppointmentsPage = lazyPage(
+  () => import("@/pages/Appointments/AppointmentsPage"),
+);
+const PrintAppointments = lazyPage(
+  () => import("@/pages/Appointments/components/PrintAppointments"),
+  "PrintAppointments",
+);
+const ManageQueuePage = lazyPage(
+  () => import("@/pages/Facility/queues/ManageQueue"),
+  "ManageQueuePage",
+);
+const QueuesIndex = lazyPage(
+  () => import("@/pages/Facility/queues/QueuesIndex"),
+);
+const TokenEncounterRedirect = lazyPage(
+  () => import("@/pages/Facility/queues/TokenEncounterRedirect"),
+);
 
 const ScheduleRoutes: AppRoutes = {
   "/facility/:facilityId/appointments": () => (

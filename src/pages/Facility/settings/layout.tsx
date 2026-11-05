@@ -1,64 +1,182 @@
 import { Redirect, useRoutes } from "raviger";
+import { Suspense } from "react";
 
-import ReferralAvailabilitySettings from "./referrals/ReferralAvailabilitySettings";
-
+import Loading from "@/components/Common/Loading";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
-import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
-import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
-import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
-import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
-import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
-import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
-import { ValueSetList } from "@/components/ValueSet/ValueSetList";
-import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
-import { WorkspaceList } from "@/components/Workspace/WorkspaceList";
 
-import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
-import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
-import { BillingSettingsLayout } from "@/pages/Facility/settings/billing/layout";
-import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
-import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
-import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
-import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
-import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
-import ImmunizationPolicyList from "@/pages/ImmunizationPolicies/ImmunizationPolicyList";
-import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
-import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { lazyPage } from "@/Routers/lazyPage";
 import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import { valueSetScopeForFacility } from "@/types/valueSet/valueSet";
 import { workspaceScopeForFacility } from "@/types/workspace/workspace";
 
-import { FacilityResponses } from "./FacilityResponses";
-import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
-import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
-import ActivityDefinitionView from "./activityDefinition/ActivityDefinitionView";
-import { ChargeItemDefinitionDetail } from "./chargeItemDefinitions/ChargeItemDefinitionDetail";
-import { ChargeItemDefinitionsList } from "./chargeItemDefinitions/ChargeItemDefinitionsList";
-import { CreateChargeItemDefinition } from "./chargeItemDefinitions/CreateChargeItemDefinition";
-import { UpdateChargeItemDefinition } from "./chargeItemDefinitions/UpdateChargeItemDefinition";
-import { GeneralSettings } from "./general/general";
-import HealthcareServiceForm from "./healthcareService/HealthcareServiceForm";
-import HealthcareServiceList from "./healthcareService/HealthcareServiceList";
-import HealthcareServiceShow from "./healthcareService/HealthcareServiceShow";
-import LocationImport from "./locations/LocationImport";
-import LocationSettings from "./locations/LocationSettings";
-import ObservationDefinitionForm from "./observationDefinition/ObservationDefinitionForm";
-import ObservationDefinitionList from "./observationDefinition/ObservationDefinitionList";
-import ObservationDefinitionView from "./observationDefinition/ObservationDefinitionView";
-import FacilityOrganizationList from "./organizations/FacilityOrganizationList";
-import ProductForm from "./product/ProductForm";
-import ProductList from "./product/ProductList";
-import ProductView from "./product/ProductView";
-import ProductKnowledgeForm from "./productKnowledge/ProductKnowledgeForm";
-import ProductKnowledgeList from "./productKnowledge/ProductKnowledgeList";
-import ProductKnowledgeView from "./productKnowledge/ProductKnowledgeView";
-import { SpecimenDefinitionDetail } from "./specimen-definitions/SpecimenDefinitionDetail";
-import SpecimenDefinitionForm from "./specimen-definitions/SpecimenDefinitionForm";
-import { SpecimenDefinitionsList } from "./specimen-definitions/SpecimenDefinitionsList";
-import TokenCategoryForm from "./tokenCategory/TokenCategoryForm";
-import TokenCategoryList from "./tokenCategory/TokenCategoryList";
-import TokenCategoryView from "./tokenCategory/TokenCategoryView";
+const BillingSettingsLayout = lazyPage(
+  () => import("@/pages/Facility/settings/billing/layout"),
+  "BillingSettingsLayout",
+);
+
+const ReferralAvailabilitySettings = lazyPage(
+  () => import("./referrals/ReferralAvailabilitySettings"),
+);
+const QuestionnaireFillPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/fill/QuestionnaireFillPage"),
+  "QuestionnaireFillPage",
+);
+const QuestionnaireCreatePage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireCreatePage"),
+  "QuestionnaireCreatePage",
+);
+const QuestionnaireDetailPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireDetailPage"),
+  "QuestionnaireDetailPage",
+);
+const QuestionnaireListPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireListPage"),
+  "QuestionnaireListPage",
+);
+const QuestionnaireRevisionPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage"),
+  "QuestionnaireRevisionPage",
+);
+const QuestionnaireStudioPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/studio/QuestionnaireStudioPage"),
+  "QuestionnaireStudioPage",
+);
+const ValueSetEditor = lazyPage(
+  () => import("@/components/ValueSet/ValueSetEditor"),
+  "ValueSetEditor",
+);
+const ValueSetList = lazyPage(
+  () => import("@/components/ValueSet/ValueSetList"),
+  "ValueSetList",
+);
+const WorkspaceEditor = lazyPage(
+  () => import("@/components/Workspace/WorkspaceEditor"),
+  "WorkspaceEditor",
+);
+const WorkspaceList = lazyPage(
+  () => import("@/components/Workspace/WorkspaceList"),
+  "WorkspaceList",
+);
+const TagConfigList = lazyPage(
+  () => import("@/pages/Admin/TagConfig/TagConfigList"),
+);
+const TagConfigView = lazyPage(
+  () => import("@/pages/Admin/TagConfig/TagConfigView"),
+);
+const CreateDevice = lazyPage(
+  () => import("@/pages/Facility/settings/devices/CreateDevice"),
+);
+const DeviceDetail = lazyPage(
+  () => import("@/pages/Facility/settings/devices/DeviceShow"),
+);
+const DevicesList = lazyPage(
+  () => import("@/pages/Facility/settings/devices/DevicesList"),
+);
+const UpdateDevice = lazyPage(
+  () => import("@/pages/Facility/settings/devices/UpdateDevice"),
+);
+const ImmunizationPolicyForm = lazyPage(
+  () => import("@/pages/ImmunizationPolicies/ImmunizationPolicyForm"),
+);
+const ImmunizationPolicyList = lazyPage(
+  () => import("@/pages/ImmunizationPolicies/ImmunizationPolicyList"),
+);
+const PatientIdentifierConfigForm = lazyPage(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm"),
+);
+const PatientIdentifierConfigList = lazyPage(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList"),
+);
+const FacilityResponses = lazyPage(
+  () => import("./FacilityResponses"),
+  "FacilityResponses",
+);
+const ActivityDefinitionForm = lazyPage(
+  () => import("./activityDefinition/ActivityDefinitionForm"),
+);
+const ActivityDefinitionList = lazyPage(
+  () => import("./activityDefinition/ActivityDefinitionList"),
+);
+const ActivityDefinitionView = lazyPage(
+  () => import("./activityDefinition/ActivityDefinitionView"),
+);
+const ChargeItemDefinitionDetail = lazyPage(
+  () => import("./chargeItemDefinitions/ChargeItemDefinitionDetail"),
+  "ChargeItemDefinitionDetail",
+);
+const ChargeItemDefinitionsList = lazyPage(
+  () => import("./chargeItemDefinitions/ChargeItemDefinitionsList"),
+  "ChargeItemDefinitionsList",
+);
+const CreateChargeItemDefinition = lazyPage(
+  () => import("./chargeItemDefinitions/CreateChargeItemDefinition"),
+  "CreateChargeItemDefinition",
+);
+const UpdateChargeItemDefinition = lazyPage(
+  () => import("./chargeItemDefinitions/UpdateChargeItemDefinition"),
+  "UpdateChargeItemDefinition",
+);
+const GeneralSettings = lazyPage(
+  () => import("./general/general"),
+  "GeneralSettings",
+);
+const HealthcareServiceForm = lazyPage(
+  () => import("./healthcareService/HealthcareServiceForm"),
+);
+const HealthcareServiceList = lazyPage(
+  () => import("./healthcareService/HealthcareServiceList"),
+);
+const HealthcareServiceShow = lazyPage(
+  () => import("./healthcareService/HealthcareServiceShow"),
+);
+const LocationImport = lazyPage(() => import("./locations/LocationImport"));
+const LocationSettings = lazyPage(() => import("./locations/LocationSettings"));
+const ObservationDefinitionForm = lazyPage(
+  () => import("./observationDefinition/ObservationDefinitionForm"),
+);
+const ObservationDefinitionList = lazyPage(
+  () => import("./observationDefinition/ObservationDefinitionList"),
+);
+const ObservationDefinitionView = lazyPage(
+  () => import("./observationDefinition/ObservationDefinitionView"),
+);
+const FacilityOrganizationList = lazyPage(
+  () => import("./organizations/FacilityOrganizationList"),
+);
+const ProductForm = lazyPage(() => import("./product/ProductForm"));
+const ProductList = lazyPage(() => import("./product/ProductList"));
+const ProductView = lazyPage(() => import("./product/ProductView"));
+const ProductKnowledgeForm = lazyPage(
+  () => import("./productKnowledge/ProductKnowledgeForm"),
+);
+const ProductKnowledgeList = lazyPage(
+  () => import("./productKnowledge/ProductKnowledgeList"),
+);
+const ProductKnowledgeView = lazyPage(
+  () => import("./productKnowledge/ProductKnowledgeView"),
+);
+const SpecimenDefinitionDetail = lazyPage(
+  () => import("./specimen-definitions/SpecimenDefinitionDetail"),
+  "SpecimenDefinitionDetail",
+);
+const SpecimenDefinitionForm = lazyPage(
+  () => import("./specimen-definitions/SpecimenDefinitionForm"),
+);
+const SpecimenDefinitionsList = lazyPage(
+  () => import("./specimen-definitions/SpecimenDefinitionsList"),
+  "SpecimenDefinitionsList",
+);
+const TokenCategoryForm = lazyPage(
+  () => import("./tokenCategory/TokenCategoryForm"),
+);
+const TokenCategoryList = lazyPage(
+  () => import("./tokenCategory/TokenCategoryList"),
+);
+const TokenCategoryView = lazyPage(
+  () => import("./tokenCategory/TokenCategoryView"),
+);
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -411,5 +529,9 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
     },
   });
 
-  return <div className="min-w-0 px-4 pb-4">{routeResult}</div>;
+  return (
+    <div className="min-w-0 px-4 pb-4">
+      <Suspense fallback={<Loading />}>{routeResult}</Suspense>
+    </div>
+  );
 }

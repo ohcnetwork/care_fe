@@ -4,7 +4,7 @@ import { CableIcon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
+import { lazyPage } from "@/Routers/lazyPage";
 import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
 
@@ -110,6 +110,10 @@ export function usePluginRoutes() {
   }
   return routes;
 }
+
+const OrganizationLayout = lazyPage(
+  () => import("@/pages/Organization/components/OrganizationLayout"),
+);
 
 export const useOrganizationRoutes = () => {
   const careApps = useCareApps();

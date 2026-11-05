@@ -1,30 +1,89 @@
-import { QuestionnaireCreatePage } from "@/components/QuestionnaireV2/manage/QuestionnaireCreatePage";
-import { QuestionnaireDetailPage } from "@/components/QuestionnaireV2/manage/QuestionnaireDetailPage";
-import { QuestionnaireListPage } from "@/components/QuestionnaireV2/manage/QuestionnaireListPage";
-import { QuestionnaireRevisionPage } from "@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage";
-import { QuestionnaireStudioPage } from "@/components/QuestionnaireV2/studio/QuestionnaireStudioPage";
-import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
-import { ValueSetList } from "@/components/ValueSet/ValueSetList";
-import { WorkspaceEditor } from "@/components/Workspace/WorkspaceEditor";
-import { WorkspaceList } from "@/components/Workspace/WorkspaceList";
-
 import { AppRoutes } from "@/Routers/AppRouter";
-import { PermissionsIndex } from "@/pages/Admin/Permissions/PermissionsIndex";
-import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
-import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
-import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
-import { ActionConfigurationForm } from "@/pages/Admin/actions/ActionConfigurationForm";
-import { ActionConfigurationList } from "@/pages/Admin/actions/ActionConfigurationList";
-import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
-import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
-import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
-import ImmunizationPolicyForm from "@/pages/ImmunizationPolicies/ImmunizationPolicyForm";
-import ImmunizationPolicyList from "@/pages/ImmunizationPolicies/ImmunizationPolicyList";
-import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
-import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+import { lazyPage } from "@/Routers/lazyPage";
 import { immunizationPolicyScope } from "@/types/emr/immunizationPolicy/immunizationPolicy";
 import { INSTANCE_VALUESET_SCOPE } from "@/types/valueSet/valueSet";
 import { INSTANCE_WORKSPACE_SCOPE } from "@/types/workspace/workspace";
+
+const QuestionnaireCreatePage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireCreatePage"),
+  "QuestionnaireCreatePage",
+);
+const QuestionnaireDetailPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireDetailPage"),
+  "QuestionnaireDetailPage",
+);
+const QuestionnaireListPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireListPage"),
+  "QuestionnaireListPage",
+);
+const QuestionnaireRevisionPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/manage/QuestionnaireRevisionPage"),
+  "QuestionnaireRevisionPage",
+);
+const QuestionnaireStudioPage = lazyPage(
+  () => import("@/components/QuestionnaireV2/studio/QuestionnaireStudioPage"),
+  "QuestionnaireStudioPage",
+);
+const ValueSetEditor = lazyPage(
+  () => import("@/components/ValueSet/ValueSetEditor"),
+  "ValueSetEditor",
+);
+const ValueSetList = lazyPage(
+  () => import("@/components/ValueSet/ValueSetList"),
+  "ValueSetList",
+);
+const WorkspaceEditor = lazyPage(
+  () => import("@/components/Workspace/WorkspaceEditor"),
+  "WorkspaceEditor",
+);
+const WorkspaceList = lazyPage(
+  () => import("@/components/Workspace/WorkspaceList"),
+  "WorkspaceList",
+);
+const PermissionsIndex = lazyPage(
+  () => import("@/pages/Admin/Permissions/PermissionsIndex"),
+  "PermissionsIndex",
+);
+const RolesIndex = lazyPage(() => import("@/pages/Admin/Roles/RolesIndex"));
+const TagConfigList = lazyPage(
+  () => import("@/pages/Admin/TagConfig/TagConfigList"),
+);
+const TagConfigView = lazyPage(
+  () => import("@/pages/Admin/TagConfig/TagConfigView"),
+);
+const ActionConfigurationForm = lazyPage(
+  () => import("@/pages/Admin/actions/ActionConfigurationForm"),
+  "ActionConfigurationForm",
+);
+const ActionConfigurationList = lazyPage(
+  () => import("@/pages/Admin/actions/ActionConfigurationList"),
+  "ActionConfigurationList",
+);
+const AdminOrganizationList = lazyPage(
+  () => import("@/pages/Admin/organizations/AdminOrganizationList"),
+);
+const PlugConfigEdit = lazyPage(
+  () => import("@/pages/Apps/PlugConfigEdit"),
+  "PlugConfigEdit",
+);
+const PlugConfigList = lazyPage(
+  () => import("@/pages/Apps/PlugConfigList"),
+  "PlugConfigList",
+);
+const ImmunizationPolicyForm = lazyPage(
+  () => import("@/pages/ImmunizationPolicies/ImmunizationPolicyForm"),
+);
+const ImmunizationPolicyList = lazyPage(
+  () => import("@/pages/ImmunizationPolicies/ImmunizationPolicyList"),
+);
+const PatientIdentifierConfigForm = lazyPage(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm"),
+);
+const PatientIdentifierConfigList = lazyPage(
+  () =>
+    import("@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList"),
+);
 
 const INSTANCE_SCOPE = {
   authContext: "instance",

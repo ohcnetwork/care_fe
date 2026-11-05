@@ -1,15 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -71,6 +62,8 @@ interface ObservationDetails {
   note?: string;
   status: string;
 }
+
+const ObservationLineChart = lazy(() => import("./ObservationLineChart"));
 
 const DEFAULT_COLORS = [
   "#2563eb", // blue-600
@@ -304,58 +297,30 @@ export const ObservationVisualizer = ({
 
             <TabsContent value="graph">
               <div style={{ height: `${height}px` }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
+                <Suspense fallback={<Skeleton className="size-full" />}>
+                  <ObservationLineChart
                     data={group.data}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="time"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      scale="time"
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-                      }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      domain={group.yAxisDomain || ["auto", "auto"]}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      labelFormatter={(value) => {
-                        if (typeof value === "number") {
-                          const date = new Date(value);
-                          return formatChartDate(date.toISOString()).display;
-                        }
-                        return value;
-                      }}
-                    />
-                    <Legend />
-                    {group.codes.map((code, codeIndex) => {
-                      if (!code.display) return null;
-                      return (
-                        <Line
-                          key={code.code}
-                          type="monotone"
-                          dataKey={code.display}
-                          stroke={
-                            group.color ||
-                            DEFAULT_COLORS[codeIndex % DEFAULT_COLORS.length]
-                          }
-                          dot={true}
-                          connectNulls
-                        />
-                      );
-                    })}
-                  </LineChart>
-                </ResponsiveContainer>
+                    yAxisDomain={group.yAxisDomain}
+                    lines={group.codes.flatMap((code, codeIndex) =>
+                      code.display
+                        ? [
+                            {
+                              key: code.code,
+                              dataKey: code.display,
+                              stroke:
+                                group.color ||
+                                DEFAULT_COLORS[
+                                  codeIndex % DEFAULT_COLORS.length
+                                ],
+                            },
+                          ]
+                        : [],
+                    )}
+                    formatLabel={(value) =>
+                      formatChartDate(new Date(value).toISOString()).display
+                    }
+                  />
+                </Suspense>
               </div>
             </TabsContent>
 

@@ -10,7 +10,7 @@ import {
   getQuestionGroupsVersion,
   subscribeToQuestionGroups,
 } from "@/components/QuestionnaireV2/groups/registry";
-import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/registry";
+import { structuredTypeLabel } from "@/components/QuestionnaireV2/structured/labels";
 
 import { QuestionType } from "@/types/questionnaire/question";
 import type { StructuredTypeValue } from "@/types/questionnaire/structured";

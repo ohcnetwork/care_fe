@@ -1,4 +1,3 @@
-import type { TFunction } from "i18next";
 import type { ComponentType } from "react";
 
 import type { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -109,8 +108,4 @@ export function resolveStructuredSlotState(
   if (missing.length > 0)
     return { kind: "missing_context", definition, missing };
   return { kind: "ready", definition };
-}
-
-export function structuredTypeLabel(type: string, t: TFunction): string {
-  return isCoreStructuredType(type) ? t(`structured_type__${type}`) : type;
 }

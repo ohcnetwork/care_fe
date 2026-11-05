@@ -1,7 +1,6 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 
 import Loading from "@/components/Common/Loading";
-import "@/lib/pdfWorker";
 import { DiagnosticReportPrintPreview } from "@/pages/Facility/services/diagnosticReports/DiagnosticReportPrintPreview";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import fileApi from "@/types/files/fileApi";

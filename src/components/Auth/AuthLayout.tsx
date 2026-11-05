@@ -1,24 +1,22 @@
 import careConfig from "@careConfig";
 import { Globe } from "lucide-react";
 import { Link } from "raviger";
-import { ReactNode, useEffect, useId } from "react";
+import { lazy, ReactNode, Suspense, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { PixelCanvas } from "@/components/Auth/PixelCanvas";
 
 import { keysOf } from "@/Utils/utils";
 import { LANGUAGES } from "@/i18n";
+
+const LanguageSelectControl = lazy(
+  () => import("@/components/Auth/LanguageSelectControl"),
+);
 
 const availableLocales = keysOf(LANGUAGES).filter((locale) =>
   careConfig.availableLocales.includes(locale),
@@ -85,18 +83,14 @@ function LanguageSelect() {
       </h2>
       <Separator orientation="vertical" aria-hidden="true" className="h-6" />
       <div className="w-full md:w-48">
-        <Select value={current} onValueChange={changeLanguage}>
-          <SelectTrigger aria-labelledby={labelId} className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent alignItemWithTrigger={false}>
-            {availableLocales.map((locale) => (
-              <SelectItem key={locale} value={locale} lang={locale}>
-                {LANGUAGES[locale]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Suspense fallback={<Skeleton className="h-12 w-full md:h-10" />}>
+          <LanguageSelectControl
+            labelId={labelId}
+            locales={availableLocales}
+            value={current}
+            onValueChange={changeLanguage}
+          />
+        </Suspense>
       </div>
     </section>
   );

@@ -119,8 +119,9 @@ test.describe("Product Knowledge Edit operations", () => {
       .getByRole("link", { name: "View" })
       .click();
 
-    // Verify all the fields
-    await expect(page.getByText(editedName)).toBeVisible();
+    // Verify all the fields (the heading waits for the lazily loaded detail
+    // page; the list stays mounted but hidden until it renders)
+    await expect(page.getByRole("heading").getByText(editedName)).toBeVisible();
     await expect(page.getByText(productType)).toBeVisible();
     await expect(page.getByText(baseUnit)).toBeVisible();
     await expect(page.getByText(hsnCode)).toBeVisible();

@@ -1,5 +1,4 @@
 import "@/style/index.css";
-import "reactflow/dist/style.css";
 
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
@@ -9,7 +8,6 @@ import careConfig from "@careConfig";
 import React, { Context } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
-import { initZod } from "./lib/zod";
 
 // Extend Window interface to include CARE_API_URL
 declare global {
@@ -54,7 +52,4 @@ initI18n()
   .catch((error) => {
     console.error("Failed to initialize i18n:", error);
   })
-  .finally(() => {
-    initZod();
-    initApp();
-  });
+  .finally(initApp);
