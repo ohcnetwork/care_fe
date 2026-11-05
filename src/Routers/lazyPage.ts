@@ -8,6 +8,16 @@ const RELOAD_GUARD_MS = 5 * 60 * 1000;
 
 let isReloading = false;
 
+// How browsers word a failed dynamic import (Chromium, Firefox, Safari), plus
+// Vite's own preload failure. Errors thrown while a page module evaluates
+// don't match, so real bugs reach the error page instead of reloading.
+const CHUNK_LOAD_ERROR =
+  /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed|Unable to preload CSS/i;
+
+function isChunkLoadError(error: unknown): boolean {
+  return error instanceof Error && CHUNK_LOAD_ERROR.test(error.message);
+}
+
 /**
  * Reloads the page so that it picks up the current deploy after a lazily
  * loaded chunk failed to load (usually because a deploy removed the hashed
@@ -80,7 +90,7 @@ export function lazyPage<
       const module = await load();
       return { default: module[exportName] };
     } catch (error) {
-      if (reloadForStaleChunk()) {
+      if (isChunkLoadError(error) && reloadForStaleChunk()) {
         // Keep the Suspense fallback on screen until the page reloads.
         return new Promise<never>(() => {});
       }
