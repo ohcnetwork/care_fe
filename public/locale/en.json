@@ -5873,7 +5873,7 @@
   "referral_mark_response_error_description": "Mark “{{title}}” as entered in error? The original answers will remain available in the referral.",
   "referral_metadata_edit_description": "Update the referral title and clinical context.",
   "referral_navigation": "Referral navigation",
-  "referral_new": "New referral",
+  "referral_new": "New Referral",
   "referral_no_active_forms": "No active forms are configured for this referral.",
   "referral_no_availability": "No referral availability found",
   "referral_no_available_records": "No available records on this page.",

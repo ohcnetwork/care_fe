@@ -2430,7 +2430,7 @@ test.describe("Encounter workspace rendering", () => {
         shortcuts.getByRole("link", { name: /Add Procedure/i }),
       ).toBeVisible();
       await expect(
-        shortcuts.getByRole("button", { name: "New referral", exact: true }),
+        shortcuts.getByRole("button", { name: "New Referral", exact: true }),
       ).toBeVisible();
       await expect(
         shortcuts.getByRole("button", { name: /More Actions|Show less/i }),

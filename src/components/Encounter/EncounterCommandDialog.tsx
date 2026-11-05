@@ -24,6 +24,7 @@ import {
   Pill,
   Plus,
   RotateCcw,
+  Scissors,
   Users,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
@@ -167,6 +168,8 @@ export function EncounterCommandDialog({
           navigate(buildEncounterUrl("/questionnaire/symptom")),
         "add-diagnosis": () =>
           navigate(buildEncounterUrl("/questionnaire/diagnosis")),
+        "add-procedure": () =>
+          navigate(buildEncounterUrl("/questionnaire/procedure")),
         "update-encounter": () =>
           navigate(buildEncounterUrl("/questionnaire/encounter")),
         "service-requests": () =>
@@ -257,6 +260,12 @@ export function EncounterCommandDialog({
             label: t("add_diagnosis"),
             shortcut: getShortcutDisplay("add-diagnosis"),
             icon: <Plus />,
+          },
+          {
+            id: "add-procedure",
+            label: t("add_procedure"),
+            shortcut: getShortcutDisplay("add-procedure"),
+            icon: <Scissors />,
           },
           {
             id: "add-service-request",
