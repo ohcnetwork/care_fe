@@ -215,7 +215,7 @@ export function QuestionnaireListPage({
                     {questionnaire.title}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="font-normal">
+                    <Badge variant="secondary" className="font-normal">
                       {t(questionnaire.subject_type)}
                     </Badge>
                   </TableCell>
@@ -259,7 +259,7 @@ export function QuestionnaireListPage({
                 <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                   {questionnaire.description}
                 </p>
-                <Badge variant="outline" className="font-normal">
+                <Badge variant="secondary" className="mt-2 font-normal">
                   {t(questionnaire.subject_type)}
                 </Badge>
               </Link>
