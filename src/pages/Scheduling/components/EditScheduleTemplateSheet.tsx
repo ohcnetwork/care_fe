@@ -31,6 +31,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -86,10 +87,12 @@ export default function EditScheduleTemplateSheet({
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
       <SheetContent className="flex min-w-full flex-col bg-background pb-0 sm:min-w-128">
-        <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
-        <SheetDescription className="sr-only">
-          {t("edit_schedule_template")}
-        </SheetDescription>
+        <SheetHeader className="border-0 pb-0">
+          <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("edit_schedule_template")}
+          </SheetDescription>
+        </SheetHeader>
         <div className="flex-1 overflow-auto -mx-6 px-6 pb-16 bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
