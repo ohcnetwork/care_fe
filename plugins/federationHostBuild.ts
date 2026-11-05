@@ -42,6 +42,9 @@ export function federationHostBuild(
   if (typeof transform !== "function") {
     throw new Error("federationHostBuild: federation plugin has no transform");
   }
+  // A source-text heuristic: it matches `"<remote>/` string literals, so a
+  // remote imported through a computed specifier or a re-export would not be
+  // rewritten. Re-check this when a real remote replaces the `dummy` one.
   const remoteImport = remoteNames.length
     ? new RegExp(
         `["'](?:${remoteNames.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})/`,
@@ -54,7 +57,9 @@ export function federationHostBuild(
     transform(code, id, options) {
       // The plugin emits the `__federation_shared_*` chunks on its first
       // transform call; an empty module triggers that without rewriting
-      // anything.
+      // anything. Like the plugin's own `sharedInfo.emitFile` cache, this is
+      // once per plugin instance, so watch rebuilds (`build --watch`, not
+      // used here) are not supported by either.
       if (!sharedChunksEmitted) {
         sharedChunksEmitted = true;
         transform.call(this, "", "\0federation-host-build", options);
