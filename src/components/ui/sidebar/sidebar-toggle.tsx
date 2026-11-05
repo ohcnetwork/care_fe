@@ -65,6 +65,7 @@ export function AppSidebarToggle({
         if (!event.defaultPrevented) scheduleClose();
       }}
       {...props}
+      data-shortcut-id="toggle-sidebar"
     >
       {showLogo ? (
         <>
@@ -90,7 +91,6 @@ export function AppSidebarToggle({
       ) : (
         <PanelLeft className="size-4" aria-hidden="true" />
       )}
-      <ShortcutBadge actionId="toggle-sidebar" alwaysShow={false} />
     </Button>
   );
 
