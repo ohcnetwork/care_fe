@@ -124,8 +124,6 @@ export const ObservationVisualizer = ({
     }),
   });
 
-  // Deployed analyse endpoints may ignore list filters, so never chart
-  // invalidated readings or readings from another encounter.
   const chartableReadings = (code: Code) =>
     (
       data?.results.find(
@@ -133,8 +131,7 @@ export const ObservationVisualizer = ({
       )?.results ?? []
     ).filter(
       (observation) =>
-        observation.status !== ObservationStatus.ENTERED_IN_ERROR &&
-        (!encounterId || observation.encounter === encounterId),
+        observation.status !== ObservationStatus.ENTERED_IN_ERROR,
     );
 
   if (isLoading) {

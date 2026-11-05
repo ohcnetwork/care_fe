@@ -530,7 +530,7 @@ export function SettingsLayout({ facilityId }: SettingsLayoutProps) {
   });
 
   return (
-    <div className="min-w-0 p-4">
+    <div className="min-w-0 px-4 pb-4">
       <Suspense fallback={<Loading />}>{routeResult}</Suspense>
     </div>
   );

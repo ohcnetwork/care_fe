@@ -18,6 +18,9 @@ declare global {
     __CORE_ENV__: typeof careConfig;
     __CARE_PLUGIN_RUNTIME__: { meta: PlugConfigMeta };
     AuthUserContext: Context<AuthContextType | null>;
+    // Provided by public/loading-screen.js until the pre-React screen is removed
+    __removeLoadingScreen?: (options?: { immediate?: boolean }) => void;
+    __holdLoadingScreen?: () => () => void;
   }
 }
 

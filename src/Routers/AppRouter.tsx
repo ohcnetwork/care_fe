@@ -192,8 +192,8 @@ export default function AppRouter() {
         <SidebarInset
           id="pages"
           className={cn(
-            "min-h-svh min-w-0 max-w-full focus:outline-hidden",
-            !isInnerWorkspace && "md:min-h-[calc(100svh-1rem)]",
+            "h-svh min-w-0 max-w-full focus:outline-hidden",
+            !isInnerWorkspace && "md:h-[calc(100svh-1rem)]",
           )}
         >
           <ShortcutCommandDialog
@@ -211,7 +211,12 @@ export default function AppRouter() {
               onSearch={() => setCommandDialogOpen(true)}
             />
           ) : null}
-          <div className={"min-w-0 p-4"} data-cui-page>
+          <div
+            className={
+              "flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 md:px-6 pb-4"
+            }
+            data-cui-page
+          >
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               <Suspense fallback={<Loading />}>{pages}</Suspense>
             </ErrorBoundary>
