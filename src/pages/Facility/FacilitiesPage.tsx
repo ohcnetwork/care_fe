@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
+
+import { isIOSDevice } from "@/Utils/utils";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
@@ -28,6 +31,9 @@ export function FacilitiesPage() {
 
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
+  // Snapshot once on mount — prevents SearchInput's focus effect from
+  // re-triggering and stealing focus when the window is resized past 640px.
+  const [shouldAutoFocus] = useState(() => !isMobile && !isIOSDevice);
 
   const { data: facilitiesResponse, isLoading } = useQuery({
     queryKey: ["facilities", qParams],
@@ -75,7 +81,7 @@ export function FacilitiesPage() {
           ]}
           className="w-[calc(100vw-2rem)] sm:max-w-min sm:min-w-64"
           onSearch={(key, value) => updateQuery({ name: value })}
-          autoFocus={!isMobile}
+          autoFocus={shouldAutoFocus}
         />
       </div>
 

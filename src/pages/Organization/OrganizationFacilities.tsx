@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -15,14 +16,16 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
-import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { FacilityListRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
+import query from "@/Utils/request/query";
+import { isIOSDevice } from "@/Utils/utils";
+
+import { Settings } from "lucide-react";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { Settings } from "lucide-react";
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
@@ -40,6 +43,9 @@ export default function OrganizationFacilities({
   const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
   const isMobile = useBreakpoints({ default: true, sm: false });
+  // Snapshot once on mount — prevents SearchInput's focus effect from
+  // re-triggering and stealing focus when the window is resized past 640px.
+  const [shouldAutoFocus] = useState(() => !isMobile && !isIOSDevice);
 
   const { isGeoAdmin } = getPermissions(
     hasPermission,
@@ -106,7 +112,7 @@ export default function OrganizationFacilities({
                   })
                 }
                 className="w-full max-w-sm"
-                autoFocus={!isMobile}
+                autoFocus={shouldAutoFocus}
               />
             </div>
 
