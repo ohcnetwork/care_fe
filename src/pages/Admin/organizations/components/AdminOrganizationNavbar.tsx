@@ -175,11 +175,7 @@ export default function AdminOrganizationNavbar({
       const currentOffset = allPages.length * LIMIT;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    // The API orders by creation date, so loaded pages are sorted by name here.
-    select: (data) =>
-      data.pages
-        .flatMap((page) => page.results)
-        .sort((left, right) => left.name.localeCompare(right.name)),
+    select: (data) => data.pages.flatMap((page) => page.results),
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

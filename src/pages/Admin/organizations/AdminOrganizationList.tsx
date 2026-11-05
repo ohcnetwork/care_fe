@@ -386,10 +386,7 @@ function FlatOrgSidebar({
       const currentOffset = allPages.length * LIMIT;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    select: (data) =>
-      data.pages
-        .flatMap((page) => page.results)
-        .sort((a, b) => a.name.localeCompare(b.name)),
+    select: (data) => data.pages.flatMap((page) => page.results),
     refetchOnWindowFocus: false,
   });
 
