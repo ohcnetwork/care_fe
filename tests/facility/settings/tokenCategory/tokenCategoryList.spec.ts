@@ -34,14 +34,19 @@ test.describe("Token Category List - Permission Tests", () => {
         page.getByRole("heading", { name: "Token Categories" }),
       ).toBeVisible();
 
-      // Verify table structure is present
-      const table = page.locator("table");
-      await expect(table).toBeVisible();
-
-      // Verify table has data rows (tbody should have at least one row)
-      const tableBody = page.locator("tbody");
-      const rowCount = await tableBody.locator("tr").count();
-      expect(rowCount).toBeGreaterThan(0);
+      // Verify a grouped table is rendered for each resource type
+      for (const resourceType of [
+        "Practitioner",
+        "Location",
+        "Healthcare Service",
+      ]) {
+        const group = page.getByRole("region", {
+          name: resourceType,
+          exact: true,
+        });
+        await expect(group.locator("table")).toBeVisible();
+        await expect(group.locator("tbody tr").first()).toBeVisible();
+      }
 
       // Verify action buttons (View/Edit) are present in at least one row
       await expect(
@@ -101,8 +106,7 @@ test.describe("Token Category List - Permission Tests", () => {
       // Step 2: Verify access denied message is shown
 
       // Step 3: Verify table and data are NOT visible
-      const table = page.locator("table");
-      await expect(table).not.toBeVisible();
+      await expect(page.locator("table")).toHaveCount(0);
 
       // Verify action buttons are NOT visible
       const viewButtons = page.getByRole("link", { name: "View", exact: true });

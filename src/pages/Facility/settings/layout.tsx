@@ -227,7 +227,6 @@ const getRoutes = (facilityId: string) => ({
     <ProductForm facilityId={facilityId} productId={id} />
   ),
   "/token_category": () => <TokenCategoryList facilityId={facilityId} />,
-  "/token_category/new": () => <TokenCategoryForm facilityId={facilityId} />,
   "/token_category/:id": ({ id }: { id: string }) => (
     <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
   ),

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,13 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -42,68 +36,51 @@ import {
 } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
+/**
+ * Edit page for a token category. Creation happens inline from the token
+ * category list, grouped by resource type.
+ */
 export default function TokenCategoryForm({
   facilityId,
   tokenCategoryId,
-  onSuccess,
 }: {
   facilityId: string;
-  tokenCategoryId?: string;
-  onSuccess?: (tokenCategory: TokenCategoryRead) => void;
+  tokenCategoryId: string;
 }) {
   const { t } = useTranslation();
-
-  const isEditMode = Boolean(tokenCategoryId);
 
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["tokenCategory", tokenCategoryId],
     queryFn: query(tokenCategoryApi.get, {
       pathParams: {
         facility_id: facilityId,
-        id: tokenCategoryId!,
+        id: tokenCategoryId,
       },
     }),
-    enabled: isEditMode,
   });
 
-  if (isEditMode && isFetching) {
-    return (
-      <Page title={t("edit_token_category")} hideTitleOnPage>
-        <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_token_category")}
-            </h1>
-          </div>
-          <FormSkeleton rows={4} />
-        </div>
-      </Page>
-    );
-  }
-
   return (
-    <Page
-      title={isEditMode ? t("edit_token_category") : t("create_token_category")}
-      hideTitleOnPage
-    >
+    <Page title={t("edit_token_category")} hideTitleOnPage>
       <div className="container mx-auto max-w-3xl">
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-gray-900">
-            {isEditMode ? t("edit_token_category") : t("create_token_category")}
+            {t("edit_token_category")}
           </h1>
-          {isEditMode && (
-            <p className="text-sm text-gray-500">
-              {t("edit_token_category_description")}
-            </p>
-          )}
+          <p className="text-sm text-gray-500">
+            {t("edit_token_category_description")}
+          </p>
         </div>
-        <TokenCategoryFormContent
-          facilityId={facilityId}
-          tokenCategoryId={tokenCategoryId}
-          existingData={existingData}
-          onSuccess={onSuccess}
-          containerClassName="rounded-lg border border-gray-200 bg-white p-6"
-        />
+        {isFetching || !existingData ? (
+          <FormSkeleton rows={4} />
+        ) : (
+          <TokenCategoryFormContent
+            facilityId={facilityId}
+            tokenCategoryId={tokenCategoryId}
+            resourceType={existingData.resource_type}
+            existingData={existingData}
+            containerClassName="rounded-lg border border-gray-200 bg-white p-6"
+          />
+        )}
       </div>
     </Page>
   );
@@ -112,6 +89,7 @@ export default function TokenCategoryForm({
 export function TokenCategoryFormContent({
   facilityId,
   tokenCategoryId,
+  resourceType,
   existingData,
   containerClassName,
   onSuccess = () => navigate(`/facility/${facilityId}/settings/token_category`),
@@ -121,6 +99,11 @@ export function TokenCategoryFormContent({
 }: {
   facilityId: string;
   tokenCategoryId?: string;
+  /**
+   * Resource type of the token category. Set on create and immutable
+   * afterwards, so it is not editable in the form.
+   */
+  resourceType: SchedulableResourceType;
   existingData?: TokenCategoryRead;
   containerClassName?: string;
   onSuccess?: (tokenCategory: TokenCategoryRead) => void;
@@ -134,7 +117,6 @@ export function TokenCategoryFormContent({
 
   const formSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
-    resource_type: z.enum(SchedulableResourceType),
     shorthand: z
       .string()
       .trim()
@@ -148,12 +130,10 @@ export function TokenCategoryFormContent({
       isEditMode && existingData
         ? {
             name: existingData.name,
-            resource_type: existingData.resource_type,
             shorthand: existingData.shorthand,
           }
         : {
             name: "",
-            resource_type: SchedulableResourceType.Practitioner,
             shorthand: "",
           },
   });
@@ -192,14 +172,13 @@ export function TokenCategoryFormContent({
     if (isEditMode && tokenCategoryId) {
       const updatePayload: TokenCategoryUpdate = {
         name: data.name,
-        resource_type: data.resource_type,
         shorthand: data.shorthand,
       };
       updateTokenCategory(updatePayload);
     } else {
       const createPayload: TokenCategoryCreate = {
         name: data.name,
-        resource_type: data.resource_type,
+        resource_type: resourceType,
         shorthand: data.shorthand,
       };
       createTokenCategory(createPayload);
@@ -220,6 +199,20 @@ export function TokenCategoryFormContent({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className={containerClassName}>
           <div className="space-y-4">
+            {isEditMode && (
+              <div className="space-y-2" data-cy="token-category-resource-type">
+                <p className="text-sm font-medium text-gray-900">
+                  {t("resource_type")}
+                </p>
+                <Badge variant={SCHEDULABLE_RESOURCE_TYPE_COLORS[resourceType]}>
+                  {t(resourceType)}
+                </Badge>
+                <p className="text-sm text-gray-500">
+                  {t("token_category_resource_type_immutable")}
+                </p>
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="name"
@@ -234,39 +227,6 @@ export function TokenCategoryFormContent({
                   </FormControl>
                   <FormDescription>
                     {t("token_category_name_description")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="resource_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel aria-required>{t("resource_type")}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("select_resource_type")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.keys(SCHEDULABLE_RESOURCE_TYPE_COLORS).map(
-                        (type) => (
-                          <SelectItem key={type} value={type}>
-                            {t(type)}
-                          </SelectItem>
-                        ),
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    {t("resource_type_description")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
