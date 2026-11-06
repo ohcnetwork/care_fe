@@ -82,9 +82,10 @@ export default function PrintPreview(props: Props) {
     };
   }, [props.disabled, props.facility]);
 
-  const { isPrinting } = useAutoPrint({
-    enabled: autoPrintEnabled && imagesReady && !props.disabled,
-  });
+  const { isPrinting, countdown, isCountdownVisible, dismissCountdown } =
+    useAutoPrint({
+      enabled: autoPrintEnabled && imagesReady && !props.disabled,
+    });
 
   const templateWatermark = props.facility
     ? resolvePrintTemplate(props.facility, props.templateSlug)?.watermark
@@ -135,6 +136,29 @@ export default function PrintPreview(props: Props) {
           </div>
         }
       >
+        {autoPrintEnabled && countdown !== null && isCountdownVisible && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-4 flex items-center justify-between gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 print:hidden"
+          >
+            <span>
+              {countdown === 1
+                ? t("auto_print_return_countdown_one", { count: countdown })
+                : t("auto_print_return_countdown", { count: countdown })}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={dismissCountdown}
+              aria-label={t("dismiss_countdown")}
+            >
+              {t("dismiss")}
+            </Button>
+          </div>
+        )}
+
         {isMobile ? (
           <div className="mt-4 print:max-w-none">
             <FitToWidthScrollContainer
