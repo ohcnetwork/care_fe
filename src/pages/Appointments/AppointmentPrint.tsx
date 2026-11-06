@@ -322,7 +322,7 @@ export default function AppointmentPrint(props: Props) {
                           <TableCell className="text-center py-0.5 px-1">
                             {index + 1}.
                           </TableCell>
-                          <TableCell className="py-0.5">
+                          <TableCell className="print-wrap whitespace-pre-wrap py-0.5">
                             <div className="flex flex-col">
                               <span>{item.title}</span>
                               {item.paid_invoice && (
@@ -398,7 +398,7 @@ export default function AppointmentPrint(props: Props) {
                         <TableCell className="text-center py-0.5 px-1">
                           {index + 1}.
                         </TableCell>
-                        <TableCell className="py-0.5">
+                        <TableCell className="print-wrap whitespace-pre-wrap py-0.5">
                           <div className="flex flex-col">
                             <span>{payment.invoiceNumber}</span>
                             {payment.payment_datetime && (

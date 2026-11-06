@@ -89,6 +89,9 @@ const DispenseOrderContent = ({
               { key: "prepared_date" },
             ]}
             cellClassName="whitespace-pre-line"
+            cellConfig={{
+              medicine: { className: "print-wrap" },
+            }}
             rows={dispenses.map((dispense) => {
               const instructions = dispense.dosage_instruction ?? [];
 
