@@ -252,7 +252,7 @@ export default function LinkDepartmentsSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent size="md">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {t("manage_organization", {
