@@ -65,6 +65,7 @@ import {
 import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
 import type {
   QuestionnaireResponse,
+  ResponseContext,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
@@ -78,6 +79,7 @@ interface AllergyQuestionProps {
     questionId: string,
     note?: string,
   ) => void;
+  setResponseContext: (questionId: string, context: ResponseContext[]) => void;
   disabled?: boolean;
 }
 
@@ -555,6 +557,7 @@ export function AllergyQuestion({
   question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
+  setResponseContext,
   disabled,
   patientId,
 }: AllergyQuestionProps) {
@@ -593,6 +596,10 @@ export function AllergyQuestion({
           },
         ],
         questionnaireResponse.question_id,
+      );
+      setResponseContext(
+        questionnaireResponse.question_id,
+        patientAllergies.results,
       );
     }
   }, [patientAllergies]);
