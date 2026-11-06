@@ -2,7 +2,7 @@ import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
 import { EncounterNavItem } from "@/components/ui/sidebar/facility/encounter-nav-item";
-import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/FacilitySidebarIcon";
+import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/facility-sidebar-icon";
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { useCareApps } from "@/hooks/useCareApps";

@@ -21,7 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
-import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/FacilitySidebarIcon";
+import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/facility-sidebar-icon";
 import { NavLink } from "@/components/ui/sidebar/nav-main";
 import { isNavigationActive } from "@/components/ui/sidebar/nav-utils";
 
