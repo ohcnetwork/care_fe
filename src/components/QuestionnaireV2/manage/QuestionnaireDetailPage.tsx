@@ -177,7 +177,7 @@ export function QuestionnaireDetailPage({
             {/* Sticky header band: back + breadcrumb, title row and the tab
                 strip stay pinned while the body scrolls beneath, keeping the
                 primary Save Form action reachable on long questionnaires. */}
-            <div className="sticky top-0 z-20 space-y-3 bg-white py-3">
+            <div className="sticky top-0 z-20 space-y-3 bg-soft-background pt-4">
               <div className="flex flex-wrap items-center gap-3">
                 <Button
                   type="button"
@@ -247,7 +247,7 @@ export function QuestionnaireDetailPage({
                 </div>
               </div>
 
-              <div className="max-w-full overflow-x-auto pb-1">
+              <div className="max-w-full overflow-x-auto border-b border-border pb-px">
                 <TabsList variant="line">
                   <TabsTrigger value="questions">{t("questions")}</TabsTrigger>
                   <TabsTrigger value="versions">{t("versions")}</TabsTrigger>

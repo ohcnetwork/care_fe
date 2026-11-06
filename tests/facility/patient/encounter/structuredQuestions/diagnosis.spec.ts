@@ -233,18 +233,25 @@ test.describe("Diagnosis", () => {
   test("add and display diagnosis with severity", async ({ page }) => {
     await addDiagnosis(page, "severe");
 
-    // The encounter overview's Diagnoses panel lists each diagnosis with its
-    // onset and a severity badge (verification shows only when unconfirmed).
-    const diagnosisItem = page
+    const diagnosisSummary = page
       .getByRole("region", { name: "Diagnoses", exact: true })
       .getByRole("listitem")
-      .filter({ has: page.getByText(diagnosisName, { exact: true }) })
-      .filter({ hasText: "Severe" })
-      .first();
-    await expect(diagnosisItem).toBeVisible();
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(diagnosisSummary).toBeVisible();
     await expect(
-      diagnosisItem.getByText("Severe", { exact: true }),
+      diagnosisSummary.getByText("Severe", { exact: true }),
     ).toBeVisible();
-    await expect(diagnosisItem).toContainText("Onset");
+    await expect(
+      diagnosisSummary.getByText(/^Onset\b/),
+    ).toBeVisible();
+
+    await page.goto(questionnaireUrl);
+    await page.getByRole("button", { name: "Diagnosis History" }).click();
+    const historyRow = page
+      .getByRole("dialog", { name: "Past Diagnoses" })
+      .getByRole("row")
+      .filter({ has: page.getByText(diagnosisName, { exact: true }) });
+    await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
+    await expect(historyRow.getByText("Confirmed", { exact: true })).toBeVisible();
   });
 });

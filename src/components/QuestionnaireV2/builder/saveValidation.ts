@@ -1,3 +1,4 @@
+import { circularConditionQuestionIds } from "@/components/QuestionnaireV2/shared/circularConditions";
 import { Question, QuestionType } from "@/types/questionnaire/question";
 import {
   isCoreStructuredType,
@@ -20,6 +21,7 @@ export const NON_RESPONSE_TYPES: QuestionType[] = ["group", "display"];
  *  resolve a condition's target link_id against the rest of the tree. */
 interface SaveCheckContext {
   typeByLinkId: Map<string, QuestionType>;
+  circularIds: Set<string>;
 }
 
 interface SaveCheck {
@@ -35,6 +37,10 @@ interface SaveCheck {
  * loops over the result, so no page changes are needed.
  */
 const SAVE_CHECKS: SaveCheck[] = [
+  {
+    predicate: (question, { circularIds }) => circularIds.has(question.id),
+    messageKey: "questionnaire_circular_conditions",
+  },
   {
     // Every question needs a title.
     predicate: (question) => !question.text.trim(),
@@ -139,7 +145,10 @@ export function findInvalidQuestions(questions: Question[]): SaveIssue[] {
     }
   };
   walk(questions);
-  const context: SaveCheckContext = { typeByLinkId };
+  const context: SaveCheckContext = {
+    typeByLinkId,
+    circularIds: circularConditionQuestionIds(questions),
+  };
 
   const issues: SaveIssue[] = [];
   const flagged = new Set<string>();

@@ -15,7 +15,7 @@ export const ENCOUNTER_LIST_CLASSES: EncounterListClass[] =
 
 /** The encounter list a user lands on, saved to their account preferences. */
 export function useDefaultEncounterClass() {
-  const { preferences, setPreference, isPending } = useUserPreferences();
+  const { preferences, setPreference, isPending } = useUserPreferences({});
   const saved = (
     preferences.encounter_list as EncounterListPreferences | undefined
   )?.default_class;

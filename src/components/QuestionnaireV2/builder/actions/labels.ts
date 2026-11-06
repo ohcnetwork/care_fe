@@ -12,12 +12,10 @@ import { humanize } from "@/Utils/actions/instructionLabels";
 
 import type { Question } from "@/types/questionnaire/question";
 
-/** What the editors need to name things: the questionnaire's answers, the
- *  registry's context values, and each question's dotted outline number. */
+/** The questionnaire answers and registry context values available to editors. */
 export interface ActionVariableSources {
   questions: QuestionVariable[];
   contextValues: ContextValueVariable[];
-  numbers: ReadonlyMap<string, string>;
 }
 
 export {
@@ -41,20 +39,18 @@ export function operatorLabel(operator: ActionRuleOperator, t: TFunction) {
   return t(OPERATOR_LABEL_KEYS[operator]);
 }
 
-export function questionLabel(question: Question, t: TFunction): string {
-  return question.text || t("untitled_question");
-}
-
-/** "3.1. Fever?" — numbered like the studio's mobile question select, so
- *  two questions sharing a title stay distinguishable. */
-export function numberedQuestionLabel(
+export function questionLabel(
   question: Question,
-  numbers: ReadonlyMap<string, string>,
   t: TFunction,
+  peers: Question[] = [],
 ): string {
-  const number = numbers.get(question.id);
-  const label = questionLabel(question, t);
-  return number ? `${number} ${label}` : label;
+  const title = question.text || t("untitled_question");
+  const duplicated = peers.some(
+    (peer) =>
+      peer.id !== question.id &&
+      (peer.text || t("untitled_question")) === title,
+  );
+  return duplicated ? `${title} (${question.link_id})` : title;
 }
 
 /** "Patient › Age" */

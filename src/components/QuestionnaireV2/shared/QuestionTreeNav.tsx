@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import { questionLabel } from "@/components/QuestionnaireV2/builder/actions/labels";
+
 import { Question } from "@/types/questionnaire/question";
 
-import { TreeItem, numberQuestions } from "./questionTree";
+import { TreeItem, buildQuestionTree, flattenQuestions } from "./questionTree";
 import { QUESTION_TYPE_ICONS } from "./questionTypeIcons";
 
 export interface QuestionTreeNavProps {
@@ -17,10 +19,10 @@ export interface QuestionTreeNavProps {
   footer?: React.ReactNode;
   /** Builder-only affordances (insert-between "+" buttons etc.) */
   renderSeparator?: (afterIndex: number) => React.ReactNode;
-  /** Question ids currently hidden by enable_when; numbering stays stable. */
+  /** Question ids currently hidden by enable_when. */
   hiddenIds?: Set<string>;
   /** Decorative per-row trailing icons (the studio's logic/issue cues) —
-   *  rendered aria-hidden so row accessible names stay number + title. */
+   *  rendered aria-hidden so row accessible names stay title. */
   rowAdornment?: (question: Question) => React.ReactNode;
   /** Accessible name for the `nav` landmark when the consumer renders its
    *  own visible heading instead of passing `title`. Supply one of the two. */
@@ -39,7 +41,8 @@ export function QuestionTreeNav({
   ariaLabel,
 }: QuestionTreeNavProps) {
   const { t } = useTranslation();
-  const items = numberQuestions(questions).filter(
+  const peers = flattenQuestions(questions).map((item) => item.question);
+  const items = buildQuestionTree(questions).filter(
     (item) => !hiddenIds?.has(item.question.id),
   );
 
@@ -63,7 +66,6 @@ export function QuestionTreeNav({
           ),
         )}
       >
-        <span className="shrink-0">{item.number}</span>
         {/* Decorative type recognition cue; aria-hidden keeps row names unchanged. */}
         <span
           aria-hidden
@@ -74,12 +76,13 @@ export function QuestionTreeNav({
         >
           <TypeIcon className="size-3" />
         </span>
-        <span className="min-w-0 flex-1">
-          {item.question.text || (
-            <span className="italic text-gray-400">
-              {t("untitled_question")}
-            </span>
+        <span
+          className={cn(
+            "min-w-0 flex-1",
+            !item.question.text && "italic text-gray-400",
           )}
+        >
+          {questionLabel(item.question, t, peers)}
         </span>
         {rowAdornment && (
           <span

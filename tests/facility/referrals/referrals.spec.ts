@@ -602,9 +602,14 @@ test.describe("Referrals", () => {
         name: "Quick Actions",
         exact: true,
       });
-      // Quick actions list every action, the referral entry included.
+      await expect(
+        quickActions.getByRole("button", {
+          name: "More Actions",
+          exact: true,
+        }),
+      ).toHaveCount(0);
       const newReferral = quickActions.getByRole("button", {
-        name: "New referral",
+        name: "New Referral",
         exact: true,
       });
       await expect(newReferral).toBeVisible();
@@ -826,7 +831,7 @@ test.describe("Referrals", () => {
       await expect(widget).toContainText(availabilityName);
       await expect(widget).toContainText("Pending");
       await expect(
-        widget.getByRole("button", { name: "New referral", exact: true }),
+        widget.getByRole("button", { name: "New Referral", exact: true }),
       ).toHaveCount(0);
       await captureResponsiveView(
         "referral-overview-populated",
@@ -1121,7 +1126,7 @@ test.describe("Referrals", () => {
         page.getByRole("row").filter({ hasText: referralTitle }),
       ).toBeVisible();
       await page
-        .getByRole("button", { name: "New referral", exact: true })
+        .getByRole("button", { name: "New Referral", exact: true })
         .click();
       await page
         .getByRole("dialog", { name: "Request form", exact: true })

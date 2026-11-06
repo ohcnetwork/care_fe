@@ -896,11 +896,10 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await closeSectionSettings(page);
 
     await page
-      .getByRole("button", { name: "Main + side", exact: true })
+      .getByRole("button", { name: "One column", exact: true })
       .click();
-    await expect(column("Left")).toHaveCount(0);
     await expect(
-      column("Side").getByRole("article", {
+      column("Main").getByRole("article", {
         name: "Active requests",
         exact: true,
       }),
@@ -909,6 +908,14 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
       .getByRole("button", { name: "Two columns", exact: true })
       .click();
     await expect(column("Side")).toHaveCount(0);
+    await expect(
+      column("Left").getByRole("article", {
+        name: "Active requests",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await sectionAction(page, "Active requests", "Move to");
+    await page.getByRole("menuitem", { name: "Right", exact: true }).click();
     await expect(
       column("Right").getByRole("article", {
         name: "Active requests",
@@ -2082,7 +2089,6 @@ test("studio shows what hides automatically without loading clinical records", a
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         key: "rounds",
@@ -2626,7 +2632,6 @@ test("studio picks vital sign codes from observation charts and saves them as se
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
@@ -2711,7 +2716,6 @@ test("studio picks a chart set and narrows its charts without emptying it", asyn
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
@@ -2835,7 +2839,6 @@ test("studio explains the tab limit beside Add tab and clears it after removal",
   }));
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages,
   };
   const api = await mockWorkspaceApi(page, { records: [record] });
@@ -2921,7 +2924,6 @@ for (const limit of ["column", "workspace"] as const) {
     ];
     record.data.template = {
       schema_version: 2,
-      surface: "encounter",
       pages,
     };
     const api = await mockWorkspaceApi(page, { records: [record] });
@@ -3002,7 +3004,6 @@ test("studio saves tab subsets as checkboxes", async ({ page }) => {
   const record = workspace("instance");
   record.data.template = {
     schema_version: 2,
-    surface: "encounter",
     pages: [
       {
         kind: "custom",
