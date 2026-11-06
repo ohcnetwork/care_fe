@@ -28,11 +28,11 @@ function normalizeValueSetPayload(data: ValueSetBase): ValueSetBase {
     compose: {
       include: data.compose.include.map((rule) => ({
         ...rule,
-        version: rule.version?.trim() || null,
+        version: rule.version?.trim(),
       })),
       exclude: data.compose.exclude.map((rule) => ({
         ...rule,
-        version: rule.version?.trim() || null,
+        version: rule.version?.trim(),
       })),
     },
   };
