@@ -87,14 +87,14 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent size="lg" className="overflow-hidden bg-soft-background">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
             {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
-        <SheetBody>
+        <SheetBody className="bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
