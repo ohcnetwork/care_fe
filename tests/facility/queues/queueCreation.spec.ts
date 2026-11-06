@@ -55,6 +55,33 @@ test.describe("Queue Creation & Editing", () => {
     await expect(createButton).toBeDisabled();
   });
 
+  test("should allow typing when editing from the queue board", async ({
+    page,
+  }) => {
+    const queueName = faker.lorem.words(3);
+    const modifiedQueueName = faker.lorem.words(4);
+    await createQueue(page, queueName);
+    const row = page.getByRole("row").filter({ hasText: queueName });
+    const servicePointsLoaded = page.waitForResponse(
+      (response) =>
+        response.url().includes(`/facility/${facilityId}/token/sub_queue/`) &&
+        response.ok(),
+    );
+    await row.getByRole("link", { name: /^open$/i }).click();
+    await servicePointsLoaded;
+    await page.getByRole("button", { name: /^settings$/i }).click();
+    await page.getByRole("menuitem", { name: /edit queue name/i }).click();
+
+    const name = page.getByRole("textbox", { name: /queue name/i });
+    await expect(name).toHaveValue(queueName);
+    await name.clear();
+    await name.pressSequentially(modifiedQueueName);
+    await expect(name).toHaveValue(modifiedQueueName);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await page.getByRole("button", { name: /update queue/i }).click();
+    await expectToast(page, /queue updated successfully/i);
+  });
+
   test("should not allow editing queue name when no changes made", async ({
     page,
   }) => {
