@@ -2694,6 +2694,7 @@
   "file_error__file_type": "Invalid file type \".{{extension}}\" Allowed types: {{allowedExtensions}}",
   "file_error__generate_pdf": "Failed to generate PDF",
   "file_error__mark_complete_failed": "Error while marking file upload as complete",
+  "file_error__max_size": "{{fileName}} is larger than the {{maxSize}} MB limit",
   "file_error__network": "Error Uploading File: Network Error",
   "file_error__single_file_name": "Please give a name for the file",
   "file_list_headings__consultation": "Consultation Files",
