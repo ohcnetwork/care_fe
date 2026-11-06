@@ -22,7 +22,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { FacilityBareMinimum } from "@/types/facility/facility";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function FacilitySwitcher({
   facilities,
@@ -32,6 +32,8 @@ export function FacilitySwitcher({
   selectedFacility: FacilityBareMinimum | null;
 }) {
   const { isMobile } = useSidebar();
+  const [isOpen, setIsOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const filteredFacilities = useMemo(() => {
@@ -41,11 +43,30 @@ export function FacilitySwitcher({
       facility.name.toLowerCase().includes(query),
     );
   }, [facilities, searchQuery]);
+  useEffect(() => {
+    if (!isOpen || isMobile || facilities.length <= 1) {
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [isOpen, isMobile, facilities.length]);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu onOpenChange={(open) => !open && setSearchQuery("")}>
+        <DropdownMenu
+          open={isOpen}
+          onOpenChange={(open) => {
+            setIsOpen(open);
+            if (!open) {
+              setSearchQuery("");
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -83,6 +104,7 @@ export function FacilitySwitcher({
               <div className="relative p-1.5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-gray-400" />
                 <Input
+                  ref={searchInputRef}
                   placeholder={t("search_facilities")}
                   aria-label={t("search_facilities")}
                   value={searchQuery}

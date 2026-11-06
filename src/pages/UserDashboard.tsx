@@ -341,6 +341,10 @@ const TabContent = ({
   renderChild,
   isLoading,
 }: TabContentProps) => {
+  const autoFocus = useBreakpoints({
+    default: false,
+    md: true,
+  });
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const filteredItems = useMemo(() => {
@@ -360,6 +364,7 @@ const TabContent = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
           <Input
+            autoFocus={autoFocus && tabId === "facilities-panel"}
             placeholder={t("search")}
             aria-label={t("search")}
             value={search}
