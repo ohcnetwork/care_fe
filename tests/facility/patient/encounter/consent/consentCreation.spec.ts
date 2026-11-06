@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
 import { addDays, format, subDays } from "date-fns";
-import { expectToast } from "tests/helper/ui";
+import { expectToast, openFixtureEncounter } from "tests/helper/ui";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
@@ -388,4 +388,44 @@ test.describe("Consent Editing", () => {
       await expect(detailFieldValue(page, "Status")).toHaveText(status);
     });
   }
+});
+
+test.describe("Encounter Consents Tab", () => {
+  test("consents tab exposes the search input", async ({ page }) => {
+    await goToConsentsTab(page);
+    await expect(
+      page.getByRole("textbox", { name: "Search existing consent" }),
+    ).toBeVisible();
+  });
+
+  test("Add Consent form opens with its defaults", async ({ page }) => {
+    await goToConsentsTab(page);
+    await page.getByRole("button", { name: "Add Consent" }).click();
+
+    const dialog = page.getByRole("dialog", { name: "Add Consent" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("radio", { name: "Permit" })).toBeChecked();
+    await expect(
+      dialog.getByRole("combobox", { name: "Category" }),
+    ).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Save" })).toBeVisible();
+  });
+
+  test("encounter actions command palette opens the consents tab", async ({
+    page,
+  }) => {
+    // Starts on the encounter overview (/updates) via the fixture helper.
+    await openFixtureEncounter(page);
+
+    await page
+      .getByRole("button", { name: /encounter actions/i })
+      .first()
+      .click();
+
+    const palette = page.getByRole("dialog", { name: "Command Palette" });
+    await expect(palette).toBeVisible();
+    await palette.getByRole("option", { name: /manage consents/i }).click();
+
+    await expect(page).toHaveURL(/\/consents$/);
+  });
 });
