@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import RadioInput from "@/components/ui/RadioInput";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { PLUGIN_Component } from "@/PluginEngine";
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -206,6 +207,11 @@ function SubQueueCard({
             </div>
 
             <Separator className="my-2" />
+            <PLUGIN_Component
+              __name="SubQueueActions"
+              facilityId={facilityId}
+              subQueue={subQueue}
+            />
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setEditSubQueue(false)}>
                 {t("cancel")}
