@@ -8,8 +8,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -250,7 +252,7 @@ export default function LinkDepartmentsSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>
             {t("manage_organization", {
@@ -265,72 +267,75 @@ export default function LinkDepartmentsSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
+        <SheetBody>
+          <div className="space-y-6">
             <div className="space-y-4">
-              <FacilityOrganizationSelector
-                facilityId={facilityId}
-                value={selectedOrgs}
-                onChange={setSelectedOrgs}
-                currentOrganizations={currentOrganizations}
-                singleSelection={entityType === "device"}
-              />
+              <div className="space-y-4">
+                <FacilityOrganizationSelector
+                  facilityId={facilityId}
+                  value={selectedOrgs}
+                  onChange={setSelectedOrgs}
+                  currentOrganizations={currentOrganizations}
+                  singleSelection={entityType === "device"}
+                />
+              </div>
 
-              <Button
-                className="w-full"
-                onClick={handleAddOrganizations}
-                disabled={!selectedOrgs?.length || isAdding}
-              >
-                {isAdding && <Spinner className="mr-2 size-4 animate-spin" />}
-                {t("add_organization", {
-                  count: entityType === "device" ? 1 : 0,
-                })}
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">
-                {t("current_organization", {
-                  count: entityType === "device" ? 1 : 0,
-                })}
-              </h3>
-              <div className="space-y-2">
-                {currentOrganizations.map((org) => (
-                  <div
-                    key={org.id}
-                    className="flex items-center justify-between rounded-md border border-gray-200 p-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <Building className="size-4 text-blue-400" />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{org.name}</span>
-                        {org.description && (
-                          <span className="text-xs text-gray-500">
-                            {org.description}
-                          </span>
-                        )}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">
+                  {t("current_organization", {
+                    count: entityType === "device" ? 1 : 0,
+                  })}
+                </h3>
+                <div className="space-y-2">
+                  {currentOrganizations.map((org) => (
+                    <div
+                      key={org.id}
+                      className="flex items-center justify-between rounded-md border border-gray-200 p-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Building className="size-4 text-blue-400" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{org.name}</span>
+                          {org.description && (
+                            <span className="text-xs text-gray-500">
+                              {org.description}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <DeleteOrganizationButton
+                        organizationId={org.id}
+                        entityType={entityType}
+                        entityId={entityId}
+                        facilityId={facilityId}
+                        onSuccess={onUpdate}
+                      />
                     </div>
-                    <DeleteOrganizationButton
-                      organizationId={org.id}
-                      entityType={entityType}
-                      entityId={entityId}
-                      facilityId={facilityId}
-                      onSuccess={onUpdate}
-                    />
-                  </div>
-                ))}
-                {currentOrganizations.length === 0 && (
-                  <p className="text-sm text-gray-500">
-                    {t("no_organization_added_yet", {
-                      count: entityType === "device" ? 1 : 0,
-                    })}
-                  </p>
-                )}
+                  ))}
+                  {currentOrganizations.length === 0 && (
+                    <p className="text-sm text-gray-500">
+                      {t("no_organization_added_yet", {
+                        count: entityType === "device" ? 1 : 0,
+                      })}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <Button
+            onClick={handleAddOrganizations}
+            disabled={!selectedOrgs?.length || isAdding}
+          >
+            {isAdding && <Spinner className="mr-2 size-4 animate-spin" />}
+            {t("add_organization", {
+              count: entityType === "device" ? 1 : 0,
+            })}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

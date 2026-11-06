@@ -24,10 +24,10 @@ import {
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -225,8 +225,8 @@ export default function QuickAddChargeItemsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg flex flex-col p-0 gap-0 overflow-y-auto">
-        <SheetHeader className="px-6 py-4 border-b">
+      <SheetContent size="md" className="overflow-hidden">
+        <SheetHeader>
           <SheetTitle>{t("quick_add")}</SheetTitle>
           <SheetDescription>
             {t("select_package_to_add_all_items")}
@@ -241,8 +241,8 @@ export default function QuickAddChargeItemsSheet({
             handleSubmit();
           }}
         >
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="p-6 space-y-6">
+          <SheetBody>
+            <div className="space-y-6">
               {/* Groups Section */}
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -317,10 +317,10 @@ export default function QuickAddChargeItemsSheet({
                 </>
               )}
             </div>
-          </ScrollArea>
+          </SheetBody>
 
           {/* Footer */}
-          <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
+          <SheetFooter>
             <div className="w-full space-y-4">
               {cartItems.length > 0 && (
                 <div className="flex items-center justify-between">

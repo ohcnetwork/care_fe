@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -225,93 +226,95 @@ export function RoleOrgAccessSummary({
               {t("manage")}
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="overflow-hidden">
             <SheetHeader>
               <SheetTitle>{t("role_organizations")}</SheetTitle>
               <SheetDescription>
                 {t("role_organization_access_summary_description")}
               </SheetDescription>
             </SheetHeader>
-            <div className="mt-4 space-y-4">
-              {/* Existing assignments */}
-              {memberships.map((membership) => (
-                <div
-                  key={membership.id}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">
-                      {membership.organization.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {membership.role.name}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 shrink-0 text-gray-400 hover:text-red-600"
-                    onClick={() =>
-                      removeRole({
-                        orgId: membership.organization.id,
-                        userRoleId: membership.id,
-                      })
-                    }
-                    disabled={isPending}
+            <SheetBody>
+              <div className="space-y-4">
+                {/* Existing assignments */}
+                {memberships.map((membership) => (
+                  <div
+                    key={membership.id}
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5"
                   >
-                    {isRemoving ? (
-                      <Spinner className="size-3.5 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-3.5" />
-                    )}
-                  </Button>
-                </div>
-              ))}
-
-              {memberships.length === 0 && (
-                <p className="py-4 text-center text-sm text-gray-400">
-                  {t("no_role_organizations_assigned")}
-                </p>
-              )}
-
-              {/* Add new assignment */}
-              <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
-                <p className="text-xs font-medium text-gray-600">
-                  {t("add_access")}
-                </p>
-                <div className="space-y-2">
-                  <AccessibleRoleOrgSelect
-                    value={newOrg?.id}
-                    onChange={setNewOrg}
-                    placeholder={t("select_role_organization")}
-                    inputPlaceholder={t("search_organization")}
-                  />
-                  <RoleSelect
-                    value={newRole}
-                    onChange={setNewRole}
-                    context={RoleContext.ROLE_ORG}
-                    placeholder={t("select_designation")}
-                  />
-                  <Button
-                    className="w-full"
-                    size="sm"
-                    onClick={() => {
-                      if (newOrg && newRole) {
-                        assignUser({ orgId: newOrg.id, role: newRole.id });
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {membership.organization.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {membership.role.name}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0 text-gray-400 hover:text-red-600"
+                      onClick={() =>
+                        removeRole({
+                          orgId: membership.organization.id,
+                          userRoleId: membership.id,
+                        })
                       }
-                    }}
-                    disabled={isPending || !newOrg || !newRole}
-                  >
-                    {isAssigning ? (
-                      <Spinner className="mr-1.5 size-3.5 animate-spin" />
-                    ) : (
-                      <Plus className="mr-1.5 size-3.5" />
-                    )}
+                      disabled={isPending}
+                    >
+                      {isRemoving ? (
+                        <Spinner className="size-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+
+                {memberships.length === 0 && (
+                  <p className="py-4 text-center text-sm text-gray-400">
+                    {t("no_role_organizations_assigned")}
+                  </p>
+                )}
+
+                {/* Add new assignment */}
+                <div className="space-y-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-3">
+                  <p className="text-xs font-medium text-gray-600">
                     {t("add_access")}
-                  </Button>
+                  </p>
+                  <div className="space-y-2">
+                    <AccessibleRoleOrgSelect
+                      value={newOrg?.id}
+                      onChange={setNewOrg}
+                      placeholder={t("select_role_organization")}
+                      inputPlaceholder={t("search_organization")}
+                    />
+                    <RoleSelect
+                      value={newRole}
+                      onChange={setNewRole}
+                      context={RoleContext.ROLE_ORG}
+                      placeholder={t("select_designation")}
+                    />
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      onClick={() => {
+                        if (newOrg && newRole) {
+                          assignUser({ orgId: newOrg.id, role: newRole.id });
+                        }
+                      }}
+                      disabled={isPending || !newOrg || !newRole}
+                    >
+                      {isAssigning ? (
+                        <Spinner className="mr-1.5 size-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="mr-1.5 size-3.5" />
+                      )}
+                      {t("add_access")}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </SheetBody>
           </SheetContent>
         </Sheet>
       }

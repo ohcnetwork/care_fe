@@ -9,8 +9,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -87,92 +89,95 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           {t("assign_user")}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("assign_user_to_patient")}</SheetTitle>
           <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium">{t("search_user")}</h3>
-            <UserSelector
-              selected={selectedUser}
-              onChange={handleUserChange}
-              placeholder={t("search_users")}
-              noOptionsMessage={t("no_users_found")}
-            />
-          </div>
-          {selectedUser && (
+        <SheetBody>
+          <div className="space-y-6">
             <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-                <div className="flex items-start gap-4">
-                  <Avatar
-                    name={formatName(selectedUser, true)}
-                    imageUrl={selectedUser.profile_picture_url}
-                    className="size-12"
-                  />
-                  <div className="flex flex-col flex-1">
-                    <TooltipComponent content={formatName(selectedUser)}>
-                      <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
-                        {formatName(selectedUser)}
-                      </p>
-                    </TooltipComponent>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("username")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.username}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("user_type")}
-                    </span>
-                    <p className="text-sm font-medium">
-                      {selectedUser.user_type}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">
-                      {t("phone_number")}
-                    </span>
-                    <p className="text-sm font-medium truncate">
-                      {selectedUser.phone_number
-                        ? formatPhoneNumberIntl(selectedUser.phone_number)
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {t("select_role")}
-                </label>
-                <div>
-                  <RoleSelect
-                    value={selectedRole}
-                    onChange={setSelectedRole}
-                    context={RoleContext.FACILITY}
-                  />
-                </div>
-              </div>
-
-              <Button
-                className="w-full"
-                onClick={handleAddUser}
-                disabled={!selectedRole}
-              >
-                {t("assign_to_patient")}
-              </Button>
+              <h3 className="text-sm font-medium">{t("search_user")}</h3>
+              <UserSelector
+                selected={selectedUser}
+                onChange={handleUserChange}
+                placeholder={t("search_users")}
+                noOptionsMessage={t("no_users_found")}
+              />
             </div>
-          )}
-        </div>
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <Avatar
+                      name={formatName(selectedUser, true)}
+                      imageUrl={selectedUser.profile_picture_url}
+                      className="size-12"
+                    />
+                    <div className="flex flex-col flex-1">
+                      <TooltipComponent content={formatName(selectedUser)}>
+                        <p className="font-medium text-gray-900 truncate max-w-56 sm:max-w-48 md:max-w-64 lg:max-w-64 xl:max-w-36">
+                          {formatName(selectedUser)}
+                        </p>
+                      </TooltipComponent>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("username")}
+                      </span>
+                      <p className="text-sm font-medium">
+                        {selectedUser.username}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("user_type")}
+                      </span>
+                      <p className="text-sm font-medium">
+                        {selectedUser.user_type}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-500">
+                        {t("phone_number")}
+                      </span>
+                      <p className="text-sm font-medium truncate">
+                        {selectedUser.phone_number
+                          ? formatPhoneNumberIntl(selectedUser.phone_number)
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {t("select_role")}
+                  </label>
+                  <div>
+                    <RoleSelect
+                      value={selectedRole}
+                      onChange={setSelectedRole}
+                      context={RoleContext.FACILITY}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <Button
+            onClick={handleAddUser}
+            disabled={!selectedUser || !selectedRole}
+          >
+            {t("assign_to_patient")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

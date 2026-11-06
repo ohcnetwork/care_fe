@@ -30,7 +30,7 @@ const SheetContext = React.createContext<{
   side: "top" | "right" | "bottom" | "left";
   containerClassName: string;
   scrolled: boolean;
-  setScrolled: (v: boolean) => void;
+  setScrolled: React.Dispatch<React.SetStateAction<boolean>>;
 } | null>(null);
 
 const SheetRootContext = React.createContext<{
@@ -403,9 +403,12 @@ function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
         "min-h-0 flex-1 overflow-y-auto overscroll-contain py-4 scrollbar-gutter-auto",
         className,
       )}
-      onScroll={(e) =>
-        ctx?.setScrolled((e.currentTarget as HTMLElement).scrollTop > 0)
-      }
+      onScroll={(e) => {
+        const top = (e.currentTarget as HTMLElement).scrollTop;
+        // Collapsing the header grows the body and can clamp scrollTop back to 0,
+        // so collapse only past a threshold larger than the header shrink.
+        ctx?.setScrolled((prev) => (prev ? top > 0 : top > 64));
+      }}
     >
       <div className={cn(ctx?.containerClassName)} {...props} />
     </div>
