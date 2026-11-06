@@ -273,6 +273,7 @@ export default function LinkDepartmentsSheet({
                 value={selectedOrgs}
                 onChange={setSelectedOrgs}
                 currentOrganizations={currentOrganizations}
+                lockCurrentOrganizations
                 singleSelection={entityType === "device"}
               />
 
