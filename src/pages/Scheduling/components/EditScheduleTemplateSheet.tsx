@@ -86,14 +86,14 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-gray-100 sm:min-w-128">
-        <SheetHeader>
+      <SheetContent className="flex min-w-full flex-col bg-background pb-0 sm:min-w-128">
+        <SheetHeader className="border-0 pb-0">
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
             {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
-        <div className="overflow-auto -mx-6 px-6 pb-16">
+        <div className="flex-1 overflow-auto -mx-6 px-6 pb-16 bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
@@ -259,7 +259,7 @@ const ScheduleTemplateEditor = ({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
+    <div className="rounded-lg bg-white p-4 shadow-sm mt-4">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
