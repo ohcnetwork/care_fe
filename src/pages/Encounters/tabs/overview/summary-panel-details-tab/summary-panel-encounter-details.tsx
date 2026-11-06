@@ -24,9 +24,14 @@ import { Signal, SquarePen } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const [showAllCareTeam, setShowAllCareTeam] = useState(false);
   const {
     selectedEncounter: encounter,
@@ -168,7 +173,10 @@ export const SummaryPanelEncounterDetails = () => {
               asChild
             >
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+                href={withReturnTo(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+                  returnTo,
+                )}
               >
                 <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
                 <span className="text-gray-950">{t("update_encounter")}</span>
@@ -287,7 +295,10 @@ export const SummaryPanelEncounterDetails = () => {
           asChild
         >
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+            href={withReturnTo(
+              `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+              returnTo,
+            )}
           >
             <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
             <span className="text-gray-950">{t("update_encounter")}</span>

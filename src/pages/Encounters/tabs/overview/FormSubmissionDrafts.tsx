@@ -16,6 +16,10 @@ import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 interface FormSubmissionDraftsProps {
   facilityId: string;
@@ -34,6 +38,7 @@ export function FormSubmissionDrafts({
   encounterId,
 }: FormSubmissionDraftsProps) {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const queryClient = useQueryClient();
   const [submissionToDiscard, setSubmissionToDiscard] =
     useState<FormSubmissionRead | null>(null);
@@ -109,7 +114,10 @@ export function FormSubmissionDrafts({
                       size="sm"
                       onClick={() =>
                         navigate(
-                          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}?continue_draft=${submission.id}`,
+                          withReturnTo(
+                            `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/${questionnaire.slug}?continue_draft=${submission.id}`,
+                            returnTo,
+                          ),
                         )
                       }
                     >

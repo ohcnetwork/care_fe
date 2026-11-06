@@ -8,9 +8,14 @@ import { Button } from "@/components/ui/button";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 export const HospitalizationDetails = () => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const {
     selectedEncounter: encounter,
     selectedEncounterId: encounterId,
@@ -35,7 +40,10 @@ export const HospitalizationDetails = () => {
         {canWriteSelectedEncounter && (
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+              href={withReturnTo(
+                `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`,
+                returnTo,
+              )}
             >
               <SquarePen className="size-4 cursor-pointer" strokeWidth={1.5} />
             </Link>
