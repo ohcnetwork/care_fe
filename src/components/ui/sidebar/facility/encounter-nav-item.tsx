@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, MoreHorizontal } from "lucide-react";
+import { ArrowRight, MoreHorizontal } from "lucide-react";
 import { Link, navigate, usePath } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAppSidebar } from "@/components/ui/sidebar/app-sidebar-provider";
+import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/FacilitySidebarIcon";
 import { NavLink } from "@/components/ui/sidebar/nav-main";
 import { isNavigationActive } from "@/components/ui/sidebar/nav-utils";
 
@@ -87,7 +88,7 @@ export function EncounterNavItem({ facilityId }: { facilityId: string }) {
           ariaLabel={listName(current)}
           isActive={!!viewing}
         >
-          <Activity />
+          <FacilitySidebarIcon name="encounters" />
           <span title={listName(current)}>{listName(current)}</span>
         </NavLink>
       </SidebarMenuButton>

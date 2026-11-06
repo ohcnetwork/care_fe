@@ -1,20 +1,8 @@
 import { TFunction } from "i18next";
-import {
-  ArrowUpRight,
-  Box,
-  CalendarDays,
-  CreditCard,
-  House,
-  MapPin,
-  Package,
-  Search,
-  Settings2,
-  UserCog,
-  Users,
-} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { EncounterNavItem } from "@/components/ui/sidebar/facility/encounter-nav-item";
+import { FacilitySidebarIcon } from "@/components/ui/sidebar/facility/FacilitySidebarIcon";
 import { NavigationLink, NavMain } from "@/components/ui/sidebar/nav-main";
 
 import { useCareApps } from "@/hooks/useCareApps";
@@ -56,25 +44,25 @@ function generateFacilityLinks(
     {
       name: t("overview"),
       url: `${baseUrl}/overview`,
-      icon: <House />,
+      icon: <FacilitySidebarIcon name="overview" />,
     },
     {
       section: t("patient_management"),
       name: t("appointments"),
       url: `${baseUrl}/appointments`,
-      icon: <CalendarDays />,
+      icon: <FacilitySidebarIcon name="appointments" />,
       visibility: permissions.canViewAppointments,
     },
     {
       name: t("queues"),
       url: `${baseUrl}/queues`,
-      icon: <Users />,
+      icon: <FacilitySidebarIcon name="queues" />,
       visibility: permissions.canViewAppointments,
     },
     {
       name: t("search_patients"),
       url: `${baseUrl}/patients`,
-      icon: <Search />,
+      icon: <FacilitySidebarIcon name="patients" />,
       visibility: canAccessEncounters,
     },
     {
@@ -87,36 +75,36 @@ function generateFacilityLinks(
     {
       name: t("search_by_location"),
       url: `${baseUrl}/encounters/locations`,
-      icon: <MapPin />,
+      icon: <FacilitySidebarIcon name="locations" />,
       visibility: canAccessEncounters,
     },
     {
       section: t("services"),
       name: t("services"),
       url: `${baseUrl}/services`,
-      icon: <Package />,
+      icon: <FacilitySidebarIcon name="services" />,
     },
     {
       name: t("referrals"),
       url: `${baseUrl}/referrals`,
-      icon: <ArrowUpRight />,
+      icon: <FacilitySidebarIcon name="referrals" />,
       visibility: permissions.canReadReferral,
     },
     {
       name: t("resource"),
       url: `${baseUrl}/resource`,
-      icon: <Box />,
+      icon: <FacilitySidebarIcon name="resources" />,
     },
     {
       section: t("administration"),
       name: t("users"),
       url: `${baseUrl}/users`,
-      icon: <UserCog />,
+      icon: <FacilitySidebarIcon name="users" />,
     },
     {
       name: t("billing"),
       url: `${baseUrl}/billing`,
-      icon: <CreditCard />,
+      icon: <FacilitySidebarIcon name="billing" />,
       children: [
         {
           name: t("accounts"),
@@ -139,7 +127,7 @@ function generateFacilityLinks(
     {
       name: t("settings"),
       url: `${baseUrl}/settings/general`,
-      icon: <Settings2 />,
+      icon: <FacilitySidebarIcon name="settings" />,
     },
   ];
 
