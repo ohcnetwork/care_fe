@@ -9,7 +9,7 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -36,7 +36,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
@@ -50,29 +49,34 @@ import {
 
 interface Props {
   facility: FacilityRead;
-  trigger?: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const EMPTY_TEMPLATE: PrintTemplate = {
   slug: "",
 };
 
-export default function PrintTemplateSheet({ facility, trigger }: Props) {
+export default function PrintTemplateSheet({
+  facility,
+  open,
+  onOpenChange,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
   const [templates, setTemplates] = useState<PrintTemplate[]>([]);
+  const wasOpen = useRef(false);
 
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen) {
+  useEffect(() => {
+    if (open && !wasOpen.current) {
       setTemplates(
         facility.print_templates?.length
           ? structuredClone(facility.print_templates)
           : [],
       );
     }
-    setOpen(isOpen);
-  };
+    wasOpen.current = open;
+  }, [open, facility.print_templates]);
 
   const { mutate: updateFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.update, {
@@ -81,7 +85,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
     onSuccess: () => {
       toast.success(t("print_templates_updated"));
       queryClient.invalidateQueries({ queryKey: ["facility", facility.id] });
-      setOpen(false);
+      onOpenChange(false);
     },
   });
 
@@ -122,8 +126,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("print_templates")}</SheetTitle>
@@ -163,7 +166,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
           <Separator />
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button onClick={handleSave} disabled={isPending}>
