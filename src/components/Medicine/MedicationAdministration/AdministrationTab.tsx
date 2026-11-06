@@ -30,6 +30,7 @@ import {
 import medicationAdministrationApi from "@/types/emr/medicationAdministration/medicationAdministrationApi";
 import {
   ACTIVE_MEDICATION_STATUSES,
+  formatMedicationRequestStatusFilter,
   INACTIVE_MEDICATION_STATUSES,
   MedicationRequestRead,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -45,12 +46,12 @@ import { GroupedMedicationRow } from "./GroupedMedicationRow";
 import { MedicineAdminDialog } from "./MedicineAdminDialog";
 import { MedicineAdminSheet } from "./MedicineAdminSheet";
 import {
-  GroupedMedication,
-  TIME_SLOTS,
   createMedicationAdministrationRequest,
   getLatestActiveRequest,
+  GroupedMedication,
   groupMedicationsByProduct,
   isTimeInSlot,
+  TIME_SLOTS,
 } from "./utils";
 
 // Types and Interfaces
@@ -178,7 +179,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryParams: {
         encounter: encounterId,
         limit: 1000,
-        status: ACTIVE_MEDICATION_STATUSES.join(","),
+        status: formatMedicationRequestStatusFilter(ACTIVE_MEDICATION_STATUSES),
         facility: facilityId,
         ...(selectedProductType === ProductKnowledgeType.medication
           ? { medications_only: true }
@@ -202,7 +203,9 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
       queryParams: {
         encounter: encounterId,
         limit: 1000,
-        status: INACTIVE_MEDICATION_STATUSES.join(","),
+        status: formatMedicationRequestStatusFilter(
+          INACTIVE_MEDICATION_STATUSES,
+        ),
         facility: facilityId,
         ...(selectedProductType === ProductKnowledgeType.medication
           ? { medications_only: true }

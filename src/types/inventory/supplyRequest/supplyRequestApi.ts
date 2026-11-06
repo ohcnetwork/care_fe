@@ -48,7 +48,7 @@ export default {
   requestOrders: {
     path: "/api/v1/supply_request/request_orders/",
     method: HttpMethod.GET,
-    TQueryParams: Type<{ delivery_order: string }>(),
+    TQuery: Type<{ delivery_order: string }>(),
     TRes: Type<PaginatedResponse<RequestOrderRetrieve>>(),
   },
 } as const;
