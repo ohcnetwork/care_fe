@@ -1,9 +1,14 @@
-import { TokenStatus } from "@/types/tokens/token/token";
+import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 export function getTokenQueueStatusCount(
   summary: TokenQueueSummary,
@@ -50,5 +55,35 @@ export function useTokenListInfiniteQuery({
       autoRefresh === "true"
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
+  });
+}
+
+export function useUpdateToken(
+  facilityId: string,
+  token: TokenRead,
+  options?: {
+    onSuccess?: (data: TokenRead) => void;
+    onError?: () => void;
+  },
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: token.queue.id,
+        id: token.id,
+      },
+    }),
+    onSuccess: (data: TokenRead) => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, token.queue.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token.queue.id],
+      });
+      options?.onSuccess?.(data);
+    },
+    onError: options?.onError,
   });
 }

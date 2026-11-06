@@ -92,10 +92,15 @@ export const ServicePointsDropDown = () => {
       >
         <div className="flex flex-col gap-2 p-2 items-start justify-start">
           <div className="w-full">
-            <DropdownMenuLabel className="text-xs font-medium px-3 text-gray-600">
+            <DropdownMenuLabel className="text-sm font-medium px-3 text-gray-600">
               {t("assigned_service_points")}
             </DropdownMenuLabel>
             <div>
+              {allServicePoints.length === 0 && (
+                <span className="text-xs text-gray-500 px-3">
+                  {t("no_service_points_available")}
+                </span>
+              )}
               {allServicePoints.map((subQueue) => {
                 const isSelected = assignedServicePointIds.includes(
                   subQueue.id,
