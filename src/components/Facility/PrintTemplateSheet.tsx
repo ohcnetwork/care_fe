@@ -9,7 +9,7 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -39,13 +39,14 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
-import mutate from "@/Utils/request/mutate";
 import { FacilityRead } from "@/types/facility/facility";
-import facilityApi from "@/types/facility/facilityApi";
 import {
   PrintTemplateType,
   type PrintTemplate,
 } from "@/types/facility/printTemplate";
+
+import mutate from "@/Utils/request/mutate";
+import facilityApi from "@/types/facility/facilityApi";
 
 interface Props {
   facility: FacilityRead;
@@ -63,20 +64,36 @@ export default function PrintTemplateSheet({
   onOpenChange,
 }: Props) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [templates, setTemplates] = useState<PrintTemplate[]>([]);
-  const wasOpen = useRef(false);
 
-  useEffect(() => {
-    if (open && !wasOpen.current) {
-      setTemplates(
-        facility.print_templates?.length
-          ? structuredClone(facility.print_templates)
-          : [],
-      );
-    }
-    wasOpen.current = open;
-  }, [open, facility.print_templates]);
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>{t("print_templates")}</SheetTitle>
+          <SheetDescription>
+            {t("print_templates_description")}
+          </SheetDescription>
+        </SheetHeader>
+        {open && (
+          <PrintTemplateSheetBody
+            facility={facility}
+            onOpenChange={onOpenChange}
+          />
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function PrintTemplateSheetBody({
+  facility,
+  onOpenChange,
+}: Pick<Props, "facility" | "onOpenChange">) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [templates, setTemplates] = useState<PrintTemplate[]>(() =>
+    structuredClone(facility.print_templates ?? []),
+  );
 
   const { mutate: updateFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.update, {
@@ -126,56 +143,45 @@ export default function PrintTemplateSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{t("print_templates")}</SheetTitle>
-          <SheetDescription>
-            {t("print_templates_description")}
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="mt-6 space-y-4">
-          {templates.length === 0 && (
-            <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
-              <Printer className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm">{t("no_print_templates")}</p>
-              <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
-            </div>
-          )}
-
-          {templates.map((template, index) => (
-            <TemplateEditor
-              key={index}
-              template={template}
-              onUpdate={(updater) => updateTemplate(index, updater)}
-              onRemove={() => removeTemplate(index)}
-            />
-          ))}
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={addTemplate}
-          >
-            <Plus className="mr-2 size-4" />
-            {t("add_print_template")}
-          </Button>
-
-          <Separator />
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleSave} disabled={isPending}>
-              {isPending ? t("saving") : t("save")}
-            </Button>
-          </div>
+    <div className="mt-6 space-y-4">
+      {templates.length === 0 && (
+        <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
+          <Printer className="mx-auto mb-2 size-8 text-gray-400" />
+          <p className="text-sm">{t("no_print_templates")}</p>
+          <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
         </div>
-      </SheetContent>
-    </Sheet>
+      )}
+
+      {templates.map((template, index) => (
+        <TemplateEditor
+          key={index}
+          template={template}
+          onUpdate={(updater) => updateTemplate(index, updater)}
+          onRemove={() => removeTemplate(index)}
+        />
+      ))}
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={addTemplate}
+      >
+        <Plus className="mr-2 size-4" />
+        {t("add_print_template")}
+      </Button>
+
+      <Separator />
+
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          {t("cancel")}
+        </Button>
+        <Button onClick={handleSave} disabled={isPending}>
+          {isPending ? t("saving") : t("save")}
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -191,7 +197,7 @@ function TemplateEditor({
   const { t } = useTranslation();
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg" data-testid="print-template-editor">
       <div className="flex items-center justify-between p-4 pb-2">
         <div className="flex-1 mr-4">
           <Label className="text-xs text-gray-500">{t("template_slug")}</Label>
@@ -387,6 +393,7 @@ function PageSection({ template, onUpdate }: SectionProps) {
               <Label className="text-xs capitalize">{t(side)}</Label>
               <Input
                 type="number"
+                aria-label={t(side)}
                 min={0}
                 step={0.5}
                 value={page?.margin?.[side] ?? ""}
@@ -500,6 +507,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
           <div className="sm:col-span-2">
             <Label className="text-xs text-gray-500">{t("image_url")}</Label>
             <Input
+              aria-label={t("image_url")}
               value={branding?.logo?.url ?? ""}
               onChange={(e) =>
                 onUpdate((tpl) => ({
