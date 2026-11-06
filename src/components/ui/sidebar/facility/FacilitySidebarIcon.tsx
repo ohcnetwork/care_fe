@@ -166,7 +166,7 @@ export function FacilitySidebarIcon({
       aria-hidden="true"
       focusable="false"
       className={cn(
-        "size-4 shrink-0 text-soft-foreground in-data-[active=true]:text-primary-700 in-[.text-primary]:text-primary-700",
+        "size-4 shrink-0 text-soft-foreground in-data-[active=true]:text-primary in-[.text-primary]:text-primary",
         className,
       )}
       {...props}
