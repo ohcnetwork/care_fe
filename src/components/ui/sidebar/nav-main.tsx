@@ -256,6 +256,7 @@ function CollapsibleNavItem({ link, path }: NavGroupProps) {
             aria-label={link.name}
             tooltip={link.name}
             isActive={childActive && !isOpen}
+            data-icon-active={childActive || undefined}
             className={cn(
               "cursor-pointer",
               childActive && isOpen && "font-medium text-primary",
