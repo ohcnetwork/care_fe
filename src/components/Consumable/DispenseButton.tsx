@@ -111,8 +111,15 @@ export const DispenseButton = ({
               chargeItems.length > 0
             ) {
               setExtractedChargeItems(chargeItems);
-              const result = await refetchAccount();
-              const fetchedAccountId = result.data?.results?.[0]?.id;
+              const chargeItemAccountIds = new Set(
+                chargeItems.map((item) => item.account).filter(Boolean),
+              );
+              // Prefer the account the charge items were created against;
+              // fall back to the active account list for older backends.
+              const fetchedAccountId =
+                chargeItemAccountIds.size === 1
+                  ? [...chargeItemAccountIds][0]
+                  : (await refetchAccount()).data?.results?.[0]?.id;
 
               if (fetchedAccountId) {
                 setAccountId(fetchedAccountId);
