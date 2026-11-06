@@ -902,7 +902,7 @@ export function CreateInvoicePage({
                       </FormItem>
                     )}
                   />
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
                     <FormField
                       control={form.control}
                       name="payment_terms"
