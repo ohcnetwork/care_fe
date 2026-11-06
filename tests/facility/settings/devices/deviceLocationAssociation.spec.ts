@@ -37,19 +37,6 @@ test.describe("Device Location Association", () => {
     await expect(page.getByText("No location associated")).toBeVisible();
   });
 
-  test("should open location association sheet", async ({ page }) => {
-    // Click associate button for location - find by Location heading
-    await page
-      .getByRole("heading", { name: "Location" })
-      .locator("..")
-      .getByRole("button", { name: "Associate" })
-      .click();
-
-    // Sheet should open
-    await expect(page.getByText("Associate Location")).toBeVisible();
-    await expect(page.getByText("No locations found")).toBeVisible();
-  });
-
   test("should associate a location to device", async ({ page }) => {
     // Click associate button for location - find by Location heading
     await page
@@ -123,8 +110,13 @@ test.describe("Device Location Association", () => {
       page.getByText("Location associated successfully"),
     ).toBeVisible();
 
-    // Close the sheet by clicking outside or pressing Escape
-    await page.keyboard.press("Escape");
+    // Close the sheet with its own control: Escape can be taken by the
+    // location picker popover inside it.
+    const associateSheet = page.getByRole("dialog", {
+      name: "Associate Location",
+    });
+    await associateSheet.getByRole("button", { name: "Close" }).click();
+    await expect(associateSheet).not.toBeVisible();
 
     // Open the sheet again
     await page

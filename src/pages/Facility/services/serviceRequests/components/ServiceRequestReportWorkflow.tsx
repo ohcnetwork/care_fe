@@ -64,7 +64,7 @@ export function ServiceRequestReportWorkflow({
           )}
         >
           {pendingReports > 0 && (
-            <h5 className="text-gray-950 font-semibold">
+            <h5 className="text-foreground font-semibold">
               {t("test_result_entries")}
             </h5>
           )}

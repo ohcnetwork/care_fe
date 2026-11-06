@@ -1,11 +1,8 @@
-import { X } from "lucide-react";
+import { ListFilter, X } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Select,
   SelectContent,
@@ -36,34 +33,29 @@ export function FilterSelect({
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
-    <div
-      className={cn(
-        "flex items-center overflow-hidden rounded-md border border-gray-400",
-        className,
-      )}
-    >
+    <ButtonGroup className={className}>
       <Select
         value={value}
         onValueChange={(newValue) => onValueChange(newValue || undefined)}
       >
-        <SelectTrigger className="border-0 hover:bg-transparent rounded-none focus:ring-0 focus:ring-offset-0">
+        <SelectTrigger>
           <div className="flex w-full items-center gap-2">
-            {icon || <CareIcon icon="l-filter" className="size-4" />}
+            {icon || <ListFilter aria-hidden="true" />}
             {value ? (
               <>
-                <span className="text-gray-950">
+                <span>
                   <Trans
                     i18nKey="filter_label_is"
                     components={{
-                      style: <span className="text-gray-600 ml-1" />,
+                      style: <span className="text-muted-foreground ml-1" />,
                     }}
                     values={{ label }}
                   />
                 </span>
-                <span className="text-gray-950 underline">{t(value)}</span>
+                <span className="underline underline-offset-4">{t(value)}</span>
               </>
             ) : (
-              <span className="text-gray-500">
+              <span className="text-muted-foreground">
                 {placeholder ? placeholder : label}
               </span>
             )}
@@ -79,14 +71,16 @@ export function FilterSelect({
       </Select>
       {value && (
         <Button
-          variant="ghost"
-          size="sm"
+          type="button"
+          variant="outline"
+          size="icon"
           onClick={onClear}
-          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
+          aria-label={t("remove_filter")}
+          aria-description={label}
         >
           <X className="size-4" />
         </Button>
       )}
-    </div>
+    </ButtonGroup>
   );
 }

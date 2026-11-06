@@ -52,6 +52,7 @@ import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/charge
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 import { add } from "@/Utils/decimal";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -204,6 +205,7 @@ export default function QuickAddChargeItemsSheet({
 
   // Submit cart
   const handleSubmit = () => {
+    if (disabled || isSubmitting) return;
     if (cartItems.length === 0) {
       toast.error(t("please_select_at_least_one_item"));
       return;
@@ -231,124 +233,136 @@ export default function QuickAddChargeItemsSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6">
-            {/* Groups Section */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-gray-500" />
-                <h3 className="font-semibold text-sm">{t("packages")}</h3>
-              </div>
-
-              {isLoadingGroups ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-20 rounded-xl" />
-                  ))}
+        <form
+          className="flex min-h-0 flex-1 flex-col"
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleSubmit();
+          }}
+        >
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="p-6 space-y-6">
+              {/* Groups Section */}
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-gray-500" />
+                  <h3 className="font-semibold text-sm">{t("packages")}</h3>
                 </div>
-              ) : groups.length === 0 ? (
-                <></>
-              ) : (
-                <div className="space-y-4">
-                  {groups.map((group) => (
-                    <GroupCard
-                      key={group.id}
-                      group={group}
-                      facilityId={facilityId}
-                      selectedPackages={selectedPackages}
-                      onPackageSelect={handlePackageSelect}
-                      onPackageDeselect={handlePackageDeselect}
-                      disabled={disabled}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
 
-            {/* Cart Section */}
-            {cartItems.length > 0 && (
-              <>
-                <Separator />
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-gray-500" />
-                      {t("items_to_add")}
-                      <Badge variant="secondary">{cartItems.length}</Badge>
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setCartItems([]);
-                        setSelectedPackages(new Set());
-                      }}
-                      className="text-destructive hover:text-destructive h-7 text-xs"
-                    >
-                      {t("clear_all")}
-                    </Button>
+                {isLoadingGroups ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-20 rounded-xl" />
+                    ))}
                   </div>
-
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {cartItems.map((item) => (
-                      <CartItemRow
-                        key={item.definition.slug}
-                        item={item}
-                        onQuantityChange={(q) =>
-                          updateQuantity(item.definition.slug, q)
-                        }
-                        onRemove={() => removeFromCart(item.definition.slug)}
+                ) : groups.length === 0 ? (
+                  <></>
+                ) : (
+                  <div className="space-y-4">
+                    {groups.map((group) => (
+                      <GroupCard
+                        key={group.id}
+                        group={group}
+                        facilityId={facilityId}
+                        selectedPackages={selectedPackages}
+                        onPackageSelect={handlePackageSelect}
+                        onPackageDeselect={handlePackageDeselect}
                         disabled={disabled}
                       />
                     ))}
                   </div>
-                </section>
-              </>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Footer */}
-        <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
-          <div className="w-full space-y-4">
-            {cartItems.length > 0 && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {t("estimated_total")}
-                </span>
-                <span className="text-xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={cartTotal} />
-                </span>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || cartItems.length === 0 || disabled}
-                variant="primary"
-                className="flex-1"
-              >
-                {isSubmitting ? (
-                  t("adding")
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("add_items")} ({cartItems.length})
-                  </>
                 )}
-              </Button>
+              </section>
+
+              {/* Cart Section */}
+              {cartItems.length > 0 && (
+                <>
+                  <Separator />
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        <ShoppingCart className="h-4 w-4 text-gray-500" />
+                        {t("items_to_add")}
+                        <Badge variant="secondary">{cartItems.length}</Badge>
+                      </h3>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setCartItems([]);
+                          setSelectedPackages(new Set());
+                        }}
+                        className="text-destructive hover:text-destructive h-7 text-xs"
+                      >
+                        {t("clear_all")}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {cartItems.map((item) => (
+                        <CartItemRow
+                          key={item.definition.slug}
+                          item={item}
+                          onQuantityChange={(q) =>
+                            updateQuantity(item.definition.slug, q)
+                          }
+                          onRemove={() => removeFromCart(item.definition.slug)}
+                          disabled={disabled}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
             </div>
-          </div>
-        </SheetFooter>
+          </ScrollArea>
+
+          {/* Footer */}
+          <SheetFooter className="border-t bg-gray-50/80 px-6 py-4">
+            <div className="w-full space-y-4">
+              {cartItems.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    {t("estimated_total")}
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">
+                    <MonetaryDisplay amount={cartTotal} />
+                  </span>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || cartItems.length === 0 || disabled}
+                  variant="primary"
+                  className="flex-1"
+                >
+                  {isSubmitting ? (
+                    t("adding")
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("add_items")} ({cartItems.length})
+                      {open && <ShortcutBadge actionId="submit-action" />}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );
@@ -404,9 +418,10 @@ function GroupCard({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <button
+        <Button
+          variant="ghost"
           type="button"
-          className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+          className="h-auto justify-start whitespace-normal w-full flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
         >
           <div className="p-1.5 rounded-md bg-gray-100">
             <FolderOpen className="h-4 w-4 text-gray-600" />
@@ -432,7 +447,7 @@ function GroupCard({
           ) : (
             <ChevronRight className="h-4 w-4 text-gray-400" />
           )}
-        </button>
+        </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="pl-4 pt-2 space-y-2">
@@ -522,11 +537,12 @@ function PackageCard({
         (disabled || items.length === 0) && "opacity-50 cursor-not-allowed",
       )}
     >
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={handleClick}
         disabled={disabled || isLoading || items.length === 0}
-        className="w-full p-3 text-left"
+        className="h-auto block whitespace-normal w-full p-3 text-left"
       >
         <div className="flex items-center gap-3">
           {/* Selection indicator */}
@@ -579,18 +595,19 @@ function PackageCard({
             />
           </div>
         </div>
-      </button>
+      </Button>
 
       {/* Expandable items preview */}
       {items.length > 0 && (
         <div className="border-t border-gray-100">
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
+            className="h-auto w-full px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-50 flex items-center justify-center gap-1"
           >
             {isExpanded ? (
               <>
@@ -603,7 +620,7 @@ function PackageCard({
                 {t("view_items")}
               </>
             )}
-          </button>
+          </Button>
 
           {isExpanded && (
             <div className="px-3 pb-2 space-y-1 bg-gray-50/50">
@@ -643,6 +660,7 @@ function CartItemRow({
   onRemove,
   disabled,
 }: CartItemRowProps) {
+  const { t } = useTranslation();
   const unitPrice = calculateTotalPrice(
     item.definition.price_components ?? [],
   ).toString();
@@ -665,30 +683,36 @@ function CartItemRow({
 
       {/* Quantity controls */}
       <div className="flex items-center gap-1">
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) - 1)}
+          aria-label={t("decrease_quantity")}
           disabled={disabled || Number(item.quantity) <= 1}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="h-auto w-auto p-1 p-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           <Minus className="h-3 w-3" />
-        </button>
+        </Button>
         <Input
           type="number"
           min={1}
+          required
+          aria-label={t("quantity")}
           value={item.quantity}
           onChange={(e) => onQuantityChange(Number(e.target.value) || 1)}
           className="w-12 h-7 text-center text-sm px-1"
           disabled={disabled}
         />
-        <button
+        <Button
+          variant="ghost"
           type="button"
           onClick={() => onQuantityChange(Number(item.quantity) + 1)}
+          aria-label={t("increase_quantity")}
           disabled={disabled}
-          className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
+          className="h-auto w-auto p-1 p-1 rounded hover:bg-gray-100 disabled:opacity-50"
         >
           <Plus className="h-3 w-3" />
-        </button>
+        </Button>
       </div>
 
       {/* Line total */}
@@ -699,14 +723,16 @@ function CartItemRow({
       </div>
 
       {/* Remove button */}
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={onRemove}
+        aria-label={t("remove")}
         disabled={disabled}
-        className="p-1 text-gray-400 hover:text-destructive rounded"
+        className="h-auto w-auto p-1 p-1 text-gray-400 hover:text-destructive rounded"
       >
         <Trash2 className="h-4 w-4" />
-      </button>
+      </Button>
     </div>
   );
 }

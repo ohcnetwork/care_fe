@@ -52,10 +52,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { paymentReconcilationLocationAtom } from "@/atoms/paymentReconcilationLocationAtom";
-import { ReceiptEdge } from "@/components/careui/receipt-edge";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ReceiptEdge } from "@/components/ui/receipt-edge";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   ExtensionEntityType,

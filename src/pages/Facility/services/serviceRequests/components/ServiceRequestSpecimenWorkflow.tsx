@@ -82,7 +82,7 @@ export function ServiceRequestSpecimenWorkflow({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h5 className="text-gray-950 font-semibold">
+              <h5 className="text-foreground font-semibold">
                 {allSpecimensCollected
                   ? t("collected_specimen")
                   : t("pending_specimen_collection")}
@@ -192,34 +192,40 @@ export function ServiceRequestSpecimenWorkflow({
       {selectedSpecimenDefinition && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 py-1.5">
-            <h5 className="text-gray-950 font-semibold">
+            <h5 className="text-foreground font-semibold">
               {t("pending_specimen_collection")}
             </h5>
             <Badge variant="orange">{pendingRequirementsCount}</Badge>
           </div>
           <Card className="overflow-hidden rounded-lg shadow-xs">
-            <CardHeader
-              className="flex cursor-pointer flex-col gap-3 bg-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
-              onClick={() => setSelectedSpecimenDefinition(null)}
-            >
-              <div className="min-w-0 m-0">
-                <span className="text-sm text-gray-600">{t("required")}:</span>
-                <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
-                  <span className="truncate">
-                    {selectedSpecimenDefinition.title}
+            <CardHeader className="p-0">
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedSpecimenDefinition(null)}
+                className="h-auto w-full flex-col items-stretch gap-3 bg-muted p-3 text-left font-normal tracking-normal sm:flex-row sm:items-center sm:justify-between sm:gap-2"
+                aria-label={t("collapse")}
+              >
+                <div className="min-w-0 m-0">
+                  <span className="text-sm text-muted-foreground">
+                    {t("required")}:
                   </span>
-                  {getExistingDraftSpecimen(
-                    selectedSpecimenDefinition.slug,
-                  ) && <Badge variant="indigo">{t("draft")}</Badge>}
-                </CardTitle>
-              </div>
+                  <CardTitle className="flex flex-wrap items-center gap-2 text-base font-semibold">
+                    <span className="truncate">
+                      {selectedSpecimenDefinition.title}
+                    </span>
+                    {getExistingDraftSpecimen(
+                      selectedSpecimenDefinition.slug,
+                    ) && <Badge variant="indigo">{t("draft")}</Badge>}
+                  </CardTitle>
+                </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
-                <Badge variant="orange">{t("collection_pending")}</Badge>
-                <ChevronsDownUp className="size-4 mx-2" />
-              </div>
+                <div className="flex flex-wrap items-center gap-2 sm:shrink-0 justify-between">
+                  <Badge variant="orange">{t("collection_pending")}</Badge>
+                  <ChevronsDownUp className="size-4 mx-2" />
+                </div>
+              </Button>
             </CardHeader>
-            <CardContent className="bg-gray-100 p-2 pt-0">
+            <CardContent className="bg-muted p-2 pt-0">
               <SpecimenForm
                 specimenDefinition={selectedSpecimenDefinition}
                 onCancel={() => setSelectedSpecimenDefinition(null)}

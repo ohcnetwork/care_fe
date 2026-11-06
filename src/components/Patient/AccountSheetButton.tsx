@@ -11,6 +11,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import query from "@/Utils/request/query";
@@ -78,22 +79,15 @@ export function AccountSheetButton({
     );
   };
 
-  const handleOpenSheet = () => {
-    refetch();
-    setSheetOpen(true);
-  };
-
   const handleSheetOpenChange = (open: boolean) => {
+    if (open) refetch();
     setSheetOpen(open);
   };
 
   return (
     <>
-      <div onClick={handleOpenSheet} className="cursor-pointer">
-        {trigger}
-      </div>
-
       <Sheet open={sheetOpen} onOpenChange={handleSheetOpenChange}>
+        <SheetTrigger asChild>{trigger}</SheetTrigger>
         <SheetContent className="sm:max-w-md md:max-w-lg">
           <SheetHeader className="mb-6">
             <SheetTitle className="text-xl flex items-center justify-start gap-2">

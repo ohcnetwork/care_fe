@@ -194,7 +194,7 @@ export const DispenseLotSelector = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto min-w-(--radix-popover-trigger-width) max-w-[90vw] p-0"
+        className="w-auto min-w-(--anchor-width) max-w-[90vw] p-0"
         align="start"
       >
         {/* Search input */}

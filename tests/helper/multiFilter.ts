@@ -1,25 +1,19 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 export function selectedMultiFilterBar(page: Page, label: RegExp) {
-  return page
-    .locator('[data-slot="dropdown-menu-trigger"]')
-    .filter({ hasText: label })
-    .locator("xpath=..");
+  return page.getByRole("group", { name: label });
 }
 
 export async function clearSelectedMultiFilter(page: Page, label: RegExp) {
   await page.keyboard.press("Escape");
   await selectedMultiFilterBar(page, label)
-    .locator('[data-slot="button"]')
+    .getByRole("button", { name: "Remove filter", exact: true })
     .click();
 }
 
 export async function clearAllMultiFilters(page: Page) {
   await page.keyboard.press("Escape");
-  await page
-    .locator('[data-slot="button"]')
-    .filter({ hasText: /clear all/i })
-    .click();
+  await page.getByRole("button", { name: /^clear all$/i }).click();
 }
 
 export async function openMultiFilter(
@@ -28,7 +22,7 @@ export async function openMultiFilter(
   scope: Page | Locator = page,
 ) {
   await scope.getByRole("button", { name: /^filter$/i }).click();
-  await page.getByRole("menuitem", { name: filterName }).click();
+  await page.getByRole("option", { name: filterName }).click();
 }
 
 export async function applyDateFilterPreset(

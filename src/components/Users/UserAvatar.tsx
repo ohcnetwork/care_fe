@@ -1,11 +1,10 @@
-import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Camera } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
@@ -104,49 +103,26 @@ export default function UserAvatar({ username }: { username: string }) {
         onOpenChange={(open) => setEditAvatar(open)}
         aspectRatio={1}
       />
-      <div>
-        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow-sm sm:rounded-lg sm:px-6 flex justify-between">
-          <div className="flex items-center">
-            <Avatar
-              name={formatName(userData, true)}
-              imageUrl={userData?.profile_picture_url}
-              className="size-20"
-            />
-            <div className="my-4 ml-4 flex flex-col gap-2">
-              {!canEditAvatar ? (
-                <TooltipComponent
-                  content={t("edit_avatar_permission_error")}
-                  className="w-full"
-                >
-                  <Button
-                    variant="white"
-                    onClick={() => setEditAvatar(!editAvatar)}
-                    type="button"
-                    id="change-avatar"
-                    disabled
-                  >
-                    {t("change_avatar")}
-                  </Button>
-                </TooltipComponent>
-              ) : (
-                <Button
-                  variant="white"
-                  onClick={() => setEditAvatar(!editAvatar)}
-                  type="button"
-                  id="change-avatar"
-                >
-                  {t("change_avatar")}
-                </Button>
-              )}
-
-              <p className="text-xs leading-5 text-gray-500">
-                {t("change_avatar_note", {
-                  maxSize: careConfig.imageUploadMaxSizeInMB,
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="relative w-fit shrink-0">
+        <Avatar
+          name={formatName(userData, true)}
+          imageUrl={userData.profile_picture_url}
+          colors={["var(--primary-100)", "var(--primary-900)"]}
+          className="size-16 rounded-lg sm:size-20"
+        />
+        {canEditAvatar && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute -bottom-1.5 -right-1.5 size-9 bg-background"
+            onClick={() => setEditAvatar(true)}
+            type="button"
+            id="change-avatar"
+            aria-label={t("change_avatar")}
+          >
+            <Camera className="size-4" aria-hidden="true" />
+          </Button>
+        )}
       </div>
     </>
   );

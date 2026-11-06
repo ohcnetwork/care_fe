@@ -5,7 +5,6 @@ import { useLocationState } from "@/hooks/useLocationState";
 
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
-import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 export default function BedsList({
@@ -38,18 +37,12 @@ export default function BedsList({
   // Update selected location when locationDetail is fetched
   React.useEffect(() => {
     if (locationDetail) {
-      // Transform LocationDetail to LocationList
-      const locationList: LocationListType = {
-        ...locationDetail,
-        has_children: false, // Since this is a detail view, we assume no children initially
-        current_encounter: undefined, // LocationDetail doesn't have this field
-      };
-      setSelectedLocation(locationList);
+      setSelectedLocation(locationDetail);
     }
   }, [locationDetail, setSelectedLocation]);
 
   return (
-    <div className="flex px-4 space-x-4 min-h-[calc(100vh-10rem)]">
+    <div className="flex py-4 space-x-4 min-h-[calc(100vh-10rem)]">
       <LocationContent
         facilityId={facilityId}
         selectedLocationId={selectedLocationId}

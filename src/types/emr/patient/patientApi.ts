@@ -1,4 +1,5 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {
@@ -72,25 +73,25 @@ export default {
   setInstanceTags: {
     path: "/api/v1/patient/{external_id}/set_instance_tags/",
     method: HttpMethod.POST,
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: TagSetRequest[] }>(),
     TRes: Type<PatientRead>(),
   },
   removeInstanceTags: {
     path: "/api/v1/patient/{external_id}/remove_instance_tags/",
     method: HttpMethod.POST,
-    TBody: Type<{ tags: string[] }>(),
+    TBody: Type<{ tags: TagSetRequest[] }>(),
     TRes: Type<PatientRead>(),
   },
   setFacilityTags: {
     path: "/api/v1/patient/{external_id}/set_facility_tags/",
     method: HttpMethod.POST,
-    TBody: Type<{ tags: string[]; facility: string | null }>(),
+    TBody: Type<{ tags: TagSetRequest[]; facility: string | null }>(),
     TRes: Type<PatientRead>(),
   },
   removeFacilityTags: {
     path: "/api/v1/patient/{external_id}/remove_facility_tags/",
     method: HttpMethod.POST,
-    TBody: Type<{ tags: string[]; facility: string | null }>(),
+    TBody: Type<{ tags: TagSetRequest[]; facility: string | null }>(),
     TRes: Type<PatientRead>(),
   },
 } as const;

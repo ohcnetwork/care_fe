@@ -68,13 +68,13 @@ export function ServiceRequestCompletion({
 
   return (
     <>
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-white">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-background border-border p-2">
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-background">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-foreground">
               {t("complete_service_request")}
             </p>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               {hasPendingReports
                 ? t("reports_pending_final_review", {
                     count: pendingReports,
@@ -181,7 +181,7 @@ const CompletionNoteContent = ({
   return (
     <>
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">
+        <p className="text-sm font-medium text-foreground">
           {t("completion_note")}
         </p>
         <Textarea

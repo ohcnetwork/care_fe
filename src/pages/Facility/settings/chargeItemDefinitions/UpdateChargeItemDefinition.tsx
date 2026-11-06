@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -58,16 +59,13 @@ export function UpdateChargeItemDefinition({
             </AlertDescription>
           </Alert>
           <div className="flex justify-end">
-            <button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/charge_item_definitions`,
-                )
-              }
-              className="text-sm text-blue-600 hover:underline"
-            >
-              {t("return_to_list")}
-            </button>
+            <Button variant="link" asChild>
+              <Link
+                href={`/facility/${facilityId}/settings/charge_item_definitions`}
+              >
+                {t("return_to_list")}
+              </Link>
+            </Button>
           </div>
         </div>
       </Page>

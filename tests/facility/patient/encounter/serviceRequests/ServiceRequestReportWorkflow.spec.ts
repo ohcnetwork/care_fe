@@ -148,8 +148,10 @@ test.describe("Service request report workflow", () => {
       page.getByRole("button", { name: "Test Results Entry", exact: true }),
     ).toBeVisible();
     await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Diagnostic Report Type" })
+      .getByRole("combobox", {
+        name: "Select Diagnostic Report Type",
+        exact: true,
+      })
       .click();
     await page
       .getByRole("option", {
@@ -188,7 +190,7 @@ test.describe("Service request report workflow", () => {
     ).toHaveCount(0);
   });
 
-  test("shows updates within the creation minute in collapsed and expanded report headers", async ({
+  test("shows updates within the creation minute in collapsed and expanded reports", async ({
     page,
   }) => {
     const fixture = await mockReportWorkflow(page, {
@@ -196,10 +198,12 @@ test.describe("Service request report workflow", () => {
       reportStatus: "final",
     });
     await page.goto(fixture.url);
-    const expand = page.getByRole("button", {
-      name: `Expand ${fixture.report.code.display}`,
-      exact: true,
-    });
+    const expand = page
+      .locator("#service-request-section-review")
+      .getByRole("button", {
+        name: `Expand ${fixture.report.code.display}`,
+        exact: true,
+      });
     await expect(expand).toContainText("Updated:");
     await expect(expand.locator("time")).toHaveAttribute(
       "datetime",
@@ -207,18 +211,21 @@ test.describe("Service request report workflow", () => {
     );
     await expand.click();
 
-    const collapse = page.getByRole("button", {
-      name: `Collapse ${fixture.report.code.display}`,
-      exact: true,
-    });
-    await expect(collapse).toContainText("Created:");
-    await expect(collapse).toContainText("Last Updated:");
-    await expect(collapse.locator("time")).toHaveCount(2);
-    await expect(collapse.locator("time").first()).toHaveAttribute(
+    const review = page.locator("#service-request-section-review");
+    await expect(
+      review.getByRole("button", {
+        name: `Collapse ${fixture.report.code.display}`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(review.getByText(/^Created:/)).toBeVisible();
+    await expect(review.getByText(/^Last Updated:/)).toBeVisible();
+    await expect(review.locator("time")).toHaveCount(2);
+    await expect(review.locator("time").first()).toHaveAttribute(
       "datetime",
       fixture.report.created_date,
     );
-    await expect(collapse.locator("time").last()).toHaveAttribute(
+    await expect(review.locator("time").last()).toHaveAttribute(
       "datetime",
       fixture.report.modified_date,
     );
