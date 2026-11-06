@@ -895,9 +895,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await requestLimit.clear();
     await closeSectionSettings(page);
 
-    await page
-      .getByRole("button", { name: "One column", exact: true })
-      .click();
+    await page.getByRole("button", { name: "One column", exact: true }).click();
     await expect(
       column("Main").getByRole("article", {
         name: "Active requests",
