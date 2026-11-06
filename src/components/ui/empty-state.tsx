@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
 }
@@ -25,7 +25,7 @@ export interface EmptyStateProps {
  *               eg. `<CareIcon icon="l-user" className="text-primary size-6" />` or
  *                   `<LucideIcon className="text-primary size-6" />`
  * @param title - The title of the empty state
- * @param description - Optional description providing more context
+ * @param description - Optional description providing more context. A string or inline content, such as a shortcut hint.
  * @param action - Optional action element (e.g., button) to prompt user action
  * @param className - Optional additional class names for styling
  */
@@ -40,9 +40,7 @@ export function EmptyState({
     <Empty className={cn("border p-6", className)}>
       <EmptyHeader>
         {icon && <EmptyMedia variant="icon">{icon}</EmptyMedia>}
-        <EmptyTitle>
-          <h3>{title}</h3>
-        </EmptyTitle>
+        <EmptyTitle>{title}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}
       </EmptyHeader>
       {action && <EmptyContent>{action}</EmptyContent>}
