@@ -50,7 +50,7 @@ function generateFacilityLinks(
       section: t("patient_management"),
       name: t("appointments"),
       url: `${baseUrl}/appointments`,
-      icon: <FacilitySidebarIcon name="appointments" />,
+      icon: <FacilitySidebarIcon name="calendarCheck" />,
       visibility: permissions.canViewAppointments,
     },
     {
