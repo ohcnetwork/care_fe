@@ -126,13 +126,15 @@ export default function AdminOrganizationFormSheet({
       name: values.name.trim(),
       description: values.description?.trim() || undefined,
       org_type: values.org_type,
-      parent_id: parentOrgId,
-    };
+    } satisfies OrganizationUpdate;
 
     if (isEditMode) {
       updateOrganization(data);
     } else {
-      createOrganization(data);
+      createOrganization({
+        ...data,
+        parent: parentOrgId,
+      } satisfies OrganizationCreate);
     }
   };
 
