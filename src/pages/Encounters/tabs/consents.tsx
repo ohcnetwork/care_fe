@@ -35,6 +35,8 @@ function ConsentCard({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
+  const { organizationId } =
+    usePathParams("/organization/:organizationId/*") ?? {};
   const encounterId = consent.encounter;
   const consentId = consent.id;
 
@@ -136,6 +138,7 @@ function ConsentCard({
                 patientId,
                 `/encounter/${encounterId}/consents/${consentId}`,
                 facilityId,
+                organizationId,
               ),
             )
           }

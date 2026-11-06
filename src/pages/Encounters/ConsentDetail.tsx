@@ -37,9 +37,13 @@ import { useEncounter } from "./utils/EncounterProvider";
 
 interface ConsentDetailPageProps {
   consentId: string;
+  organizationId?: string;
 }
 
-export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
+export function ConsentDetailPage({
+  consentId,
+  organizationId,
+}: ConsentDetailPageProps) {
   const { t } = useTranslation();
 
   const {
@@ -116,7 +120,11 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
             {t("consent_not_found_description")}
           </p>
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`}
+            href={
+              organizationId
+                ? `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/consents`
+                : `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/consents`
+            }
             className="hover:underline flex items-center gap-2"
           >
             <ChevronLeft className="size-4" />
