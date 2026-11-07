@@ -19,7 +19,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -202,16 +207,13 @@ function RequirementsContent({
                 {t("create_new")}
               </Button>
             </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
-            >
-              <div className="flex-1 overflow-y-auto py-6">
+            <SheetContent size="lg" showCloseButton>
+              <SheetBody className="py-0">
                 {createForm?.(
                   () => setIsCreateSheetOpen(false),
                   () => setIsCreateSheetOpen(false),
                 )}
-              </div>
+              </SheetBody>
             </SheetContent>
           </Sheet>
         </div>

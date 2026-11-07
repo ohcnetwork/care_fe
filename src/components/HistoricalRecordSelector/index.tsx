@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -370,192 +372,193 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           </span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl lg:max-w-4xl p-0 overflow-y-auto">
-        <div className="flex flex-col gap-2 p-2">
-          <SheetHeader className="px-2 py-0">
-            <SheetTitle className="text-lg font-medium">
-              {title || t("history")}
-            </SheetTitle>
-            <SheetDescription className="sr-only">
-              {title || t("history")}
-            </SheetDescription>
-          </SheetHeader>
-          {structuredTypes.length > 1 && (
-            <Tabs
-              value={activeType}
-              onValueChange={handleTabChange}
-              className="w-full"
-            >
-              <div className="max-w-full overflow-x-auto pb-1">
-                <TabsList variant="line">
-                  {structuredTypes.map(({ type }) => (
-                    <TabsTrigger key={type} value={type}>
-                      {type}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-            </Tabs>
-          )}
-        </div>
-
-        <div className="space-y-0 p-2">
-          {state.dateGroupedRecords.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Clock className="size-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">{t("no_records_found")}</p>
-            </div>
-          ) : (
-            state.dateGroupedRecords.map(({ date, records }) => (
-              <Collapsible
-                key={date}
-                open={state.expandedDates.has(date)}
-                onOpenChange={(isOpen) => handleExpandDate(date, isOpen)}
+      <SheetContent size="xl" className="overflow-hidden">
+        <SheetHeader>
+          <SheetTitle>{title || t("history")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {title || t("history")}
+          </SheetDescription>
+        </SheetHeader>
+        <SheetBody>
+          <div className="flex flex-col gap-2">
+            {structuredTypes.length > 1 && (
+              <Tabs
+                value={activeType}
+                onValueChange={handleTabChange}
+                className="w-full"
               >
-                <CollapsibleTrigger className="w-full bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-t-md mb-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="px-2">
-                      <p className="text-sm text-indigo-700 font-medium">
-                        {date}
-                      </p>
-                    </div>
-                    {state.expandedDates.has(date) ? (
-                      <ChevronsDownUp className="size-4 text-gray-400" />
-                    ) : (
-                      <ChevronsUpDown className="size-4 text-gray-400" />
-                    )}
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="lg:overflow-visible overflow-x-auto p-2">
-                    {isLoadingRecords ? (
-                      <div className="space-y-2 p-2">
-                        <Skeleton className="h-8 w-full" />
-                      </div>
-                    ) : records.length ? (
-                      <Table className="w-full min-w-fit border-separate border-spacing-y-2">
-                        <TableHeader>
-                          <TableRow className="border-0">
-                            <TableHead className="border-0 bg-transparent p-2 w-12">
-                              <Checkbox
-                                checked={records.every((record) =>
-                                  (
-                                    state.selectedRecords[activeType] || []
-                                  ).includes(record),
-                                )}
-                                onCheckedChange={() => {
-                                  handleSelectAllInDateGroup(date, records);
-                                }}
-                                className="size-5"
-                              />
-                            </TableHead>
-                            {activeTypeConfig?.displayFields.map((field) => (
-                              <TableHead
-                                key={String(field.label)}
-                                className={
-                                  "border border-gray-200 bg-gray-50 nth-2:rounded-l-md nth-last-1:rounded-r-md"
-                                }
-                              >
-                                {field.label}
-                              </TableHead>
-                            ))}
-                            {activeTypeConfig?.expandableFields &&
-                              activeTypeConfig.expandableFields.length > 0 && (
-                                <TableHead
-                                  className={
-                                    "border border-gray-200 bg-gray-50 nth-last-1:rounded-r-md"
-                                  }
-                                ></TableHead>
-                              )}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {records.map((record: T, index: number) => (
-                            <RecordItem
-                              key={index}
-                              record={record}
-                              isSelected={(
-                                state.selectedRecords[activeType] || []
-                              ).includes(record)}
-                              onToggleSelect={handleToggleSelect}
-                              displayFields={
-                                activeTypeConfig?.displayFields || []
-                              }
-                              expandedRecordId={expandedRecordId}
-                              onToggleExpand={(id) =>
-                                setExpandedRecordId(
-                                  expandedRecordId === id ? undefined : id,
-                                )
-                              }
-                              expandableFields={
-                                activeTypeConfig?.expandableFields || []
-                              }
-                            />
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      <div className="pb-4 text-center text-sm text-gray-500">
-                        {t("no_records_found")}
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            ))
-          )}
-        </div>
-        <div className="flex justify-between items-center p-2">
-          {isLoadingRecords && <Skeleton className="h-8 w-full" />}
-        </div>
-
-        <div className="sticky bottom-0 bg-white p-4 border-t">
-          {state.dateGroupedRecords.length > 0 &&
-            (isLoadingRecords ? (
-              <div className="flex justify-center p-4">
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : recordsData?.count &&
-              recordsData.count >
-                (state.currentOffset[activeType] || 0) + LIMIT ? (
-              <Button
-                variant="ghost"
-                onClick={handleLoadMore}
-                className="font-semibold underline p-0 justify-start"
-              >
-                {t("load_more")}
-              </Button>
-            ) : null)}
-          <div className="flex justify-between items-center gap-2 w-full">
-            <div className="text-sm">
-              <span className="font-medium">
-                {(state.selectedRecords[activeType] || []).length} {activeType}
-              </span>{" "}
-              {t("selected")}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                className="font-semibold underline"
-                onClick={handleClose}
-              >
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handleAddSelected}
-                disabled={
-                  disabled ||
-                  (state.selectedRecords[activeType] || []).length === 0
-                }
-                className="bg-emerald-600 hover:bg-emerald-700"
-                data-cy="add-selected-records"
-              >
-                <Files className="size-4" />
-                {t("add_selected")}
-              </Button>
-            </div>
+                <div className="max-w-full overflow-x-auto pb-1">
+                  <TabsList variant="line">
+                    {structuredTypes.map(({ type }) => (
+                      <TabsTrigger key={type} value={type}>
+                        {type}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
+              </Tabs>
+            )}
           </div>
-        </div>
+
+          <div className="space-y-1 p-2">
+            {state.dateGroupedRecords.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <Clock className="size-8 text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">{t("no_records_found")}</p>
+              </div>
+            ) : (
+              state.dateGroupedRecords.map(({ date, records }) => (
+                <Collapsible
+                  key={date}
+                  open={state.expandedDates.has(date)}
+                  onOpenChange={(isOpen) => handleExpandDate(date, isOpen)}
+                >
+                  <CollapsibleTrigger className="w-full bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-t-md">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="px-2">
+                        <p className="text-sm text-indigo-700 font-medium">
+                          {date}
+                        </p>
+                      </div>
+                      {state.expandedDates.has(date) ? (
+                        <ChevronsDownUp className="size-4 text-gray-400" />
+                      ) : (
+                        <ChevronsUpDown className="size-4 text-gray-400" />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="lg:overflow-visible overflow-x-auto **:data-[slot=table-container]:border-0">
+                      {isLoadingRecords ? (
+                        <div className="space-y-2 p-2">
+                          <Skeleton className="h-8 w-full" />
+                        </div>
+                      ) : records.length ? (
+                        <Table className="w-full min-w-fit border-separate border-spacing-y-2">
+                          <TableHeader>
+                            <TableRow className="border-0">
+                              <TableHead className="border-0 bg-transparent p-2 w-12">
+                                <Checkbox
+                                  checked={records.every((record) =>
+                                    (
+                                      state.selectedRecords[activeType] || []
+                                    ).includes(record),
+                                  )}
+                                  onCheckedChange={() => {
+                                    handleSelectAllInDateGroup(date, records);
+                                  }}
+                                  className="size-5"
+                                />
+                              </TableHead>
+                              {activeTypeConfig?.displayFields.map((field) => (
+                                <TableHead
+                                  key={String(field.label)}
+                                  className={
+                                    "border border-gray-200 bg-gray-50 nth-2:rounded-l-md nth-last-1:rounded-r-md"
+                                  }
+                                >
+                                  {field.label}
+                                </TableHead>
+                              ))}
+                              {activeTypeConfig?.expandableFields &&
+                                activeTypeConfig.expandableFields.length >
+                                  0 && (
+                                  <TableHead
+                                    className={
+                                      "border border-gray-200 bg-gray-50 nth-last-1:rounded-r-md"
+                                    }
+                                  ></TableHead>
+                                )}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {records.map((record: T, index: number) => (
+                              <RecordItem
+                                key={index}
+                                record={record}
+                                isSelected={(
+                                  state.selectedRecords[activeType] || []
+                                ).includes(record)}
+                                onToggleSelect={handleToggleSelect}
+                                displayFields={
+                                  activeTypeConfig?.displayFields || []
+                                }
+                                expandedRecordId={expandedRecordId}
+                                onToggleExpand={(id) =>
+                                  setExpandedRecordId(
+                                    expandedRecordId === id ? undefined : id,
+                                  )
+                                }
+                                expandableFields={
+                                  activeTypeConfig?.expandableFields || []
+                                }
+                              />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                        <div className="pb-4 text-center text-sm text-gray-500">
+                          {t("no_records_found")}
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))
+            )}
+          </div>
+
+          {isLoadingRecords && <Skeleton className="h-8 w-full" />}
+
+          <div className="p-2">
+            {state.dateGroupedRecords.length > 0 &&
+              (isLoadingRecords ? (
+                <div className="flex justify-center p-4">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : recordsData?.count &&
+                recordsData.count >
+                  (state.currentOffset[activeType] || 0) + LIMIT ? (
+                <Button
+                  variant="ghost"
+                  onClick={handleLoadMore}
+                  className="font-semibold underline justify-start"
+                >
+                  {t("load_more")}
+                </Button>
+              ) : null)}
+          </div>
+        </SheetBody>
+
+        <SheetFooter className="sm:items-center sm:justify-between">
+          <div className="text-sm">
+            <span className="font-medium">
+              {(state.selectedRecords[activeType] || []).length} {activeType}
+            </span>{" "}
+            {t("selected")}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              className="font-semibold underline"
+              onClick={handleClose}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleAddSelected}
+              disabled={
+                disabled ||
+                (state.selectedRecords[activeType] || []).length === 0
+              }
+              className="bg-emerald-600 hover:bg-emerald-700"
+              data-cy="add-selected-records"
+            >
+              <Files className="size-4" />
+              {t("add_selected")}
+            </Button>
+          </div>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

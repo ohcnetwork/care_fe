@@ -25,8 +25,10 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -162,7 +164,10 @@ export default function FacilityOrganizationFormSheet({
       ) : (
         <SheetTrigger asChild>{trigger}</SheetTrigger>
       )}
-      <SheetContent onCloseAutoFocus={(event) => event.preventDefault()}>
+      <SheetContent
+        className="overflow-hidden"
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
         <SheetHeader>
           <SheetTitle>
             {isEditMode
@@ -178,75 +183,83 @@ export default function FacilityOrganizationFormSheet({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel aria-required>{t("name")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={t("enter_department_team_name")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="org_type"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel>{t(`type`)}</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue
-                          placeholder={t("select_organization_type")}
+            <SheetBody>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel aria-required>{t("name")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder={t("enter_department_team_name")}
                         />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(FacilityOrganizationType)
-                        .filter(
-                          (type) => type !== FacilityOrganizationType.ROOT,
-                        )
-                        .map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type === FacilityOrganizationType.DEPT
-                              ? t("department")
-                              : t("team")}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel>{t("description")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={t("enter_department_team_description")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end mt-6 space-x-2">
+                <FormField
+                  control={form.control}
+                  name="org_type"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>{t(`type`)}</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue
+                              placeholder={t("select_organization_type")}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(FacilityOrganizationType)
+                            .filter(
+                              (type) => type !== FacilityOrganizationType.ROOT,
+                            )
+                            .map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type === FacilityOrganizationType.DEPT
+                                  ? t("department")
+                                  : t("team")}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>{t("description")}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder={t("enter_department_team_description")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </SheetBody>
+
+            <SheetFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -273,7 +286,7 @@ export default function FacilityOrganizationFormSheet({
                     ? t("update_organization")
                     : t("create_organization")}
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

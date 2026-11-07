@@ -12,6 +12,7 @@ import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -202,7 +203,7 @@ export default function PatientIdentifierConfigList({
                     {t("add_patient_identifier_config")}
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="overflow-y-auto">
+                <SheetContent size="md" className="overflow-hidden">
                   <SheetHeader>
                     <SheetTitle>
                       {selectedConfig && "id" in selectedConfig
@@ -215,7 +216,7 @@ export default function PatientIdentifierConfigList({
                         : t("manage_instance_patient_identifier_config")}
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-6 pb-6">
+                  <SheetBody>
                     <PatientIdentifierConfigForm
                       facilityId={facilityId}
                       configId={
@@ -225,7 +226,7 @@ export default function PatientIdentifierConfigList({
                       }
                       onSuccess={handleSheetClose}
                     />
-                  </div>
+                  </SheetBody>
                 </SheetContent>
               </Sheet>
             )}

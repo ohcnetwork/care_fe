@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -34,12 +35,12 @@ export default function EditServiceHistorySheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("service_record_edit")}</SheetTitle>
           <SheetDescription>{t("service_record_description")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <ServiceHistoryForm
             facilityId={facilityId}
             deviceId={deviceId}
@@ -49,7 +50,7 @@ export default function EditServiceHistorySheet({
               setOpen(false);
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

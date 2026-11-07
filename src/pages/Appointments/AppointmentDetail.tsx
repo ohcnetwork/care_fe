@@ -25,7 +25,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -1119,43 +1121,26 @@ const AppointmentActions = ({
             </AlertDialog>
 
             <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-              <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+              <SheetContent size="lg" className="overflow-hidden">
                 <SheetHeader>
                   <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
                 </SheetHeader>
 
-                <div className="mt-6 flex-1">
-                  <div className="text-sm">
-                    <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">
-                        {t("tags", { count: 2 })}
-                      </Label>
-                      <TagAssignmentSheet
-                        entityType="appointment"
-                        entityId={appointment.id}
-                        facilityId={facilityId}
-                        currentTags={appointment.tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["appointment", appointment.id],
-                          });
-                        }}
-                        canWrite={true}
-                      />
-                    </div>
-                    {appointment.tags?.length > 0 ? (
-                      <p className="text-gray-600 flex flex-wrap gap-1">
-                        {appointment.tags.map((tag) => (
-                          <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
-                        ))}
-                      </p>
-                    ) : (
-                      <p className="text-gray-600 md:-mt-2">
-                        {t("no_tags_assigned")}
-                      </p>
-                    )}
-                  </div>
-                  <Label>{t("note")}</Label>
+                <SheetBody>
+                  <Label className="pb-2">{t("tags", { count: 2 })}</Label>
+                  <TagAssignmentSheet
+                    entityType="appointment"
+                    entityId={appointment.id}
+                    facilityId={facilityId}
+                    currentTags={appointment.tags}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["appointment", appointment.id],
+                      });
+                    }}
+                    canWrite={true}
+                  />
+                  <Label className="pt-4 mb-2">{t("note")}</Label>
                   <RichTextEditor
                     label={t("note")}
                     placeholder={t("appointment_note")}
@@ -1195,26 +1180,25 @@ const AppointmentActions = ({
                       currentAppointment={appointment}
                     />
                   </div>
-
-                  <div className="flex justify-end gap-2 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsRescheduleOpen(false);
-                        setSelectedSlotId(undefined);
-                      }}
-                    >
-                      {t("cancel")}
-                    </Button>
-                    <Button
-                      variant="default"
-                      disabled={!selectedSlotId || isPending}
-                      onClick={addRescheduleAppointment}
-                    >
-                      {isPending ? t("rescheduling") : t("reschedule")}
-                    </Button>
-                  </div>
-                </div>
+                </SheetBody>
+                <SheetFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsRescheduleOpen(false);
+                      setSelectedSlotId(undefined);
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="default"
+                    disabled={!selectedSlotId || isPending}
+                    onClick={addRescheduleAppointment}
+                  >
+                    {isPending ? t("rescheduling") : t("reschedule")}
+                  </Button>
+                </SheetFooter>
               </SheetContent>
             </Sheet>
           </>
