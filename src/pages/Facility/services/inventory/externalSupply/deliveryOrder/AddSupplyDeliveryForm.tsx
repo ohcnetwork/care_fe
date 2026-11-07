@@ -19,6 +19,7 @@ import { z } from "zod";
 
 import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -955,6 +956,14 @@ export function AddSupplyDeliveryForm({
       <DisablingCover disabled={isProcessing} message={t("saving")}>
         <Card className="bg-gray-50 py-4 rounded-md">
           <CardContent className="space-y-4 px-2 sm:px-6">
+            {!origin && (
+              <PLUGIN_Component
+                __name="SupplyDeliveryFormActions"
+                facilityId={facilityId}
+                deliveryOrderId={deliveryOrderId}
+                form={form}
+              />
+            )}
             {fields.length > 0 ? (
               <Form {...form}>
                 <form
