@@ -12,7 +12,6 @@ For missing i18n keys, simply add the key to the end of the `public/locale/en.js
 
 ### Technology Stack
 
-- Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
 - State Management: @tanstack/react-query for server state, React hooks for client state
 - Routing: raviger for application routing
