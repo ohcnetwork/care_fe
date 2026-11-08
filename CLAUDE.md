@@ -136,10 +136,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 - Don't rely on cleanup — the DB snapshot system handles state reset
 - Use `getFacilityId()`, `getPatientId()`, `getEncounterId()` from `tests/support/` for fixture IDs
 
-## Code Style Guidelines
-
-- **i18n**: All user-facing strings must use i18next. English translations go in `public/locale/en.json`. Non-English managed via Crowdin — do not edit directly.
-
 ## Architecture
 
 ### Routing (Raviger)
