@@ -304,7 +304,7 @@ Calibration: judge only the changed surfaces and their direct siblings. Unchange
 ## Repo conventions (cite these files; don't invent rules)
 
 - **`CLAUDE.md`** — typing, import order; all user-facing strings via i18next (`public/locale/en.json`).
-- **`.github/instructions/careui.instructions.md`** — ARIA on medical data, keyboard nav, WCAG AA contrast, **44px minimum touch targets**.
+- **`.github/instructions/careui.instructions.md`** + **`.github/copilot-instructions.md`** — ARIA on medical data, keyboard nav, WCAG AA contrast, **44px minimum touch targets**.
 - **`.github/instructions/react-components.instructions.md`** — shadcn/ui + CAREUI medical components; `cn()` from `src/lib/utils.ts`; CVA for variants; `focus-visible:ring-1` focus states.
 - **`.github/instructions/pages.instructions.md`** + **`src/hooks/useBreakpoints.ts`** — mobile-first; breakpoints xs 480 / sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536.
 - **`tailwind.config.js`** — color tokens (primary `#0d9f6e`); never hardcode colors inline.
