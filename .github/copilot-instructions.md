@@ -12,7 +12,6 @@ For missing i18n keys, simply add the key to the end of the `public/locale/en.js
 
 ### Technology Stack
 
-- Frontend Framework: React 19.1.1 with TypeScript
 - Build Tool: Vite 6.3.5 for fast development and optimized builds
 - Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
 - UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
