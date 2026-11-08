@@ -159,7 +159,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Development Tools
 
-- Prettier 3.3.3 with Tailwind plugin
 - Playwright for E2E testing
 - Vite PWA plugin for service worker
 
