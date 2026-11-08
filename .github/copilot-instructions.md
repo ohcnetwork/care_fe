@@ -182,7 +182,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Environment Variables
 
 - `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
-- `REACT_ENABLE_HCX` -- enable HCX features
 - `NODE_OPTIONS="--max-old-space-size=4096"` -- required for Docker builds
 
 ### Build Process Details
