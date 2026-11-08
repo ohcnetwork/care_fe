@@ -28,7 +28,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 - Hover cards: Use `PatientHoverCard` for patient info overlays
 - Badge usage: Display patient status, facility capacity, medication dosage with color variants
 
-## Styling with Tailwind CSS 4.1.3
+## Styling with Tailwind CSS 4.3.2
 - Class variance authority: Use `cva()` for variant-based component styling
 - Utility function: Use `cn()` from `@/lib/utils` for conditional classes
 - Color system: Follow primary-700, gray-900, red-500 pattern with dark mode variants
