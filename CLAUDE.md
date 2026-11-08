@@ -138,7 +138,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 
 ## Code Style Guidelines
 
-- **Types**: Use `interface` for objects, avoid `any`, prefer maps over enums
 - **Naming**: PascalCase for component files (`AuthWizard.tsx`), camelCase for hooks/utils (`useAuth.ts`), kebab-case for directories
 - **Components**: Functional components only, named exports preferred, one component per file
 - **i18n**: All user-facing strings must use i18next. English translations go in `public/locale/en.json`. Non-English managed via Crowdin — do not edit directly.
