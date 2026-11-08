@@ -138,7 +138,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 
 ## Code Style Guidelines
 
-- **Imports**: Order by 3rd-party → library → CAREUI → UI → components → hooks → utils → relative. Prettier plugin auto-sorts on format.
 - **Types**: Use `interface` for objects, avoid `any`, prefer maps over enums
 - **Naming**: PascalCase for component files (`AuthWizard.tsx`), camelCase for hooks/utils (`useAuth.ts`), kebab-case for directories
 - **Components**: Functional components only, named exports preferred, one component per file
