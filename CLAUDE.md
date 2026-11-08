@@ -226,10 +226,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 `care.config.ts` centralizes runtime config (API URLs, feature flags, locale settings, plugin config). Environment variables prefixed with `REACT_`.
 
-## Git Workflow
-
-- Pre-commit hooks via husky run Prettier and ESLint on staged files
-
 ## Autonomous AI Workflow
 
 When working autonomously on this codebase, follow this sequence:
