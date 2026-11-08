@@ -360,7 +360,7 @@ Per **`.github/instructions/careui.instructions.md`**:
 - Validation states: `aria-invalid` present when the field is invalid?
 - Icon-only controls: `sr-only` span or `aria-label`?
 - Keyboard operability: custom click handlers also handle `onKeyDown` / `onKeyPress` (Enter/Space)?
-- Focus states: `focus-visible:ring-1` present on new interactive elements?
+- Focus states: `focus-visible:ring-1` present on new interactive elements? **Cite `.github/instructions/react-components.instructions.md`.**
 - Touch targets: new interactive elements ≥ 44×44 CSS px? (Check height class — `h-11` = 44px.)
 
 ### Workflow efficiency (hospital context)
