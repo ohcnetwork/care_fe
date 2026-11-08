@@ -219,7 +219,7 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 - `src/types/` — Domain type definitions with corresponding `*Api.ts` route files
 - `src/Utils/request/` — API request infrastructure (query, mutate, error handling)
 - `src/hooks/` — Custom React hooks (auth, file management, plugins, etc.)
-- `src/Providers/` — Auth, history, patient user providers
+- `src/Providers/` — Auth, patient user providers
 - `src/Routers/` — App routing and route definitions
 
 ### Configuration
