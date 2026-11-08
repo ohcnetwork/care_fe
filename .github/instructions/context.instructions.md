@@ -10,7 +10,6 @@ applyTo: "src/context/**/*.{ts,tsx}"
 - Medical role-based permissions (Doctor, Nurse, Admin, Pharmacist)
 - Patient data access control with dynamic permission checking
 - Facility-level permissions for multi-facility healthcare systems
-- Emergency override permissions for critical care situations
 
 ### Shortcut Context (`ShortcutContext.tsx`)
 - Medical workflow keyboard shortcuts for rapid clinical actions
