@@ -19,7 +19,6 @@ applyTo: "src/hooks/**/*.{ts,tsx}"
 ### UI & Navigation
 - useSidebarState: Dashboard sidebar management
 - useKeyboardShortcuts: Medical workflow shortcuts
-- useAppHistory: Clinical workflow navigation history
 
 ## Hook Development Standards
 
