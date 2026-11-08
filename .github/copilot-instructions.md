@@ -6,7 +6,7 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. This repository has custom setup requirements and workflows that must be followed exactly.
 
-Do not run lint or prettier. For missing i18n keys, simply add the key to the end of the `public/locale/en.json` file. Do not read the i18n files, directly append items to the end of the JSON when there is an error regarding a missing key.
+For missing i18n keys, simply add the key to the end of the `public/locale/en.json` file. Do not read the i18n files, directly append items to the end of the JSON when there is an error regarding a missing key.
 
 ## Architecture Overview
 
