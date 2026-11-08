@@ -9,7 +9,6 @@ applyTo: "src/common/**/*.{ts,tsx}"
 ### Permission System (`Permissions.tsx`)
 - Role-based access control for medical staff (Doctor, Nurse, Admin)
 - Dynamic permission checking with `getPermissions()` function
-- Emergency override permissions for critical care situations
 
 ### Application Constants (`constants.tsx`)  
 - Core application configuration
