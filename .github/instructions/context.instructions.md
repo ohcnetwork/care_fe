@@ -13,7 +13,6 @@ applyTo: "src/context/**/*.{ts,tsx}"
 
 ### Shortcut Context (`ShortcutContext.tsx`)
 - Medical workflow keyboard shortcuts for rapid clinical actions
-- Emergency protocol shortcuts for rapid response scenarios
 - Accessibility shortcuts for clinical environments
 
 ## Context Implementation Patterns
