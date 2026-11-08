@@ -226,12 +226,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 `care.config.ts` centralizes runtime config (API URLs, feature flags, locale settings, plugin config). Environment variables prefixed with `REACT_`.
 
-## Autonomous AI Workflow
-
-When working autonomously on this codebase, follow this sequence:
-
-7. **For writing tests:** Read `tests/PLAYWRIGHT_GUIDE.md` — it contains complete patterns for all form interactions, selectors, assertions, and helpers
-
 ### Quick verification cycle
 
 ```bash
