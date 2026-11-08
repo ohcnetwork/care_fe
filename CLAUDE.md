@@ -228,7 +228,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 ## Git Workflow
 
-- Branch naming: `issues/{issue#}/{short-name}`
 - Default branch: `develop` (staging auto-deploys)
 - Pre-commit hooks via husky run Prettier and ESLint on staged files
 
