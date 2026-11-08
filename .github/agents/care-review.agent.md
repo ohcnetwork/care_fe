@@ -138,10 +138,6 @@ and a change that only handles the happy path is not legible — the reader cann
 failure case was considered or forgotten. For every new or modified failure-capable call, ask what
 the user sees when it rejects:
 
-- **`useMutation` with `onSuccess` but no `onError`** — the request fails, the toast never fires, the
-  dialog stays open, and the user retries into the same silence. This is a `Broken` finding, not a
-  polish note: it is invisible in testing and only surfaces in production. (Check how neighbouring
-  mutations in the same area surface errors and match that.)
 - **A rejected promise with no `.catch`**, or an `await` in a handler with no `try`/`catch`.
 - **An error already surfaced but swallowed** — `query()`/`mutate()` toast on 400/406 by default, so
   `silent: true` on a user-initiated action means the user gets nothing unless the code handles it.
