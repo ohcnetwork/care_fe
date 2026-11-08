@@ -230,7 +230,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 When working autonomously on this codebase, follow this sequence:
 
-3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
 4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
 5. **For new features:** Add Playwright tests in `tests/` following `tests/PLAYWRIGHT_GUIDE.md`
 6. **For i18n:** Add English strings to `public/locale/en.json`
