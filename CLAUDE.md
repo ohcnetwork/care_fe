@@ -230,7 +230,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 When working autonomously on this codebase, follow this sequence:
 
-1. **Before coding:** Read relevant source files and understand existing patterns
 2. **After changes:** Run `npm run lint-fix` and `npm run format` on changed files (pre-commit hooks also run these automatically)
 3. **Verify:** Run relevant Playwright tests against the local backend to validate changes
 4. **For API changes:** Check corresponding backend endpoint in the care backend repo and update both repos if needed
