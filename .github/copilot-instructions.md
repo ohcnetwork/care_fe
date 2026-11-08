@@ -100,7 +100,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Bootstrap, Build, and Test the Repository
 
 - `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
-- `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
+- `npm run postinstall` -- installs platform-specific dependencies (takes ~3 seconds)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
