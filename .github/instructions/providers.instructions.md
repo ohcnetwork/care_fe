@@ -7,7 +7,6 @@ applyTo: "src/Providers/**/*.{ts,tsx}"
 ## Core Providers
 - AuthUserProvider: Authenticated user and role management
 - PatientUserProvider: Patient authentication for public appointment booking
-- HistoryAPIProvider: Navigation history for clinical workflows
 
 ### Authentication Patterns
 ```typescript
