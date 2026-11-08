@@ -138,7 +138,6 @@ npm run playwright:test           # Tests run against clean DB, auto-restores on
 
 ## Code Style Guidelines
 
-- **TypeScript**: Strict mode, ES2022 target, path aliases (`@/*` → `src/*`, `@careConfig` → `care.config.ts`)
 - **Formatting**: Double quotes, 2-space indent, semicolons required
 - **Imports**: Order by 3rd-party → library → CAREUI → UI → components → hooks → utils → relative. Prettier plugin auto-sorts on format.
 - **Types**: Use `interface` for objects, avoid `any`, prefer maps over enums
