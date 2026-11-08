@@ -164,7 +164,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ## Configuration Files & Environment
 
-- `.env` -- environment variables (not committed)
+- `.env` -- environment variables
 - `.env.docker` -- Docker environment template
 - `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 - `care.config.ts` -- application configuration
