@@ -18,7 +18,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 
 ## UI Component System
 - shadcn/ui components: Primary UI - Button, Card, Badge, etc. from `@/components/ui/`
-- Healthcare-specific: CAREUI custom - Calendar, WeekdayCheckbox, Zoom from `@/CAREUI/`
+- Healthcare-specific: CAREUI custom - Calendar, WeekdayCheckbox from `@/CAREUI/`
 - Button variants: Use `buttonVariants` from `@/components/ui/button` with CVA patterns
 - Card structure: Follow `<Card><CardHeader>` pattern for consistent layouts
 
