@@ -118,7 +118,7 @@ Organize legibility findings by severity so the most important ones lead:
 **`Convention` (repo style)**
 
 - Violates a documented pattern in `CLAUDE.md` or the repo's conventions
-- Example: user-facing strings must use i18next keys, per `CLAUDE.md`'s _Code Style Guidelines_
+- Example: user-facing strings must use i18next keys, per `AGENTS.md`'s _Code Style Guidelines_
 - Fix is straightforward once the rule is known
 
 **`Polish` (optional — advisory only)**
