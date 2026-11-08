@@ -230,7 +230,6 @@ JWT tokens in localStorage. `AuthUserProvider` handles login/logout, token refre
 
 When working autonomously on this codebase, follow this sequence:
 
-6. **For i18n:** Add English strings to `public/locale/en.json`
 7. **For writing tests:** Read `tests/PLAYWRIGHT_GUIDE.md` — it contains complete patterns for all form interactions, selectors, assertions, and helpers
 
 ### Quick verification cycle
