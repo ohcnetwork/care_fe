@@ -12,7 +12,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 
 ## Component Architecture Patterns
 - Healthcare domain: Feature-based organization - Components grouped by Patient/, Facility/, Medication/, etc.
-- React 19.1.1 hooks: Functional components only - Use React 19.1.1 hooks pattern
+- React 19.2.7 hooks: Functional components only - Use React 19.2.7 hooks pattern
 - TypeScript interfaces: Props interfaces - Always define PatientInfoCardProps, etc.
 - Handle prefix: Event handlers - handleSubmit, handleTagsUpdate, handlePatientSelect
 
