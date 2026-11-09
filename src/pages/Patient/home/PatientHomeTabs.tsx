@@ -58,7 +58,7 @@ export default function PatientHomeTabs({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <div className="overflow-x-auto border-b border-border">
+      <div className="border-b border-border">
         <TabsList variant="line">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.id} value={tab.id}>
