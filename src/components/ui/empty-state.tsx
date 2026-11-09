@@ -8,7 +8,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { cn } from "@/lib/utils";
 
 export interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -37,7 +36,7 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <Empty className={cn("border p-6", className)}>
+    <Empty className={className}>
       <EmptyHeader>
         {icon && <EmptyMedia variant="icon">{icon}</EmptyMedia>}
         <EmptyTitle>{title}</EmptyTitle>
