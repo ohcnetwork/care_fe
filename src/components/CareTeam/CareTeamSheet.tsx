@@ -12,9 +12,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -205,14 +205,14 @@ export function CareTeamSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="w-full sm:max-w-3xl pr-0">
-        <SheetHeader className="space-y-1 mr-2">
-          <SheetTitle className="text-xl font-semibold">
+      <SheetContent size="lg">
+        <SheetHeader>
+          <SheetTitle>
             {canWrite ? t("manage_care_team") : t("view_care_team")}
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="h-full my-6 pb-12 pr-6">
+        <SheetBody>
           <div className="space-y-6">
             <FacilityOrganizationSelector
               singleSelection={true}
@@ -359,7 +359,7 @@ export function CareTeamSheet({
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </SheetBody>
 
         <ConfirmActionDialog
           open={!!memberToRemove}

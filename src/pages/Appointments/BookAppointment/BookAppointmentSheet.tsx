@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAppointmentReferral } from "@/components/Referral/useAppointmentReferral";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -47,41 +48,44 @@ export default function BookAppointmentSheet({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
+        size="full"
         aria-describedby={undefined}
-        className="md:w-[90%] max-w-none! h-full overflow-y-auto"
+        className="md:w-[90%] overflow-hidden"
       >
         <SheetHeader>
           <SheetTitle>{t("book_appointment")}</SheetTitle>
         </SheetHeader>
-        <Tabs defaultValue="appointment">
-          <div className="max-w-full overflow-x-auto pb-1">
-            <TabsList variant="line">
-              <TabsTrigger value="appointment">
-                {t("book_appointment")}
-              </TabsTrigger>
-              <TabsTrigger value="encounter">{t("bookings")}</TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent
-            value="appointment"
-            className="flex lg:flex-row gap-4 mt-2"
-          >
-            <BookAppointmentDetails
-              patientId={patientId}
-              onSuccess={() => {
-                setIsOpen(false);
-                onSuccess?.();
-              }}
-            />
-          </TabsContent>
-          <TabsContent value="encounter">
-            <BookingsList
-              patientId={patientId}
-              facilityId={facilityId ?? ""}
-              appointmentQueryParams={referralContext.successQueryParams}
-            />
-          </TabsContent>
-        </Tabs>
+        <SheetBody>
+          <Tabs defaultValue="appointment">
+            <div className="max-w-full overflow-x-auto pb-1">
+              <TabsList variant="line">
+                <TabsTrigger value="appointment">
+                  {t("book_appointment")}
+                </TabsTrigger>
+                <TabsTrigger value="encounter">{t("bookings")}</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent
+              value="appointment"
+              className="flex lg:flex-row gap-4 mt-2"
+            >
+              <BookAppointmentDetails
+                patientId={patientId}
+                onSuccess={() => {
+                  setIsOpen(false);
+                  onSuccess?.();
+                }}
+              />
+            </TabsContent>
+            <TabsContent value="encounter">
+              <BookingsList
+                patientId={patientId}
+                facilityId={facilityId ?? ""}
+                appointmentQueryParams={referralContext.successQueryParams}
+              />
+            </TabsContent>
+          </Tabs>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

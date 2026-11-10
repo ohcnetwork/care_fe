@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -48,11 +49,11 @@ export function EditDiscountCodeSheet({
           <PencilIcon className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-md">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("edit_discount_code")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <DiscountCodeForm
             defaultValues={code}
             onSubmit={(data) => {
@@ -75,7 +76,7 @@ export function EditDiscountCodeSheet({
               });
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

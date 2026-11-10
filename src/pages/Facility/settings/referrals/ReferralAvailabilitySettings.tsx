@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/item";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -454,8 +455,8 @@ export default function ReferralAvailabilitySettings({
           if (!open) setEditingId(null);
         }}
       >
-        <SheetContent className="w-full overflow-y-auto bg-background text-foreground sm:max-w-2xl">
-          <SheetHeader className="mb-6">
+        <SheetContent size="lg" className="overflow-hidden">
+          <SheetHeader>
             <SheetTitle className="text-foreground">
               {t(
                 editingId === "new"
@@ -475,14 +476,18 @@ export default function ReferralAvailabilitySettings({
               onCancel={() => setEditingId(null)}
             />
           ) : detailQuery.isLoading ? (
-            <CardListSkeleton count={3} />
+            <SheetBody>
+              <CardListSkeleton count={3} />
+            </SheetBody>
           ) : detailQuery.isError ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <FieldError>{t("referral_availability_load_error")}</FieldError>
-              <Button variant="outline" onClick={() => detailQuery.refetch()}>
-                {t("retry")}
-              </Button>
-            </div>
+            <SheetBody>
+              <div className="flex flex-wrap items-center gap-3">
+                <FieldError>{t("referral_availability_load_error")}</FieldError>
+                <Button variant="outline" onClick={() => detailQuery.refetch()}>
+                  {t("retry")}
+                </Button>
+              </div>
+            </SheetBody>
           ) : (
             detailQuery.data && (
               <ReferralAvailabilityForm
