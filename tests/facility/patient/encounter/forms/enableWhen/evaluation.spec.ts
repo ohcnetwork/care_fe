@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+import { findInvalidQuestions } from "../../../../../../src/components/QuestionnaireV2/builder/saveValidation";
 import {
   buildLinkIndex,
   isQuestionEnabledInState,
 } from "../../../../../../src/components/QuestionnaireV2/form/engine/store";
+import { circularConditionQuestionIds } from "../../../../../../src/components/QuestionnaireV2/shared/circularConditions";
 import type { QuestionnaireResponse } from "../../../../../../src/types/questionnaire/form";
 import type { Question } from "../../../../../../src/types/questionnaire/question";
-import { findInvalidQuestions } from "../../../../../../src/components/QuestionnaireV2/builder/saveValidation";
-import { circularConditionQuestionIds } from "../../../../../../src/components/QuestionnaireV2/shared/circularConditions";
 
 function booleanQuestion(id: string, controllers: string[] = []): Question {
   return {
@@ -23,7 +23,9 @@ function booleanQuestion(id: string, controllers: string[] = []): Question {
   };
 }
 
-function answered(questions: Question[]): Record<string, QuestionnaireResponse> {
+function answered(
+  questions: Question[],
+): Record<string, QuestionnaireResponse> {
   return Object.fromEntries(
     questions.map((question) => [
       question.id,
@@ -128,10 +130,7 @@ test("group conditions cannot depend on their own descendants", () => {
 
 test("a large cyclic component is detected without enumerating its paths", () => {
   const questions = Array.from({ length: 30 }, (_, index) =>
-    booleanQuestion(
-      `${index}`,
-      [`${(index + 1) % 30}`, `${(index + 2) % 30}`],
-    ),
+    booleanQuestion(`${index}`, [`${(index + 1) % 30}`, `${(index + 2) % 30}`]),
   );
   expect(circularConditionQuestionIds(questions)).toEqual(
     new Set(questions.map((question) => question.id)),

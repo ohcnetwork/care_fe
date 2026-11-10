@@ -1082,7 +1082,7 @@ const AppointmentActions = ({
               onOpenChange={setIsRescheduleReasonOpen}
             >
               <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
-                <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:place-items-stretch">
+                <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
                   <AlertDialogTitle>
                     {t("reschedule_appointment")}
                   </AlertDialogTitle>
@@ -1210,7 +1210,7 @@ const AppointmentActions = ({
       ) && (
         <AlertDialog open={isNoShowOpen} onOpenChange={setIsNoShowOpen}>
           <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
-            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:place-items-stretch">
+            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
               <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
               <Label>{t("note")}</Label>
               <RichTextEditor
@@ -1254,7 +1254,7 @@ const AppointmentActions = ({
       {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
         <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
           <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
-            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:place-items-stretch">
+            <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
               <AlertDialogTitle>{t("cancel_appointment")}</AlertDialogTitle>
               <Label>{t("note")}</Label>
               <RichTextEditor
@@ -1292,7 +1292,7 @@ const AppointmentActions = ({
       {/* Mark as Entered in Error */}
       <AlertDialog open={isErrorOpen} onOpenChange={setIsErrorOpen}>
         <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
-          <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:place-items-stretch">
+          <AlertDialogHeader className="min-w-0 place-items-stretch text-left sm:group-data-[size=default]/alert-dialog-content:place-items-stretch">
             <AlertDialogTitle>{t("mark_as_entered_in_error")}</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <Alert variant="destructive" className="mt-4">
