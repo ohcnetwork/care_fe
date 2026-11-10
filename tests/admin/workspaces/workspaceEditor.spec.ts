@@ -99,8 +99,12 @@ async function addSection(page: Page, column: string, label: string) {
   await expect(picker).not.toBeVisible();
 }
 
+// The sheet is titled with the section's widget name, so find it by the
+// remove action that only the section settings sheet offers.
 function sectionSettings(page: Page) {
-  return page.getByRole("dialog", { name: "Section settings", exact: true });
+  return page.getByRole("dialog").filter({
+    has: page.getByRole("button", { name: "Remove section", exact: true }),
+  });
 }
 
 async function openSectionSettings(page: Page, name: string) {
