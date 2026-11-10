@@ -17,6 +17,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -39,6 +40,7 @@ import {
   QUESTIONNAIRE_STATUSES,
   QuestionStatus,
   QuestionnaireScope,
+  SUBJECT_TYPES_FOR_CONTEXT,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import query from "@/Utils/request/query";
@@ -81,6 +83,7 @@ export function QuestionnaireListPage({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         title: qParams.search,
         status: qParams.status,
+        subject_type: qParams.subject_type,
         facility: scope.facilityId,
         auth_context: scope.authContext,
       },
@@ -136,6 +139,14 @@ export function QuestionnaireListPage({
           />
         </div>
 
+        <FilterSelect
+          value={qParams.subject_type || ""}
+          onValueChange={(subject_type) => updateQuery({ subject_type })}
+          options={SUBJECT_TYPES_FOR_CONTEXT[scope.authContext]}
+          label={t("subject_type")}
+          onClear={() => updateQuery({ subject_type: undefined })}
+        />
+
         {canWriteQuestionnaire && (
           <div className="flex w-full flex-wrap gap-2 md:ml-auto md:w-auto">
             <Button variant="outline" onClick={() => setImportOpen(true)}>
@@ -170,15 +181,15 @@ export function QuestionnaireListPage({
         <div className="hidden md:block">
           <Table className="table-fixed">
             <TableHeader>
-              <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead className="h-8 w-[30%] text-xs font-medium text-gray-500">
+              <TableRow>
+                <TableHead className="w-2/6 bg-secondary">
                   {t("title")}
                 </TableHead>
-                <TableHead className="h-8 w-[50%] text-xs font-medium text-gray-500">
-                  {t("description")}
+                <TableHead className="w-1/6 bg-secondary">
+                  {t("subject_type")}
                 </TableHead>
-                <TableHead className="h-8 w-[20%] text-xs font-medium text-gray-500">
-                  {t("slug")}
+                <TableHead className="w-4/6 bg-secondary">
+                  {t("description")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -203,6 +214,11 @@ export function QuestionnaireListPage({
                   <TableCell className="truncate font-medium">
                     {questionnaire.title}
                   </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="font-normal">
+                      {t(questionnaire.subject_type)}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-gray-500">
                     <div className="flex items-center justify-between gap-2">
                       <span className="min-w-0 flex-1 truncate">
@@ -221,14 +237,6 @@ export function QuestionnaireListPage({
                         {t("see_details")}
                       </Button>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className="max-w-full truncate font-normal"
-                    >
-                      {questionnaire.slug}
-                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -252,7 +260,7 @@ export function QuestionnaireListPage({
                   {questionnaire.description}
                 </p>
                 <Badge variant="secondary" className="mt-2 font-normal">
-                  {questionnaire.slug}
+                  {t(questionnaire.subject_type)}
                 </Badge>
               </Link>
             </Button>
