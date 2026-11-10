@@ -411,7 +411,7 @@ export function ResourceCategoryList<
       <div className="mb-4">
         {/* Breadcrumb Navigation */}
 
-        <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
+        <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4 sm:flex-wrap">
           <div className="flex flex-col items-start space-x-2">
             <h1 className="text-2xl font-bold text-gray-700">{baseTitle}</h1>
             <ResourceCategoryBreadcrumb
