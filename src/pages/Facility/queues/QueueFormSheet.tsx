@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -20,13 +21,16 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
@@ -57,6 +61,8 @@ interface QueueFormSheetProps {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   initialDate?: Date;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function QueueFormSheet({
@@ -67,9 +73,13 @@ export default function QueueFormSheet({
   trigger,
   onSuccess,
   initialDate,
+  open,
+  onOpenChange,
 }: QueueFormSheetProps) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = onOpenChange ?? setInternalOpen;
   const queryClient = useQueryClient();
 
   const isEditMode = Boolean(queueId);
@@ -98,7 +108,7 @@ export default function QueueFormSheet({
     if (queue && isEditMode) {
       form.reset({
         name: queue.name,
-        date: new Date(queue.date),
+        date: parseISO(queue.date),
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -166,15 +176,17 @@ export default function QueueFormSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="size-4 mr-2" />
-            {isEditMode ? t("edit") : t("create_queue")}
-          </Button>
-        )}
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      {(trigger || open === undefined) && (
+        <SheetTrigger asChild>
+          {trigger || (
+            <Button>
+              <Plus className="size-4 mr-2" />
+              {isEditMode ? t("edit") : t("create_queue")}
+            </Button>
+          )}
+        </SheetTrigger>
+      )}
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isEditMode ? t("edit_queue") : t("create_queue")}
@@ -186,78 +198,78 @@ export default function QueueFormSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {isEditMode && isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6 mt-6"
-            >
-              {/* Queue Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("queue_name")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("enter_queue_name")}
-                        {...field}
-                        autoFocus
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <SheetBody>
+          {isEditMode && isLoading ? (
+            <FormSkeleton rows={1} />
+          ) : (
+            <Form {...form}>
+              <form id="queue-form" onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-6">
+                  {/* Queue Name */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("queue_name")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("enter_queue_name")}
+                            {...field}
+                            autoFocus
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Date - Only show in create mode */}
-              {!isEditMode && (
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("date")}</FormLabel>
-                      <FormControl>
-                        <DatePicker
-                          date={field.value}
-                          onChange={field.onChange}
-                          disabled={(date) =>
-                            dayjs(date).isBefore(dayjs(), "day")
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  {/* Date - Only show in create mode */}
+                  {!isEditMode && (
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("date")}</FormLabel>
+                          <FormControl>
+                            <DatePicker
+                              date={field.value}
+                              onChange={field.onChange}
+                              disabled={(date) =>
+                                dayjs(date).isBefore(dayjs(), "day")
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              )}
+                </div>
+              </form>
+            </Form>
+          )}
+        </SheetBody>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isPending || !form.formState.isDirty}
-                className="w-full"
-              >
-                {isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    {isEditMode ? t("updating") : t("creating")}
-                  </>
-                ) : isEditMode ? (
-                  t("update_queue")
-                ) : (
-                  t("create_queue")
-                )}
-              </Button>
-            </form>
-          </Form>
-        )}
+        <SheetFooter>
+          <Button
+            type="submit"
+            form="queue-form"
+            disabled={isLoading || isPending || !form.formState.isDirty}
+          >
+            {isPending ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                {isEditMode ? t("updating") : t("creating")}
+              </>
+            ) : isEditMode ? (
+              t("update_queue")
+            ) : (
+              t("create_queue")
+            )}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

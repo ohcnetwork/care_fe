@@ -4,7 +4,10 @@ import { Check, Search } from "lucide-react";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { encounterListFiltersAtom } from "@/atoms/encounterFilterAtom";
+import {
+  encounterFilterStorageKey,
+  encounterListFiltersAtom,
+} from "@/atoms/encounterFilterAtom";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -40,6 +43,7 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/components/ui/popover";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import Page from "@/components/Common/Page";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -159,8 +163,11 @@ export function EncounterList({
     ],
   });
   const { t } = useTranslation();
-  const [, setSavedFilters] = useAtom(encounterListFiltersAtom);
-  const hasRestoredFilters = useRef(false);
+  const user = useAuthUser();
+  const filterScope = `${user.id}:${facilityId}`;
+  const storageKey = encounterFilterStorageKey("list", filterScope);
+  const [, setSavedFilters] = useAtom(encounterListFiltersAtom(filterScope));
+  const hasRestoredFilters = useRef<string | null>(null);
   const hasAppliedDefaultStatus = useRef(false);
   const [searchWith, setSearchWith] = useState<SearchWith>(
     qParams.external_identifier
@@ -296,8 +303,8 @@ export function EncounterList({
 
   // Restore filters from sessionStorage on mount AND set default dates if needed
   useEffect(() => {
-    if (hasRestoredFilters.current) return;
-    hasRestoredFilters.current = true;
+    if (hasRestoredFilters.current === storageKey) return;
+    hasRestoredFilters.current = storageKey;
 
     const urlParams = new URLSearchParams(window.location.search);
     const restoredParams: Record<string, string | undefined> = {};
@@ -313,7 +320,7 @@ export function EncounterList({
 
     if (!hasUrlFilters) {
       try {
-        const stored = sessionStorage.getItem("encounter_list_filters");
+        const stored = sessionStorage.getItem(storageKey);
         if (stored) {
           const filters = JSON.parse(stored);
           if (filters.status) restoredParams.status = filters.status;
@@ -358,7 +365,7 @@ export function EncounterList({
       updateQuery(restoredParams);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey]);
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],

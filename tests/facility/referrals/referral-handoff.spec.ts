@@ -355,7 +355,7 @@ async function completeReferralHandoff(
           `/facility/${sourceFacilityId}/patient/${patientId}/encounter/${encounterId}/referrals`,
         );
         await senderPage
-          .getByRole("button", { name: "New referral", exact: true })
+          .getByRole("button", { name: "New Referral", exact: true })
           .click();
         const creation = senderPage.getByRole("dialog", {
           name: "Request form",
@@ -688,9 +688,11 @@ async function completeReferralHandoff(
           name: "Book Appointment",
           exact: true,
         });
-        await expect(
-          booking.getByPlaceholder("Type the reason for visit"),
-        ).toHaveValue(fixture.title);
+        const reason = booking.getByRole("textbox", {
+          name: /reason for visit/i,
+        });
+        await expect(reason).toBeEditable();
+        await expect(reason).toHaveText(fixture.title);
         await booking
           .getByRole("radio", { name: "Practitioner", exact: true })
           .click();

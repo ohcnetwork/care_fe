@@ -110,7 +110,7 @@ export default function PatientRouter() {
         >
           <BrowserWarning />
           <WorkspaceHeader patient />
-          <div className="min-w-0 p-4" data-cui-page>
+          <div className="min-w-0 px-4 pb-4" data-cui-page>
             <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
               {pages}
             </ErrorBoundary>

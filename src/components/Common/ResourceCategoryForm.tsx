@@ -22,8 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -73,7 +75,13 @@ export function ResourceCategoryForm({
     title: z.string().min(1, t("field_required")),
     slug_value: slugValueSchema(),
     description: z.string().optional(),
-    resource_sub_type: z.enum(ResourceCategorySubType),
+    resource_sub_type: z
+      .enum(ResourceCategorySubType)
+      .refine(
+        (value) =>
+          value.startsWith(`${resourceType}:`) || value.startsWith("all:"),
+        t("category_sub_type_unavailable"),
+      ),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -166,6 +174,10 @@ export function ResourceCategoryForm({
     },
   });
 
+  const selectedSubType = form.watch("resource_sub_type");
+  const hasValidSubType =
+    formSchema.shape.resource_sub_type.safeParse(selectedSubType).success;
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const payload: ResourceCategoryCreate | ResourceCategoryUpdate = {
       title: values.title,
@@ -188,8 +200,10 @@ export function ResourceCategoryForm({
   if (isLoadingCategory) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent className="w-[400px] sm:w-[540px]">
-          <FormSkeleton rows={10} />
+        <SheetContent size="md">
+          <SheetBody>
+            <FormSkeleton rows={10} />
+          </SheetBody>
         </SheetContent>
       </Sheet>
     );
@@ -197,7 +211,7 @@ export function ResourceCategoryForm({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-md">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>
             {isEditing ? t("edit_category") : t("create_category")}
@@ -210,110 +224,124 @@ export function ResourceCategoryForm({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("name")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("enter_category_title")}
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        if (!isEditing) {
-                          form.setValue(
-                            "slug_value",
-                            generateSlugValue(e.target.value),
-                            {
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <SheetBody>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("name")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("enter_category_title")}
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (!isEditing) {
+                              form.setValue(
+                                "slug_value",
+                                generateSlugValue(e.target.value),
+                                {
+                                  shouldValidate: true,
+                                },
+                              );
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="slug_value"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("slug")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("enter_category_slug")}
+                          {...field}
+                          onChange={(e) => {
+                            const sanitizedValue = e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9_-]/g, "");
+                            form.setValue("slug_value", sanitizedValue, {
                               shouldValidate: true,
-                            },
-                          );
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                              shouldDirty: true,
+                            });
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t("slug_format_message")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="slug_value"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("slug")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t("enter_category_slug")}
-                      {...field}
-                      onChange={(e) => {
-                        const sanitizedValue = e.target.value
-                          .toLowerCase()
-                          .replace(/[^a-z0-9_-]/g, "");
-                        form.setValue("slug_value", sanitizedValue, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>{t("slug_format_message")}</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("description")}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t("enter_category_description")}
+                          className="min-h-[80px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t("category_description_help")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("description")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t("enter_category_description")}
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {t("category_description_help")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="resource_sub_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("resource_sub_type")}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={hasValidSubType ? field.value : ""}
+                      >
+                        <ResourceSubTypePicker
+                          resourceType={resourceType}
+                          onValueChange={field.onChange}
+                          value={hasValidSubType ? field.value : undefined}
+                        />
+                      </Select>
+                      <FormDescription>
+                        {hasValidSubType
+                          ? t("resource_sub_type_help")
+                          : t("category_sub_type_unavailable")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </SheetBody>
 
-            <FormField
-              control={form.control}
-              name="resource_sub_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("resource_sub_type")}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <ResourceSubTypePicker
-                      resourceType={resourceType}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    />
-                  </Select>
-                  <FormDescription>
-                    {t("resource_sub_type_help")}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-2">
+            <SheetFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || !hasValidSubType}>
                 {isLoading && (
                   <CareIcon
                     icon="l-spinner"
@@ -322,7 +350,7 @@ export function ResourceCategoryForm({
                 )}
                 {isEditing ? t("update_category") : t("create_category")}
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

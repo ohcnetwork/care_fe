@@ -82,6 +82,8 @@ CareUI composites also supply Combobox, Filters, Pagination, Kbd, Spinner, and E
 
 The imported Filters component exposes custom-renderer open state so clinical pickers open after adding a filter, plus per-field clear permissions and layout classes. Its select fields use single selection and multiselect fields use multiple selection. Preserve these adaptations when refreshing registry source. Questionnaire ChoiceChipGroup similarly supplies one shared RadioGroup for keyboard navigation while retaining optional-answer clearing.
 
+Questionnaire visibility evaluates root answers and controller ancestry. Circular dependencies (including a group depending on its own descendant) are configuration errors: the builder blocks saving them, and previously saved forms display an alert and disable the circular questions. Submission is blocked for the entire fill session if any form has circular conditions, preserving every form's draft rather than silently omitting affected answers. Cycle detection runs when the link index is built; per-evaluation memoization then keeps overlapping conditional dependencies bounded without reusing stale answers.
+
 - `src/CAREUI/` — Custom healthcare icon library, use `lucide-react` unless you are explicitly asked to use CAREUI icons.
 - Forms use `react-hook-form` + `zod` validation with the custom `<Form>` component
 

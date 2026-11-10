@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -516,45 +516,40 @@ export function LocationSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent className="w-full sm:max-w-3xl pr-2 pl-3">
-          <SheetHeader className="space-y-1 px-1">
-            <SheetTitle className="text-sm font-semibold">
-              {t("update_location")}
-            </SheetTitle>
+        <SheetContent size="xl" className="overflow-hidden">
+          <SheetHeader>
+            <SheetTitle>{t("update_location")}</SheetTitle>
           </SheetHeader>
 
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => setTab(value as "assign" | "history")}
-            className="mt-2"
-          >
-            <div className="max-w-full overflow-x-auto pb-1">
-              <TabsList variant="line">
-                {!readOnly && (
-                  <TabsTrigger value="assign">
-                    {t("assign_location")}
+          <SheetBody>
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setTab(value as "assign" | "history")}
+            >
+              <div className="max-w-full overflow-x-auto pb-1">
+                <TabsList variant="line">
+                  {!readOnly && (
+                    <TabsTrigger value="assign">
+                      {t("assign_location")}
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger value="history">
+                    {t("location_history")}
                   </TabsTrigger>
-                )}
-                <TabsTrigger value="history">
-                  {t("location_history")}
-                </TabsTrigger>
-              </TabsList>
-            </div>
+                </TabsList>
+              </div>
 
-            {!readOnly && (
-              <TabsContent value="assign" className="mt-2">
-                <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
+              {!readOnly && (
+                <TabsContent value="assign" className="mt-2">
                   {renderScreen()}
-                </ScrollArea>
-              </TabsContent>
-            )}
+                </TabsContent>
+              )}
 
-            <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
+              <TabsContent value="history" className="mt-2">
                 <LocationHistoryComponent history={history} />
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </SheetBody>
         </SheetContent>
       </Sheet>
 

@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -113,7 +114,7 @@ export default function ChangeAccountSheet({
         if (!isOpen) setSelectedAccountId(null);
       }}
     >
-      <SheetContent className="sm:max-w-md">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("change_account")}</SheetTitle>
           <SheetDescription>
@@ -123,81 +124,85 @@ export default function ChangeAccountSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              {t("selected_items")} ({chargeItems.length})
-            </p>
-            <div className="max-h-32 overflow-y-auto space-y-1 rounded-md border p-2">
-              {chargeItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="text-sm text-gray-600 flex justify-between"
-                >
-                  <span className="truncate">{item.title}</span>
-                  <MonetaryDisplay amount={item.total_price} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              {t("select_target_account")}
-            </p>
-            {isLoading ? (
-              <TableSkeleton count={3} />
-            ) : !accounts?.length ? (
-              <EmptyState
-                icon={
-                  <CareIcon icon="l-user" className="text-primary size-6" />
-                }
-                title={t("no_other_accounts_available")}
-              />
-            ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {accounts.map((account) => (
-                  <Button
-                    variant="outline"
-                    key={account.id}
-                    type="button"
-                    className={cn(
-                      "h-auto block whitespace-normal",
-                      `w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
-                        selectedAccountId === account.id
-                          ? "border-primary bg-primary/5 ring-1 ring-primary"
-                          : "border-gray-200"
-                      }`,
-                    )}
-                    onClick={() => setSelectedAccountId(account.id)}
+        <SheetBody>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">
+                {t("selected_items")} ({chargeItems.length})
+              </p>
+              <div className="max-h-32 overflow-y-auto space-y-1 rounded-md border p-2">
+                {chargeItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="text-sm text-gray-600 flex justify-between"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">
-                        {account.name}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
-                          {t(account.status)}
-                        </Badge>
-                        <Badge
-                          variant={
-                            ACCOUNT_BILLING_STATUS_COLORS[
-                              account.billing_status
-                            ]
-                          }
-                        >
-                          {t(account.billing_status)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </Button>
+                    <span className="truncate">{item.title}</span>
+                    <MonetaryDisplay amount={item.total_price} />
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <SheetFooter className="pt-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">
+                {t("select_target_account")}
+              </p>
+              {isLoading ? (
+                <TableSkeleton count={3} />
+              ) : !accounts?.length ? (
+                <EmptyState
+                  icon={
+                    <CareIcon icon="l-user" className="text-primary size-6" />
+                  }
+                  title={t("no_other_accounts_available")}
+                />
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {accounts.map((account) => (
+                    <Button
+                      variant="outline"
+                      key={account.id}
+                      type="button"
+                      className={cn(
+                        "h-auto block whitespace-normal",
+                        `w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
+                          selectedAccountId === account.id
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-gray-200"
+                        }`,
+                      )}
+                      onClick={() => setSelectedAccountId(account.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm">
+                          {account.name}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Badge
+                            variant={ACCOUNT_STATUS_COLORS[account.status]}
+                          >
+                            {t(account.status)}
+                          </Badge>
+                          <Badge
+                            variant={
+                              ACCOUNT_BILLING_STATUS_COLORS[
+                                account.billing_status
+                              ]
+                            }
+                          >
+                            {t(account.billing_status)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetBody>
+
+        <SheetFooter>
           <SheetClose asChild>
             <Button variant="outline" type="button">
               {t("cancel")}

@@ -78,6 +78,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { DateTimePicker } from "@/components/Common/DateTimePicker";
@@ -194,7 +195,7 @@ export function CreateInvoicePage({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: InvoiceStatus.draft,
-      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
+      payment_terms: careConfig.defaultPaymentTerms,
       note: "",
       issue_date: "",
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],

@@ -188,7 +188,7 @@ export default function DeviceShow({
 
   return (
     <div
-      className="min-w-0 space-y-6 text-neutral-950"
+      className="min-w-0 space-y-6 text-foreground pt-4"
       data-cy="device-detail-page"
     >
       <PageHeadTitle title={device.registered_name} />

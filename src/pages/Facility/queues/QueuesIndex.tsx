@@ -8,7 +8,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,7 @@ import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { queuePractitionerAtom } from "@/atoms/queuePractitionerAtom";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
-import { startOfDay } from "date-fns";
+import { parseISO } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
 import ManageServicePointSheet from "./ManageServicePointSheet";
@@ -78,6 +78,7 @@ function QueueRow({
   index,
 }: QueueRowProps) {
   const { t } = useTranslation();
+  const [editOpen, setEditOpen] = useState(false);
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
@@ -151,18 +152,10 @@ function QueueRow({
                 {t("open_queue_board")}
               </Link>
             </DropdownMenuItem>
-            <QueueFormSheet
-              facilityId={facilityId}
-              resourceType={resourceType}
-              resourceId={resourceId}
-              queueId={queue.id}
-              trigger={
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Pencil className="size-4 mr-2" />
-                  {t("edit_queue_name")}
-                </DropdownMenuItem>
-              }
-            />
+            <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+              <Pencil className="size-4 mr-2" />
+              {t("edit_queue_name")}
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setPrimary({})}
               disabled={queue.is_primary}
@@ -172,6 +165,14 @@ function QueueRow({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <QueueFormSheet
+          facilityId={facilityId}
+          resourceType={resourceType}
+          resourceId={resourceId}
+          queueId={queue.id}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
       </TableCell>
     </TableRow>
   );
@@ -315,7 +316,7 @@ export default function QueuesIndex({
 
   return (
     <Page title={t("token_queues")} hideTitleOnPage>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto">
         {/* Header Section - Date, Practitioner, Create Queue */}
         <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
           {/* Date Filter */}
@@ -324,7 +325,7 @@ export default function QueuesIndex({
               {t("date")}
             </label>
             <DatePicker
-              date={qParams.date ? new Date(qParams.date) : undefined}
+              date={qParams.date ? parseISO(qParams.date) : undefined}
               onChange={handleDateChange}
             />
           </div>
@@ -350,7 +351,7 @@ export default function QueuesIndex({
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
-              initialDate={startOfDay(qParams.date)}
+              initialDate={qParams.date ? parseISO(qParams.date) : undefined}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
                   <Plus className="size-4 mr-2" />
@@ -384,7 +385,9 @@ export default function QueuesIndex({
                     facilityId={facilityId}
                     resourceType={resourceType}
                     resourceId={effectiveResourceId}
-                    initialDate={startOfDay(qParams.date)}
+                    initialDate={
+                      qParams.date ? parseISO(qParams.date) : undefined
+                    }
                     trigger={
                       <Button disabled={isPast}>
                         <Plus className="size-4 mr-2" />

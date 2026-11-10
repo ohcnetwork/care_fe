@@ -1,8 +1,6 @@
 import "@/style/index.css";
 import "reactflow/dist/style.css";
 
-import * as Sentry from "@sentry/browser";
-
 import App from "@/App";
 import { AuthContextType, AuthUserContext } from "@/hooks/useAuthUser";
 import { initI18n } from "@/i18n";
@@ -20,6 +18,9 @@ declare global {
     __CORE_ENV__: typeof careConfig;
     __CARE_PLUGIN_RUNTIME__: { meta: PlugConfigMeta };
     AuthUserContext: Context<AuthContextType | null>;
+    // Provided by public/loading-screen.js until the pre-React screen is removed
+    __removeLoadingScreen?: (options?: { immediate?: boolean }) => void;
+    __holdLoadingScreen?: () => () => void;
   }
 }
 
@@ -30,13 +31,6 @@ window.__CORE_ENV__ = careConfig;
 
 if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
-}
-
-if (import.meta.env.PROD) {
-  Sentry.init({
-    environment: import.meta.env.MODE,
-    dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
-  });
 }
 
 function initApp() {

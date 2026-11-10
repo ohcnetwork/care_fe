@@ -32,8 +32,10 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -173,8 +175,8 @@ export function ImmunizationRecordSheet({
   const isEdit = !!target.record;
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto sm:max-w-xl">
-        <SheetHeader className="mb-4">
+      <SheetContent size="md">
+        <SheetHeader>
           <SheetTitle>
             {t(isEdit ? "immunization_edit_record" : "immunization_record")}
           </SheetTitle>
@@ -357,248 +359,94 @@ function ImmunizationRecordForm({
       <form
         noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-1 flex-col gap-5"
+        className="flex min-h-0 flex-1 flex-col"
       >
-        {!isEdit && linkable.length > 0 && (
-          <FormField
-            control={form.control}
-            name="recommendation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("immunization_for_recommendation")}</FormLabel>
-                <Select
-                  value={field.value}
-                  disabled={isPending}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    const next = recommendations.find(
-                      (item) => item.id === value,
-                    );
-                    const code = toCode(next?.codes?.[0]);
-                    if (code)
-                      form.setValue("code", code, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={NO_RECOMMENDATION}>
-                      {t("immunization_no_recommendation")}
-                    </SelectItem>
-                    {linkable.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {[
-                          codingsLabel(item.codes) ||
-                            t("immunization_unspecified_vaccine"),
-                          doseLabel(t, item),
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <FormField
-          control={form.control}
-          name="code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-required>{t("immunization_vaccine")}</FormLabel>
-              <FormControl>
-                <ValueSetSelect
-                  system="system-medication"
-                  value={field.value}
-                  onSelect={(code) => field.onChange(code)}
-                  placeholder={t("immunization_select_vaccine")}
-                  aria-label={t("immunization_vaccine")}
-                  disabled={isEdit || isPending}
-                  className="h-9 w-full justify-between text-left font-normal"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel aria-required>{t("status")}</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(isEdit ? IMMUNIZATION_STATUS : CREATE_STATUSES).map(
-                      (option) => (
-                        <SelectItem key={option} value={option}>
-                          {t(`immunization_status__${option}`)}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="occurrence"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel aria-required={status === "completed"}>
-                  {t(
-                    status === "not_done"
-                      ? "immunization_decision_date"
-                      : "immunization_administered_on",
-                  )}
-                </FormLabel>
-                <FormControl>
-                  <DateTimeInput
-                    name={field.name}
-                    ref={field.ref}
-                    onBlur={field.onBlur}
-                    value={field.value ?? ""}
-                    max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                    onDateChange={(value) => field.onChange(value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {status === "not_done" && (
-          <FormField
-            control={form.control}
-            name="reason"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel aria-required>
-                  {t("immunization_not_done_reason")}
-                </FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={t("immunization_select_reason")}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {IMMUNIZATION_NOT_DONE_REASONS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {t(`immunization_reason__${option}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <FormField
-          control={form.control}
-          name="historical"
-          render={({ field }) => (
-            <FormItem className="flex items-start gap-3 rounded-md border border-gray-200 p-3">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={(checked) =>
-                    field.onChange(checked === true)
-                  }
-                  className="mt-0.5"
-                />
-              </FormControl>
-              <div className="space-y-1">
-                <FormLabel>{t("immunization_historical")}</FormLabel>
-                <FormDescription>
-                  {t("immunization_historical_hint")}
-                </FormDescription>
-              </div>
-            </FormItem>
-          )}
-        />
-
-        {!isEdit && linked && status === "completed" && (
-          <FormField
-            control={form.control}
-            name="complete_recommendation"
-            render={({ field }) => (
-              <FormItem className="flex items-center gap-3">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    disabled={isPending}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked === true)
-                    }
-                  />
-                </FormControl>
-                <FormLabel className="font-normal">
-                  {t("immunization_mark_recommendation_complete")}
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
-
-        {status !== "not_done" && (
-          <section
-            className="space-y-4 border-t border-gray-100 pt-5"
-            aria-label={t("immunization_administration_details")}
-          >
-            <h3 className="text-sm font-semibold text-gray-900">
-              {t("immunization_administration_details")}
-            </h3>
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
+        <SheetBody>
+          <div className="flex flex-col gap-5">
+            {!isEdit && linkable.length > 0 && (
               <FormField
                 control={form.control}
-                name="dose_value"
+                name="recommendation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("immunization_dose_quantity")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
-                        step="any"
-                      />
-                    </FormControl>
+                    <FormLabel>
+                      {t("immunization_for_recommendation")}
+                    </FormLabel>
+                    <Select
+                      value={field.value}
+                      disabled={isPending}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const next = recommendations.find(
+                          (item) => item.id === value,
+                        );
+                        const code = toCode(next?.codes?.[0]);
+                        if (code)
+                          form.setValue("code", code, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={NO_RECOMMENDATION}>
+                          {t("immunization_no_recommendation")}
+                        </SelectItem>
+                        {linkable.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {[
+                              codingsLabel(item.codes) ||
+                                t("immunization_unspecified_vaccine"),
+                              doseLabel(t, item),
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            )}
+
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>
+                    {t("immunization_vaccine")}
+                  </FormLabel>
+                  <FormControl>
+                    <ValueSetSelect
+                      system="system-medication"
+                      value={field.value}
+                      onSelect={(code) => field.onChange(code)}
+                      placeholder={t("immunization_select_vaccine")}
+                      aria-label={t("immunization_vaccine")}
+                      disabled={isEdit || isPending}
+                      className="h-9 w-full justify-between text-left font-normal"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="dose_unit"
+                name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("immunization_dose_unit")}</FormLabel>
+                    <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -606,145 +454,314 @@ function ImmunizationRecordForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {DOSAGE_UNITS_CODES.map((unit) => (
-                          <SelectItem key={unit.code} value={unit.code}>
-                            {unit.display}
+                        {(isEdit ? IMMUNIZATION_STATUS : CREATE_STATUSES).map(
+                          (option) => (
+                            <SelectItem key={option} value={option}>
+                              {t(`immunization_status__${option}`)}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="occurrence"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required={status === "completed"}>
+                      {t(
+                        status === "not_done"
+                          ? "immunization_decision_date"
+                          : "immunization_administered_on",
+                      )}
+                    </FormLabel>
+                    <FormControl>
+                      <DateTimeInput
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value ?? ""}
+                        max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                        onDateChange={(value) => field.onChange(value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {status === "not_done" && (
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel aria-required>
+                      {t("immunization_not_done_reason")}
+                    </FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={t("immunization_select_reason")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {IMMUNIZATION_NOT_DONE_REASONS.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {t(`immunization_reason__${option}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="route"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("route")}</FormLabel>
-                    <FormControl>
-                      <ValueSetSelect
-                        system="system-route"
-                        value={field.value}
-                        onSelect={(code) => field.onChange(code)}
-                        placeholder={t("select_route")}
-                        aria-label={t("route")}
-                        disabled={isPending}
-                        className="h-9 w-full justify-between text-left font-normal"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="site"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("site")}</FormLabel>
-                    <FormControl>
-                      <ValueSetSelect
-                        system="system-body-site"
-                        value={field.value}
-                        onSelect={(code) => field.onChange(code)}
-                        placeholder={t("select_site")}
-                        aria-label={t("site")}
-                        disabled={isPending}
-                        className="h-9 w-full justify-between text-left font-normal"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            {!isEdit && !historical && (
-              <div className="grid gap-3 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="administered_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("immunization_administered_by")}</FormLabel>
-                      <UserSelector
-                        selected={field.value ?? undefined}
-                        onChange={field.onChange}
-                        onClear={() => field.onChange(null)}
-                        facilityId={facilityId}
-                        placeholder={t("select_user")}
-                        disabled={isPending}
-                      />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("location")}</FormLabel>
-                      <LocationSearch
-                        facilityId={facilityId}
-                        value={field.value}
-                        onSelect={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormItem>
-                  )}
-                />
-              </div>
             )}
+
             <FormField
               control={form.control}
-              name="is_subpotent"
+              name="historical"
               render={({ field }) => (
-                <FormItem className="flex items-center gap-3">
+                <FormItem className="flex items-start gap-3 rounded-md border border-gray-200 p-3">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={(checked) =>
                         field.onChange(checked === true)
                       }
+                      className="mt-0.5"
                     />
                   </FormControl>
-                  <FormLabel className="font-normal">
-                    {t("immunization_subpotent_dose")}
-                  </FormLabel>
+                  <div className="space-y-1">
+                    <FormLabel>{t("immunization_historical")}</FormLabel>
+                    <FormDescription>
+                      {t("immunization_historical_hint")}
+                    </FormDescription>
+                  </div>
                 </FormItem>
               )}
             />
-            {isSubpotent && (
+
+            {!isEdit && linked && status === "completed" && (
               <FormField
                 control={form.control}
-                name="subpotent_reason"
+                name="complete_recommendation"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("immunization_subpotent_reason")}</FormLabel>
+                  <FormItem className="flex items-center gap-3">
                     <FormControl>
-                      <Input {...field} />
+                      <Checkbox
+                        checked={field.value}
+                        disabled={isPending}
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                      />
                     </FormControl>
+                    <FormLabel className="font-normal">
+                      {t("immunization_mark_recommendation_complete")}
+                    </FormLabel>
                   </FormItem>
                 )}
               />
             )}
-          </section>
-        )}
 
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("note")}</FormLabel>
-              <FormControl>
-                <Textarea {...field} rows={3} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+            {status !== "not_done" && (
+              <section
+                className="space-y-4 border-t border-gray-100 pt-5"
+                aria-label={t("immunization_administration_details")}
+              >
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {t("immunization_administration_details")}
+                </h3>
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
+                  <FormField
+                    control={form.control}
+                    name="dose_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("immunization_dose_quantity")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            inputMode="decimal"
+                            min={0}
+                            step="any"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dose_unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("immunization_dose_unit")}</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {DOSAGE_UNITS_CODES.map((unit) => (
+                              <SelectItem key={unit.code} value={unit.code}>
+                                {unit.display}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                  <FormField
+                    control={form.control}
+                    name="route"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("route")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            system="system-route"
+                            value={field.value}
+                            onSelect={(code) => field.onChange(code)}
+                            placeholder={t("select_route")}
+                            aria-label={t("route")}
+                            disabled={isPending}
+                            className="h-9 w-full justify-between text-left font-normal"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="site"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("site")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            system="system-body-site"
+                            value={field.value}
+                            onSelect={(code) => field.onChange(code)}
+                            placeholder={t("select_site")}
+                            aria-label={t("site")}
+                            disabled={isPending}
+                            className="h-9 w-full justify-between text-left font-normal"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {!isEdit && !historical && (
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                    <FormField
+                      control={form.control}
+                      name="administered_by"
+                      render={({ field }) => (
+                        <FormItem className="min-w-0 [&_button]:min-w-0">
+                          <FormLabel>
+                            {t("immunization_administered_by")}
+                          </FormLabel>
+                          <UserSelector
+                            selected={field.value ?? undefined}
+                            onChange={field.onChange}
+                            onClear={() => field.onChange(null)}
+                            facilityId={facilityId}
+                            placeholder={t("select_user")}
+                            disabled={isPending}
+                          />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("location")}</FormLabel>
+                          <LocationSearch
+                            facilityId={facilityId}
+                            value={field.value}
+                            onSelect={field.onChange}
+                            disabled={isPending}
+                          />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+                <FormField
+                  control={form.control}
+                  name="is_subpotent"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked === true)
+                          }
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        {t("immunization_subpotent_dose")}
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                {isSubpotent && (
+                  <FormField
+                    control={form.control}
+                    name="subpotent_reason"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("immunization_subpotent_reason")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </section>
+            )}
 
-        <div className="mt-auto flex justify-end gap-2 border-t border-gray-100 pt-4">
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("note")}</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={3} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </SheetBody>
+
+        <SheetFooter>
           <Button
             type="button"
             variant="outline"
@@ -759,7 +776,7 @@ function ImmunizationRecordForm({
             )}
             {t(isEdit ? "save" : "immunization_save_record")}
           </Button>
-        </div>
+        </SheetFooter>
       </form>
     </Form>
   );

@@ -104,13 +104,13 @@ test.describe("Fill outline overlay", () => {
   }) => {
     await openOutline(page);
 
-    await test.step("rows are numbered and land on their question", async () => {
+    await test.step("rows use question titles and land on their question", async () => {
       const nav = outlineNav(page);
       await expect(nav).toBeVisible();
       const row = nav.getByRole("button", {
         name: /Medications taken \(repeats\)/,
       });
-      await expect(row).toContainText("21.");
+      await expect(row).toHaveAccessibleName("Medications taken (repeats)");
       await row.click();
       await expect(
         questionBlock(page, "Medications taken (repeats)"),
@@ -170,7 +170,7 @@ test.describe("Fill outline overlay", () => {
       nav.getByRole("button", { name: /Examination findings/ }),
     ).toBeVisible();
     const child = nav.getByRole("button", { name: /General appearance/ });
-    await expect(child).toContainText("12.1");
+    await expect(child).toHaveAccessibleName("General appearance");
     await child.click();
     await expect(questionBlock(page, "General appearance")).toBeInViewport();
   });
