@@ -426,4 +426,52 @@ test.describe("Schedule Template Management", () => {
       });
     });
   });
+
+  test("should not validate the number of slots when auto-fill is off", async ({
+    page,
+  }) => {
+    const testData = ScheduleTestDataFactory.createWeekdaySchedule();
+    const formPage = new ScheduleFormPage(page);
+    const cardPage = new ScheduleCardPage(page);
+    const slotCountInput = formPage.getSlotCountInput();
+
+    await test.step("Fill the template form with auto-fill enabled", async () => {
+      await page.getByRole("button", { name: "Create Template" }).click();
+      await formPage.fillTemplateName(testData.templateName);
+      await formPage.selectMidMonthDate("first", 1);
+      await formPage.selectWeekdays(testData.weekdays);
+      await formPage.selectMidMonthDate("second", 2);
+      await formPage.fillSessionDetails({
+        title: testData.sessionTitle,
+        startTime: testData.startTime,
+        endTime: testData.endTime,
+        patientsPerSlot: testData.patientsPerSlot,
+      });
+      await expect(slotCountInput).toHaveValue("1");
+    });
+
+    await test.step("Saving with an empty slot count shows an error", async () => {
+      await slotCountInput.clear();
+      await formPage.submitTemplate();
+      await expect(getFieldErrorMessage(slotCountInput)).toContainText(
+        "This field is required",
+      );
+    });
+
+    await test.step("Template is created once auto-fill is turned off", async () => {
+      await page
+        .getByRole("switch", { name: "Auto-fill slot duration" })
+        .click();
+      await expect(slotCountInput).toBeHidden();
+      await formPage.submitTemplate();
+      await expectToast(page, "Schedule template created successfully");
+      await page.getByRole("button", { name: "Next Month" }).click();
+      await cardPage.verifyCardContent(testData.templateName, {
+        sessionTitle: testData.sessionTitle,
+        displayTime: testData.displayTime,
+        slotDuration: "300",
+        numberOfSlots: SCHEDULE_CONSTANTS.DEFAULT_SLOT_COUNT,
+      });
+    });
+  });
 });

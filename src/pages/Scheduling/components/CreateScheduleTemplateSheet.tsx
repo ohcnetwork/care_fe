@@ -140,14 +140,7 @@ export default function CreateScheduleTemplateSheet({
                     message: t("field_required"),
                   }),
                 is_auto_fill: z.boolean().optional(),
-                num_of_slots: z
-                  .union([
-                    z.number().min(1, t("number_min_error", { min: 1 })),
-                    z.null(),
-                  ])
-                  .refine((val) => val !== null, {
-                    message: t("field_required"),
-                  }),
+                num_of_slots: z.number().nullable(),
               }),
               // Schema for open and closed types
               z.object({
@@ -181,7 +174,26 @@ export default function CreateScheduleTemplateSheet({
                 message: t("start_time_must_be_before_end_time"),
                 path: ["start_time"], // This will show error at the start_time field
               },
-            ),
+            )
+            .superRefine((data, ctx) => {
+              // The slot count only drives auto-fill, so skip it when auto-fill is off
+              if (data.slot_type !== "appointment" || !data.is_auto_fill) {
+                return;
+              }
+              if (data.num_of_slots === null) {
+                ctx.addIssue({
+                  code: "custom",
+                  message: t("field_required"),
+                  path: ["num_of_slots"],
+                });
+              } else if (data.num_of_slots < 1) {
+                ctx.addIssue({
+                  code: "custom",
+                  message: t("number_min_error", { min: 1 }),
+                  path: ["num_of_slots"],
+                });
+              }
+            }),
         )
         .min(1, t("schedule_sessions_min_error")),
     })

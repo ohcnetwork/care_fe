@@ -639,11 +639,7 @@ const NewAvailabilityCard = ({
         .array(z.number() as unknown as z.ZodType<DayOfWeek, DayOfWeek>)
         .min(1, t("schedule_weekdays_min_error")),
       is_auto_fill: z.boolean().optional(),
-      num_of_slots: z
-        .union([z.number().min(1, t("number_min_error", { min: 1 })), z.null()])
-        .refine((val) => val !== null, {
-          message: t("field_required"),
-        }),
+      num_of_slots: z.number().nullable(),
     })
     .refine(
       (data) => {
@@ -657,7 +653,24 @@ const NewAvailabilityCard = ({
         message: t("start_time_must_be_before_end_time"),
         path: ["start_time"], // This will show the error on the start_time field
       },
-    );
+    )
+    .superRefine((data, ctx) => {
+      // The slot count only drives auto-fill, so skip it when auto-fill is off
+      if (!data.is_auto_fill) return;
+      if (data.num_of_slots === null) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("field_required"),
+          path: ["num_of_slots"],
+        });
+      } else if (data.num_of_slots < 1) {
+        ctx.addIssue({
+          code: "custom",
+          message: t("number_min_error", { min: 1 }),
+          path: ["num_of_slots"],
+        });
+      }
+    });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
