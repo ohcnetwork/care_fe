@@ -925,15 +925,6 @@ const NewAvailabilityCard = ({
                                 {...field}
                                 value={field.value ?? ""}
                                 className="shadow-none"
-                                onBeforeInput={(e) => {
-                                  if (
-                                    /[eE+]/.test(
-                                      (e.nativeEvent as InputEvent).data ?? "",
-                                    )
-                                  ) {
-                                    e.preventDefault();
-                                  }
-                                }}
                                 onChange={(e) => {
                                   const value = e.target.valueAsNumber;
                                   field.onChange(isNaN(value) ? null : value);
