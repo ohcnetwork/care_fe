@@ -4,9 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { cn } from "@/lib/utils";
+
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface ArchivedBadgeProps {
+  className?: string;
   reason?: string;
   archivedBy?: Parameters<typeof formatName>[0];
   archivedAt?: string;
@@ -17,6 +20,7 @@ interface ArchivedBadgeProps {
  * reveals why, by whom and when the entry was archived.
  */
 export function ArchivedBadge({
+  className,
   reason,
   archivedBy,
   archivedAt,
@@ -48,7 +52,10 @@ export function ArchivedBadge({
     >
       <button
         type="button"
-        className="shrink-0 cursor-help rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className={cn(
+          "shrink-0 cursor-help rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          className,
+        )}
       >
         <Badge variant="neutral" size="sm">
           {t("archived")}

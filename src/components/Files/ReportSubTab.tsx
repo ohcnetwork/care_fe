@@ -135,7 +135,7 @@ export function ReportSubTab({
 
       <Frame spacing="sm" className="min-w-0">
         <FrameHeader className="flex-row flex-wrap items-center gap-2">
-          <InputGroup className="min-w-0 flex-1 bg-background sm:max-w-xs">
+          <InputGroup className="bg-background sm:w-auto sm:max-w-xs sm:flex-1">
             <InputGroupInput
               aria-label={t("search_reports")}
               placeholder={t("search_reports")}
@@ -221,7 +221,7 @@ export function ReportSubTab({
                   <TableHead className="hidden w-[16%] px-4 md:table-cell">
                     {t("date")}
                   </TableHead>
-                  <TableHead className="w-40 pr-4 text-right">
+                  <TableHead className="w-14 pr-4 text-right md:w-40">
                     <span className="sr-only">{t("actions")}</span>
                   </TableHead>
                 </TableRow>
@@ -239,11 +239,17 @@ export function ReportSubTab({
                         report.is_archived && "bg-muted/30",
                       )}
                     >
-                      <TableCell className="py-3 pl-4">
+                      <TableCell className="relative py-3 pl-4">
+                        <button
+                          type="button"
+                          onClick={() => handleView(report)}
+                          aria-label={`${t("view")} ${report.name}`}
+                          className="absolute inset-0 active:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring md:hidden"
+                        />
                         <div className="flex min-w-0 items-center gap-3">
                           <span
                             className={cn(
-                              "flex size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground",
+                              "hidden size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground md:flex",
                               report.is_archived && "opacity-60",
                             )}
                           >
@@ -264,21 +270,32 @@ export function ReportSubTab({
                               </span>
                               {report.is_archived && (
                                 <ArchivedBadge
+                                  className="hidden md:inline-flex"
                                   reason={report.archive_reason}
                                   archivedBy={report.archived_by}
                                   archivedAt={report.archived_datetime}
                                 />
                               )}
                             </div>
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground md:hidden">
-                              {[
-                                t(report.report_type),
-                                formatDateTime(
-                                  report.created_date,
-                                  "DD MMM YYYY",
-                                ),
-                              ].join(" · ")}
-                            </p>
+                            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground md:hidden">
+                              {report.is_archived && (
+                                <ArchivedBadge
+                                  className="relative z-10"
+                                  reason={report.archive_reason}
+                                  archivedBy={report.archived_by}
+                                  archivedAt={report.archived_datetime}
+                                />
+                              )}
+                              <span className="truncate">
+                                {[
+                                  t(report.report_type),
+                                  formatDateTime(
+                                    report.created_date,
+                                    "DD MMM YYYY",
+                                  ),
+                                ].join(" · ")}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -358,7 +375,12 @@ function ReportRowActions({
     // entries have no menu, so reserve the space the menu trigger takes.
     return (
       <div className="flex items-center justify-end gap-1.5">
-        <Button variant="outline" size="sm" onClick={onView}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onView}
+        >
           <Eye />
           {t("view")}
         </Button>
@@ -369,7 +391,12 @@ function ReportRowActions({
 
   return (
     <div className="flex items-center justify-end gap-1.5">
-      <Button variant="outline" size="sm" onClick={onView}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="hidden md:inline-flex"
+        onClick={onView}
+      >
         <Eye />
         {t("view")}
       </Button>

@@ -231,7 +231,7 @@ export const FilesPage = ({
 
       <Frame spacing="sm" className="min-w-0">
         <FrameHeader className="flex-row flex-wrap items-center gap-2">
-          <InputGroup className="min-w-0 flex-1 bg-background sm:max-w-xs">
+          <InputGroup className="bg-background sm:w-auto sm:max-w-xs sm:flex-1">
             <InputGroupInput
               id="search-by-filename"
               name="name"
@@ -296,7 +296,7 @@ export const FilesPage = ({
                   <TableHead className="hidden w-[14%] px-4 md:table-cell">
                     {t("date")}
                   </TableHead>
-                  <TableHead className="w-40 pr-4 text-right">
+                  <TableHead className="w-14 pr-4 text-right md:w-40">
                     <span className="sr-only">{t("actions")}</span>
                   </TableHead>
                 </TableRow>
@@ -309,6 +309,26 @@ export const FilesPage = ({
                   const uploadedBy = file.uploaded_by
                     ? formatName(file.uploaded_by)
                     : "";
+                  const isAudio = fileType === "AUDIO";
+                  const isPreviewable = fileManager.isPreviewable(file);
+                  const viewArchived = () => {
+                    setSelectedArchivedFile(file);
+                    setOpenArchivedFileDialog(true);
+                  };
+                  const play = () => {
+                    setSelectedAudioFile(file);
+                    setOpenAudioPlayerDialog(true);
+                  };
+                  const view = () => fileManager.viewFile(file, associatingId);
+                  // On mobile, tapping the row runs the row's main action
+                  // instead of showing inline buttons.
+                  const openFile = file.is_archived
+                    ? viewArchived
+                    : isAudio
+                      ? play
+                      : isPreviewable
+                        ? view
+                        : undefined;
 
                   return (
                     <TableRow
@@ -318,11 +338,19 @@ export const FilesPage = ({
                         file.is_archived && "bg-muted/30",
                       )}
                     >
-                      <TableCell className="py-3 pl-4">
+                      <TableCell className="relative py-3 pl-4">
+                        {openFile && (
+                          <button
+                            type="button"
+                            onClick={openFile}
+                            aria-label={`${t("view")} ${fileName}`}
+                            className="absolute inset-0 active:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring md:hidden"
+                          />
+                        )}
                         <div className="flex min-w-0 items-center gap-3">
                           <span
                             className={cn(
-                              "flex size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground",
+                              "hidden size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground md:flex",
                               file.is_archived && "opacity-60",
                             )}
                           >
@@ -343,21 +371,32 @@ export const FilesPage = ({
                               </span>
                               {file.is_archived && (
                                 <ArchivedBadge
+                                  className="hidden md:inline-flex"
                                   reason={file.archive_reason}
                                   archivedBy={file.archived_by}
                                   archivedAt={file.archived_datetime}
                                 />
                               )}
                             </div>
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground md:hidden">
-                              {[
-                                t(`file_type__${fileType.toLowerCase()}`),
-                                formatDateTime(
-                                  file.created_date,
-                                  "DD MMM YYYY",
-                                ),
-                              ].join(" · ")}
-                            </p>
+                            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground md:hidden">
+                              {file.is_archived && (
+                                <ArchivedBadge
+                                  className="relative z-10"
+                                  reason={file.archive_reason}
+                                  archivedBy={file.archived_by}
+                                  archivedAt={file.archived_datetime}
+                                />
+                              )}
+                              <span className="truncate">
+                                {[
+                                  t(`file_type__${fileType.toLowerCase()}`),
+                                  formatDateTime(
+                                    file.created_date,
+                                    "DD MMM YYYY",
+                                  ),
+                                ].join(" · ")}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -383,19 +422,11 @@ export const FilesPage = ({
                         <FileRowActions
                           file={file}
                           canEdit={canEdit}
-                          isAudio={fileType === "AUDIO"}
-                          isPreviewable={fileManager.isPreviewable(file)}
-                          onPlay={() => {
-                            setSelectedAudioFile(file);
-                            setOpenAudioPlayerDialog(true);
-                          }}
-                          onView={() =>
-                            fileManager.viewFile(file, associatingId)
-                          }
-                          onViewArchived={() => {
-                            setSelectedArchivedFile(file);
-                            setOpenArchivedFileDialog(true);
-                          }}
+                          isAudio={isAudio}
+                          isPreviewable={isPreviewable}
+                          onPlay={play}
+                          onView={view}
+                          onViewArchived={viewArchived}
                           onDownload={() =>
                             fileManager.downloadFile(file, associatingId)
                           }
@@ -472,7 +503,12 @@ function FileRowActions({
     // entries have no menu, so reserve the space the menu trigger takes.
     return (
       <div className="flex items-center justify-end gap-1.5">
-        <Button variant="outline" size="sm" onClick={onViewArchived}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onViewArchived}
+        >
           <Eye />
           {t("view")}
         </Button>
@@ -484,13 +520,23 @@ function FileRowActions({
   return (
     <div className="flex items-center justify-end gap-1.5">
       {isAudio && (
-        <Button variant="outline" size="sm" onClick={onPlay}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onPlay}
+        >
           <Play />
           {t("play")}
         </Button>
       )}
       {isPreviewable && (
-        <Button variant="outline" size="sm" onClick={onView}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onView}
+        >
           <Eye />
           {t("view")}
         </Button>

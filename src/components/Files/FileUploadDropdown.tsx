@@ -1,7 +1,6 @@
+import { Camera, FilePlus2, Mic, Upload } from "lucide-react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { FileUploadReturn } from "@/hooks/useFileUpload";
-import { FilePlus2Icon } from "lucide-react";
 
 interface FileUploadDropdownProps {
   fileUpload: FileUploadReturn;
@@ -29,7 +27,7 @@ export default function FileUploadDropdown({
   showAudioCapture = true,
   inputRef,
   buttonVariant = "outline",
-  buttonClassName = "flex flex-row items-center",
+  buttonClassName,
   buttonText,
   disabled = false,
 }: FileUploadDropdownProps) {
@@ -47,38 +45,23 @@ export default function FileUploadDropdown({
           className={buttonClassName}
           disabled={disabled}
         >
-          <FilePlus2Icon className="mr-1" />
-          <span>{buttonText ?? t("add_files")}</span>
+          <FilePlus2 />
+          {buttonText ?? t("add_files")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-[calc(100vw-2.5rem)] sm:w-full"
-      >
-        <DropdownMenuItem
-          className="flex flex-row items-center text-primary-900 font-medium"
-          onSelect={() => fileInputRef.current?.click()}
-          aria-label={t("choose_file")}
-        >
-          <CareIcon icon="l-file-upload-alt" />
-          <span>{t("choose_file")}</span>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+          <Upload />
+          {t("choose_file")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => fileUpload.handleCameraCapture()}
-          className="flex items-center text-primary-900 font-medium"
-          aria-label={t("open_camera")}
-        >
-          <CareIcon icon="l-camera" />
-          <span>{t("open_camera")}</span>
+        <DropdownMenuItem onSelect={() => fileUpload.handleCameraCapture()}>
+          <Camera />
+          {t("open_camera")}
         </DropdownMenuItem>
         {showAudioCapture && (
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleAudioCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("record")}
-          >
-            <CareIcon icon="l-microphone" />
-            <span>{t("record")}</span>
+          <DropdownMenuItem onSelect={() => fileUpload.handleAudioCapture()}>
+            <Mic />
+            {t("record")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
