@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { FileUploadReturn } from "@/hooks/useFileUpload";
+import { FilePlus2Icon } from "lucide-react";
 
 interface FileUploadDropdownProps {
   fileUpload: FileUploadReturn;
@@ -46,9 +47,8 @@ export default function FileUploadDropdown({
           className={buttonClassName}
           disabled={disabled}
         >
-          <CareIcon icon="l-file-upload" className="mr-1" />
+          <FilePlus2Icon className="mr-1" />
           <span>{buttonText ?? t("add_files")}</span>
-          <CareIcon icon="l-angle-down" className="ml-1" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

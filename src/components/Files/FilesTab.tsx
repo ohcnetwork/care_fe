@@ -25,6 +25,8 @@ export interface FilesTabsProps {
   readOnly?: boolean;
 }
 
+const TAB_SCOPED_PARAMS = ["name", "is_archived", "page", "limit"];
+
 export const FilesTab = ({
   patient,
   type,
@@ -66,9 +68,16 @@ export const FilesTab = ({
     <div className="space-y-4">
       <Tabs
         value={tabValue}
-        onValueChange={(value) =>
-          setQParams({ file: value }, { overwrite: false })
-        }
+        onValueChange={(value) => {
+          // Search, status and page belong to the tab that set them; carrying
+          // them over could land the other tab on an empty or out-of-range page.
+          const rest = Object.fromEntries(
+            Object.entries(qParams).filter(
+              ([key]) => !TAB_SCOPED_PARAMS.includes(key),
+            ),
+          );
+          setQParams({ ...rest, file: value }, { overwrite: true });
+        }}
       >
         <TabsList className={type != "encounter" ? "mt-2" : ""}>
           <TabsTrigger value="all">{t("files")}</TabsTrigger>
