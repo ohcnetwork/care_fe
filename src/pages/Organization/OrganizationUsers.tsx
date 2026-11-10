@@ -133,23 +133,14 @@ export default function OrganizationUsers({
             canCreateServiceAccount,
           } = getPermissions(hasPermission, orgPermissions);
           return (
-            <div className="space-y-6">
-              <div className="justify-between items-center flex flex-wrap">
-                <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                  <EntityBadge
-                    title={
-                      isServiceAccount ? t("service_accounts") : t("users")
-                    }
-                    count={users?.count}
-                    isFetching={isFetchingUsers}
-                    translationParams={{
-                      entity: isServiceAccount
-                        ? t("service_account")
-                        : t("user"),
-                    }}
-                  />
-                </div>
-                <div className="gap-2 flex flex-wrap mt-2">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <EntityBadge
+                  title={isServiceAccount ? t("service_accounts") : t("users")}
+                  count={users?.count}
+                  isFetching={isFetchingUsers}
+                />
+                <div className="flex flex-wrap gap-2">
                   {(canCreateUser || canCreateServiceAccount) && (
                     <AddUserSheet
                       open={openAddUserSheet}
@@ -188,55 +179,49 @@ export default function OrganizationUsers({
                   )}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <SearchInput
-                  options={searchOptions}
-                  onSearch={handleSearch}
-                  onFieldChange={handleFieldChange}
-                  className="w-full"
-                />
-              </div>
-              {isFetchingUsers ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              <SearchInput
+                options={searchOptions}
+                onSearch={handleSearch}
+                onFieldChange={handleFieldChange}
+                className="w-full sm:max-w-sm"
+              />
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                {isFetchingUsers ? (
                   <CardGridSkeleton count={6} />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {users?.results?.length === 0 ? (
-                    <Card className="col-span-full">
-                      <CardContent className="p-6 text-center text-gray-500">
-                        {t("no_users_found")}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    users?.results?.map((userRole) => (
-                      <UserCard
-                        key={userRole.user.id}
-                        user={userRole.user}
-                        roleName={userRole.role.name}
-                        editRoleAction={
-                          canManageOrganizationUsers && (
-                            <EditUserRoleSheet
-                              organizationId={id}
-                              userRole={userRole}
-                              trigger={
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="underline text-gray-500"
-                                >
-                                  <span>{t("edit")}</span>
-                                </Button>
-                              }
-                            />
-                          )
-                        }
-                        isServiceAccount={isServiceAccount}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
+                ) : users?.results?.length === 0 ? (
+                  <Card className="col-span-full">
+                    <CardContent className="p-6 text-center text-gray-500">
+                      {t("no_users_found")}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  users?.results?.map((userRole) => (
+                    <UserCard
+                      key={userRole.user.id}
+                      user={userRole.user}
+                      roleName={userRole.role.name}
+                      editRoleAction={
+                        canManageOrganizationUsers && (
+                          <EditUserRoleSheet
+                            organizationId={id}
+                            userRole={userRole}
+                            trigger={
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="underline text-gray-500"
+                              >
+                                <span>{t("edit")}</span>
+                              </Button>
+                            }
+                          />
+                        )
+                      }
+                      isServiceAccount={isServiceAccount}
+                    />
+                  ))
+                )}
+              </div>
               <Pagination totalCount={users?.count || 0} />
             </div>
           );

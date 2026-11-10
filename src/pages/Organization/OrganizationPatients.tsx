@@ -108,22 +108,20 @@ export default function OrganizationPatients({
     >
       {() => {
         return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                <EntityBadge
-                  title={t("patients")}
-                  count={patients?.count}
-                  isFetching={isFetching}
-                  translationParams={{ entity: "Patient" }}
-                />
-              </div>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <EntityBadge
+                title={t("patients")}
+                count={patients?.count}
+                isFetching={isFetching}
+              />
             </div>
 
             <SearchInput
               options={searchOptions}
               onSearch={handleSearch}
               onFieldChange={handleFieldChange}
+              className="w-full sm:max-w-sm"
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">

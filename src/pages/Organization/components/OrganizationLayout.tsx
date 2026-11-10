@@ -22,8 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -223,29 +223,24 @@ export default function OrganizationLayout({
 
       {/* Desktop Navigation — hide when only one tab visible */}
       {visibleNavItems.length > 1 && (
-        <div className="mt-4 min-w-0 hidden lg:block">
-          <Menubar className="w-full h-full overflow-x-auto">
-            {navItems
-              .filter((item) => item.visibility)
-              .map((item) => (
-                <MenubarMenu key={item.url}>
-                  <MenubarTrigger
-                    className={`${
-                      path === item.url
-                        ? "font-medium text-primary-700 bg-gray-100"
-                        : "hover:text-primary-500 hover:bg-gray-100 text-gray-700"
-                    }`}
-                    asChild
-                  >
-                    <Link href={item.url} className="cursor-pointer">
-                      <div className="mr-2">{item.icon}</div>
-                      {item.name}
-                    </Link>
-                  </MenubarTrigger>
-                </MenubarMenu>
+        <Tabs
+          value={activeNavItem?.url ?? null}
+          activationMode="manual"
+          className="mt-4 hidden lg:flex"
+        >
+          <div className="min-w-0 max-w-full overflow-x-auto pb-1">
+            <TabsList
+              variant="line"
+              className="w-full justify-start border-b border-border"
+            >
+              {visibleNavItems.map((item) => (
+                <TabsTrigger key={item.url} value={item.url} asChild>
+                  <Link href={item.url}>{item.name}</Link>
+                </TabsTrigger>
               ))}
-          </Menubar>
-        </div>
+            </TabsList>
+          </div>
+        </Tabs>
       )}
 
       {/* Mobile Navigation */}
