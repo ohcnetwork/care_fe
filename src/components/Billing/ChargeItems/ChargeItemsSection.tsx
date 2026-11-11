@@ -37,6 +37,8 @@ interface ChargeItemsSectionProps {
   disableCreateChargeItemsSection?: boolean;
   viewOnly?: boolean;
   className?: string;
+  /** Create Invoice lists every billable charge item on the patient's account, not just this resource's. */
+  invoiceAllAccountChargeItems?: boolean;
 }
 
 export function ChargeItemsSection({
@@ -50,6 +52,7 @@ export function ChargeItemsSection({
   disableCreateChargeItemsSection = false,
   viewOnly = false,
   className,
+  invoiceAllAccountChargeItems = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
   useShortcutSubContext("facility:appointment");
@@ -169,7 +172,11 @@ export function ChargeItemsSection({
           onOpenChange={() =>
             setInvoiceSheetState({ open: false, chargeItems: [] })
           }
-          preSelectedChargeItems={invoiceSheetState.chargeItems}
+          preSelectedChargeItems={
+            invoiceAllAccountChargeItems
+              ? undefined
+              : invoiceSheetState.chargeItems
+          }
           onSuccess={() => {
             queryClient.invalidateQueries({
               queryKey: ["chargeItems", facilityId, resourceId],
