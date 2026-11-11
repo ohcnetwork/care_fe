@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -119,8 +119,8 @@ export function SubstitutionSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline">{t("sub")}</Button>}
       </SheetTrigger>
-      <SheetContent className="flex h-full w-full flex-col sm:max-w-2xl">
-        <SheetHeader className="space-y-3 pb-6">
+      <SheetContent size="md" className="overflow-hidden">
+        <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
             {t("substitute_medication")}
           </SheetTitle>
@@ -141,7 +141,7 @@ export function SubstitutionSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 pr-6">
+        <SheetBody>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -249,9 +249,9 @@ export function SubstitutionSheet({
               />
             </form>
           </Form>
-        </ScrollArea>
+        </SheetBody>
 
-        <SheetFooter className="border-t pt-6">
+        <SheetFooter>
           <div className="flex w-full justify-between gap-3">
             <div className="flex gap-3 flex-1">
               <Button

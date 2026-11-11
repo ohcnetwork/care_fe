@@ -241,9 +241,7 @@ test.describe("Diagnosis", () => {
     await expect(
       diagnosisSummary.getByText("Severe", { exact: true }),
     ).toBeVisible();
-    await expect(
-      diagnosisSummary.getByText(/^Onset\b/),
-    ).toBeVisible();
+    await expect(diagnosisSummary.getByText(/^Onset\b/)).toBeVisible();
 
     await page.goto(questionnaireUrl);
     await page.getByRole("button", { name: "Diagnosis History" }).click();
@@ -252,6 +250,8 @@ test.describe("Diagnosis", () => {
       .getByRole("row")
       .filter({ has: page.getByText(diagnosisName, { exact: true }) });
     await expect(historyRow.getByText("Severe", { exact: true })).toBeVisible();
-    await expect(historyRow.getByText("Confirmed", { exact: true })).toBeVisible();
+    await expect(
+      historyRow.getByText("Confirmed", { exact: true }),
+    ).toBeVisible();
   });
 });

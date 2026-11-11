@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -26,19 +27,19 @@ export default function EditFacilitySheet({ facilityId, trigger }: Props) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("edit_facility")}</SheetTitle>
           <SheetDescription>{t("update_existing_facility")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <FacilityForm
             facilityId={facilityId}
             onSubmitSuccess={() => {
               setOpen(false);
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

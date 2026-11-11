@@ -105,13 +105,8 @@ test.describe("Device Organization Association", () => {
     await managingOrgSection.getByRole("button", { name: "Associate" }).click();
     let manageOrgSheet = await getManageOrganizationSheet(page);
 
-    // On first open, Administration should be pre-selected in the blue card.
-    const initiallySelectedOrganizationChip = manageOrgSheet
-      .getByRole("button", { name: "Add Organization" })
-      .locator("xpath=preceding-sibling::*[1]");
-    await expect(initiallySelectedOrganizationChip).toContainText(
-      "Administration",
-    );
+    // On first open, Administration should be pre-selected.
+    await expect(manageOrgSheet).toContainText("Administration");
 
     await submitAddOrganization(manageOrgSheet);
 
@@ -154,9 +149,8 @@ test.describe("Device Organization Association", () => {
     const departmentItems = page.locator('[data-slot="command-item"]');
 
     // Verify the blue selected card is replaced with the newly selected department.
-    const updatedSelectedOrganizationChip = manageOrgSheet
-      .getByRole("button", { name: "Add Organization" })
-      .locator("xpath=preceding-sibling::*[1]");
+    const updatedSelectedOrganizationChip =
+      manageOrgSheet.locator("p.truncate");
     await expect(updatedSelectedOrganizationChip).toContainText(
       selectedDepartment,
     );

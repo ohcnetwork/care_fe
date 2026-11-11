@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -86,14 +87,14 @@ export default function EditScheduleTemplateSheet({
       <SheetTrigger asChild>
         {trigger || <Button variant="outline" size="sm"></Button>}
       </SheetTrigger>
-      <SheetContent className="flex min-w-full flex-col bg-background pb-0 sm:min-w-128">
-        <SheetHeader className="border-0 pb-0">
+      <SheetContent size="lg" className="overflow-hidden">
+        <SheetHeader>
           <SheetTitle>{t("edit_schedule_template")}</SheetTitle>
           <SheetDescription className="sr-only">
             {t("edit_schedule_template")}
           </SheetDescription>
         </SheetHeader>
-        <div className="flex-1 overflow-auto -mx-6 px-6 pb-16 bg-muted-background">
+        <SheetBody className="bg-muted-background">
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
@@ -130,7 +131,7 @@ export default function EditScheduleTemplateSheet({
             resourceType={resourceType}
             resourceId={resourceId}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );
@@ -259,7 +260,7 @@ const ScheduleTemplateEditor = ({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm mt-4">
+    <div className="rounded-lg bg-white p-4 shadow-sm">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

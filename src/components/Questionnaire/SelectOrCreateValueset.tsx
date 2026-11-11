@@ -208,10 +208,7 @@ export function SelectOrCreateValueset({
               {t("create_valueset")}
             </Button>
           </SheetTrigger>
-          <SheetContent
-            side="right"
-            className="w-full overflow-y-auto p-0 sm:max-w-4xl"
-          >
+          <SheetContent size="lg" className="overflow-y-auto">
             <ValueSetEditor
               scope={scope}
               onCancel={() => handleSheetOpenChange(false)}

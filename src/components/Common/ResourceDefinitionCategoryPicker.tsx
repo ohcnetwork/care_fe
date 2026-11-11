@@ -777,6 +777,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   const renderMainContent = () => (
     <Command
+      shouldFilter={false}
       className={cn(
         "border-0",
         isMobile && "in-data-[slot=drawer-content]:h-full!",

@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -114,7 +116,7 @@ export default function ScheduleChargeItemDefinitionSelector({
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-[90%] sm:max-w-2xl">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("select_charge_item_definitions")}</SheetTitle>
           <SheetDescription>
@@ -125,111 +127,116 @@ export default function ScheduleChargeItemDefinitionSelector({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-6 flex flex-col gap-6"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            <FormField
-              control={form.control}
-              name="charge_item_definition"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("consultation_charge")}</FormLabel>
-                  <FormControl>
-                    <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                      <ChargeItemDefinitionPicker
-                        facilityId={facilityId}
-                        value={field.value}
-                        onValueChange={(def) => {
-                          if (!def) {
-                            field.onChange(null);
-                            return;
-                          }
-                          const selected = Array.isArray(def) ? def[0] : def;
-                          field.onChange(selected);
-                        }}
-                        placeholder={t("select_charge_item_definition")}
-                        className="grow-1"
-                        showCreateButton
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="re_visit_allowed_days"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("re_visit_allowed_days")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={reVisitDays ?? ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "") {
-                          field.onChange(undefined);
-                          return;
-                        }
-                        const parsed = Number(value);
-                        if (!isNaN(parsed)) {
-                          field.onChange(parsed);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="re_visit_charge_item_definition"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={!reVisitDays ? "text-gray-400" : ""}>
-                    {t("re_visit_consultation_charge")}
-                  </FormLabel>
-                  <FormControl>
-                    <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                      <ChargeItemDefinitionPicker
-                        facilityId={facilityId}
-                        value={field.value ?? undefined}
-                        onValueChange={(def) => {
-                          const selected = Array.isArray(def) ? def[0] : def;
-                          field.onChange(selected ?? null);
-                        }}
-                        placeholder={t("select_charge_item_definition")}
-                        className="grow-1"
-                        showCreateButton
-                        disabled={!reVisitDays}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <SheetBody>
+              <div className="flex flex-col gap-6">
+                <FormField
+                  control={form.control}
+                  name="charge_item_definition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("consultation_charge")}</FormLabel>
+                      <FormControl>
+                        <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                          <ChargeItemDefinitionPicker
+                            facilityId={facilityId}
+                            value={field.value}
+                            onValueChange={(def) => {
+                              if (!def) {
+                                field.onChange(null);
+                                return;
+                              }
+                              const selected = Array.isArray(def)
+                                ? def[0]
+                                : def;
+                              field.onChange(selected);
+                            }}
+                            placeholder={t("select_charge_item_definition")}
+                            className="grow"
+                            showCreateButton
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="re_visit_allowed_days"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("re_visit_allowed_days")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={reVisitDays ?? ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "") {
+                              field.onChange(undefined);
+                              return;
+                            }
+                            const parsed = Number(value);
+                            if (!isNaN(parsed)) {
+                              field.onChange(parsed);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="re_visit_charge_item_definition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={!reVisitDays ? "text-gray-400" : ""}
+                      >
+                        {t("re_visit_consultation_charge")}
+                      </FormLabel>
+                      <FormControl>
+                        <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                          <ChargeItemDefinitionPicker
+                            facilityId={facilityId}
+                            value={field.value ?? undefined}
+                            onValueChange={(def) => {
+                              const selected = Array.isArray(def)
+                                ? def[0]
+                                : def;
+                              field.onChange(selected ?? null);
+                            }}
+                            placeholder={t("select_charge_item_definition")}
+                            className="grow"
+                            showCreateButton
+                            disabled={!reVisitDays}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </SheetBody>
 
-            <div className="flex justify-end gap-4 border-t pt-4 sticky bottom-0 bg-white">
+            <SheetFooter>
               <Button
                 variant="outline"
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-full sm:w-auto"
               >
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                className="w-full sm:w-auto"
-                disabled={!chargeItemDef}
-              >
+              <Button type="submit" disabled={!chargeItemDef}>
                 {t("save")}
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>

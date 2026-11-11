@@ -99,8 +99,12 @@ async function addSection(page: Page, column: string, label: string) {
   await expect(picker).not.toBeVisible();
 }
 
+// The sheet is titled with the section's widget name, so find it by the
+// remove action that only the section settings sheet offers.
 function sectionSettings(page: Page) {
-  return page.getByRole("dialog", { name: "Section settings", exact: true });
+  return page.getByRole("dialog").filter({
+    has: page.getByRole("button", { name: "Remove section", exact: true }),
+  });
 }
 
 async function openSectionSettings(page: Page, name: string) {
@@ -895,9 +899,7 @@ test("visual editing builds, orders, and reloads an encounter workspace", async 
     await requestLimit.clear();
     await closeSectionSettings(page);
 
-    await page
-      .getByRole("button", { name: "One column", exact: true })
-      .click();
+    await page.getByRole("button", { name: "One column", exact: true }).click();
     await expect(
       column("Main").getByRole("article", {
         name: "Active requests",

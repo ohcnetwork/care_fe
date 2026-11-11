@@ -20,8 +20,10 @@ import {
 import RadioInput from "@/components/ui/RadioInput";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -188,7 +190,7 @@ export default function CreateTokenForm({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent>
         <SheetHeader>
           <SheetTitle>{t("create_token")}</SheetTitle>
           <SheetDescription>
@@ -208,148 +210,149 @@ export default function CreateTokenForm({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4 space-y-2"
+            className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="space-y-6">
-              {/* Resource Type Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-900">
-                  {t("select_resource_type")}
-                </label>
-                <div className="grid grid-cols-1 gap-3 mt-1">
-                  {Object.values(SchedulableResourceType).map((type) => (
-                    <Button
-                      key={type}
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "h-auto min-h-16 w-full justify-start text-left",
-                        selectedResource.resource_type === type &&
-                          "ring-2 ring-primary text-primary bg-primary/5",
-                      )}
-                      onClick={() => {
-                        setSelectedResource({
-                          resource: null,
-                          resource_type: type,
-                        });
-                        // Reset resource selection when type changes
-                        form.setValue("resourceId", "");
-                      }}
-                    >
-                      <div className="flex flex-col items-start">
-                        <div className="text-sm font-semibold">
-                          {t(`resource_type__${type}`)}
+            <SheetBody>
+              <div className="space-y-6">
+                {/* Resource Type Selection */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-900">
+                    {t("select_resource_type")}
+                  </label>
+                  <div className="grid grid-cols-1 gap-3 mt-1">
+                    {Object.values(SchedulableResourceType).map((type) => (
+                      <Button
+                        key={type}
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "h-auto min-h-16 w-full justify-start text-left",
+                          selectedResource.resource_type === type &&
+                            "ring-2 ring-primary text-primary bg-primary/5",
+                        )}
+                        onClick={() => {
+                          setSelectedResource({
+                            resource: null,
+                            resource_type: type,
+                          });
+                          // Reset resource selection when type changes
+                          form.setValue("resourceId", "");
+                        }}
+                      >
+                        <div className="flex flex-col items-start">
+                          <div className="text-sm font-semibold">
+                            {t(`resource_type__${type}`)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {t(`resource_type_description__${type}`)}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {t(`resource_type_description__${type}`)}
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Separator */}
+                <div className="border-t border-gray-200" />
+
+                {/* Form Fields */}
+                <div className="space-y-5">
+                  {/* Resource Selection */}
+                  <FormField
+                    control={form.control}
+                    name="resourceId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t(
+                            `schedulable_resource__${selectedResource.resource_type}`,
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <ScheduleResourceSelector
+                            selectedResource={selectedResource}
+                            facilityId={facilityId}
+                            setSelectedResource={(resource) => {
+                              setSelectedResource(resource);
+                              field.onChange(resource.resource?.id || "");
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Token Category Selection */}
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("category")}</FormLabel>
+                        <FormControl>
+                          {isLoadingCategories ? (
+                            <div className="flex items-center justify-center py-8 text-gray-500">
+                              {t("loading_categories")}
+                            </div>
+                          ) : categories && categories.length > 0 ? (
+                            <RadioInput
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isLoadingCategories}
+                              options={
+                                categories?.map(
+                                  (category: TokenCategoryRead) => ({
+                                    value: category.id,
+                                    label: `${category.name}${
+                                      category.shorthand
+                                        ? ` (${category.shorthand})`
+                                        : ""
+                                    }`,
+                                  }),
+                                ) ?? []
+                              }
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center py-8 text-gray-500">
+                              {t("no_categories_found")}
+                            </div>
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Note Field */}
+                  <FormField
+                    control={form.control}
+                    name="note"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("note")}</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder={t("enter_note_optional")}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
+            </SheetBody>
 
-              {/* Separator */}
-              <div className="border-t border-gray-200" />
-
-              {/* Form Fields */}
-              <div className="space-y-5">
-                {/* Resource Selection */}
-                <FormField
-                  control={form.control}
-                  name="resourceId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t(
-                          `schedulable_resource__${selectedResource.resource_type}`,
-                        )}
-                      </FormLabel>
-                      <FormControl>
-                        <ScheduleResourceSelector
-                          selectedResource={selectedResource}
-                          facilityId={facilityId}
-                          setSelectedResource={(resource) => {
-                            setSelectedResource(resource);
-                            field.onChange(resource.resource?.id || "");
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Token Category Selection */}
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
-                      <FormControl>
-                        {isLoadingCategories ? (
-                          <div className="flex items-center justify-center py-8 text-gray-500">
-                            {t("loading_categories")}
-                          </div>
-                        ) : categories && categories.length > 0 ? (
-                          <RadioInput
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isLoadingCategories}
-                            options={
-                              categories?.map(
-                                (category: TokenCategoryRead) => ({
-                                  value: category.id,
-                                  label: `${category.name}${
-                                    category.shorthand
-                                      ? ` (${category.shorthand})`
-                                      : ""
-                                  }`,
-                                }),
-                              ) ?? []
-                            }
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center py-8 text-gray-500">
-                            {t("no_categories_found")}
-                          </div>
-                        )}
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Note Field */}
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("note")}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={t("enter_note_optional")}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 mt-6">
+            <SheetFooter>
               <Button
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
                   form.reset();
                 }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-                data-shortcut-id="cancel-action"
+                variant="outline"
               >
                 {t("cancel")}
               </Button>
@@ -364,7 +367,7 @@ export default function CreateTokenForm({
                 {isPending ? t("creating") : t("create_token")}
                 <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
-            </div>
+            </SheetFooter>
           </form>
         </Form>
       </SheetContent>
