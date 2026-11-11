@@ -2,6 +2,7 @@ import { AppUpdateNotifier } from "@/components/Common/AppUpdateNotifier";
 import Loading from "@/components/Common/Loading";
 import ProductionWarningBanner from "@/components/Common/ProductionWarningBanner";
 import { Toaster } from "@/components/ui/sonner";
+import { AppearanceProvider } from "@/context/AppearanceContext";
 import { ShortcutProvider } from "@/context/ShortcutContext";
 import Integrations from "@/Integrations";
 import { OverrideProvider } from "@/lib/override";
@@ -15,7 +16,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLocationChange } from "raviger";
 import { lazy, Suspense, useEffect } from "react";
-import { PubSubProvider } from "./Utils/pubsubContext";
 
 const PatientRouter = lazy(() => import("@/Routers/PatientRouter"));
 const AppRouter = lazy(() => import("@/Routers/AppRouter"));
@@ -31,15 +31,16 @@ const ScrollToTop = () => {
 const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
+    window.__removeLoadingScreen?.();
   }, []);
 
   return (
     <>
       <ProductionWarningBanner />
       <QueryClientProvider client={queryClient}>
-        <ScrollToTop />
-        <Suspense fallback={<Loading />}>
-          <PubSubProvider>
+        <AppearanceProvider>
+          <ScrollToTop />
+          <Suspense fallback={<Loading />}>
             <ShortcutProvider>
               <PluginEngine>
                 <OverrideProvider>
@@ -58,7 +59,6 @@ const App = () => {
                 </OverrideProvider>
                 <Toaster
                   position={careConfig.toastPosition}
-                  theme="light"
                   richColors
                   expand
                   // For `richColors` to work, pass at-least an empty object.
@@ -69,11 +69,11 @@ const App = () => {
                 <AppUpdateNotifier />
               </PluginEngine>
             </ShortcutProvider>
-          </PubSubProvider>
-        </Suspense>
+          </Suspense>
 
-        {/* Devtools are not included in production builds by default */}
-        <ReactQueryDevtools initialIsOpen={false} />
+          {/* Devtools are not included in production builds by default */}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </AppearanceProvider>
       </QueryClientProvider>
       <Integrations.Sentry disabled={!import.meta.env.PROD} />
     </>

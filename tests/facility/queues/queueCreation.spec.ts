@@ -28,6 +28,9 @@ test.describe("Queue Creation & Editing", () => {
   test("should create a new queue", async ({ page }) => {
     const uniqueQueueName = faker.lorem.words(3);
     await createQueue(page, uniqueQueueName);
+    await expect(
+      page.getByRole("row").filter({ hasText: uniqueQueueName }),
+    ).toBeVisible();
   });
 
   test("should edit queue name", async ({ page }) => {
@@ -35,11 +38,15 @@ test.describe("Queue Creation & Editing", () => {
     const modifiedQueueName = faker.lorem.words(4);
     await createQueue(page, uniqueQueueName);
     await openQueueEditMenu(page, uniqueQueueName);
-    await page
-      .getByRole("textbox", { name: /queue name/i })
-      .fill(modifiedQueueName);
+    const name = page.getByRole("textbox", { name: /queue name/i });
+    await name.clear();
+    await name.pressSequentially(modifiedQueueName);
+    await expect(name).toHaveValue(modifiedQueueName);
     await page.getByRole("button", { name: /update queue/i }).click();
     await expectToast(page, /queue updated successfully/i);
+    await expect(
+      page.getByRole("row").filter({ hasText: modifiedQueueName }),
+    ).toBeVisible();
   });
 
   test("should not allow creating a queue without a name", async ({ page }) => {

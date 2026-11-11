@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { PatientListRead } from "@/types/emr/patient/patient";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 import { UserReadMinimal } from "@/types/user/user";
@@ -36,6 +36,7 @@ export interface DeliveryOrderCreate extends DeliveryOrder {
   destination: string;
   extensions: Record<string, unknown>;
   patient?: string;
+  tags?: TagSetRequest[];
 }
 
 export interface DeliveryOrderUpdate extends DeliveryOrder {

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
@@ -58,10 +59,15 @@ const FacilityDeleteDialog = ({
   });
 
   const defaultTrigger = (
-    <button className={buttonVariants({ variant: "destructive", size: "sm" })}>
+    <Button
+      variant="destructive"
+      size="sm"
+      type="button"
+      className={buttonVariants({ variant: "destructive", size: "sm" })}
+    >
       <Trash2Icon className="mr-2 size-4" />
       {t("delete_facility")}
-    </button>
+    </Button>
   );
 
   const description = (

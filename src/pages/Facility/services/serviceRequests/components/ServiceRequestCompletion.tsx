@@ -56,13 +56,13 @@ export function ServiceRequestCompletion({
 
   return (
     <>
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-white border-gray-300 p-2">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-white">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t bg-background border-border p-2">
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3 gap-2 bg-background">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-foreground">
               {t("complete_service_request")}
             </p>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               {hasPendingReports
                 ? t("reports_pending_final_review", {
                     count: pendingReports,
@@ -92,42 +92,46 @@ export function ServiceRequestCompletion({
         title={t("add_completion_note")}
         description={t("service_request_completion_note_description")}
       >
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-900">
-            {t("completion_note")}
-          </p>
-          <Textarea
-            value={completionNote}
-            onChange={(e) => setCompletionNote(e.target.value)}
-            placeholder={t("enter_note")}
-            className="min-h-14"
-            aria-label={t("completion_note")}
-          />
-        </div>
-        <div className="flex flex-row items-start justify-start gap-2 pt-2 sm:pt-0">
-          <Button
-            variant="primary"
-            onClick={() =>
-              completeServiceRequest({
-                status: Status.completed,
-                note: completionNote.trim() || null,
-                locations: request.locations.map((loc) => loc.id),
-              })
-            }
-            disabled={isCompletingServiceRequest}
-          >
-            <CheckIcon className="size-4" />
-            {isCompletingServiceRequest
-              ? t("updating")
-              : t("save_and_complete")}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isCompletingServiceRequest}
-          >
-            {t("cancel")}
-          </Button>
+        <div className="space-y-4 px-4 pb-4 lg:px-0 lg:pb-0 mt-3">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-900">
+              {t("completion_note")}
+            </p>
+            <Textarea
+              value={completionNote}
+              onChange={(e) => setCompletionNote(e.target.value)}
+              placeholder={t("enter_note")}
+              className="min-h-14 resize-y"
+              aria-label={t("completion_note")}
+            />
+          </div>
+          <div className="flex flex-wrap items-start justify-start gap-2">
+            <Button
+              variant="primary"
+              className="w-auto"
+              onClick={() =>
+                completeServiceRequest({
+                  status: Status.completed,
+                  note: completionNote.trim() || null,
+                  locations: request.locations.map((loc) => loc.id),
+                })
+              }
+              disabled={isCompletingServiceRequest}
+            >
+              <CheckIcon className="size-4" />
+              {isCompletingServiceRequest
+                ? t("updating")
+                : t("save_and_complete")}
+            </Button>
+            <Button
+              variant="outline"
+              className="w-auto"
+              onClick={() => handleOpenChange(false)}
+              disabled={isCompletingServiceRequest}
+            >
+              {t("cancel")}
+            </Button>
+          </div>
         </div>
       </ResponsiveDialog>
     </>

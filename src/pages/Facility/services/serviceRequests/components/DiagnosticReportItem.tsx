@@ -14,7 +14,7 @@ import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticR
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import query from "@/Utils/request/query";
 
-import { DottedDivider } from "@/components/careui/dotted-divider";
+import { DottedDivider } from "@/components/ui/dotted-divider";
 import { DiagnosticReportTimestamps } from "@/pages/Facility/services/serviceRequests/components/DiagnosticReportTimestamps";
 import { DiagnosticReportAttachments } from "./DiagnosticReportAttachments";
 import { DiagnosticReportItemProps } from "./diagnosticReportFormTypes";
@@ -62,8 +62,8 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
   return (
     <Card
       className={cn(
-        "shadow-none border-gray-300 rounded-lg bg-white",
-        isExpanded && "bg-gray-100",
+        "shadow-none border-border rounded-lg bg-background",
+        isExpanded && "bg-muted",
       )}
     >
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -113,9 +113,9 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
               )}
               <div className="space-y-4">
                 {showEditor && (
-                  <Card className="mb-4 shadow-none rounded-lg border-gray-200 bg-white">
+                  <Card className="mb-4 shadow-none rounded-lg border-border bg-background">
                     <CardContent className="p-2 space-y-2">
-                      <h6 className="font-medium text-gray-950">
+                      <h6 className="font-medium text-foreground">
                         {t("conclusion")}
                       </h6>
                       <RichTextEditor
@@ -146,7 +146,7 @@ export function DiagnosticReportItem(props: DiagnosticReportItemProps) {
                   )}
                 </div>
                 <div className="space-y-4 pb-2">
-                  <DottedDivider className="text-gray-400" />
+                  <DottedDivider className="text-muted-foreground" />
                   <DiagnosticReportAttachments
                     reportId={report.id}
                     attachments={attachments}

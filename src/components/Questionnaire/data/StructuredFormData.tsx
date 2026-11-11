@@ -1,4 +1,5 @@
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 const encounterQuestionnaire: QuestionnaireRead = {
   id: "encounter",
@@ -6,7 +7,8 @@ const encounterQuestionnaire: QuestionnaireRead = {
   version: "0.0.1",
   title: "Encounter",
   status: "active",
-  subject_type: "patient",
+  // Must be "encounter": a `patient` subject_type makes the renderer drop the question.
+  subject_type: "encounter",
   questions: [
     {
       id: "encounter",
@@ -133,6 +135,25 @@ const symptom_questionnaire: QuestionnaireRead = {
   ],
 };
 
+const procedure_questionnaire: QuestionnaireRead = {
+  id: "procedure",
+  slug: "procedure",
+  version: "0.0.1",
+  title: "Procedure",
+  status: "active",
+  subject_type: "encounter",
+  questions: [
+    {
+      id: "procedure",
+      text: "Procedure",
+      type: "structured",
+      structured_type: "procedure",
+      link_id: "1.1",
+      required: true,
+    },
+  ],
+};
+
 const files_questionnaire: QuestionnaireRead = {
   id: "files",
   slug: "files",
@@ -209,7 +230,7 @@ const appointment_questionnaire: QuestionnaireRead = {
   ],
 };
 
-export const STRUCTURED_QUESTIONS = [
+const structuredQuestionEntries = [
   {
     value: "allergy_intolerance",
     label: "Allergy Intolerance",
@@ -230,6 +251,11 @@ export const STRUCTURED_QUESTIONS = [
     value: "diagnosis",
     label: "Diagnosis",
     questionnaire: diagnosis_questionnaire,
+  },
+  {
+    value: "procedure",
+    label: "Procedure",
+    questionnaire: procedure_questionnaire,
   },
   {
     value: "encounter",
@@ -259,6 +285,12 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
+export const STRUCTURED_QUESTIONS: readonly {
+  value: StructuredQuestionType;
+  label: string;
+  questionnaire: QuestionnaireRead;
+}[] = structuredQuestionEntries;
+
 export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
@@ -270,8 +302,7 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
     {} as Record<string, QuestionnaireRead>,
   );
 
-export type StructuredQuestionType =
-  (typeof STRUCTURED_QUESTIONS)[number]["value"];
+export type { StructuredQuestionType } from "@/types/questionnaire/structured";
 
 export function filterStructuredQuestionnaireSlugs(slug?: string) {
   return slug &&

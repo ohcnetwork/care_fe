@@ -1,6 +1,5 @@
-import { CaretDownIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
+import { ChevronDown as CaretDownIcon, CheckIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
@@ -14,7 +13,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -35,6 +40,9 @@ import UserApi from "@/types/user/userApi";
 
 interface Props {
   selected?: UserReadMinimal;
+  selectedId?: string;
+  dialogTitle?: string;
+
   onChange: (user: UserReadMinimal) => void;
   placeholder?: string;
   noOptionsMessage?: string;
@@ -58,7 +66,7 @@ interface UserCommandContentProps {
   isFetching: boolean;
   isFetchingNextPage: boolean;
   noOptionsMessage?: string;
-  selected?: UserReadMinimal;
+  selectedId?: string;
   onChange: (user: UserReadMinimal) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
@@ -72,7 +80,7 @@ function UserCommandContent({
   isFetching,
   isFetchingNextPage,
   noOptionsMessage,
-  selected,
+  selectedId,
   onChange,
   setOpen,
   ref,
@@ -83,12 +91,14 @@ function UserCommandContent({
   return (
     <Command>
       <CommandInput
+        aria-label={t("search")}
         placeholder={t("search")}
         value={search}
         onValueChange={setSearch}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+        wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
       />
-      <CommandList>
+      <CommandList className="p-1 scrollbar-gutter-auto">
         <CommandEmpty>
           {isFetching ? t("searching") : noOptionsMessage || t("no_results")}
         </CommandEmpty>
@@ -99,7 +109,7 @@ function UserCommandContent({
                 onClear();
                 setOpen(false);
               }}
-              className="cursor-pointer text-destructive"
+              className="cursor-pointer text-destructive max-md:min-h-11"
             >
               {t("clear_all")}
             </CommandItem>
@@ -114,14 +124,14 @@ function UserCommandContent({
                 onChange(user);
                 setOpen(false);
               }}
-              className="cursor-pointer w-full"
+              className="w-full cursor-pointer max-md:min-h-11 [&>svg:last-child]:hidden"
               ref={i === usersList.length - 1 ? ref : undefined}
             >
               <div className="flex items-center gap-2 w-full">
                 <Avatar
                   imageUrl={user.profile_picture_url}
                   name={formatName(user, true)}
-                  className="size-6 rounded-full"
+                  className="size-6"
                 />
                 <div className="flex flex-col min-w-0">
                   <span
@@ -134,7 +144,7 @@ function UserCommandContent({
                     {user.username}
                   </span>
                 </div>
-                {selected?.id === user.id && <CheckIcon className="ml-auto" />}
+                {selectedId === user.id && <CheckIcon className="ml-auto" />}
               </div>
             </CommandItem>
           ))}
@@ -149,6 +159,9 @@ function UserCommandContent({
 
 export default function UserSelector({
   selected,
+  selectedId,
+  dialogTitle,
+
   onChange,
   placeholder,
   noOptionsMessage,
@@ -260,8 +273,13 @@ export default function UserSelector({
         <DrawerTrigger asChild className={popoverClassName}>
           {renderTriggerButton()}
         </DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+        <DrawerContent height="fixed" className="p-1.5">
+          <DrawerHeader className="pl-1 md:pb-2" showCloseButton>
+            <DrawerTitle>
+              {dialogTitle || placeholder || t("select_user")}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
             <UserCommandContent
               search={search}
               setSearch={setSearch}
@@ -269,7 +287,7 @@ export default function UserSelector({
               isFetching={isFetching}
               isFetchingNextPage={isFetchingNextPage}
               noOptionsMessage={noOptionsMessage}
-              selected={selected}
+              selectedId={selectedId ?? selected?.id}
               onChange={onChange}
               setOpen={setOpen}
               ref={ref}
@@ -287,10 +305,8 @@ export default function UserSelector({
         {renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
-        className={cn(
-          "p-0 w-(--radix-popover-trigger-width)",
-          contentClassName,
-        )}
+        aria-label={dialogTitle}
+        className={cn("p-0 w-(--anchor-width) overflow-clip", contentClassName)}
         align={contentAlign || "start"}
         sideOffset={4}
       >
@@ -301,7 +317,7 @@ export default function UserSelector({
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
           noOptionsMessage={noOptionsMessage}
-          selected={selected}
+          selectedId={selectedId ?? selected?.id}
           onChange={onChange}
           setOpen={setOpen}
           ref={ref}

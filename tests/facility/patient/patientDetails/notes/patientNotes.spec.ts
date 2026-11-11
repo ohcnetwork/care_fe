@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -12,38 +14,19 @@ test.describe("Patient Notes - Isolation from Encounter Notes", () => {
 
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
 
     // Generate unique titles and messages
     patientNoteTitle = `Patient Note ${faker.string.alphanumeric(8)}`;
     patientNoteMessage = `Patient message: ${faker.lorem.sentence()}`;
 
-    // Navigate to encounters list page
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
-    );
-
-    // Navigate to first patient's encounter
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
-
-    encounterUrl = page.url();
+    encounterUrl = `/facility/${facilityId}/patient/${getPatientId()}/encounter/${getEncounterId()}/notes`;
+    await page.goto(`/facility/${facilityId}/patient/${getPatientId()}/notes`);
   });
 
   test("should create patient note and verify it does NOT appear in encounter notes", async ({
     page,
   }) => {
     const messageInput = page.getByPlaceholder("Type your message...");
-    // Click patient info hover card to open patient menu
-    await page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .last()
-      .click();
-
-    // Navigate to patient profile and then to Notes tab
-    await page.getByRole("link", { name: "View Profile" }).click();
-    await page.getByRole("tab", { name: "Notes" }).click();
-
     // Wait for notes section to load
     await expect(
       page.getByRole("button", { name: /New/i }).first(),
@@ -77,9 +60,64 @@ test.describe("Patient Notes - Isolation from Encounter Notes", () => {
     // Verify message appears in patient notes
     await expect(page.getByText(patientNoteMessage)).toBeVisible();
 
-    // Navigate back to the encounter and open Notes tab
+    // Exercise the native notes adapter's update endpoints before checking
+    // isolation, so a working referral adapter cannot hide a native regression.
+    const originalMessage = patientNoteMessage;
+    patientNoteMessage = `Updated ${patientNoteMessage}`;
+    const messages = page.getByRole("list", {
+      name: "Discussion messages",
+      exact: true,
+    });
+    await messages
+      .getByRole("listitem")
+      .filter({ hasText: originalMessage })
+      .getByRole("button", { name: "Edit message", exact: true })
+      .click();
+    await page
+      .getByRole("textbox", { name: "Edit message", exact: true })
+      .fill(patientNoteMessage);
+    await page
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    await expect(
+      messages.getByText(patientNoteMessage, { exact: true }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Rename discussion", exact: true })
+      .click();
+    const rename = page.getByRole("dialog", {
+      name: "Rename discussion",
+      exact: true,
+    });
+    patientNoteTitle = `Updated ${patientNoteTitle}`;
+    await rename
+      .getByRole("textbox", { name: "Discussion title", exact: true })
+      .fill(patientNoteTitle);
+    await rename
+      .getByRole("button", { name: "Save Changes", exact: true })
+      .click();
+    await expect(rename).not.toBeVisible();
+    await page.reload();
+    await page
+      .getByRole("button")
+      .filter({ hasText: patientNoteTitle })
+      .click();
+    const updatedMessage = messages
+      .getByRole("listitem")
+      .filter({ hasText: patientNoteMessage });
+    await expect(
+      updatedMessage.getByText(patientNoteMessage, { exact: true }),
+    ).toBeVisible();
+    await updatedMessage
+      .getByText("Edit history (1 change)", { exact: true })
+      .click();
+    await expect(
+      updatedMessage.getByText(originalMessage, { exact: true }),
+    ).toBeVisible();
+
+    // Open the encounter discussion context for the same patient.
     await page.goto(encounterUrl);
-    await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes to load by checking for the "New" button
     await expect(page.getByRole("button", { name: /^New$/i })).toBeVisible({

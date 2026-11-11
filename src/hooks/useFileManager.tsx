@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -84,6 +84,9 @@ export default function useFileManager(
     useState<FileReadMinimal | null>(null);
   const [editError, setEditError] = useState("");
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  // Identifies the latest preview load, so a load that finishes after the
+  // preview was closed or moved to another file cannot reopen or replace it.
+  const previewRequest = useRef(0);
   const queryClient = useQueryClient();
 
   const getExtension = (url: string) => {
@@ -110,6 +113,7 @@ export default function useFileManager(
   };
 
   const viewFile = async (file: FileReadMinimal, associating_id: string) => {
+    const request = ++previewRequest.current;
     const index = uploadedFiles?.findIndex((f) => f.id === file.id) ?? -1;
     setCurrentIndex(index);
     setFileUrl("");
@@ -117,7 +121,7 @@ export default function useFileManager(
 
     const data = await retrieveUpload(file, associating_id);
 
-    if (!data) return;
+    if (!data || request !== previewRequest.current) return;
 
     const signedUrl = data.read_signed_url as string;
     const extension = getExtension(signedUrl);
@@ -193,6 +197,7 @@ export default function useFileManager(
   };
 
   const handleFilePreviewClose = () => {
+    previewRequest.current++;
     setDownloadURL("");
     setFileState({
       ...file_state,

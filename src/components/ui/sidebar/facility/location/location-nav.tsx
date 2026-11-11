@@ -1,12 +1,20 @@
+import {
+  Bed,
+  CalendarClock,
+  CalendarDays,
+  ClipboardList,
+  FlaskConical,
+  House,
+  Package,
+  Pill,
+  Users,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { CalendarIcon, Logs } from "lucide-react";
 
 export function LocationNav() {
   const { t } = useTranslation();
@@ -20,25 +28,26 @@ export function LocationNav() {
     <NavMain
       links={[
         {
+          name: t("overview"),
+          url: `${baseUrl}/overview`,
+          icon: <House />,
+        },
+        {
+          section: t("patient_care"),
           name: t("beds"),
           url: `${baseUrl}/beds`,
-          icon: <CareIcon icon="l-bed" />,
+          icon: <Bed />,
         },
         {
-          name: t("laboratory"),
-          url: `${baseUrl}/laboratory`,
-          icon: <CareIcon icon="l-microscope" />,
-          children: [
-            {
-              name: t("service_requests"),
-              url: `${baseUrl}/service_requests`,
-            },
-          ],
+          name: t("service_requests"),
+          url: `${baseUrl}/service_requests`,
+          icon: <FlaskConical />,
         },
         {
+          section: t("services"),
           name: t("pharmacy"),
           url: `${baseUrl}/pharmacy`,
-          icon: <CareIcon icon="l-medical-drip" />,
+          icon: <Pill />,
           children: [
             {
               name: t("prescription_queue"),
@@ -57,7 +66,7 @@ export function LocationNav() {
         {
           name: t("inventory"),
           url: `${baseUrl}/inventory/summary`,
-          icon: <CareIcon icon="l-shop" />,
+          icon: <Package />,
           children: [
             {
               name: t("items"),
@@ -84,19 +93,26 @@ export function LocationNav() {
           ],
         },
         {
+          section: t("scheduling"),
           name: t("schedule"),
           url: `${baseUrl}/schedule`,
-          icon: <CalendarIcon />,
+          icon: <CalendarClock />,
         },
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
-          icon: <CareIcon icon="d-calendar" />,
+          icon: <CalendarDays />,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
-          icon: <Logs />,
+          icon: <Users />,
+        },
+        {
+          section: t("forms"),
+          name: t("responses"),
+          url: `${baseUrl}/responses`,
+          icon: <ClipboardList />,
         },
       ]}
     />

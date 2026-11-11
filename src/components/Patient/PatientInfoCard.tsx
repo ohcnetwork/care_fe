@@ -36,17 +36,21 @@ export const PatientInfoCard = ({
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md">
-        <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between px-2">
-          <div className="space-y-4">
+        <CardHeader className="flex flex-col gap-3 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-4">
+          <div className="min-w-0 max-w-full">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
           </div>
-          {children}
+          {children && (
+            <div className="flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0">
+              {children}
+            </div>
+          )}
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
-        <CardHeader className="px-1 py-0 pt-2 md:pt-1">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
+        <CardHeader className="px-3 py-2">
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               {tags.length > 0 ? (
                 tags.map((tag) => (
                   <TagBadge
@@ -73,7 +77,11 @@ export const PatientInfoCard = ({
                 onTagsUpdate();
               }}
               trigger={
-                <Button variant="ghost">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="self-end sm:self-auto"
+                >
                   <SettingsIcon className=" text-gray-950" strokeWidth={1.5} />
                   <span className="font-semibold underline">
                     {tags.length === 0 ? t("add_tags") : t("manage_tags")}

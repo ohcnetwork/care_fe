@@ -1,4 +1,5 @@
 import { Control, FieldValues, Path } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,14 @@ interface SchemaFieldProps<TFieldValues extends FieldValues> {
   isFieldRequired?: (fieldPath: string) => boolean;
 }
 
+/** Radix uses string values; option indices preserve the schema's original types. */
+function getSelectedOption(metadata: ExtensionFieldMetadata, value: unknown) {
+  const index = metadata.options?.findIndex(
+    (option) => JSON.stringify(option.value) === JSON.stringify(value),
+  );
+  return index !== undefined && index >= 0 ? String(index) : "";
+}
+
 /**
  * Schema-driven field renderer that creates appropriate UI components
  * based on JSON Schema field metadata and x-ui control hints
@@ -60,6 +69,7 @@ export function SchemaField<TFieldValues extends FieldValues>({
   isFieldVisible,
   isFieldRequired,
 }: SchemaFieldProps<TFieldValues>) {
+  const { t } = useTranslation();
   const fieldPath = basePath
     ? (`${basePath}.${metadata.name}` as Path<TFieldValues>)
     : (metadata.name as Path<TFieldValues>);
@@ -109,7 +119,11 @@ export function SchemaField<TFieldValues extends FieldValues>({
             return (
               <SchemaField
                 key={nestedMeta.name}
-                metadata={{ ...nestedMeta, required: isRequired }}
+                metadata={{
+                  ...nestedMeta,
+                  required: isRequired,
+                  readOnly: metadata.readOnly || nestedMeta.readOnly,
+                }}
                 control={control}
                 basePath={fieldPath as string}
                 conditionalRules={conditionalRules}
@@ -153,7 +167,11 @@ export function SchemaField<TFieldValues extends FieldValues>({
             return (
               <SchemaField
                 key={nestedMeta.name}
-                metadata={{ ...nestedMeta, required: isRequired }}
+                metadata={{
+                  ...nestedMeta,
+                  required: isRequired,
+                  readOnly: metadata.readOnly || nestedMeta.readOnly,
+                }}
                 control={control}
                 basePath={fieldPath as string}
                 conditionalRules={conditionalRules}
@@ -200,9 +218,12 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </div>
             <FormControl>
               <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                disabled={metadata.readOnly}
+                checked={field.value === true}
+                onCheckedChange={(value) => {
+                  if (!metadata.readOnly && !field.disabled)
+                    field.onChange(value);
+                }}
+                disabled={metadata.readOnly || field.disabled}
               />
             </FormControl>
             <FormMessage />
@@ -229,23 +250,25 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </FormLabel>
             <FormControl>
               <RadioGroup
-                onValueChange={field.onChange}
-                value={String(field.value ?? "")}
-                disabled={metadata.readOnly}
+                onValueChange={(value) => {
+                  if (!metadata.readOnly && !field.disabled) {
+                    field.onChange(metadata.options?.[Number(value)]?.value);
+                  }
+                }}
+                value={getSelectedOption(metadata, field.value)}
+                disabled={metadata.readOnly || field.disabled}
                 className={cn(
                   isInline ? "flex flex-row gap-4" : "flex flex-col gap-2",
                 )}
               >
-                {metadata.options?.map((option) => (
-                  <div
-                    key={String(option.value)}
-                    className="flex items-center space-x-2"
-                  >
+                {metadata.options?.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
                     <RadioGroupItem
-                      value={String(option.value)}
-                      id={`${fieldPath}-${option.value}`}
+                      value={String(index)}
+                      disabled={metadata.readOnly || field.disabled}
+                      id={`${fieldPath}-${index}`}
                     />
-                    <Label htmlFor={`${fieldPath}-${option.value}`}>
+                    <Label htmlFor={`${fieldPath}-${index}`}>
                       {option.label}
                     </Label>
                   </div>
@@ -278,8 +301,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </FormLabel>
             <FormControl>
               <Textarea
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
                 className={
                   metadata.uiVariant === "compact"
@@ -313,9 +336,12 @@ export function SchemaField<TFieldValues extends FieldValues>({
           >
             <FormControl>
               <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                disabled={metadata.readOnly}
+                checked={field.value === true}
+                onCheckedChange={(value) => {
+                  if (!metadata.readOnly && !field.disabled)
+                    field.onChange(value);
+                }}
+                disabled={metadata.readOnly || field.disabled}
               />
             </FormControl>
             <div className="space-y-1 leading-none">
@@ -348,12 +374,14 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <DatePicker
                 date={field.value ? new Date(field.value) : undefined}
-                onChange={(date) =>
-                  field.onChange(
-                    date ? new Date(date).toISOString() : undefined,
-                  )
-                }
-                disablePicker={metadata.readOnly}
+                onChange={(date) => {
+                  if (!metadata.readOnly && !field.disabled) {
+                    field.onChange(
+                      date ? new Date(date).toISOString() : undefined,
+                    );
+                  }
+                }}
+                disablePicker={metadata.readOnly || field.disabled}
                 dateFormat="dd-MM-yyyy"
               />
             </FormControl>
@@ -384,8 +412,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <Input
                 type="datetime-local"
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -414,9 +442,12 @@ export function SchemaField<TFieldValues extends FieldValues>({
           >
             <FormControl>
               <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                disabled={metadata.readOnly}
+                checked={field.value === true}
+                onCheckedChange={(value) => {
+                  if (!metadata.readOnly && !field.disabled)
+                    field.onChange(value);
+                }}
+                disabled={metadata.readOnly || field.disabled}
               />
             </FormControl>
             <div className="space-y-1 leading-none">
@@ -447,20 +478,29 @@ export function SchemaField<TFieldValues extends FieldValues>({
               )}
             </FormLabel>
             <Select
-              onValueChange={field.onChange}
-              value={String(field.value ?? "")}
-              disabled={metadata.readOnly}
+              onValueChange={(value) => {
+                if (!metadata.readOnly && !field.disabled) {
+                  field.onChange(metadata.options?.[Number(value)]?.value);
+                }
+              }}
+              value={getSelectedOption(metadata, field.value)}
+              disabled={metadata.readOnly || field.disabled}
             >
               <FormControl>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={`Select ${metadata.label}`} />
+                  <SelectValue
+                    placeholder={t("schema_select_placeholder", {
+                      label: metadata.label,
+                    })}
+                  />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {metadata.options?.map((option) => (
+                {metadata.options?.map((option, index) => (
                   <SelectItem
-                    key={String(option.value)}
-                    value={String(option.value)}
+                    key={index}
+                    value={String(index)}
+                    disabled={metadata.readOnly || field.disabled}
                   >
                     {option.label}
                   </SelectItem>
@@ -495,21 +535,21 @@ export function SchemaField<TFieldValues extends FieldValues>({
               <Input
                 type="number"
                 inputMode={metadata.type === "integer" ? "numeric" : "decimal"}
-                step={metadata.type === "integer" ? 1 : "0.01"}
+                step={metadata.type === "integer" ? 1 : "any"}
                 min={metadata.minimum}
                 max={metadata.maximum}
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 onChange={(e) => {
+                  if (metadata.readOnly || field.disabled) return;
                   const value = e.target.value;
                   if (value === "") {
-                    field.onChange(undefined);
+                    // Incomplete numbers (e.g. "1e") must remain invalid drafts,
+                    // not become an omitted optional field.
+                    field.onChange(e.target.validity.badInput ? "" : undefined);
                   } else {
-                    field.onChange(
-                      metadata.type === "integer"
-                        ? parseInt(value, 10)
-                        : parseFloat(value),
-                    );
+                    const number = Number(value);
+                    field.onChange(Number.isFinite(number) ? number : value);
                   }
                 }}
                 value={field.value ?? ""}
@@ -542,12 +582,14 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <DatePicker
                 date={field.value ? new Date(field.value) : undefined}
-                onChange={(date) =>
-                  field.onChange(
-                    date ? new Date(date).toISOString() : undefined,
-                  )
-                }
-                disablePicker={metadata.readOnly}
+                onChange={(date) => {
+                  if (!metadata.readOnly && !field.disabled) {
+                    field.onChange(
+                      date ? new Date(date).toISOString() : undefined,
+                    );
+                  }
+                }}
+                disablePicker={metadata.readOnly || field.disabled}
                 dateFormat="dd-MM-yyyy"
               />
             </FormControl>
@@ -578,8 +620,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <Input
                 type="datetime-local"
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -610,8 +652,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <Input
                 type="time"
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -642,8 +684,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <Input
                 type="email"
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -674,8 +716,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <Input
                 type="url"
-                disabled={metadata.readOnly}
                 {...field}
+                disabled={metadata.readOnly || field.disabled}
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -733,7 +775,11 @@ export function SchemaField<TFieldValues extends FieldValues>({
             return (
               <SchemaField
                 key={nestedMeta.name}
-                metadata={{ ...nestedMeta, required: isRequired }}
+                metadata={{
+                  ...nestedMeta,
+                  required: isRequired,
+                  readOnly: metadata.readOnly || nestedMeta.readOnly,
+                }}
                 control={control}
                 basePath={fieldPath as string}
                 conditionalRules={conditionalRules}
@@ -764,8 +810,8 @@ export function SchemaField<TFieldValues extends FieldValues>({
               minLength={metadata.minLength}
               maxLength={metadata.maxLength}
               pattern={metadata.pattern}
-              disabled={metadata.readOnly}
               {...field}
+              disabled={metadata.readOnly || field.disabled}
               value={field.value ?? ""}
             />
           </FormControl>

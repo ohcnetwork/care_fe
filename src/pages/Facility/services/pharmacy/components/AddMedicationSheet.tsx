@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -216,7 +217,7 @@ export function AddMedicationSheet({
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent size="lg">
           <SheetHeader>
             <SheetTitle>{t("add_medication")}</SheetTitle>
             <SheetDescription>
@@ -224,270 +225,273 @@ export function AddMedicationSheet({
             </SheetDescription>
           </SheetHeader>
 
-          <div className="flex flex-col gap-6 py-4">
-            {/* Medicine */}
-            <div className="flex flex-col gap-2">
-              <Label>{t("medicine")}</Label>
-              <ProductKnowledgeSelect
-                value={productKnowledge}
-                onChange={(pk) => {
-                  if (!pk) return;
-                  handleSelectMedication(pk);
-                }}
-                className="w-full"
-                disabled={isSaving}
-                hideClearButton
-              />
-            </div>
+          <SheetBody>
+            <div className="flex flex-col gap-6">
+              {/* Medicine */}
+              <div className="flex flex-col gap-2">
+                <Label>{t("medicine")}</Label>
+                <ProductKnowledgeSelect
+                  value={productKnowledge}
+                  onChange={(pk) => {
+                    if (!pk) return;
+                    handleSelectMedication(pk);
+                  }}
+                  className="w-full"
+                  disabled={isSaving}
+                  hideClearButton
+                />
+              </div>
 
-            {productKnowledge && (
-              <>
-                {/* Dosage instruction */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-2">
-                    <Label>
-                      {t("dosage")}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                    <ComboboxQuantityInput
-                      quantity={instruction.dose_and_rate?.dose_quantity}
-                      onChange={(value) => {
-                        updateInstruction({
-                          dose_and_rate: value
-                            ? {
-                                type: "ordered",
-                                dose_quantity: value,
-                                dose_range: undefined,
-                              }
-                            : undefined,
-                        });
-                      }}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>
-                      {t("frequency")}
-                      <span className="text-red-500 ml-0.5">*</span>
-                    </Label>
-                    <DosageFrequencyInput
-                      dosageInstruction={instruction}
-                      onDosageInstructionChange={updateInstruction}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>{t("duration")}</Label>
-                    <DurationInput
-                      value={getTimingBounds(instruction.timing?.repeat)}
-                      onChange={(bounds) => {
-                        if (instruction.timing) {
-                          updateInstruction({
-                            timing: {
-                              ...instruction.timing,
-                              repeat: {
-                                ...instruction.timing.repeat,
-                                ...timingBoundsToRepeat(bounds),
-                              },
-                            },
-                          });
-                        } else if (
-                          instruction.text &&
-                          sumManSlots(instruction.text) !== null
-                        ) {
-                          // Text M-A-N dosage: keep the frequency derived
-                          // from the pattern (e.g. 1-0-1), then apply the
-                          // chosen duration / range / period.
-                          const base = buildTimingForTextDosage(
-                            instruction.text,
-                            { value: "0", unit: "d" },
-                          );
-                          updateInstruction({
-                            timing: {
-                              ...base,
-                              repeat: {
-                                ...base.repeat,
-                                ...timingBoundsToRepeat(bounds),
-                              },
-                            },
-                          });
-                        } else {
-                          updateInstruction({
-                            timing: {
-                              repeat: {
-                                frequency: 1,
-                                period: "1",
-                                period_unit: "d",
-                                ...timingBoundsToRepeat(bounds),
-                              },
-                            },
-                          });
-                        }
-                      }}
-                      disabled={isSaving || instruction.as_needed_boolean}
-                    />
-                  </div>
-                  {instruction.as_needed_boolean && (
+              {productKnowledge && (
+                <>
+                  {/* Dosage instruction */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="flex flex-col gap-2">
-                      <Label>{t("select_prn_reason")}</Label>
-                      <ValueSetSelect
-                        system="system-as-needed-reason"
-                        value={instruction.as_needed_for || null}
-                        placeholder={t("select_prn_reason")}
-                        onSelect={(value) =>
+                      <Label>
+                        {t("dosage")}
+                        <span className="text-red-500">*</span>
+                      </Label>
+                      <ComboboxQuantityInput
+                        quantity={instruction.dose_and_rate?.dose_quantity}
+                        onChange={(value) => {
                           updateInstruction({
-                            as_needed_for: value || undefined,
-                          })
-                        }
+                            dose_and_rate: value
+                              ? {
+                                  type: "ordered",
+                                  dose_quantity: value,
+                                  dose_range: undefined,
+                                }
+                              : undefined,
+                          });
+                        }}
                         disabled={isSaving}
                       />
                     </div>
-                  )}
-                  <div className="flex flex-col gap-2">
-                    <Label>{t("route")}</Label>
-                    <ValueSetSelect
-                      system="system-route"
-                      value={instruction.route}
-                      onSelect={(route) => updateInstruction({ route })}
-                      placeholder={t("select_route")}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>{t("site")}</Label>
-                    <ValueSetSelect
-                      system="system-body-site"
-                      value={instruction.site}
-                      onSelect={(site) => updateInstruction({ site })}
-                      placeholder={t("select_site")}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>{t("method")}</Label>
-                    <ValueSetSelect
-                      system="system-administration-method"
-                      value={instruction.method}
-                      onSelect={(method) => updateInstruction({ method })}
-                      placeholder={t("select_method")}
-                      disabled={isSaving}
-                      count={20}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label>{t("instructions")}</Label>
-                    <InstructionsPopover
-                      currentInstructions={additionalInstructions}
-                      addInstruction={addAdditionalInstruction}
-                      removeInstruction={removeAdditionalInstruction}
-                      disabled={isSaving}
-                    />
-                  </div>
-                </div>
-
-                {/* Note */}
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="add-medication-note">{t("note")}</Label>
-                  <Input
-                    id="add-medication-note"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder={t("additional_notes")}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <span className="text-xs text-gray-600">
-                  {t("required_quantity")}:{" "}
-                  <span className="font-medium text-gray-900">
-                    {requiredQuantityText}
-                  </span>
-                </span>
-
-                {/* Lots */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <Label>{t("select_lot")}</Label>
-                    {canAutoSelectInventoryItems && (
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        type="button"
-                        onClick={() => autoSelectInventoryItems()}
-                        disabled={isSaving || isAutoSelectingInventoryItems}
-                        title={t("auto_select_lots")}
-                      >
-                        <RefreshCcwIcon
-                          className={cn(
-                            "size-3.5 text-gray-500",
-                            isAutoSelectingInventoryItems && "animate-spin",
-                          )}
-                        />
-                      </Button>
-                    )}
-                  </div>
-
-                  {lots.map((lot, index) => (
-                    <div key={lot.item.id} className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <DispenseLotSelector
-                          facilityId={facilityId}
-                          locationId={locationId}
-                          productKnowledgeId={productKnowledge.id}
-                          value={lot}
-                          selected={lots}
-                          onChange={setLots}
-                          disabled={isSaving || isAutoSelectingInventoryItems}
-                        />
-                        <Input
-                          type="number"
-                          min={0}
-                          max={lot.item.net_content}
-                          value={lot.quantity}
-                          onChange={(e) =>
-                            setLots(
-                              lots.map((l, i) =>
-                                i === index
-                                  ? {
-                                      ...l,
-                                      quantity: e.target.value
-                                        ? roundWhole(e.target.value)
-                                        : "",
-                                      autoSelected: false,
-                                    }
-                                  : l,
-                              ),
-                            )
+                    <div className="flex flex-col gap-2">
+                      <Label>
+                        {t("frequency")}
+                        <span className="text-red-500">*</span>
+                      </Label>
+                      <DosageFrequencyInput
+                        dosageInstruction={instruction}
+                        onDosageInstructionChange={updateInstruction}
+                        disabled={isSaving}
+                        className="shadow-xs border-input"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("duration")}</Label>
+                      <DurationInput
+                        value={getTimingBounds(instruction.timing?.repeat)}
+                        onChange={(bounds) => {
+                          if (instruction.timing) {
+                            updateInstruction({
+                              timing: {
+                                ...instruction.timing,
+                                repeat: {
+                                  ...instruction.timing.repeat,
+                                  ...timingBoundsToRepeat(bounds),
+                                },
+                              },
+                            });
+                          } else if (
+                            instruction.text &&
+                            sumManSlots(instruction.text) !== null
+                          ) {
+                            // Text M-A-N dosage: keep the frequency derived
+                            // from the pattern (e.g. 1-0-1), then apply the
+                            // chosen duration / range / period.
+                            const base = buildTimingForTextDosage(
+                              instruction.text,
+                              { value: "0", unit: "d" },
+                            );
+                            updateInstruction({
+                              timing: {
+                                ...base,
+                                repeat: {
+                                  ...base.repeat,
+                                  ...timingBoundsToRepeat(bounds),
+                                },
+                              },
+                            });
+                          } else {
+                            updateInstruction({
+                              timing: {
+                                repeat: {
+                                  frequency: 1,
+                                  period: "1",
+                                  period_unit: "d",
+                                  ...timingBoundsToRepeat(bounds),
+                                },
+                              },
+                            });
                           }
-                          className="w-24"
-                          placeholder="0"
-                          disabled={isSaving || isAutoSelectingInventoryItems}
+                        }}
+                        disabled={isSaving || instruction.as_needed_boolean}
+                      />
+                    </div>
+                    {instruction.as_needed_boolean && (
+                      <div className="flex flex-col gap-2">
+                        <Label>{t("select_prn_reason")}</Label>
+                        <ValueSetSelect
+                          system="system-as-needed-reason"
+                          value={instruction.as_needed_for || null}
+                          placeholder={t("select_prn_reason")}
+                          onSelect={(value) =>
+                            updateInstruction({
+                              as_needed_for: value || undefined,
+                            })
+                          }
+                          disabled={isSaving}
                         />
                       </div>
-                      {!isLotValid(lot) && (
-                        <span className="text-sm text-red-600">
-                          {isPositive(lot.quantity || "0")
-                            ? t("insufficient_stock")
-                            : t("quantity_must_be_greater_than_zero")}
-                        </span>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("route")}</Label>
+                      <ValueSetSelect
+                        system="system-route"
+                        value={instruction.route}
+                        onSelect={(route) => updateInstruction({ route })}
+                        placeholder={t("select_route")}
+                        disabled={isSaving}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("site")}</Label>
+                      <ValueSetSelect
+                        system="system-body-site"
+                        value={instruction.site}
+                        onSelect={(site) => updateInstruction({ site })}
+                        placeholder={t("select_site")}
+                        disabled={isSaving}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("method")}</Label>
+                      <ValueSetSelect
+                        system="system-administration-method"
+                        value={instruction.method}
+                        onSelect={(method) => updateInstruction({ method })}
+                        placeholder={t("select_method")}
+                        disabled={isSaving}
+                        count={20}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("instructions")}</Label>
+                      <InstructionsPopover
+                        currentInstructions={additionalInstructions}
+                        addInstruction={addAdditionalInstruction}
+                        removeInstruction={removeAdditionalInstruction}
+                        disabled={isSaving}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Note */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="add-medication-note">{t("note")}</Label>
+                    <Input
+                      id="add-medication-note"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder={t("additional_notes")}
+                      disabled={isSaving}
+                    />
+                  </div>
+
+                  <span className="text-xs text-gray-600">
+                    {t("required_quantity")}:{" "}
+                    <span className="font-medium text-gray-900">
+                      {requiredQuantityText}
+                    </span>
+                  </span>
+
+                  {/* Lots */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <Label>{t("select_lot")}</Label>
+                      {canAutoSelectInventoryItems && (
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          type="button"
+                          onClick={() => autoSelectInventoryItems()}
+                          disabled={isSaving || isAutoSelectingInventoryItems}
+                          title={t("auto_select_lots")}
+                        >
+                          <RefreshCcwIcon
+                            className={cn(
+                              "size-3.5 text-gray-500",
+                              isAutoSelectingInventoryItems && "animate-spin",
+                            )}
+                          />
+                        </Button>
                       )}
                     </div>
-                  ))}
 
-                  {lots.length === 0 && (
-                    <DispenseLotSelector
-                      facilityId={facilityId}
-                      locationId={locationId}
-                      productKnowledgeId={productKnowledge.id}
-                      selected={lots}
-                      onChange={setLots}
-                      disabled={isSaving || isAutoSelectingInventoryItems}
-                    />
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+                    {lots.map((lot, index) => (
+                      <div key={lot.item.id} className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <DispenseLotSelector
+                            facilityId={facilityId}
+                            locationId={locationId}
+                            productKnowledgeId={productKnowledge.id}
+                            value={lot}
+                            selected={lots}
+                            onChange={setLots}
+                            disabled={isSaving || isAutoSelectingInventoryItems}
+                          />
+                          <Input
+                            type="number"
+                            min={0}
+                            max={lot.item.net_content}
+                            value={lot.quantity}
+                            onChange={(e) =>
+                              setLots(
+                                lots.map((l, i) =>
+                                  i === index
+                                    ? {
+                                        ...l,
+                                        quantity: e.target.value
+                                          ? roundWhole(e.target.value)
+                                          : "",
+                                        autoSelected: false,
+                                      }
+                                    : l,
+                                ),
+                              )
+                            }
+                            className="w-24"
+                            placeholder="0"
+                            disabled={isSaving || isAutoSelectingInventoryItems}
+                          />
+                        </div>
+                        {!isLotValid(lot) && (
+                          <span className="text-sm text-red-600">
+                            {isPositive(lot.quantity || "0")
+                              ? t("insufficient_stock")
+                              : t("quantity_must_be_greater_than_zero")}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+
+                    {lots.length === 0 && (
+                      <DispenseLotSelector
+                        facilityId={facilityId}
+                        locationId={locationId}
+                        productKnowledgeId={productKnowledge.id}
+                        selected={lots}
+                        onChange={setLots}
+                        disabled={isSaving || isAutoSelectingInventoryItems}
+                      />
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </SheetBody>
 
           <SheetFooter>
             <Button

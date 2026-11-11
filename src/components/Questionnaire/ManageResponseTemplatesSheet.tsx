@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/ui/spinner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -7,7 +8,6 @@ import {
   ChevronLeft,
   ClipboardListIcon,
   Edit,
-  Loader2Icon,
   PillIcon,
   PlusIcon,
   SaveIcon,
@@ -48,12 +48,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -492,7 +493,7 @@ function TemplateCard({
             onClick={(e) => e.stopPropagation()}
           >
             {isApplying && (
-              <Loader2Icon className="size-4 animate-spin text-primary-600" />
+              <Spinner className="size-4 animate-spin text-primary-600" />
             )}
             {isApplied && (
               <CheckCircle2Icon className="size-4 text-green-600" />
@@ -980,7 +981,11 @@ export default function ManageResponseTemplatesSheet({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form
+          id="response-template-form"
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
           <FormField
             control={form.control}
             name="name"
@@ -1047,44 +1052,6 @@ export default function ManageResponseTemplatesSheet({
                 </FormDescription>
               </div>
             )}
-
-          <div className="flex gap-2 justify-end pt-2">
-            <Button
-              variant="outline"
-              onClick={handleResetForm}
-              disabled={isCreating || isUpdating}
-              size="sm"
-              className="h-9"
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isCreating || isUpdating || isLoadingDetails}
-              size="sm"
-              className="h-9"
-            >
-              {isCreating || isUpdating ? (
-                <>
-                  <Loader2Icon className="size-3.5 mr-1.5 animate-spin" />
-                  <span className="text-xs">
-                    {editingTemplate ? t("updating") : t("creating")}
-                  </span>
-                </>
-              ) : (
-                <>
-                  {savingCurrent || editingTemplate ? (
-                    <SaveIcon className="size-3.5 mr-1.5" />
-                  ) : (
-                    <PlusIcon className="size-3.5 mr-1.5" />
-                  )}
-                  <span className="text-xs">
-                    {editingTemplate ? t("save_changes") : t("create_template")}
-                  </span>
-                </>
-              )}
-            </Button>
-          </div>
         </form>
       </Form>
     </div>
@@ -1115,8 +1082,8 @@ export default function ManageResponseTemplatesSheet({
         }}
       >
         <SheetTrigger asChild>{trigger ?? defaultTrigger}</SheetTrigger>
-        <SheetContent className="flex flex-col sm:max-w-lg p-0 overflow-y-auto">
-          <SheetHeader className="p-4 space-y-2 bg-gray-100 border border-b-gray-200">
+        <SheetContent size="md" className="overflow-hidden">
+          <SheetHeader>
             <div className="flex items-center gap-2">
               {viewMode === "create" && (
                 <Button
@@ -1154,11 +1121,42 @@ export default function ManageResponseTemplatesSheet({
             </div>
           </SheetHeader>
 
-          <ScrollArea className="flex-1 pb-4">
-            <div className="px-4">
-              {viewMode === "list" ? renderTemplateList() : renderCreateForm()}
-            </div>
-          </ScrollArea>
+          <SheetBody>
+            {viewMode === "list" ? renderTemplateList() : renderCreateForm()}
+          </SheetBody>
+          {viewMode === "create" && (
+            <SheetFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResetForm}
+                disabled={isCreating || isUpdating}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                form="response-template-form"
+                disabled={isCreating || isUpdating || isLoadingDetails}
+              >
+                {isCreating || isUpdating ? (
+                  <>
+                    <Spinner className="size-4 animate-spin" />
+                    {editingTemplate ? t("updating") : t("creating")}
+                  </>
+                ) : (
+                  <>
+                    {savingCurrent || editingTemplate ? (
+                      <SaveIcon className="size-4" />
+                    ) : (
+                      <PlusIcon className="size-4" />
+                    )}
+                    {editingTemplate ? t("save_changes") : t("create_template")}
+                  </>
+                )}
+              </Button>
+            </SheetFooter>
+          )}
         </SheetContent>
       </Sheet>
 

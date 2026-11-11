@@ -1,4 +1,4 @@
-import { CubeIcon } from "@radix-ui/react-icons";
+import { Box as CubeIcon } from "lucide-react";
 
 import { usePluginDevices } from "@/pages/Facility/settings/devices/hooks/usePluginDevices";
 
