@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   createQuestionnaire,
   openQuestionBuilder,
+  selectQuestionnaireStatusTab,
 } from "tests/helper/questionnaireV2";
 import { expectToast } from "tests/helper/ui";
 
@@ -41,10 +42,7 @@ test.describe("Questionnaire v2 detail", () => {
 
     await test.step("Navigate list -> row -> detail and confirm the edit persisted", async () => {
       await page.goto("/admin/questionnaires");
-      await page
-        .getByRole("radiogroup", { name: "Status" })
-        .getByRole("radio", { name: "Draft" })
-        .click();
+      await selectQuestionnaireStatusTab(page, "Draft");
       await page.getByPlaceholder("Search Questionnaires").fill(newTitle);
 
       // The table row's role is overridden to "link" (QuestionnaireListPage

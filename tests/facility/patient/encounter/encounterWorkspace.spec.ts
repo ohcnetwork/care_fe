@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 
 import type { PlugConfig } from "../../../../src/types/plugConfig";
+import type { Question } from "../../../../src/types/questionnaire/question";
 import type { UserReadMinimal } from "../../../../src/types/user/user";
 import type {
   WorkspaceRead,
@@ -9,6 +10,8 @@ import type {
   WorkspaceUpdate,
   WorkspaceUserDefaultAttributes,
 } from "../../../../src/types/workspace/workspace";
+import { draftFormCount, draftFormNoteText } from "../../../helper/fillDrafts";
+import { verifyLabelledValues } from "../../../helper/questionnaire";
 import { installEncounterWidgetRemote } from "../../../support/encounterWidgetRemote";
 
 test.use({
@@ -89,6 +92,7 @@ async function mockEncounterWorkspaceApi(
     allowWorkspaceUpdate?: boolean;
     includeSectionData?: boolean;
     includeConfigData?: boolean;
+    includeWidgetData?: boolean;
   } = {},
 ) {
   const actor = user();
@@ -122,8 +126,11 @@ async function mockEncounterWorkspaceApi(
     facility_tags: [],
     instance_identifiers: [],
     facility_identifiers: [],
+    // Patient-level responses are granted separately from clinical data.
     permissions:
-      options.clinicalRead === false ? [] : ["can_view_clinical_data"],
+      options.clinicalRead === false
+        ? []
+        : ["can_view_clinical_data", "can_view_questionnaire_responses"],
   };
   const currentEncounter = {
     id: faker.string.uuid(),
@@ -164,6 +171,19 @@ async function mockEncounterWorkspaceApi(
             role: { system: "test", code: "doctor", display: "Ward doctor" },
             member: pastCareTeamMember,
           },
+          // The signed-in user cared for the previous admission only.
+          ...(options.includeWidgetData
+            ? [
+                {
+                  role: {
+                    system: "test",
+                    code: "nurse",
+                    display: "Ward nurse",
+                  },
+                  member: actor,
+                },
+              ]
+            : []),
         ]
       : [],
   };
@@ -211,6 +231,11 @@ async function mockEncounterWorkspaceApi(
   const workspaceReads: URL[] = [];
   const clinicalReads: URL[] = [];
   const sectionReads: URL[] = [];
+  const analyseRequests: {
+    encounter: string | null;
+    status: string | null;
+    codes: string[];
+  }[] = [];
   const writes: string[] = [];
   const questionId = faker.string.uuid();
   const questionnaire = {
@@ -232,8 +257,8 @@ async function mockEncounterWorkspaceApi(
       },
     ],
   };
-  const observations = [currentEncounter, pastEncounter].map(
-    (encounter, index) => ({
+  const observations = [
+    ...[currentEncounter, pastEncounter].map((encounter, index) => ({
       id: faker.string.uuid(),
       encounter: encounter.id,
       status: "final",
@@ -251,8 +276,73 @@ async function mockEncounterWorkspaceApi(
       },
       created_by: actor,
       updated_by: actor,
-    }),
-  );
+    })),
+    // An earlier pulse and a saturation reading give the latest-vitals matrix
+    // a change to report and a second code to render.
+    ...(options.includeWidgetData
+      ? [
+          {
+            id: faker.string.uuid(),
+            encounter: currentEncounter.id,
+            status: "final",
+            subject_type: "encounter",
+            main_code: {
+              system: "http://loinc.org",
+              code: "8867-4",
+              display: "Pulse",
+            },
+            effective_datetime: "2026-10-01T06:00:00Z",
+            value_type: "quantity",
+            value: {
+              value: "76",
+              unit: { system: "http://unitsofmeasure.org", code: "/min" },
+            },
+            created_by: pastCareTeamMember,
+            updated_by: pastCareTeamMember,
+          },
+          {
+            id: faker.string.uuid(),
+            encounter: currentEncounter.id,
+            status: "final",
+            subject_type: "encounter",
+            main_code: {
+              system: "http://loinc.org",
+              code: "2708-6",
+              display: "Oxygen saturation",
+            },
+            effective_datetime: "2026-10-01T07:30:00Z",
+            value_type: "quantity",
+            value: {
+              value: "97",
+              unit: { system: "http://unitsofmeasure.org", code: "%" },
+            },
+            created_by: pastCareTeamMember,
+            updated_by: pastCareTeamMember,
+          },
+        ]
+      : []),
+  ];
+  const enteredInErrorObservations = options.includeWidgetData
+    ? Array.from({ length: 8 }, (_, index) => ({
+        id: faker.string.uuid(),
+        encounter: currentEncounter.id,
+        status: "entered_in_error",
+        subject_type: "encounter",
+        main_code: {
+          system: "http://loinc.org",
+          code: "8867-4",
+          display: "Pulse",
+        },
+        effective_datetime: `2026-10-01T09:0${index}:00Z`,
+        value_type: "quantity",
+        value: {
+          value: "140",
+          unit: { system: "http://unitsofmeasure.org", code: "/min" },
+        },
+        created_by: pastCareTeamMember,
+        updated_by: pastCareTeamMember,
+      }))
+    : [];
   const questionnaireResponses = [currentEncounter, pastEncounter]
     .map((encounter, index) => ({
       id: faker.string.uuid(),
@@ -385,18 +475,211 @@ async function mockEncounterWorkspaceApi(
       diagnosis: "Previous asthma",
     },
   };
+  const imagingReport = {
+    id: faker.string.uuid(),
+    status: "final",
+    category: { system: "test", code: "imaging", display: "Imaging" },
+    encounter: currentEncounter,
+    observations: [],
+    conclusion: "No acute findings",
+    created_by: actor,
+    updated_by: actor,
+    requester: actor,
+    created_date: "2026-10-01T12:00:00Z",
+    modified_date: "2026-10-01T12:30:00Z",
+  };
+  const widgetOrders = options.includeWidgetData
+    ? [
+        {
+          title: "Chest X-ray",
+          status: "active",
+          category: "imaging",
+          code: {
+            system: "http://loinc.org",
+            code: "36643-5",
+            display: "XR Chest",
+          },
+          diagnostic_reports: [imagingReport],
+          created_date: "2026-10-01T09:00:00Z",
+        },
+        {
+          title: "Creatinine",
+          status: "active",
+          category: "laboratory",
+          code: {
+            system: "http://loinc.org",
+            code: "2160-0",
+            display: "Creatinine",
+          },
+          diagnostic_reports: [],
+          created_date: "2026-10-01T10:00:00Z",
+        },
+        {
+          title: "Unsent draft order",
+          status: "draft",
+          category: "laboratory",
+          code: {
+            system: "http://loinc.org",
+            code: "718-7",
+            display: "Hemoglobin",
+          },
+          diagnostic_reports: [],
+          created_date: "2026-10-01T11:00:00Z",
+        },
+      ].map((order) => ({
+        id: faker.string.uuid(),
+        encounter: currentEncounter,
+        intent: "order",
+        priority: "routine",
+        do_not_perform: false,
+        tags: [],
+        locations: [],
+        specimens: [],
+        created_by: actor,
+        updated_by: actor,
+        ...order,
+      }))
+    : [];
+  const otherPrescriber = user();
+  const medicationRequests = options.includeWidgetData
+    ? [
+        {
+          id: faker.string.uuid(),
+          status: "active",
+          intent: "order",
+          category: "inpatient",
+          priority: "routine",
+          medication: {
+            system: "http://snomed.info/sct",
+            code: "322236009",
+            display: "Paracetamol 500 mg tablet",
+          },
+          encounter: currentEncounter.id,
+          dosage_instruction: [
+            {
+              text: "1-0-1",
+              dose_and_rate: {
+                dose_quantity: {
+                  value: 500,
+                  unit: {
+                    system: "http://unitsofmeasure.org",
+                    code: "mg",
+                    display: "mg",
+                  },
+                },
+              },
+            },
+          ],
+          authored_on: "2026-10-01T09:30:00Z",
+          created_date: "2026-10-01T09:30:00Z",
+          modified_date: "2026-10-01T09:30:00Z",
+          created_by: actor,
+          updated_by: actor,
+          requester: actor,
+        },
+        {
+          id: faker.string.uuid(),
+          status: "active",
+          intent: "order",
+          category: "inpatient",
+          priority: "routine",
+          medication: {
+            system: "http://snomed.info/sct",
+            code: "387458008",
+            display: "Aspirin 75 mg tablet",
+          },
+          encounter: pastEncounter.id,
+          dosage_instruction: [{ text: "0-0-1" }],
+          authored_on: "2026-09-01T09:30:00Z",
+          created_date: "2026-09-01T09:30:00Z",
+          modified_date: "2026-09-01T09:30:00Z",
+          created_by: otherPrescriber,
+          updated_by: otherPrescriber,
+          requester: otherPrescriber,
+        },
+        {
+          id: faker.string.uuid(),
+          status: "completed",
+          intent: "order",
+          category: "inpatient",
+          priority: "routine",
+          medication: {
+            system: "http://snomed.info/sct",
+            code: "372756006",
+            display: "Warfarin 5 mg tablet",
+          },
+          encounter: pastEncounter.id,
+          dosage_instruction: [{ text: "1-0-0" }],
+          authored_on: "2026-09-01T10:00:00Z",
+          created_date: "2026-09-01T10:00:00Z",
+          modified_date: "2026-09-02T10:00:00Z",
+          created_by: otherPrescriber,
+          updated_by: otherPrescriber,
+          requester: otherPrescriber,
+        },
+      ]
+    : [];
+  const medicationStatements = options.includeWidgetData
+    ? [
+        {
+          id: faker.string.uuid(),
+          status: "active",
+          medication: {
+            system: "http://snomed.info/sct",
+            code: "109081006",
+            display: "Metformin 500 mg tablet",
+          },
+          dosage_text: "1-0-1 after food",
+          effective_period: { start: "2026-08-15T00:00:00Z" },
+          encounter: currentEncounter.id,
+          information_source: "patient",
+          created_date: "2026-10-01T09:45:00Z",
+          modified_date: "2026-10-01T09:45:00Z",
+          created_by: actor,
+          updated_by: actor,
+        },
+        {
+          id: faker.string.uuid(),
+          status: "stopped",
+          medication: {
+            system: "http://snomed.info/sct",
+            code: "387517004",
+            display: "Stopped statin",
+          },
+          dosage_text: "0-0-1",
+          encounter: currentEncounter.id,
+          information_source: "patient",
+          created_date: "2026-10-01T09:50:00Z",
+          modified_date: "2026-10-01T09:50:00Z",
+          created_by: actor,
+          updated_by: actor,
+        },
+      ]
+    : [];
 
   await page.addInitScript(() => {
     localStorage.setItem("care_access_token", "encounter-workspace-test");
   });
-  if (options.includeSectionData) {
+  if (options.includeSectionData || options.includeOverview) {
     await page.route("**/config/plots.json", async (route) => {
       await route.fulfill({
         json: [
           {
             id: "primary-parameters",
             name: "Primary Parameters",
-            groups: [{ title: "Pulse", codes: [observations[0].main_code] }],
+            groups: [
+              { title: "Pulse", codes: [observations[0].main_code] },
+              {
+                title: "SpO2",
+                codes: [
+                  {
+                    system: "http://loinc.org",
+                    code: "2708-6",
+                    display: "Oxygen saturation",
+                  },
+                ],
+              },
+            ],
           },
         ],
       });
@@ -411,6 +694,51 @@ async function mockEncounterWorkspaceApi(
       const url = new URL(request.url());
       const path = url.pathname;
       if (request.method() !== "GET") {
+        // Analysis is a read in disguise: the chart groups readings per code.
+        if (
+          (options.includeSectionData || options.includeOverview) &&
+          request.method() === "POST" &&
+          path === `/api/v1/patient/${patient.id}/observation/analyse/`
+        ) {
+          clinicalReads.push(url);
+          sectionReads.push(url);
+          const body = request.postDataJSON() as {
+            codes: { code: string }[];
+            page_size?: number;
+          };
+          analyseRequests.push({
+            encounter: url.searchParams.get("encounter"),
+            status: url.searchParams.get("status"),
+            codes: body.codes.map((code) => code.code),
+          });
+          const statuses = url.searchParams.get("status")?.split(",");
+          const analysedObservations = url.searchParams.has("status")
+            ? [...observations, ...enteredInErrorObservations]
+            : observations;
+          await route.fulfill({
+            json: {
+              results: body.codes.map((code) => ({
+                code,
+                results: analysedObservations
+                  .filter(
+                    (item) =>
+                      item.main_code.code === code.code &&
+                      (!url.searchParams.has("encounter") ||
+                        item.encounter === url.searchParams.get("encounter")) &&
+                      (!statuses || statuses.includes(item.status)),
+                  )
+                  .sort(
+                    (a, b) =>
+                      Date.parse(b.effective_datetime) -
+                      Date.parse(a.effective_datetime),
+                  )
+                  .slice(0, body.page_size ?? 10)
+                  .map((item) => ({ ...item, encounter: null })),
+              })),
+            },
+          });
+          return;
+        }
         writes.push(`${request.method()} ${path}`);
         if (
           options.allowWorkspaceUpdate &&
@@ -535,8 +863,17 @@ async function mockEncounterWorkspaceApi(
         return;
       }
       if (path === "/api/v1/encounter/") {
+        const careTeamUser = url.searchParams.get("care_team_user");
+        const results = [currentEncounter, pastEncounter].filter(
+          (encounter) =>
+            !careTeamUser ||
+            encounter.care_team.some(
+              ({ member }) => member.username === careTeamUser,
+            ),
+        );
+        const limit = Number(url.searchParams.get("limit") ?? results.length);
         await route.fulfill({
-          json: { count: 2, results: [currentEncounter, pastEncounter] },
+          json: { count: results.length, results: results.slice(0, limit) },
         });
         return;
       }
@@ -610,14 +947,16 @@ async function mockEncounterWorkspaceApi(
             });
             return;
           }
-          const results = serviceRequests
+          const results = [...serviceRequests, ...widgetOrders]
             .filter(
               (request) =>
                 path ===
                   `/api/v1/facility/${request.encounter.facility.id}/service_request/` &&
                 request.encounter.id === url.searchParams.get("encounter") &&
                 (!url.searchParams.has("status") ||
-                  request.status === url.searchParams.get("status")),
+                  request.status === url.searchParams.get("status")) &&
+                (!url.searchParams.has("category") ||
+                  request.category === url.searchParams.get("category")),
             )
             .sort(
               (a, b) => Date.parse(b.created_date) - Date.parse(a.created_date),
@@ -644,8 +983,35 @@ async function mockEncounterWorkspaceApi(
         if (path === `/api/v1/patient/${patient.id}/observation/`) {
           clinicalReads.push(url);
           sectionReads.push(url);
+          const codes = url.searchParams.get("codes")?.split(",");
           const results = observations.filter(
-            (item) => item.encounter === url.searchParams.get("encounter"),
+            (item) =>
+              (!url.searchParams.has("encounter") ||
+                item.encounter === url.searchParams.get("encounter")) &&
+              (!codes || codes.includes(item.main_code.code)),
+          );
+          await route.fulfill({ json: { count: results.length, results } });
+          return;
+        }
+        if (path === `/api/v1/patient/${patient.id}/medication/request/`) {
+          clinicalReads.push(url);
+          sectionReads.push(url);
+          const statuses = url.searchParams.get("status")?.split(",");
+          const results = medicationRequests.filter(
+            (item) =>
+              (!statuses || statuses.includes(item.status)) &&
+              (!url.searchParams.has("encounter") ||
+                item.encounter === url.searchParams.get("encounter")),
+          );
+          await route.fulfill({ json: { count: results.length, results } });
+          return;
+        }
+        if (path === `/api/v1/patient/${patient.id}/medication/statement/`) {
+          clinicalReads.push(url);
+          sectionReads.push(url);
+          const statuses = url.searchParams.get("status")?.split(",");
+          const results = medicationStatements.filter(
+            (item) => !statuses || statuses.includes(item.status),
           );
           await route.fulfill({ json: { count: results.length, results } });
           return;
@@ -656,7 +1022,10 @@ async function mockEncounterWorkspaceApi(
           const results = questionnaireResponses
             .filter(
               (item) =>
-                item.encounter === url.searchParams.get("encounter") &&
+                (!url.searchParams.has("encounter") ||
+                  item.encounter === url.searchParams.get("encounter")) &&
+                (!url.searchParams.has("created_by") ||
+                  item.created_by.id === url.searchParams.get("created_by")) &&
                 (!url.searchParams.has("questionnaire_slug") ||
                   item.questionnaire.slug ===
                     url.searchParams.get("questionnaire_slug")),
@@ -772,16 +1141,382 @@ async function mockEncounterWorkspaceApi(
     clinicalNames,
     clinicalReads,
     sectionReads,
+    analyseRequests,
     questionnaire,
     questionnaireResponses,
     draft,
     reportTemplate,
     currentCareTeamMember,
     pastCareTeamMember,
+    otherPrescriber,
+    imagingReport,
+    widgetOrders,
     writes,
     basePath: `/facility/${facility.id}/patient/${patient.id}/encounter/${currentEncounter.id}`,
   };
 }
+
+test("submitted boolean values stay paired with their exact question labels", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeOverview: true,
+    includeSectionData: true,
+  });
+  fixture.defaults.length = 0;
+  const question = fixture.questionnaire.questions[0];
+  question.text = "Consent details";
+  question.type = "boolean";
+  const consentQuestion = {
+    ...question,
+    id: faker.string.uuid(),
+    link_id: "consent",
+    text: "Consent",
+  };
+  fixture.questionnaire.questions.push(consentQuestion);
+  for (const response of fixture.questionnaireResponses) {
+    response.responses[0].values = [{ type: "boolean", value: "false" }];
+    response.responses.push({
+      question_id: consentQuestion.id,
+      link_id: consentQuestion.link_id,
+      values: [{ type: "boolean", value: "true" }],
+    });
+  }
+
+  await page.goto(`${fixture.basePath}/updates`);
+  await verifyLabelledValues(page, [
+    ["Consent", "Yes"],
+    ["Consent details", "No"],
+  ]);
+});
+
+test("a cyclic added form blocks the whole submission and retains both draft forms", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const cyclic = {
+    ...fixture.questionnaire,
+    id: faker.string.uuid(),
+    title: "Circular review",
+    questions: ["first", "second"].map((id, index) => ({
+      id,
+      link_id: id,
+      text: id,
+      type: "string",
+      enable_when: [
+        {
+          question: index === 0 ? "second" : "first",
+          operator: "equals",
+          answer: "yes",
+        },
+      ],
+    })),
+  };
+  await page.route("**/api/v1/questionnaire/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/api/v1/questionnaire/") {
+      await route.fulfill({ json: { count: 1, results: [cyclic] } });
+    } else if (path === `/api/v1/questionnaire/${cyclic.id}/`) {
+      await route.fulfill({ json: cyclic });
+    } else {
+      await route.fallback();
+    }
+  });
+  const batchPosts: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname === "/api/v1/batch_requests/"
+    ) {
+      batchPosts.push(request.url());
+    }
+  });
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  await page
+    .locator(`[data-question-id="${fixture.questionnaire.questions[0].id}"]`)
+    .getByRole("textbox")
+    .fill("Keep this clinical note");
+  await page.getByRole("button", { name: "Add questionnaire" }).click();
+  await page.getByPlaceholder("Search Forms").fill(cyclic.title);
+  await page.getByRole("option", { name: cyclic.title }).click();
+  await expect(page.locator("[data-form-key]")).toHaveCount(2);
+  await expect.poll(() => draftFormCount(page)).toBe(2);
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect(
+    page.locator("[data-sonner-toast]").filter({
+      hasText: "This form has circular visibility conditions.",
+    }),
+  ).toBeVisible();
+  expect(batchPosts).toHaveLength(0);
+  expect(await draftFormCount(page)).toBe(2);
+  expect(await draftFormNoteText(page, fixture.questionnaire.id)).toBe(
+    "Keep this clinical note",
+  );
+});
+
+test("fill navigation distinguishes duplicate titles and repeated group controls identify their row", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    { id: "first", link_id: "first", text: "Shared title", type: "string" },
+    {
+      id: "group",
+      link_id: "group",
+      text: "Findings",
+      type: "group",
+      repeats: true,
+      questions: [
+        {
+          id: "second",
+          link_id: "second",
+          text: "Shared title",
+          type: "string",
+        },
+      ],
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  const group = page.locator('[data-question-id="group"]').first();
+  await group.getByRole("button", { name: "Add Another" }).click();
+  await group.getByRole("button", { name: "Add Another" }).click();
+  await expect(
+    group.getByRole("heading", { name: "Findings (1)", exact: true }),
+  ).toBeVisible();
+  await expect(
+    group.getByRole("heading", { name: "Findings (2)", exact: true }),
+  ).toBeVisible();
+  await group
+    .locator("[data-group-row]")
+    .nth(0)
+    .getByRole("textbox")
+    .fill("First");
+  await group
+    .locator("[data-group-row]")
+    .nth(1)
+    .getByRole("textbox")
+    .fill("Second");
+  await group
+    .getByRole("button", { name: "Remove Findings (1)", exact: true })
+    .click();
+  await expect(group.getByRole("textbox")).toHaveValue("Second");
+  await expect(
+    group.getByRole("button", { name: "Remove Findings (1)", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Questions outline" }).focus();
+  const outline = page.getByRole("complementary", {
+    name: "Questions outline",
+  });
+  await expect(
+    outline.getByRole("button", { name: "Shared title (first)", exact: true }),
+  ).toBeVisible();
+  await expect(
+    outline.getByRole("button", { name: "Shared title (second)", exact: true }),
+  ).toBeVisible();
+});
+
+test("formatting-only optional appointment notes do not require a slot", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    { ...fixture.questionnaire.questions[0], type: "string" },
+    {
+      id: "appointment",
+      link_id: "appointment",
+      text: "Optional appointment",
+      type: "structured",
+      structured_type: "appointment",
+      required: false,
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  const posts: string[] = [];
+  await page.route("**/api/v1/batch_requests/**", async (route) => {
+    posts.push(route.request().postData() ?? "");
+    await route.fulfill({ json: { results: [] } });
+  });
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}`,
+  );
+  await page
+    .locator(`[data-question-id="${questions[0].id}"]`)
+    .getByRole("textbox")
+    .fill("Clinical note");
+  const editor = page
+    .locator('[data-question-id="appointment"]')
+    .getByRole("textbox", { name: /reason for visit/i });
+  await editor.fill("Needs a slot");
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect(
+    page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "Validation failed" }),
+  ).toBeVisible();
+  expect(posts).toHaveLength(0);
+  await editor.fill("");
+  await editor.pressSequentially("# ");
+  await expect(editor).toHaveText("");
+  await page.getByRole("button", { name: "Save Changes" }).click();
+  await expect.poll(() => posts.length).toBe(1);
+  const body = JSON.parse(posts[0]) as { requests: { url: string }[] };
+  expect(body.requests.map((request) => request.url)).toEqual([
+    `/api/v1/questionnaire/${fixture.questionnaire.id}/submit/`,
+  ]);
+});
+
+test("resumed appointments without notes can clear their slot when changing resource", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const questions: Question[] = [
+    {
+      id: "appointment",
+      link_id: "appointment",
+      text: "Optional appointment",
+      type: "structured",
+      structured_type: "appointment",
+      required: false,
+    },
+  ];
+  await page.route(
+    `**/api/v1/questionnaire/${fixture.questionnaire.id}/**`,
+    (route) => route.fulfill({ json: { ...fixture.questionnaire, questions } }),
+  );
+  await page.route(
+    `**/api/v1/form_submission/${fixture.draft.id}/**`,
+    (route) =>
+      route.fulfill({
+        json: {
+          ...fixture.draft,
+          response_dump: {
+            questionnaireResponses: {
+              questionnaire: fixture.questionnaire,
+              responses: [
+                {
+                  question_id: "appointment",
+                  link_id: "appointment",
+                  structured_type: "appointment",
+                  values: [
+                    {
+                      type: "appointment",
+                      value: [{ slot_id: "existing-slot", tags: [] }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(
+    `${fixture.basePath}/questionnaire/${fixture.questionnaire.id}?continue_draft=${fixture.draft.id}`,
+  );
+  const appointment = page.locator('[data-question-id="appointment"]');
+  await expect(
+    appointment.getByRole("combobox", { name: "Select Practitioner" }),
+  ).toBeVisible();
+  await appointment
+    .getByRole("radio", { name: "Location", exact: true })
+    .click();
+  await expect(
+    appointment.getByRole("combobox", { name: "Select Location" }),
+  ).toBeVisible();
+  await expect(
+    appointment.getByRole("button", {
+      name: "Select the resource",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  expect(errors).toEqual([]);
+});
+
+test("organization history filters use each primary encounter's facility scope", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page);
+  const otherFacility = { ...fixture.facility, id: faker.string.uuid() };
+  fixture.pastEncounter.facility = otherFacility;
+  const organizationId = faker.string.uuid();
+  await page.route(`**/api/v1/organization/${organizationId}/**`, (route) =>
+    route.fulfill({
+      json: {
+        id: organizationId,
+        name: "History scope",
+        org_type: "team",
+        permissions: ["can_list_patients", "can_view_patient"],
+      },
+    }),
+  );
+  await page.addInitScript(
+    ({ actorId, facilities }) => {
+      for (const [index, facility] of facilities.entries()) {
+        sessionStorage.setItem(
+          `encounter_history_filters:${actorId}:${facility.id}`,
+          JSON.stringify({
+            status: index === 0 ? "completed" : "in_progress",
+            selectedTags: [],
+            tagsBehavior: "any",
+          }),
+        );
+      }
+    },
+    {
+      actorId: fixture.actor.id,
+      facilities: [fixture.facility, otherFacility],
+    },
+  );
+  const historyRequests: URL[] = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (
+      url.pathname === "/api/v1/encounter/" &&
+      url.searchParams.get("limit") === "14"
+    ) {
+      historyRequests.push(url);
+    }
+  });
+  const organizationPath = `/organization/${organizationId}/patient/${fixture.patient.id}/encounter`;
+  await page.goto(`${organizationPath}/${fixture.currentEncounter.id}/updates`);
+  const historyButton = page.getByRole("button", {
+    name: /^Encounter History/,
+  });
+  await historyButton.click();
+  await expect
+    .poll(() => historyRequests.at(-1)?.searchParams.get("status"))
+    .toBe("completed");
+  await historyButton.click();
+  await page.evaluate((path) => {
+    history.pushState({}, "", path);
+    dispatchEvent(new PopStateEvent("popstate"));
+  }, `${organizationPath}/${fixture.pastEncounter.id}/updates`);
+  await historyButton.click();
+  await expect
+    .poll(() => historyRequests.at(-1)?.searchParams.get("status"))
+    .toBe("in_progress");
+});
 
 test.describe("Encounter workspace rendering", () => {
   test("renders configured clinical data while retaining system pages and encounter navigation", async ({
@@ -1112,10 +1847,13 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("tab", { name: "Ward rounds", exact: true }),
     ).toBeVisible();
-    // Overview also queries the default account through a POST endpoint.
+    // Analysis is a read despite using POST; Overview also queries the
+    // default account through a POST endpoint.
     expect(
       fixture.writes.filter(
-        (request) => !request.endsWith("/account/default_account/"),
+        (request) =>
+          !request.endsWith("/account/default_account/") &&
+          !request.endsWith("/observation/analyse/"),
       ),
     ).toEqual([]);
   });
@@ -1151,11 +1889,20 @@ test.describe("Encounter workspace rendering", () => {
       },
     };
     fixture.workspaces.push(alternateWorkspace);
+    const unrelatedWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Unrelated ${faker.word.words(2)}`,
+    };
+    const inaccessibleWorkspace: WorkspaceRead = {
+      ...fixture.workspace,
+      id: faker.string.uuid(),
+      name: `Inaccessible ${faker.word.words(2)}`,
+    };
+    fixture.workspaces.push(unrelatedWorkspace);
 
     const openPicker = async () => {
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -1174,10 +1921,8 @@ test.describe("Encounter workspace rendering", () => {
       ).toHaveCount(0);
       const picker = await openPicker();
       await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        picker.getByText("Use this workspace for your Inpatient encounters.", {
+        picker.getByRole("heading", {
+          name: "Standard encounter",
           exact: true,
         }),
       ).toBeVisible();
@@ -1202,7 +1947,7 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.defaultWrites).toEqual([
         {
           workspaceId: fixture.workspace.id,
-          body: { attribute: "encounter_class", value: "imp" },
+          body: { attribute: "scope", value: "all" },
         },
       ]);
       expect(fixture.workspaceReads.length).toBeGreaterThan(0);
@@ -1233,36 +1978,12 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
     });
 
-    await test.step("Retain inpatient and outpatient defaults on the same workspace across facilities", async () => {
+    await test.step("Apply the same saved workspace across classes and facilities", async () => {
       await page.goto(`${outpatientPath}/updates`);
-      await expect(
-        page.getByRole("tab", { name: "Ward rounds", exact: true }),
-      ).toHaveCount(0);
-      const picker = await openPicker();
-      await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        picker.getByText("Use this workspace for your Ambulatory encounters.", {
-          exact: true,
-        }),
-      ).toBeVisible();
-      await picker
-        .getByRole("option")
-        .filter({ hasText: fixture.workspace.name })
-        .click();
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
       await expect(
         page.getByRole("heading", { name: "Ward rounds", exact: true }),
       ).toBeVisible();
-      expect(fixture.defaultWrites[1]).toMatchObject({
-        workspaceId: fixture.workspace.id,
-        body: { attribute: "encounter_class" },
-      });
-      expect(fixture.defaultWrites[1].body.value.split(",").sort()).toEqual([
-        "amb",
-        "imp",
-      ]);
       await page.goto(`${outpatientPath}/updates`);
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
       await page.goto(`${fixture.basePath}/updates`);
@@ -1274,23 +1995,14 @@ test.describe("Encounter workspace rendering", () => {
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/rounds"));
     });
 
-    const unrelatedWorkspace: WorkspaceRead = {
-      ...fixture.workspace,
-      id: faker.string.uuid(),
-      name: `Unrelated ${faker.word.words(2)}`,
+    // The next selection retires accessible legacy class choices; other
+    // attributes and choices for inaccessible workspaces stay untouched.
+    const legacyDefault: WorkspaceUserDefaultAttributes = {
+      attribute: "encounter_class",
+      value: "obsenc",
+      workspace: unrelatedWorkspace,
     };
-    const inaccessibleWorkspace: WorkspaceRead = {
-      ...fixture.workspace,
-      id: faker.string.uuid(),
-      name: `Inaccessible ${faker.word.words(2)}`,
-    };
-    fixture.workspaces.push(unrelatedWorkspace);
     const protectedDefaults: WorkspaceUserDefaultAttributes[] = [
-      {
-        attribute: "encounter_class",
-        value: "obsenc",
-        workspace: unrelatedWorkspace,
-      },
       { attribute: "status", value: "amb", workspace: fixture.workspace },
       {
         attribute: "encounter_class",
@@ -1298,9 +2010,9 @@ test.describe("Encounter workspace rendering", () => {
         workspace: inaccessibleWorkspace,
       },
     ];
-    fixture.defaults.push(...protectedDefaults);
+    fixture.defaults.push(legacyDefault, ...protectedDefaults);
 
-    await test.step("Persist a replacement workspace without changing other class or attribute defaults", async () => {
+    await test.step("Replace the shared workspace and retire accessible legacy choices", async () => {
       const picker = await openPicker();
       await picker
         .getByRole("option")
@@ -1311,14 +2023,18 @@ test.describe("Encounter workspace rendering", () => {
         page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
       await expect(page).toHaveURL((url) => url.pathname.endsWith("/review"));
-      expect(fixture.defaultWrites.slice(2)).toEqual([
+      expect(fixture.defaultWrites.slice(1)).toEqual([
         {
           workspaceId: fixture.workspace.id,
-          body: { attribute: "encounter_class", value: "imp" },
+          body: { attribute: "scope", value: "" },
+        },
+        {
+          workspaceId: unrelatedWorkspace.id,
+          body: { attribute: "encounter_class", value: "" },
         },
         {
           workspaceId: alternateWorkspace.id,
-          body: { attribute: "encounter_class", value: "amb" },
+          body: { attribute: "scope", value: "all" },
         },
       ]);
       await page.reload();
@@ -1327,7 +2043,7 @@ test.describe("Encounter workspace rendering", () => {
       ).toBeVisible();
     });
 
-    await test.step("Retry cleanup when a partial clear makes the chosen workspace active", async () => {
+    await test.step("Retry cleanup after a partial clear", async () => {
       const competingWorkspace: WorkspaceRead = {
         ...alternateWorkspace,
         id: faker.string.uuid(),
@@ -1338,19 +2054,9 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
-      // These legacy rules arrive after page load: clearing one competitor can
-      // make the chosen workspace active before another cleanup request fails.
-      for (const rule of fixture.defaults) {
-        if (
-          rule.workspace.id === fixture.workspace.id &&
-          rule.attribute === "encounter_class"
-        ) {
-          rule.value = "imp,amb";
-        }
-      }
       fixture.defaults.push({
-        attribute: "encounter_class",
-        value: "amb",
+        attribute: "scope",
+        value: "all",
         workspace: competingWorkspace,
       });
       fixture.failures.defaultSave = 1;
@@ -1365,22 +2071,24 @@ test.describe("Encounter workspace rendering", () => {
       await expect(picker.getByRole("alert")).toHaveText(
         "Could not select this workspace. Please try again.",
       );
+      // The competing choice whose cleanup failed is still the saved one.
       await expect(
-        picker.getByText(`Workspace: ${fixture.workspace.name}`, {
+        picker.getByRole("heading", {
+          name: competingWorkspace.name,
           exact: true,
         }),
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Ward rounds", exact: true }),
+        page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
       expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
         {
           workspaceId: alternateWorkspace.id,
-          body: { attribute: "encounter_class", value: "" },
+          body: { attribute: "scope", value: "" },
         },
         {
           workspaceId: competingWorkspace.id,
-          body: { attribute: "encounter_class", value: "" },
+          body: { attribute: "scope", value: "" },
         },
       ]);
       await choice.click();
@@ -1388,16 +2096,15 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         page.getByRole("heading", { name: "Ward rounds", exact: true }),
       ).toBeVisible();
-      const retryWrites = fixture.defaultWrites.slice(writesBefore + 2);
-      expect(retryWrites).toHaveLength(2);
-      expect(retryWrites[0]).toEqual({
-        workspaceId: competingWorkspace.id,
-        body: { attribute: "encounter_class", value: "" },
-      });
-      expect(retryWrites[1].workspaceId).toBe(fixture.workspace.id);
-      expect(retryWrites[1].body.value.split(",").sort()).toEqual([
-        "amb",
-        "imp",
+      expect(fixture.defaultWrites.slice(writesBefore + 2)).toEqual([
+        {
+          workspaceId: competingWorkspace.id,
+          body: { attribute: "scope", value: "" },
+        },
+        {
+          workspaceId: fixture.workspace.id,
+          body: { attribute: "scope", value: "all" },
+        },
       ]);
       await page.reload();
       await expect(
@@ -1408,7 +2115,7 @@ test.describe("Encounter workspace rendering", () => {
     await test.step("Show the saved server state when the chosen workspace fails and allow retry", async () => {
       fixture.failures.defaultSave = 1;
       fixture.failures.defaultSaveWorkspaceId = alternateWorkspace.id;
-      fixture.failures.defaultSaveValue = "amb";
+      fixture.failures.defaultSaveValue = "all";
       const writesBefore = fixture.defaultWrites.length;
       const picker = await openPicker();
       const choice = picker
@@ -1419,7 +2126,10 @@ test.describe("Encounter workspace rendering", () => {
         "Could not select this workspace. Please try again.",
       );
       await expect(
-        picker.getByText("Workspace: Standard encounter", { exact: true }),
+        picker.getByRole("heading", {
+          name: "Standard encounter",
+          exact: true,
+        }),
       ).toBeVisible();
       await expect(
         page.getByRole("tab", { name: "Overview", exact: true }),
@@ -1435,15 +2145,15 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
         {
           workspaceId: fixture.workspace.id,
-          body: { attribute: "encounter_class", value: "imp" },
+          body: { attribute: "scope", value: "" },
         },
         {
           workspaceId: alternateWorkspace.id,
-          body: { attribute: "encounter_class", value: "amb" },
+          body: { attribute: "scope", value: "all" },
         },
         {
           workspaceId: alternateWorkspace.id,
-          body: { attribute: "encounter_class", value: "amb" },
+          body: { attribute: "scope", value: "all" },
         },
       ]);
       await page.reload();
@@ -1452,21 +2162,79 @@ test.describe("Encounter workspace rendering", () => {
       ).toBeVisible();
       await page.goto(`${fixture.basePath}/updates`);
       await expect(
-        page.getByRole("heading", { name: "Ward rounds", exact: true }),
+        page.getByRole("heading", { name: "Clinical review", exact: true }),
       ).toBeVisible();
       expect(fixture.defaults).toEqual(
         expect.arrayContaining(protectedDefaults),
       );
-      for (const workspace of [unrelatedWorkspace, inaccessibleWorkspace]) {
-        expect(fixture.writes).not.toContain(
-          `POST /api/v1/workspace/${workspace.id}/set_default_attributes/`,
-        );
-      }
+      expect(fixture.writes).not.toContain(
+        `POST /api/v1/workspace/${inaccessibleWorkspace.id}/set_default_attributes/`,
+      );
+      // The retired legacy choice was cleared once and stays inactive.
       expect(
-        fixture.defaultWrites.every(
-          ({ body }) => body.attribute === "encounter_class",
+        fixture.defaultWrites.filter(
+          ({ workspaceId }) => workspaceId === unrelatedWorkspace.id,
+        ),
+      ).toEqual([
+        {
+          workspaceId: unrelatedWorkspace.id,
+          body: { attribute: "encounter_class", value: "" },
+        },
+      ]);
+      expect(fixture.defaults).toContainEqual({ ...legacyDefault, value: "" });
+      expect(
+        fixture.defaultWrites.every(({ body }) =>
+          ["scope", "encounter_class"].includes(body.attribute),
         ),
       ).toBe(true);
+    });
+
+    await test.step("Reset returns every screen to its standard layout", async () => {
+      const writesBefore = fixture.defaultWrites.length;
+      const header = page.getByRole("button", { name: /^Workspace: / });
+      await expect(header).toHaveAccessibleName(
+        `Workspace: ${alternateWorkspace.name}`,
+      );
+      const picker = await openPicker();
+      await picker
+        .getByRole("button", {
+          name: "Reset to standard workspace",
+          exact: true,
+        })
+        .click();
+      await expect(picker).not.toBeVisible();
+      await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
+      await expect(
+        page.getByRole("tab", { name: "Overview", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page.getByRole("tab", { name: "Ward rounds", exact: true }),
+      ).toHaveCount(0);
+      await expect(header).toHaveAccessibleName(
+        "Workspace: Standard encounter",
+      );
+      expect(fixture.defaultWrites.slice(writesBefore)).toEqual([
+        {
+          workspaceId: alternateWorkspace.id,
+          body: { attribute: "scope", value: "" },
+        },
+      ]);
+      const standardPicker = await openPicker();
+      await expect(
+        standardPicker.getByRole("button", {
+          name: "Reset to standard workspace",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await page.reload();
+      await expect(
+        page.getByRole("tab", { name: "Ward rounds", exact: true }),
+      ).toHaveCount(0);
+      await page.goto(`${outpatientPath}/updates`);
+      await expect(
+        page.getByRole("tab", { name: "Overview", exact: true }),
+      ).toBeVisible();
     });
   });
 
@@ -1497,10 +2265,13 @@ test.describe("Encounter workspace rendering", () => {
     await expect(
       page.getByRole("tab", { name: "Ward rounds", exact: true }),
     ).toHaveCount(0);
-    await page.getByRole("button", { name: "Workspace", exact: true }).click();
+    await page.getByRole("button", { name: /^Workspace: / }).click();
     const picker = page.getByRole("dialog", { name: "Workspace", exact: true });
     await expect(
-      picker.getByText("Workspace: Standard encounter", { exact: true }),
+      picker.getByRole("heading", {
+        name: "Standard encounter",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
       picker.getByRole("option").filter({ hasText: activeWorkspace.name }),
@@ -1522,12 +2293,11 @@ test.describe("Encounter workspace rendering", () => {
     const fixture = await mockEncounterWorkspaceApi(page, {
       includeSectionData: true,
     });
-    // Referral creation remains authorized on this historical encounter while
-    // its clinical actions stay read-only.
-    fixture.pastEncounter.permissions = [
-      ...fixture.pastEncounter.permissions,
-      "can_create_referral",
-    ];
+    // Both encounters authorize referral creation: the active encounter offers
+    // it beside the clinical actions, while the closed one hides every action.
+    for (const encounter of [fixture.currentEncounter, fixture.pastEncounter]) {
+      encounter.permissions = [...encounter.permissions, "can_create_referral"];
+    }
     fixture.workspace.template = {
       schema_version: 1,
       pages: [
@@ -1586,7 +2356,7 @@ test.describe("Encounter workspace rendering", () => {
     const pastDoctor = `${fixture.pastCareTeamMember.first_name} ${fixture.pastCareTeamMember.last_name}`;
 
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto(`${fixture.basePath}/rounds`);
+    await page.goto(`${fixture.basePath}/updates`);
     await expect(
       vitals.getByRole("cell", { name: "82 /min", exact: true }),
     ).toBeVisible();
@@ -1657,6 +2427,15 @@ test.describe("Encounter workspace rendering", () => {
 
     await test.step("Existing actions retain the configured return page and draft target", async () => {
       await expect(
+        shortcuts.getByRole("link", { name: /Add Procedure/i }),
+      ).toBeVisible();
+      await expect(
+        shortcuts.getByRole("button", { name: "New Referral", exact: true }),
+      ).toBeVisible();
+      await expect(
+        shortcuts.getByRole("button", { name: /More Actions|Show less/i }),
+      ).toHaveCount(0);
+      await expect(
         page
           .getByRole("region", { name: "Favorite ward forms", exact: true })
           .getByRole("link", {
@@ -1709,7 +2488,7 @@ test.describe("Encounter workspace rendering", () => {
       await page.goto(`${fixture.basePath}/rounds`);
     });
 
-    await test.step("Overview retains records and historical referral creation without clinical edits", async () => {
+    await test.step("Overview retains records without showing actions for a closed encounter", async () => {
       await page.getByRole("tab", { name: "Overview", exact: true }).click();
       await expect(
         page.getByRole("cell", { name: "82 /min", exact: true }),
@@ -1756,16 +2535,7 @@ test.describe("Encounter workspace rendering", () => {
       await expect(
         careTeam.getByRole("button", { name: "Manage Care Team", exact: true }),
       ).toHaveCount(0);
-      await expect(
-        shortcuts.getByRole("button", { name: "New referral", exact: true }),
-      ).toBeVisible();
-      await expect(shortcuts.getByRole("link")).toHaveCount(0);
-      await expect(
-        shortcuts.getByRole("button", { name: "Forms", exact: true }),
-      ).toHaveCount(0);
-      await expect(
-        shortcuts.getByRole("button", { name: "More Actions", exact: true }),
-      ).toHaveCount(0);
+      await expect(shortcuts).toHaveCount(0);
       for (const name of [
         "Favorite ward forms",
         "Pending ward forms",
@@ -2231,9 +3001,7 @@ test.describe("Encounter workspace rendering", () => {
 
     await test.step("Selecting a workspace also clears the previous page's filters", async () => {
       await page.goto(`${fixture.basePath}/service_requests?${filters}`);
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -2358,7 +3126,7 @@ test.describe("Encounter workspace rendering", () => {
     const failureMessage =
       "This widget could not be displayed. Other encounter information is still available.";
 
-    await test.step("The editor authors plugin schema fields and preserves unknown options", async () => {
+    await test.step("The studio authors plugin schema fields and preserves unknown options", async () => {
       await page.goto(
         `/facility/${fixture.facility.id}/settings/workspaces/${fixture.workspace.id}/edit`,
       );
@@ -2369,9 +3137,12 @@ test.describe("Encounter workspace rendering", () => {
         name: "Template (JSON)",
         exact: true,
       });
-      if (!(await templateField.isVisible())) {
-        await page.getByRole("button", { name: "JSON", exact: true }).click();
-      }
+      await page
+        .getByRole("button", { name: "More options", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Edit as JSON (advanced)", exact: true })
+        .click();
       await templateField.fill(
         JSON.stringify(
           makeTemplate(
@@ -2387,79 +3158,87 @@ test.describe("Encounter workspace rendering", () => {
           { exact: true },
         ),
       ).toBeVisible();
-      await page.getByRole("button", { name: "Visual", exact: true }).click();
       await page
-        .getByRole("button", {
-          name: "Configure Consultant review",
-          exact: true,
-        })
-        .first()
+        .getByRole("button", { name: "Back to design", exact: true })
         .click();
-      const inspector = page.getByRole("region", {
-        name: "Widget settings",
-        exact: true,
+      // The sheet is titled with the section's widget name, so find it by
+      // the remove action that only the section settings sheet offers.
+      const drawer = page.getByRole("dialog").filter({
+        has: page.getByRole("button", { name: "Remove section", exact: true }),
       });
+      const openSettings = async (name: string) => {
+        await page
+          .getByRole("button", { name: `Settings for ${name}`, exact: true })
+          .first()
+          .click();
+        await expect(drawer).toBeVisible();
+      };
+      const done = drawer.getByRole("button", { name: "Done", exact: true });
+      const closeDrawer = async () => {
+        await done.click();
+        await expect(drawer).not.toBeVisible();
+      };
       const save = page.getByRole("button", {
         name: "Save Changes",
         exact: true,
       });
-      const configJson = inspector.getByRole("textbox", {
+      const configJson = drawer.getByRole("textbox", {
         name: "Widget configuration (JSON)",
         exact: true,
       });
-      const pendingConfig =
-        '{"opaque_metadata":{"nested":["keep",5]},"caption":"Draft review","pending_schema":';
-      try {
+      const showAdvanced = async () => {
         if (!(await configJson.isVisible())) {
-          await inspector
+          await drawer
             .getByText("Advanced configuration", { exact: true })
             .click();
         }
+      };
+      await openSettings("Consultant review");
+      const pendingConfig =
+        '{"opaque_metadata":{"nested":["keep",5]},"caption":"Draft review","pending_schema":';
+      try {
+        await showAdvanced();
         await configJson.fill(pendingConfig);
         await expect(configJson).toHaveValue(pendingConfig);
         await expect(configJson).toHaveAttribute("aria-invalid", "true");
-        await expect(save).toBeDisabled();
+        await expect(done).toBeDisabled();
       } finally {
         remote.releaseManifest();
       }
       await expect(
-        inspector.getByRole("textbox", { name: "Review caption", exact: true }),
+        drawer.getByRole("textbox", { name: "Review caption", exact: true }),
       ).toBeVisible();
-      if (!(await configJson.isVisible())) {
-        await inspector
-          .getByText("Advanced configuration", { exact: true })
-          .click();
-      }
+      await showAdvanced();
       await expect(configJson).toHaveValue(pendingConfig);
       await expect(configJson).toHaveAttribute("aria-invalid", "true");
-      await expect(save).toBeDisabled();
+      await expect(done).toBeDisabled();
       await configJson.fill(
         JSON.stringify({ ...unknownConfig, caption: "Draft review" }),
       );
       await expect(configJson).toHaveAttribute("aria-invalid", "false");
-      await expect(save).toBeEnabled();
-      await inspector
+      await expect(done).toBeEnabled();
+      await drawer
         .getByRole("textbox", { name: "Review caption", exact: true })
         .fill("Review before discharge");
-      await inspector
+      await drawer
         .getByRole("combobox", { name: "Mode de revue", exact: true })
         .click();
       await page
         .getByRole("option", { name: "Revue complète", exact: true })
         .click();
       await expect(
-        inspector.getByText("Présentation pour cette consultation", {
+        drawer.getByText("Présentation pour cette consultation", {
           exact: true,
         }),
       ).toBeVisible();
-      await inspector
+      await drawer
         .getByRole("combobox", { name: "Priorité de revue", exact: true })
         .click();
       await page.getByRole("option", { name: "Urgente", exact: true }).click();
       await expect(
-        inspector.getByText("Paramètres de revue", { exact: true }),
+        drawer.getByText("Paramètres de revue", { exact: true }),
       ).toBeVisible();
-      await inspector
+      await drawer
         .getByRole("checkbox", { name: "Mettre en évidence", exact: true })
         .check();
       for (const [index, label] of [
@@ -2467,46 +3246,37 @@ test.describe("Encounter workspace rendering", () => {
         "temporary",
         "discharge",
       ].entries()) {
-        await inspector
+        await drawer
           .getByText("Review labels", { exact: true })
           .locator("..")
           .getByRole("button", { name: "Add", exact: true })
           .click();
-        await inspector
+        await drawer
           .getByRole("textbox", { name: "Review label", exact: true })
           .nth(index)
           .fill(label);
       }
-      await inspector
+      await drawer
         .getByRole("button", {
           name: "Remove item Review labels 2",
           exact: true,
         })
         .click();
-      const labels = inspector.getByRole("textbox", {
+      const labels = drawer.getByRole("textbox", {
         name: "Review label",
         exact: true,
       });
       await expect(labels).toHaveCount(2);
       await expect(labels.nth(0)).toHaveValue("rounds");
       await expect(labels.nth(1)).toHaveValue("discharge");
+      await closeDrawer();
+      await expect(save).toBeEnabled();
 
-      await page
-        .getByRole("button", {
-          name: "Configure Missing extension",
-          exact: true,
-        })
-        .first()
-        .click();
-      if (!(await configJson.isVisible())) {
-        await inspector
-          .getByText("Advanced configuration", { exact: true })
-          .click();
-      }
+      await openSettings("Missing extension");
+      await showAdvanced();
       await configJson.fill(JSON.stringify({ display_code: "5" }));
-      await page
-        .getByRole("button", { name: "Add system page", exact: true })
-        .click();
+      await closeDrawer();
+      await page.getByRole("button", { name: "Add tab", exact: true }).click();
       await page
         .getByRole("menuitem", { name: "lab.results", exact: true })
         .click();
@@ -2524,27 +3294,21 @@ test.describe("Encounter workspace rendering", () => {
         },
       ]);
       await page.reload();
-      await page
-        .getByRole("button", {
-          name: "Configure Consultant review",
-          exact: true,
-        })
-        .first()
-        .click();
+      await openSettings("Consultant review");
       await expect(
-        inspector.getByRole("textbox", { name: "Review caption", exact: true }),
+        drawer.getByRole("textbox", { name: "Review caption", exact: true }),
       ).toHaveValue("Review before discharge");
       await expect(
-        inspector.getByRole("combobox", { name: "Mode de revue", exact: true }),
+        drawer.getByRole("combobox", { name: "Mode de revue", exact: true }),
       ).toHaveText("Revue complète");
       await expect(
-        inspector.getByRole("combobox", {
+        drawer.getByRole("combobox", {
           name: "Priorité de revue",
           exact: true,
         }),
       ).toHaveText("Urgente");
       await expect(
-        inspector.getByRole("checkbox", {
+        drawer.getByRole("checkbox", {
           name: "Mettre en évidence",
           exact: true,
         }),
@@ -2552,19 +3316,9 @@ test.describe("Encounter workspace rendering", () => {
       await expect(labels).toHaveCount(2);
       await expect(labels.nth(0)).toHaveValue("rounds");
       await expect(labels.nth(1)).toHaveValue("discharge");
-      await inspector
-        .getByText("Advanced configuration", { exact: true })
-        .click();
-      expect(
-        JSON.parse(
-          await inspector
-            .getByRole("textbox", {
-              name: "Widget configuration (JSON)",
-              exact: true,
-            })
-            .inputValue(),
-        ),
-      ).toEqual(reviewConfig);
+      await showAdvanced();
+      expect(JSON.parse(await configJson.inputValue())).toEqual(reviewConfig);
+      await closeDrawer();
       await expect(save).toBeDisabled();
     });
 
@@ -3021,7 +3775,7 @@ test.describe("Encounter workspace rendering", () => {
         },
         { kind: "system", key: "medicines" },
       ];
-      for (const template of [{ pages }, { schema_version: 2, pages }]) {
+      for (const template of [{ pages }, { schema_version: 999, pages }]) {
         fixture.workspace.template = template;
         await page.goto(`${fixture.basePath}/rounds`);
         await expect(
@@ -3057,9 +3811,7 @@ test.describe("Encounter workspace rendering", () => {
       fixture.workspace.template = {};
       fixture.defaults.splice(0);
       await page.goto(`${fixture.basePath}/updates`);
-      await page
-        .getByRole("button", { name: "Workspace", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Workspace: / }).click();
       const picker = page.getByRole("dialog", {
         name: "Workspace",
         exact: true,
@@ -3092,7 +3844,7 @@ test.describe("Encounter workspace rendering", () => {
       expect(fixture.defaultWrites).toEqual([
         {
           workspaceId: fixture.workspace.id,
-          body: { attribute: "encounter_class", value: "amb" },
+          body: { attribute: "scope", value: "all" },
         },
       ]);
     });
@@ -3176,7 +3928,7 @@ test.describe("Encounter workspace rendering", () => {
     ).toHaveCount(0);
     expect(fixture.clinicalReads).toEqual([]);
     await expect(
-      page.getByRole("button", { name: "Workspace", exact: true }),
+      page.getByRole("button", { name: /^Workspace: / }),
     ).toBeVisible();
   });
 
@@ -3293,4 +4045,660 @@ test.describe("Encounter workspace rendering", () => {
       page.getByRole("tab", { name: "Later workspace review", exact: true }),
     ).toHaveCount(0);
   });
+});
+
+test("studio response lists and location history stay read-only on closed encounters", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  fixture.workspace.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "rounds",
+        title: "Clinical studio",
+        columns: [
+          {
+            span: 8,
+            widgets: [
+              {
+                type: "questionnaire_responses",
+                title: "Encounter forms",
+              },
+            ],
+          },
+          {
+            span: 3,
+            widgets: [{ type: "locations", title: "Visit locations" }],
+          },
+          {
+            span: 1,
+            widgets: [{ type: "quick_actions", title: "Active tools" }],
+          },
+        ],
+      },
+      { kind: "system", key: "responses" },
+    ],
+  };
+  await page.goto(
+    `${fixture.basePath}/rounds?selectedEncounter=${fixture.pastEncounter.id}`,
+  );
+  const forms = page.getByRole("region", {
+    name: "Encounter forms",
+    exact: true,
+  });
+  await expect(
+    forms.getByText("Prior admission note", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Active tools", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator('div[style*="--workspace-columns"] > div'),
+  ).toHaveCount(2);
+  await forms
+    .getByRole("button", { name: "More Actions", exact: true })
+    .click();
+  await expect(page.getByRole("menu")).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", {
+      name: "Mark as entered in error",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+
+  await page
+    .getByRole("region", { name: "Visit locations", exact: true })
+    .getByRole("button", { name: /view history/i })
+    .click();
+  const sheet = page.getByRole("dialog");
+  await expect(
+    sheet.getByRole("tab", { name: /location history/i }),
+  ).toHaveAttribute("aria-selected", "true");
+  await expect(
+    sheet.getByRole("tab", { name: /assign location/i }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("tab", { name: "Responses", exact: true }).click();
+  await expect(
+    page.getByText("Prior admission note", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "More Actions", exact: true }).click();
+  await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", {
+      name: "Mark as entered in error",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  expect(
+    fixture.writes.filter(
+      (request) => !request.endsWith("/account/default_account/"),
+    ),
+  ).toEqual([]);
+});
+
+test("one workspace selection configures encounter and clinical history layouts", async ({
+  page,
+}, testInfo) => {
+  const fixture = await mockEncounterWorkspaceApi(page);
+  const history: WorkspaceRead = {
+    ...fixture.workspace,
+    id: faker.string.uuid(),
+    name: `History workspace ${faker.string.alphanumeric(8)}`,
+    template: {
+      schema_version: 2,
+      pages: [{ kind: "system", key: "updates" }],
+      history_pages: [
+        {
+          kind: "custom",
+          key: "background",
+          title: "Medical background",
+          columns: [
+            {
+              span: 12,
+              widgets: [{ type: "diagnosis", title: "All diagnoses" }],
+            },
+          ],
+        },
+      ],
+    },
+  };
+  fixture.workspaces.push(history);
+  fixture.defaults.splice(0);
+  const header = page.getByRole("button", { name: /^Workspace: / });
+  const picker = page.getByRole("dialog", { name: "Workspace", exact: true });
+  const historyPath = `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history`;
+  const diagnoses = page.getByRole("region", {
+    name: "All diagnoses",
+    exact: true,
+  });
+  await page.goto(`${fixture.basePath}/updates`);
+  await header.click();
+  await picker.getByRole("option").filter({ hasText: history.name }).click();
+  // The picker closes once the choice is saved.
+  await expect(picker).not.toBeVisible();
+  await expect(header).toHaveAccessibleName(`Workspace: ${history.name}`);
+  await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
+  await expect
+    .poll(() => fixture.defaultWrites)
+    .toEqual([
+      {
+        workspaceId: history.id,
+        body: { attribute: "scope", value: "all" },
+      },
+    ]);
+  // A deep link keeps its standard history tab reachable beside the chosen
+  // layout's own history pages.
+  await page.goto(`${historyPath}/diagnoses`);
+  await expect(
+    page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await page
+    .getByRole("tab", { name: "Medical background", exact: true })
+    .click();
+  await expect(page).toHaveURL((url) =>
+    url.pathname.endsWith("/history/background"),
+  );
+  await expect(diagnoses).toBeVisible();
+  // After a reload only the layout's widget reads diagnoses.
+  fixture.clinicalReads.length = 0;
+  await page.reload();
+  await expect(diagnoses).toBeVisible();
+  await expect
+    .poll(() =>
+      fixture.clinicalReads.some(
+        (url) =>
+          url.pathname.endsWith("/diagnosis/") &&
+          !url.searchParams.has("encounter"),
+      ),
+    )
+    .toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("clinical-history-workspace.png"),
+    fullPage: true,
+  });
+
+  await test.step("Resetting the shared choice restores standard encounter and history pages", async () => {
+    await page.goto(`${fixture.basePath}/updates`);
+    await header.click();
+    await picker
+      .getByRole("button", {
+        name: "Reset to standard workspace",
+        exact: true,
+      })
+      .click();
+    await expect(picker).not.toBeVisible();
+    await expect(header).toHaveAccessibleName("Workspace: Standard encounter");
+    await expect(page).toHaveURL((url) => url.pathname.endsWith("/updates"));
+    expect(fixture.defaultWrites.at(-1)).toEqual({
+      workspaceId: history.id,
+      body: { attribute: "scope", value: "" },
+    });
+    await page.goto(`${historyPath}/diagnoses`);
+    await expect(diagnoses).toHaveCount(0);
+    await expect(
+      page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Medical background", exact: true }),
+    ).toHaveCount(0);
+  });
+
+  await page.goto(`${fixture.basePath}/updates`);
+  await header.click();
+  await expect(
+    picker.getByRole("option").filter({ hasText: history.name }),
+  ).toBeVisible();
+});
+
+test("studio history pages can show only the forms the viewer submitted", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+  });
+  const history: WorkspaceRead = {
+    ...fixture.workspace,
+    id: faker.string.uuid(),
+    name: `My forms ${faker.string.alphanumeric(8)}`,
+    template: {
+      schema_version: 2,
+      pages: [{ kind: "system", key: "updates" }],
+      history_pages: [
+        {
+          kind: "custom",
+          key: "my_forms",
+          title: "My forms",
+          columns: [
+            {
+              span: 12,
+              widgets: [
+                {
+                  type: "questionnaire_responses",
+                  title: "Forms I submitted",
+                  config: { authored_by: "me" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  };
+  fixture.workspaces.push(history);
+  fixture.defaults.splice(0);
+  fixture.defaults.push({
+    attribute: "scope",
+    value: "all",
+    workspace: history,
+  });
+  await page.goto(
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/my_forms`,
+  );
+  // The deep-linked standard tab stays open; the layout adds its own page.
+  await page.getByRole("tab", { name: "My forms", exact: true }).click();
+  await expect(page).toHaveURL((url) =>
+    url.pathname.endsWith("/history/my_forms"),
+  );
+  const forms = page.getByRole("region", {
+    name: "Forms I submitted",
+    exact: true,
+  });
+  // History pages have no encounter, so the list spans every visit.
+  await expect(
+    forms.getByText("Current ward note", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    forms.getByText("Prior admission note", { exact: true }),
+  ).toBeVisible();
+  expect(
+    fixture.clinicalReads.some(
+      (url) =>
+        url.pathname.endsWith("/questionnaire_response/") &&
+        url.searchParams.get("created_by") === fixture.actor.id &&
+        !url.searchParams.has("encounter"),
+    ),
+  ).toBe(true);
+  // History pages are read-only: responses can be printed, not retracted.
+  await forms
+    .getByRole("button", { name: "More Actions", exact: true })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("menuitem", { name: "Print this response", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("menuitem", {
+      name: "Mark as entered in error",
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await test.step("Standard history deep links remain available alongside custom tabs", async () => {
+    await page.goto(
+      `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/diagnoses`,
+    );
+    await expect(
+      page.getByRole("tab", { name: "Past Diagnoses", exact: true }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(page).toHaveURL((url) =>
+      url.pathname.endsWith("/history/diagnoses"),
+    );
+    await expect(forms).toHaveCount(0);
+  });
+  expect(fixture.defaultWrites).toEqual([]);
+});
+
+test("studio summary widgets show latest vitals, outstanding orders, current medication, and care-team encounters", async ({
+  page,
+}) => {
+  const fixture = await mockEncounterWorkspaceApi(page, {
+    includeSectionData: true,
+    includeWidgetData: true,
+  });
+  fixture.widgetOrders[1].diagnostic_reports = [
+    {
+      ...fixture.imagingReport,
+      id: faker.string.uuid(),
+      status: "preliminary",
+      conclusion: "",
+    },
+  ];
+  const loinc = (code: string, display: string) => ({
+    system: "http://loinc.org",
+    code,
+    display,
+  });
+  fixture.workspace.template = {
+    schema_version: 2,
+    surface: "encounter",
+    pages: [
+      {
+        kind: "custom",
+        key: "summary",
+        title: "Clinical summary",
+        columns: [
+          {
+            span: 7,
+            widgets: [
+              {
+                type: "vitals",
+                title: "Latest vitals",
+                config: {
+                  codes: [
+                    loinc("8867-4", "Pulse"),
+                    loinc("2708-6", "Oxygen saturation"),
+                    loinc("8310-5", "Body temperature"),
+                  ],
+                },
+              },
+              { type: "outstanding_orders", title: "Results & orders" },
+              {
+                type: "observation_chart",
+                title: "Pulse trend",
+                config: {
+                  plot: "primary-parameters",
+                  groups: ["Pulse"],
+                  height: 160,
+                },
+              },
+              {
+                type: "encounter_summary",
+                title: "Reports only",
+                config: { tabs: ["reports"] },
+              },
+            ],
+          },
+          {
+            span: 5,
+            widgets: [
+              { type: "current_medications", title: "Current medication" },
+              {
+                type: "recent_encounters",
+                title: "My encounters",
+                config: { care_team: "mine", limit: 3 },
+              },
+              { type: "recent_encounters", title: "All encounters" },
+              {
+                type: "recent_encounters",
+                title: "Other visits",
+                config: { exclude_current: true, status: "completed" },
+              },
+              {
+                type: "current_medications",
+                title: "Outside medications",
+                config: { sources: "statements" },
+              },
+              { type: "encounter_extensions", title: "App extensions" },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const actorName = `${fixture.actor.first_name} ${fixture.actor.last_name}`;
+  const vitals = page.getByRole("region", {
+    name: "Latest vitals",
+    exact: true,
+  });
+  const orders = page.getByRole("region", {
+    name: "Results & orders",
+    exact: true,
+  });
+  const medication = page.getByRole("region", {
+    name: "Current medication",
+    exact: true,
+  });
+  const mine = page.getByRole("region", { name: "My encounters", exact: true });
+  const all = page.getByRole("region", { name: "All encounters", exact: true });
+
+  await page.goto(`${fixture.basePath}/summary`);
+
+  // Latest vitals: a reading-time matrix with one row per configured code,
+  // latest reading first.
+  const vitalRow = (name: string) =>
+    vitals.getByRole("row").filter({
+      has: page.getByRole("button", { name, exact: true }),
+    });
+  const pulse = vitalRow("Pulse");
+  await expect(pulse.getByRole("cell").first()).toHaveText("82 /min");
+  await expect(
+    pulse.getByRole("cell", { name: "76 /min", exact: true }),
+  ).toBeVisible();
+  await pulse.getByRole("button", { name: "Pulse", exact: true }).click();
+  const observationHistory = page.getByRole("dialog", { name: "Pulse" });
+  await expect(observationHistory).toBeVisible();
+  await expect(observationHistory).toContainText("All Encounters");
+  await expect(observationHistory).toContainText("3 recordings");
+  // The sheet opens on its plots; the reading-time matrix is the Table tab.
+  const historyTable = observationHistory.getByRole("tab", {
+    name: "Table",
+    exact: true,
+  });
+  await historyTable.click();
+  const historyMatrix = observationHistory.getByRole("table");
+  const pulseHistory = historyMatrix.getByRole("row").nth(1);
+  await expect(pulseHistory).toContainText("82");
+  await expect(pulseHistory).toContainText("76");
+  await expect(pulseHistory).toContainText("64");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      ),
+    )
+    .toBeLessThanOrEqual(0);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await observationHistory
+    .getByRole("checkbox", {
+      name: "Show current encounter recordings",
+    })
+    .click();
+  await expect(observationHistory).toContainText("2 recordings");
+  // The refreshed readings open on the plots again.
+  await historyTable.click();
+  await expect(pulseHistory).toContainText("82");
+  await expect(pulseHistory).not.toContainText("64");
+  await page.keyboard.press("Escape");
+  await expect(observationHistory).toHaveCount(0);
+  await expect(vitalRow("Oxygen saturation")).toContainText("97");
+  const temperature = vitalRow("Body temperature");
+  await expect(temperature).toContainText("No reading");
+  await expect(temperature).not.toContainText(/\d/);
+  await expect(vitals).toContainText(`by ${actorName}`);
+  await expect(
+    page
+      .getByRole("region", { name: "Pulse trend", exact: true })
+      .locator(".recharts-line-curve"),
+  ).toBeVisible();
+  // The tiles ask the analysis endpoint for the latest valid readings per
+  // code, scoped to the current encounter, instead of listing every
+  // observation.
+  expect(
+    fixture.analyseRequests.some(
+      (request) =>
+        request.encounter === fixture.currentEncounter.id &&
+        request.status === "final,amended" &&
+        request.codes.join(",") === "8867-4,2708-6,8310-5",
+    ),
+  ).toBe(true);
+
+  // Outstanding orders: drafts are excluded, reports link out, open orders
+  // link to their status page.
+  await expect(orders).toContainText("1 with reports · 1 awaiting results");
+  await expect(orders.getByText("Unsent draft order")).toHaveCount(0);
+  const xray = orders.getByRole("listitem").filter({ hasText: "Chest X-ray" });
+  await expect(xray).toContainText("Imaging");
+  await expect(xray).toContainText("Report received");
+  await expect(
+    xray.getByRole("link", { name: "View Report", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/diagnostic_reports/${fixture.imagingReport.id}`,
+  );
+  const creatinine = orders
+    .getByRole("listitem")
+    .filter({ hasText: "Creatinine" });
+  await expect(creatinine).toContainText("Laboratory");
+  await expect(creatinine).toContainText("No result yet");
+  await expect(
+    creatinine.getByRole("link", { name: "View Report", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    creatinine.getByRole("link", { name: "Check Status", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    `/facility/${fixture.facility.id}/service_requests/${fixture.widgetOrders[1].id}`,
+  );
+
+  // Current medication: active prescriptions and outside statements only.
+  const paracetamol = medication
+    .getByRole("row")
+    .filter({ hasText: "Paracetamol 500 mg tablet" });
+  await expect(paracetamol).toContainText("500 mg · 1-0-1");
+  await expect(paracetamol).toContainText("since 01 Oct 2026");
+  await expect(paracetamol.getByText("You", { exact: true })).toBeVisible();
+  await expect(
+    medication.getByRole("row").filter({ hasText: "Aspirin 75 mg tablet" }),
+  ).toContainText(
+    `${fixture.otherPrescriber.first_name} ${fixture.otherPrescriber.last_name}`,
+  );
+  const metformin = medication
+    .getByRole("row")
+    .filter({ hasText: "Metformin 500 mg tablet" });
+  await expect(metformin).toContainText("1-0-1 after food");
+  await expect(metformin).toContainText("Outside Rx");
+  await expect(medication.getByText("Warfarin 5 mg tablet")).toHaveCount(0);
+  await expect(medication.getByText("Stopped statin")).toHaveCount(0);
+  await expect(
+    medication.getByRole("link", { name: "Medication History", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    new RegExp(
+      `^/facility/${fixture.facility.id}/patient/${fixture.patient.id}/history/medications\\?sourceUrl=.*summary`,
+    ),
+  );
+  expect(
+    fixture.sectionReads.some(
+      (url) =>
+        url.pathname.endsWith("/medication/request/") &&
+        url.searchParams.get("status") === "active" &&
+        url.searchParams.get("medications_only") === "true",
+    ),
+  ).toBe(true);
+  expect(
+    fixture.sectionReads.some(
+      (url) =>
+        url.pathname.endsWith("/medication/statement/") &&
+        url.searchParams.get("status") === "active",
+    ),
+  ).toBe(true);
+
+  // Recent encounters: the care-team filter follows the signed-in user.
+  const mineRows = mine.getByRole("listitem");
+  await expect(mineRows).toHaveCount(1);
+  await expect(mineRows.first()).toContainText("Completed");
+  await expect(mineRows.first()).toContainText(
+    `${fixture.pastCareTeamMember.first_name} ${fixture.pastCareTeamMember.last_name} (Ward doctor) +1`,
+  );
+  await expect(
+    mineRows.first().getByRole("link", { name: "See encounter", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/encounter/${fixture.pastEncounter.id}/updates`,
+  );
+  await expect(
+    mine.getByRole("link", { name: "See all encounters", exact: true }),
+  ).toHaveAttribute(
+    "href",
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/encounters`,
+  );
+  await expect(all.getByRole("listitem")).toHaveCount(2);
+  const current = all.getByRole("listitem").filter({ hasText: "In Progress" });
+  await expect(current).toContainText("Current Encounter");
+  await expect(
+    current.getByRole("link", { name: "See encounter", exact: true }),
+  ).toHaveCount(0);
+  const encounterReads = fixture.sectionReads.filter((url) =>
+    url.pathname.endsWith("/encounter/"),
+  );
+  expect(encounterReads).toHaveLength(0);
+
+  // Filters: other visits hides the current encounter; sources limits rows.
+  const otherVisits = page.getByRole("region", {
+    name: "Other visits",
+    exact: true,
+  });
+  await expect(otherVisits.getByRole("listitem")).toHaveCount(1);
+  await expect(otherVisits).not.toContainText("Current Encounter");
+  const outside = page.getByRole("region", {
+    name: "Outside medications",
+    exact: true,
+  });
+  await expect(outside.getByRole("row")).toHaveCount(2);
+  await expect(outside).toContainText("Metformin 500 mg tablet");
+  await expect(outside).not.toContainText("Paracetamol");
+
+  // Chart: only the selected group renders, with its analysis request.
+  const chart = page.getByRole("region", { name: "Pulse trend", exact: true });
+  await expect(
+    chart.getByRole("heading", { name: "Pulse", exact: true }),
+  ).toBeVisible();
+  await expect(
+    chart.getByRole("heading", { name: "SpO2", exact: true }),
+  ).toHaveCount(0);
+  await expect(chart.locator(".recharts-wrapper")).toHaveCount(1);
+  expect(
+    fixture.sectionReads.some(
+      (url) =>
+        url.pathname.endsWith("/observation/analyse/") &&
+        url.searchParams.get("encounter") === fixture.currentEncounter.id,
+    ),
+  ).toBe(true);
+
+  // Tab subsets render without a tab bar.
+  const reportsOnly = page.getByRole("region", {
+    name: "Reports only",
+    exact: true,
+  });
+  await expect(reportsOnly.getByRole("tab")).toHaveCount(0);
+  // The section title replaces the panel's own header instead of stacking.
+  await expect(reportsOnly.getByText(/^Reports$/)).toHaveCount(0);
+  await expect(
+    reportsOnly.getByRole("link", { name: "Ward summary report", exact: true }),
+  ).toBeVisible();
+
+  // Nothing contributes to the extension slot, so it takes no space.
+  await expect(
+    page.getByRole("region", { name: "App extensions", exact: true }),
+  ).toHaveCount(0);
+  expect(fixture.writes).toEqual([]);
+
+  // The same layout scopes vitals and orders to a completed encounter.
+  await page.goto(
+    `/facility/${fixture.facility.id}/patient/${fixture.patient.id}/encounter/${fixture.pastEncounter.id}/summary`,
+  );
+  await expect(
+    vitalRow("Pulse").getByRole("cell", { name: "64 /min", exact: true }),
+  ).toBeVisible();
+  await expect(vitalRow("Pulse")).not.toContainText("82");
+  await expect(medication).toBeVisible();
+  await expect(orders).toContainText("No service requests found");
+  await expect(orders.getByRole("listitem")).toHaveCount(0);
 });

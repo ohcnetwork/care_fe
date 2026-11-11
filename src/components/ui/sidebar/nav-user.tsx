@@ -53,7 +53,7 @@ export function FacilityNavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="bg-strong-background/60 shadow-sm data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+              className="bg-strong-background/50 border pl-2 border-strong-border data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
               tooltip={formatName(user)}
               aria-label={formatName(user)}
             >

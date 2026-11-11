@@ -61,7 +61,7 @@ export const BookingsList = ({
             <TabsTrigger value="past">{t("past")}</TabsTrigger>
             <TabsTrigger value="cancelled">{t("cancelled")}</TabsTrigger>
           </TabsList>
-          <TabsContent value="upcoming" className="space-y-4 overflow-x-auto">
+          <TabsContent value="upcoming" className="space-y-4">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
@@ -70,7 +70,7 @@ export const BookingsList = ({
               date_after={today}
             />
           </TabsContent>
-          <TabsContent value="past" className="space-y-4 overflow-x-auto">
+          <TabsContent value="past" className="space-y-4 ">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}

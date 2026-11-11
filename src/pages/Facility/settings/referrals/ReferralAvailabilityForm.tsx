@@ -11,7 +11,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FieldError, FieldGroup, FieldSet } from "@/components/ui/field";
 import { Form, FormField, FormItem } from "@/components/ui/form";
-import { Frame, FrameFooter, FramePanel } from "@/components/ui/frame";
+import { Frame, FramePanel } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SheetBody, SheetFooter } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -183,171 +184,172 @@ export function ReferralAvailabilityForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
+        className="flex min-h-0 flex-1 flex-col"
         data-cy="referral-availability-form"
       >
-        <FieldSet disabled={isPending} className="gap-0">
-          <Frame stacked>
-            <FramePanel>
-              <FieldGroup>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <ReferralAvailabilityField label={t("name")} required>
-                        <Input {...field} maxLength={255} autoFocus />
-                      </ReferralAvailabilityField>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <ReferralAvailabilityField label={t("description")}>
-                        <Textarea {...field} rows={3} />
-                      </ReferralAvailabilityField>
-                    </FormItem>
-                  )}
-                />
-                <div className="grid gap-4 sm:grid-cols-2">
+        <SheetBody>
+          <FieldSet disabled={isPending} className="gap-0">
+            <Frame stacked>
+              <FramePanel>
+                <FieldGroup>
                   <FormField
                     control={form.control}
-                    name="referral_type"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={!!availability || isPending}
-                        >
-                          <ReferralAvailabilityField label={t("referral_type")}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </ReferralAvailabilityField>
-                          <SelectContent>
-                            <SelectItem value="consultation">
-                              {t("referral_type_consultation")}
-                            </SelectItem>
-                            <SelectItem value="lab">
-                              {t("referral_type_lab")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <ReferralAvailabilityField label={t("name")} required>
+                          <Input {...field} maxLength={255} autoFocus />
+                        </ReferralAvailabilityField>
                       </FormItem>
                     )}
                   />
                   <FormField
                     control={form.control}
-                    name="status"
+                    name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={isPending}
-                        >
-                          <ReferralAvailabilityField label={t("status")}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </ReferralAvailabilityField>
-                          <SelectContent>
-                            {(["draft", "active", "inactive"] as const).map(
-                              (status) => (
-                                <SelectItem key={status} value={status}>
-                                  {t(status)}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
+                        <ReferralAvailabilityField label={t("description")}>
+                          <Textarea {...field} rows={3} />
+                        </ReferralAvailabilityField>
                       </FormItem>
                     )}
                   />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="is_public"
-                  render={({ field }) => (
-                    <FormItem>
-                      <ReferralAvailabilityField
-                        orientation="horizontal"
-                        label={t("referral_public_availability")}
-                        description={t("referral_public_availability_help")}
-                      >
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isPending}
-                        />
-                      </ReferralAvailabilityField>
-                    </FormItem>
-                  )}
-                />
-              </FieldGroup>
-            </FramePanel>
-            <FramePanel>
-              <ReferralQuestionnaireMappings
-                facilityId={scope.facilityId}
-                value={questionnaires}
-                onChange={setQuestionnaires}
-                disabled={isPending}
-              />
-            </FramePanel>
-            <FramePanel>
-              <ReferralDefaultCareTeam
-                facilityId={scope.facilityId}
-                organizationId={
-                  scope.entityType === "internal_organization"
-                    ? scope.entityId
-                    : undefined
-                }
-                value={careTeam}
-                onChange={setCareTeam}
-                disabled={isPending}
-              />
-            </FramePanel>
-            {formError && (
-              <div className="p-4">
-                <FieldError>{formError}</FieldError>
-              </div>
-            )}
-            <FrameFooter className="sticky bottom-0 flex-row flex-wrap justify-end gap-2 border-t border-border bg-background">
-              {availability && onDelete && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  className="mr-auto"
-                  onClick={onDelete}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="referral_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={!!availability || isPending}
+                          >
+                            <ReferralAvailabilityField
+                              label={t("referral_type")}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </ReferralAvailabilityField>
+                            <SelectContent>
+                              <SelectItem value="consultation">
+                                {t("referral_type_consultation")}
+                              </SelectItem>
+                              <SelectItem value="lab">
+                                {t("referral_type_lab")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isPending}
+                          >
+                            <ReferralAvailabilityField label={t("status")}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </ReferralAvailabilityField>
+                            <SelectContent>
+                              {(["draft", "active", "inactive"] as const).map(
+                                (status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {t(status)}
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="is_public"
+                    render={({ field }) => (
+                      <FormItem>
+                        <ReferralAvailabilityField
+                          orientation="horizontal"
+                          label={t("referral_public_availability")}
+                          description={t("referral_public_availability_help")}
+                        >
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isPending}
+                          />
+                        </ReferralAvailabilityField>
+                      </FormItem>
+                    )}
+                  />
+                </FieldGroup>
+              </FramePanel>
+              <FramePanel>
+                <ReferralQuestionnaireMappings
+                  facilityId={scope.facilityId}
+                  value={questionnaires}
+                  onChange={setQuestionnaires}
                   disabled={isPending}
-                >
-                  <Trash2 className="size-4" />
-                  {t("referral_delete_availability")}
-                </Button>
+                />
+              </FramePanel>
+              <FramePanel>
+                <ReferralDefaultCareTeam
+                  facilityId={scope.facilityId}
+                  organizationId={
+                    scope.entityType === "internal_organization"
+                      ? scope.entityId
+                      : undefined
+                  }
+                  value={careTeam}
+                  onChange={setCareTeam}
+                  disabled={isPending}
+                />
+              </FramePanel>
+              {formError && (
+                <div className="p-4">
+                  <FieldError>{formError}</FieldError>
+                </div>
               )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isPending}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending && <Spinner className="size-4 animate-spin" />}
-                {t(
-                  availability
-                    ? "save_changes"
-                    : "referral_create_availability",
-                )}
-              </Button>
-            </FrameFooter>
-          </Frame>
-        </FieldSet>
+            </Frame>
+          </FieldSet>
+        </SheetBody>
+
+        <SheetFooter>
+          {availability && onDelete && (
+            <Button
+              type="button"
+              variant="destructive"
+              className="sm:mr-auto"
+              onClick={onDelete}
+              disabled={isPending}
+            >
+              <Trash2 className="size-4" />
+              {t("referral_delete_availability")}
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            {t("cancel")}
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Spinner className="size-4 animate-spin" />}
+            {t(availability ? "save_changes" : "referral_create_availability")}
+          </Button>
+        </SheetFooter>
       </form>
     </Form>
   );

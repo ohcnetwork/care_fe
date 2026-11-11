@@ -71,6 +71,18 @@ test.describe("Questionnaire v2 builder groups", () => {
       .click();
     const rows = canvas.locator("[data-group-row]");
     await expect(rows).toHaveCount(2);
+    await expect(
+      rows.nth(0).getByRole("heading", {
+        name: "Repeated findings (1)",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      rows.nth(1).getByRole("heading", {
+        name: "Repeated findings (2)",
+        exact: true,
+      }),
+    ).toBeVisible();
     await rows.nth(0).getByRole("textbox").nth(0).fill("16");
     await rows.nth(0).getByRole("textbox").nth(1).fill("Caries");
     await rows.nth(1).getByRole("textbox").nth(0).fill("16");
@@ -78,7 +90,10 @@ test.describe("Questionnaire v2 builder groups", () => {
     await expect(rows.nth(0).getByRole("textbox").nth(1)).toHaveValue("Caries");
     await rows
       .nth(0)
-      .getByRole("button", { name: "Remove", exact: true })
+      .getByRole("button", {
+        name: "Remove Repeated findings (1)",
+        exact: true,
+      })
       .click();
     await expect(rows).toHaveCount(1);
     await expect(rows.nth(0).getByRole("textbox").nth(0)).toHaveValue("16");
@@ -206,7 +221,11 @@ test.describe("Questionnaire v2 builder groups", () => {
       await dialog.getByRole("button", { name: "Move", exact: true }).click();
 
       // A2 is now the first top-level question in the tree nav.
-      await expect(nav.getByRole("button", { name: a2 })).toContainText("1.");
+      await expect(
+        nav
+          .getByRole("button")
+          .filter({ hasText: new RegExp([a2, groupA, groupB].join("|")) }),
+      ).toHaveText([a2, groupA, groupB]);
     });
   });
 

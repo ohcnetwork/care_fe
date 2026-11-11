@@ -44,13 +44,14 @@ test.describe("Questionnaire v2 per-mount scoping", () => {
   }) => {
     const facilityId = getFacilityId();
 
-    await test.step("Admin create offers all five subject types", async () => {
+    await test.step("Admin create offers all six subject types", async () => {
       await page.goto("/admin/questionnaires/new");
       const group = page.getByRole("radiogroup", { name: "Subject Type" });
-      await expect(group.getByRole("radio")).toHaveCount(5);
+      await expect(group.getByRole("radio")).toHaveCount(6);
       for (const label of [
         "Patient",
         "Encounter",
+        "Referral",
         "Location",
         "Device",
         "Facility",
@@ -64,11 +65,17 @@ test.describe("Questionnaire v2 per-mount scoping", () => {
     await test.step("Facility create omits the Patient subject type", async () => {
       await page.goto(`/facility/${facilityId}/settings/questionnaires/new`);
       const group = page.getByRole("radiogroup", { name: "Subject Type" });
-      await expect(group.getByRole("radio")).toHaveCount(4);
+      await expect(group.getByRole("radio")).toHaveCount(5);
       await expect(
         group.getByRole("radio", { name: "Patient", exact: true }),
       ).not.toBeVisible();
-      for (const label of ["Encounter", "Location", "Device", "Facility"]) {
+      for (const label of [
+        "Encounter",
+        "Referral",
+        "Location",
+        "Device",
+        "Facility",
+      ]) {
         await expect(
           group.getByRole("radio", { name: label, exact: true }),
         ).toBeVisible();

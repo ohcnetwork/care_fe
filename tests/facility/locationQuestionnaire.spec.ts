@@ -828,7 +828,11 @@ test.describe("Location overview and forms", () => {
       const selectedSubmitter = page.getByRole("option").filter({
         has: page.getByText(history.user.username, { exact: true }),
       });
-      await expect(selectedSubmitter.locator("svg.lucide-check")).toBeVisible();
+      // CommandItem also renders its own check, transparent until the item is
+      // data-checked; assert the submitter picker's own selection check.
+      await expect(
+        selectedSubmitter.locator("svg.lucide-check:not(.opacity-0)"),
+      ).toBeVisible();
       await page.keyboard.press("Escape");
 
       const filteredUrl = page.url();

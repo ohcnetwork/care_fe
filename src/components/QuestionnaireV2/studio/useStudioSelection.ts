@@ -5,10 +5,6 @@ import {
   BuilderState,
   findQuestion,
 } from "@/components/QuestionnaireV2/builder/builderReducer";
-import {
-  findQuestionNumber,
-  findTopLevelIndex,
-} from "@/components/QuestionnaireV2/shared/questionTree";
 
 /** Inspector and reveal state, kept separate from the persisted draft. The
  * outline owns its keyboard/multi-selection behavior and calls these actions. */
@@ -59,8 +55,9 @@ export function useStudioSelection(
   );
 
   const revealQuestion = useCallback(
-    (questionId: string) => {
+    (questionId: string, { focusTitle = true } = {}) => {
       selectQuestion(questionId);
+      if (!focusTitle) setFocusTitle(false);
       setScrollRequest((previous) => ({
         id: questionId,
         nonce: (previous?.nonce ?? 0) + 1,
@@ -86,16 +83,6 @@ export function useStudioSelection(
         ? "form"
         : "question";
   const formSelected = panel === "form";
-  const topLevelIndex = state.selectedId
-    ? findTopLevelIndex(state.questions, state.selectedId)
-    : 0;
-  // The selected question's own dotted number (e.g. "3.1." for a nested
-  // child) — falls back to the top-level ancestor's ordinal for questions
-  // nested deeper than `findQuestionNumber` numbers (grandchildren+).
-  const selectedNumber =
-    (state.selectedId &&
-      findQuestionNumber(state.questions, state.selectedId)) ||
-    `${topLevelIndex + 1}.`;
   return {
     studioDispatch,
     setInspectorTarget,
@@ -108,7 +95,6 @@ export function useStudioSelection(
     revealQuestion,
     revealAction,
     selectedQuestion,
-    selectedNumber,
     panel,
     formSelected,
   };

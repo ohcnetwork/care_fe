@@ -4,8 +4,8 @@ import * as path from "path";
 
 import { expectToast } from "./ui";
 
-/** Deterministic backend fixtures loaded by the care repo's E2E fixture
- *  script (present in the Playwright DB snapshot, so restores keep them). */
+/** Deterministic fixtures seeded by the setup project
+ *  (tests/support/questionnaireE2EFixtures.ts). */
 export const KITCHEN_SINK_FACILITY_SLUG = "e2e-kitchen-sink-facility";
 export const KITCHEN_SINK_INSTANCE_SLUG = "e2e-kitchen-sink-instance";
 export const VERSIONED_SLUG = "e2e-versioned";
@@ -80,7 +80,7 @@ export async function getQuestionnaireIdBySlug(slug: string): Promise<string> {
   }
 
   throw new Error(
-    `Fixture questionnaire "${slug}" not found — reload backend E2E fixtures`,
+    `Fixture questionnaire "${slug}" not found — run the Playwright setup project`,
   );
 }
 
@@ -139,10 +139,25 @@ export async function createQuestionnaireAndOpenBuilder(
 }
 
 /**
+ * Switches the questionnaire list's status filter. Each tab's radio is
+ * visually hidden inside its label, so the label is what takes the click.
+ */
+export async function selectQuestionnaireStatusTab(
+  page: Page,
+  status: "Active" | "Draft" | "Retired",
+): Promise<void> {
+  await page
+    .getByRole("radiogroup", { name: "Status" })
+    .locator("label")
+    .filter({ has: page.getByRole("radio", { name: status, exact: true }) })
+    .click();
+}
+
+/**
  * Picks a valueset in the builder's SelectOrCreateValueset autocomplete.
- * The search MUST be scoped to the opened popover/dialog — a bare
- * `[data-slot="command-input"]` first() can resolve to a different cmdk
- * input on the builder page and leave the list unfiltered (flake).
+ * The search box (Autocomplete's Base UI combobox input) only renders while
+ * the picker — a popover, or a drawer on mobile — is open, so the strict
+ * role + name locator can only resolve to the opened picker's input.
  */
 export async function pickValuesetFromAutocomplete(
   page: Page,
@@ -152,12 +167,10 @@ export async function pickValuesetFromAutocomplete(
     .getByRole("combobox")
     .filter({ hasText: "Select a value set" })
     .click();
-  const dialog = page.getByRole("dialog").last();
-  const scope = (await dialog.isVisible().catch(() => false))
-    ? dialog
-    : page.locator("[data-radix-popper-content-wrapper]").last();
-  await scope.locator('[data-slot="command-input"]').first().fill(search);
-  await scope.getByRole("option", { name: optionName }).click();
+  await page
+    .getByRole("combobox", { name: "Search option...", exact: true })
+    .fill(search);
+  await page.getByRole("option", { name: optionName }).click();
   await expect(
     page.getByRole("combobox").filter({ hasText: optionName }),
   ).toBeVisible();

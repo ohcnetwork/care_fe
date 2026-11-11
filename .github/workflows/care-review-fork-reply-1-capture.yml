@@ -1,0 +1,61 @@
+# Fork-reply bridge, Stage 1 of 3 — CAPTURE.
+#
+# Why this exists: `care-review` reviews fork PRs fine (it triggers on `pull_request_target`, which
+# runs in base-repo context WITH the Copilot credential). A conversation comment (`issue_comment`)
+# also keeps that credential, so `care-review` answers those itself — this bridge does not listen
+# for them. An inline reply fires `pull_request_review_comment`, and GitHub withholds
+# `COPILOT_GITHUB_TOKEN` when the PR head is a fork, so that run dies at activation. This 3-stage
+# bridge carries the trust back: Stage 1 (here) runs powerless and just records what was said;
+# Stage 2 (`workflow_run`, which DOES get secrets) picks the record up and dispatches the reply
+# agent (Stage 3).
+#
+# This stage is deliberately dumb and powerless. It holds NO token (`permissions: {}`) — proving the
+# untrusted fork side needs nothing GitHub withholds. The job `if:` only uses event payload (repo,
+# bot, head.repo) so same-repo inline comments — already answered by care-review — do not spin
+# Capture+Dispatch. "Is this addressed to care-review?" still needs a token/API, so Stage 2 owns
+# that and must not dispatch Stage 3 unless it passes. A hostile Capture.yml can drop the head.repo
+# skip; Stage 2's API fork gate is the trusted copy. Same split as pr-review-trigger.yml ->
+# pr-automation.yml and the Cloudflare preview bridge.
+name: CARE Reply Bridge — Capture
+
+on:
+  pull_request_review_comment:
+    types: [created]
+
+# Zero permissions: a hostile fork comment can do nothing here. The captured context crosses to
+# Stage 2 as an artifact, never as a token-bearing action.
+permissions: {}
+
+# Cheap trigger-level gate only. Upstream-repo, skip bots (see care-review.md's bot rationale), skip
+# same-repo heads (care-review already answers those; inverse of care-review.md's fork skip, same
+# field as cloudflare-preview.yml). Addressed-to-reviewer is NOT here — it needs a token, so Stage 2
+# owns it and must not dispatch the Copilot agent until that gate passes.
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ github.repository == 'ohcnetwork/care_fe' &&
+          github.event.comment.user.type != 'Bot' &&
+          github.event.pull_request.head.repo.full_name != github.repository }}
+    steps:
+      # Pointers only. Stage 2 re-fetches the comment via the API by id, so the attacker-controlled
+      # body never crosses this boundary and never needs to be logged.
+      - name: Record reply context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$EVENT_NAME" > event_name.txt
+          printf '%s' "$PR_NUMBER"  > pr_number.txt
+          printf '%s' "$COMMENT_ID" > comment_id.txt
+
+      - name: Upload reply context
+        uses: actions/upload-artifact@v4
+        with:
+          name: fork-reply-context
+          path: |
+            event_name.txt
+            pr_number.txt
+            comment_id.txt

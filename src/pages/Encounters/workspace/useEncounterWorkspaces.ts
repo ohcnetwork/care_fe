@@ -1,58 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useWorkspaceList } from "@/hooks/useWorkspaces";
 
 import { EncounterClass } from "@/types/emr/encounter/encounter";
 import workspaceApi from "@/types/workspace/workspaceApi";
 import query from "@/Utils/request/query";
 
-import { parseEncounterClasses } from "./workspacePreferences";
+import { findPreferredWorkspaceId } from "./workspacePreferences";
 
 /**
- * The backend owns access; saved choices apply across facilities by class.
- * Only active workspaces are offered, so saved choices for draft or archived
- * workspaces fall back to the standard encounter.
+ * The user's one workspace choice, shared by encounters and clinical history.
+ * The backend owns access and only active workspaces are offered, so choices
+ * for draft, archived or revoked workspaces fall back to the standard screens.
+ * Pass the encounter class to also honour legacy per-class choices.
  */
 export function useEncounterWorkspaces(encounterClass?: EncounterClass) {
   const user = useAuthUser();
   const defaults = useQuery({
-    queryKey: ["workspace-user-defaults", user.id, "encounter"],
+    queryKey: ["workspace-user-defaults", user.id],
     queryFn: query(workspaceApi.getUserDefaultAttributes, { silent: true }),
     retry: false,
     // The header and content share these reads. Remounting an observer must
     // preserve a failed result until the user explicitly chooses Try Again.
     retryOnMount: false,
   });
-  const list = useQuery({
-    queryKey: ["workspaces", user.id, "encounter", "active"],
-    queryFn: async ({ signal }) => {
-      const response = await query.paginated(workspaceApi.list, {
-        queryParams: { status: "active" },
-        silent: true,
-      })({ signal });
-      return response.results;
-    },
-    retry: false,
-    retryOnMount: false,
-  });
+  const list = useWorkspaceList();
   const accessibleWorkspaces = new Map(
     (list.data ?? []).map((workspace) => [workspace.id, workspace]),
   );
-  // Keep the defaults API's order and skip deleted or revoked workspaces.
-  const firstMatch = defaults.data?.results.find(
-    ({ attribute, value, workspace }) =>
-      attribute === "encounter_class" &&
-      encounterClass !== undefined &&
-      parseEncounterClasses(value).has(encounterClass) &&
-      accessibleWorkspaces.has(workspace.id),
-  );
+  const workspaceId =
+    defaults.isError || list.isError
+      ? undefined
+      : findPreferredWorkspaceId(
+          defaults.data?.results ?? [],
+          new Set(accessibleWorkspaces.keys()),
+          encounterClass,
+        );
 
   return {
     defaults,
     list,
-    workspace:
-      !defaults.isError && !list.isError && firstMatch
-        ? accessibleWorkspaces.get(firstMatch.workspace.id)
-        : undefined,
+    workspace: workspaceId ? accessibleWorkspaces.get(workspaceId) : undefined,
   };
 }

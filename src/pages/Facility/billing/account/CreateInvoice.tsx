@@ -78,6 +78,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { DateTimePicker } from "@/components/Common/DateTimePicker";
@@ -194,7 +195,7 @@ export function CreateInvoicePage({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: InvoiceStatus.draft,
-      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
+      payment_terms: careConfig.defaultPaymentTerms,
       note: "",
       issue_date: "",
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
@@ -500,7 +501,7 @@ export function CreateInvoicePage({
               {isLoading ? (
                 <TableSkeleton count={3} />
               ) : (
-                <div className="rounded-t-sm border border-gray-300">
+                <div className="rounded-t-sm border border-gray-300 [&_[data-slot=table-container]]:rounded-none [&_[data-slot=table-container]]:border-0">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
@@ -809,6 +810,7 @@ export function CreateInvoicePage({
                           },
                         }}
                         translationBaseKey="charge_item_definition"
+                        data-shortcut-id="enter-action"
                       />
                     </div>
                   )}

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -105,26 +106,30 @@ export function ServiceRequestCompletion({
             if (!isCompletingServiceRequest) setIsCompleteDialogOpen(open);
           }}
         >
-          <SheetContent side="bottom">
+          <SheetContent side="bottom" className="overflow-hidden">
             <SheetHeader>
               <SheetTitle>{t("add_completion_note")}</SheetTitle>
               <SheetDescription>
                 {t("service_request_completion_note_description")}
               </SheetDescription>
             </SheetHeader>
-            <CompletionNoteContent
-              note={completionNote}
-              isUpdating={isCompletingServiceRequest}
-              onNoteChange={setCompletionNote}
-              onComplete={() =>
-                completeServiceRequest({
-                  status: Status.completed,
-                  note: completionNote.trim() || null,
-                  locations: request.locations.map((loc) => loc.id),
-                })
-              }
-              onCancel={() => setIsCompleteDialogOpen(false)}
-            />
+            <SheetBody>
+              <div className="space-y-4">
+                <CompletionNoteContent
+                  note={completionNote}
+                  isUpdating={isCompletingServiceRequest}
+                  onNoteChange={setCompletionNote}
+                  onComplete={() =>
+                    completeServiceRequest({
+                      status: Status.completed,
+                      note: completionNote.trim() || null,
+                      locations: request.locations.map((loc) => loc.id),
+                    })
+                  }
+                  onCancel={() => setIsCompleteDialogOpen(false)}
+                />
+              </div>
+            </SheetBody>
           </SheetContent>
         </Sheet>
       ) : (

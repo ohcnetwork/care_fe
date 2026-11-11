@@ -10,6 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -24,7 +25,6 @@ import DeviceTypeIcon from "@/pages/Facility/settings/devices/components/DeviceT
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 import query from "@/Utils/request/query";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface DeviceSearchProps {
   facilityId: string;
@@ -48,6 +48,7 @@ function DeviceCommandContent({
   setSearch,
   devices,
   isPending,
+  value,
   onSelect,
   setOpen,
 }: DeviceCommandContentProps) {
@@ -57,30 +58,35 @@ function DeviceCommandContent({
     <Command>
       <CommandInput
         placeholder={t("search_devices")}
+        aria-label={t("search_devices")}
         value={search}
         onValueChange={setSearch}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
-        autoFocus={!isIOSDevice}
+        wrapperClassName="border-b border-gray-100 p-2 shadow-xs md:pt-2"
+        className="text-base sm:text-sm"
+        autoFocus
       />
-      {isPending ? (
-        <CardListSkeleton count={3} />
-      ) : (
-        <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
-      )}
-      <CommandGroup className="overflow-y-auto">
-        {devices?.map((device) => (
-          <CommandItem
-            key={device.id}
-            value={device.registered_name}
-            onSelect={() => {
-              onSelect(device);
-              setOpen(false);
-            }}
-          >
-            <DeviceItem device={device} />
-          </CommandItem>
-        ))}
-      </CommandGroup>
+      <CommandList className="scrollbar-gutter-auto">
+        {isPending ? (
+          <CardListSkeleton count={3} />
+        ) : (
+          <CommandEmpty>{t("no_devices_found")}</CommandEmpty>
+        )}
+        <CommandGroup>
+          {devices?.map((device) => (
+            <CommandItem
+              key={device.id}
+              value={device.registered_name}
+              data-checked={value?.id === device.id}
+              onSelect={() => {
+                onSelect(device);
+                setOpen(false);
+              }}
+            >
+              <DeviceItem device={device} />
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
     </Command>
   );
 }
@@ -131,8 +137,12 @@ export function DeviceSearch({
         <DrawerTrigger asChild disabled={disabled}>
           {renderTriggerButton()}
         </DrawerTrigger>
-        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
-          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+        <DrawerContent
+          aria-describedby={undefined}
+          height="fixed"
+          className="p-1.5"
+        >
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
             <DeviceCommandContent
               search={search}
               setSearch={setSearch}
@@ -153,7 +163,7 @@ export function DeviceSearch({
       <PopoverTrigger asChild disabled={disabled}>
         {renderTriggerButton()}
       </PopoverTrigger>
-      <PopoverContent className="p-0 pointer-events-auto w-[var(--anchor-width)]">
+      <PopoverContent className="p-0 pointer-events-auto w-[var(--anchor-width)] overflow-clip">
         <DeviceCommandContent
           search={search}
           setSearch={setSearch}

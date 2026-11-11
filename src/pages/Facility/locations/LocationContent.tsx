@@ -18,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -75,11 +76,11 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
           {t("view_encounter")}
         </Button>
       </div>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("bed_encounter_details")}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <SheetBody>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Spinner className="size-8 animate-spin text-gray-400" />
@@ -98,7 +99,7 @@ function OccupiedBedSheet({ location, facilityId }: OccupiedBedSheetProps) {
               </p>
             </div>
           )}
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

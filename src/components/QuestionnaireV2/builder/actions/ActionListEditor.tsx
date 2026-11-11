@@ -3,6 +3,17 @@ import { useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -11,7 +22,6 @@ import {
   ALWAYS_CONDITION,
   lintExpression,
 } from "@/components/QuestionnaireV2/shared/actionExpression";
-import { flattenNumberedQuestions } from "@/components/QuestionnaireV2/shared/questionTree";
 
 import { ActionIssue } from "@/components/QuestionnaireV2/builder/actionValidation";
 import {
@@ -91,12 +101,6 @@ export function ActionListEditor({
       contextValues: contextType
         ? reachableContextValues(contextType, registry.fields)
         : [],
-      numbers: new Map(
-        flattenNumberedQuestions(questions).map(({ question, number }) => [
-          question.id,
-          number,
-        ]),
-      ),
     }),
     [questions, contextType, registry.fields],
   );
@@ -204,15 +208,37 @@ export function ActionListEditor({
                         className="size-4 text-red-500"
                       />
                     )}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t("delete_action", { n: index + 1 })}
-                      onClick={() => removeAction(index)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("remove_action", { n: index + 1 })}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("action_remove_confirm", { n: index + 1 })}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("action_remove_confirm_hint")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction
+                            variant="destructive"
+                            onClick={() => removeAction(index)}
+                          >
+                            {t("remove")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </>
                 }
               >

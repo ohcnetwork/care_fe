@@ -1,4 +1,5 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
+import { TagSetRequest } from "@/types/emr/tagConfig/tagConfig";
 import {
   Appointment,
   AppointmentCancelRequest,
@@ -209,13 +210,13 @@ export default {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/set_tags/",
       method: HttpMethod.POST,
       TRes: Type<unknown>(),
-      TBody: Type<{ tags: string[] }>(),
+      TBody: Type<{ tags: TagSetRequest[] }>(),
     },
     removeTags: {
       path: "/api/v1/facility/{facilityId}/appointments/{external_id}/remove_tags/",
       method: HttpMethod.POST,
       TRes: Type<unknown>(),
-      TBody: Type<{ tags: string[] }>(),
+      TBody: Type<{ tags: TagSetRequest[] }>(),
     },
   },
 } as const;

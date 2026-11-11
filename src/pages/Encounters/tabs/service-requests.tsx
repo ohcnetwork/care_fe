@@ -19,7 +19,6 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 
@@ -29,6 +28,7 @@ export const EncounterServiceRequestTab = () => {
     selectedEncounterId: encounterId,
     facilityId,
     patientId,
+    canWriteClinicalData,
   } = useEncounter();
   const { t } = useTranslation();
   const {
@@ -124,7 +124,7 @@ export const EncounterServiceRequestTab = () => {
             />
           </div>
 
-          {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
+          {encounter && facilityId && canWriteClinicalData && (
             <Button variant="primary" asChild className="w-full sm:w-auto">
               <Link
                 href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
@@ -149,6 +149,7 @@ export const EncounterServiceRequestTab = () => {
                   requests={data.results}
                   facilityId={facilityId || ""}
                   showPatientInfo={false}
+                  readOnly={!canWriteClinicalData}
                 />
               ) : (
                 <div className="p-6 text-center text-gray-500">

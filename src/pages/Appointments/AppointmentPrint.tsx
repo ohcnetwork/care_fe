@@ -13,6 +13,7 @@ import { getPermissions } from "@/common/Permissions";
 import { DisablingCover } from "@/components/Common/DisablingCover";
 import PrintFooter from "@/components/Common/PrintFooter";
 import TagBadge from "@/components/Tags/TagBadge";
+import { Markdown } from "@/components/ui/markdown";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Table,
@@ -294,7 +295,7 @@ export default function AppointmentPrint(props: Props) {
                 {t("charges")}
               </div>
 
-              <div className="border rounded overflow-hidden">
+              <div className="rounded-md overflow-hidden">
                 <Table className="text-xs">
                   <TableHeader>
                     <TableRow className="bg-gray-50 divide-x">
@@ -371,7 +372,7 @@ export default function AppointmentPrint(props: Props) {
                 {t("payment_details")}
               </div>
 
-              <div className="border rounded overflow-hidden">
+              <div className="rounded-md overflow-hidden">
                 <Table className="text-xs">
                   <TableHeader>
                     <TableRow className="bg-gray-50 divide-x">
@@ -455,7 +456,11 @@ export default function AppointmentPrint(props: Props) {
                 {t("note")}
               </div>
               <div className="text-xs whitespace-pre-wrap bg-gray-50 p-1.5 rounded">
-                {appointment.note}
+                <Markdown
+                  content={appointment.note}
+                  richText
+                  className="prose-sm text-xs"
+                />
               </div>
             </div>
           )}

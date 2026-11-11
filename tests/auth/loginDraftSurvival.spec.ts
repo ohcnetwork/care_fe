@@ -87,15 +87,29 @@ test.describe("Fill draft lifecycle at the login form", () => {
     const currentUserResponsePromise = page.waitForResponse(
       (res) => res.url().includes("/getcurrentuser/") && res.ok(),
     );
+    // Once the user loads, AuthUserProvider refreshes the token and writes
+    // the new pair to localStorage. Stripping the tokens before that write
+    // lands lets it put them back, and /login then opens signed in.
+    const tokenRefreshResponsePromise = page.waitForResponse(
+      (res) => res.url().includes("/auth/token/refresh/") && res.ok(),
+    );
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/^password$/i).fill("admin");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     const currentUserResponse = await currentUserResponsePromise;
     const { id: adminUserId } = (await currentUserResponse.json()) as {
       id: string;
     };
     expect(adminUserId).toBeTruthy();
     await page.waitForURL(loggedInUrl, { timeout: 15000 });
+    const { access: refreshedAccessToken } = (await (
+      await tokenRefreshResponsePromise
+    ).json()) as { access: string };
+    await expect
+      .poll(() =>
+        page.evaluate((key) => localStorage.getItem(key), ACCESS_TOKEN_KEY),
+      )
+      .toBe(refreshedAccessToken);
 
     // Drop back to a logged-out /login without going through the sign-out
     // UI: signOut() does a full, unconditional draft clear (unchanged by
@@ -142,7 +156,7 @@ test.describe("Fill draft lifecycle at the login form", () => {
     // A mistyped password must not touch either draft.
     await page.getByRole("textbox", { name: /username/i }).fill("admin");
     await page.getByLabel(/^password$/i).fill("wrongpassword");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     await expect(page.getByText(/no active account found/i)).toBeVisible({
       timeout: 10000,
     });
@@ -159,9 +173,13 @@ test.describe("Fill draft lifecycle at the login form", () => {
 
     // Sign in correctly as the same user.
     await page.getByLabel(/^password$/i).fill("admin");
-    await page.getByRole("button", { name: /login/i }).click();
+    await page.getByRole("button", { name: /^sign in$/i }).click();
     await page.waitForURL(loggedInUrl, { timeout: 15000 });
-    await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /^Good (Morning|Afternoon|Evening), .+/,
+      }),
+    ).toBeVisible();
 
     // The OTHER user's draft is gone — cleared as soon as credentials were
     // accepted.

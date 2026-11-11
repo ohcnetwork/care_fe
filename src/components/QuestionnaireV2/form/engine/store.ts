@@ -3,6 +3,7 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { selectAtom } from "jotai/utils";
 import { useMemo } from "react";
 
+import { circularConditionQuestionIds } from "@/components/QuestionnaireV2/shared/circularConditions";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
   QuestionnaireResponse,
@@ -81,16 +82,32 @@ export function useClearStructuredRenderFailed(questionId: string) {
   return useAtom(clearAtom)[1];
 }
 
-/** link_id → question_id for enable_when lookups. */
+interface QuestionNode {
+  question: Question;
+  parent?: Question;
+}
+
+const questionNodes = new WeakMap<
+  Record<string, string>,
+  { nodes: Map<string, QuestionNode>; circularIds: Set<string> }
+>();
+
+/** Index both links and ancestry so disabled controllers count as unanswered. */
 export function buildLinkIndex(questions: Question[]): Record<string, string> {
   const index: Record<string, string> = {};
-  const walk = (list: Question[]) => {
+  const nodes = new Map<string, QuestionNode>();
+  const walk = (list: Question[], parent?: Question) => {
     for (const question of list) {
       index[question.link_id] = question.id;
-      if (question.questions) walk(question.questions);
+      nodes.set(question.id, { question, parent });
+      if (question.questions) walk(question.questions, question);
     }
   };
   walk(questions);
+  questionNodes.set(index, {
+    nodes,
+    circularIds: circularConditionQuestionIds(questions),
+  });
   return index;
 }
 
@@ -98,6 +115,15 @@ const questionIdByLinkIdAtom = atom((get) => {
   const questionnaire = get(questionnaireAtom);
   return questionnaire ? buildLinkIndex(questionnaire.questions) : {};
 });
+
+const hasCircularConditionsAtom = atom(
+  (get) =>
+    (questionNodes.get(get(questionIdByLinkIdAtom))?.circularIds.size ?? 0) > 0,
+);
+
+export function useHasCircularConditions(): boolean {
+  return useAtomValue(hasCircularConditionsAtom);
+}
 
 /** Flatten ordinary groups, seed choice defaults, and keep repeating groups
  *  as containers whose child answers are created separately for each row. */
@@ -295,15 +321,64 @@ export function isQuestionEnabledInState(
   responses: Record<string, QuestionnaireResponse>,
   linkIndex: Record<string, string>,
 ): boolean {
+  return isEnabledByConditions(question, responses, linkIndex, {
+    visiting: new Set(),
+    completed: new Map(),
+  });
+}
+
+interface VisibilityEvaluation {
+  visiting: Set<string>;
+  completed: Map<string, boolean>;
+}
+
+function isEnabledByConditions(
+  question: Question,
+  responses: Record<string, QuestionnaireResponse>,
+  linkIndex: Record<string, string>,
+  evaluation: VisibilityEvaluation,
+): boolean {
+  const cached = evaluation.completed.get(question.id);
+  if (cached !== undefined) return cached;
+  const metadata = questionNodes.get(linkIndex);
+  if (metadata?.circularIds.has(question.id)) return false;
   if (!question.enable_when?.length) return true;
-  const results = question.enable_when.map((condition) =>
-    condition.question in linkIndex
-      ? evaluateEnableWhen(condition, responses[linkIndex[condition.question]])
-      : false,
-  );
-  return question.enable_behavior === "any"
-    ? results.some(Boolean)
-    : results.every(Boolean);
+  if (evaluation.visiting.has(question.id)) {
+    return false;
+  }
+  evaluation.visiting.add(question.id);
+  try {
+    const nodes = metadata?.nodes;
+    const results = question.enable_when.map((condition) => {
+      const controllerId = linkIndex[condition.question];
+      if (!controllerId) return false;
+      let enabled = true;
+      for (
+        let controller = nodes?.get(controllerId)?.question;
+        controller && enabled;
+        controller = nodes?.get(controller.id)?.parent
+      ) {
+        enabled = isEnabledByConditions(
+          controller,
+          responses,
+          linkIndex,
+          evaluation,
+        );
+      }
+      return evaluateEnableWhen(
+        condition,
+        enabled ? responses[controllerId] : undefined,
+      );
+    });
+    const enabled =
+      question.enable_behavior === "any"
+        ? results.some(Boolean)
+        : results.every(Boolean);
+    evaluation.completed.set(question.id, enabled);
+    return enabled;
+  } finally {
+    evaluation.visiting.delete(question.id);
+  }
 }
 
 export function useQuestionEnabled(question: Question): boolean {

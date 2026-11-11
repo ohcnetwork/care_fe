@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { X } from "lucide-react";
 import { Link, useLocationChange, usePath } from "raviger";
 import * as React from "react";
@@ -12,6 +11,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { AdminNav } from "@/components/ui/sidebar/admin-nav";
@@ -38,16 +38,9 @@ import { isFacilitySettingsPath } from "@/pages/Facility/settings/utils";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 
-const hasCustomLogo = [
-  careConfig.mainLogo?.dark,
-  careConfig.mainLogo?.light,
-].some((source) => source && source !== "/images/care_logo.svg");
-const logoOnLight = hasCustomLogo
-  ? (careConfig.mainLogo?.dark ?? careConfig.mainLogo?.light)
-  : "/images/care_logo_on_light.svg";
-const logoOnDark = hasCustomLogo
-  ? (careConfig.mainLogo?.light ?? careConfig.mainLogo?.dark)
-  : "/images/care_logo_on_dark.svg";
+// The sidebar always carries the Care wordmark, whatever REACT_MAIN_LOGO is.
+const logoOnLight = "/images/care_logo_on_light.svg";
+const logoOnDark = "/images/care_logo_on_dark.svg";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: CurrentUserRead;
@@ -113,10 +106,22 @@ export function AppSidebar({
     scheduleClose,
     handleSidebarFocus,
     handleSidebarBlur,
+    handleToggleMouseEnter,
   } = useAppSidebar();
   const showHeader = pinned || isMobile || (innerWorkspace && isOverlay);
   const [selectedFacility, setSelectedFacility] =
     React.useState<FacilityBareMinimum | null>(null);
+
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [
+    sidebarFor,
+    facilitySettingsSidebar,
+    facilityLocationSidebar,
+    facilityServiceSidebar,
+  ]);
 
   const userOrganizations = user?.organizations;
   const selectedOrganization = React.useMemo(() => {
@@ -213,7 +218,7 @@ export function AppSidebar({
         )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent ref={contentRef}>
         {facilityLocationSidebar && <LocationNav />}
         {facilitySettingsSidebar && <FacilitySettingsNav />}
         {facilityServiceSidebar && <ServiceNav />}
@@ -249,6 +254,23 @@ export function AppSidebar({
           />
         )}
       </SidebarFooter>
+      {!isMobile && (
+        // Edge hover target that previews the collapsed sidebar, like the
+        // header toggle. Leaving is handled by the Sidebar's onMouseLeave.
+        // Starts below the header so it never overlaps the toggle's hit area.
+        // Pointer-only (not focusable), so it stays out of the accessibility
+        // tree and the header toggle remains the one "Toggle Sidebar" control.
+        <SidebarRail
+          aria-hidden="true"
+          onMouseEnter={handleToggleMouseEnter}
+          className="fixed top-[calc(var(--app-sidebar-offset)+(--spacing(2)))] left-0 right-auto! visible items-center justify-center after:hidden hover:group-data-[collapsible=offcanvas]:bg-sidebar-accent group-data-[state=expanded]:hidden"
+        >
+          <span
+            aria-hidden="true"
+            className="h-8 w-1 rounded-full bg-muted-foreground/40"
+          />
+        </SidebarRail>
+      )}
     </Sidebar>
   );
 }
