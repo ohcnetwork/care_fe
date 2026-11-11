@@ -71,7 +71,7 @@ export function MarkInvoiceAsBalancedDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-          <AlertDialogDescription asChild>
+          <AlertDialogDescription asChild className="w-full">
             <div className="space-y-4">
               <p>{t("are_you_sure_want_to_mark_as_balanced")}</p>
               <div className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">

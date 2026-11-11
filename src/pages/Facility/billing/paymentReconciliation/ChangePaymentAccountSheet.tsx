@@ -1,13 +1,10 @@
-import { cn } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowRightLeft } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Sheet,
@@ -20,23 +17,16 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-
-import {
-  ACCOUNT_BILLING_STATUS_COLORS,
-  ACCOUNT_STATUS_COLORS,
-  AccountBase,
-  AccountStatus,
-} from "@/types/billing/account/Account";
-import accountApi from "@/types/billing/account/accountApi";
 import {
   getPaymentTypeLabelKey,
   PaymentReconciliationRead,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { multiply } from "@/Utils/decimal";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
+
+import TargetAccountPicker from "@/pages/Facility/billing/account/components/TargetAccountPicker";
 
 interface ChangePaymentAccountSheetProps {
   open: boolean;
@@ -61,23 +51,6 @@ export default function ChangePaymentAccountSheet({
   const queryClient = useQueryClient();
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null,
-  );
-
-  const { data: accountsResponse, isLoading } = useQuery({
-    queryKey: ["accounts", patientId, facilityId, "change-payment-account"],
-    queryFn: query(accountApi.listAccount, {
-      pathParams: { facilityId },
-      queryParams: {
-        patient: patientId,
-        status: AccountStatus.active,
-        limit: 50,
-      },
-    }),
-    enabled: open,
-  });
-
-  const accounts = (accountsResponse?.results as AccountBase[])?.filter(
-    (account) => account.id !== currentAccountId,
   );
 
   const { mutate: changeAccount, isPending } = useMutation({
@@ -128,89 +101,59 @@ export default function ChangePaymentAccountSheet({
         </SheetHeader>
 
         <SheetBody>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700">
                 {t("selected_payments")} ({payments.length})
               </p>
-              <div className="max-h-32 overflow-y-auto space-y-1 rounded-md border p-2">
+              <ul className="max-h-40 overflow-y-auto divide-y rounded-md border bg-white">
                 {payments.map((payment) => (
-                  <div
+                  <li
                     key={payment.id}
-                    className="text-sm text-gray-600 flex justify-between"
+                    className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
                   >
-                    <span className="truncate flex flex-col">
-                      {t(
-                        getPaymentTypeLabelKey(
-                          payment.reconciliation_type,
-                          payment.is_credit_note,
-                        ),
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-gray-950">
+                        {t(
+                          getPaymentTypeLabelKey(
+                            payment.reconciliation_type,
+                            payment.is_credit_note,
+                          ),
+                        )}
+                        {payment.payment_datetime && (
+                          <span className="text-gray-500">
+                            {" · "}
+                            {formatDateTime(
+                              payment.payment_datetime,
+                              "DD MMM YYYY",
+                            )}
+                          </span>
+                        )}
+                      </span>
+                      <span className="truncate font-mono text-xs text-gray-500">
+                        {payment.id}
+                      </span>
+                    </div>
+                    <MonetaryDisplay
+                      amount={multiply(
+                        payment.amount,
+                        payment.is_credit_note ? -1 : 1,
                       )}
-                      <span className="font-mono text-xs">{payment.id}</span>
-                    </span>
-                    {" - "}
-                    <MonetaryDisplay amount={payment.amount} />
-                  </div>
+                      className="shrink-0 font-medium text-gray-950"
+                    />
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">
-                {t("select_target_account")}
-              </p>
-              {isLoading ? (
-                <TableSkeleton count={3} />
-              ) : !accounts?.length ? (
-                <EmptyState
-                  icon={
-                    <CareIcon icon="l-user" className="text-primary size-6" />
-                  }
-                  title={t("no_other_accounts_available")}
-                />
-              ) : (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {accounts.map((account) => (
-                    <Button
-                      variant="outline"
-                      key={account.id}
-                      type="button"
-                      className={cn(
-                        "h-auto block whitespace-normal",
-                        `w-full text-left rounded-md border p-3 transition-colors hover:bg-gray-50 ${
-                          selectedAccountId === account.id
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "border-gray-200"
-                        }`,
-                      )}
-                      onClick={() => setSelectedAccountId(account.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm">
-                          {account.name}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Badge
-                            variant={ACCOUNT_STATUS_COLORS[account.status]}
-                          >
-                            {t(account.status)}
-                          </Badge>
-                          <Badge
-                            variant={
-                              ACCOUNT_BILLING_STATUS_COLORS[
-                                account.billing_status
-                              ]
-                            }
-                          >
-                            {t(account.billing_status)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <TargetAccountPicker
+              facilityId={facilityId}
+              patientId={patientId}
+              currentAccountId={currentAccountId}
+              enabled={open}
+              value={selectedAccountId}
+              onValueChange={setSelectedAccountId}
+            />
           </div>
         </SheetBody>
 
