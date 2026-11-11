@@ -1,4 +1,5 @@
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 import PrintFooter from "@/components/Common/PrintFooter";
 import { Markdown } from "@/components/ui/markdown";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
@@ -197,6 +198,13 @@ export const DiagnosticReportPrintPreview = ({
         title={`${t("diagnostic_report", { count: diagnosticReportLength })} - ${diagnosticReportDetail?.service_request?.title || t("diagnostic_report", { count: diagnosticReportLength })}`}
         facility={facility}
         templateSlug={PrintTemplateType.diagnostic_report}
+        pageHeader={
+          diagnosticReportDetail && (
+            <PatientPrintPageHeader
+              patient={diagnosticReportDetail.encounter.patient}
+            />
+          )
+        }
         disabled={
           isLoading ||
           isFetchingFileUrls ||

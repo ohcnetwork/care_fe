@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import PatientPrintPageHeader from "@/components/Common/PatientPrintPageHeader";
 import {
   PrintableEncounterDetails as EncounterDetails,
   PrintableResponseCard as ResponseCard,
@@ -72,6 +73,11 @@ export function PrintQuestionnaireResponse({
       }
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
+      pageHeader={
+        (encounter?.patient ?? patient) && (
+          <PatientPrintPageHeader patient={(encounter?.patient ?? patient)!} />
+        )
+      }
     >
       <div className="max-w-5xl mx-auto">
         <div>
