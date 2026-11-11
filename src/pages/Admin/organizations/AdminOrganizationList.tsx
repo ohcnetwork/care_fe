@@ -52,7 +52,7 @@ const FLAT_ORG_TYPES = new Set<string>([
   OrgType.PRODUCT_SUPPLIER,
 ]);
 
-const LIMIT = 30;
+const LIMIT = 20;
 
 export default function AdminOrganizationList({
   organizationId,

@@ -11,7 +11,7 @@ import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-const LIMIT = 30;
+const LIMIT = 20;
 
 interface OrganizationTreeNodeProps {
   organization: Organization;
