@@ -223,6 +223,7 @@ export function CreateInvoicePage({
     isLoading,
     fetchNextPage,
     hasNextPage,
+    isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["chargeItems", facilityId, accountId],
@@ -992,6 +993,7 @@ export function CreateInvoicePage({
                   isQuickAddOpen ||
                   isEditDialogOpen ||
                   isApplyingInline ||
+                  isFetching ||
                   chargeItems.length === 0
                 }
               >
