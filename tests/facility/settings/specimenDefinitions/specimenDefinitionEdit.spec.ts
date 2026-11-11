@@ -10,6 +10,7 @@ import {
   preparationOptions,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -187,5 +188,61 @@ test.describe("Specimen Definitions Edit", () => {
     ).toBeVisible();
     await expect(page.getByText(capOption)).toBeVisible();
     await expect(page.getByText(minimumVolume.toString())).toBeVisible();
+  });
+
+  test("should remove an existing Derived From URI when the field is cleared", async ({
+    page,
+  }) => {
+    const derivedFromURI = faker.internet.url();
+
+    // Create a specimen definition that has a Derived From URI
+    await page.getByRole("button", { name: "Add Definition" }).click();
+
+    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
+    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
+    await page
+      .getByRole("textbox", { name: "Description *" })
+      .fill(definitionDescription);
+    await page.getByRole("combobox", { name: "Status *" }).click();
+    await page.getByRole("option", { name: status }).click();
+
+    await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option", { name: typeCollected }).click();
+
+    await page
+      .getByRole("textbox", { name: "Derived From URI" })
+      .fill(derivedFromURI);
+
+    await page.getByRole("button", { name: /save/i }).click();
+    await expectToast(page, "Specimen definition created");
+
+    // Apply status filter before searching
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: status.toLowerCase() }).click();
+
+    // Search for the newly created definition and open its edit form
+    await page
+      .getByRole("textbox", { name: "Search definitions" })
+      .fill(definitionTitle);
+    await expect(page.locator('[data-slot="table-body"]')).toContainText(
+      definitionTitle,
+    );
+    await page.getByRole("link", { name: /edit/i }).first().click();
+
+    // Clear the stored URI and save
+    const derivedFromURIField = page.getByRole("textbox", {
+      name: "Derived From URI",
+    });
+    await expect(derivedFromURIField).toHaveValue(derivedFromURI);
+    await derivedFromURIField.clear();
+
+    await page.getByRole("button", { name: /save/i }).click();
+    await expectToast(page, "Specimen Definition updated");
+
+    // The detail page should no longer show the removed URI
+    await expect(
+      page.getByRole("heading", { name: definitionTitle }),
+    ).toBeVisible();
+    await expect(page.getByText(derivedFromURI)).toHaveCount(0);
   });
 });
