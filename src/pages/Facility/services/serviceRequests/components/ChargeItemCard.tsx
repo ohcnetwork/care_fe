@@ -35,12 +35,12 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
 
   return (
     <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-      <div className="flex min-w-0 flex-row items-center gap-2 text-sm text-gray-600">
-        <span className="text-sm text-gray-950 font-medium text-wrap">
+      <div className="flex min-w-0 flex-row items-center gap-2 text-sm text-muted-foreground">
+        <span className="text-sm text-foreground font-medium text-wrap">
           {chargeItem.title}
         </span>
         {isGreaterThan(chargeItem.quantity, 1) && (
-          <span className="text-sm text-gray-950 whitespace-nowrap">
+          <span className="text-sm text-foreground whitespace-nowrap">
             {t("x")} {round(chargeItem.quantity)}
           </span>
         )}
@@ -53,7 +53,7 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
           {chargeItem.total_price_components?.length > 0 && (
             <Popover>
               <PopoverTrigger>
-                <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
+                <InfoIcon className="size-4 text-muted-foreground cursor-pointer" />
               </PopoverTrigger>
               <PopoverContent
                 side="right"

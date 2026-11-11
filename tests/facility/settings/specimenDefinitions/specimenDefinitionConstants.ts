@@ -1,5 +1,5 @@
 export const MIN_SLUG_LENGTH = 5;
-export const MAX_SLUG_LENGTH = 25;
+export const MAX_SLUG_LENGTH = 50;
 export const INT_MAX = 100; // Arbitrary upper limit for integer fields
 export const DELETED_STATUS = "Retired";
 export const STATUS_OPTIONS = ["Draft", "Active"];

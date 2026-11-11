@@ -7,6 +7,28 @@ import { Organization } from "@/types/organization/organization";
 export type UserType =
   "doctor" | "nurse" | "staff" | "volunteer" | "administrator";
 
+export const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+export const USER_LANGUAGE_SYSTEM = "urn:iso:std:iso:639:-3" as const;
+
+export interface UserCommunication {
+  language: { code: string; system: typeof USER_LANGUAGE_SYSTEM };
+  preferred: boolean;
+  proficiency?: (typeof CEFR_LEVELS)[number] | null;
+}
+
+export interface UserQualification {
+  registration_number: string;
+  issuer: string;
+  degree: { code: string; system: string };
+  meta: Record<string, unknown>;
+}
+
+export interface UserQualificationDegree {
+  code: string;
+  system: string;
+  display?: string | null;
+}
+
 export interface UserBase {
   id: string;
   first_name: string;
@@ -25,6 +47,8 @@ export interface UserReadMinimal extends UserBase {
   mfa_enabled: boolean;
   deleted: boolean;
   is_service_account: boolean;
+  communication: UserCommunication[];
+  qualification: UserQualification[];
   role_orgs?: Array<{
     id: string;
     organization: Organization;
@@ -48,11 +72,6 @@ export interface CurrentUserRead extends UserRead, Permissions {
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
-  qualification: string | null;
-  doctor_experience_commenced_on: string | null;
-  doctor_medical_council_registration: string | null;
-  weekly_working_hours: string | null;
-  verified: boolean;
   facilities: FacilityBareMinimum[];
   organizations: Organization[];
   last_login: string;
@@ -72,6 +91,8 @@ export interface UserUpdate {
   suffix?: string | null;
   gender: (typeof GENDER_TYPES)[number]["id"];
   geo_organization?: string;
+  communication?: UserCommunication[];
+  qualification?: UserQualification[];
 }
 
 export interface UserCreate extends UserUpdate {

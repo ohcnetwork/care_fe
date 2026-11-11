@@ -1,4 +1,4 @@
-import { DialogDescription } from "@radix-ui/react-dialog";
+import { DialogDescription } from "@/components/ui/dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Hash, Info, MoreVertical } from "lucide-react";
@@ -893,17 +893,21 @@ function BillingLifecycleStepper({
                 )}
               />
             )}
-            <button
+            <Button
+              variant="ghost"
               type="button"
               disabled={!isClickable}
               onClick={() => handleStepClick(index)}
               title={stepLabels[step]}
               className={cn(
-                "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
-                isClickable
-                  ? "cursor-pointer hover:bg-gray-100"
-                  : "cursor-default",
-                isNext && "hover:ring-1 hover:ring-primary-300",
+                "h-auto",
+                cn(
+                  "flex items-center gap-1 group transition-all rounded-full px-1.5 py-0.5 text-xs",
+                  isClickable
+                    ? "cursor-pointer hover:bg-gray-100"
+                    : "cursor-default",
+                  isNext && "hover:ring-1 hover:ring-primary-300",
+                ),
               )}
             >
               <div
@@ -938,7 +942,7 @@ function BillingLifecycleStepper({
                   {stepLabels[step]}
                 </span>
               )}
-            </button>
+            </Button>
           </div>
         );
       })}

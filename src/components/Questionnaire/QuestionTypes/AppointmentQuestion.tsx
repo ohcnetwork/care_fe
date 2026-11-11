@@ -10,13 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { QuestionLabel } from "@/components/Questionnaire/QuestionLabel";
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
 import useAuthUser from "@/hooks/useAuthUser";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
@@ -40,6 +41,7 @@ import {
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import { hasMarkdownContent } from "@/Utils/markdown";
 
 interface AppointmentQuestionProps {
   question: Question;
@@ -54,6 +56,11 @@ interface AppointmentQuestionProps {
   facilityId: string;
 }
 
+interface AppointmentResponseValue extends CreateAppointmentQuestion {
+  resource_object?: ScheduleResourceFormState;
+  slot_object?: TokenSlot;
+}
+
 const APPOINTMENT_FIELDS: FieldDefinitions = {
   SLOT: {
     key: "slot_id",
@@ -62,14 +69,17 @@ const APPOINTMENT_FIELDS: FieldDefinitions = {
 } as const;
 
 export function validateAppointmentQuestion(
-  value: CreateAppointmentQuestion,
+  value: CreateAppointmentQuestion | undefined,
   questionId: string,
   required: boolean,
 ): QuestionValidationError[] {
   return validateFields(value, questionId, {
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required,
+      required:
+        required ||
+        hasMarkdownContent(value?.note ?? "") ||
+        !!value?.tags?.length,
     },
   });
 }
@@ -107,24 +117,51 @@ export function AppointmentQuestion({
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
   const currentUser = useAuthUser();
+  const values =
+    (questionnaireResponse.values?.[0]?.value as AppointmentResponseValue[]) ||
+    [];
+  const value = values[0] ?? { tags: [], note: "" };
+  const committedSlot = value.slot_object;
+
   const [cachedServiceType, setCachedServiceType] = useAtom(
     scheduleServiceTypeAtom,
   );
-  const [selectedResource, setSelectedResource] =
-    useState<ScheduleResourceFormState>(() =>
-      getInitialResourceState(cachedServiceType, currentUser),
+  const [pendingResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>(
+      () =>
+        value.resource_object ??
+        getInitialResourceState(cachedServiceType, currentUser),
     );
+  const selectedResource = value.resource_object ?? pendingResource;
 
   useEffect(() => {
-    if (selectedResource.resource_type !== cachedServiceType) {
+    if (
+      !value.resource_object &&
+      selectedResource.resource_type !== cachedServiceType
+    ) {
       setSelectedResource(
         getInitialResourceState(cachedServiceType, currentUser),
       );
     }
-  }, [cachedServiceType, currentUser, selectedResource.resource_type]);
+  }, [
+    cachedServiceType,
+    currentUser,
+    selectedResource.resource_type,
+    value.resource_object,
+  ]);
 
   const handleResourceChange = (resource: ScheduleResourceFormState) => {
+    if (disabled) return;
     setSelectedResource(resource);
+    setSelectedSlotId(undefined);
+    setSelectedSlot(undefined);
+    if (value.slot_id || value.slot_object || value.resource_object) {
+      handleUpdate({
+        slot_id: undefined,
+        slot_object: undefined,
+        resource_object: undefined,
+      });
+    }
     if (resource.resource_type !== cachedServiceType) {
       setCachedServiceType(resource.resource_type);
     }
@@ -132,18 +169,18 @@ export function AppointmentQuestion({
 
   const [open, setOpen] = useState(false);
   const { hasError } = useFieldError(question.id, errors);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedDate, setSelectedDate] = useState(() =>
+    committedSlot ? new Date(committedSlot.start_datetime) : new Date(),
+  );
+  const [selectedSlotId, setSelectedSlotId] = useState<string | undefined>(
+    value.slot_id,
+  );
 
-  const values =
-    (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
-    [];
-  const value = values[0] ?? { tags: [], note: "" };
-
-  const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
+  const handleUpdate = (updates: Partial<AppointmentResponseValue>) => {
+    if (disabled) return;
     const updatedValue = { ...value, ...updates };
     if (
-      !updatedValue.note?.trim() &&
+      !hasMarkdownContent(updatedValue.note ?? "") &&
       !updatedValue.slot_id &&
       !updatedValue.tags?.length
     ) {
@@ -162,11 +199,17 @@ export function AppointmentQuestion({
   };
 
   // Query to get slot details for display
-  const [selectedSlot, setSelectedSlot] = useState<TokenSlot>();
+  const [selectedSlot, setSelectedSlot] = useState<TokenSlot | undefined>(
+    committedSlot,
+  );
 
   // Update slot details when a slot is selected
   const handleSlotSelect = (slotId: string | undefined) => {
-    handleUpdate({ slot_id: slotId });
+    handleUpdate({
+      slot_id: slotId,
+      slot_object: slotId ? selectedSlot : undefined,
+      resource_object: slotId ? selectedResource : undefined,
+    });
     // Only close the sheet if a slot was actually selected
     if (slotId) {
       setOpen(false);
@@ -180,18 +223,20 @@ export function AppointmentQuestion({
 
   return (
     <div className="space-y-4">
-      <QuestionLabel question={question} />
-      <AppointmentFormSection
-        facilityId={facilityId}
-        selectedTags={selectedTags}
-        setSelectedTags={(tags) =>
-          handleUpdate({ tags: tags.map((tag) => tag.id) })
-        }
-        reason={value.note || ""}
-        setReason={(reason) => handleUpdate({ note: reason })}
-        selectedResource={selectedResource}
-        setSelectedResource={handleResourceChange}
-      />
+      <fieldset disabled={disabled} className="min-w-0 space-y-4">
+        <AppointmentFormSection
+          disabled={disabled}
+          facilityId={facilityId}
+          selectedTags={selectedTags}
+          setSelectedTags={(tags) =>
+            handleUpdate({ tags: tags.map((tag) => tag.id) })
+          }
+          reason={value.note || ""}
+          setReason={(reason) => handleUpdate({ note: reason })}
+          selectedResource={selectedResource}
+          setSelectedResource={handleResourceChange}
+        />
+      </fieldset>
 
       <div>
         <Label className="block mb-2">
@@ -206,23 +251,40 @@ export function AppointmentQuestion({
               "ring-1 ring-red-500",
           )}
         >
-          <Sheet open={open} onOpenChange={setOpen}>
+          <Sheet
+            open={open}
+            onOpenChange={(nextOpen) => {
+              if (disabled) return;
+              if (nextOpen) {
+                setSelectedSlotId(value.slot_id);
+                setSelectedSlot(committedSlot);
+                if (committedSlot) {
+                  setSelectedDate(new Date(committedSlot.start_datetime));
+                }
+              }
+              setOpen(nextOpen);
+            }}
+          >
             <SheetTrigger asChild>
-              {value.slot_id && selectedSlot ? (
-                <Button variant="outline" className="w-full justify-start">
+              {value.slot_id && committedSlot ? (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  disabled={disabled}
+                >
                   <span className="font-normal">
                     <Trans
                       i18nKey="selected_token_slot_display"
                       values={{
                         date: format(
-                          selectedSlot.start_datetime,
+                          committedSlot.start_datetime,
                           "dd MMM, yyyy",
                         ),
                         startTime: format(
-                          selectedSlot.start_datetime,
+                          committedSlot.start_datetime,
                           "h:mm a",
                         ),
-                        endTime: format(selectedSlot.end_datetime, "h:mm a"),
+                        endTime: format(committedSlot.end_datetime, "h:mm a"),
                       }}
                       components={{
                         strong: <span className="font-semibold" />,
@@ -244,48 +306,54 @@ export function AppointmentQuestion({
                 </Button>
               )}
             </SheetTrigger>
-            <SheetContent side="right" className="sm:max-w-xl overflow-auto">
+            <SheetContent size="lg" className="overflow-hidden">
               <SheetHeader>
                 <SheetTitle>{t("select_appointment_slot")}</SheetTitle>
               </SheetHeader>
-              <div className="space-y-4">
-                <AppointmentDateSelection
-                  facilityId={facilityId}
-                  resourceId={selectedResource.resource?.id || undefined}
-                  resourceType={selectedResource.resource_type}
-                  setSelectedDate={setSelectedDate}
-                  selectedDate={selectedDate}
-                />
-                <AppointmentSlotPicker
-                  selectedDate={selectedDate}
-                  facilityId={facilityId}
-                  resourceId={selectedResource.resource?.id || undefined}
-                  resourceType={selectedResource.resource_type}
-                  selectedSlotId={selectedSlotId}
-                  onSlotDetailsChange={setSelectedSlot}
-                  onSlotSelect={setSelectedSlotId}
-                />
-                <div className="flex justify-end gap-2 mt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setOpen(false);
+              <SheetBody>
+                <div className="space-y-4">
+                  <AppointmentDateSelection
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id || undefined}
+                    resourceType={selectedResource.resource_type}
+                    setSelectedDate={(date) => {
+                      setSelectedDate(date);
+                      setSelectedSlotId(undefined);
                       setSelectedSlot(undefined);
                     }}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <Button
-                    variant="default"
-                    disabled={!selectedSlotId}
-                    onClick={() => {
-                      handleSlotSelect(selectedSlotId);
-                    }}
-                  >
-                    {t("submit")}
-                  </Button>
+                    selectedDate={selectedDate}
+                  />
+                  <AppointmentSlotPicker
+                    selectedDate={selectedDate}
+                    facilityId={facilityId}
+                    resourceId={selectedResource.resource?.id || undefined}
+                    resourceType={selectedResource.resource_type}
+                    selectedSlotId={selectedSlotId}
+                    onSlotDetailsChange={setSelectedSlot}
+                    onSlotSelect={setSelectedSlotId}
+                  />
                 </div>
-              </div>
+              </SheetBody>
+              <SheetFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setSelectedSlot(undefined);
+                  }}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="default"
+                  disabled={disabled || !selectedSlotId || !selectedSlot}
+                  onClick={() => {
+                    handleSlotSelect(selectedSlotId);
+                  }}
+                >
+                  {t("submit")}
+                </Button>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>

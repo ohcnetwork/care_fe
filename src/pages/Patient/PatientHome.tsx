@@ -95,7 +95,7 @@ export default function PatientHome() {
 
   if (isVerifyingPatient || !facility) {
     return (
-      <div className="space-y-4 md:max-w-5xl mx-auto">
+      <div className="space-y-4 md:max-w-5xl w-full mx-auto">
         <CardListSkeleton count={1} />
         <CardGridSkeleton count={4} />
       </div>
@@ -111,7 +111,7 @@ export default function PatientHome() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-6 md:max-w-5xl mx-auto">
+        <div className="space-y-6 md:max-w-5xl mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">

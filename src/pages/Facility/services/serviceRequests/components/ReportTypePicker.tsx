@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,13 @@ export function ReportTypePicker({
   onDismiss?: () => void;
 }) {
   const { t } = useTranslation();
+  const triggerId = useId();
   const [selectedCode, setSelectedCode] = useState<Code | null>(null);
   const effectiveSelectedCode =
     availableReportCodes.length === 1 ? availableReportCodes[0] : selectedCode;
 
   return (
-    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-gray-300 bg-gray-100 p-4">
+    <div className="flex flex-col items-stretch gap-2 rounded-lg border border-border bg-muted p-4">
       {onDismiss && (
         <Button
           aria-label={t("close")}
@@ -50,7 +51,10 @@ export function ReportTypePicker({
         </Button>
       )}
       <div className="w-full flex-1 space-y-2">
-        <Label className="text-sm font-medium text-gray-950">
+        <Label
+          htmlFor={triggerId}
+          className="text-sm font-medium text-foreground"
+        >
           {t("select_diagnostic_report_type")}
         </Label>
         <Select
@@ -65,7 +69,7 @@ export function ReportTypePicker({
           }}
           disabled={!hasCollectedSpecimens || disableEdit}
         >
-          <SelectTrigger className="w-full bg-white">
+          <SelectTrigger id={triggerId} className="w-full">
             <SelectValue placeholder={t("select_diagnostic_report_type")} />
           </SelectTrigger>
           <SelectContent>
@@ -82,8 +86,7 @@ export function ReportTypePicker({
       <div className="flex ml-auto items-center gap-2">
         {availableReportCodes.length !== 1 && (
           <Button
-            variant="ghost"
-            className="underline"
+            variant="link"
             onClick={() => setSelectedCode(null)}
             disabled={!effectiveSelectedCode}
           >

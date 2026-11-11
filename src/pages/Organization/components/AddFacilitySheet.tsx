@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -34,12 +35,12 @@ export default function AddFacilitySheet({ organizationId }: Props) {
           {t("add_facility")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("add_new_facility")}</SheetTitle>
           <SheetDescription>{t("create_new_facility")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-6">
+        <SheetBody>
           <FacilityForm
             organizationId={organizationId}
             onSubmitSuccess={() => {
@@ -47,7 +48,7 @@ export default function AddFacilitySheet({ organizationId }: Props) {
               queryClient.invalidateQueries({ queryKey: ["currentUser"] });
             }}
           />
-        </div>
+        </SheetBody>
       </SheetContent>
     </Sheet>
   );

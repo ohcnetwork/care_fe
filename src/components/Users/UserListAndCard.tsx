@@ -135,7 +135,7 @@ export function UserCard(props: UserCardProps) {
                     key={membership.id}
                     variant="outline"
                     className="w-auto"
-                    size="xs"
+                    size="sm"
                   >
                     {membership.organization.name}
                   </Badge>

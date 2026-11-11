@@ -1,13 +1,18 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { questionBlock } from "tests/helper/questionnaireV2";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Form Submission and Display in Encounter Overview", () => {
   /**
-   * Helper function to interact with form fields by their label text
+   * Interact with one question on the v2 fill canvas, scoped through the
+   * renderer's `data-question-id` block for the exact label (bare role
+   * queries would match every question on the one-scroll form). Choice
+   * options render as radio chips named by the option value (these fixture
+   * options carry no display text).
    */
   async function fillFormField(
     page: Page,
@@ -15,34 +20,15 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     action: "radio" | "input" | "textarea",
     value: string,
   ) {
-    // Find the label and navigate to its question container
-    const labelLocator = page.getByText(labelText, { exact: true });
-    await labelLocator.scrollIntoViewIfNeeded();
+    const block = questionBlock(page, labelText);
+    await block.scrollIntoViewIfNeeded();
 
     if (action === "radio") {
-      // For radio buttons, find the parent container and then the specific radio option
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@id, 'question')]",
-      );
-      await questionContainer.locator(`label[for="${value}"]`).click();
+      await block.getByRole("radio", { name: value, exact: true }).click();
     } else if (action === "input") {
-      // For number inputs, find the parent container
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@id, 'question')]",
-      );
-      const input = questionContainer.locator('input[type="number"]').first();
-      await input.scrollIntoViewIfNeeded();
-      await input.fill(value);
+      await block.getByRole("spinbutton").fill(value);
     } else if (action === "textarea") {
-      // For textareas
-      const questionContainer = labelLocator.locator(
-        "xpath=ancestor::div[contains(@class, 'space-y-1')]",
-      );
-      const textarea = questionContainer.locator(
-        'textarea[data-slot="textarea"]',
-      );
-      await textarea.scrollIntoViewIfNeeded();
-      await textarea.fill(value);
+      await block.getByRole("textbox").fill(value);
     }
   }
 
@@ -160,8 +146,8 @@ test.describe("Form Submission and Display in Encounter Overview", () => {
     await fillFormField(page, "Tidal Volume (mL)", "input", tidalVolume);
     await fillFormField(page, "FiO2 (%)", "input", fio2);
 
-    // Submit the form
-    const submitButton = page.getByRole("button", { name: "Submit" });
+    // Submit the form (the v2 fill page's primary action)
+    const submitButton = page.getByRole("button", { name: "Save Changes" });
     await submitButton.scrollIntoViewIfNeeded();
     await submitButton.click();
 

@@ -1,5 +1,7 @@
 import { FilesTabsProps } from "@/components/Files/FilesTab";
+import type { RegisteredGroupDefinition } from "@/components/QuestionnaireV2/groups/registry";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
+import type { ActionDescriptor, ActionRunResult } from "@/lib/actions";
 import type { OverrideCondition } from "@/lib/override";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
@@ -13,18 +15,27 @@ import {
 import { FacilityRead } from "@/types/facility/facility";
 import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserRead, UserReadMinimal } from "@/types/user/user";
+import type { JSONSchema2020 } from "@/Utils/schema/types";
 import { ComponentType, LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;
 }>;
 
+/**
+ * The agent contract. Scribe no longer receives a page's raw state and its
+ * setter: it receives the actions the host is currently offering in this
+ * scope, and one callback to invoke them. The host validates every call
+ * (`lib/actions`), so a plugin can neither write a shape the page does not
+ * expect nor reach a record outside the open session.
+ *
+ * Changing this shape requires a lockstep update in `care_scribe`.
+ */
 export type ScribeComponentType = React.FC<{
-  formState: QuestionnaireFormState[];
-  setFormState: React.Dispatch<React.SetStateAction<QuestionnaireFormState[]>>;
+  actions: ActionDescriptor[];
+  invoke: (actionId: string, input: unknown) => Promise<ActionRunResult>;
 }>;
 
 export type PatientHomeActionsComponentType = React.FC<{
@@ -121,20 +132,17 @@ export type DiagnosticReportOverrideComponentType = React.FC<{
   disabled?: boolean;
 }>;
 
-// To Support additional options to create delivery orders
 export type DeliveryOrderActionsComponentType = React.FC<{
   facilityId: string;
   locationId: string;
 }>;
 
-// Sections rendered on the user profile (summary) page
 export type UserProfileSectionsComponentType = React.FC<{
   user: UserRead;
   isOwnProfile: boolean;
   className?: string;
 }>;
 
-// Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
@@ -157,11 +165,9 @@ export type SupportedPluginComponents = {
   UserProfileSections: UserProfileSectionsComponentType;
 };
 
-// Create a type for lazy-loaded components
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LazyComponent<T extends React.FC<any>> = LazyExoticComponent<T>;
 
-// Define PluginComponentMap with lazy-loaded components
 export type PluginComponentMap = {
   [K in keyof SupportedPluginComponents]?: LazyComponent<
     SupportedPluginComponents[K]
@@ -187,20 +193,69 @@ export type PluginDeviceManifest = {
   encounterOverview?: React.FC<{ encounter: EncounterRead }>;
 };
 
+export interface PluginEncounterWidgetProps {
+  patientId: string;
+  encounterId: string;
+  encounter: EncounterRead;
+  facilityId?: string;
+  title?: string;
+  config: Record<string, unknown>;
+  readOnly: boolean;
+}
+
+export type PluginEncounterWidgetComponent =
+  | ComponentType<PluginEncounterWidgetProps>
+  | LazyExoticComponent<ComponentType<PluginEncounterWidgetProps>>;
+
+/** Patient history pages have no selected encounter, so both fields may be absent. */
+export interface PluginPatientWidgetProps extends Omit<
+  PluginEncounterWidgetProps,
+  "encounterId" | "encounter"
+> {
+  encounterId?: string;
+  encounter?: EncounterRead;
+}
+
+export type PluginPatientWidgetComponent =
+  | ComponentType<PluginPatientWidgetProps>
+  | LazyExoticComponent<ComponentType<PluginPatientWidgetProps>>;
+
+interface PluginEncounterOnlyWidgetDefinition {
+  component: PluginEncounterWidgetComponent;
+  /** Object schema used by the workspace configuration editor. */
+  configSchema: JSONSchema2020;
+  supportsPatientHistory?: false;
+  /** The host hides this widget before mounting it in a closed encounter. */
+  requiresActiveEncounter?: boolean;
+}
+
+interface PluginPatientHistoryWidgetDefinition {
+  component: PluginPatientWidgetComponent;
+  /** Object schema used by the workspace configuration editor. */
+  configSchema: JSONSchema2020;
+  /**
+   * The widget can be added to patient history pages. It receives the
+   * selected encounter when there is one and must show patient-wide data
+   * otherwise.
+   */
+  supportsPatientHistory: true;
+  requiresActiveEncounter?: never;
+}
+
+export type PluginEncounterWidgetDefinition =
+  PluginEncounterOnlyWidgetDefinition | PluginPatientHistoryWidgetDefinition;
+
 /**
  * Plugin override definition for replacing registered components
  */
 export type PluginOverride = {
-  /** The key of the component to override (must be registered with register()) */
+  /** Key the target component was registered under with `register()`. */
   component: string;
-  /** The replacement component */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacement: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
-  /** Optional conditions for when this override applies */
   condition?: OverrideCondition;
-  /** Priority (higher = takes precedence, default 0) */
+  /** Higher wins; default 0. */
   priority?: number;
-  /** Description for debugging */
   description?: string;
 };
 
@@ -221,10 +276,17 @@ export type PluginManifest = {
     string,
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
+  encounterWidgets?: Record<
+    string,
+    | PluginEncounterWidgetDefinition
+    /** @deprecated Supply a definition with configSchema for the configuration editor. */
+    | PluginEncounterWidgetComponent
+  >;
   encounterFileTabs?: Record<string, LazyComponent<React.FC<FilesTabsProps>>>;
   devices?: readonly PluginDeviceManifest[];
-  /** Component overrides provided by this plugin */
   overrides?: readonly PluginOverride[];
+  /** Registered groups contribute ordinary child questions and their rendering. */
+  registeredQuestionGroups?: readonly RegisteredGroupDefinition[];
 };
 
 export type PluginManifestWithMeta = PluginManifest & {

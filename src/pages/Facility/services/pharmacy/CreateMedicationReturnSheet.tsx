@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -152,7 +153,7 @@ export function CreateMedicationReturnSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
+      <SheetContent size="md">
         <SheetHeader>
           <SheetTitle>{t("create_medication_return")}</SheetTitle>
           <SheetDescription>
@@ -164,89 +165,98 @@ export function CreateMedicationReturnSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 mt-6">
-          <PatientIdentifierSelector
-            facilityId={facilityId}
-            selectedPatient={selectedPatient}
-            onPatientSelect={handlePatientSelect}
-            onClearPatient={handleClearPatient}
-          />
+        <SheetBody>
+          <div className="space-y-6">
+            <PatientIdentifierSelector
+              facilityId={facilityId}
+              selectedPatient={selectedPatient}
+              onPatientSelect={handlePatientSelect}
+              onClearPatient={handleClearPatient}
+            />
 
-          {selectedPatient && (
-            <>
-              <NoActiveAccountWarningDialog
-                patientId={selectedPatient.id}
-                facilityId={facilityId}
-              />
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
-                  <Card className="p-0 bg-gray-50">
-                    <CardContent className="space-y-4 p-4 rounded-md">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("name")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                className="h-9"
-                                placeholder={t("enter_return_name")}
-                                {...field}
-                                autoFocus
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+            {selectedPatient && (
+              <>
+                <NoActiveAccountWarningDialog
+                  patientId={selectedPatient.id}
+                  facilityId={facilityId}
+                />
+                <Form {...form}>
+                  <form
+                    id="create-medication-return-form"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    <Card className="p-0 bg-gray-50">
+                      <CardContent className="space-y-4 p-4 rounded-md">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("name")}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="h-9"
+                                  placeholder={t("enter_return_name")}
+                                  {...field}
+                                  autoFocus
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="note"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              {t("note")}
-                              <span className="text-gray-500 text-sm italic">
-                                {" "}
-                                ({t("optional")})
-                              </span>
-                            </FormLabel>
-                            <FormControl>
-                              <Textarea
-                                rows={3}
-                                placeholder={t("enter_return_note")}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </CardContent>
-                  </Card>
+                        <FormField
+                          control={form.control}
+                          name="note"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                {t("note")}
+                                <span className="text-gray-500 text-sm italic">
+                                  {" "}
+                                  ({t("optional")})
+                                </span>
+                              </FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={3}
+                                  placeholder={t("enter_return_note")}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                    </Card>
+                  </form>
+                </Form>
+              </>
+            )}
+          </div>
+        </SheetBody>
 
-                  <SheetFooter className="gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {t("cancel")}
-                    </Button>
-                    <Button type="submit" disabled={isCreating}>
-                      {isCreating ? t("creating") : t("create_return")}
-                    </Button>
-                  </SheetFooter>
-                </form>
-              </Form>
-            </>
-          )}
-        </div>
+        {selectedPatient && (
+          <SheetFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form="create-medication-return-form"
+              disabled={isCreating}
+            >
+              {isCreating ? t("creating") : t("create_return")}
+            </Button>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

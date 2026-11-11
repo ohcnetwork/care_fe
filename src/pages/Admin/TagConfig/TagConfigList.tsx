@@ -20,7 +20,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
+import TagConfigForm from "./TagConfigForm";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigListProps {
@@ -76,7 +76,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 {t("manage_tag_config_description")}
               </p>
             </div>
-            <TagConfigFormDrawer
+            <TagConfigForm
               title={t("add_tag_config")}
               facilityId={facilityId}
               trigger={
