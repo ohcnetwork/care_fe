@@ -2817,7 +2817,7 @@
   "goal": "Our goal is to continuously improve the quality and accessibility of public healthcare services using digital tools.",
   "got_it": "Got it!",
   "govt": "Goverence",
-  "govt_organization_required_depth_validation": "At least {{depth}} levels of geo-organization should be selected",
+  "govt_organization_required_depth_validation": "Select the required geo-organization levels (minimum: {{depth}}).",
   "granted_on": "Granted On",
   "graph": "Graph",
   "greater": "Greater Than",
