@@ -69,6 +69,7 @@ import {
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
+import { getExpirationDateThresholdForDispensing } from "@/pages/Facility/services/inventory/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   DispenseOrderBatchResponse,
@@ -208,7 +209,11 @@ export default function DispenseDrawer({
           queryParams: {
             limit: 100,
             product_knowledge: productKnowledgeId,
+            status: "active",
             net_content_gt: 0,
+            ordering: "product__expiration_date",
+            product_expiration_date_after:
+              getExpirationDateThresholdForDispensing().toISOString(),
           },
         })({ signal: new AbortController().signal });
 
@@ -232,7 +237,7 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
-  // Auto-select first valid (non-expired) lot by default
+  // Inventories are fetched earliest-expiry first (FEFO), so the first valid lot is the one to use
   useEffect(() => {
     fields.forEach((field, index) => {
       const inventories =

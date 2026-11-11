@@ -1,0 +1,872 @@
+import { faker } from "@faker-js/faker";
+import { expect, Page, test } from "@playwright/test";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
+
+test.use({ storageState: "tests/.auth/user.json" });
+
+function createObservation() {
+  return {
+    id: faker.string.uuid(),
+    status: "final",
+    value_type: "decimal",
+    value: { value: "101" },
+    component: [],
+    effective_datetime: new Date().toISOString(),
+    observation_definition: {
+      id: faker.string.uuid(),
+      title: faker.word.words(3),
+      status: "active",
+      description: "",
+      category: "laboratory",
+      code: { system: "test", code: "glucose", display: "Glucose" },
+      permitted_data_type: "decimal",
+      component: [],
+      body_site: null,
+      method: null,
+      permitted_unit: null,
+      qualified_ranges: [],
+    },
+  };
+}
+
+function createReport(
+  observations: ReturnType<typeof createObservation>[] = [],
+) {
+  const serviceRequestId = faker.string.uuid();
+  return {
+    id: faker.string.uuid(),
+    status: "preliminary",
+    code: { system: "test", code: "panel", display: faker.word.words(3) },
+    category: { system: "test", code: "lab", display: "Laboratory" },
+    conclusion: "",
+    note: "",
+    observations,
+    created_by: {
+      username: "reviewer",
+      first_name: "Review",
+      last_name: "Clinician",
+      profile_picture_url: null,
+    },
+    updated_by: {
+      username: "reviewer",
+      first_name: "Review",
+      last_name: "Clinician",
+      profile_picture_url: null,
+    },
+    encounter: {
+      id: getEncounterId(),
+      patient: {
+        id: getPatientId(),
+        name: faker.person.fullName(),
+        gender: "male",
+        date_of_birth: "1990-01-01",
+        instance_identifiers: [],
+      },
+    },
+    service_request: { id: serviceRequestId, title: faker.word.words(3) },
+    created_date: new Date().toISOString(),
+    modified_date: new Date().toISOString(),
+  };
+}
+
+function createFile(reportId: string) {
+  return {
+    id: faker.string.uuid(),
+    name: faker.word.words(2),
+    file_type: "diagnostic_report",
+    associating_id: reportId,
+    mime_type: "application/pdf",
+    extension: "pdf",
+    is_archived: false,
+    upload_completed: true,
+    created_date: new Date().toISOString(),
+    uploaded_by: {
+      username: "reviewer",
+      first_name: "Review",
+      last_name: "Clinician",
+    },
+  };
+}
+
+interface ReportListSnapshot extends Omit<
+  ReturnType<typeof createReport>,
+  "observations"
+> {
+  observations?: ReturnType<typeof createObservation>[];
+}
+
+async function mockReviewPage(
+  page: Page,
+  report: ReturnType<typeof createReport>,
+  listReport: ReportListSnapshot = report,
+) {
+  const facilityId = getFacilityId();
+  const activity = {
+    id: faker.string.uuid(),
+    slug: faker.string.uuid(),
+    title: faker.word.words(3),
+    classification: "laboratory",
+    diagnostic_report_codes: [report.code],
+    specimen_requirements: [],
+    observation_result_requirements: [],
+  };
+  let reportRequests = 0;
+  const reportUrl = `**/api/v1/patient/${getPatientId()}/diagnostic_report/${report.id}/`;
+  await page.route(reportUrl, (route) => {
+    if (route.request().method() === "PUT") {
+      Object.assign(report, route.request().postDataJSON());
+    } else {
+      reportRequests += 1;
+    }
+    return route.fulfill({ json: report });
+  });
+  await page.route(
+    `**/api/v1/facility/${facilityId}/service_request/${report.service_request.id}/`,
+    (route) =>
+      route.fulfill({
+        json: {
+          id: report.service_request.id,
+          title: activity.title,
+          category: "laboratory",
+          status: "active",
+          intent: "order",
+          priority: "routine",
+          activity_definition: activity,
+          encounter: report.encounter,
+          diagnostic_reports: [listReport],
+          specimens: [],
+          locations: [],
+          tags: [],
+        },
+      }),
+  );
+  await page.route(
+    `**/api/v1/facility/${facilityId}/activity_definition/${activity.slug}/`,
+    (route) => route.fulfill({ json: activity }),
+  );
+  for (const resource of ["charge_item", "account"]) {
+    await page.route(
+      `**/api/v1/facility/${facilityId}/${resource}/?*`,
+      (route) => route.fulfill({ json: { count: 0, results: [] } }),
+    );
+  }
+
+  return {
+    url: `/facility/${facilityId}/service_requests/${report.service_request.id}`,
+    reportUrl,
+    reportRequests: () => reportRequests,
+    entry: page
+      .locator('[data-slot="collapsible"]')
+      .filter({
+        has: page.locator('[data-slot="collapsible-trigger"]').filter({
+          hasText: listReport.code.display,
+        }),
+      })
+      .first(),
+    review: page.locator('[data-slot="collapsible"]').filter({
+      has: page.getByRole("button", {
+        name: new RegExp(`^(Expand|Collapse) ${report.code.display}$`),
+      }),
+    }),
+  };
+}
+
+test.describe("Diagnostic report review", () => {
+  test("keeps additional observation history available after every result is entered in error", async ({
+    page,
+  }) => {
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+
+    for (const observationsInList of [true, false]) {
+      await test.step(`History from ${observationsInList ? "list" : "fetched"} report observations`, async () => {
+        const observation = createObservation();
+        observation.status = "entered_in_error";
+        const report = createReport([observation]);
+        report.status = "final";
+        const { observations, ...listReport } = report;
+        const fixture = await mockReviewPage(
+          page,
+          report,
+          observationsInList ? { ...listReport, observations } : listReport,
+        );
+
+        await page.goto(fixture.url);
+        const expand = fixture.review.getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        });
+        await expect(expand).toBeVisible();
+        const history = fixture.review.getByRole("button", {
+          name: "View Observation History",
+          exact: true,
+        });
+        if (observationsInList) {
+          await expect(history).toBeVisible();
+        } else {
+          await expect(history).toHaveCount(0);
+        }
+        expect(fixture.reportRequests()).toBe(0);
+
+        await expand.click();
+        await expect(
+          fixture.review.getByRole("link", { name: "Print Report" }),
+        ).toBeVisible();
+        await expect(
+          fixture.review.getByText(observation.observation_definition.title),
+        ).toHaveCount(0);
+        await history.click();
+        await page
+          .getByRole("menuitem", {
+            name: "View Observation History",
+            exact: true,
+          })
+          .click();
+        const historySheet = page.getByRole("dialog");
+        await expect(
+          historySheet.getByRole("heading", {
+            name: observation.observation_definition.title,
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(
+          historySheet.getByText("Entered in Error", { exact: true }),
+        ).toBeVisible();
+        await expect(
+          historySheet.getByText("101", { exact: true }),
+        ).toBeVisible();
+      });
+    }
+  });
+
+  test("saves fetched report metadata when the service request snapshot is stale", async ({
+    page,
+  }) => {
+    const listReport = createReport();
+    listReport.status = "modified";
+    const report = {
+      ...listReport,
+      status: "preliminary",
+      code: {
+        system: "test",
+        code: "updated-panel",
+        display: faker.word.words(3),
+      },
+      category: { system: "test", code: "updated-lab", display: "Updated lab" },
+      note: faker.lorem.sentence(),
+    };
+    const fixture = await mockReviewPage(page, report, listReport);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.route("**/api/v1/batch_requests/", (route) =>
+      route.fulfill({
+        json: {
+          results: [
+            { reference_id: "update-report", status_code: 200, data: report },
+          ],
+        },
+      }),
+    );
+
+    await page.goto(fixture.url);
+    const entry = fixture.entry;
+    await entry
+      .getByRole("textbox", { name: "Conclusion", exact: true })
+      .fill("Updated conclusion");
+    const saved = page.waitForRequest("**/api/v1/batch_requests/");
+    await entry.getByRole("button", { name: "Save Results" }).click();
+    const { requests } = (await saved).postDataJSON();
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({
+      reference_id: "update-report",
+      body: {
+        id: report.id,
+        status: "preliminary",
+        code: report.code,
+        category: report.category,
+        note: report.note,
+        conclusion: "Updated conclusion",
+      },
+    });
+  });
+
+  test("locks an open entry draft when review approval finalizes the fetched report", async ({
+    page,
+  }) => {
+    const report = createReport();
+    report.conclusion = "Saved conclusion";
+    const listReport = { ...report };
+    const fixture = await mockReviewPage(page, report, listReport);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    let batchRequests = 0;
+    await page.route("**/api/v1/batch_requests/", (route) => {
+      batchRequests += 1;
+      return route.fulfill({ status: 400, json: {} });
+    });
+
+    await page.goto(fixture.url);
+    const entry = fixture.entry;
+    const save = entry.getByRole("button", { name: "Save Results" });
+    const conclusion = entry.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
+    await conclusion.fill("Unsubmitted entry draft");
+    await expect(save).toBeEnabled();
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    await fixture.review
+      .getByRole("button", { name: "Approve Results", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Approve", exact: true }).click();
+
+    await expect(
+      fixture.review.getByRole("link", { name: "Print Report" }),
+    ).toBeVisible();
+    await expect(save).toHaveCount(0);
+    await expect(conclusion).not.toBeEditable();
+    await expect(conclusion).toHaveText("Unsubmitted entry draft");
+    expect(listReport.status).toBe("preliminary");
+    expect(report.status).toBe("final");
+    expect(batchRequests).toBe(0);
+  });
+
+  test("cancels a pending entry save when review approval finalizes the report during catalog lookup", async ({
+    page,
+  }) => {
+    const observation = createObservation();
+    const report = createReport([observation]);
+    report.conclusion = "Saved conclusion";
+    const fixture = await mockReviewPage(page, report, { ...report });
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    let batchRequests = 0;
+    await page.route("**/api/v1/batch_requests/", (route) => {
+      batchRequests += 1;
+      return route.fulfill({ status: 400, json: {} });
+    });
+    let releaseCatalog = () => {};
+    const catalogGate = new Promise<void>((resolve) => {
+      releaseCatalog = resolve;
+    });
+    const catalogUrl = "**/api/v1/observation_definition/?*";
+    await page.route(catalogUrl, async (route) => {
+      await catalogGate;
+      await route.fulfill({
+        json: {
+          count: 1,
+          results: [
+            {
+              ...observation.observation_definition,
+              slug: faker.string.uuid(),
+            },
+          ],
+        },
+      });
+    });
+
+    try {
+      await page.goto(fixture.url);
+      const entry = fixture.entry;
+      const group = entry.getByRole("group", {
+        name: observation.observation_definition.title,
+        exact: true,
+      });
+      await group
+        .getByRole("button", { name: "Result actions 1", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Add Another Result", exact: true })
+        .click();
+      await group.getByPlaceholder("Result value").nth(1).fill("102");
+      await page
+        .getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        })
+        .click();
+      const approve = fixture.review.getByRole("button", {
+        name: "Approve Results",
+        exact: true,
+      });
+      await expect(approve).toBeEnabled();
+      const catalogRequested = page.waitForRequest(catalogUrl);
+      await entry.getByRole("button", { name: "Save Results" }).click();
+      await catalogRequested;
+
+      await approve.click();
+      await page.getByRole("button", { name: "Approve", exact: true }).click();
+      await expect(
+        fixture.review.getByRole("link", { name: "Print Report" }),
+      ).toBeVisible();
+      const catalogResponse = page.waitForResponse(catalogUrl);
+      releaseCatalog();
+      await catalogResponse;
+      await page.waitForLoadState("networkidle");
+
+      await expect(
+        entry.getByRole("button", { name: "Save Results" }),
+      ).toHaveCount(0);
+      await expect(
+        group.getByPlaceholder("Result value").nth(1),
+      ).toBeDisabled();
+      expect(report.status).toBe("final");
+      expect(batchRequests).toBe(0);
+    } finally {
+      releaseCatalog();
+    }
+  });
+
+  test("requires report content and uses the edited conclusion for approval", async ({
+    page,
+  }) => {
+    const report = createReport();
+    const fixture = await mockReviewPage(page, report);
+    let releaseFiles = () => {};
+    const filesGate = new Promise<void>((resolve) => {
+      releaseFiles = resolve;
+    });
+    await page.route("**/api/v1/files/?*", async (route) => {
+      await filesGate;
+      await route.fulfill({ json: { count: 0, results: [] } });
+    });
+    try {
+      await page.goto(fixture.url);
+      await page
+        .getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        })
+        .click();
+      const approve = fixture.review.getByRole("button", {
+        name: "Approve Results",
+      });
+      await expect(approve).toBeDisabled();
+      releaseFiles();
+      await expect(approve).toBeDisabled();
+
+      const conclusion = fixture.review.getByRole("textbox", {
+        name: "Conclusion",
+        exact: true,
+      });
+      await conclusion.click();
+      await fixture.review
+        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .click();
+      await expect(conclusion.getByRole("listitem")).toHaveCount(1);
+      await expect(approve).toBeDisabled();
+      await conclusion.press("Enter");
+      await expect(conclusion.getByRole("listitem")).toHaveCount(0);
+      const more = fixture.review.getByRole("button", {
+        name: "More formatting options",
+        exact: true,
+      });
+      await more.click();
+      await fixture.review
+        .getByRole("dialog", { name: "More formatting options", exact: true })
+        .getByRole("radio", { name: "Check list", exact: true })
+        .click();
+      await more.press("Escape");
+      await expect(conclusion.getByRole("checkbox")).toHaveCount(1);
+      await expect(approve).toBeDisabled();
+      await conclusion.press("Enter");
+      await expect(conclusion.getByRole("checkbox")).toHaveCount(0);
+      await conclusion.fill("Review conclusion without observations");
+      await expect(approve).toBeEnabled();
+      await conclusion.fill("   ");
+      await expect(approve).toBeDisabled();
+      await conclusion.fill("");
+      await expect(conclusion).toHaveText("");
+      await fixture.review
+        .getByRole("radio", { name: "Bold", exact: true })
+        .click();
+      await conclusion.pressSequentially("Final clinical conclusion");
+      await expect(conclusion.locator("strong")).toHaveText(
+        "Final clinical conclusion",
+      );
+      await conclusion.press("Enter");
+      await expect(conclusion.locator("p")).toHaveCount(2);
+      await fixture.review
+        .getByRole("radio", { name: "Remove bold", exact: true })
+        .click();
+      await fixture.review
+        .getByRole("radio", { name: "Bulleted list", exact: true })
+        .click();
+      await conclusion.pressSequentially("First finding");
+      await conclusion.press("Enter");
+      await conclusion.pressSequentially("Second finding");
+      await expect(conclusion.getByRole("listitem")).toHaveText([
+        "First finding",
+        "Second finding",
+      ]);
+      await expect(conclusion.locator("strong")).toHaveText(
+        "Final clinical conclusion",
+      );
+      await approve.click();
+      const approvalRequest = page.waitForRequest(
+        (request) =>
+          request.method() === "PUT" && request.url().includes(report.id),
+      );
+      await page.getByRole("button", { name: "Approve", exact: true }).click();
+      const savedReport = (await approvalRequest).postDataJSON();
+      expect(savedReport.status).toBe("final");
+      expect(savedReport.conclusion).toMatch(
+        /\*\*Final clinical conclusion\*\*/,
+      );
+      expect(savedReport.conclusion).toMatch(
+        /[-*] First finding\n[-*] Second finding/,
+      );
+      await expect(
+        fixture.review.locator("strong", {
+          hasText: "Final clinical conclusion",
+        }),
+      ).toBeVisible();
+    } finally {
+      releaseFiles();
+    }
+  });
+
+  test("ignores archived and incomplete attachments when checking approval readiness", async ({
+    page,
+  }) => {
+    const report = createReport();
+    const fixture = await mockReviewPage(page, report);
+    const completeFile = createFile(report.id);
+    let files = [
+      { ...createFile(report.id), is_archived: true },
+      { ...createFile(report.id), upload_completed: false },
+    ];
+    let filesGate = Promise.resolve();
+    await page.route("**/api/v1/files/?*", async (route) => {
+      await filesGate;
+      await route.fulfill({ json: { count: files.length, results: files } });
+    });
+
+    await page.goto(fixture.url);
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const approve = fixture.review.getByRole("button", {
+      name: "Approve Results",
+    });
+    await expect(
+      fixture.review
+        .getByText(files[0].name + files[0].extension, { exact: true })
+        .last(),
+    ).toBeVisible();
+    await expect(approve).toBeDisabled();
+
+    files = [completeFile];
+    await page
+      .getByRole("button", {
+        name: `Collapse ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const fileResponse = page.waitForResponse("**/api/v1/files/?*");
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    await fileResponse;
+    await expect(approve).toBeEnabled();
+
+    files = [];
+    let releaseFiles = () => {};
+    filesGate = new Promise<void>((resolve) => {
+      releaseFiles = resolve;
+    });
+    try {
+      await page
+        .getByRole("button", {
+          name: `Collapse ${report.code.display}`,
+          exact: true,
+        })
+        .click();
+      const pendingFiles = page.waitForRequest("**/api/v1/files/?*");
+      await page
+        .getByRole("button", {
+          name: `Expand ${report.code.display}`,
+          exact: true,
+        })
+        .click();
+      await pendingFiles;
+      await expect(approve).toBeDisabled();
+      const emptyFiles = page.waitForResponse("**/api/v1/files/?*");
+      releaseFiles();
+      await emptyFiles;
+      await expect(approve).toBeDisabled();
+    } finally {
+      releaseFiles();
+    }
+  });
+
+  test("preserves a review draft across refetch and keeps conclusion editors independent", async ({
+    page,
+  }) => {
+    const report = createReport();
+    report.conclusion = "Saved conclusion";
+    const fixture = await mockReviewPage(page, report);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.goto(fixture.url);
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const conclusion = fixture.review.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
+    await expect(conclusion).toHaveText("Saved conclusion");
+    const entryConclusion = page
+      .locator('[data-slot="collapsible"]')
+      .filter({
+        has: page.getByRole("button", { name: "Save Results", exact: true }),
+      })
+      .getByRole("textbox", { name: "Conclusion", exact: true });
+    await expect(
+      page.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).toHaveCount(2);
+    await expect(entryConclusion).toHaveText("Saved conclusion");
+    await conclusion.fill("Unsaved review draft");
+    await expect(entryConclusion).toHaveText("Saved conclusion");
+    report.conclusion = "Saved by another reviewer";
+    await page
+      .getByRole("button", {
+        name: `Collapse ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const reportResponse = page.waitForResponse(fixture.reportUrl);
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    await reportResponse;
+    await expect(conclusion).toHaveText("Unsaved review draft");
+    await expect(entryConclusion).toHaveText("Saved by another reviewer");
+  });
+
+  test("keeps mobile formatting on one row and preserves the draft through more options", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const report = createReport();
+    const fixture = await mockReviewPage(page, report);
+    await page.route("**/api/v1/files/?*", (route) =>
+      route.fulfill({ json: { count: 0, results: [] } }),
+    );
+    await page.goto(fixture.url);
+    await page
+      .getByRole("button", {
+        name: `Expand ${report.code.display}`,
+        exact: true,
+      })
+      .click();
+    const conclusion = fixture.review.getByRole("textbox", {
+      name: "Conclusion",
+      exact: true,
+    });
+    await conclusion.click();
+    await conclusion.pressSequentially("Draft assessment");
+    const toolbar = fixture.review.getByRole("toolbar");
+    const more = toolbar.getByRole("button", {
+      name: "More formatting options",
+      exact: true,
+    });
+    await expect(more).toBeVisible();
+    await expect(toolbar.locator("button:visible")).toHaveCount(6);
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      const geometry = await toolbar.evaluate((element) => {
+        const controls = Array.from(element.querySelectorAll("button")).filter(
+          (control) => control.checkVisibility(),
+        );
+        const centers = controls.map((control) => {
+          const rect = control.getBoundingClientRect();
+          return rect.top + rect.height / 2;
+        });
+        return {
+          rowHeightDifference: Math.max(...centers) - Math.min(...centers),
+          hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
+          pageHasHorizontalOverflow:
+            document.documentElement.scrollWidth > window.innerWidth,
+        };
+      });
+      expect(
+        geometry.rowHeightDifference,
+        `Controls at ${width}px`,
+      ).toBeLessThanOrEqual(1);
+      expect(geometry.hasHorizontalOverflow, `Toolbar at ${width}px`).toBe(
+        false,
+      );
+      expect(geometry.pageHasHorizontalOverflow, `Page at ${width}px`).toBe(
+        false,
+      );
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await conclusion.press("ControlOrMeta+a");
+    await more.click();
+    const moreOptions = fixture.review.getByRole("dialog", {
+      name: "More formatting options",
+      exact: true,
+    });
+    await expect(
+      moreOptions.getByRole("radio", { name: /^Undo / }),
+    ).toBeEnabled();
+    await moreOptions
+      .getByRole("radio", { name: "Highlight", exact: true })
+      .click();
+    await more.press("Escape");
+    await expect(moreOptions).not.toBeVisible();
+    const blockType = toolbar.getByRole("combobox", {
+      name: "Block type",
+      exact: true,
+    });
+    await blockType.press("Space");
+    await page
+      .getByRole("option", { name: "Heading 2", exact: true })
+      .press("Enter");
+    await expect(
+      conclusion.getByRole("heading", { name: "Draft assessment", level: 2 }),
+    ).toBeVisible();
+    await expect(
+      conclusion
+        .getByRole("heading", { name: "Draft assessment", level: 2 })
+        .locator("mark"),
+    ).toBeVisible();
+
+    await conclusion.press("ControlOrMeta+a");
+    await conclusion.press("ArrowRight");
+    await conclusion.press("Enter");
+    await conclusion.pressSequentially("Follow-up finding");
+    await toolbar
+      .getByRole("radio", { name: "Bulleted list", exact: true })
+      .click();
+    await more.click();
+    await expect(
+      moreOptions.getByRole("radio", { name: /^Undo / }),
+    ).toBeEnabled();
+    await more.press("Escape");
+    await expect(conclusion.getByRole("listitem")).toHaveText([
+      "Follow-up finding",
+    ]);
+    await expect(
+      conclusion.getByRole("heading", { name: "Draft assessment", level: 2 }),
+    ).toBeVisible();
+    await expect(
+      conclusion
+        .getByRole("heading", { name: "Draft assessment", level: 2 })
+        .locator("mark"),
+    ).toBeVisible();
+    await expect(
+      fixture.review.getByRole("button", { name: "Approve Results" }),
+    ).toBeEnabled();
+  });
+
+  test("loads final report details only after keyboard expansion and keeps attachments read-only", async ({
+    page,
+  }) => {
+    const report = createReport();
+    report.status = "final";
+    report.conclusion =
+      "## **Clinical interpretation**\n\n<u>Underlined detail</u> and ==Highlighted detail==\n\n- First finding\n- Second finding\n\n- [ ] Follow up\n- [x] Sample reviewed\n\nValues <left> and <medication> remain visible.";
+    const fixture = await mockReviewPage(page, report);
+    let fileRequests = 0;
+    await page.route("**/api/v1/files/?*", (route) => {
+      fileRequests += 1;
+      return route.fulfill({
+        json: { count: 1, results: [createFile(report.id)] },
+      });
+    });
+    await page.goto(fixture.url);
+    const toggle = page.getByRole("button", {
+      name: `Expand ${report.code.display}`,
+      exact: true,
+    });
+    await expect(toggle).toBeVisible();
+    expect(fixture.reportRequests()).toBe(0);
+    expect(fileRequests).toBe(0);
+    await toggle.focus();
+    await toggle.press("Enter");
+    await expect(
+      fixture.review.getByRole("link", { name: "Print Report" }),
+    ).toBeVisible();
+    await expect(
+      fixture.review.getByRole("button", { name: "actions", exact: true }),
+    ).toBeVisible();
+    expect(fixture.reportRequests()).toBe(1);
+    expect(fileRequests).toBe(1);
+    await expect(
+      fixture.review.locator("strong", { hasText: "Clinical interpretation" }),
+    ).toBeVisible();
+    await expect(fixture.review.getByRole("listitem")).toHaveText([
+      "First finding",
+      "Second finding",
+      "Follow up",
+      "Sample reviewed",
+    ]);
+    await expect(
+      fixture.review.getByRole("heading", {
+        name: "Clinical interpretation",
+        level: 2,
+      }),
+    ).toBeVisible();
+    await expect(
+      fixture.review.locator("u", { hasText: "Underlined detail" }),
+    ).toBeVisible();
+    await expect(
+      fixture.review.locator("mark", { hasText: "Highlighted detail" }),
+    ).toBeVisible();
+    const checkboxes = fixture.review.getByRole("checkbox");
+    await expect(checkboxes).toHaveCount(2);
+    await expect(checkboxes.nth(0)).toBeDisabled();
+    await expect(checkboxes.nth(0)).not.toBeChecked();
+    await expect(checkboxes.nth(1)).toBeDisabled();
+    await expect(checkboxes.nth(1)).toBeChecked();
+    await expect(
+      fixture.review.getByText(
+        "Values <left> and <medication> remain visible.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      fixture.review.getByRole("textbox", { name: "Conclusion", exact: true }),
+    ).toHaveCount(0);
+    await fixture.review
+      .getByRole("button", { name: "actions", exact: true })
+      .click();
+    await expect(
+      page.getByRole("menuitem", { name: "Download", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: "Archive", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("menuitem", { name: "Rename", exact: true }),
+    ).toHaveCount(0);
+  });
+});

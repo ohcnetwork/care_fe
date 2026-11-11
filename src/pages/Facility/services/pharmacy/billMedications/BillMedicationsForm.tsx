@@ -65,7 +65,9 @@ export default function BillMedicationsForm({ facilityId, mode }: Props) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(
-          (values) => mode.submit(values),
+          (values) => {
+            if (!mode.isSubmitting) mode.submit(values);
+          },
           (errors) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const errorMessage = ((errors as any)[""] as GlobalError)?.message;

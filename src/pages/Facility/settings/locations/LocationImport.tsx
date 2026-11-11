@@ -84,6 +84,7 @@ const processRowLocations = (data: string[][]) => {
         name: location,
         form: locationForm,
         mode: locationForm === "bd" ? "instance" : "kind",
+        inventory_usage: "none",
         status: "active",
         operational_status: "U",
         description,
@@ -542,6 +543,7 @@ export function useSaveLocations(facilityId: string) {
         location_type: n.location_type,
         form: n.form,
         mode: n.mode,
+        inventory_usage: n.inventory_usage,
       }));
 
     console.log("Saving locations:", toSave);

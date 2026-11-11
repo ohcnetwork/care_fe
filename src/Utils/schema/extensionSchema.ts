@@ -175,6 +175,9 @@ function extractPropertyMetadata(
     uiControl: xui?.control,
     uiVariant: xui?.variant,
     uiMetadata: xui?.metadata,
+    // Plugin-supplied, so ignore a malformed placement instead of crashing hosts
+    uiPlacement:
+      typeof xui?.placement?.after === "string" ? xui.placement : undefined,
     render_blacklist: xui?.render_blacklist,
   };
 

@@ -34,6 +34,7 @@ import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
+  InventoryUsageOptions,
   LocationFormOptions,
   type LocationWrite,
   type OperationalStatus,
@@ -66,6 +67,7 @@ export default function LocationForm({
     status: z.enum(["active", "inactive", "unknown"] as const),
     operational_status: z.enum(["C", "H", "O", "U", "K", "I"] as const),
     form: z.enum(LocationFormOptions),
+    inventory_usage: z.enum(InventoryUsageOptions),
     parent: z.string().optional().nullable(),
     enableBulkCreation: z.boolean().default(false),
     numberOfBeds: z.string().optional(),
@@ -88,6 +90,7 @@ export default function LocationForm({
     status: "active",
     operational_status: "U",
     form: "ro",
+    inventory_usage: "none",
     parent: null,
     enableBulkCreation: false,
     numberOfBeds: "2",
@@ -176,6 +179,7 @@ export default function LocationForm({
         status: location.status,
         operational_status: location.operational_status,
         form: location.form,
+        inventory_usage: location.inventory_usage ?? "none",
         parent: parentId || null,
         organizations: [],
         customizeNames: false,
@@ -195,6 +199,9 @@ export default function LocationForm({
     onSuccess: () => {
       toast.success(isEditMode ? t("location_updated") : t("location_created"));
       queryClient.invalidateQueries({ queryKey: ["locations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["location", facilityId, locationId],
+      });
       onSuccess?.();
     },
   });
@@ -489,6 +496,31 @@ export default function LocationForm({
               <FormControl>
                 <Textarea {...field} placeholder={t("description")} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="inventory_usage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("inventory_usage")}</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full" ref={field.ref}>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {InventoryUsageOptions.map((usage) => (
+                    <SelectItem key={usage} value={usage}>
+                      {t(`inventory_usage__${usage}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

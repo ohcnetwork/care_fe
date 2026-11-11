@@ -773,7 +773,10 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
 
   const renderMainContent = () => (
-    <Command className={cn("border-0", isMobile ? "h-full" : "max-h-[40vh]")}>
+    <Command
+      shouldFilter={false}
+      className={cn("border-0", isMobile ? "h-full" : "max-h-[40vh]")}
+    >
       {renderSearchInput()}
       {renderBreadcrumbs()}
       <CommandList
