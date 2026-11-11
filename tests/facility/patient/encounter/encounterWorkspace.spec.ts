@@ -3161,9 +3161,10 @@ test.describe("Encounter workspace rendering", () => {
       await page
         .getByRole("button", { name: "Back to design", exact: true })
         .click();
-      const drawer = page.getByRole("dialog", {
-        name: "Section settings",
-        exact: true,
+      // The sheet is titled with the section's widget name, so find it by
+      // the remove action that only the section settings sheet offers.
+      const drawer = page.getByRole("dialog").filter({
+        has: page.getByRole("button", { name: "Remove section", exact: true }),
       });
       const openSettings = async (name: string) => {
         await page
