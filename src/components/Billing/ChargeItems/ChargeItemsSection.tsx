@@ -82,7 +82,7 @@ export function ChargeItemsSection({
   });
 
   const { data: account } = useQuery({
-    queryKey: ["accounts", patientId],
+    queryKey: ["accounts", patientId, facilityId],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
       queryParams: {
