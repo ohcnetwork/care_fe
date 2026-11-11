@@ -64,6 +64,7 @@ export function PrintQuestionnaireResponse({
   });
 
   const questionnaire = questionnaireResponse?.questionnaire;
+  const headerPatient = encounter?.patient ?? patient;
 
   return (
     <PrintPreview
@@ -74,9 +75,7 @@ export function PrintQuestionnaireResponse({
       facility={facility}
       templateSlug={PrintTemplateType.questionnaire_response_logs}
       pageHeader={
-        (encounter?.patient ?? patient) && (
-          <PatientPrintPageHeader patient={(encounter?.patient ?? patient)!} />
-        )
+        headerPatient && <PatientPrintPageHeader patient={headerPatient} />
       }
     >
       <div className="max-w-5xl mx-auto">
@@ -87,10 +86,7 @@ export function PrintQuestionnaireResponse({
             </h2>
           </div>
 
-          <EncounterDetails
-            encounter={encounter}
-            patient={encounter?.patient ?? patient}
-          />
+          <EncounterDetails encounter={encounter} patient={headerPatient} />
 
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <div className="text-center sm:text-left sm:order-1">
