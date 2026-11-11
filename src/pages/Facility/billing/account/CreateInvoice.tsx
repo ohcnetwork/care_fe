@@ -248,6 +248,8 @@ export function CreateInvoicePage({
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!facilityId && !!accountId && !preSelectedChargeItems,
+    // Drop the list once the page or sheet closes, so reopening it never shows items that were just invoiced.
+    gcTime: 0,
   });
 
   const createMutation = useMutation({
