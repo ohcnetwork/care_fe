@@ -8,6 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
@@ -109,109 +110,120 @@ export default function OrganizationPatients({
       {() => {
         return (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <EntityBadge
-                title={t("patients")}
-                count={patients?.count}
-                isFetching={isFetching}
-              />
-            </div>
-
-            <SearchInput
-              options={searchOptions}
-              onSearch={handleSearch}
-              onFieldChange={handleFieldChange}
-              className="w-full sm:max-w-sm"
+            <EntityBadge
+              title={t("patients")}
+              description={t("organization_patients_description")}
+              count={patients?.count}
+              isFetching={isFetching}
             />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {isFetching ? (
-                <CardGridSkeleton count={6} />
-              ) : patients?.results?.length === 0 ? (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+            <Frame>
+              <FrameHeader>
+                <SearchInput
+                  options={searchOptions}
+                  onSearch={handleSearch}
+                  onFieldChange={handleFieldChange}
+                  className="w-full sm:max-w-sm"
+                />
+              </FrameHeader>
+              <FramePanel>
+                {!isFetching && patients?.results?.length === 0 ? (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
                     {t("no_patients_found")}
-                  </CardContent>
-                </Card>
-              ) : (
-                patients?.results?.map((patient) => (
-                  <Link
-                    key={patient.id}
-                    href={`/patient/${patient.id}`}
-                    className="block"
-                  >
-                    <Card className="h-full hover:border-primary/50 transition-colors">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col h-full">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-4">
-                              <Avatar
-                                name={patient.name || ""}
-                                className="size-10"
-                              />
-                              <div>
-                                <h3 className="text-sm font-medium text-gray-900">
-                                  {patient.name}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                  {formatPhoneNumberIntl(patient.phone_number)}
-                                </p>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="shrink-0"
-                              asChild
-                            >
-                              <div>
-                                <CareIcon
-                                  icon="l-arrow-up-right"
-                                  className="size-4"
-                                />
-                              </div>
-                            </Button>
-                          </div>
-                          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                            <div className="text-sm">
-                              <div className="text-gray-500">{t("phone")}</div>
-                              <div className="font-medium">
-                                {formatPhoneNumberIntl(patient.phone_number)}
-                              </div>
-                            </div>
-                            <div className="text-sm">
-                              <div className="text-gray-500">{t("gender")}</div>
-                              <div className="font-medium">
-                                {patient.gender}
-                              </div>
-                            </div>
-                            {patient.geo_organization && (
-                              <div className="col-span-2 text-sm">
-                                <div className="text-gray-500">
-                                  {t("organization")}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {isFetching ? (
+                      <CardGridSkeleton count={6} />
+                    ) : (
+                      patients?.results?.map((patient) => (
+                        <Link
+                          key={patient.id}
+                          href={`/patient/${patient.id}`}
+                          className="block"
+                        >
+                          <Card className="h-full hover:border-primary/50 transition-colors">
+                            <CardContent className="p-6">
+                              <div className="flex flex-col h-full">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start space-x-4">
+                                    <Avatar
+                                      name={patient.name || ""}
+                                      className="size-10"
+                                    />
+                                    <div>
+                                      <h3 className="text-sm font-medium text-gray-900">
+                                        {patient.name}
+                                      </h3>
+                                      <p className="text-sm text-gray-500">
+                                        {formatPhoneNumberIntl(
+                                          patient.phone_number,
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="shrink-0"
+                                    asChild
+                                  >
+                                    <div>
+                                      <CareIcon
+                                        icon="l-arrow-up-right"
+                                        className="size-4"
+                                      />
+                                    </div>
+                                  </Button>
                                 </div>
-                                <div className="font-medium">
-                                  {patient.geo_organization.name}
+                                <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+                                  <div className="text-sm">
+                                    <div className="text-gray-500">
+                                      {t("phone")}
+                                    </div>
+                                    <div className="font-medium">
+                                      {formatPhoneNumberIntl(
+                                        patient.phone_number,
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="text-sm">
+                                    <div className="text-gray-500">
+                                      {t("gender")}
+                                    </div>
+                                    <div className="font-medium">
+                                      {patient.gender}
+                                    </div>
+                                  </div>
+                                  {patient.geo_organization && (
+                                    <div className="col-span-2 text-sm">
+                                      <div className="text-gray-500">
+                                        {t("organization")}
+                                      </div>
+                                      <div className="font-medium">
+                                        {patient.geo_organization.name}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                  <div className="text-sm text-gray-500">
+                                    {t("last_modified")}{" "}
+                                    <RelativeDateTooltip
+                                      className="underline underline-offset-2"
+                                      date={patient.modified_date}
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <div className="text-sm text-gray-500">
-                              {t("last_modified")}{" "}
-                              <RelativeDateTooltip
-                                className="underline underline-offset-2"
-                                date={patient.modified_date}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))
-              )}
-            </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                )}
+              </FramePanel>
+            </Frame>
             <Pagination totalCount={patients?.count ?? 0} />
           </div>
         );

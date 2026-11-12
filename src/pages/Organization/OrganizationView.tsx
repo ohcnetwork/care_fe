@@ -1,20 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { Building2, ChevronRight } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import SearchInput from "@/components/Common/SearchInput";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import { Organization, getOrgLabel } from "@/types/organization/organization";
+import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
 import EntityBadge from "./components/EntityBadge";
@@ -66,84 +73,132 @@ export default function OrganizationView({
       {() => {
         return (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <EntityBadge
-                title={t("organizations")}
-                count={children?.count}
-                isFetching={isFetching}
-              />
-            </div>
-
-            <SearchInput
-              options={[
-                {
-                  key: "name",
-                  type: "text",
-                  placeholder: t("search_by_name"),
-                  value: qParams.name || "",
-                  display: t("name"),
-                },
-              ]}
-              onSearch={(key, value) =>
-                updateQuery({
-                  [key]: value || undefined,
-                })
-              }
-              showSearchIcon
-              className="w-full sm:max-w-sm"
+            <EntityBadge
+              title={t("organizations")}
+              description={t("organization_children_description")}
+              count={children?.count}
+              isFetching={isFetching}
             />
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {isFetching ? (
-                <CardGridSkeleton count={6} />
-              ) : children?.results?.length ? (
-                children.results.map((orgChild: Organization) => (
-                  <Card key={orgChild.id} className="flex flex-col h-full">
-                    <CardContent className="p-6 grow">
-                      <div className="space-y-4 grow">
-                        <div className="space-y-1 mb-2">
-                          <h3 className="text-lg font-semibold">
-                            {orgChild.name}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{orgChild.org_type}</Badge>
-                            {orgChild.metadata?.govt_org_type && (
-                              <Badge variant="outline">
-                                {getOrgLabel(
-                                  orgChild.org_type,
-                                  orgChild.metadata,
-                                )}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        {orgChild.description && (
-                          <p className="text-sm text-gray-500 line-clamp-2">
-                            {orgChild.description}
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                    <div className="p-4 pt-0 mt-auto text-end">
-                      <Button variant="link" asChild>
-                        <Link href={`${baseUrl}/children/${orgChild.id}`}>
-                          {t("view_details")}
-                          <CareIcon icon="l-arrow-right" className="size-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </Card>
-                ))
-              ) : (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-gray-500">
+            <Frame>
+              <FrameHeader>
+                <SearchInput
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_name"),
+                      value: qParams.name || "",
+                      display: t("name"),
+                    },
+                  ]}
+                  onSearch={(key, value) =>
+                    updateQuery({
+                      [key]: value || undefined,
+                    })
+                  }
+                  showSearchIcon
+                  className="w-full sm:max-w-sm"
+                />
+              </FrameHeader>
+              <FramePanel className="overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+                {!isFetching && !children?.results?.length ? (
+                  <div className="p-6 text-center text-sm text-muted-foreground">
                     {qParams.name
                       ? t("no_organizations_found")
                       : t("no_sub_organizations_found")}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-4">
+                          {t("organization")}
+                        </TableHead>
+                        <TableHead className="px-4">
+                          {t("administrative_unit")}
+                        </TableHead>
+                        <TableHead className="px-4">{t("type")}</TableHead>
+                        <TableHead className="px-4">
+                          <span className="sr-only">{t("actions")}</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-white">
+                      {isFetching
+                        ? Array.from({ length: 5 }, (_, index) => (
+                            <TableRow key={index} aria-hidden="true">
+                              <TableCell className="px-4">
+                                <Skeleton className="h-5 w-40" />
+                              </TableCell>
+                              <TableCell className="px-4">
+                                <Skeleton className="h-5 w-20" />
+                              </TableCell>
+                              <TableCell className="px-4">
+                                <Skeleton className="h-5 w-24" />
+                              </TableCell>
+                              <TableCell className="px-4">
+                                <Skeleton className="ml-auto h-12 w-20 md:h-10" />
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        : children?.results?.map((orgChild: Organization) => (
+                            <TableRow
+                              key={orgChild.id}
+                              onClick={() =>
+                                navigate(`${baseUrl}/children/${orgChild.id}`)
+                              }
+                              className="cursor-pointer hover:bg-muted/50"
+                            >
+                              <TableCell className="px-4 whitespace-normal">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <Building2 className="size-4" aria-hidden />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-semibold text-foreground">
+                                      {orgChild.name}
+                                    </div>
+                                    {orgChild.description && (
+                                      <p className="line-clamp-1 max-w-md text-xs text-muted-foreground">
+                                        {orgChild.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="px-4 text-muted-foreground">
+                                {orgChild.metadata?.govt_org_type
+                                  ? t(
+                                      `SYSTEM__govt_org_type__${orgChild.metadata.govt_org_type}`,
+                                    )
+                                  : "-"}
+                              </TableCell>
+                              <TableCell className="px-4">
+                                <Badge variant="secondary">
+                                  {t(`SYSTEM__org_type__${orgChild.org_type}`)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell
+                                className="px-4 text-right"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button variant="ghost" asChild>
+                                  <Link
+                                    href={`${baseUrl}/children/${orgChild.id}`}
+                                    aria-label={`${t("open")} ${orgChild.name}`}
+                                  >
+                                    {t("open")}
+                                    <ChevronRight data-icon="inline-end" />
+                                  </Link>
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </FramePanel>
+            </Frame>
             <Pagination totalCount={children?.count ?? 0} />
           </div>
         );

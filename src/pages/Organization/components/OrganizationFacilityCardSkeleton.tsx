@@ -11,8 +11,8 @@ export function OrganizationFacilityCardSkeleton() {
         <Skeleton className="h-4 w-1/2" />
       </div>
       <div className="flex items-center justify-between gap-2 border-t border-border bg-muted/40 px-4 py-3">
-        <Skeleton className="h-9 w-32" />
-        <Skeleton className="h-9 w-9" />
+        <Skeleton className="h-12 w-32 md:h-10" />
+        <Skeleton className="size-12 md:size-10" />
       </div>
     </Card>
   );

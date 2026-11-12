@@ -1,10 +1,14 @@
-import { ArrowUpRight, Hospital, Settings } from "lucide-react";
+import { ArrowUpRight, Settings } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
+import { Avatar } from "@/components/Common/Avatar";
+
+import { cn } from "@/lib/utils";
 
 import { FacilityListRead } from "@/types/facility/facility";
 import { renderGeoOrganizations } from "@/types/organization/organization";
@@ -26,7 +30,12 @@ export function OrganizationFacilityCard({ facility, showSettings }: Props) {
 
   return (
     <Card className="@container/facility-card flex h-full flex-col overflow-hidden">
-      <div className="aspect-5/2 shrink-0 overflow-hidden border-b border-border bg-muted">
+      <div
+        className={cn(
+          "aspect-5/2 shrink-0 overflow-hidden bg-muted",
+          facility.read_cover_image_url && "border-b border-border",
+        )}
+      >
         {facility.read_cover_image_url ? (
           <img
             src={facility.read_cover_image_url}
@@ -35,8 +44,14 @@ export function OrganizationFacilityCard({ facility, showSettings }: Props) {
             className="size-full object-cover"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-placeholder-foreground/50">
-            <Hospital className="size-8 stroke-[1.5]" aria-hidden="true" />
+          <div
+            className="flex size-full items-center justify-center overflow-hidden"
+            aria-hidden="true"
+          >
+            <Avatar
+              name={facility.name}
+              className="rounded-none after:hidden [&_text]:text-2xl! [&_text]:font-bold"
+            />
           </div>
         )}
       </div>
@@ -70,15 +85,31 @@ export function OrganizationFacilityCard({ facility, showSettings }: Props) {
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/40 px-4 py-3">
-        <Button variant="outline" size="sm" asChild>
+      <div
+        className={cn(
+          "flex flex-wrap items-center gap-2 border-t border-border bg-muted/40 px-4 py-3",
+          showSettings ? "justify-between" : "",
+        )}
+      >
+        <Button
+          variant="outline"
+          size="default"
+          className={showSettings ? "" : "w-full"}
+          asChild
+        >
           <Link href={`/facility/${facility.id}/settings/general`}>
             {t("view_facility")}
             <ArrowUpRight data-icon="inline-end" />
           </Link>
         </Button>
         {showSettings && (
-          <Button variant="ghost" size="sm" title={t("settings")} asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="@2xs/facility-card:w-auto"
+            title={t("settings")}
+            asChild
+          >
             <Link href={`/facility/${facility.id}/settings/departments`}>
               <Settings data-icon="inline-start" />
               <span className="sr-only @2xs/facility-card:not-sr-only">

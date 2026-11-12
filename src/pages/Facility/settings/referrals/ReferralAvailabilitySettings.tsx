@@ -11,6 +11,8 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Page from "@/components/Common/Page";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,18 +51,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Muted,
-  CareUIPageTitle as PageTitle,
-  SubsectionTitle,
-} from "@/components/ui/typography";
-
-import Page from "@/components/Common/Page";
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import { Muted } from "@/components/ui/typography";
 
 import query from "@/Utils/request/query";
 import { ReferralFilters } from "@/components/Referral/ReferralFilters";
 import { usePermissions } from "@/context/PermissionContext";
+import EntityBadge from "@/pages/Organization/components/EntityBadge";
 import {
   ReferralAvailabilityRead,
   ReferralAvailabilityStatus,
@@ -196,258 +192,266 @@ export default function ReferralAvailabilitySettings({
     : scopeType === "facility"
       ? facilityQuery.data?.name
       : departmentQuery.data?.name;
-  const Title = embedded ? SubsectionTitle : PageTitle;
   const content = (
     <>
-      <div className="container mx-auto space-y-6 text-foreground">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-          <div>
-            <Title>{t("referral_availability_settings")}</Title>
-            <Muted className="mt-2 max-w-2xl">
-              {t("referral_availability_settings_description")}
-            </Muted>
-          </div>
-          {canManage && (
-            <Button onClick={() => setEditingId("new")}>
-              <FilePlus2 className="size-4" />
-              {t("referral_create_availability")}
-            </Button>
-          )}
-        </div>
+      <div className="container mx-auto space-y-4 text-foreground">
+        <EntityBadge
+          title={t("referral_availability_settings")}
+          description={t("referral_availability_settings_description")}
+          isFetching={false}
+          showCount={false}
+          actions={
+            canManage && (
+              <Button onClick={() => setEditingId("new")}>
+                <FilePlus2 className="size-4" />
+                {t("referral_create_availability")}
+              </Button>
+            )
+          }
+        />
 
         <Frame stacked>
-          <FrameHeader>
+          <FrameHeader className="gap-3">
             <FrameTitle className="flex items-center gap-2">
               <Building2 className="size-4" />
               {t("referral_configuration_scope")}
             </FrameTitle>
-          </FrameHeader>
-          <FramePanel className="space-y-3">
-            <ReferralFilters
-              key={organizationId ?? facilityId}
-              departmentFilter={
-                facilityId
-                  ? {
-                      facilityId,
-                      departmentId,
-                      department: departmentQuery.data,
-                    }
-                  : undefined
-              }
-              status={status === "all" ? null : status}
-              statusOptions={(["draft", "active", "inactive"] as const).map(
-                (value) => ({ value, label: t(value) }),
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              {canManage && (
+                <InputGroup className="min-w-0 w-full bg-background sm:flex-1">
+                  <InputGroupInput
+                    aria-label={t("referral_search_availability")}
+                    placeholder={t("referral_search_availability")}
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setPage(1);
+                    }}
+                  />
+                  <InputGroupAddon>
+                    <Search />
+                  </InputGroupAddon>
+                </InputGroup>
               )}
-              onChange={(updates) => {
-                if ("department" in updates) {
-                  setDepartmentId(updates.department?.id ?? "");
-                  setEditingId(null);
-                  setDeletingAvailability(null);
-                }
-                if ("status" in updates) {
-                  setStatus(
-                    (updates.status as ReferralAvailabilityStatus | null) ??
-                      "all",
-                  );
-                }
-                setPage(1);
-              }}
-            />
-            <Muted>{scopeName}</Muted>
-          </FramePanel>
-        </Frame>
-
-        {permissionsLoading ? (
-          <CardListSkeleton count={2} />
-        ) : permissionsError ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <FieldError>{t("referral_scope_load_error")}</FieldError>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (organizationId) organizationQuery.refetch();
-                else facilityQuery.refetch();
-                if (departmentId) departmentQuery.refetch();
-              }}
-            >
-              {t("retry")}
-            </Button>
-          </div>
-        ) : !canManage ? (
-          <Empty className="border border-border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Building2 />
-              </EmptyMedia>
-              <EmptyTitle>
-                {t(
-                  scopeType === "internal_organization" && !departmentId
-                    ? "referral_select_department"
-                    : "referral_scope_permission_required",
-                )}
-              </EmptyTitle>
-              <EmptyDescription>
-                {t(
-                  organizationId
-                    ? "referral_organization_manage_permission"
-                    : "referral_scope_permission_help",
-                )}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <Frame stacked>
-            <FrameHeader className="flex-col gap-3 sm:flex-row">
-              <InputGroup className="min-w-0 flex-1 sm:max-w-md bg-background">
-                <InputGroupInput
-                  aria-label={t("referral_search_availability")}
-                  placeholder={t("referral_search_availability")}
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                />
-                <InputGroupAddon>
-                  <Search />
-                </InputGroupAddon>
-              </InputGroup>
-            </FrameHeader>
-            <FramePanel className="p-0">
-              {availabilityQuery.isLoading ? (
-                <CardListSkeleton count={3} />
-              ) : availabilityQuery.isError ? (
-                <div className="flex flex-wrap items-center gap-3 p-4">
-                  <FieldError>
-                    {t("referral_availability_load_error")}
-                  </FieldError>
-                  <Button
-                    variant="outline"
-                    onClick={() => availabilityQuery.refetch()}
-                  >
-                    {t("retry")}
-                  </Button>
-                </div>
-              ) : !availabilityQuery.data?.results.length ? (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <FilePlus2 />
-                    </EmptyMedia>
-                    <EmptyTitle>{t("referral_no_availability")}</EmptyTitle>
-                    <EmptyDescription>
-                      {t(
-                        search || status !== "all"
-                          ? "referral_adjust_availability_filters"
-                          : "referral_create_availability_help",
-                      )}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              ) : (
-                <ItemGroup className="gap-0">
-                  {availabilityQuery.data.results.map((availability) => (
-                    <Item
-                      key={availability.id}
-                      role="listitem"
-                      className="rounded-none border-0 border-border [&:not(:last-child)]:border-b"
-                    >
-                      <ItemContent className="min-w-0">
-                        <ItemTitle className="flex-wrap line-clamp-none">
-                          <h2 className="text-sm font-medium break-words">
-                            {availability.name}
-                          </h2>
-                          <Badge variant={STATUS_VARIANTS[availability.status]}>
-                            {t(availability.status)}
-                          </Badge>
-                        </ItemTitle>
-                        {availability.description && (
-                          <ItemDescription>
-                            {availability.description}
-                          </ItemDescription>
-                        )}
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>
-                            {t(
-                              availability.referral_type === "consultation"
-                                ? "referral_type_consultation"
-                                : "referral_type_lab",
-                            )}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            {availability.is_public ? (
-                              <Globe2 className="size-3.5" />
-                            ) : (
-                              <LockKeyhole className="size-3.5" />
-                            )}
-                            {t(
-                              availability.is_public
-                                ? "referral_visibility_public"
-                                : "referral_visibility_private",
-                            )}
-                          </span>
-                        </div>
-                      </ItemContent>
-                      <ItemActions>
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingId(availability.id)}
-                          aria-label={t("referral_edit_named_availability", {
-                            name: availability.name,
-                          })}
-                        >
-                          <Pencil className="size-4" />
-                          {t("edit")}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => setDeletingAvailability(availability)}
-                          aria-label={t("referral_delete_named_availability", {
-                            name: availability.name,
-                          })}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </ItemActions>
-                    </Item>
-                  ))}
-                </ItemGroup>
-              )}
-            </FramePanel>
-            {!!availabilityQuery.data?.count &&
-              availabilityQuery.data.count > PAGE_SIZE && (
-                <FrameFooter className="flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-                  <span>
-                    {t("referral_availability_page", {
-                      page,
-                      total: Math.ceil(
-                        availabilityQuery.data.count / PAGE_SIZE,
-                      ),
-                    })}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      disabled={page <= 1}
-                      onClick={() => setPage(page - 1)}
-                    >
-                      {t("previous")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      disabled={
-                        page * PAGE_SIZE >= availabilityQuery.data.count
+              <ReferralFilters
+                key={organizationId ?? facilityId}
+                departmentFilter={
+                  facilityId
+                    ? {
+                        facilityId,
+                        departmentId,
+                        department: departmentQuery.data,
                       }
-                      onClick={() => setPage(page + 1)}
+                    : undefined
+                }
+                status={status === "all" ? null : status}
+                statusOptions={(["draft", "active", "inactive"] as const).map(
+                  (value) => ({ value, label: t(value) }),
+                )}
+                onChange={(updates) => {
+                  if ("department" in updates) {
+                    setDepartmentId(updates.department?.id ?? "");
+                    setEditingId(null);
+                    setDeletingAvailability(null);
+                  }
+                  if ("status" in updates) {
+                    setStatus(
+                      (updates.status as ReferralAvailabilityStatus | null) ??
+                        "all",
+                    );
+                  }
+                  setPage(1);
+                }}
+                compact
+              />
+            </div>
+            <Muted>{scopeName}</Muted>
+          </FrameHeader>
+
+          <FramePanel className="p-0">
+            {permissionsLoading ? (
+              <div className="p-4">
+                <CardListSkeleton count={2} />
+              </div>
+            ) : permissionsError ? (
+              <div className="flex flex-wrap items-center gap-3 p-4">
+                <FieldError>{t("referral_scope_load_error")}</FieldError>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (organizationId) organizationQuery.refetch();
+                    else facilityQuery.refetch();
+                    if (departmentId) departmentQuery.refetch();
+                  }}
+                >
+                  {t("retry")}
+                </Button>
+              </div>
+            ) : !canManage ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Building2 />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    {t(
+                      scopeType === "internal_organization" && !departmentId
+                        ? "referral_select_department"
+                        : "referral_scope_permission_required",
+                    )}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    {t(
+                      organizationId
+                        ? "referral_organization_manage_permission"
+                        : "referral_scope_permission_help",
+                    )}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <>
+                {availabilityQuery.isLoading ? (
+                  <CardListSkeleton count={3} />
+                ) : availabilityQuery.isError ? (
+                  <div className="flex flex-wrap items-center gap-3 p-4">
+                    <FieldError>
+                      {t("referral_availability_load_error")}
+                    </FieldError>
+                    <Button
+                      variant="outline"
+                      onClick={() => availabilityQuery.refetch()}
                     >
-                      {t("next")}
+                      {t("retry")}
                     </Button>
                   </div>
-                </FrameFooter>
-              )}
-          </Frame>
-        )}
+                ) : !availabilityQuery.data?.results.length ? (
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <FilePlus2 />
+                      </EmptyMedia>
+                      <EmptyTitle>{t("referral_no_availability")}</EmptyTitle>
+                      <EmptyDescription>
+                        {t(
+                          search || status !== "all"
+                            ? "referral_adjust_availability_filters"
+                            : "referral_create_availability_help",
+                        )}
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                ) : (
+                  <ItemGroup className="gap-0">
+                    {availabilityQuery.data.results.map((availability) => (
+                      <Item
+                        key={availability.id}
+                        role="listitem"
+                        className="rounded-none border-0 border-border [&:not(:last-child)]:border-b"
+                      >
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="flex-wrap line-clamp-none">
+                            <h2 className="text-sm font-medium break-words">
+                              {availability.name}
+                            </h2>
+                            <Badge
+                              variant={STATUS_VARIANTS[availability.status]}
+                            >
+                              {t(availability.status)}
+                            </Badge>
+                          </ItemTitle>
+                          {availability.description && (
+                            <ItemDescription>
+                              {availability.description}
+                            </ItemDescription>
+                          )}
+                          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                            <span>
+                              {t(
+                                availability.referral_type === "consultation"
+                                  ? "referral_type_consultation"
+                                  : "referral_type_lab",
+                              )}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              {availability.is_public ? (
+                                <Globe2 className="size-3.5" />
+                              ) : (
+                                <LockKeyhole className="size-3.5" />
+                              )}
+                              {t(
+                                availability.is_public
+                                  ? "referral_visibility_public"
+                                  : "referral_visibility_private",
+                              )}
+                            </span>
+                          </div>
+                        </ItemContent>
+                        <ItemActions>
+                          <Button
+                            variant="outline"
+                            onClick={() => setEditingId(availability.id)}
+                            aria-label={t("referral_edit_named_availability", {
+                              name: availability.name,
+                            })}
+                          >
+                            <Pencil className="size-4" />
+                            {t("edit")}
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() =>
+                              setDeletingAvailability(availability)
+                            }
+                            aria-label={t(
+                              "referral_delete_named_availability",
+                              {
+                                name: availability.name,
+                              },
+                            )}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </ItemActions>
+                      </Item>
+                    ))}
+                  </ItemGroup>
+                )}
+              </>
+            )}
+          </FramePanel>
+          {canManage &&
+            !permissionsLoading &&
+            !permissionsError &&
+            !!availabilityQuery.data?.count &&
+            availabilityQuery.data.count > PAGE_SIZE && (
+              <FrameFooter className="flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
+                <span>
+                  {t("referral_availability_page", {
+                    page,
+                    total: Math.ceil(availabilityQuery.data.count / PAGE_SIZE),
+                  })}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    {t("previous")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={page * PAGE_SIZE >= availabilityQuery.data.count}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    {t("next")}
+                  </Button>
+                </div>
+              </FrameFooter>
+            )}
+        </Frame>
       </div>
       <Sheet
         open={!!editingId && canManage}

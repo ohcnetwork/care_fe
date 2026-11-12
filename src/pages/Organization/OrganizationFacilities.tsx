@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 
 import SearchInput from "@/components/Common/SearchInput";
 
@@ -69,55 +69,58 @@ export default function OrganizationFacilities({
         );
         return (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <EntityBadge
-                title={t("facilities")}
-                count={facilities?.count}
-                isFetching={isFetching}
-              />
-              {canCreateFacility && <AddFacilitySheet organizationId={id} />}
-            </div>
-
-            <SearchInput
-              options={[
-                {
-                  key: "name",
-                  type: "text",
-                  placeholder: t("search_by_facility_name"),
-                  value: qParams.name || "",
-                  display: t("name"),
-                },
-              ]}
-              onSearch={(key, value) =>
-                updateQuery({
-                  [key]: value || undefined,
-                })
+            <EntityBadge
+              title={t("facilities")}
+              description={t("organization_facilities_description")}
+              count={facilities?.count}
+              isFetching={isFetching}
+              actions={
+                canCreateFacility && <AddFacilitySheet organizationId={id} />
               }
-              showSearchIcon
-              className="w-full sm:max-w-sm"
             />
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {isFetching ? (
-                Array.from({ length: 8 }, (_, index) => (
-                  <OrganizationFacilityCardSkeleton key={index} />
-                ))
-              ) : facilities?.results?.length === 0 ? (
-                <Card className="col-span-full">
-                  <CardContent className="p-6 text-center text-muted-foreground">
+            <Frame>
+              <FrameHeader>
+                <SearchInput
+                  options={[
+                    {
+                      key: "name",
+                      type: "text",
+                      placeholder: t("search_by_facility_name"),
+                      value: qParams.name || "",
+                      display: t("name"),
+                    },
+                  ]}
+                  onSearch={(key, value) =>
+                    updateQuery({
+                      [key]: value || undefined,
+                    })
+                  }
+                  showSearchIcon
+                  className="w-full sm:max-w-sm"
+                />
+              </FrameHeader>
+              <FramePanel>
+                {!isFetching && facilities?.results?.length === 0 ? (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
                     {t("no_facilities_found")}
-                  </CardContent>
-                </Card>
-              ) : (
-                facilities?.results?.map((facility) => (
-                  <OrganizationFacilityCard
-                    key={facility.id}
-                    facility={facility}
-                    showSettings={isGeoAdmin}
-                  />
-                ))
-              )}
-            </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {isFetching
+                      ? Array.from({ length: 8 }, (_, index) => (
+                          <OrganizationFacilityCardSkeleton key={index} />
+                        ))
+                      : facilities?.results?.map((facility) => (
+                          <OrganizationFacilityCard
+                            key={facility.id}
+                            facility={facility}
+                            showSettings={isGeoAdmin}
+                          />
+                        ))}
+                  </div>
+                )}
+              </FramePanel>
+            </Frame>
             <Pagination totalCount={facilities?.count ?? 0} />
           </div>
         );
