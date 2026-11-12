@@ -36,7 +36,7 @@ interface Seed {
 /**
  * A patient whose source account holds an active and a draft advance
  * (movable), a cancelled advance and a payment against an invoice (not
- * movable), plus a valid target and a billing-closed account.
+ * movable), plus a target account and a billing-closed account.
  */
 async function seedPayments(facilityId: string): Promise<Seed> {
   const suffix = faker.string.alphanumeric(6);
@@ -175,11 +175,14 @@ test.describe("Payment change account", () => {
     ).toBeVisible();
     await expect(sheet.getByText("Selected payments (1)")).toBeVisible();
 
-    await test.step("Only other active, open accounts are offered", async () => {
-      await expect(sheet.getByRole("radio")).toHaveCount(1);
-      await expect(sheet.getByText(seed.target.name)).toBeVisible();
+    await test.step("The patient's other active accounts are offered", async () => {
+      await expect(sheet.getByRole("radio")).toHaveCount(2);
+      for (const offered of [seed.target, seed.closed]) {
+        await expect(
+          sheet.getByRole("radio", { name: offered.name }),
+        ).toBeVisible();
+      }
       await expect(sheet.getByText(seed.source.name)).toHaveCount(0);
-      await expect(sheet.getByText(seed.closed.name)).toHaveCount(0);
     });
 
     const submit = sheet.getByRole("button", {
@@ -188,7 +191,9 @@ test.describe("Payment change account", () => {
     });
     await expect(submit).toBeDisabled();
     await sheet.getByText(seed.target.name).click();
-    await expect(sheet.getByRole("radio")).toBeChecked();
+    await expect(
+      sheet.getByRole("radio", { name: seed.target.name }),
+    ).toBeChecked();
 
     const changeAccount = page.waitForResponse(
       (response) =>

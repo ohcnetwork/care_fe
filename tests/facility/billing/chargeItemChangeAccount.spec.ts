@@ -29,8 +29,8 @@ interface Seed {
 
 /**
  * A patient with a source account holding two billable items, one
- * not-billable item and one billed item (on a draft invoice), plus a valid
- * target account and two accounts that must never be offered as targets.
+ * not-billable item and one billed item (on a draft invoice), plus a target
+ * account, a billing-closed account and an inactive account.
  */
 async function seedAccounts(facilityId: string): Promise<Seed> {
   const suffix = faker.string.alphanumeric(6);
@@ -197,11 +197,15 @@ test.describe("Charge item change account", () => {
     ).toBeVisible();
     await expect(sheet.getByText(seed.billable[0])).toBeVisible();
 
-    await test.step("Only other active, open accounts are offered", async () => {
+    await test.step("Only the patient's other active accounts are offered", async () => {
       await expect(sheet.getByText("Select target account")).toBeVisible();
-      await expect(sheet.getByRole("radio")).toHaveCount(1);
-      await expect(sheet.getByText(seed.target.name)).toBeVisible();
-      for (const excluded of [seed.source, seed.inactive, seed.closed]) {
+      await expect(sheet.getByRole("radio")).toHaveCount(2);
+      for (const offered of [seed.target, seed.closed]) {
+        await expect(
+          sheet.getByRole("radio", { name: offered.name }),
+        ).toBeVisible();
+      }
+      for (const excluded of [seed.source, seed.inactive]) {
         await expect(sheet.getByText(excluded.name)).toHaveCount(0);
       }
     });
@@ -212,7 +216,9 @@ test.describe("Charge item change account", () => {
     });
     await expect(submit).toBeDisabled();
     await sheet.getByText(seed.target.name).click();
-    await expect(sheet.getByRole("radio")).toBeChecked();
+    await expect(
+      sheet.getByRole("radio", { name: seed.target.name }),
+    ).toBeChecked();
 
     const changeAccount = page.waitForResponse(
       (response) =>

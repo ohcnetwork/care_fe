@@ -16,7 +16,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { isAccountActiveAndBillable } from "@/pages/Facility/billing/account/utils";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   AccountStatus,
@@ -37,8 +36,8 @@ interface TargetAccountPickerProps {
 }
 
 /**
- * Lists the patient's other accounts that can receive charge items or
- * payments (active and not billing-closed) as single-select choice cards.
+ * Lists the patient's other active accounts as single-select choice cards,
+ * as targets for moving charge items or payments.
  */
 export default function TargetAccountPicker({
   facilityId,
@@ -65,8 +64,7 @@ export default function TargetAccountPicker({
   });
 
   const accounts = accountsResponse?.results.filter(
-    (account) =>
-      account.id !== currentAccountId && isAccountActiveAndBillable(account),
+    (account) => account.id !== currentAccountId,
   );
 
   return (
