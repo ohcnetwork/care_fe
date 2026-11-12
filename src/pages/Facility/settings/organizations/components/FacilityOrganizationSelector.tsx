@@ -1,10 +1,5 @@
 import { Spinner } from "@/components/ui/spinner";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, ChevronDown, ChevronRight, Star, X } from "lucide-react";
 import {
   useCallback,
@@ -47,6 +42,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -132,39 +128,27 @@ export default function FacilityOrganizationSelector(
     fetchNextPage: fetchNextPageRoot,
     hasNextPage: hasNextPageRoot,
     isFetchingNextPage: isFetchingNextPageRoot,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: [
       "facilityOrganization",
       facilityId,
       facilityOrgSearch,
       showAllOrgs,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(
-        showAllOrgs
-          ? facilityOrganizationApi.list
-          : facilityOrganizationApi.listMine,
-        {
-          pathParams: { facilityId },
-          queryParams: {
-            parent: "",
-            name: facilityOrgSearch,
-            limit: String(PAGE_LIMIT),
-            offset: String(pageParam),
-          },
+    ...query.infinite(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        pageSize: PAGE_LIMIT,
+        debounceInterval: 500,
+        queryParams: {
+          parent: "",
+          name: facilityOrgSearch,
         },
-      )({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => ({
-      results: data?.pages.flatMap((p) => p.results) || [],
-      count: data?.pages[0]?.count || 0,
-    }),
+      },
+    ),
   });
 
   const {
@@ -173,33 +157,21 @@ export default function FacilityOrganizationSelector(
     fetchNextPage: fetchNextPageChild,
     hasNextPage: hasNextPageChild,
     isFetchingNextPage: isFetchingNextPageChild,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: [
       "organizations",
       facilityId,
       navigationLevels[navigationLevels.length - 1]?.id,
       facilityOrgSearch,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(facilityOrganizationApi.list, {
-        pathParams: { facilityId },
-        queryParams: {
-          parent: navigationLevels[navigationLevels.length - 1]?.id,
-          name: facilityOrgSearch,
-          limit: String(PAGE_LIMIT),
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => ({
-      results: data?.pages.flatMap((p) => p.results) || [],
-      count: data?.pages[0]?.count || 0,
+    ...query.infinite(facilityOrganizationApi.list, {
+      pathParams: { facilityId },
+      pageSize: PAGE_LIMIT,
+      debounceInterval: 500,
+      queryParams: {
+        parent: navigationLevels[navigationLevels.length - 1]?.id,
+        name: facilityOrgSearch,
+      },
     }),
     enabled: navigationLevels.length > 0,
   });

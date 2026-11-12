@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { CircleAlert, CircleCheck, CirclePause } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect } from "react";
@@ -12,8 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
-import query from "@/Utils/request/query";
-import { formatDateTime, relativeTime } from "@/Utils/utils";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
@@ -22,6 +20,8 @@ import {
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { outstandingOrdersConfigSchema } from "@/types/workspace/widgetConfigSchemas";
+import query from "@/Utils/request/query";
+import { formatDateTime, relativeTime } from "@/Utils/utils";
 
 interface OutstandingOrdersWidgetProps {
   title?: string;
@@ -129,7 +129,7 @@ export function OutstandingOrdersWidget({
     hasNextPage,
     fetchNextPage,
     refetch,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: [
       "serviceRequests",
       facilityId,
@@ -137,33 +137,25 @@ export function OutstandingOrdersWidget({
       selectedEncounterId,
       { category, limit },
     ],
-    queryFn: ({ pageParam, signal }) =>
-      query(serviceRequestApi.listServiceRequest, {
-        pathParams: { facilityId: facilityId ?? "" },
-        queryParams: {
-          encounter: selectedEncounterId,
-          category,
-          limit: Math.max(limit, MIN_PAGE_SIZE),
-          offset: pageParam,
-          ordering: "-created_date",
-        },
-        silent: true,
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const offset = allPages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return lastPage.results.length > 0 && offset < lastPage.count
-        ? offset
-        : undefined;
-    },
+    ...query.infinite(serviceRequestApi.listServiceRequest, {
+      pathParams: { facilityId: facilityId ?? "" },
+      queryParams: {
+        encounter: selectedEncounterId,
+        category,
+        ordering: "-created_date",
+      },
+      pageSize: Math.max(limit, MIN_PAGE_SIZE),
+      silent: true,
+    }),
+    select: (infiniteData) => ({
+      results: infiniteData.pages.flatMap((page) => page.results),
+      pagesLoaded: infiniteData.pages.length,
+    }),
     enabled: canRead && parsedConfig.success,
   });
-  const fetched = data?.pages.flatMap((page) => page.results) ?? [];
+  const fetched = data?.results ?? [];
   const eligible = fetched.filter(isEligible);
-  const pagesLoaded = data?.pages.length ?? 0;
+  const pagesLoaded = data?.pagesLoaded ?? 0;
   const needsMore =
     eligible.length < limit &&
     !!hasNextPage &&

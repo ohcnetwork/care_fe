@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -10,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { MedicationRequestEmptyState as EmptyState } from "@/components/Medicine/MedicationRequestTable";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import {
   MEDICATION_STATEMENT_STATUS,
   MedicationStatementRead,
@@ -51,28 +51,19 @@ export function MedicationStatementList({
   const LIMIT = showTimeLine ? 30 : 14;
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-medication_statements", patientId, encounterId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(medicationStatementApi.list, {
-          pathParams: { patientId },
-          queryParams: {
-            limit: LIMIT,
-            offset: String(pageParam),
-            status: status.join(","),
-          },
-        })({ signal });
-        return response as PaginatedResponse<MedicationStatementRead>;
-      },
+      ...query.infinite(medicationStatementApi.list, {
+        pathParams: { patientId },
+        queryParams: {
+          status: status.join(","),
+        },
+        pageSize: LIMIT,
+      }),
       enabled: canAccess,
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * 100;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
     });
 
-  const medications = data?.pages.flatMap((page) => page.results) ?? [];
+  const medications = data?.results ?? [];
 
   if (isLoading) {
     return (

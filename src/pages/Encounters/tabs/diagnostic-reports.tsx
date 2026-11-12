@@ -1,8 +1,7 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useScopedQueryParams } from "@/hooks/useScopedQueryParams";
 import { cn } from "@/lib/utils";
 import { DiagnosticReportDetailCard } from "@/pages/Encounters/DiagnosticReportDetailCard";
@@ -32,7 +32,6 @@ import {
 } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime } from "@/Utils/utils";
 
 interface LeftCardProps {
@@ -194,8 +193,6 @@ export const DiagnosticReportsTab = ({
   showObservationHistory = false,
 }: DiagnosticReportsTabProps) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
-
   const [qParams, setQueryParams] = useScopedQueryParams<{
     reportId?: string;
     activityDefinition?: string;
@@ -208,48 +205,31 @@ export const DiagnosticReportsTab = ({
 
   const {
     data: reportsData,
-    fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: [
       "infinite-diagnosticReports",
       patientId,
       encounterId,
       activityDefinition,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(diagnosticReportApi.listDiagnosticReports, {
-        pathParams: { patient_external_id: patientId },
-        queryParams: {
-          encounter: encounterId,
-          limit: LIMIT,
-          offset: pageParam,
-        },
-      })({ signal });
-      return response as PaginatedResponse<DiagnosticReportRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(diagnosticReportApi.listDiagnosticReports, {
+      pathParams: { patient_external_id: patientId },
+      queryParams: { encounter: encounterId },
+      pageSize: LIMIT,
+    }),
   });
 
-  const allReports = reportsData?.pages.flatMap((page) => page.results) ?? [];
+  const allReports = reportsData?.results ?? [];
 
   const reports = activityDefinition
     ? allReports.filter((r) => r.service_request?.title === activityDefinition)
     : allReports;
 
   const selectedReport = reports.find((r) => r.id === reportId) || reports[0];
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   const handleReportClick = (report: DiagnosticReportRead) => {
     setQueryParams({ ...qParams, reportId: report.id });

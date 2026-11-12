@@ -1,11 +1,10 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
 import { Check as CheckIcon, FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -62,6 +61,7 @@ import useFilters, { FilterState } from "@/hooks/useFilters";
 import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -522,14 +522,12 @@ function AppointmentColumn(props: {
   const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>(
     [],
   );
-  const { ref, inView } = useInView();
 
   const {
     data: appointmentsData,
-    fetchNextPage,
-    hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: [
       "infinite-appointments",
       facilityId,
@@ -544,41 +542,31 @@ function AppointmentColumn(props: {
       props.tags_behavior,
       props.patient,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(scheduleApis.appointments.list, {
-        pathParams: { facilityId },
-        queryParams: {
-          offset: pageParam,
-          status:
-            selectedStatuses.length === 0
-              ? props.statusGroup.statuses.join(",")
-              : selectedStatuses.join(","),
-          tags: props.tags?.join(","),
-          tags_behavior: props.tags_behavior,
-          limit: 10,
-          slot: props.slot,
-          resource_type: props.resourceType,
-          resource_ids: props.resourceIds.join(","),
-          date_after: props.date_from,
-          date_before: props.date_to,
-          patient: props.patient,
-        },
-        silent: true,
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * 10;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(scheduleApis.appointments.list, {
+      pathParams: { facilityId },
+      queryParams: {
+        status:
+          selectedStatuses.length === 0
+            ? props.statusGroup.statuses.join(",")
+            : selectedStatuses.join(","),
+        tags: props.tags?.join(","),
+        tags_behavior: props.tags_behavior,
+        slot: props.slot,
+        resource_type: props.resourceType,
+        resource_ids: props.resourceIds.join(","),
+        date_after: props.date_from,
+        date_before: props.date_to,
+        patient: props.patient,
+      },
+      silent: true,
+      pageSize: 10,
+    }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
     refetchInterval:
       props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
-  const appointments =
-    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
+  const appointments = appointmentsData?.results ?? [];
 
   const toggleStatus = (status: AppointmentStatus) => {
     setSelectedStatuses((prev) =>
@@ -588,12 +576,6 @@ function AppointmentColumn(props: {
     );
   };
 
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
   return (
     <div className="bg-gray-100 py-4 rounded-lg w-80 overflow-y-hidden">
       <div className="flex flex-row justify-between px-3 gap-2 mb-3">
@@ -602,16 +584,16 @@ function AppointmentColumn(props: {
             {props.statusGroup.label}
           </h2>
           <span className="bg-gray-200 px-2 py-1 rounded-md text-xs font-medium">
-            {appointmentsData?.pages[0]?.count == null ? (
+            {appointmentsData?.count == null ? (
               "..."
-            ) : appointmentsData?.pages[0]?.count === appointments.length ? (
-              appointmentsData?.pages[0]?.count
+            ) : appointmentsData?.count === appointments.length ? (
+              appointmentsData?.count
             ) : (
               <Trans
                 i18nKey="showing_x_of_y"
                 values={{
                   x: appointments.length,
-                  y: appointmentsData?.pages[0]?.count,
+                  y: appointmentsData?.count,
                 }}
                 components={{
                   strong: <span className="font-bold" />,

@@ -1,7 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -14,12 +10,11 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { formatName } from "@/Utils/utils";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { Code } from "@/types/base/code/code";
-import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
+import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { useTranslation } from "react-i18next";
 
 interface ObservationHistoryTableProps {
@@ -45,42 +40,24 @@ export const ObservationHistoryTable = ({
   encounterId,
   codes,
 }: ObservationHistoryTableProps) => {
-  const { ref, inView } = useInView();
   const { t } = useTranslation();
 
-  const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationListRead>
-  >({
+  const { data, isLoading, hasNextPage, ref } = useInfiniteList({
     queryKey: [
       "infinite-observations",
       patientId,
       encounterId,
       codes.map((c) => c.code),
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(observationApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          limit: String(LIMIT),
-          codes: codes.map((c) => c.code).join(","),
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response as PaginatedResponse<ObservationListRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(observationApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+        codes: codes.map((c) => c.code).join(","),
+      },
+      pageSize: LIMIT,
+    }),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -92,7 +69,7 @@ export const ObservationHistoryTable = ({
     );
   }
 
-  if (!data?.pages[0]?.results.length) {
+  if (!data?.results.length) {
     return (
       <div className="flex h-[200px] items-center justify-center text-gray-500">
         {t("no_data_available")}
@@ -113,33 +90,31 @@ export const ObservationHistoryTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.pages.map((page, _pageIndex) =>
-            page.results.map((observation) => {
-              const name = formatName(observation.data_entered_by);
+          {data?.results.map((observation) => {
+            const name = formatName(observation.data_entered_by);
 
-              return (
-                <TableRow key={observation.id}>
-                  <TableCell>
-                    {formatDate(observation.effective_datetime)}
-                  </TableCell>
-                  <TableCell>
-                    {codes.find((c) => c.code === observation.main_code?.code)
-                      ?.display || observation.main_code?.code}
-                  </TableCell>
-                  <TableCell>{observation.value.value || "-"}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar name={name} className="size-6" />
-                      <span>{name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-500">
-                    {observation.note}
-                  </TableCell>
-                </TableRow>
-              );
-            }),
-          )}
+            return (
+              <TableRow key={observation.id}>
+                <TableCell>
+                  {formatDate(observation.effective_datetime)}
+                </TableCell>
+                <TableCell>
+                  {codes.find((c) => c.code === observation.main_code?.code)
+                    ?.display || observation.main_code?.code}
+                </TableCell>
+                <TableCell>{observation.value.value || "-"}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar name={name} className="size-6" />
+                    <span>{name}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-gray-500">
+                  {observation.note}
+                </TableCell>
+              </TableRow>
+            );
+          })}
           {hasNextPage && (
             <TableRow ref={ref}>
               <TableCell colSpan={5}>

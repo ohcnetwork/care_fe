@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -9,8 +8,9 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { ClinicalListPanel } from "@/components/Patient/Common/ClinicalListPanel";
 import EmptyState from "@/components/Patient/Common/EmptyState";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
@@ -53,31 +53,17 @@ export function SymptomsList({
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
   const facilityId = providedFacilityId ?? currentFacilityId;
-  const queryState = useInfiniteQuery({
+  const queryState = useInfiniteList({
     queryKey: ["infinite-symptoms", patientId, encounterId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(symptomApi.listSymptoms, {
-        pathParams: { patientId },
-        silent: true,
-        queryParams: {
-          encounter: encounterId,
-          limit: LIMIT,
-          offset: String(pageParam),
-          exclude_verification_status: "entered_in_error",
-        },
-      })({ signal });
-      return response as PaginatedResponse<Symptom>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return lastPage.results.length > 0 && currentOffset < lastPage.count
-        ? currentOffset
-        : undefined;
-    },
+    ...query.infinite(symptomApi.listSymptoms, {
+      pathParams: { patientId },
+      silent: true,
+      queryParams: {
+        encounter: encounterId,
+        exclude_verification_status: "entered_in_error",
+      },
+      pageSize: LIMIT,
+    }),
   });
 
   const {
@@ -91,7 +77,7 @@ export function SymptomsList({
     isFetchingNextPage,
   } = queryState;
 
-  const symptoms = data?.pages.flatMap((page) => page.results) ?? [];
+  const symptoms = data?.results ?? [];
 
   if (showTimeline) {
     if (isLoading) return <TableSkeleton count={5} />;
@@ -181,8 +167,7 @@ export function SymptomsList({
       history="symptoms"
       emptyMessage={t("no_symptoms_recorded_description")}
       summary={
-        !!data?.pages[0]?.count &&
-        t("clinical_summary_recorded", { count: data.pages[0].count })
+        !!data?.count && t("clinical_summary_recorded", { count: data.count })
       }
       hasData={symptoms.length > 0}
       showEmpty={showEmpty}

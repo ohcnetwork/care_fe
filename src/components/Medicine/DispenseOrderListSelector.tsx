@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { useEffect, useMemo } from "react";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
@@ -39,33 +40,17 @@ export default function DispenseOrderListSelector({
   const [openDrawer, setOpenDrawer] = React.useState(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
+    useInfiniteList({
       queryKey: ["infinite-dispenseOrders", patientId, facilityId],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(dispenseOrderApi.list, {
-          pathParams: { facilityId: facilityId ?? "" },
-          queryParams: {
-            patient: patientId,
-            limit: String(RESULTS_PER_PAGE_LIMIT),
-            offset: String(pageParam),
-          },
-        })({
-          signal,
-        });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+      ...query.infinite(dispenseOrderApi.list, {
+        pathParams: { facilityId: facilityId ?? "" },
+        queryParams: { patient: patientId },
+        pageSize: RESULTS_PER_PAGE_LIMIT,
+      }),
       enabled: !!facilityId,
     });
 
-  const dispenseOrders = useMemo(
-    () => data?.pages.flatMap((page) => page.results) ?? [],
-    [data],
-  );
+  const dispenseOrders = useMemo(() => data?.results ?? [], [data]);
 
   const loadMoreRefMobile = useOnInView<HTMLDivElement>((inView) => {
     if (inView && hasNextPage && !isFetchingNextPage) {

@@ -1,5 +1,5 @@
 import { CheckedState } from "@/components/ui/checkbox";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRightLeft,
   ChevronDown,
@@ -12,7 +12,6 @@ import {
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
@@ -43,6 +42,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import {
   MonetaryComponent,
@@ -204,44 +204,30 @@ function ChargeItemsTable({
   };
 
   const RESULTS_PER_PAGE = 20;
-  const { ref: loadMoreRef, inView } = useInView();
 
   const {
-    data: chargeItems,
-    fetchNextPage,
+    data,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery({
+    ref: loadMoreRef,
+  } = useInfiniteList({
     queryKey: ["infinite-chargeItems", accountId, qParams],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          account: accountId,
-          status: qParams.status,
-          service_resource: qParams.service_resource,
-          created_by: qParams.created_by,
-          ordering: qParams.ordering,
-          title: qParams.title,
-          limit: RESULTS_PER_PAGE,
-          offset: pageParam,
-          ...getDateQueryParams(),
-        },
-      })({ signal });
-      return response as { results: ChargeItemRead[]; count: number };
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * RESULTS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data?.pages.flatMap((p) => p.results) ?? [],
+    ...query.infinite(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      pageSize: RESULTS_PER_PAGE,
+      queryParams: {
+        account: accountId,
+        status: qParams.status,
+        service_resource: qParams.service_resource,
+        created_by: qParams.created_by,
+        ordering: qParams.ordering,
+        title: qParams.title,
+        ...getDateQueryParams(),
+      },
+    }),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
+  const chargeItems = data?.results;
 
   const handleChargeItemsAdded = () => {
     queryClient.invalidateQueries({
