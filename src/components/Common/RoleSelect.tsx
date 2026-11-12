@@ -1,8 +1,7 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown as CaretSortIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/popover";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { RoleBase, RoleContext } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 import query from "@/Utils/request/query";
@@ -124,38 +124,18 @@ export function RoleSelect({
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { ref, inView } = useInView();
   const isMobile = useBreakpoints({ default: true, sm: false });
   const selectedRoleId = value?.id;
 
-  const getQueryParams = (pageParam: number) => ({
-    limit: String(PAGE_LIMIT),
-    offset: String(pageParam),
-    name: searchTerm,
-    context,
-  });
-
-  const {
-    data: rolesList,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-  } = useInfiniteQuery({
+  const { data, isFetchingNextPage, isFetching, ref } = useInfiniteList({
     queryKey: ["roles", searchTerm, context],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(roleApi.listRoles, {
-        queryParams: getQueryParams(pageParam),
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
-    select: (data) => data?.pages.flatMap((p) => p.results) || [],
+    ...query.infinite(roleApi.listRoles, {
+      queryParams: { name: searchTerm, context },
+      pageSize: PAGE_LIMIT,
+      debounceInterval: 500,
+    }),
   });
+  const rolesList = data?.results;
 
   const { data: selectedRoleData } = useQuery({
     queryKey: ["role", selectedRoleId],
@@ -166,10 +146,6 @@ export function RoleSelect({
   });
 
   const selectedRole = value?.name ? value : selectedRoleData;
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
