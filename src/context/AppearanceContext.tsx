@@ -5,6 +5,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -17,7 +18,8 @@ import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { CurrentUserRead } from "@/types/user/user";
 import userApi from "@/types/user/userApi";
 
-export type AppearanceTheme = "light" | "light-protanopia" | "light-tritanopia";
+export type AppearanceTheme =
+  "light" | "dark" | "system" | "light-protanopia" | "light-tritanopia";
 export type AppearanceFontSize = "small" | "default" | "large" | "larger";
 export type AppearanceMotion = "system" | "reduce" | "allow";
 
@@ -75,12 +77,13 @@ const AppearanceSyncContext = createContext<
 
 function effectiveTheme(value: unknown): AppearanceTheme | undefined {
   // Older saved preferences remain on the account until the user makes a change.
-  // Only their light equivalents are available while dark themes are disabled.
+  // Color-vision themes are only offered in light, so legacy dark variants map
+  // to their light equivalents.
   switch (value) {
     case "light":
     case "dark":
     case "system":
-      return "light";
+      return value;
     case "light-protanopia":
     case "dark-protanopia":
       return "light-protanopia";
@@ -182,7 +185,16 @@ const subscribeReducedMotion = (callback: () => void) =>
   subscribeMedia("(prefers-reduced-motion: reduce)", callback);
 const reducedMotionSnapshot = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const subscribeDarkScheme = (callback: () => void) =>
+  subscribeMedia("(prefers-color-scheme: dark)", callback);
+const darkSchemeSnapshot = () =>
+  window.matchMedia("(prefers-color-scheme: dark)").matches;
 const serverMediaSnapshot = () => false;
+
+function applyColorScheme(root: HTMLElement, scheme: "light" | "dark") {
+  root.classList.toggle("dark", scheme === "dark");
+  root.classList.toggle("light", scheme === "light");
+}
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -195,6 +207,11 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const systemPrefersReduced = useSyncExternalStore(
     subscribeReducedMotion,
     reducedMotionSnapshot,
+    serverMediaSnapshot,
+  );
+  const systemPrefersDark = useSyncExternalStore(
+    subscribeDarkScheme,
+    darkSchemeSnapshot,
     serverMediaSnapshot,
   );
 
@@ -329,15 +346,18 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [save]);
 
   const { preferences } = state;
-  const resolvedTheme = "light" as const;
+  const resolvedTheme: "light" | "dark" =
+    preferences.theme === "dark" ||
+    (preferences.theme === "system" && systemPrefersDark)
+      ? "dark"
+      : "light";
   const reducedMotion =
     preferences.motion === "reduce" ||
     (preferences.motion === "system" && systemPrefersReduced);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("dark");
-    root.classList.add("light");
+    applyColorScheme(root, resolvedTheme);
     const variant = preferences.theme.split("-")[1];
     if (variant) root.setAttribute("data-theme", variant);
     else root.removeAttribute("data-theme");
@@ -350,6 +370,20 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     root.setAttribute("data-reduced-motion", String(reducedMotion));
     root.classList.toggle("reduce-motion", reducedMotion);
   }, [preferences, resolvedTheme, reducedMotion]);
+
+  useEffect(() => {
+    if (resolvedTheme !== "dark") return;
+    // Printed records always use the light palette.
+    const root = document.documentElement;
+    const printLight = () => applyColorScheme(root, "light");
+    const restoreDark = () => applyColorScheme(root, "dark");
+    window.addEventListener("beforeprint", printLight);
+    window.addEventListener("afterprint", restoreDark);
+    return () => {
+      window.removeEventListener("beforeprint", printLight);
+      window.removeEventListener("afterprint", restoreDark);
+    };
+  }, [resolvedTheme]);
 
   const value = useMemo(
     () => ({

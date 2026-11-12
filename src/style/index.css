@@ -9,6 +9,7 @@
 @config "../../tailwind.config.js";
 
 @import "./careui.css";
+@import "./dark.css";
 
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {

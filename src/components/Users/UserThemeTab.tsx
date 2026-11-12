@@ -1,4 +1,13 @@
-import { Contrast, Eye, Monitor, Sparkles, Sun, Zap } from "lucide-react";
+import {
+  Contrast,
+  Eye,
+  Monitor,
+  MonitorCog,
+  Moon,
+  Sparkles,
+  Sun,
+  Zap,
+} from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -47,7 +56,26 @@ export default function UserThemeTab() {
     retrySave,
   } = useAppearance();
 
-  const lightSelected = preferences.theme === "light";
+  const themeOptions = [
+    {
+      value: "light",
+      label: t("appearance_light"),
+      description: t("appearance_light_description"),
+      icon: Sun,
+    },
+    {
+      value: "dark",
+      label: t("appearance_dark"),
+      description: t("appearance_dark_description"),
+      icon: Moon,
+    },
+    {
+      value: "system",
+      label: t("appearance_system"),
+      description: t("appearance_system_description"),
+      icon: MonitorCog,
+    },
+  ] as const;
   const colorVisionOptions = [
     {
       value: "light-protanopia",
@@ -177,34 +205,41 @@ export default function UserThemeTab() {
                 {t("appearance_theme_description")}
               </p>
             </div>
-            <div className="grid max-w-48 gap-3">
-              <AppearanceChoiceCard
-                id={`${id}-light`}
-                value="light"
-                selected={lightSelected}
-              >
-                <ThemePreview theme="light" />
-                <span className="flex items-center gap-1.5">
-                  <Sun
-                    className={cn(
-                      "size-3.5 shrink-0",
-                      lightSelected ? "text-primary" : "text-muted-foreground",
-                    )}
-                    aria-hidden="true"
-                  />
-                  <span
-                    className={cn(
-                      "text-sm font-medium",
-                      lightSelected ? "text-primary" : "text-foreground",
-                    )}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {themeOptions.map((option) => {
+                const Icon = option.icon;
+                const selected = preferences.theme === option.value;
+                return (
+                  <AppearanceChoiceCard
+                    key={option.value}
+                    id={`${id}-${option.value}`}
+                    value={option.value}
+                    selected={selected}
                   >
-                    {t("appearance_light")}
-                  </span>
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {t("appearance_light_description")}
-                </span>
-              </AppearanceChoiceCard>
+                    <ThemePreview theme={option.value} />
+                    <span className="flex items-center gap-1.5">
+                      <Icon
+                        className={cn(
+                          "size-3.5 shrink-0",
+                          selected ? "text-primary" : "text-muted-foreground",
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className={cn(
+                          "text-sm font-medium",
+                          selected ? "text-primary" : "text-foreground",
+                        )}
+                      >
+                        {option.label}
+                      </span>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {option.description}
+                    </span>
+                  </AppearanceChoiceCard>
+                );
+              })}
             </div>
           </div>
           <Separator />
