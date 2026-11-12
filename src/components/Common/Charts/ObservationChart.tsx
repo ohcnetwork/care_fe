@@ -225,6 +225,31 @@ export const ObservationVisualizer = ({
     };
   });
 
+  // Function to get ticks for the X-axis based on the data
+  const getChartTicks = (data: ChartData[]) => {
+    const times = [
+      ...new Set(data.map((item) => Number(item.time)).filter(Number.isFinite)),
+    ].sort((a, b) => a - b);
+
+    if (times.length <= 1) {
+      return times;
+    }
+
+    const min = times[0];
+    const max = times[times.length - 1];
+
+    const tickCount = Math.min(5, times.length);
+
+    const step = (max - min) / (tickCount - 1);
+    const ticks: number[] = [];
+
+    for (let i = 0; i < tickCount; i++) {
+      ticks.push(min + step * i);
+    }
+
+    return ticks;
+  };
+
   return (
     <div
       className="grid gap-4"
@@ -287,6 +312,9 @@ export const ObservationVisualizer = ({
                       type="number"
                       domain={["dataMin", "dataMax"]}
                       scale="time"
+                      ticks={getChartTicks(group.data)}
+                      minTickGap={30}
+                      interval="preserveStartEnd"
                       tickFormatter={(value) => {
                         const date = new Date(value);
                         return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
