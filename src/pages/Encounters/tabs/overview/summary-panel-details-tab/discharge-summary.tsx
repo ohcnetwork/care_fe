@@ -29,6 +29,7 @@ export const DischargeDetails = () => {
   const dischargeStatus = encounter.status_history.history.find(
     (status) => status.status === "discharged",
   );
+  const disposition = encounter.hospitalization?.discharge_disposition;
 
   return (
     <div className="bg-gray-100 rounded-md w-full border border-gray-200 p-1 pt-2 space-y-1">
@@ -71,6 +72,16 @@ export const DischargeDetails = () => {
               )}
               <Badge variant="green">{t("discharged")}</Badge>
             </div>
+            {disposition && (
+              <div className="flex flex-wrap gap-x-1 text-xs">
+                <span className="text-gray-700">
+                  {t("discharge_disposition")}:
+                </span>
+                <span className="font-semibold text-gray-950">
+                  {t(`encounter_discharge_disposition__${disposition}`)}
+                </span>
+              </div>
+            )}
             <Dialog>
               <DialogTrigger asChild>
                 <div className="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-sm p-2 gap-1 cursor-pointer">
