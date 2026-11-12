@@ -43,7 +43,12 @@ function OrganizationTreeNode({
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["organization", "list", organizationType, organization.id],
+    queryKey: [
+      "infinite-organization",
+      "list",
+      organizationType,
+      organization.id,
+    ],
     queryFn: ({ pageParam, signal }) =>
       query(organizationApi.list, {
         pathParams: { id: organization.id },
@@ -160,7 +165,7 @@ export default function AdminOrganizationNavbar({
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["organization", "list", organizationType],
+    queryKey: ["infinite-organization", "list", organizationType],
     queryFn: ({ pageParam, signal }) =>
       query(organizationApi.list, {
         queryParams: {

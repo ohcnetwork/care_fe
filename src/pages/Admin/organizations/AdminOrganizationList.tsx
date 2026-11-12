@@ -370,7 +370,7 @@ function FlatOrgSidebar({
     isFetchingNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["organization", "list", organizationType, searchTerm],
+    queryKey: ["infinite-organization", "list", organizationType, searchTerm],
     queryFn: ({ pageParam, signal }) =>
       query.debounced(organizationApi.list, {
         queryParams: {
