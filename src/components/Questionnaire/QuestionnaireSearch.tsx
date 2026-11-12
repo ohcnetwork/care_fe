@@ -48,8 +48,6 @@ interface QuestionnaireSearchProps {
   size?: React.ComponentProps<typeof Button>["size"];
 }
 
-const QUESTIONNAIRES_PER_PAGE = 30;
-
 export function QuestionnaireSearch({
   placeholder,
   trigger,
@@ -87,7 +85,7 @@ export function QuestionnaireSearch({
         }),
         status: "active",
       },
-      pageSize: QUESTIONNAIRES_PER_PAGE,
+      pageSize: 30,
       debounceInterval: 500,
     }),
     enabled: isOpen && !disabled,

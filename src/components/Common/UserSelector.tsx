@@ -56,8 +56,6 @@ interface Props {
   onClear?: () => void;
 }
 
-const PAGE_LIMIT = 50;
-
 interface UserCommandContentProps {
   search: string;
   setSearch: (value: string) => void;
@@ -205,7 +203,7 @@ export default function UserSelector({
           search_text: search,
           is_service_account: isServiceAccount,
         },
-        pageSize: PAGE_LIMIT,
+        pageSize: 50,
         debounceInterval: 500,
       },
     ),

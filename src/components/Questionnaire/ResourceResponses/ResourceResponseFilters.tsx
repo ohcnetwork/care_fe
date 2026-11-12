@@ -56,8 +56,6 @@ interface ResourceResponseFiltersProps {
   disabled?: boolean;
 }
 
-const QUESTIONNAIRES_PER_PAGE = 30;
-
 export default function ResourceResponseFilters({
   facilityId,
   subjectType,
@@ -84,7 +82,7 @@ export default function ResourceResponseFilters({
         facility_or_instance: facilityId,
         title: formSearch || undefined,
       },
-      pageSize: QUESTIONNAIRES_PER_PAGE,
+      pageSize: 30,
       debounceInterval: 500,
     }),
     enabled: formsOpen && !disabled,

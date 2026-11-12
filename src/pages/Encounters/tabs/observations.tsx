@@ -71,8 +71,6 @@ function groupObservationsByDate(
   }, {});
 }
 
-const PAGE_SIZE = 20;
-
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
@@ -93,7 +91,7 @@ export const EncounterObservationsTab = () => {
         encounter: encounterId,
         ignore_group: true,
       },
-      pageSize: PAGE_SIZE,
+      pageSize: 20,
     }),
   });
 

@@ -17,7 +17,6 @@ export function getTokenQueueStatusCount(
     return acc;
   }, 0);
 }
-const PAGE_SIZE = 50;
 
 export function useTokenListInfiniteQuery({
   facilityId,
@@ -33,7 +32,7 @@ export function useTokenListInfiniteQuery({
     queryKey: ["infinite-tokens", facilityId, queueId, qParams],
     ...query.infinite(tokenApi.list, {
       pathParams: { facility_id: facilityId, queue_id: queueId },
-      pageSize: PAGE_SIZE,
+      pageSize: 50,
       queryParams: qParams,
     }),
     refetchInterval:

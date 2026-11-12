@@ -42,8 +42,6 @@ interface RoleSelectProps {
   placeholder?: string;
 }
 
-const PAGE_LIMIT = 10;
-
 interface RoleCommandContentProps {
   setSearchTerm: (value: string) => void;
   rolesList?: RoleBase[];
@@ -131,7 +129,7 @@ export function RoleSelect({
     queryKey: ["roles", searchTerm, context],
     ...query.infinite(roleApi.listRoles, {
       queryParams: { name: searchTerm, context },
-      pageSize: PAGE_LIMIT,
+      pageSize: 10,
       debounceInterval: 500,
     }),
   });

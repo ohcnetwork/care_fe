@@ -23,8 +23,6 @@ interface ObservationHistoryTableProps {
   codes: Code[];
 }
 
-const LIMIT = 30;
-
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const hours = date.getHours().toString().padStart(2, "0");
@@ -55,7 +53,7 @@ export const ObservationHistoryTable = ({
         encounter: encounterId,
         codes: codes.map((c) => c.code).join(","),
       },
-      pageSize: LIMIT,
+      pageSize: 30,
     }),
   });
 

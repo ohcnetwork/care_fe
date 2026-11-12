@@ -74,7 +74,6 @@ export function AllergyList({
 }: AllergyListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
   const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
   const facilityId = providedFacilityId ?? currentFacilityId;
   const queryState = useInfiniteList({
@@ -89,7 +88,7 @@ export function AllergyList({
             : undefined,
         exclude_verification_status: "entered_in_error",
       },
-      pageSize: LIMIT,
+      pageSize: showTimeline ? 30 : 14,
     }),
   });
 

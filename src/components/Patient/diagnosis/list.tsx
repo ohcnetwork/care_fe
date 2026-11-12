@@ -54,7 +54,6 @@ export function DiagnosisList({
 }: DiagnosisListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
   const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
   const facilityId = providedFacilityId ?? currentFacilityId;
   const queryState = useInfiniteList({
@@ -68,7 +67,7 @@ export function DiagnosisList({
         exclude_verification_status: "entered_in_error",
         ...(encounterId ? { encounter: encounterId } : {}),
       },
-      pageSize: LIMIT,
+      pageSize: showTimeline ? 30 : 14,
     }),
   });
 

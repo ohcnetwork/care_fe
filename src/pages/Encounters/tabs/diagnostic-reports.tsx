@@ -175,8 +175,6 @@ function LeftPanel({
   );
 }
 
-const LIMIT = 14;
-
 interface DiagnosticReportsTabProps {
   patientId: string;
   encounterId?: string;
@@ -219,7 +217,7 @@ export const DiagnosticReportsTab = ({
     ...query.infinite(diagnosticReportApi.listDiagnosticReports, {
       pathParams: { patient_external_id: patientId },
       queryParams: { encounter: encounterId },
-      pageSize: LIMIT,
+      pageSize: 14,
     }),
   });
 

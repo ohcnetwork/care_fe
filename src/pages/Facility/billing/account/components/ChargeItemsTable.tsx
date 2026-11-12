@@ -203,8 +203,6 @@ function ChargeItemsTable({
     };
   };
 
-  const RESULTS_PER_PAGE = 20;
-
   const {
     data,
     hasNextPage,
@@ -215,7 +213,7 @@ function ChargeItemsTable({
     queryKey: ["infinite-chargeItems", accountId, qParams],
     ...query.infinite(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
-      pageSize: RESULTS_PER_PAGE,
+      pageSize: 20,
       queryParams: {
         account: accountId,
         status: qParams.status,

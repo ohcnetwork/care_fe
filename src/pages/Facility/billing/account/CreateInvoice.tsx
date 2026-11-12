@@ -92,8 +92,6 @@ import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet"
 import ChargeItemActionsMenu from "./components/ChargeItemActions";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
 
-const ITEMS_PER_PAGE = 200;
-
 const formSchema = z.object({
   status: z.enum(InvoiceStatus),
   payment_terms: z.string().optional(),
@@ -225,7 +223,7 @@ export function CreateInvoicePage({
     queryKey: ["chargeItems", facilityId, accountId],
     ...query.infinite(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
-      pageSize: ITEMS_PER_PAGE,
+      pageSize: 200,
       queryParams: {
         status: ChargeItemStatus.billable,
         account: accountId,

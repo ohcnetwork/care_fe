@@ -48,8 +48,6 @@ export function MedicationStatementList({
 }: MedicationStatementListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeLine ? 30 : 14;
-
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteList({
       queryKey: ["infinite-medication_statements", patientId, encounterId],
@@ -58,7 +56,7 @@ export function MedicationStatementList({
         queryParams: {
           status: status.join(","),
         },
-        pageSize: LIMIT,
+        pageSize: showTimeLine ? 30 : 14,
       }),
       enabled: canAccess,
     });
