@@ -86,7 +86,7 @@ const accountId = getAccountId();
 
 ## Common URLs
 
-```typescript
+```md
 // Facility pages
 `/facility/${facilityId}/overview`
 `/facility/${facilityId}/settings/locations`
