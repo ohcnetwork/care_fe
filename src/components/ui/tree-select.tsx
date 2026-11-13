@@ -55,11 +55,9 @@ export interface TreeSelectNode {
   hasChildren?: boolean;
 }
 
-export type TreeSelectOption = TreeSelectNode;
+type TreeSelectPresentation = "auto" | "popover" | "drawer";
 
-export type TreeSelectPresentation = "auto" | "popover" | "drawer";
-
-export interface TreeSelectItemLabel {
+interface TreeSelectItemLabel {
   /** Lowercase noun for one option, e.g. "department". */
   singular: string;
   /** Lowercase noun for several options, e.g. "departments". */
@@ -103,7 +101,7 @@ interface TreeSelectBaseProps {
   className?: string;
 }
 
-export type TreeSelectProps = TreeSelectBaseProps &
+type TreeSelectProps = TreeSelectBaseProps &
   (
     | {
         mode: "single";
@@ -176,18 +174,6 @@ const defaultItemLabel: TreeSelectItemLabel = {
 function capitalize(text: string) {
   return text.charAt(0).toLocaleUpperCase() + text.slice(1);
 }
-
-// The drawer is sized to the visual viewport so its footer stays above the
-// on-screen keyboard, which shrinks the visual but not the layout viewport.
-const drawerGap = () => Math.max(16, window.innerHeight * 0.06);
-const readDrawerTop = () =>
-  (window.visualViewport?.offsetTop ?? 0) + drawerGap();
-const readDrawerHeight = () =>
-  Math.max(
-    0,
-    (window.visualViewport?.height ?? window.innerHeight) - drawerGap(),
-  );
-const readNothing = () => null;
 
 function LoadMoreSentinel({
   loading,
@@ -355,33 +341,6 @@ function TreeSelect(props: TreeSelectProps) {
       rowRefs.current.get(activeKey)?.scrollIntoView({ block: "nearest" });
   }, [activeKey]);
 
-  const fitDrawer = open && !inPopover;
-  const subscribeViewport = React.useCallback(
-    (onChange: () => void) => {
-      if (!fitDrawer) return () => {};
-      const viewport = window.visualViewport;
-      viewport?.addEventListener("resize", onChange);
-      viewport?.addEventListener("scroll", onChange);
-      window.addEventListener("resize", onChange);
-      return () => {
-        viewport?.removeEventListener("resize", onChange);
-        viewport?.removeEventListener("scroll", onChange);
-        window.removeEventListener("resize", onChange);
-      };
-    },
-    [fitDrawer],
-  );
-  const drawerTop = React.useSyncExternalStore<number | null>(
-    subscribeViewport,
-    readDrawerTop,
-    readNothing,
-  );
-  const drawerHeight = React.useSyncExternalStore<number | null>(
-    subscribeViewport,
-    readDrawerHeight,
-    readNothing,
-  );
-
   const changeOpen = (nextOpen: boolean) => {
     if (nextOpen) {
       setQuery("");
@@ -455,17 +414,10 @@ function TreeSelect(props: TreeSelectProps) {
       pagination?.hasMore(row.entry.node.id)
     )
       pagination.loadMore(row.entry.node.id);
-    setActiveKey(row.key);
   };
 
   const navigate = (event: React.KeyboardEvent) => {
-    if (
-      event.altKey ||
-      event.ctrlKey ||
-      event.metaKey ||
-      event.nativeEvent.isComposing
-    )
-      return;
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
     const index = visibleRows.findIndex((row) => row.key === activeKey);
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
@@ -549,7 +501,7 @@ function TreeSelect(props: TreeSelectProps) {
               data-active={activeKey === row.key || undefined}
               className={cn(
                 "hover:bg-muted flex min-h-12 min-w-0 items-center gap-2 rounded-md px-2 text-sm sm:min-h-11",
-                props.mode === "single" && selected && "bg-blue-50",
+                props.mode === "single" && selected && "bg-muted-background",
                 activeKey === row.key && "bg-muted",
               )}
             >
@@ -646,9 +598,9 @@ function TreeSelect(props: TreeSelectProps) {
               {row.expandable && (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="tertiary"
                   size="icon"
-                  className="size-10 shrink-0 aria-expanded:bg-transparent aria-expanded:hover:bg-muted-background"
+                  className="size-10 shrink-0"
                   aria-expanded={expandedRow}
                   aria-busy={loadingChildren || undefined}
                   aria-controls={`${panelId}-${row.key}-children`}
@@ -759,7 +711,9 @@ function TreeSelect(props: TreeSelectProps) {
             ref={searchRef}
             value={query}
             onChange={(event) => changeQuery(event.target.value)}
-            onKeyDown={navigate}
+            onKeyDown={(event) => {
+              if (!event.nativeEvent.isComposing) navigate(event);
+            }}
             placeholder={t("schema_search_placeholder", { label: plural })}
             aria-label={t("schema_search_placeholder", { label: plural })}
             role="combobox"
@@ -839,9 +793,8 @@ function TreeSelect(props: TreeSelectProps) {
       {props.mode === "multi" ? (
         <>
           <span className="text-soft-foreground me-auto text-xs" role="status">
-            {selectedIds.length
-              ? t("selected_count", { count: selectedIds.length })
-              : t("none")}
+            {selectedIds.length > 0 &&
+              t("selected_count", { count: selectedIds.length })}
           </span>
           {selectedIds.length > 0 ? (
             <>
@@ -967,35 +920,9 @@ function TreeSelect(props: TreeSelectProps) {
             showSwipeHandle
           >
             <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-            <DrawerContent
-              initialFocus={closeRef}
-              style={
-                {
-                  "--tree-select-drawer-top":
-                    drawerTop === null ? undefined : `${drawerTop}px`,
-                  "--tree-select-drawer-height":
-                    drawerHeight === null ? undefined : `${drawerHeight}px`,
-                } as React.CSSProperties
-              }
-              className="top-(--tree-select-drawer-top,6dvh) h-(--tree-select-drawer-height,94dvh) w-full max-w-none transition-[transform,opacity,filter] data-[swipe-axis=y]:[--drawer-content-max-height:100dvh] data-[swipe-direction=down]:bottom-auto data-[swipe-direction=down]:rounded-t-[14px] sm:mx-auto sm:max-w-lg"
-            >
-              <DrawerHeader showCloseButton={false} className="p-2 pb-0">
-                <div className="flex min-h-11 items-center gap-2 ps-2">
-                  <DrawerTitle className="min-w-0 flex-1 text-lg font-semibold">
-                    {panelTitle}
-                  </DrawerTitle>
-                  <Button
-                    ref={closeRef}
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-11"
-                    aria-label={t("close")}
-                    onClick={() => setOpen(false)}
-                  >
-                    <X aria-hidden="true" />
-                  </Button>
-                </div>
+            <DrawerContent initialFocus={closeRef} height="fixed">
+              <DrawerHeader showCloseButton>
+                <DrawerTitle>{panelTitle}</DrawerTitle>
               </DrawerHeader>
               {panelBody}
               {footer}
