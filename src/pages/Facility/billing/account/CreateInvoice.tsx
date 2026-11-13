@@ -223,6 +223,7 @@ export function CreateInvoicePage({
     isLoading,
     fetchNextPage,
     hasNextPage,
+    isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["chargeItems", facilityId, accountId],
@@ -325,7 +326,7 @@ export function CreateInvoicePage({
   }, [chargeItems, selectedRows]);
 
   useEffect(() => {
-    if (chargeItems.length === 0) return;
+    if (chargeItems.length === 0 && !hasInitializedSelections.current) return;
 
     // First load - select all items
     if (!hasInitializedSelections.current) {
@@ -351,25 +352,32 @@ export function CreateInvoicePage({
       return;
     }
 
-    // After initial load - auto-select any new items (e.g., from Quick Add)
-    const newItems = chargeItems.filter(
-      (item) => !knownItemIds.current.has(item.id),
+    // After initial load - auto-select any new items (e.g., from Quick Add),
+    // and drop selections for items that left the list (e.g., marked not billable)
+    const currentIds = new Set(chargeItems.map((item) => item.id));
+    const newIds = [...currentIds].filter(
+      (id) => !knownItemIds.current.has(id),
     );
-    if (newItems.length > 0) {
-      setSelectedRows((prev) => {
-        const updated = { ...prev };
-        newItems.forEach((item) => {
-          updated[item.id] = true;
-        });
-        return updated;
+    const removedIds = [...knownItemIds.current].filter(
+      (id) => !currentIds.has(id),
+    );
+    if (newIds.length === 0 && removedIds.length === 0) return;
+
+    setSelectedRows((prev) => {
+      const updated = { ...prev };
+      newIds.forEach((id) => {
+        updated[id] = true;
       });
-      form.setValue("charge_items", [
-        ...form.getValues("charge_items"),
-        ...newItems.map((item) => item.id),
-      ]);
-      // Update known items
-      newItems.forEach((item) => knownItemIds.current.add(item.id));
-    }
+      removedIds.forEach((id) => {
+        delete updated[id];
+      });
+      return updated;
+    });
+    form.setValue("charge_items", [
+      ...form.getValues("charge_items").filter((id) => currentIds.has(id)),
+      ...newIds,
+    ]);
+    knownItemIds.current = currentIds;
   }, [chargeItems, form]);
 
   const handleConfirmPendingItem = useCallback(() => {
@@ -985,6 +993,7 @@ export function CreateInvoicePage({
                   isQuickAddOpen ||
                   isEditDialogOpen ||
                   isApplyingInline ||
+                  isFetching ||
                   chargeItems.length === 0
                 }
               >

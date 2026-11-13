@@ -582,6 +582,7 @@ const AppointmentDetailsContent = ({
         encounterId={appointment.associated_encounter?.id}
         viewOnly={true}
         disableCreateChargeItems
+        invoiceAllAccountChargeItems
       />
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
