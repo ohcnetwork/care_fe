@@ -16,7 +16,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowRightIcon, ListPlus } from "lucide-react";
+import { ArrowRightIcon, ListPlus, PrinterIcon } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -81,7 +81,7 @@ export default function PrescriptionsPreviewPage({
           />
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex flex-wrap gap-2 justify-between">
           <div className="flex gap-3">
             <div className="w-full lg:w-64">
               <Input
@@ -109,17 +109,29 @@ export default function PrescriptionsPreviewPage({
               />
             </div>
           </div>
-          {activePrescriptionIds.length > 0 && (
-            <Button size="lg" asChild>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="lg" asChild>
               <Link
-                href={`/medication_requests/patient/${patientId}/bill/prescriptions/${activePrescriptionIds.join(",")}`}
+                href={`/medication_requests/patient/${patientId}/prescriptions/${prescriptionIds.join(",")}/print`}
               >
-                {t("start_billing")}
-                <ShortcutBadge actionId="billing-action" />
-                <ArrowRightIcon className="size-4" />
+                <PrinterIcon className="size-4" />
+                {prescriptionIds.length > 1
+                  ? t("print_all_prescriptions")
+                  : t("print_prescription")}
               </Link>
             </Button>
-          )}
+            {activePrescriptionIds.length > 0 && (
+              <Button size="lg" asChild>
+                <Link
+                  href={`/medication_requests/patient/${patientId}/bill/prescriptions/${activePrescriptionIds.join(",")}`}
+                >
+                  {t("start_billing")}
+                  <ShortcutBadge actionId="billing-action" />
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
 
         <UnbilledPrescriptionsCard

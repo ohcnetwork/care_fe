@@ -1,6 +1,7 @@
 import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { PrintPrescriptions } from "@/components/Prescription/PrintPrescriptions";
 import { QuestionnaireFillPage } from "@/components/QuestionnaireV2/fill/QuestionnaireFillPage";
 
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
@@ -84,6 +85,20 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       prescriptionIds={prescriptionIds.split(",")}
     />
   ),
+  "/medication_requests/patient/:patientId/prescriptions/:prescriptionIds/print":
+    ({
+      patientId,
+      prescriptionIds,
+    }: {
+      patientId: string;
+      prescriptionIds: string;
+    }) => (
+      <PrintPrescriptions
+        facilityId={facilityId}
+        patientId={patientId}
+        prescriptionIds={prescriptionIds.split(",")}
+      />
+    ),
   "/medication_requests/patient/:patientId/bill/prescriptions/:prescriptionIds":
     ({
       patientId,
