@@ -1,0 +1,69 @@
+/*
+  Dark mode compatibility layer.
+
+  CareUI's semantic tokens (careui.css) already define dark values, but most
+  CARE screens still use Tailwind's neutral palettes (gray-*, neutral-*,
+  secondary-*, white) directly. Instead of adding dark: variants to thousands
+  of class names, those scales are inverted while .dark is on <html>.
+
+  The overrides live on <body>, not <html>: careui.css resolves its .dark
+  tokens on <html> from the original palette, and <body> inherits those
+  resolved values untouched. Colored palettes are intentionally left alone
+  because CareUI components already pair them with dark: variants.
+
+  New code should prefer semantic tokens (bg-card, text-muted-foreground,
+  border-border, ...); this layer only keeps legacy classes readable.
+*/
+.dark body {
+  /* bg-white is the card surface, matching --card. */
+  --color-white: oklch(0.205 0 0);
+
+  --color-neutral-50: oklch(0.17 0 0);
+  --color-neutral-100: oklch(0.24 0 0);
+  --color-neutral-200: oklch(0.29 0 0);
+  --color-neutral-300: oklch(0.371 0 0);
+  --color-neutral-400: oklch(0.556 0 0);
+  --color-neutral-500: oklch(0.708 0 0);
+  --color-neutral-600: oklch(0.8 0 0);
+  --color-neutral-700: oklch(0.87 0 0);
+  --color-neutral-800: oklch(0.922 0 0);
+  --color-neutral-900: oklch(0.97 0 0);
+  --color-neutral-950: oklch(0.985 0 0);
+
+  --color-gray-50: var(--color-neutral-50);
+  --color-gray-100: var(--color-neutral-100);
+  --color-gray-200: var(--color-neutral-200);
+  --color-gray-300: var(--color-neutral-300);
+  --color-gray-400: var(--color-neutral-400);
+  --color-gray-500: var(--color-neutral-500);
+  --color-gray-600: var(--color-neutral-600);
+  --color-gray-700: var(--color-neutral-700);
+  --color-gray-800: var(--color-neutral-800);
+  --color-gray-900: var(--color-neutral-900);
+  --color-gray-950: var(--color-neutral-950);
+
+  /* index.css aliases these on <html>; re-resolve them against the scale above. */
+  --color-secondary-50: var(--color-neutral-50);
+  --color-secondary-100: var(--color-neutral-100);
+  --color-secondary-200: var(--color-neutral-200);
+  --color-secondary-300: var(--color-neutral-300);
+  --color-secondary-400: var(--color-neutral-400);
+  --color-secondary-500: var(--color-neutral-500);
+  --color-secondary-600: var(--color-neutral-600);
+  --color-secondary-700: var(--color-neutral-700);
+  --color-secondary-800: var(--color-neutral-800);
+  --color-secondary-900: var(--color-neutral-900);
+  --color-secondary-950: var(--color-neutral-950);
+}
+
+@layer utilities {
+  /* text-white sits on colored fills (buttons, badges, checkboxes); keep it white. */
+  :where(.dark) .text-white,
+  :where(.dark) .hover\:text-white:hover {
+    color: oklch(1 0 0);
+  }
+
+  :where(.dark) .text-black {
+    color: var(--foreground);
+  }
+}

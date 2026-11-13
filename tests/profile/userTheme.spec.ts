@@ -314,10 +314,14 @@ test.describe("Own account appearance preferences", () => {
     await expect(page.locator("html")).toHaveCSS("font-size", "20px");
   });
 
-  test("keeps themes light for system and legacy settings while respecting motion preferences", async ({
+  test("applies dark and system themes and maps legacy settings while respecting motion preferences", async ({
     page,
     request,
   }) => {
+    const html = page.locator("html");
+    const lightChoice = "Light Clean white background";
+    const darkChoice = "Dark Easier on the eyes in low light";
+    const systemChoice = "System Matches your device's light or dark setting";
     await page.emulateMedia({
       colorScheme: "light",
       reducedMotion: "no-preference",
@@ -325,17 +329,14 @@ test.describe("Own account appearance preferences", () => {
     await openTheme(page);
     const themes = page.getByRole("radiogroup", { name: "Theme", exact: true });
     await expect(
-      themes.getByRole("radio", { name: /^(Dark|System)\b/ }),
-    ).toHaveCount(0);
-    await expect(
-      themes.getByRole("radio", { name: "Light Clean white background" }),
+      themes.getByRole("radio", { name: lightChoice, exact: true }),
     ).toBeChecked();
     await chooseRadio(
       page,
       "Reduce Motion",
       "Recommended Use system preference Follows your device setting automatically",
     );
-    await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+    await expect(html).toHaveCSS("color-scheme", "light");
     await expect(
       page.getByRole("status").filter({
         hasText:
@@ -344,7 +345,8 @@ test.describe("Own account appearance preferences", () => {
     ).toBeVisible();
 
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-    await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+    // An explicit Light theme ignores the device color scheme.
+    await expect(html).toHaveCSS("color-scheme", "light");
     await expect(
       page.getByRole("status").filter({
         hasText:
@@ -352,12 +354,30 @@ test.describe("Own account appearance preferences", () => {
       }),
     ).toBeVisible();
 
+    await test.step("System follows the device color scheme", async () => {
+      await chooseRadio(page, "Theme", systemChoice);
+      await expect(html).toHaveCSS("color-scheme", "dark");
+      await page.emulateMedia({ colorScheme: "light" });
+      await expect(html).toHaveCSS("color-scheme", "light");
+      await page.emulateMedia({ colorScheme: "dark" });
+      await expect(html).toHaveCSS("color-scheme", "dark");
+    });
+
+    await test.step("Dark ignores the device and prints in light", async () => {
+      await chooseRadio(page, "Theme", darkChoice);
+      await page.emulateMedia({ colorScheme: "light" });
+      await expect(html).toHaveCSS("color-scheme", "dark");
+      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+      await expect(html).toHaveCSS("color-scheme", "light");
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+      await expect(html).toHaveCSS("color-scheme", "dark");
+    });
+
     await chooseRadio(
       page,
       "Reduce Motion",
       "Allow motion Full animation & transition experience",
     );
-    await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
     await expect(
       page.getByRole("status").filter({ hasText: /^Motion enabled$/ }),
     ).toBeVisible();
@@ -365,12 +385,13 @@ test.describe("Own account appearance preferences", () => {
       colorScheme: "light",
       reducedMotion: "no-preference",
     });
+    await chooseRadio(page, "Theme", lightChoice);
     await chooseRadio(
       page,
       "Reduce Motion",
       "Reduce Motion Subtle fades, no movement or scaling",
     );
-    await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+    await expect(html).toHaveCSS("color-scheme", "light");
     await expect(
       page.getByRole("status").filter({ hasText: /^Reduced motion enabled$/ }),
     ).toBeVisible();
@@ -381,7 +402,7 @@ test.describe("Own account appearance preferences", () => {
       )
       .toEqual({ ...initialAppearance, motion: "reduce" });
 
-    await test.step("Display legacy themes as light without rewriting saved preferences", async () => {
+    await test.step("Display saved and legacy themes without rewriting saved preferences", async () => {
       await page.emulateMedia({ colorScheme: "dark" });
       let hydrationWrites = 0;
       page.on("request", (request) => {
@@ -395,22 +416,25 @@ test.describe("Own account appearance preferences", () => {
       await saveAppearance(request, headers, {});
       await page.reload();
       await expect(
-        themes.getByRole("radio", { name: "Light Clean white background" }),
+        themes.getByRole("radio", { name: lightChoice, exact: true }),
       ).toBeChecked();
-      await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+      // Accounts without a saved theme stay light even on a dark device.
+      await expect(html).toHaveCSS("color-scheme", "light");
       expect(
         (await currentUser(request, headers)).preferences.appearance,
       ).toEqual({});
-      for (const [legacyTheme, visibleChoice] of [
-        ["dark", "Light Clean white background"],
-        ["system", "Light Clean white background"],
+      for (const [legacyTheme, visibleChoice, colorScheme] of [
+        ["dark", darkChoice, "dark"],
+        ["system", systemChoice, "dark"],
         [
           "dark-protanopia",
           "Light Protanopia & Deuteranopia Difficulty distinguishing reds & greens",
+          "light",
         ],
         [
           "dark-tritanopia",
           "Light Tritanopia Difficulty distinguishing blues & greens",
+          "light",
         ],
       ]) {
         const legacyAppearance = { ...initialAppearance, theme: legacyTheme };
@@ -419,7 +443,7 @@ test.describe("Own account appearance preferences", () => {
         await expect(
           themes.getByRole("radio", { name: visibleChoice, exact: true }),
         ).toBeChecked();
-        await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+        await expect(html).toHaveCSS("color-scheme", colorScheme);
         expect(
           (await currentUser(request, headers)).preferences.appearance,
         ).toEqual(legacyAppearance);
