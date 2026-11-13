@@ -1,21 +1,48 @@
-import dayjs from "dayjs";
-import { SearchIcon } from "lucide-react";
-import { useState } from "react";
+import {
+  Archive,
+  Download,
+  EllipsisVertical,
+  Eye,
+  FileHeart,
+  FileText,
+  LucideIcon,
+  Plus,
+  RefreshCw,
+  SearchIcon,
+} from "lucide-react";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  Frame,
+  FrameFooter,
+  FrameHeader,
+  FramePanel,
+} from "@/components/ui/frame";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -26,23 +53,17 @@ import {
 } from "@/components/ui/table";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import Loading from "@/components/Common/Loading";
-import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
-import { EmptyState } from "@/components/ui/empty-state";
+import Pagination from "@/components/Common/Pagination";
+import { ArchivedBadge } from "@/components/Files/ArchivedBadge";
+import { ArchiveStatusFilter } from "@/components/Files/FileFilters";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
-import queryClient from "@/Utils/request/queryClient";
+import { formatDateTime } from "@/Utils/utils";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import {
-  ReportRead,
-  ReportReadList,
-  ReportType,
-} from "@/types/emr/report/report";
-import { navigate } from "raviger";
-import { toast } from "sonner";
+import { ReportReadList, ReportType } from "@/types/emr/report/report";
 
 interface ReportTabProps {
   associatingId: string;
@@ -51,6 +72,12 @@ interface ReportTabProps {
   patientId?: string;
   encounterId?: string;
 }
+
+const REPORT_TYPE_ICONS: Partial<Record<string, LucideIcon>> = {
+  [ReportType.DISCHARGE_SUMMARY]: FileHeart,
+};
+
+const PAGE_SIZE = 15;
 
 export function ReportSubTab({
   associatingId,
@@ -61,14 +88,17 @@ export function ReportSubTab({
 }: ReportTabProps) {
   const { t } = useTranslation();
   const { facility } = useCurrentFacilitySilently();
-  const { qParams, updateQuery, Pagination } = useFilters({
-    limit: 15,
+  const { qParams, updateQuery, updatePage } = useFilters({
+    limit: PAGE_SIZE,
     disableCache: true,
   });
+  const page = Number(qParams.page) || 1;
 
   const {
     reports,
-    isLoading: reportsLoading,
+    count: totalCount,
+    isLoading,
+    isFetching,
     viewFile,
     downloadFile,
     archiveReport,
@@ -77,27 +107,16 @@ export function ReportSubTab({
   } = useReportManager({
     associatingId,
     enabled: true,
-    qParams,
     reportType,
+    queryParams: {
+      name: qParams.name || undefined,
+      is_archived: qParams.is_archived,
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    },
   });
 
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Filter reports based on search term and archived status
-  const filteredReports = reports.filter((report) => {
-    const matchesSearch = report.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
-
-  const getReportTypeIcon = (reportType: string): IconName => {
-    const iconMap: Record<string, IconName> = {
-      discharge_summary: "l-file-medical-alt",
-    };
-    return iconMap[reportType] || "l-file-alt";
-  };
-
+  const isFiltered = !!qParams.name || qParams.is_archived !== undefined;
   const canNavigateToPreview = !!(facilityId && patientId && encounterId);
 
   const handleView = (report: ReportReadList) => {
@@ -110,319 +129,295 @@ export function ReportSubTab({
     }
   };
 
-  const DetailButtons = ({ report }: { report: ReportReadList }) => {
-    return (
-      <div className="flex flex-row gap-2 justify-end">
-        <Button
-          onClick={() => handleView(report)}
-          variant="secondary"
-          className="w-auto flex flex-row justify-stretch items-center"
-        >
-          <CareIcon icon="l-eye" className="mr-1" />
-          <span>{t("view")}</span>
-        </Button>
-        <div className="flex flex-row items-center justify-end gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
-                <CareIcon icon="l-ellipsis-h" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => downloadFile(report)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                  <span>{t("download")}</span>
-                </Button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => archiveReport(report as unknown as ReportRead)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <CareIcon icon="l-archive-alt" className="mr-1" />
-                  <span>{t("archive")}</span>
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    );
-  };
+  return (
+    <>
+      {Dialogs}
 
-  const getArchivedMessage = (report: ReportReadList) => {
-    return (
-      <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 self-center uppercase font-bold">
-          {t("archived")}
-        </span>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            handleView(report);
-          }}
-        >
-          <span className="flex flex-row items-center gap-1">
-            <CareIcon icon="l-archive-alt" />
-            {t("view")}
-          </span>
-        </Button>
-      </div>
-    );
-  };
-
-  const RenderCards = () => (
-    <div className="xl:hidden flex flex-col gap-3 pt-3 px-2">
-      {filteredReports &&
-        filteredReports.length > 0 &&
-        filteredReports.map((report) => {
-          return (
-            <Card
-              key={report.id}
-              className={cn(
-                report.is_archived ? "bg-white/50 opacity-70" : "bg-white",
-              )}
+      <Frame spacing="sm" className="min-w-0">
+        <FrameHeader className="flex-row flex-wrap items-center gap-2">
+          <InputGroup className="bg-background sm:w-auto sm:max-w-xs sm:flex-1">
+            <InputGroupInput
+              aria-label={t("search_reports")}
+              placeholder={t("search_reports")}
+              value={qParams.name || ""}
+              onChange={(e) => updateQuery({ name: e.target.value })}
+            />
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+          </InputGroup>
+          <ArchiveStatusFilter
+            value={qParams.is_archived}
+            onChange={(is_archived) => updateQuery({ is_archived })}
+          />
+          <TooltipComponent content={t("refresh")}>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t("refresh")}
+              disabled={isFetching}
+              onClick={async () => {
+                await refetch();
+                toast.success(t("refreshed"));
+              }}
             >
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                      <CareIcon
-                        icon={getReportTypeIcon(report.report_type)}
-                        className="text-xl"
-                      />
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate w-full">
-                        {report.name}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {t(report.report_type)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <RefreshCw className={cn(isFetching && "animate-spin")} />
+            </Button>
+          </TooltipComponent>
+          {facility && (
+            <div className="ml-auto">
+              <TemplateReportSheet
+                facilityId={facility.id}
+                associatingId={associatingId}
+                permissions={facility.permissions ?? []}
+                reportType={reportType}
+                trigger={
+                  <Button variant="outline">
+                    <Plus />
+                    {t("generate_report")}
+                  </Button>
+                }
+                onSuccess={() => refetch()}
+              />
+            </div>
+          )}
+        </FrameHeader>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="text-gray-500">{t("date")}</div>
-                    <div className="font-medium">
-                      {dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex justify-end">
-                  {report.is_archived ? (
-                    getArchivedMessage(report)
-                  ) : (
-                    <DetailButtons report={report} />
+        <FramePanel className="min-w-0 overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+          {isLoading ? (
+            <div
+              className="space-y-2 p-3"
+              role="status"
+              aria-label={t("loading")}
+            >
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : !reports.length ? (
+            <Empty className="p-6 sm:p-10">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FileText />
+                </EmptyMedia>
+                <EmptyTitle>{t("no_reports_found")}</EmptyTitle>
+                <EmptyDescription>
+                  {t(
+                    isFiltered
+                      ? "try_adjusting_your_filters_or_search"
+                      : "no_reports_found_description",
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-    </div>
-  );
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table className="table-fixed">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-4">{t("report_name")}</TableHead>
+                  <TableHead className="hidden w-[22%] px-4 md:table-cell">
+                    {t("type")}
+                  </TableHead>
+                  <TableHead className="hidden w-[16%] px-4 md:table-cell">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-14 pr-4 text-right md:w-40">
+                    <span className="sr-only">{t("actions")}</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reports.map((report) => {
+                  const Icon =
+                    REPORT_TYPE_ICONS[report.report_type] ?? FileText;
 
-  const RenderTable = () => (
-    <div className="hidden -mt-2 xl:block">
-      <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
-        <TableHeader>
-          <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[25%] bg-white rounded-l">
-              {t("report_name")}
-            </TableHead>
-            <TableHead className="w-[15%] rounded-y bg-white">
-              {t("type")}
-            </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
-              {t("date")}
-            </TableHead>
-            <TableHead className="w-[20%] text-right rounded-r bg-white"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredReports &&
-            filteredReports.length > 0 &&
-            filteredReports.map((report) => {
-              return (
-                <TableRow
-                  key={report.id}
-                  className={cn("shadow rounded-md overflow-hidden group")}
-                >
-                  <TableCell
-                    className={cn(
-                      "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                      report.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                        <CareIcon
-                          icon={getReportTypeIcon(report.report_type)}
-                          className="text-xl"
-                        />
-                      </span>
-                      {report.name && report.name.length > 30 ? (
-                        <TooltipComponent content={report.name}>
-                          <span className="text-gray-900 truncate block">
-                            {report.name}
-                          </span>
-                        </TooltipComponent>
-                      ) : (
-                        <span className="text-gray-900 truncate block">
-                          {report.name}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "rounded-y-md group-hover:bg-transparent",
-                      report.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    {t(report.report_type)}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "rounded-y-md group-hover:bg-transparent",
-                      report.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    <TooltipComponent
-                      content={dayjs(report.created_date).format(
-                        "DD MMM YYYY, hh:mm A",
+                  return (
+                    <TableRow
+                      key={report.id}
+                      className={cn(
+                        "hover:bg-muted/40",
+                        report.is_archived && "bg-muted/30",
                       )}
                     >
-                      <span>
-                        {dayjs(report.created_date).format("DD MMM YYYY")}
-                      </span>
-                    </TooltipComponent>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                      report.is_archived ? "bg-white/50" : "bg-white",
-                    )}
-                  >
-                    {report.is_archived ? (
-                      getArchivedMessage(report)
-                    ) : (
-                      <div className="flex flex-row gap-2 justify-end">
-                        <DetailButtons report={report} />
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-        </TableBody>
-      </Table>
-    </div>
-  );
+                      <TableCell className="relative py-3 pl-4">
+                        <button
+                          type="button"
+                          onClick={() => handleView(report)}
+                          aria-label={`${t("view")} ${report.name}`}
+                          className="absolute inset-0 active:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring md:hidden"
+                        />
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={cn(
+                              "hidden size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground md:flex",
+                              report.is_archived && "opacity-60",
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <span
+                                className={cn(
+                                  "truncate font-medium",
+                                  report.is_archived
+                                    ? "text-muted-foreground"
+                                    : "text-foreground",
+                                )}
+                                title={report.name}
+                              >
+                                {report.name}
+                              </span>
+                              {report.is_archived && (
+                                <ArchivedBadge
+                                  className="hidden md:inline-flex"
+                                  reason={report.archive_reason}
+                                  archivedBy={report.archived_by}
+                                  archivedAt={report.archived_datetime}
+                                />
+                              )}
+                            </div>
+                            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground md:hidden">
+                              {report.is_archived && (
+                                <ArchivedBadge
+                                  className="relative z-10"
+                                  reason={report.archive_reason}
+                                  archivedBy={report.archived_by}
+                                  archivedAt={report.archived_datetime}
+                                />
+                              )}
+                              <span className="truncate">
+                                {[
+                                  t(report.report_type),
+                                  formatDateTime(
+                                    report.created_date,
+                                    "DD MMM YYYY",
+                                  ),
+                                ].join(" · ")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden truncate px-4 text-muted-foreground md:table-cell">
+                        {t(report.report_type)}
+                      </TableCell>
+                      <TableCell className="hidden px-4 text-muted-foreground md:table-cell">
+                        <TooltipComponent
+                          content={formatDateTime(
+                            report.created_date,
+                            "DD MMM YYYY, hh:mm A",
+                          )}
+                        >
+                          <span>
+                            {formatDateTime(report.created_date, "DD MMM YYYY")}
+                          </span>
+                        </TooltipComponent>
+                      </TableCell>
+                      <TableCell className="pr-4 text-right">
+                        <ReportRowActions
+                          report={report}
+                          onView={() => handleView(report)}
+                          onDownload={() => downloadFile(report)}
+                          onArchive={() => archiveReport(report)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </FramePanel>
 
-  if (reportsLoading) {
-    return <Loading />;
+        {totalCount > 0 && (
+          <FrameFooter className="flex-row flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              {t("reports_result_range", {
+                start: (page - 1) * PAGE_SIZE + 1,
+                end: Math.min(page * PAGE_SIZE, totalCount),
+                total: totalCount,
+              })}
+            </p>
+            {totalCount > PAGE_SIZE && (
+              <Pagination
+                data={{ totalCount }}
+                cPage={page}
+                defaultPerPage={PAGE_SIZE}
+                onChange={(page) => updatePage(page)}
+                className=""
+              />
+            )}
+          </FrameFooter>
+        )}
+      </Frame>
+    </>
+  );
+}
+
+interface ReportRowActionsProps {
+  report: ReportReadList;
+  onView: () => void;
+  onDownload: () => void;
+  onArchive: () => void;
+}
+
+function ReportRowActions({
+  report,
+  onView,
+  onDownload,
+  onArchive,
+}: ReportRowActionsProps) {
+  const { t } = useTranslation();
+
+  if (report.is_archived) {
+    // Keep the View button in the same slot as on active rows: archived
+    // entries have no menu, so reserve the space the menu trigger takes.
+    return (
+      <div className="flex items-center justify-end gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onView}
+        >
+          <Eye />
+          {t("view")}
+        </Button>
+        <span aria-hidden className="size-9 shrink-0" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col">
-      {/* Header with search and actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 border-b">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-1 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder={t("search_reports")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <FilterButton
-            onFilterChange={(filter) => updateQuery(filter)}
-            activeLabel={t("active_reports")}
-            archivedLabel={t("archived_reports")}
-            includeArchivedParam
-          />
-          <Button
-            variant="outline_primary"
-            className="min-w-24 sm:min-w-28"
-            onClick={async () => {
-              await queryClient.invalidateQueries({
-                queryKey: ["reports", associatingId],
-              });
-              toast.success(t("refreshed"));
-            }}
-          >
-            <CareIcon icon="l-sync" className="mr-2" />
-            {t("refresh")}
+    <div className="flex items-center justify-end gap-1.5">
+      <Button
+        variant="outline"
+        size="sm"
+        className="hidden md:inline-flex"
+        onClick={onView}
+      >
+        <Eye />
+        {t("view")}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label={t("more_actions")}>
+            <EllipsisVertical />
           </Button>
-        </div>
-        {facility && (
-          <TemplateReportSheet
-            facilityId={facility.id}
-            associatingId={associatingId}
-            permissions={facility.permissions ?? []}
-            reportType={reportType}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon="l-plus" className="mr-1" />
-                <span>{t("generate_report")}</span>
-              </Button>
-            }
-            onSuccess={() => {
-              refetch();
-            }}
-          />
-        )}
-      </div>
-
-      <FilterBadges
-        isArchived={qParams.is_archived}
-        onClearFilter={() =>
-          updateQuery({ is_archived: undefined, include_archived: false })
-        }
-        activeLabel="active_reports"
-        archivedLabel="archived_reports"
-      />
-
-      {!reportsLoading && filteredReports.length === 0 ? (
-        <EmptyState
-          icon={<CareIcon icon="l-file-alt" className="text-primary size-6" />}
-          title={t("no_reports_found")}
-          description={t("no_reports_found_description")}
-        />
-      ) : (
-        <>
-          <RenderCards />
-          <RenderTable />
-        </>
-      )}
-
-      {/* Pagination */}
-      {filteredReports.length > 0 && (
-        <div className="flex justify-center p-4">
-          <Pagination totalCount={filteredReports.length} />
-        </div>
-      )}
-
-      {/* Dialogs */}
-      {Dialogs}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-40">
+          <DropdownMenuItem onSelect={onDownload}>
+            <Download />
+            {t("download")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onSelect={onArchive}>
+            <Archive />
+            {t("archive")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

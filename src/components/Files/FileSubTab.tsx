@@ -1,23 +1,52 @@
-import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
-import { t } from "i18next";
-import { SearchIcon } from "lucide-react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  Archive,
+  Download,
+  EllipsisVertical,
+  Eye,
+  FileAudio,
+  FileImage,
+  FileText,
+  FileVideo,
+  FolderOpen,
+  LucideIcon,
+  Pencil,
+  Play,
+  Presentation,
+  SearchIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  Frame,
+  FrameFooter,
+  FrameHeader,
+  FramePanel,
+} from "@/components/ui/frame";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -28,10 +57,11 @@ import {
 } from "@/components/ui/table";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import Loading from "@/components/Common/Loading";
+import Pagination from "@/components/Common/Pagination";
+import { ArchivedBadge } from "@/components/Files/ArchivedBadge";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
-import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
+import { ArchiveStatusFilter } from "@/components/Files/FileFilters";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 import FileUploadDropdown from "@/components/Files/FileUploadDropdown";
 
@@ -42,7 +72,7 @@ import useFilters from "@/hooks/useFilters";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -62,6 +92,20 @@ interface FilesTabProps {
   canEdit: boolean | undefined;
 }
 
+const FILE_TYPE_ICONS: Record<
+  keyof typeof FILE_EXTENSIONS | "UNKNOWN",
+  LucideIcon
+> = {
+  AUDIO: FileAudio,
+  IMAGE: FileImage,
+  PRESENTATION: Presentation,
+  VIDEO: FileVideo,
+  DOCUMENT: FileText,
+  UNKNOWN: FileText,
+};
+
+const PAGE_SIZE = 15;
+
 export const FilesPage = ({
   type,
   associatingId,
@@ -69,6 +113,7 @@ export const FilesPage = ({
   encounter,
   canEdit,
 }: FilesTabProps) => {
+  const { t } = useTranslation();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
   const [selectedArchivedFile, setSelectedArchivedFile] =
@@ -77,11 +122,12 @@ export const FilesPage = ({
     useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
   const { hasPermission } = usePermissions();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
+  const { qParams, updateQuery, updatePage } = useFilters({
+    limit: PAGE_SIZE,
     disableCache: true,
   });
-  // const queryClient = useQueryClient();
+  const page = Number(qParams.page) || 1;
+
   const { canViewClinicalData } = getPermissions(
     hasPermission,
     patient?.permissions ?? [],
@@ -95,24 +141,21 @@ export const FilesPage = ({
       ? canReadEncounterClinicalData || canReadEncounter
       : canViewClinicalData;
 
+  const queryParams = {
+    file_type: type,
+    associating_id: associatingId,
+    name: qParams.name || undefined,
+    is_archived: qParams.is_archived,
+    ordering: "-created_date",
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
+  };
+
   const { data: files, isLoading: filesLoading } = useQuery({
-    queryKey: ["files", type, associatingId, qParams],
-    queryFn: query.debounced(fileApi.list, {
-      queryParams: {
-        file_type: type,
-        associating_id: associatingId,
-        name: qParams.name,
-        limit: resultsPerPage,
-        offset: ((qParams.page || 1) - 1) * resultsPerPage,
-        ...(qParams.is_archived !== undefined && {
-          is_archived: qParams.is_archived,
-        }),
-        ...(qParams.file !== "all" && {
-          file_category: qParams.file,
-        }),
-      },
-    }),
+    queryKey: ["files", type, associatingId, queryParams],
+    queryFn: query.debounced(fileApi.list, { queryParams }),
     enabled: canAccess,
+    placeholderData: keepPreviousData,
   });
 
   const fileManager = useFileManager({
@@ -154,335 +197,25 @@ export const FilesPage = ({
     }
   }, [openUploadDialog]);
 
-  const getFileType = (file: FileReadMinimal) => {
-    return fileManager.getFileType(file);
-  };
-
-  const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
-    AUDIO: "l-volume",
-    IMAGE: "l-image",
-    PRESENTATION: "l-presentation-play",
-    VIDEO: "l-video",
-    UNKNOWN: "l-file-medical",
-    DOCUMENT: "l-file-medical",
-  };
-
-  const getArchivedMessage = (file: FileReadMinimal) => {
-    return (
-      <div className="flex flex-row gap-2 justify-end">
-        <span className="text-gray-200/90 self-center uppercase font-bold">
-          {t("archived")}
-        </span>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setSelectedArchivedFile(file);
-            setOpenArchivedFileDialog(true);
-          }}
-        >
-          <span className="flex flex-row items-center gap-1">
-            <CareIcon icon="l-archive-alt" />
-            {t("view")}
-          </span>
-        </Button>
-      </div>
-    );
-  };
-
-  const DetailButtons = ({ file }: { file: FileReadMinimal }) => {
-    const filetype = getFileType(file);
-    return (
-      <>
-        <div className="flex flex-row gap-2 justify-end">
-          {filetype === "AUDIO" && !file.is_archived && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSelectedAudioFile(file);
-                setOpenAudioPlayerDialog(true);
-              }}
-            >
-              <span className="flex flex-row items-center gap-1">
-                <CareIcon icon="l-play-circle" className="mr-1" />
-                {t("play")}
-              </span>
-            </Button>
-          )}
-          {fileManager.isPreviewable(file) && (
-            <Button
-              variant="secondary"
-              onClick={() => fileManager.viewFile(file, associatingId)}
-            >
-              <span className="flex flex-row items-center gap-1">
-                <CareIcon icon="l-eye" />
-                {t("view")}
-              </span>
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" aria-label="actions">
-                <CareIcon icon="l-ellipsis-h" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => fileManager.downloadFile(file, associatingId)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                  <span>{t("download")}</span>
-                </Button>
-              </DropdownMenuItem>
-              {canEdit && (
-                <>
-                  <DropdownMenuItem asChild className="text-primary-900">
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        fileManager.archiveFile(file, associatingId)
-                      }
-                      variant="ghost"
-                      className="w-full flex flex-row justify-stretch items-center"
-                    >
-                      <CareIcon icon="l-archive-alt" className="mr-1" />
-                      <span>{t("archive")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="text-primary-900">
-                    <Button
-                      size="sm"
-                      onClick={() => fileManager.editFile(file, associatingId)}
-                      variant="ghost"
-                      className="w-full flex flex-row justify-stretch items-center"
-                    >
-                      <CareIcon icon="l-pen" className="mr-1" />
-                      <span>{t("rename")}</span>
-                    </Button>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </>
-    );
-  };
-
-  const FileUploadButtons = () => {
-    if (!canEdit) return <></>;
-    return (
-      <FileUploadDropdown
-        fileUpload={fileUpload}
-        buttonVariant="outline_primary"
-        buttonClassName="flex flex-row items-center mr-2"
-      />
-    );
-  };
-
-  const RenderCard = () => (
-    <div className="xl:hidden space-y-4 px-2">
-      {files?.results && files?.results?.length > 0
-        ? files.results.map((file) => {
-            const filetype = getFileType(file);
-            const fileName = file.name ? file.name + file.extension : "";
-
-            return (
-              <Card
-                key={file.id}
-                className={cn(
-                  "overflow-hidden",
-                  file.is_archived ? "bg-white/50" : "bg-white",
-                )}
-              >
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                      <CareIcon icon={icons[filetype]} className="text-xl" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-gray-900 truncate">
-                        {fileName}
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500">
-                        {filetype}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="text-gray-500">{t("date")}</div>
-                      <div className="font-medium">
-                        {dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">{t("shared_by")}</div>
-                      <div className="font-medium">
-                        {file.uploaded_by ? formatName(file.uploaded_by) : ""}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 flex justify-end">
-                    {file.is_archived ? (
-                      getArchivedMessage(file)
-                    ) : (
-                      <DetailButtons file={file} />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        : !filesLoading && (
-            <div className="text-center py-4 text-gray-500">
-              {t("no_files_found")}
-            </div>
-          )}
-    </div>
-  );
-
-  const RenderTable = () => (
-    <div className="hidden xl:block -mt-2">
-      <Table className="border-separate border-spacing-y-3 mx-2 lg:max-w-[calc(100%-16px)]">
-        <TableHeader>
-          <TableRow className="shadow rounded overflow-hidden">
-            <TableHead className="w-[20%] bg-white rounded-l">
-              {t("file_name")}
-            </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
-              {t("file_type")}
-            </TableHead>
-            <TableHead className="w-[25%] rounded-y bg-white">
-              {t("date")}
-            </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
-              {t("shared_by")}
-            </TableHead>
-            <TableHead className="w-[15%] text-right rounded-r bg-white"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {files?.results && files?.results?.length > 0
-            ? files.results.map((file) => {
-                const filetype = getFileType(file);
-                const fileName = file.name ? file.name + file.extension : "";
-
-                return (
-                  <TableRow
-                    key={file.id}
-                    className={cn("shadow rounded-md overflow-hidden group")}
-                  >
-                    <TableCell
-                      className={cn(
-                        "font-medium rounded-l-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="p-2 rounded-full bg-gray-100 shrink-0">
-                          <CareIcon
-                            icon={icons[filetype]}
-                            className="text-xl"
-                          />
-                        </span>
-                        {file.name && file.name.length > 20 ? (
-                          <TooltipComponent content={fileName}>
-                            <span className="text-gray-900 truncate block">
-                              {fileName}
-                            </span>
-                          </TooltipComponent>
-                        ) : (
-                          <span className="text-gray-900 truncate block">
-                            {fileName}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {filetype}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      <TooltipComponent
-                        content={dayjs(file.created_date).format(
-                          "DD MMM YYYY, hh:mm A",
-                        )}
-                      >
-                        <span>
-                          {dayjs(file.created_date).format("DD MMM YYYY ")}
-                        </span>
-                      </TooltipComponent>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {file.uploaded_by ? formatName(file.uploaded_by) : ""}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "text-right rounded-r-md rounded-y-md group-hover:bg-transparent",
-                        file.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {file.is_archived ? (
-                        getArchivedMessage(file)
-                      ) : (
-                        <DetailButtons file={file} />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            : !filesLoading && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    {t("no_files_found")}
-                  </TableCell>
-                </TableRow>
-              )}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  const isFiltered = !!qParams.name || qParams.is_archived !== undefined;
+  const totalCount = files?.count ?? 0;
 
   return (
-    <div className="space-y-4">
-      <div className="z-40">
-        {fileUpload.Dialogues}
-        {fileManager.Dialogues}
-        <AudioPlayerDialog
-          open={openAudioPlayerDialog}
-          onOpenChange={(open) => {
-            setOpenAudioPlayerDialog(open);
-            if (!open) {
-              setSelectedAudioFile(null);
-            }
-          }}
-          file={selectedAudioFile || null}
-          type={type}
-          associatingId={associatingId}
-        />
-      </div>
+    <>
+      {fileUpload.Dialogues}
+      {fileManager.Dialogues}
+      <AudioPlayerDialog
+        open={openAudioPlayerDialog}
+        onOpenChange={(open) => {
+          setOpenAudioPlayerDialog(open);
+          if (!open) {
+            setSelectedAudioFile(null);
+          }
+        }}
+        file={selectedAudioFile || null}
+        type={type}
+        associatingId={associatingId}
+      />
       <ArchivedFileDialog
         open={openArchivedFileDialog}
         onOpenChange={setOpenArchivedFileDialog}
@@ -495,94 +228,345 @@ export const FilesPage = ({
         associatingId={associatingId}
         type={type}
       />
-      <div className="flex flex-wrap items-center gap-2 -mt-2 ">
-        <div className="relative flex-1 min-w-72 max-w-96 ml-2">
-          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
-          <Input
-            id="search-by-filename"
-            name="name"
-            placeholder={t("search_files")}
-            value={qParams.name || ""}
-            onChange={(e) => updateQuery({ name: e.target.value })}
-            className="pointer-events-auto pl-10"
-          />
-        </div>
 
-        <div className="flex items-center gap-2">
-          <FilterButton
-            onFilterChange={(filter) => updateQuery(filter)}
-            activeLabel={t("active_files")}
-            archivedLabel={t("archived_files")}
+      <Frame spacing="sm" className="min-w-0">
+        <FrameHeader className="flex-row flex-wrap items-center gap-2">
+          <InputGroup className="bg-background sm:w-auto sm:max-w-xs sm:flex-1">
+            <InputGroupInput
+              id="search-by-filename"
+              name="name"
+              aria-label={t("search_files")}
+              placeholder={t("search_files")}
+              value={qParams.name || ""}
+              onChange={(e) => updateQuery({ name: e.target.value })}
+            />
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+          </InputGroup>
+          <ArchiveStatusFilter
+            value={qParams.is_archived}
+            onChange={(is_archived) => updateQuery({ is_archived })}
           />
-          {/* {type === "encounter" && (
-            <>
-              <Button
-                variant="outline_primary"
-                className="min-w-24 sm:min-w-28"
-                onClick={async () => {
-                  await queryClient.invalidateQueries({
-                    queryKey: ["files"],
-                  });
-                  queryClient.invalidateQueries({
-                    queryKey: ["discharge_files"],
-                  });
-                  toast.success(t("refreshed"));
-                }}
-              >
-                <CareIcon icon="l-sync" className="mr-2" />
-                {t("refresh")}
-              </Button>
-              <ReportBuilderSheet
-                facilityId={facilityId || ""}
-                patientId={encounter?.patient.id || ""}
-                encounterId={encounter?.id || ""}
-                permissions={encounter?.permissions || []}
-                trigger={
-                  <Button variant="primary" asChild>
-                    <div className="flex items-center gap-1 text-gray-950 py-0.5 cursor-pointer">
-                      <CareIcon
-                        icon="l-file-export"
-                        className="size-4 text-green-600"
-                      />
-                      {t("generate_report", {
-                        count: 2,
-                      })}
-                    </div>
-                  </Button>
-                }
-                onSuccess={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["files"],
-                  });
-                  queryClient.invalidateQueries({
-                    queryKey: ["discharge_files"],
-                  });
-                }}
+          {canEdit && (
+            <div className="ml-auto">
+              <FileUploadDropdown fileUpload={fileUpload} />
+            </div>
+          )}
+        </FrameHeader>
+
+        <FramePanel className="min-w-0 overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+          {filesLoading ? (
+            <div
+              className="space-y-2 p-3"
+              role="status"
+              aria-label={t("loading")}
+            >
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : !files?.results.length ? (
+            <Empty className="p-6 sm:p-10">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FolderOpen />
+                </EmptyMedia>
+                <EmptyTitle>{t("no_files_found", { type: "" })}</EmptyTitle>
+                <EmptyDescription>
+                  {t(
+                    isFiltered
+                      ? "try_adjusting_your_filters_or_search"
+                      : "no_files_found_description",
+                  )}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table className="table-fixed">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-4">{t("file_name")}</TableHead>
+                  <TableHead className="hidden w-[14%] px-4 md:table-cell">
+                    {t("file_type")}
+                  </TableHead>
+                  <TableHead className="hidden w-[20%] px-4 lg:table-cell">
+                    {t("shared_by")}
+                  </TableHead>
+                  <TableHead className="hidden w-[14%] px-4 md:table-cell">
+                    {t("date")}
+                  </TableHead>
+                  <TableHead className="w-14 pr-4 text-right md:w-40">
+                    <span className="sr-only">{t("actions")}</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {files.results.map((file) => {
+                  const fileType = fileManager.getFileType(file);
+                  const Icon = FILE_TYPE_ICONS[fileType];
+                  const fileName = file.name ? file.name + file.extension : "";
+                  const uploadedBy = file.uploaded_by
+                    ? formatName(file.uploaded_by)
+                    : "";
+                  const isAudio = fileType === "AUDIO";
+                  const isPreviewable = fileManager.isPreviewable(file);
+                  const viewArchived = () => {
+                    setSelectedArchivedFile(file);
+                    setOpenArchivedFileDialog(true);
+                  };
+                  const play = () => {
+                    setSelectedAudioFile(file);
+                    setOpenAudioPlayerDialog(true);
+                  };
+                  const view = () => fileManager.viewFile(file, associatingId);
+                  // On mobile, tapping the row runs the row's main action
+                  // instead of showing inline buttons.
+                  const openFile = file.is_archived
+                    ? viewArchived
+                    : isAudio
+                      ? play
+                      : isPreviewable
+                        ? view
+                        : undefined;
+
+                  return (
+                    <TableRow
+                      key={file.id}
+                      className={cn(
+                        "hover:bg-muted/40",
+                        file.is_archived && "bg-muted/30",
+                      )}
+                    >
+                      <TableCell className="relative py-3 pl-4">
+                        {openFile && (
+                          <button
+                            type="button"
+                            onClick={openFile}
+                            aria-label={`${t("view")} ${fileName}`}
+                            className="absolute inset-0 active:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring md:hidden"
+                          />
+                        )}
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={cn(
+                              "hidden size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground md:flex",
+                              file.is_archived && "opacity-60",
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <span
+                                className={cn(
+                                  "truncate font-medium",
+                                  file.is_archived
+                                    ? "text-muted-foreground"
+                                    : "text-foreground",
+                                )}
+                                title={fileName}
+                              >
+                                {fileName}
+                              </span>
+                              {file.is_archived && (
+                                <ArchivedBadge
+                                  className="hidden md:inline-flex"
+                                  reason={file.archive_reason}
+                                  archivedBy={file.archived_by}
+                                  archivedAt={file.archived_datetime}
+                                />
+                              )}
+                            </div>
+                            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground md:hidden">
+                              {file.is_archived && (
+                                <ArchivedBadge
+                                  className="relative z-10"
+                                  reason={file.archive_reason}
+                                  archivedBy={file.archived_by}
+                                  archivedAt={file.archived_datetime}
+                                />
+                              )}
+                              <span className="truncate">
+                                {[
+                                  t(`file_type__${fileType.toLowerCase()}`),
+                                  formatDateTime(
+                                    file.created_date,
+                                    "DD MMM YYYY",
+                                  ),
+                                ].join(" · ")}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden px-4 text-muted-foreground md:table-cell">
+                        {t(`file_type__${fileType.toLowerCase()}`)}
+                      </TableCell>
+                      <TableCell className="hidden truncate px-4 text-muted-foreground lg:table-cell">
+                        {uploadedBy}
+                      </TableCell>
+                      <TableCell className="hidden px-4 text-muted-foreground md:table-cell">
+                        <TooltipComponent
+                          content={formatDateTime(
+                            file.created_date,
+                            "DD MMM YYYY, hh:mm A",
+                          )}
+                        >
+                          <span>
+                            {formatDateTime(file.created_date, "DD MMM YYYY")}
+                          </span>
+                        </TooltipComponent>
+                      </TableCell>
+                      <TableCell className="pr-4 text-right">
+                        <FileRowActions
+                          file={file}
+                          canEdit={canEdit}
+                          isAudio={isAudio}
+                          isPreviewable={isPreviewable}
+                          onPlay={play}
+                          onView={view}
+                          onViewArchived={viewArchived}
+                          onDownload={() =>
+                            fileManager.downloadFile(file, associatingId)
+                          }
+                          onRename={() =>
+                            fileManager.editFile(file, associatingId)
+                          }
+                          onArchive={() =>
+                            fileManager.archiveFile(file, associatingId)
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </FramePanel>
+
+        {totalCount > 0 && (
+          <FrameFooter className="flex-row flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              {t("files_result_range", {
+                start: (page - 1) * PAGE_SIZE + 1,
+                end: Math.min(page * PAGE_SIZE, totalCount),
+                total: totalCount,
+              })}
+            </p>
+            {totalCount > PAGE_SIZE && (
+              <Pagination
+                data={{ totalCount }}
+                cPage={page}
+                defaultPerPage={PAGE_SIZE}
+                onChange={(page) => updatePage(page)}
+                className=""
               />
-            </>
-          )} */}
-        </div>
-
-        <div className="ml-auto">
-          <FileUploadButtons />
-        </div>
-      </div>
-      <FilterBadges
-        isArchived={qParams.is_archived}
-        onClearFilter={() => updateQuery({ is_archived: undefined })}
-        activeLabel="active_files"
-        archivedLabel="archived_files"
-      />
-      <RenderTable />
-      <RenderCard />
-
-      <div className="flex">
-        {filesLoading ? (
-          <Loading />
-        ) : (
-          <Pagination totalCount={files?.count || 0} />
+            )}
+          </FrameFooter>
         )}
-      </div>
-    </div>
+      </Frame>
+    </>
   );
 };
+
+interface FileRowActionsProps {
+  file: FileReadMinimal;
+  canEdit: boolean | undefined;
+  isAudio: boolean;
+  isPreviewable: boolean;
+  onPlay: () => void;
+  onView: () => void;
+  onViewArchived: () => void;
+  onDownload: () => void;
+  onRename: () => void;
+  onArchive: () => void;
+}
+
+function FileRowActions({
+  file,
+  canEdit,
+  isAudio,
+  isPreviewable,
+  onPlay,
+  onView,
+  onViewArchived,
+  onDownload,
+  onRename,
+  onArchive,
+}: FileRowActionsProps) {
+  const { t } = useTranslation();
+
+  if (file.is_archived) {
+    // Keep the View button in the same slot as on active rows: archived
+    // entries have no menu, so reserve the space the menu trigger takes.
+    return (
+      <div className="flex items-center justify-end gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onViewArchived}
+        >
+          <Eye />
+          {t("view")}
+        </Button>
+        <span aria-hidden className="size-9 shrink-0" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      {isAudio && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onPlay}
+        >
+          <Play />
+          {t("play")}
+        </Button>
+      )}
+      {isPreviewable && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden md:inline-flex"
+          onClick={onView}
+        >
+          <Eye />
+          {t("view")}
+        </Button>
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label={t("more_actions")}>
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-40">
+          <DropdownMenuItem onSelect={onDownload}>
+            <Download />
+            {t("download")}
+          </DropdownMenuItem>
+          {canEdit && (
+            <>
+              <DropdownMenuItem onSelect={onRename}>
+                <Pencil />
+                {t("rename")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onSelect={onArchive}>
+                <Archive />
+                {t("archive")}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
