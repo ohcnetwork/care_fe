@@ -49,13 +49,6 @@ export interface UserReadMinimal extends UserBase {
   is_service_account: boolean;
   communication: UserCommunication[];
   qualification: UserQualification[];
-}
-
-export interface UserRead extends UserReadMinimal {
-  geo_organization?: Organization;
-  created_by?: UserReadMinimal;
-  email: string;
-  flags: string[];
   role_orgs?: Array<{
     id: string;
     organization: Organization;
@@ -66,6 +59,13 @@ export interface UserRead extends UserReadMinimal {
       is_system: boolean;
     };
   }>;
+}
+
+export interface UserRead extends UserReadMinimal {
+  geo_organization?: Organization;
+  created_by?: UserReadMinimal;
+  email: string;
+  flags: string[];
 }
 
 export interface CurrentUserRead extends UserRead, Permissions {
