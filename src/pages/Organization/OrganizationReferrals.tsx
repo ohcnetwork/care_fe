@@ -7,10 +7,9 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Muted, SubsectionTitle } from "@/components/ui/typography";
-
 import { usePermissions } from "@/context/PermissionContext";
 
+import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   RouteContext,
 } from "./components/OrganizationLayout";
@@ -29,13 +28,13 @@ export default function OrganizationReferrals(
   return (
     <OrganizationLayout {...props}>
       {({ orgPermissions }) => (
-        <div className="space-y-5 text-foreground">
-          <header className="space-y-2">
-            <SubsectionTitle>
-              {t("referral_organization_incoming")}
-            </SubsectionTitle>
-            <Muted>{t("referral_organization_incoming_description")}</Muted>
-          </header>
+        <div className="space-y-4 text-foreground">
+          <EntityBadge
+            title={t("referral_organization_incoming")}
+            description={t("referral_organization_incoming_description")}
+            isFetching={false}
+            showCount={false}
+          />
           {hasPermission("can_read_referral", orgPermissions) ? (
             <ReferralList
               scope={{

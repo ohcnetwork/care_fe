@@ -49,7 +49,7 @@ export async function createDisposableUserViaUi(
     .getByRole("link", { name: /Government$/ })
     .first()
     .click();
-  await page.getByRole("menuitem", { name: "Users" }).click();
+  await page.getByRole("tab", { name: "Users" }).click();
 
   await page.getByRole("button", { name: "Add User" }).click();
   await page.getByRole("textbox", { name: "First Name" }).fill(firstName);

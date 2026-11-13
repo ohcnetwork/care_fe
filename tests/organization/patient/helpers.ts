@@ -48,7 +48,7 @@ export async function navigateToOrganizationPatient(page: Page) {
   await page.waitForURL(/\/organization\/([^/]+)/);
 
   // Go to Patients section
-  await page.getByRole("menuitem", { name: "Patients" }).click();
+  await page.getByRole("tab", { name: "Patients" }).click();
   await page.waitForURL(/\/organization\/([^/]+)\/patients/);
 
   await page
