@@ -23,6 +23,7 @@ permissions:
 jobs:
   assign-pr:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     # Only run for pull_request_target events and skip PRs created by bots
     if: >-
       github.event_name == 'pull_request_target' &&
@@ -89,6 +90,7 @@ jobs:
 
   handle-review:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     # Only run for workflow_run events from the PR Review Trigger workflow
     if: >-
       github.event_name == 'workflow_run' &&

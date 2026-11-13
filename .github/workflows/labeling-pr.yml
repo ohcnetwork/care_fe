@@ -7,6 +7,7 @@ on:
 jobs:
   label-type-changes:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
