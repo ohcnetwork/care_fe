@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { UserCard } from "@/components/Users/UserListAndCard";
 
@@ -21,7 +22,6 @@ import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
-import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout, {
   type RouteContext,
@@ -134,7 +134,7 @@ export default function OrganizationUsers({
           } = getPermissions(hasPermission, orgPermissions);
           return (
             <div className="space-y-4">
-              <EntityBadge
+              <SectionHeader
                 title={isServiceAccount ? t("service_accounts") : t("users")}
                 description={t(
                   isServiceAccount

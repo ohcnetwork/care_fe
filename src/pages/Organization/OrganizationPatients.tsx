@@ -13,6 +13,7 @@ import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -21,7 +22,6 @@ import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   type RouteContext,
 } from "./components/OrganizationLayout";
@@ -110,7 +110,7 @@ export default function OrganizationPatients({
       {() => {
         return (
           <div className="space-y-4">
-            <EntityBadge
+            <SectionHeader
               title={t("patients")}
               description={t("organization_patients_description")}
               count={patients?.count}

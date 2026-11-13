@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,6 @@ import { Muted } from "@/components/ui/typography";
 import query from "@/Utils/request/query";
 import { ReferralFilters } from "@/components/Referral/ReferralFilters";
 import { usePermissions } from "@/context/PermissionContext";
-import EntityBadge from "@/pages/Organization/components/EntityBadge";
 import {
   ReferralAvailabilityRead,
   ReferralAvailabilityStatus,
@@ -195,11 +195,9 @@ export default function ReferralAvailabilitySettings({
   const content = (
     <>
       <div className="container mx-auto space-y-4 text-foreground">
-        <EntityBadge
+        <SectionHeader
           title={t("referral_availability_settings")}
           description={t("referral_availability_settings_description")}
-          isFetching={false}
-          showCount={false}
           actions={
             canManage && (
               <Button onClick={() => setEditingId("new")}>

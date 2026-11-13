@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import SearchInput from "@/components/Common/SearchInput";
+import { SectionHeader } from "@/components/Common/SectionHeader";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -24,7 +25,6 @@ import query from "@/Utils/request/query";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
-import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout, {
   type RouteContext,
 } from "./components/OrganizationLayout";
@@ -73,7 +73,7 @@ export default function OrganizationView({
       {() => {
         return (
           <div className="space-y-4">
-            <EntityBadge
+            <SectionHeader
               title={t("organizations")}
               description={t("organization_children_description")}
               count={children?.count}
