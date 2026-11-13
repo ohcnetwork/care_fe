@@ -26,12 +26,6 @@ export const TokenActiveStatuses: TokenStatus[] = [
   TokenStatus.IN_PROGRESS,
 ];
 
-export const TokenFinalStatuses: TokenStatus[] = [
-  TokenStatus.FULFILLED,
-  TokenStatus.CANCELLED,
-  TokenStatus.ENTERED_IN_ERROR,
-];
-
 export const TOKEN_STATUS_COLORS = {
   UNFULFILLED: "secondary",
   CREATED: "blue",
