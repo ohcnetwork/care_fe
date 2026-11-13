@@ -47,6 +47,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getTokenQueueStatusCount } from "./utils";
 
@@ -68,6 +69,7 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resource = useScheduleResource();
+  const [editOpen, setEditOpen] = useState(false);
   const [qParams, setQueryParams] = useQueryParams<{
     autoRefresh?: string;
   }>();
@@ -190,7 +192,11 @@ export function ManageQueuePage({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t("settings")}
+                >
                   <SettingsIcon />
                 </Button>
               </DropdownMenuTrigger>
@@ -222,21 +228,21 @@ export function ManageQueuePage({
                     </DropdownMenuItem>
                   }
                 />
-                <QueueFormSheet
-                  facilityId={facilityId}
-                  resourceType={resourceType}
-                  resourceId={resourceId}
-                  queueId={queueId}
-                  trigger={
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <Edit3 className="mr-2 size-4" />
-                      {t("edit_queue_name")}
-                    </DropdownMenuItem>
-                  }
-                />
+                <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+                  <Edit3 className="mr-2 size-4" />
+                  {t("edit_queue_name")}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </DropdownMenuContent>
             </DropdownMenu>
+            <QueueFormSheet
+              facilityId={facilityId}
+              resourceType={resourceType}
+              resourceId={resourceId}
+              queueId={queueId}
+              open={editOpen}
+              onOpenChange={setEditOpen}
+            />
           </div>
         </div>
 

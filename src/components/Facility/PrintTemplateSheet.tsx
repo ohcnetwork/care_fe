@@ -38,7 +38,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 
@@ -52,7 +51,8 @@ import {
 
 interface Props {
   facility: FacilityRead;
-  trigger?: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const EMPTY_TEMPLATE: PrintTemplate = {
@@ -61,22 +61,40 @@ const EMPTY_TEMPLATE: PrintTemplate = {
 
 const URL_PLACEHOLDER = "https://...";
 
-export default function PrintTemplateSheet({ facility, trigger }: Props) {
+export default function PrintTemplateSheet({
+  facility,
+  open,
+  onOpenChange,
+}: Props) {
+  const { t } = useTranslation();
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent size="lg" className="overflow-hidden">
+        <SheetHeader>
+          <SheetTitle>{t("print_templates")}</SheetTitle>
+          <SheetDescription>
+            {t("print_templates_description")}
+          </SheetDescription>
+        </SheetHeader>
+        <PrintTemplateSheetBody
+          facility={facility}
+          onOpenChange={onOpenChange}
+        />
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function PrintTemplateSheetBody({
+  facility,
+  onOpenChange,
+}: Pick<Props, "facility" | "onOpenChange">) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [templates, setTemplates] = useState<PrintTemplate[]>([]);
-
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen) {
-      setTemplates(
-        facility.print_templates?.length
-          ? structuredClone(facility.print_templates)
-          : [],
-      );
-    }
-    setOpen(isOpen);
-  };
+  const [templates, setTemplates] = useState<PrintTemplate[]>(() =>
+    structuredClone(facility.print_templates ?? []),
+  );
 
   const { mutate: updateFacility, isPending } = useMutation({
     mutationFn: mutate(facilityApi.update, {
@@ -85,7 +103,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
     onSuccess: () => {
       toast.success(t("print_templates_updated"));
       queryClient.invalidateQueries({ queryKey: ["facility", facility.id] });
-      setOpen(false);
+      onOpenChange(false);
     },
   });
 
@@ -126,57 +144,47 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent size="lg" className="overflow-hidden">
-        <SheetHeader>
-          <SheetTitle>{t("print_templates")}</SheetTitle>
-          <SheetDescription>
-            {t("print_templates_description")}
-          </SheetDescription>
-        </SheetHeader>
+    <>
+      <SheetBody>
+        <div className="space-y-4">
+          {templates.length === 0 && (
+            <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
+              <Printer className="mx-auto mb-2 size-8 text-gray-400" />
+              <p className="text-sm">{t("no_print_templates")}</p>
+              <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
+            </div>
+          )}
 
-        <SheetBody>
-          <div className="space-y-4">
-            {templates.length === 0 && (
-              <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
-                <Printer className="mx-auto mb-2 size-8 text-gray-400" />
-                <p className="text-sm">{t("no_print_templates")}</p>
-                <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
-              </div>
-            )}
+          {templates.map((template, index) => (
+            <TemplateEditor
+              key={index}
+              template={template}
+              onUpdate={(updater) => updateTemplate(index, updater)}
+              onRemove={() => removeTemplate(index)}
+            />
+          ))}
 
-            {templates.map((template, index) => (
-              <TemplateEditor
-                key={index}
-                template={template}
-                onUpdate={(updater) => updateTemplate(index, updater)}
-                onRemove={() => removeTemplate(index)}
-              />
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={addTemplate}
-            >
-              <Plus className="mr-2 size-4" />
-              {t("add_print_template")}
-            </Button>
-          </div>
-        </SheetBody>
-
-        <SheetFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            {t("cancel")}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={addTemplate}
+          >
+            <Plus className="mr-2 size-4" />
+            {t("add_print_template")}
           </Button>
-          <Button onClick={handleSave} disabled={isPending}>
-            {isPending ? t("saving") : t("save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </SheetBody>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          {t("cancel")}
+        </Button>
+        <Button onClick={handleSave} disabled={isPending}>
+          {isPending ? t("saving") : t("save")}
+        </Button>
+      </SheetFooter>
+    </>
   );
 }
 
