@@ -21,21 +21,22 @@ import query from "@/Utils/request/query";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
-type FacilityOrganizationTreeSelectProps = {
+interface FacilityOrganizationTreeSelectProps {
   facilityId: string;
+  value?: string[] | null;
+  onChange: (
+    value: string[] | null,
+    organizations?: FacilityOrganizationRead[],
+  ) => void;
+  singleSelection?: boolean;
   favoriteList?: string;
-  /** Organizations already known to the caller, so selected ones show names without a request. */
-  knownOrganizations?: FacilityOrganizationRead[];
   /** Skips selecting the user's only department when nothing is selected. */
   optional?: boolean;
-} & (
-  | { mode?: "multi"; value: string[]; onChange: (value: string[]) => void }
-  | {
-      mode: "single";
-      value: string | null;
-      onChange: (value: string | null) => void;
-    }
-);
+  /** Departments already attached elsewhere: shown as linked and not selectable again. */
+  currentOrganizations?: FacilityOrganizationRead[];
+  /** Records for selected ids, so selected ones show names without a request. */
+  knownOrganizations?: FacilityOrganizationRead[];
+}
 
 const PAGE_LIMIT = 20;
 
@@ -225,12 +226,14 @@ function useFavoriteOrganizations(facilityId: string, favoriteList?: string) {
 
   // Saves only the difference from the stored favourites.
   const changePreferredIds = (ids: string[]) => {
-    for (const organizationId of ids) {
-      if (!preferredIds.includes(organizationId))
+    const wanted = new Set(ids);
+    const saved = new Set(preferredIds);
+    for (const organizationId of wanted) {
+      if (!saved.has(organizationId))
         setFavorite({ organizationId, preferred: true });
     }
-    for (const organizationId of preferredIds) {
-      if (!ids.includes(organizationId))
+    for (const organizationId of saved) {
+      if (!wanted.has(organizationId))
         setFavorite({ organizationId, preferred: false });
     }
   };
@@ -244,18 +247,53 @@ function useFavoriteOrganizations(facilityId: string, favoriteList?: string) {
   };
 }
 
+// The user's preferred departments, else their only department.
+function pickDefaultIds({
+  loaded,
+  hasValue,
+  preferredIds,
+  assignedIds,
+  optional,
+}: {
+  loaded: boolean;
+  hasValue: boolean;
+  preferredIds: string[];
+  assignedIds?: string[];
+  optional?: boolean;
+}) {
+  if (hasValue || !loaded) return [];
+  if (preferredIds.length > 0) return preferredIds;
+  return !optional && assignedIds?.length === 1 ? assignedIds : [];
+}
+
+function useDefaultSelection(ids: string[], apply: (ids: string[]) => void) {
+  const applied = useRef(false);
+  const applyOnce = useEffectEvent((ids: string[]) => {
+    // A ref also guards StrictMode's repeated setup, and keeps a cleared
+    // selection from being refilled.
+    if (applied.current) return;
+    applied.current = true;
+    apply(ids);
+  });
+  // Runs every render; the ref in applyOnce makes it a one-time call.
+  useEffect(() => {
+    if (ids.length > 0) applyOnce(ids);
+  });
+}
+
 export default function FacilityOrganizationTreeSelect(
   props: FacilityOrganizationTreeSelectProps,
 ) {
-  const { facilityId, favoriteList, knownOrganizations, optional } = props;
-  const selection = props.value;
-  const value = Array.isArray(selection)
-    ? selection
-    : selection
-      ? [selection]
-      : [];
+  const {
+    facilityId,
+    favoriteList,
+    singleSelection,
+    currentOrganizations,
+    knownOrganizations,
+    optional,
+  } = props;
+  const value = props.value ?? [];
   const { t } = useTranslation();
-  const defaultsApplied = useRef(false);
   const [search, setSearch] = useState("");
   const root = useRootOrganizations(facilityId, search);
   const children = useChildPages(facilityId);
@@ -273,6 +311,7 @@ export default function FacilityOrganizationTreeSelect(
     ...Object.values(children.pages).flatMap((page) => page.items),
     ...(mine?.results ?? []),
     ...favorites.organizations,
+    ...(currentOrganizations ?? []),
     ...(knownOrganizations ?? []),
   ];
 
@@ -297,6 +336,14 @@ export default function FacilityOrganizationTreeSelect(
   });
 
   const tree = buildTree([...records, ...fetchedOrganizations]);
+  const recordsById = new Map(
+    [...records, ...fetchedOrganizations].map((record) => [record.id, record]),
+  );
+  const select = (ids: string[]) =>
+    props.onChange(
+      ids.length > 0 ? ids : null,
+      ids.flatMap((id) => recordsById.get(id) ?? []),
+    );
   // Undefined until loaded, so the "my departments" group is not shown empty.
   const assignedIds = mine?.results.map(({ id }) => id);
   const { preferredIds } = favorites;
@@ -319,24 +366,16 @@ export default function FacilityOrganizationTreeSelect(
     },
   };
 
-  // Preselect the user's preferred departments, else their only department.
-  let defaultIds: string[] = [];
-  if (value.length === 0 && mine && favorites.loaded) {
-    if (preferredIds.length > 0) defaultIds = preferredIds;
-    else if (!optional && assignedIds?.length === 1) defaultIds = assignedIds;
-  }
-  const applyDefaults = useEffectEvent((ids: string[]) => {
-    // A ref also guards StrictMode's repeated setup, and keeps a cleared
-    // selection from being refilled.
-    if (defaultsApplied.current) return;
-    defaultsApplied.current = true;
-    if (props.mode === "single") props.onChange(ids[0] ?? null);
-    else props.onChange(ids);
-  });
-  // Runs every render; the ref in applyDefaults makes it a one-time call.
-  useEffect(() => {
-    if (defaultIds.length > 0) applyDefaults(defaultIds);
-  });
+  useDefaultSelection(
+    pickDefaultIds({
+      loaded: !!mine && favorites.loaded,
+      hasValue: value.length > 0,
+      preferredIds,
+      assignedIds,
+      optional,
+    }),
+    (ids) => select(singleSelection ? ids.slice(0, 1) : ids),
+  );
 
   const common = {
     tree,
@@ -346,6 +385,7 @@ export default function FacilityOrganizationTreeSelect(
     },
     placeholder: t("select_department"),
     assignedIds,
+    linkedIds: currentOrganizations?.map(({ id }) => id),
     preferredIds,
     onPreferredIdsChange: favoriteList
       ? favorites.changePreferredIds
@@ -355,19 +395,14 @@ export default function FacilityOrganizationTreeSelect(
     pagination,
   };
 
-  return props.mode === "single" ? (
+  return singleSelection ? (
     <TreeSelect
       {...common}
       mode="single"
-      value={props.value}
-      onChange={props.onChange}
+      value={value[0] ?? null}
+      onChange={(id) => select(id ? [id] : [])}
     />
   ) : (
-    <TreeSelect
-      {...common}
-      mode="multi"
-      value={props.value}
-      onChange={props.onChange}
-    />
+    <TreeSelect {...common} mode="multi" value={value} onChange={select} />
   );
 }

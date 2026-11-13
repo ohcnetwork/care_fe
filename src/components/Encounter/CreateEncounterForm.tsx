@@ -431,7 +431,7 @@ export default function CreateEncounterForm({
                       <FacilityOrganizationTreeSelect
                         facilityId={facilityId}
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(ids) => field.onChange(ids ?? [])}
                         favoriteList="encounter_departments"
                         knownOrganizations={defaultOrganizations}
                       />
