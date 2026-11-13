@@ -231,7 +231,7 @@ export function FileListTable({
         })
       ) : (
         <div className="text-center py-4 text-muted-foreground">
-          {t("no_files_found", { type: t(type).toLowerCase() })}
+          {t("no_files_found")}
         </div>
       )}
 

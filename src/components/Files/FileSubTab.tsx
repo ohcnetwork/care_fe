@@ -343,7 +343,7 @@ export const FilesPage = ({
           })
         : !filesLoading && (
             <div className="text-center py-4 text-gray-500">
-              {t("no_files_found", { type: t(type).toLowerCase() })}
+              {t("no_files_found")}
             </div>
           )}
     </div>
@@ -456,7 +456,7 @@ export const FilesPage = ({
             : !filesLoading && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">
-                    {t("no_files_found", { type: t(type).toLowerCase() })}
+                    {t("no_files_found")}
                   </TableCell>
                 </TableRow>
               )}
