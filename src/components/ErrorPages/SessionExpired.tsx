@@ -147,16 +147,17 @@ export default function SessionExpired() {
 
   const [seconds, setSeconds] = useState(0);
   const [breathState, setBreathState] = useState<"in" | "out">("in");
-  const startTimeRef = useRef(Date.now());
+  const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     toast.dismiss();
   }, []);
 
   useEffect(() => {
+    startTimeRef.current = Date.now();
     const tick = () => {
       const now = Date.now();
-      const elapsedMs = now - startTimeRef.current;
+      const elapsedMs = now - (startTimeRef.current ?? now);
       const elapsedSec = Math.floor(elapsedMs / 1000);
       setSeconds(elapsedSec); // Positive count
     };
