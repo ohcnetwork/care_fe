@@ -363,6 +363,11 @@
       --print-scale: 1;
     }
 
+    /* Safari prints at the screen layout width, so the relative <main> sits beside the sidebar gap and shifts the absolute print section */
+    body:has(#section-to-print) #pages {
+      position: static;
+    }
+
     /* Isolated print styles — shared by single-print and multi-print */
     #single-print,
     #single-print *,

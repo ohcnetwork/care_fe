@@ -22,7 +22,6 @@ import type {
   WatermarkConfig,
 } from "@/types/facility/printTemplate";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { isIOSDevice } from "@/Utils/utils";
 
 interface WatermarkProps {
   text: string;
@@ -157,7 +156,22 @@ export default function PrintPreview(props: Props) {
 const TILE_W = 220;
 const TILE_H = 100;
 
+const MIN_PAGE_HEIGHT_PX = 400;
+
 function StatusWatermark({ watermark }: { watermark: WatermarkProps }) {
+  const stackRef = useRef<HTMLDivElement>(null);
+  const [pages, setPages] = useState(1);
+
+  useEffect(() => {
+    const section = stackRef.current?.parentElement;
+    if (!section) return;
+    const observer = new ResizeObserver(() =>
+      setPages(Math.ceil(section.scrollHeight / MIN_PAGE_HEIGHT_PX) + 1),
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   const colorClass = cn(
     watermark.color === "red" && "text-red-600",
     watermark.color === "gray" && "text-gray-600",
@@ -165,24 +179,37 @@ function StatusWatermark({ watermark }: { watermark: WatermarkProps }) {
     !watermark.color && "text-red-600",
   );
 
+  const stamp = (
+    <span
+      className={cn(
+        "text-6xl font-bold uppercase tracking-widest opacity-20 -rotate-30 whitespace-nowrap",
+        colorClass,
+      )}
+
+      style={{
+        fontSize: `min(8cqw, ${120 / Math.max(watermark.text.length, 1)}cqw)`,
+      }}
+    >
+      {watermark.text}
+    </span>
+  );
+
   return (
     <>
-      {/* Print: fixed so the browser stamps it on every page (absolute on iOS where fixed print is broken) */}
+      {/* Print: fixed repeats the stamp on every page */}
+      <div className="@container absolute print:fixed supports-[-webkit-hyphens:none]:print:hidden inset-0 flex items-center justify-center select-none pointer-events-none z-5">
+        {stamp}
+      </div>
+      {/* Safari print: one stamp per page-height slot, clipped to the content height */}
       <div
-        className={cn(
-          "print:flex",
-          isIOSDevice ? "absolute" : "fixed",
-          "inset-0 flex items-center justify-center select-none pointer-events-none z-10",
-        )}
+        ref={stackRef}
+        className="@container hidden supports-[-webkit-hyphens:none]:print:block absolute inset-0 overflow-hidden select-none pointer-events-none z-5"
       >
-        <span
-          className={cn(
-            "text-6xl font-bold uppercase tracking-widest opacity-20 -rotate-30 whitespace-nowrap",
-            colorClass,
-          )}
-        >
-          {watermark.text}
-        </span>
+        {Array.from({ length: pages }, (_, page) => (
+          <div key={page} className="flex h-screen items-center justify-center">
+            {stamp}
+          </div>
+        ))}
       </div>
     </>
   );
@@ -205,31 +232,16 @@ function TiledWatermark({ watermark }: { watermark: WatermarkConfig }) {
   const dataUri = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
   return (
-    <>
-      <div
-        className="absolute inset-0 select-none pointer-events-none z-10 text-gray-900 print:hidden"
-        aria-hidden="true"
-        style={{
-          backgroundImage: dataUri,
-          backgroundRepeat: "repeat",
-          backgroundSize: `${TILE_W}px ${TILE_H}px`,
-          opacity,
-        }}
-      />
-      <div
-        className={cn(
-          "hidden print:block inset-0 select-none pointer-events-none z-10 text-gray-900",
-          isIOSDevice ? "absolute" : "fixed",
-        )}
-        aria-hidden="true"
-        style={{
-          backgroundImage: dataUri,
-          backgroundRepeat: "repeat",
-          backgroundSize: `${TILE_W}px ${TILE_H}px`,
-          opacity,
-        }}
-      />
-    </>
+    <div
+      className="absolute inset-0 select-none pointer-events-none z-5 text-gray-900"
+      aria-hidden="true"
+      style={{
+        backgroundImage: dataUri,
+        backgroundRepeat: "repeat",
+        backgroundSize: `${TILE_W}px ${TILE_H}px`,
+        opacity,
+      }}
+    />
   );
 }
 
