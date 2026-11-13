@@ -36,7 +36,13 @@ function MonetaryDisplay({
   fallback?: React.ReactNode;
   hideCurrency?: boolean;
 } & React.ComponentProps<"data">) {
-  amount &&= round(amount);
+  if (amount) {
+    if (!isNaN(Number(amount))) {
+      amount = round(amount);
+    } else {
+      amount = null;
+    }
+  }
 
   if ((amount ?? factor) == null) {
     return fallback ?? "-";
