@@ -79,7 +79,7 @@ export default function OrganizationFacilities({
               }
             />
             <Frame>
-              <FrameHeader>
+              <FrameHeader className="p-1 md:p-2">
                 <SearchInput
                   options={[
                     {
