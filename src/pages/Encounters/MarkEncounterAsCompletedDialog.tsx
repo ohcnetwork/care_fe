@@ -35,14 +35,18 @@ export function MarkEncounterAsCompletedDialog({
 
   if (!encounter) return null;
 
+  const shouldShowCompletionWarning =
+    completeEverythingToMark &&
+    Boolean(encounter.appointment?.id || encounter.appointment?.token?.id);
+
   return (
     <AlertDialog {...props}>
-      <AlertDialogContent>
+      <AlertDialogContent className="gap-3">
         <AlertDialogHeader>
           <AlertDialogTitle>{t("mark_as_complete")}</AlertDialogTitle>
-          <AlertDialogDescription className="flex flex-col gap-2">
+          <AlertDialogDescription className="flex flex-col gap-1">
             <span>{t("mark_encounter_as_complete_confirmation")}</span>
-            {completeEverythingToMark && (
+            {shouldShowCompletionWarning && (
               <div className="bg-yellow-50 flex gap-2 items-center justify-start rounded-md p-1">
                 <AlertTriangleIcon className="text-yellow-500 size-4" />
                 <span className="block text-sm text-yellow-900">
