@@ -37,7 +37,7 @@ function SubMenuFilter({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[var(--radix-dropdown-menu-trigger-width)] p-0"
+        className="w-(--radix-dropdown-menu-trigger-width) p-0"
         align="start"
       >
         {availableOptions.map((option) => (
@@ -63,6 +63,7 @@ export function SelectedFilterBar({
   onFilterChange,
   onOperationChange,
   selectedBarClassName,
+  selectedValueClassName,
   facilityId,
 }: {
   selectedFilterKey: string;
@@ -74,6 +75,7 @@ export function SelectedFilterBar({
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
   selectedBarClassName?: string;
+  selectedValueClassName?: string;
   facilityId?: string;
 }) {
   const { t } = useTranslation();
@@ -89,13 +91,13 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 w-fit",
+          "flex w-full max-w-full min-w-0 shrink-0 basis-full items-center overflow-hidden rounded-md border border-gray-200 bg-white md:w-fit md:basis-auto",
           selectedBarClassName,
         )}
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
+            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm shrink-0"
             onClick={onClick}
           >
             {filter?.icon}
@@ -111,22 +113,28 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap">
-          <span className="truncate text-gray-950 font-medium">
+        <div
+          className={cn(
+            "flex h-9 w-0 min-w-0 flex-1 items-center gap-2 overflow-hidden whitespace-nowrap border-gray-200 px-3 md:w-auto md:flex-none md:max-w-64 lg:max-w-80 xl:max-w-96",
+            selectedValueClassName,
+          )}
+        >
+          <div className="flex min-w-0 flex-1 overflow-hidden text-gray-950 font-medium">
             {filter.renderSelected?.(selected, filter, onFilterChange)}
-          </span>
+          </div>
         </div>
         {!filter?.disableClear && (
           <Button
             variant="ghost"
             onClick={clearFilter}
-            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50"
+            size="icon"
+            className="ml-auto size-9 shrink-0 rounded-l-none border-l border-gray-200 p-0 hover:bg-gray-50"
           >
             <X className="h-5 w-5 text-gray-600" />
           </Button>
         )}
       </div>
-      <DropdownMenuContent className="w-[320px] p-0" align="start">
+      <DropdownMenuContent className="w-80 p-0" align="start">
         <FilterRenderer
           activeFilter={filter.key}
           selectedFilters={selectedFilters}

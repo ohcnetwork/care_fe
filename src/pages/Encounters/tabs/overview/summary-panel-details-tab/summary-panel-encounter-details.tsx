@@ -17,6 +17,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
+import { getPatientIdentifiers } from "@/types/emr/patient/patient";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Signal, SquarePen } from "lucide-react";
@@ -225,19 +226,17 @@ export const SummaryPanelEncounterDetails = () => {
 
           <div className="flex flex-row gap-2">
             <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
-              {patient?.instance_identifiers
-                ?.filter(({ config }) => !config.config.auto_maintained)
-                .map((identifier) => (
-                  <div
-                    key={identifier.config.id}
-                    className="flex flex-col items-start"
-                  >
-                    <span className="text-gray-600 md:w-auto">
-                      {identifier.config.config.display}:{" "}
-                    </span>
-                    <span className="font-semibold">{identifier.value}</span>
-                  </div>
-                ))}
+              {getPatientIdentifiers(patient).map((identifier) => (
+                <div
+                  key={identifier.config.id}
+                  className="flex flex-col items-start"
+                >
+                  <span className="text-gray-600 md:w-auto">
+                    {identifier.config.config.display}:{" "}
+                  </span>
+                  <span className="font-semibold">{identifier.value}</span>
+                </div>
+              ))}
             </div>
           </div>
 

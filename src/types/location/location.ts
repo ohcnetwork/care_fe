@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export type Status = "active" | "inactive" | "unknown";
@@ -23,6 +24,16 @@ export type SystemAvailabilityStatus = "available" | "reserved";
 export type OperationalStatus = "C" | "H" | "O" | "U" | "K" | "I";
 
 export type LocationMode = "instance" | "kind";
+
+export const InventoryUsageOptions = [
+  "none",
+  "store",
+  "supplier",
+  "consumption",
+  "adjustment",
+] as const;
+
+export type InventoryUsage = (typeof InventoryUsageOptions)[number];
 
 export type LocationForm = (typeof LocationFormOptions)[number];
 
@@ -34,6 +45,7 @@ export interface LocationBase {
   location_type?: Code;
   form: LocationForm;
   mode: LocationMode;
+  inventory_usage: InventoryUsage;
 }
 
 export interface LocationDetail extends LocationBase {
@@ -42,6 +54,7 @@ export interface LocationDetail extends LocationBase {
   organizations: FacilityOrganizationRead[];
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
+  tags: TagConfig[];
 }
 
 export interface LocationRead extends LocationBase {
@@ -51,15 +64,17 @@ export interface LocationRead extends LocationBase {
   current_encounter?: EncounterRead;
   sort_index: number;
   system_availability_status: SystemAvailabilityStatus;
+  tags: TagConfig[];
 }
 
 export type LocationMinSpec = Omit<LocationRead, "current_encounter">;
 
-export interface LocationWrite extends LocationBase {
+export interface LocationWrite extends Omit<LocationBase, "inventory_usage"> {
   id?: string;
   parent?: string;
   organizations: string[];
   mode: LocationMode;
+  inventory_usage?: InventoryUsage;
 }
 
 export interface LocationImport extends LocationBase {

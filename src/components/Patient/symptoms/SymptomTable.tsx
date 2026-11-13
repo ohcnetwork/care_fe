@@ -81,7 +81,7 @@ const SymptomCard = ({
                 <div className="text-gray-500">{t("reported_by")}:</div>
                 <div className="mt-1 flex items-center gap-1.5">
                   <Avatar
-                    name={formatName(symptom.created_by)}
+                    name={formatName(symptom.created_by, true)}
                     className="size-5"
                     imageUrl={symptom.created_by.profile_picture_url}
                   />

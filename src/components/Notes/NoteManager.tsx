@@ -137,7 +137,7 @@ function MessageItem({
           >
             <span className="flex pr-2">
               <Avatar
-                name={formatName(message.created_by)}
+                name={formatName(message.created_by, true)}
                 imageUrl={message.created_by?.profile_picture_url}
                 className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
               />

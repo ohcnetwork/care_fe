@@ -1,12 +1,12 @@
 import { Code } from "@/types/base/code/code";
 import {
   PrescriptionCreate,
-  PrescriptionRead,
+  PrescriptionList,
 } from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
-import { add, divide, isZero, multiply, roundUp } from "@/Utils/decimal";
+import { add, divide, isZero, multiply } from "@/Utils/decimal";
 import Decimal from "decimal.js";
 
 export const MEDICATION_REQUEST_STATUS_COLORS = {
@@ -364,8 +364,6 @@ export interface MedicationRequestDosageInstruction {
   text?: string;
   additional_instruction?: Code[];
   patient_instruction?: string;
-  // TODO: query: how to map for "Immediate" frequency
-  // TODO: query how to map Days
   timing?: Timing;
   /**
    * True if it is a PRN medication
@@ -405,7 +403,7 @@ export interface MedicationRequest {
   status?: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
   intent?: MedicationRequestIntent;
-  category?: "inpatient" | "outpatient" | "community" | "discharge";
+  category?: MedicationCategory;
   priority?: "stat" | "urgent" | "asap" | "routine";
   do_not_perform: boolean;
   medication?: Code;
@@ -451,12 +449,19 @@ export enum MedicationPriority {
   ROUTINE = "routine",
 }
 
+export enum MedicationCategory {
+  inpatient = "inpatient",
+  outpatient = "outpatient",
+  community = "community",
+  discharge = "discharge",
+}
+
 export interface MedicationRequestRead {
   id: string;
   status: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
   intent: MedicationRequestIntent;
-  category: "inpatient" | "outpatient" | "community" | "discharge";
+  category: MedicationCategory;
   priority: MedicationPriority;
   do_not_perform: boolean;
   medication: Code;
@@ -472,7 +477,7 @@ export interface MedicationRequestRead {
   inventory_items_internal?: InventoryRead[];
   dispense_status?: MedicationRequestDispenseStatus;
   requester?: UserReadMinimal;
-  prescription?: PrescriptionRead;
+  prescription?: PrescriptionList;
 }
 
 export const MEDICATION_REQUEST_TIMING_OPTIONS: Record<
@@ -1001,7 +1006,7 @@ export function parseMedicationStringToRequest(
     status: "active",
     intent: "order",
     priority: "routine",
-    category: "inpatient",
+    category: MedicationCategory.inpatient,
     authored_on: new Date().toISOString(),
     requester: requester,
   };
@@ -1686,18 +1691,9 @@ export function convertToHours(value: string, unit: string): Decimal {
 }
 
 /**
- * Core computation: total dose quantity for a single dosage instruction.
- * Returns the total as a Decimal, or null if it can't be computed.
- *
- * Handles:
- *  - M-A-N text patterns (sums actual slot values)
- *  - Standard FHIR frequency × period
- *  - Dose ranges (tapered, uses average)
- */
-/**
  * The course length in days from whichever scheduling bound is set: a duration
- * directly, a range by its longest end (`high`, so dispensing covers the full
- * course), or a period by `end - start`. Null when no usable bound is present.
+ * directly, a range by its inclusive span (`high - low + 1`, so e.g. day 4 → day
+ * 7 is 4 days), or a period by `end - start`. Null when no usable bound is set.
  */
 function effectiveDurationDays(repeat: Timing["repeat"]): Decimal | null {
   if (repeat.bounds_duration && repeat.bounds_duration.value !== "0") {
@@ -1707,10 +1703,16 @@ function effectiveDurationDays(repeat: Timing["repeat"]): Decimal | null {
     );
   }
   if (repeat.bounds_range) {
-    return convertToDays(
+    const low = convertToDays(
+      repeat.bounds_range.low.value,
+      repeat.bounds_range.low.unit,
+    );
+    const high = convertToDays(
       repeat.bounds_range.high.value,
       repeat.bounds_range.high.unit,
     );
+    // Inclusive of both the start and end day (day 4 → day 7 = 4 days).
+    return high.minus(low).plus(1);
   }
   if (repeat.bounds_period?.start && repeat.bounds_period.end) {
     const ms =
@@ -1768,39 +1770,4 @@ export function computeTotalDoseQuantity(
   }
 
   return multiply(doseValue, numberOfDoses) as Decimal;
-}
-
-// ─── Consumers of computeTotalDoseQuantity ──────────────────────────
-
-export function computeMedicationDispenseQuantity(
-  medication: MedicationRequestRead,
-): string {
-  const DEFAULT_QTY = "1";
-  if (!medication.dosage_instruction.length) return DEFAULT_QTY;
-
-  // Sum across all dosage instructions
-  let totalQty = 0;
-  let hasAnyDose = false;
-
-  for (const instruction of medication.dosage_instruction) {
-    const doseValue = instruction.dose_and_rate?.dose_quantity?.value;
-    if (!doseValue) continue;
-
-    const unitCode = instruction.dose_and_rate?.dose_quantity?.unit?.code;
-    const nonVolumetric = ["{tbl}", "{count}"];
-    if (unitCode && !nonVolumetric.includes(unitCode)) continue;
-
-    hasAnyDose = true;
-
-    if (instruction.as_needed_boolean) {
-      totalQty += parseFloat(doseValue);
-      continue;
-    }
-
-    const total = computeTotalDoseQuantity(instruction);
-    totalQty += parseFloat(String(total ?? doseValue));
-  }
-
-  if (!hasAnyDose) return DEFAULT_QTY;
-  return totalQty > 0 ? roundUp(String(totalQty)) : DEFAULT_QTY;
 }

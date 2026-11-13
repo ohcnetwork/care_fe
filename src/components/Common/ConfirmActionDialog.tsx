@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ButtonVariant, buttonVariants } from "@/components/ui/button";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface ConfirmActionDialogProps {
   open: boolean;
@@ -58,6 +59,7 @@ export default function ConfirmActionDialog({
             disabled={disabled}
           >
             {confirmText}
+            <ShortcutBadge actionId="submit-action" />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

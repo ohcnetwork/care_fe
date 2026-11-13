@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, interactive-widget=resizes-content" />
+      content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, interactive-widget=resizes-content"
+    />
     <title>%REACT_APP_TITLE%</title>
     <meta name="description" content="%REACT_APP_META_DESCRIPTION%" />
     <meta property="og:title" content="%REACT_APP_TITLE%" />
@@ -23,83 +24,71 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link
       rel="apple-touch-icon"
-      href="/images/icons/apple-touch-icon-180x180.png" />
+      href="/images/icons/apple-touch-icon-180x180.png"
+    />
     %REACT_INJECTED_HEAD%
   </head>
 
   <body>
     <noscript>
-      <div style="
-        font-family: sans-serif;
-        color: #d32f2f;
-        font-size: 16px;
-        text-align: center;
-        padding: 20px;
-        background-color: #ffebee;
-        border: 1px solid #d32f2f;
-        border-radius: 8px;
-        margin: 20px;
-        max-width: 500px;
-        margin: 40px auto;
-      ">
-        <h2 style="margin-bottom: 10px;">🚫 JavaScript is Disabled</h2>
+      <div
+        style="
+          font-family: sans-serif;
+          color: #d32f2f;
+          font-size: 16px;
+          text-align: center;
+          padding: 20px;
+          background-color: #ffebee;
+          border: 1px solid #d32f2f;
+          border-radius: 8px;
+          margin: 20px;
+          max-width: 500px;
+          margin: 40px auto;
+        "
+      >
+        <h2 style="margin-bottom: 10px">🚫 JavaScript is Disabled</h2>
         <p>
-          This application requires JavaScript to function properly. It looks like JavaScript is either 
+          This application requires JavaScript to function properly. It looks
+          like JavaScript is either
           <strong>disabled</strong> or <strong>blocked</strong> in your browser.
         </p>
-        <p style="margin-top: 10px;">
+        <p style="margin-top: 10px">
           🔧 <strong>How to Enable JavaScript:</strong>
         </p>
-          <ul style="text-align: left; display: inline-block; margin: 10px auto;">
-            <li>Go to your browser settings.</li>
-            <li>Find the "JavaScript" section.</li>
-            <li>Enable JavaScript and refresh this page.</li>
-          </ul>
+        <ul style="text-align: left; display: inline-block; margin: 10px auto">
+          <li>Go to your browser settings.</li>
+          <li>Find the "JavaScript" section.</li>
+          <li>Enable JavaScript and refresh this page.</li>
+        </ul>
         <p>If you are using a script blocker, allow scripts from this site.</p>
       </div>
     </noscript>
     <div id="root">
       <style nonce="7e14cf80">
-        .App-logo {
-          height: 10vmin;
-          pointer-events: none;
-          filter: brightness(80%);
-        }
-        @media (prefers-reduced-motion: no-preference) {
-          .App-logo {
-            animation: App-logo-blink 1s linear infinite;
-          }
-        }
-        @keyframes App-logo-blink {
-          0% {
-            opacity: 0;
-          }
-          25% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 1;
-          }
-          75% {
-            opacity: 0.5;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
         .temp-loading {
           display: grid;
           place-items: center;
           height: 100vh;
           text-align: center;
         }
+        .temp-loading-heart {
+          width: 4rem;
+          aspect-ratio: 10 / 8;
+        }
       </style>
       <div class="temp-loading">
-        <img
-          class="App-logo"
-          src="/images/care_logo_gray.svg"
-          alt="Care is loading"
-        />
+        <!-- Static frame of the Care UI loading animation; the animated version takes over once the bundle mounts. -->
+        <svg
+          class="temp-loading-heart"
+          viewBox="0 0 10 8"
+          role="img"
+          aria-label="Care is loading"
+        >
+          <path
+            fill="#f43f5e"
+            d="M 2.3,0 L 3.01,0 L 3.01,1.01 L 2,1.01 L 2,0.3 Q 2,0 2.3,0 Z M 3,0 L 3.71,0 Q 4.01,0 4.01,0.3 L 4.01,1.01 L 3,1.01 L 3,0 Z M 6.3,0 L 7.01,0 L 7.01,1.01 L 6,1.01 L 6,0.3 Q 6,0 6.3,0 Z M 7,0 L 7.71,0 Q 8.01,0 8.01,0.3 L 8.01,1.01 L 7,1.01 L 7,0 Z M 1,1 L 2.01,1 L 2.01,2.01 L 1,2.01 L 1,1 Z M 2,1 L 3.01,1 L 3.01,2.01 L 2,2.01 L 2,1 Z M 3,1 L 4.01,1 L 4.01,2.01 L 3,2.01 L 3,1 Z M 4,1 L 5.01,1 L 5.01,2.01 L 4,2.01 L 4,1 Z M 5,1 L 6.01,1 L 6.01,2.01 L 5,2.01 L 5,1 Z M 6,1 L 7.01,1 L 7.01,2.01 L 6,2.01 L 6,1 Z M 7,1 L 8.01,1 L 8.01,2.01 L 7,2.01 L 7,1 Z M 8,1 L 9.01,1 L 9.01,2.01 L 8,2.01 L 8,1 Z M 0.3,2 L 1.01,2 L 1.01,3.01 L 0,3.01 L 0,2.3 Q 0,2 0.3,2 Z M 1,2 L 2.01,2 L 2.01,3.01 L 1,3.01 L 1,2 Z M 3,2 L 4.01,2 L 4.01,3.01 L 3,3.01 L 3,2 Z M 4,2 L 5.01,2 L 5.01,3.01 L 4,3.01 L 4,2 Z M 5,2 L 6.01,2 L 6.01,3.01 L 5,3.01 L 5,2 Z M 6,2 L 7.01,2 L 7.01,3.01 L 6,3.01 L 6,2 Z M 7,2 L 8.01,2 L 8.01,3.01 L 7,3.01 L 7,2 Z M 8,2 L 9.01,2 L 9.01,3.01 L 8,3.01 L 8,2 Z M 9,2 L 9.71,2 Q 10.01,2 10.01,2.3 L 10.01,3.01 L 9,3.01 L 9,2 Z M 0,3 L 1.01,3 L 1.01,4.01 L 0.3,4.01 Q 0,4.01 0,3.71 L 0,3 Z M 1,3 L 2.01,3 L 2.01,4.01 L 1,4.01 L 1,3 Z M 2,3 L 3.01,3 L 3.01,4.01 L 2,4.01 L 2,3 Z M 3,3 L 4.01,3 L 4.01,4.01 L 3,4.01 L 3,3 Z M 4,3 L 5.01,3 L 5.01,4.01 L 4,4.01 L 4,3 Z M 5,3 L 6.01,3 L 6.01,4.01 L 5,4.01 L 5,3 Z M 6,3 L 7.01,3 L 7.01,4.01 L 6,4.01 L 6,3 Z M 7,3 L 8.01,3 L 8.01,4.01 L 7,4.01 L 7,3 Z M 8,3 L 9.01,3 L 9.01,4.01 L 8,4.01 L 8,3 Z M 9,3 L 10.01,3 L 10.01,3.71 Q 10.01,4.01 9.71,4.01 L 9,4.01 L 9,3 Z M 1,4 L 2.01,4 L 2.01,5.01 L 1,5.01 L 1,4 Z M 2,4 L 3.01,4 L 3.01,5.01 L 2,5.01 L 2,4 Z M 3,4 L 4.01,4 L 4.01,5.01 L 3,5.01 L 3,4 Z M 4,4 L 5.01,4 L 5.01,5.01 L 4,5.01 L 4,4 Z M 5,4 L 6.01,4 L 6.01,5.01 L 5,5.01 L 5,4 Z M 6,4 L 7.01,4 L 7.01,5.01 L 6,5.01 L 6,4 Z M 7,4 L 8.01,4 L 8.01,5.01 L 7,5.01 L 7,4 Z M 8,4 L 9.01,4 L 9.01,5.01 L 8,5.01 L 8,4 Z M 2,5 L 3.01,5 L 3.01,6.01 L 2,6.01 L 2,5 Z M 3,5 L 4.01,5 L 4.01,6.01 L 3,6.01 L 3,5 Z M 4,5 L 5.01,5 L 5.01,6.01 L 4,6.01 L 4,5 Z M 5,5 L 6.01,5 L 6.01,6.01 L 5,6.01 L 5,5 Z M 6,5 L 7.01,5 L 7.01,6.01 L 6,6.01 L 6,5 Z M 7,5 L 8.01,5 L 8.01,6.01 L 7,6.01 L 7,5 Z M 3,6 L 4.01,6 L 4.01,7.01 L 3,7.01 L 3,6 Z M 4,6 L 5.01,6 L 5.01,7.01 L 4,7.01 L 4,6 Z M 5,6 L 6.01,6 L 6.01,7.01 L 5,7.01 L 5,6 Z M 6,6 L 7.01,6 L 7.01,7.01 L 6,7.01 L 6,6 Z M 4,7 L 5.01,7 L 5.01,8.01 L 4.3,8.01 Q 4,8.01 4,7.71 L 4,7 Z M 5,7 L 6.01,7 L 6.01,7.71 Q 6.01,8.01 5.71,8.01 L 5,8.01 L 5,7 Z"
+          />
+        </svg>
       </div>
     </div>
     <script type="module" src="/src/index.tsx"></script>

@@ -145,7 +145,9 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{product.name}</h1>
+              <h1 className="text-2xl font-bold wrap-anywhere">
+                {product.name}
+              </h1>
               <Badge variant={PRODUCT_KNOWLEDGE_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>

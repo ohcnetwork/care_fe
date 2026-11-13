@@ -1,6 +1,9 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
 
-import { AllergyIntolerance } from "./allergyIntolerance";
+import {
+  AllergyIntolerance,
+  AllergyIntoleranceRequest,
+} from "./allergyIntolerance";
 
 export default {
   getAllergy: {
@@ -12,5 +15,11 @@ export default {
     path: "/api/v1/patient/{patientId}/allergy_intolerance/{allergyId}/",
     method: HttpMethod.GET,
     TRes: Type<AllergyIntolerance>(),
+  },
+  upsertAllergy: {
+    path: "/api/v1/patient/{patientId}/allergy_intolerance/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<AllergyIntolerance[]>(),
+    TBody: Type<{ datapoints: AllergyIntoleranceRequest[] }>(),
   },
 };

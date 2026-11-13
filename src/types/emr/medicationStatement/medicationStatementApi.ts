@@ -1,5 +1,8 @@
 import { HttpMethod, PaginatedResponse, Type } from "@/Utils/request/types";
-import { MedicationStatementRead } from "@/types/emr/medicationStatement";
+import {
+  MedicationStatementRead,
+  MedicationStatementRequest,
+} from "@/types/emr/medicationStatement";
 
 const medicationStatementApi = {
   list: {
@@ -9,6 +12,12 @@ const medicationStatementApi = {
     defaultQueryParams: {
       ordering: "-created_date",
     },
+  },
+  upsert: {
+    path: "/api/v1/patient/{patientId}/medication/statement/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<MedicationStatementRead[]>(),
+    TBody: Type<{ datapoints: MedicationStatementRequest[] }>(),
   },
 } as const;
 

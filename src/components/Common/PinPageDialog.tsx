@@ -27,6 +27,7 @@ interface PinPageDialogProps {
 function PinPageDialog({ url }: PinPageDialogProps) {
   const { t } = useTranslation();
   const [open, onOpenChange] = useState(false);
+  const { facilityId } = useCurrentFacilitySilently();
   const {
     addCustomLink,
     isCustomLink,
@@ -34,8 +35,7 @@ function PinPageDialog({ url }: PinPageDialogProps) {
     isPending,
     canAddMoreLinks,
     maxCustomLinks,
-  } = useUserPreferences();
-  const { facilityId } = useCurrentFacilitySilently();
+  } = useUserPreferences({ facilityId });
 
   const [includeQueryParams, setIncludeQueryParams] = useState(false);
   const pathUrl = includeQueryParams
@@ -88,7 +88,11 @@ function PinPageDialog({ url }: PinPageDialogProps) {
       <Button
         variant="outline"
         onClick={() => onOpenChange(true)}
-        className="hidden"
+        className="sr-only"
+        tabIndex={-1}
+        aria-label={
+          isAlreadyPinned ? t("unpin_page_shortcut") : t("pin_page_shortcut")
+        }
       >
         <ShortcutBadge actionId="pin-page" />
       </Button>

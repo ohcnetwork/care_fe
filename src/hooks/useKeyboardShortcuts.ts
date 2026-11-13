@@ -2,14 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
 
-export interface ShortcutConditions {
-  readOnly?: boolean;
-  canEdit?: boolean;
-  canCreate?: boolean;
-  questionnairesEnabled?: boolean;
-  [key: string]: unknown; // Allow custom conditions
-}
-
 export interface ShortcutHandlers {
   [action: string]: () => void;
 }
@@ -18,13 +10,11 @@ export interface KeyboardShortcut {
   key: string;
   action: string;
   description: string;
-  when: string;
   subContext?: string;
 }
 
 export function useKeyboardShortcuts(
   contexts: string[],
-  conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
   activeSubContext?: string,
   ignoreInputFields?: boolean,
@@ -43,48 +33,12 @@ export function useKeyboardShortcuts(
     return allShortcuts;
   }, [contexts]);
 
-  const evaluateWhenCondition = useCallback(
-    (whenClause: string): boolean => {
-      if (whenClause === "always") return true;
-
-      const evalContext = {
-        canEdit: conditions.canEdit || false,
-        canCreate: conditions.canCreate || false,
-        readOnly: conditions.readOnly || false,
-        questionnairesEnabled: conditions.questionnairesEnabled || false,
-        ...conditions, // Allow custom conditions
-      };
-
-      try {
-        let expression = whenClause;
-        Object.entries(evalContext).forEach(([key, value]) => {
-          const regex = new RegExp(`\\b${key}\\b`, "g");
-          expression = expression.replace(regex, String(value));
-        });
-
-        return new Function(`return ${expression}`)();
-      } catch (error) {
-        console.warn(
-          `Failed to evaluate shortcut condition: ${whenClause}`,
-          error,
-        );
-        return false;
-      }
-    },
-    [conditions],
-  );
-
   const categorizedShortcuts = useMemo(() => {
     const direct: Record<string, KeyboardShortcut> = {};
     const prefixGroups: Record<string, Record<string, KeyboardShortcut>> = {};
     const modified: Record<string, KeyboardShortcut> = {};
 
     shortcuts.forEach((shortcut) => {
-      //should be active or not check
-      if (!evaluateWhenCondition(shortcut.when)) {
-        return;
-      }
-
       if (
         (activeSubContext &&
           shortcut.subContext &&
@@ -118,7 +72,7 @@ export function useKeyboardShortcuts(
     });
 
     return { direct, prefixGroups, modified };
-  }, [shortcuts, evaluateWhenCondition]);
+  }, [shortcuts, activeSubContext]);
 
   const matchesKeyCombo = useCallback(
     (keyCombo: string, event: KeyboardEvent): boolean => {
@@ -327,9 +281,7 @@ export function useKeyboardShortcuts(
   }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   return {
-    shortcuts: shortcuts.filter((shortcut) =>
-      evaluateWhenCondition(shortcut.when),
-    ),
+    shortcuts,
     activePrefix,
     isOptionPressed,
   };

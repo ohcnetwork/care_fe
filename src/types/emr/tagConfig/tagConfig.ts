@@ -40,6 +40,7 @@ export enum TagResource {
   DELIVERY_ORDER = "supply_delivery_order",
   REQUEST_ORDER = "supply_request_order",
   ACCOUNT = "account",
+  LOCATION = "location",
 }
 
 export interface TagConfigBase {
@@ -53,7 +54,7 @@ export interface TagConfigBase {
 }
 
 export interface TagConfig extends TagConfigBase {
-  meta: TagConfigMeta;
+  metadata: TagConfigMeta;
   priority: number;
   status: TagStatus;
   system_generated: boolean;
@@ -78,6 +79,7 @@ export interface TagConfigRequest {
   organization?: string;
   facility?: string;
   facility_organization?: string;
+  metadata?: TagConfigMeta;
 }
 
 export function getTagHierarchyDisplay(

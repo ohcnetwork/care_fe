@@ -16,6 +16,7 @@ import {
   accountBillingStatusFilter,
   accountStatusFilter,
   dateFilter,
+  encounterClassFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -55,7 +56,7 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateTimeQueryString } from "@/Utils/utils";
 
-import { isPositive } from "@/Utils/decimal";
+import { isPositive, roundWhole } from "@/Utils/decimal";
 import AccountSheet from "./AccountSheet";
 
 function formatDate(date?: string) {
@@ -111,6 +112,7 @@ export function AccountList({
     accountStatusFilter("status"),
     dateFilter("created_date", t("period"), longDateRangeOptions, false),
     accountBillingStatusFilter("billing_status"),
+    encounterClassFilter("encounter_class"),
     tagFilter("tags", TagResource.ACCOUNT, "multi", "tags"),
   ];
 
@@ -159,6 +161,9 @@ export function AccountList({
     billing_status: qParams.billing_status
       ? [qParams.billing_status]
       : undefined,
+    encounter_class: qParams.encounter_class
+      ? [qParams.encounter_class]
+      : undefined,
     tags: selectedTags,
   });
 
@@ -172,6 +177,7 @@ export function AccountList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         status: qParams.status,
         billing_status: qParams.billing_status,
+        encounter_class: qParams.encounter_class,
         created_date_after: qParams.created_date_after,
         created_date_before: qParams.created_date_before,
         tags: qParams.tags,
@@ -287,12 +293,14 @@ export function AccountList({
                   <TableCell
                     className={cn(
                       "border-x p-3 text-base font-medium leading-6",
-                      isPositive(account.total_balance)
+                      isPositive(roundWhole(account.total_balance))
                         ? "text-gray-950"
                         : "text-green-700 italic",
                     )}
                   >
-                    <MonetaryDisplay amount={account.total_balance} />
+                    <MonetaryDisplay
+                      amount={roundWhole(account.total_balance)}
+                    />
                   </TableCell>
                   <TableCell className="text-base font-medium leading-6 text-gray-950">
                     <MonetaryDisplay

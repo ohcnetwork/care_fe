@@ -5,12 +5,13 @@ import {
   EllipsisVertical,
   Eye,
   Hash,
+  History,
   MoreVertical,
   Printer,
   Truck,
 } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -19,6 +20,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +35,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -53,7 +56,11 @@ import {
 } from "@/hooks/useExtensions";
 import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import { cn } from "@/lib/utils";
-import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
+import UpsertLimitCallout from "@/pages/Facility/services/inventory/externalSupply/components/UpsertLimitCallout";
+import {
+  AddSupplyDeliveryForm,
+  AddSupplyDeliveryFormHandle,
+} from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
@@ -67,6 +74,7 @@ import {
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
+  ACTIVE_SUPPLY_DELIVERY_STATUSES,
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -76,6 +84,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { ExtensionContexts } from "@/Utils/schema/types";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import careConfig from "@careConfig";
 
 interface Props {
   facilityId: string;
@@ -171,7 +180,6 @@ function AllSupplyDeliveriesComponent({
 function getDeliveryOrderStatusActions(
   status: DeliveryOrderStatus,
   internal: boolean,
-  anyCompletedSupplyDeliveries: boolean,
 ) {
   const isPendingOrCompleted = [
     DeliveryOrderStatus.draft,
@@ -190,24 +198,19 @@ function getDeliveryOrderStatusActions(
       status: DeliveryOrderStatus.draft,
       icon: <Edit className="size-4" />,
       label: "mark_as_draft",
-      visibility: true,
     },
     {
       status: DeliveryOrderStatus.entered_in_error,
       icon: <CareIcon icon="l-exclamation-circle" />,
       label: "mark_as_entered_in_error",
-      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
     {
       status: DeliveryOrderStatus.abandoned,
       icon: <CareIcon icon="l-ban" />,
       label: "mark_as_abandoned",
-      visibility: internal ? true : !anyCompletedSupplyDeliveries,
     },
   ];
-  return actions.filter(
-    (action) => action.status !== status && action.visibility,
-  );
+  return actions.filter((action) => action.status !== status);
 }
 
 export function DeliveryOrderShow({
@@ -241,6 +244,10 @@ export function DeliveryOrderShow({
     condition: SupplyDeliveryCondition.normal,
   });
   const [showAllDeliveries, setShowAllDeliveries] = useState(false);
+  const [showCancelledDeliveries, setShowCancelledDeliveries] = useState(false);
+  const deliveryFormRef = useRef<AddSupplyDeliveryFormHandle>(null);
+  const [editingDeliveryIds, setEditingDeliveryIds] = useState<string[]>([]);
+  const [hasPendingItemChanges, setHasPendingItemChanges] = useState(false);
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
   const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
@@ -264,18 +271,20 @@ export function DeliveryOrderShow({
 
   const isRequester = locationId === deliveryOrder?.destination.id;
 
-  const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
-    useQuery({
-      queryKey: ["supplyDeliveries", deliveryOrderId],
-      queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
-        queryParams: {
-          order: deliveryOrderId,
-          facility: facilityId,
-          ordering: "created_date",
-        },
-      }),
-      enabled: !!deliveryOrderId,
-    });
+  const {
+    data: supplyDeliveries,
+    isLoading: isLoadingSupplyDeliveries,
+    isFetching: isFetchingSupplyDeliveries,
+  } = useQuery({
+    queryKey: ["supplyDeliveries", deliveryOrderId],
+    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        order: deliveryOrderId,
+        facility: facilityId,
+        ordering: "created_date",
+      },
+    }),
+  });
 
   const supplyOrderId = supplyDeliveries?.results?.find(
     (delivery) => delivery.supply_request && delivery.supply_request.id,
@@ -288,6 +297,7 @@ export function DeliveryOrderShow({
         queryClient.invalidateQueries({
           queryKey: ["supplyDeliveries", deliveryOrderId],
         });
+        queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
         toast.success(t("supply_deliveries_updated_successfully"));
       },
       onError: (_error) => {
@@ -306,10 +316,20 @@ export function DeliveryOrderShow({
         deliveryOrderId: deliveryOrderId,
       },
     }),
-    onSuccess: (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
-      queryClient.invalidateQueries({
-        queryKey: ["deliveryOrders", deliveryOrderId],
-      });
+    onSuccess: async (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
+      setSelectedDeliveries([]);
+      await Promise.all(
+        [
+          ["deliveryOrders"],
+          ["supplyDeliveries", deliveryOrderId],
+          ["allSupplyDeliveries"],
+          ["supplyRequests"],
+          ["inventory", facilityId],
+          ["inventoryItems", facilityId],
+          ["dispensableItems", facilityId],
+          ["expiredItems", facilityId],
+        ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      );
 
       toast.success(
         updatedDeliveryOrder.status === DeliveryOrderStatus.pending
@@ -460,16 +480,42 @@ export function DeliveryOrderShow({
   const canAddSupplyDeliveries =
     deliveryOrder.status === DeliveryOrderStatus.draft;
 
-  const anyCompletedSupplyDeliveries =
-    supplyDeliveries?.results?.some(
-      (delivery) => delivery.status === SupplyDeliveryStatus.completed,
-    ) ?? false;
+  const canMarkAsCompleted =
+    !!supplyDeliveries?.results?.length &&
+    supplyDeliveries.results.every(
+      (delivery) =>
+        delivery.status === SupplyDeliveryStatus.completed ||
+        delivery.status === SupplyDeliveryStatus.abandoned ||
+        delivery.status === SupplyDeliveryStatus.entered_in_error,
+    );
 
   const deliveryOrderStatusActions = getDeliveryOrderStatusActions(
     deliveryOrder.status,
     internal,
-    anyCompletedSupplyDeliveries,
   );
+
+  const inprogressSupplyDeliveries =
+    supplyDeliveries?.results?.filter(
+      (delivery) => delivery.status === SupplyDeliveryStatus.in_progress,
+    ) ?? [];
+
+  const hasReachedUpsertLimit =
+    inprogressSupplyDeliveries.length >= careConfig.maxDatapointsPerUpsert;
+
+  const isWithinUpsertLimit =
+    selectedDeliveries.length <= careConfig.maxDatapointsPerUpsert;
+
+  const activeSupplyDeliveries =
+    supplyDeliveries?.results.filter((delivery) =>
+      ACTIVE_SUPPLY_DELIVERY_STATUSES.some(
+        (status) => status === delivery.status,
+      ),
+    ) ?? [];
+  const cancelledDeliveriesCount =
+    (supplyDeliveries?.results.length ?? 0) - activeSupplyDeliveries.length;
+  const visibleSupplyDeliveries = showCancelledDeliveries
+    ? (supplyDeliveries?.results ?? [])
+    : activeSupplyDeliveries;
 
   return (
     <Page
@@ -486,7 +532,7 @@ export function DeliveryOrderShow({
             : "md:max-w-[calc(100vw-9rem)]",
         )}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button
               size="icon"
@@ -526,7 +572,7 @@ export function DeliveryOrderShow({
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {supplyOrderId && (
               <Button variant="outline" asChild>
                 <Link
@@ -547,21 +593,30 @@ export function DeliveryOrderShow({
             </Button>
 
             {(!isRequester || !internal) &&
-              deliveryOrder.status === DeliveryOrderStatus.draft && (
+              deliveryOrder.status === DeliveryOrderStatus.draft &&
+              (hasPendingItemChanges ? (
+                <Button variant="outline" disabled>
+                  <Edit /> {t("edit_order")}
+                </Button>
+              ) : (
                 <Button variant="outline" asChild>
                   <Link href={`${deliveryOrderId}/edit`}>
-                    <Edit /> {t("edit")}
+                    <Edit /> {t("edit_order")}
                     <ShortcutBadge actionId="edit-order" />
                   </Link>
                 </Button>
-              )}
+              ))}
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
                 onClick={() =>
                   handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.pending)
                 }
-                disabled={isUpdating || supplyDeliveries?.results.length === 0}
+                disabled={
+                  isUpdating ||
+                  hasPendingItemChanges ||
+                  activeSupplyDeliveries.length === 0
+                }
               >
                 {isUpdating ? t("updating") : t("mark_as_approved")}
                 <ShortcutBadge actionId="mark-as" />
@@ -578,7 +633,8 @@ export function DeliveryOrderShow({
                   disabled={
                     isUpsertingDeliveries ||
                     isUpdating ||
-                    selectedDeliveries.length !== 0
+                    selectedDeliveries.length !== 0 ||
+                    !canMarkAsCompleted
                   }
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
@@ -589,7 +645,16 @@ export function DeliveryOrderShow({
             {deliveryOrderStatusActions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label={t("actions")}
+                    disabled={
+                      hasPendingItemChanges ||
+                      isUpdating ||
+                      isUpsertingDeliveries
+                    }
+                  >
                     <EllipsisVertical className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -605,7 +670,7 @@ export function DeliveryOrderShow({
                               status: action.status,
                             })
                           }
-                          disabled={isUpdating}
+                          disabled={isUpdating || isUpsertingDeliveries}
                           className="w-full flex justify-stretch"
                         >
                           {action.icon}
@@ -619,6 +684,12 @@ export function DeliveryOrderShow({
             )}
           </div>
         </div>
+
+        {hasPendingItemChanges && (
+          <p className="text-sm text-gray-600" role="status">
+            {t("save_or_discard_delivery_changes")}
+          </p>
+        )}
 
         {/* Delivery Order Details */}
         <Card>
@@ -709,13 +780,7 @@ export function DeliveryOrderShow({
                       }
                     />
                     {deliveryOrder?.tags?.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="secondary"
-                        className="rounded-sm"
-                      >
-                        {tag.display}
-                      </Badge>
+                      <TagBadge key={tag.id} tag={tag} className="rounded-sm" />
                     ))}
                   </div>
                 </div>
@@ -771,7 +836,7 @@ export function DeliveryOrderShow({
 
         {/* Supply Deliveries Section */}
         <Card>
-          <CardHeader className="text-lg flex flex-row justify-between">
+          <CardHeader className="text-lg flex flex-row flex-wrap items-center justify-between gap-2">
             <CardTitle>
               {isRequester
                 ? deliveryOrder.status === DeliveryOrderStatus.completed
@@ -779,7 +844,22 @@ export function DeliveryOrderShow({
                   : t("items_to_receive")
                 : t("supply_deliveries")}
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {cancelledDeliveriesCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={showCancelledDeliveries}
+                  onClick={() => setShowCancelledDeliveries((show) => !show)}
+                >
+                  <History className="size-4" />
+                  {showCancelledDeliveries
+                    ? t("hide_cancelled_items")
+                    : t("show_cancelled_items", {
+                        count: cancelledDeliveriesCount,
+                      })}
+                </Button>
+              )}
               {deliveryOrder.status === DeliveryOrderStatus.pending && (
                 <Button
                   variant="outline"
@@ -799,7 +879,8 @@ export function DeliveryOrderShow({
                       disabled={
                         isUpdating ||
                         isUpsertingDeliveries ||
-                        selectedDeliveries.length === 0
+                        selectedDeliveries.length === 0 ||
+                        !isWithinUpsertLimit
                       }
                     >
                       {isUpsertingDeliveries
@@ -819,7 +900,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_abandoned")}
@@ -829,7 +911,8 @@ export function DeliveryOrderShow({
                           disabled={
                             isUpdating ||
                             isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
+                            selectedDeliveries.length === 0 ||
+                            !isWithinUpsertLimit
                           }
                         >
                           {t("mark_as_damaged")}
@@ -840,6 +923,15 @@ export function DeliveryOrderShow({
                 )}
             </div>
           </CardHeader>
+          {!isWithinUpsertLimit && (
+            <div className="px-4">
+              <UpsertLimitCallout>
+                {t("max_deliveries_selected_limit", {
+                  count: careConfig.maxDatapointsPerUpsert,
+                })}
+              </UpsertLimitCallout>
+            </div>
+          )}
           <CardContent className="p-2">
             {isLoadingSupplyDeliveries ? (
               <div className="space-y-2">
@@ -853,11 +945,10 @@ export function DeliveryOrderShow({
             ) : (
               <div className="space-y-6">
                 {/* Existing Supply Deliveries Table */}
-                {supplyDeliveries?.results &&
-                supplyDeliveries.results.length > 0 ? (
+                {visibleSupplyDeliveries.length > 0 ? (
                   <div className="space-y-4">
                     <SupplyDeliveryTable
-                      deliveries={supplyDeliveries.results}
+                      deliveries={visibleSupplyDeliveries}
                       showCheckbox={
                         deliveryOrder.status === DeliveryOrderStatus.pending &&
                         isRequester
@@ -883,18 +974,23 @@ export function DeliveryOrderShow({
                       onSelectAll={(checked) => {
                         if (checked) {
                           setSelectedDeliveries(
-                            supplyDeliveries.results
-                              .filter(
-                                (d) =>
-                                  d.status === SupplyDeliveryStatus.in_progress,
-                              )
-                              .map((d) => d.id),
+                            inprogressSupplyDeliveries.map((d) => d.id),
                           );
                         } else {
                           setSelectedDeliveries([]);
                         }
                       }}
                       internal={internal}
+                      facilityId={facilityId}
+                      linkToProduct
+                      editingDeliveryIds={editingDeliveryIds}
+                      onEditDelivery={
+                        canAddSupplyDeliveries && !internal
+                          ? (delivery) => {
+                              deliveryFormRef.current?.editDelivery(delivery);
+                            }
+                          : undefined
+                      }
                       onDeliveryClick={(delivery) => {
                         setShowAllDeliveries(true);
                         setSelectedProductKnowledgeDrawer(
@@ -907,19 +1003,37 @@ export function DeliveryOrderShow({
                       deliveryOrderStatus={deliveryOrder.status}
                     />
                   </div>
-                ) : (
-                  <></>
+                ) : cancelledDeliveriesCount > 0 ? (
+                  <p className="py-6 text-center text-sm text-gray-500">
+                    {t("no_active_deliveries")}
+                  </p>
+                ) : null}
+
+                {hasReachedUpsertLimit && canAddSupplyDeliveries && (
+                  <UpsertLimitCallout>
+                    {t("max_datapoints_per_upsert_limit", {
+                      count: careConfig.maxDatapointsPerUpsert,
+                    })}
+                  </UpsertLimitCallout>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
                 {canAddSupplyDeliveries && (
-                  <AddSupplyDeliveryForm
-                    deliveryOrderId={deliveryOrderId}
-                    facilityId={facilityId}
-                    origin={deliveryOrder.origin?.id}
-                    destination={deliveryOrder.destination.id}
-                    onSuccess={handleSupplyDeliverySuccess}
-                  />
+                  <div>
+                    <AddSupplyDeliveryForm
+                      ref={deliveryFormRef}
+                      deliveryOrderId={deliveryOrderId}
+                      facilityId={facilityId}
+                      origin={deliveryOrder.origin?.id}
+                      destination={deliveryOrder.destination.id}
+                      onSuccess={handleSupplyDeliverySuccess}
+                      supplyDeliveriesCount={inprogressSupplyDeliveries.length}
+                      isFetchingSupplyDeliveries={isFetchingSupplyDeliveries}
+                      currentSupplyDeliveries={supplyDeliveries?.results ?? []}
+                      onEditingDeliveryIdsChange={setEditingDeliveryIds}
+                      onPendingChangesChange={setHasPendingItemChanges}
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -939,7 +1053,10 @@ export function DeliveryOrderShow({
         >
           <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10 ">
             <DrawerHeader>
-              <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
+              <DrawerTitle>{t("delivery_history")}</DrawerTitle>
+              <DrawerDescription>
+                {t("delivery_history_description")}
+              </DrawerDescription>
             </DrawerHeader>
             <div>
               <div className="flex items-center justify-end px-4">
@@ -1105,8 +1222,8 @@ export function DeliveryOrderShow({
               ? t("mark_order_as_draft_confirmation_description")
               : deliveryOrderStatusDialog.status ===
                   DeliveryOrderStatus.entered_in_error
-                ? t("mark_order_as_entered_in_error_confirmation_description")
-                : t("mark_order_as_abandoned_confirmation_description")
+                ? t("delivery_order_entered_in_error_confirmation_description")
+                : t("delivery_order_abandoned_confirmation_description")
           }
           confirmText={t("confirm")}
           variant={
@@ -1120,7 +1237,7 @@ export function DeliveryOrderShow({
             }
             setDeliveryOrderStatusDialog({ open: false, status: null });
           }}
-          disabled={isUpdating}
+          disabled={isUpdating || isUpsertingDeliveries}
         />
       </div>
     </Page>

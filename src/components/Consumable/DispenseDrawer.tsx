@@ -18,7 +18,6 @@ import {
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
 import {
-  MedicationDispenseCategory,
   MedicationDispenseCreate,
   MedicationDispenseStatus,
 } from "@/types/emr/medicationDispense/medicationDispense";
@@ -70,6 +69,7 @@ import {
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
+import { getExpirationDateThresholdForDispensing } from "@/pages/Facility/services/inventory/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   DispenseOrderBatchResponse,
@@ -78,6 +78,7 @@ import {
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { MedicationCategory } from "@/types/emr/medicationRequest/medicationRequest";
 import {
   isGreaterThan,
   isLessThanOrEqual,
@@ -208,7 +209,11 @@ export default function DispenseDrawer({
           queryParams: {
             limit: 100,
             product_knowledge: productKnowledgeId,
+            status: "active",
             net_content_gt: 0,
+            ordering: "product__expiration_date",
+            product_expiration_date_after:
+              getExpirationDateThresholdForDispensing().toISOString(),
           },
         })({ signal: new AbortController().signal });
 
@@ -232,7 +237,7 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
-  // Auto-select first valid (non-expired) lot by default
+  // Inventories are fetched earliest-expiry first (FEFO), so the first valid lot is the one to use
   useEffect(() => {
     fields.forEach((field, index) => {
       const inventories =
@@ -244,9 +249,7 @@ export default function DispenseDrawer({
         inventories?.length &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
-        const validLot = inventories.find((inv) =>
-          isLotAllowedForDispensing(inv.product.expiration_date),
-        );
+        const validLot = inventories.find(isLotAllowedForDispensing);
 
         if (validLot) {
           form.setValue(`items.${index}.lots`, [
@@ -459,7 +462,7 @@ export default function DispenseDrawer({
 
           const dispenseData: MedicationDispenseCreate = {
             status: MedicationDispenseStatus.completed,
-            category: MedicationDispenseCategory.outpatient,
+            category: MedicationCategory.outpatient,
             when_prepared: new Date(),
             dosage_instruction: [],
             encounter: encounterId,

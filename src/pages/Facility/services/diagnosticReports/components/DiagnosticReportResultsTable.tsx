@@ -191,7 +191,7 @@ export function DiagnosticReportResultsTable({
         <TableRow
           key={observation.id}
           className={cn(
-            "divide-x divide-gray-300 text-sm text-gray-950",
+            "divide-x divide-gray-300 text-sm text-gray-950 hover:bg-white",
             hasComponents && "border-b-0",
           )}
         >
@@ -254,7 +254,7 @@ export function DiagnosticReportResultsTable({
   return (
     <div className="rounded-md border overflow-hidden">
       <Table className="border-collapse bg-white shadow-sm cursor-default table-fixed w-full">
-        <TableHeader className="bg-gray-100">
+        <TableHeader className="bg-gray-50">
           <TableRow className="divide-x-1 divide-gray-300">
             <TableHead className="font-medium text-sm text-gray-700 w-[25%] align-top pt-2">
               {t("test")}

@@ -121,10 +121,14 @@ export const EncounterDetails = () => {
               <ShortcutBadge actionId="update-encounter" />
             </Link>
           </Button>
-          <Button className="hidden" onClick={() => markAsCompleted(true)}>
+          <Button
+            className="sr-only"
+            tabIndex={-1}
+            onClick={() => markAsCompleted(true)}
+          >
             <ShortcutBadge actionId="mark-as-completed" />
           </Button>
-          <Button className="hidden" onClick={dispense}>
+          <Button className="sr-only" tabIndex={-1} onClick={dispense}>
             <ShortcutBadge actionId="dispense" />
           </Button>
         </>

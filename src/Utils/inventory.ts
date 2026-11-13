@@ -1,5 +1,13 @@
-import { addMonths, endOfMonth, isAfter } from "date-fns";
+import {
+  addMonths,
+  endOfMonth,
+  formatDate,
+  isAfter,
+  startOfMonth,
+} from "date-fns";
 
+import { Badge } from "@/components/ui/badge";
+import { InventoryRead } from "@/types/inventory/product/inventory";
 import careConfig from "@careConfig";
 
 export type ExpiryStatus = "expired" | "expiring_soon" | "valid";
@@ -32,6 +40,25 @@ export function getExpiryStatus(
 }
 
 /**
+ * Gets the expiration date range of products considered "expired" by
+ * {@link getExpiryStatus}.
+ */
+export function getExpiredDateRange() {
+  return { to: endOfMonth(new Date()) };
+}
+
+/**
+ * Gets the expiration date range of products considered "expiring_soon"
+ */
+export function getExpiringSoonDateRange(expiryMonthOffset: number) {
+  const today = new Date();
+  return {
+    from: startOfMonth(addMonths(today, 1)),
+    to: endOfMonth(addMonths(today, expiryMonthOffset)),
+  };
+}
+
+/**
  * Checks if a product is restricted based on its expiration date
  * (i.e., expired or expiring soon)
  * @param expirationDate - The expiration date string
@@ -49,22 +76,31 @@ export function isProductRestrictedFromDispensing(
  * @param expirationDate - The expiration date string
  * @returns boolean - true if the lot is valid for selection
  */
-export function isLotAllowedForDispensing(
-  expirationDate: string | undefined,
-): boolean {
-  return !isProductRestrictedFromDispensing(expirationDate);
+export function isLotAllowedForDispensing(inventory: InventoryRead) {
+  return !isProductRestrictedFromDispensing(inventory.product.expiration_date);
 }
 
 /**
  * Gets the badge variant for displaying expiry status
  * @param expirationDate - The expiration date string
- * @returns Badge variant - "destructive" for expired, "yellow" for expiring soon, "primary" for valid
+ * @returns Badge variant - "destructive" for expired, "yellow" for expiring soon, "green" for valid
  */
 export function getExpiryBadgeVariant(
   expirationDate: string | undefined,
-): "destructive" | "yellow" | "primary" {
+): React.ComponentProps<typeof Badge>["variant"] {
   const status = getExpiryStatus(expirationDate);
   if (status === "expired") return "destructive";
   if (status === "expiring_soon") return "yellow";
-  return "primary";
+  return "green";
+}
+
+/**
+ * Formats the expiry date of a lot
+ * @param inventory - The inventory object
+ * @returns The formatted expiry date
+ */
+export function formatLotExpiry(inventory: InventoryRead) {
+  return inventory.product.expiration_date
+    ? formatDate(inventory.product.expiration_date, "MM/yyyy")
+    : "-";
 }
