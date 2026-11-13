@@ -51,7 +51,7 @@ import {
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import FacilityOrganizationTreeSelect from "@/pages/Facility/settings/organizations/components/FacilityOrganizationTreeSelect";
 import { toCareTeamMembers } from "@/types/careTeam/careTeam";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import {
@@ -427,22 +427,13 @@ export default function CreateEncounterForm({
                   name="organizations"
                   render={({ field }) => (
                     <FormItem>
-                      <FacilityOrganizationSelector
+                      <FormLabel>{t("departments")}</FormLabel>
+                      <FacilityOrganizationTreeSelect
                         facilityId={facilityId}
                         value={field.value}
-                        // The selector treats these as already chosen, so pass
-                        // only the ones still selected to allow re-adding.
-                        currentOrganizations={defaultOrganizations.filter(
-                          ({ id }) => field.value.includes(id),
-                        )}
-                        onChange={(value) => {
-                          if (value === null) {
-                            form.setValue("organizations", []);
-                          } else {
-                            form.setValue("organizations", value);
-                          }
-                        }}
+                        onChange={(ids) => field.onChange(ids ?? [])}
                         favoriteList="encounter_departments"
+                        knownOrganizations={defaultOrganizations}
                       />
                       <FormMessage />
                     </FormItem>
