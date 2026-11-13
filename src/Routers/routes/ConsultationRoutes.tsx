@@ -6,24 +6,25 @@ import EncounterQuestionnaire from "@/components/Patient/EncounterQuestionnaire"
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import { EncounterShow } from "@/pages/Encounters/EncounterShow";
-import { PrintPrescription } from "@/pages/Encounters/PrintPrescription";
 import ReportViewer from "@/pages/Encounters/ReportViewer";
 import { EncounterProvider } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { PrintPrescriptions } from "@/components/Prescription/PrintPrescriptions";
+import { PrintEncounterPrescriptions } from "@/pages/Encounters/PrintEncounterPrescriptions";
 import type { AdministrableProductType } from "@/types/inventory/productKnowledge/productKnowledge";
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/prescription/:prescriptionId/print":
     ({ facilityId, patientId, prescriptionId }) => (
-      <PrintPrescription
+      <PrintPrescriptions
         facilityId={facilityId}
         patientId={patientId}
-        prescriptionId={prescriptionId}
+        prescriptionIds={[prescriptionId]}
       />
     ),
   "/facility/:facilityId/patient/:patientId/encounter/:encounterId/prescriptions/print":
     ({ facilityId, patientId, encounterId }) => (
-      <PrintPrescription
+      <PrintEncounterPrescriptions
         facilityId={facilityId}
         patientId={patientId}
         encounterId={encounterId}
