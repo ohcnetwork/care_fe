@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +15,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import { useEncounterSilently } from "@/pages/Encounters/utils/EncounterProvider";
 import { Code } from "@/types/base/code/code";
@@ -79,7 +79,7 @@ export function ObservationDetailSheet({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: [
       "observation-history",
       patientId,
@@ -87,34 +87,25 @@ export function ObservationDetailSheet({
       codesParam,
       encounterScoped,
     ],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(observationApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          codes: codesParam,
-          status: RESULT_STATUSES,
-          limit: String(RESULTS_PER_PAGE_LIMIT),
-          offset: String(pageParam),
-          ...(encounterScoped ? { encounter: encounterId } : {}),
-        },
-      })({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * RESULTS_PER_PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(observationApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        codes: codesParam,
+        status: RESULT_STATUSES,
+        ...(encounterScoped ? { encounter: encounterId } : {}),
+      },
+      pageSize: RESULTS_PER_PAGE_LIMIT,
+    }),
     enabled: open && validCodes.length > 0,
   });
 
-  const allResults = historyData?.pages.flatMap((page) => page.results) ?? [];
+  const allResults = historyData?.results ?? [];
 
   const entriesByCode = resolveObservationEntries(allResults, validCodes);
 
   const codeList = Object.values(entriesByCode).map((list) => list[0].code);
 
-  const totalCount = historyData?.pages?.[0]?.count ?? 0;
+  const totalCount = historyData?.count ?? 0;
 
   // The list filter matches code values across systems, so loaded pages can
   // hold no readings for the requested systems while later pages still might.

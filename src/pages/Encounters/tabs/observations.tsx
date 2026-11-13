@@ -1,8 +1,5 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { Card } from "@/components/ui/card";
 
@@ -13,11 +10,11 @@ import { ObservationDetailSheet } from "@/components/Common/Charts/ObservationDe
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { ArrowRight } from "lucide-react";
 
@@ -74,48 +71,29 @@ function groupObservationsByDate(
   }, {});
 }
 
-const PAGE_SIZE = 20;
-
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
   const { selectedEncounterId: encounterId, patientId } = useEncounter();
-  const { ref, inView } = useInView();
-
   const {
     data,
-    fetchNextPage,
     hasNextPage,
     isLoading,
     isFetchingNextPage,
     isError,
     isFetching,
     refetch,
-  } = useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
+    ref,
+  } = useInfiniteList({
     queryKey: ["infinite-observations", patientId, encounterId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(observationApi.list, {
-        pathParams: { patientId },
-        queryParams: {
-          encounter: encounterId,
-          ignore_group: true,
-          limit: PAGE_SIZE,
-          offset: String(pageParam),
-        },
-      })({ signal });
-      return response as PaginatedResponse<ObservationListRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_SIZE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(observationApi.list, {
+      pathParams: { patientId },
+      queryParams: {
+        encounter: encounterId,
+        ignore_group: true,
+      },
+      pageSize: 20,
+    }),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage && !isError) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
   if (isError) {
     return <ClinicalListError isFetching={isFetching} onRetry={refetch} />;
@@ -129,7 +107,7 @@ export const EncounterObservationsTab = () => {
     );
   }
 
-  const observations = data?.pages.flatMap((page) => page.results) ?? [];
+  const observations = data?.results ?? [];
 
   if (observations.length === 0) {
     return (

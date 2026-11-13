@@ -1,10 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { t as i18nT } from "i18next";
 import {
   CheckIcon,
@@ -59,6 +54,8 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import UserSelector from "@/components/Common/UserSelector";
 
 import { cn } from "@/lib/utils";
+
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
@@ -76,7 +73,6 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { UserReadMinimal } from "@/types/user/user";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, goBack } from "@/Utils/utils";
 import careConfig from "@careConfig";
 
@@ -95,8 +91,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 import ChargeItemActionsMenu from "./components/ChargeItemActions";
 import QuickAddChargeItemsSheet from "./components/QuickAddChargeItemsSheet";
-
-const ITEMS_PER_PAGE = 200;
 
 const formSchema = z.object({
   status: z.enum(InvoiceStatus),
@@ -225,29 +219,17 @@ export function CreateInvoicePage({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: ["chargeItems", facilityId, accountId],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(chargeItemApi.listChargeItem, {
-        pathParams: { facilityId },
-        queryParams: {
-          limit: String(ITEMS_PER_PAGE),
-          offset: String(pageParam),
-          status: ChargeItemStatus.billable,
-          account: accountId,
-          ordering: "created_date",
-        },
-      })({ signal });
-      return response as PaginatedResponse<ChargeItemRead>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (
-      lastPage: PaginatedResponse<ChargeItemRead>,
-      allPages: PaginatedResponse<ChargeItemRead>[],
-    ) => {
-      const currentOffset = allPages.length * ITEMS_PER_PAGE;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+    ...query.infinite(chargeItemApi.listChargeItem, {
+      pathParams: { facilityId },
+      pageSize: 200,
+      queryParams: {
+        status: ChargeItemStatus.billable,
+        account: accountId,
+        ordering: "created_date",
+      },
+    }),
     enabled: !!facilityId && !!accountId && !preSelectedChargeItems,
   });
 
@@ -312,10 +294,7 @@ export function CreateInvoicePage({
     fetchNextPage();
   };
 
-  const chargeItems =
-    preSelectedChargeItems ??
-    chargeItemsData?.pages.flatMap((page) => page.results) ??
-    [];
+  const chargeItems = preSelectedChargeItems ?? chargeItemsData?.results ?? [];
 
   // Calculate total of selected items
   const selectedItemsTotal = useMemo(() => {

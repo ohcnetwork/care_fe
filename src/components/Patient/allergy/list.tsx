@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   BeakerIcon,
@@ -16,8 +15,9 @@ import { ClinicalListError } from "@/components/Patient/Common/ClinicalListError
 import { ClinicalListPanel } from "@/components/Patient/Common/ClinicalListPanel";
 import EmptyState from "@/components/Patient/Common/EmptyState";
 
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AllergyCategory,
@@ -74,38 +74,22 @@ export function AllergyList({
 }: AllergyListProps) {
   const { t } = useTranslation();
 
-  const LIMIT = showTimeline ? 30 : 14;
   const { facilityId: currentFacilityId } = useCurrentFacilitySilently();
   const facilityId = providedFacilityId ?? currentFacilityId;
-  const queryState = useInfiniteQuery({
+  const queryState = useInfiniteList({
     queryKey: ["infinite-allergies", patientId, encounterId, encounterStatus],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(allergyIntoleranceApi.getAllergy, {
-        pathParams: { patientId },
-        silent: true,
-        queryParams: {
-          encounter:
-            encounterStatus &&
-            completedEncounterStatus.includes(encounterStatus)
-              ? encounterId
-              : undefined,
-          limit: LIMIT,
-          offset: String(pageParam),
-          exclude_verification_status: "entered_in_error",
-        },
-      })({ signal });
-      return response as PaginatedResponse<AllergyIntolerance>;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.reduce(
-        (count, page) => count + page.results.length,
-        0,
-      );
-      return lastPage.results.length > 0 && currentOffset < lastPage.count
-        ? currentOffset
-        : undefined;
-    },
+    ...query.infinite(allergyIntoleranceApi.getAllergy, {
+      pathParams: { patientId },
+      silent: true,
+      queryParams: {
+        encounter:
+          encounterStatus && completedEncounterStatus.includes(encounterStatus)
+            ? encounterId
+            : undefined,
+        exclude_verification_status: "entered_in_error",
+      },
+      pageSize: showTimeline ? 30 : 14,
+    }),
   });
 
   const {
@@ -119,7 +103,7 @@ export function AllergyList({
     isFetchingNextPage,
   } = queryState;
 
-  const allergies = data?.pages.flatMap((page) => page.results) ?? [];
+  const allergies = data?.results ?? [];
 
   if (showTimeline) {
     if (isLoading) return <TableSkeleton count={5} />;
@@ -209,8 +193,7 @@ export function AllergyList({
       history="allergies"
       emptyMessage={t("no_allergies_recorded_description")}
       summary={
-        !!data?.pages[0]?.count &&
-        t("clinical_summary_recorded", { count: data.pages[0].count })
+        !!data?.count && t("clinical_summary_recorded", { count: data.count })
       }
       hasData={allergies.length > 0}
       showEmpty={showEmpty}

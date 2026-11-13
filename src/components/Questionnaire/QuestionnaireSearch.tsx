@@ -1,4 +1,3 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronsUpDown as CaretSortIcon, Plus } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -31,6 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 
 import query from "@/Utils/request/query";
 import { conditionalAttribute } from "@/Utils/utils";
@@ -47,8 +47,6 @@ interface QuestionnaireSearchProps {
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
 }
-
-const QUESTIONNAIRES_PER_PAGE = 30;
 
 export function QuestionnaireSearch({
   placeholder,
@@ -74,31 +72,25 @@ export function QuestionnaireSearch({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInfiniteQuery({
+  } = useInfiniteList({
     queryKey: ["questionnaires", "picker", search, subjectType, facilityId],
-    queryFn: ({ pageParam, signal }) =>
-      query.debounced(questionnaireApi.list, {
-        queryParams: {
-          title: search,
-          ...conditionalAttribute(!!subjectType, {
-            subject_type: subjectType,
-          }),
-          ...conditionalAttribute(!!facilityId, {
-            facility_or_instance: facilityId,
-          }),
-          status: "active",
-          limit: QUESTIONNAIRES_PER_PAGE,
-          offset: pageParam,
-        },
-      })({ signal }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) => {
-      const offset = pages.length * QUESTIONNAIRES_PER_PAGE;
-      return offset < lastPage.count ? offset : undefined;
-    },
+    ...query.infinite(questionnaireApi.list, {
+      queryParams: {
+        title: search,
+        ...conditionalAttribute(!!subjectType, {
+          subject_type: subjectType,
+        }),
+        ...conditionalAttribute(!!facilityId, {
+          facility_or_instance: facilityId,
+        }),
+        status: "active",
+      },
+      pageSize: 30,
+      debounceInterval: 500,
+    }),
     enabled: isOpen && !disabled,
   });
-  const questionnaires = data?.pages.flatMap((page) => page.results) ?? [];
+  const questionnaires = data?.results ?? [];
 
   const handleOpenChange = (open: boolean) => {
     if (open && disabled) return;

@@ -1,8 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { ChevronDown as CaretDownIcon, CheckIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +30,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
 import { cn } from "@/lib/utils";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
@@ -56,8 +55,6 @@ interface Props {
   trigger?: React.ReactNode;
   onClear?: () => void;
 }
-
-const PAGE_LIMIT = 50;
 
 interface UserCommandContentProps {
   search: string;
@@ -178,7 +175,6 @@ export default function UserSelector({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { ref, inView } = useInView();
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const getPathParams = () => {
@@ -188,49 +184,34 @@ export default function UserSelector({
       : { facilityId: facilityId };
   };
 
-  const getQueryParams = (pageParam: number) => ({
-    limit: String(PAGE_LIMIT),
-    offset: String(pageParam),
-    search_text: search,
-    is_service_account: isServiceAccount,
-  });
-
   const {
     data: usersList,
-    fetchNextPage,
-    hasNextPage,
     isFetchingNextPage,
     isFetching,
-  } = useInfiniteQuery({
+    ref,
+  } = useInfiniteList({
     queryKey: ["users", facilityId, search, organizationId, isServiceAccount],
-    queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query.debounced(
-        facilityId
-          ? organizationId
-            ? facilityOrganizationApi.listUsers
-            : facilityApi.getUsers
-          : UserApi.list,
-        {
-          pathParams: getPathParams(),
-          queryParams: getQueryParams(pageParam),
+    ...query.infinite(
+      facilityId
+        ? organizationId
+          ? facilityOrganizationApi.listUsers
+          : facilityApi.getUsers
+        : UserApi.list,
+      {
+        pathParams: getPathParams(),
+        queryParams: {
+          search_text: search,
+          is_service_account: isServiceAccount,
         },
-      )({ signal });
-      return response;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      const currentOffset = allPages.length * PAGE_LIMIT;
-      return currentOffset < lastPage.count ? currentOffset : null;
-    },
+        pageSize: 50,
+        debounceInterval: 500,
+      },
+    ),
     select: (data) =>
-      data?.pages.flatMap((p) =>
+      data.pages.flatMap((p) =>
         p.results.map((u) => ("user" in u ? u.user : u)),
-      ) || [],
+      ),
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage) fetchNextPage();
-  }, [inView, hasNextPage, fetchNextPage]);
 
   const renderTriggerButton = () =>
     trigger || (
