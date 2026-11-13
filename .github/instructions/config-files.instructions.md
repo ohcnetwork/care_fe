@@ -14,7 +14,7 @@ applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 
 ### Code Quality Configuration
 - `eslint.config.mjs` - ESLint linting rules
-- `.prettierrc` - Prettier formatting configuration
+- `.prettierrc.json` - Prettier formatting configuration
 - `components.json` - shadcn/ui component configuration
 
 ### Dependency Management

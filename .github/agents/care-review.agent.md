@@ -118,7 +118,7 @@ Organize legibility findings by severity so the most important ones lead:
 **`Convention` (repo style)**
 
 - Violates a documented pattern in `CLAUDE.md` or the repo's conventions
-- Example: user-facing strings must use i18next keys, per `CLAUDE.md`'s _Code Style Guidelines_
+- Example: user-facing strings must use i18next keys, per `AGENTS.md`'s _Code Style Guidelines_
 - Fix is straightforward once the rule is known
 
 **`Polish` (optional — advisory only)**
@@ -138,10 +138,6 @@ and a change that only handles the happy path is not legible — the reader cann
 failure case was considered or forgotten. For every new or modified failure-capable call, ask what
 the user sees when it rejects:
 
-- **`useMutation` with `onSuccess` but no `onError`** — the request fails, the toast never fires, the
-  dialog stays open, and the user retries into the same silence. This is a `Broken` finding, not a
-  polish note: it is invisible in testing and only surfaces in production. (Check how neighbouring
-  mutations in the same area surface errors and match that.)
 - **A rejected promise with no `.catch`**, or an `await` in a handler with no `try`/`catch`.
 - **An error already surfaced but swallowed** — `query()`/`mutate()` toast on 400/406 by default, so
   `silent: true` on a user-initiated action means the user gets nothing unless the code handles it.
@@ -307,8 +303,8 @@ Calibration: judge only the changed surfaces and their direct siblings. Unchange
 
 ## Repo conventions (cite these files; don't invent rules)
 
-- **`CLAUDE.md`** — typing, import order; all user-facing strings via i18next (`public/locale/en.json`, append-only).
-- **`.github/instructions/careui.instructions.md`** — ARIA on medical data, keyboard nav, WCAG AA contrast, **44px minimum touch targets**.
+- **`CLAUDE.md`** — typing, import order; all user-facing strings via i18next (`public/locale/en.json`).
+- **`.github/instructions/careui.instructions.md`** + **`.github/copilot-instructions.md`** — ARIA on medical data, keyboard nav, WCAG AA contrast, **44px minimum touch targets**.
 - **`.github/instructions/react-components.instructions.md`** — shadcn/ui + CAREUI medical components; `cn()` from `src/lib/utils.ts`; CVA for variants; `focus-visible:ring-1` focus states.
 - **`.github/instructions/pages.instructions.md`** + **`src/hooks/useBreakpoints.ts`** — mobile-first; breakpoints xs 480 / sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536.
 - **`tailwind.config.js`** — color tokens (primary `#0d9f6e`); never hardcode colors inline.
@@ -364,7 +360,7 @@ Per **`.github/instructions/careui.instructions.md`**:
 - Validation states: `aria-invalid` present when the field is invalid?
 - Icon-only controls: `sr-only` span or `aria-label`?
 - Keyboard operability: custom click handlers also handle `onKeyDown` / `onKeyPress` (Enter/Space)?
-- Focus states: `focus-visible:ring-1` present on new interactive elements?
+- Focus states: `focus-visible:ring-1` present on new interactive elements? **Cite `.github/instructions/react-components.instructions.md`.**
 - Touch targets: new interactive elements ≥ 44×44 CSS px? (Check height class — `h-11` = 44px.)
 
 ### Workflow efficiency (hospital context)
