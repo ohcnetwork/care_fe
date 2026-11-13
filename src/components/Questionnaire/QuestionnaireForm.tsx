@@ -79,6 +79,7 @@ export interface QuestionnaireFormProps {
   subjectType?: string;
   onSubmit?: () => void;
   facilityId?: string;
+  returnTo?: string;
 }
 
 interface ValidationErrorDisplayProps {
@@ -366,6 +367,7 @@ export function QuestionnaireForm({
   subjectType,
   onSubmit,
   facilityId,
+  returnTo,
 }: QuestionnaireFormProps) {
   const { t } = useTranslation();
   const [{ continue_draft: continueDraftId }] = useQueryParams();
@@ -507,7 +509,9 @@ export function QuestionnaireForm({
       flushSync(() => setIsDirty(false));
       toast.success(t("draft_saved_successfully"));
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        returnTo ??
+          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        { replace: true },
       );
     },
     onError: () => {
@@ -530,7 +534,9 @@ export function QuestionnaireForm({
         queryKey: ["formSubmission", continueDraftId],
       });
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        returnTo ??
+          `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+        { replace: true },
       );
     },
     onError: () => {
@@ -958,7 +964,7 @@ export function QuestionnaireForm({
     <div className="flex gap-4">
       {/* Left Navigation */}
       <div className="w-64 border-r border-gray-200 p-4 space-y-4 overflow-y-auto sticky top-6 h-screen lg:block hidden">
-        <BackButton className="w-full">
+        <BackButton className="w-full" to={returnTo}>
           <ArrowLeft />
           <span>{t("back_to_encounter")}</span>
         </BackButton>
@@ -1126,7 +1132,11 @@ export function QuestionnaireForm({
             {/* Submit and Cancel Buttons */}
             {questionnaireForms.length > 0 && (
               <div className="flex justify-end gap-4 mx-4 mt-4 max-w-4xl">
-                <BackButton variant="outline" disabled={isPending}>
+                <BackButton
+                  variant="outline"
+                  disabled={isPending}
+                  to={returnTo}
+                >
                   {t("cancel")}
                 </BackButton>
                 {isDraftSaveable && (

@@ -18,6 +18,10 @@ import {
   Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 import { DiagnosisTable } from "./DiagnosisTable";
 
@@ -45,6 +49,7 @@ export function DiagnosisList({
   showViewEncounter = true,
 }: DiagnosisListProps) {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
@@ -156,7 +161,11 @@ export function DiagnosisList({
       title={t("diagnoses")}
       readOnly={readOnly}
       className={className}
-      editLink={!readOnly ? "questionnaire/diagnosis" : undefined}
+      editLink={
+        !readOnly
+          ? withReturnTo("questionnaire/diagnosis", returnTo)
+          : undefined
+      }
       actionButton={
         <Button
           variant="ghost"

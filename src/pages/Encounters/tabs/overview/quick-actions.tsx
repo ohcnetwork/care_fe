@@ -13,11 +13,16 @@ import {
 } from "@/CAREUI/icons/CustomIcons";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 import { FormDialog } from "./FormsDialog";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   return (
     <div
@@ -28,31 +33,31 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         icon={<AllergyIcon className="text-red-700" />}
         title={t("allergy")}
         actionId="add-allergy"
-        href={`questionnaire/allergy_intolerance`}
+        href={withReturnTo("questionnaire/allergy_intolerance", returnTo)}
       />
       <QuickAction
         icon={<TestTubeIcon className="text-pink-700 size-8" />}
         title={t("service_request")}
         actionId="add-service-request"
-        href={`questionnaire/service_request`}
+        href={withReturnTo("questionnaire/service_request", returnTo)}
       />
       <QuickAction
         icon={<MedicineIcon className="text-blue-800 size-8" />}
         title={t("add_medication")}
-        href={`questionnaire/medication_request`}
+        href={withReturnTo("questionnaire/medication_request", returnTo)}
         actionId="add-medication-request"
       />
       <QuickAction
         icon={<HeartPulse className="text-orange-700 size-8" />}
         title={t("add_symptom")}
-        href={`questionnaire/symptom`}
+        href={withReturnTo("questionnaire/symptom", returnTo)}
         actionId="add-symptoms"
         hidden
       />
       <QuickAction
         icon={<Stethoscope className="text-purple-700 size-8" />}
         title={t("add_diagnosis")}
-        href={`questionnaire/diagnosis`}
+        href={withReturnTo("questionnaire/diagnosis", returnTo)}
         actionId="add-diagnosis"
         hidden
       />

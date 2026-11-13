@@ -22,6 +22,10 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { inactiveEncounterStatus } from "@/types/emr/encounter/encounter";
 import { Priority, Status } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 export const EncounterServiceRequestTab = () => {
   const {
@@ -31,6 +35,7 @@ export const EncounterServiceRequestTab = () => {
     patientId,
   } = useEncounter();
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const {
     qParams,
     updateQuery,
@@ -127,7 +132,10 @@ export const EncounterServiceRequestTab = () => {
           {encounter && !inactiveEncounterStatus.includes(encounter.status) && (
             <Button variant="primary">
               <Link
-                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`}
+                href={withReturnTo(
+                  `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`,
+                  returnTo,
+                )}
                 className="flex items-center"
               >
                 <PlusIcon className="size-5 mr-1" />

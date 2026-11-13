@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { resolveEncounterReturnTo } from "@/Utils/returnTo";
 
 interface Props {
   facilityId?: string;
@@ -30,6 +31,13 @@ export default function EncounterQuestionnaire({
   subjectType,
 }: Props) {
   const { t } = useTranslation();
+  const [{ return_to: returnTo }] = useQueryParams();
+  const exitTarget =
+    facilityId && encounterId
+      ? resolveEncounterReturnTo(returnTo, facilityId, patientId, encounterId)
+      : facilityId
+        ? `/facility/${facilityId}/patient/${patientId}/updates`
+        : `/patient/${patientId}/updates`;
 
   const { data: encounter } = useQuery({
     queryKey: ["encounter", encounterId],
@@ -65,19 +73,8 @@ export default function EncounterQuestionnaire({
               subjectType={subjectType}
               encounterId={encounterId}
               questionnaireSlug={questionnaireSlug}
-              onSubmit={() => {
-                if (encounterId && facilityId) {
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
-                  );
-                } else if (facilityId) {
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/updates`,
-                  );
-                } else {
-                  navigate(`/patient/${patientId}/updates`);
-                }
-              }}
+              returnTo={facilityId && encounterId ? exitTarget : undefined}
+              onSubmit={() => navigate(exitTarget, { replace: true })}
             />
           </CardContent>
         </Card>

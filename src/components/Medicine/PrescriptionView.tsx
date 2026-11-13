@@ -14,6 +14,10 @@ import { Markdown } from "@/components/ui/markdown";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface PrescriptionViewProps {
@@ -32,6 +36,7 @@ export default function PrescriptionView({
   encounterId,
 }: PrescriptionViewProps) {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const { data: prescription, isLoading } = useQuery({
@@ -93,11 +98,12 @@ export default function PrescriptionView({
               className="text-gray-950 hover:text-gray-700 h-9"
             >
               <Link
-                href={
+                href={withReturnTo(
                   prescriptionId
                     ? `questionnaire/medication_request?prescription=${prescriptionId}`
-                    : `questionnaire/medication_request`
-                }
+                    : `questionnaire/medication_request`,
+                  returnTo,
+                )}
               >
                 {prescriptionId ? (
                   <>

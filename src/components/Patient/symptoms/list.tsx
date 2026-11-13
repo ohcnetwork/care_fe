@@ -15,6 +15,10 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Symptom } from "@/types/emr/symptom/symptom";
 import symptomApi from "@/types/emr/symptom/symptomApi";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 
 import { SymptomTable } from "./SymptomTable";
 
@@ -42,6 +46,7 @@ export function SymptomsList({
   showViewEncounter = true,
 }: SymptomsListProps) {
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   const LIMIT = showTimeline ? 30 : 14;
   const { facilityId } = useCurrentFacilitySilently();
@@ -151,7 +156,9 @@ export function SymptomsList({
       title={t("symptoms")}
       readOnly={readOnly}
       className={className}
-      editLink={!readOnly ? "questionnaire/symptom" : undefined}
+      editLink={
+        !readOnly ? withReturnTo("questionnaire/symptom", returnTo) : undefined
+      }
       actionButton={
         <Button
           variant="ghost"

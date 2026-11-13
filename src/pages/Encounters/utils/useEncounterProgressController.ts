@@ -13,6 +13,10 @@ import tokenApi from "@/types/tokens/token/tokenApi";
 import { BatchRequestObject, useBatchRequest } from "@/Utils/request/batch";
 import { useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import {
+  currentPathWithSafeReturnQuery,
+  withReturnTo,
+} from "@/Utils/returnTo";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -27,6 +31,7 @@ export function useEncounterProgressController({
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const returnTo = currentPathWithSafeReturnQuery();
 
   const { mutate: executeBatch, isPending } = useBatchRequest({
     onSuccess: ({ results }) => {
@@ -113,7 +118,10 @@ export function useEncounterProgressController({
   const completeEverything = () => {
     if (encounterRequiresDischarge(encounter)) {
       navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        withReturnTo(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+          returnTo,
+        ),
       );
       return;
     }
@@ -133,7 +141,10 @@ export function useEncounterProgressController({
   const completeEncounter = () => {
     if (encounterRequiresDischarge(encounter)) {
       navigate(
-        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+        withReturnTo(
+          `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/questionnaire/encounter?toDischarge=true`,
+          returnTo,
+        ),
       );
       return;
     }
