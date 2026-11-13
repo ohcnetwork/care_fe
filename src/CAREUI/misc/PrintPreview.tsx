@@ -322,7 +322,10 @@ function PageHeaderRepeater({
   if (!pageHeader) return <>{children}</>;
 
   return (
-    <table className="w-full border-collapse">
+    <table
+      className="w-full border-collapse"
+      style={{ tableLayout: "fixed", fontSize: "inherit" }}
+    >
       <thead className="hidden print:table-header-group">
         <div className="h-8 overflow-hidden">{pageHeader}</div>
       </thead>
