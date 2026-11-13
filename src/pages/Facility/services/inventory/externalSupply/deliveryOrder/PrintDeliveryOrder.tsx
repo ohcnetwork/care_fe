@@ -9,7 +9,14 @@ import PrintFooter from "@/components/Common/PrintFooter";
 import PrintTable from "@/components/Common/PrintTable";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  getExtensionFieldsWithName,
+  getExtensionValue,
+  NamespacedExtensionData,
+} from "@/hooks/useExtensions";
+import useExtensionSchemas from "@/hooks/useExtensionSchemas";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ExtensionEntityType } from "@/types/extensions/extensions";
 import { PrintTemplateType } from "@/types/facility/printTemplate";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
@@ -20,6 +27,8 @@ import { SupplyDeliveryRead } from "@/types/inventory/supplyDelivery/supplyDeliv
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { round } from "@/Utils/decimal";
 import query from "@/Utils/request/query";
+import { ExtensionContexts } from "@/Utils/schema/types";
+import { formatDateTime } from "@/Utils/utils";
 
 interface DetailRowProps {
   label: string;
@@ -38,6 +47,14 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
     </div>
   );
 };
+
+function formatExtensionValue(value: unknown, fieldFormat?: string) {
+  if (typeof value === "number") return value.toFixed(2);
+  if (fieldFormat === "date" || fieldFormat === "date-time") {
+    return formatDateTime(value as string);
+  }
+  return String(value);
+}
 
 interface DeliveryOrderContentProps {
   deliveryOrder: DeliveryOrderRetrieve;
@@ -125,6 +142,35 @@ const DeliveryOrderPreview = ({
 }: DeliveryOrderPreviewProps) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
+  const { getExtensions } = useExtensionSchemas();
+
+  const allExtensions = getExtensions(
+    ExtensionEntityType.supply_delivery_order,
+    "retrieve",
+  );
+
+  const extensionRows = getExtensionFieldsWithName(
+    allExtensions,
+    ExtensionContexts.supply_delivery_order_summary,
+  ).flatMap((field) => {
+    const value = getExtensionValue(
+      deliveryOrder.extensions as NamespacedExtensionData,
+      field,
+      {
+        delivery_order: deliveryOrder,
+        supply_deliveries: supplyDeliveries,
+      },
+    );
+    if (value === undefined || value === null) return [];
+
+    return [
+      {
+        key: `${field.extensionName}-${field.name}`,
+        label: field.label,
+        value: formatExtensionValue(value, field.format),
+      },
+    ];
+  });
 
   return (
     <PrintPreview
@@ -139,7 +185,7 @@ const DeliveryOrderPreview = ({
         </h2>
 
         {/* Delivery Order Details */}
-        <div className="grid md:grid-cols-2 print:grid-cols-2 gap-6 border-t border-gray-200 pt-2">
+        <div className="grid grid-cols-2 gap-6 border-t border-gray-200 pt-2">
           <div className="space-y-2">
             <DetailRow
               label={t("deliver_to")}
@@ -179,6 +225,19 @@ const DeliveryOrderPreview = ({
             </div>
           </div>
         </div>
+
+        {extensionRows.length > 0 && (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 pt-2 pb-4">
+            {extensionRows.map((row) => (
+              <DetailRow
+                key={row.key}
+                label={row.label}
+                value={row.value}
+                isStrong
+              />
+            ))}
+          </div>
+        )}
 
         <DeliveryOrderContent
           deliveryOrder={deliveryOrder}
