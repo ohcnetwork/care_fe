@@ -11,6 +11,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Separator } from "@/components/ui/separator";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import { RegisteredGroupAnswerView } from "@/components/QuestionnaireV2/groups/RegisteredGroupAnswerView";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -233,12 +234,12 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
     <div>
       <div className="font-medium text-base">{question.text}</div>
       <div className="space-y-1">
-        {response.values.map((valueObj, index) => {
+        {(response.values ?? []).map((valueObj, index) => {
           const value = valueObj.value;
           const coding = valueObj.coding;
           const unit = valueObj.unit;
 
-          if (!value && !coding) return null;
+          if ((value == null || value === "") && !coding) return null;
 
           const precedentUnit = unit ? unit : question.unit;
 
@@ -256,9 +257,10 @@ function QuestionResponseValue({ question, response }: QuestionResponseProps) {
                   {coding.display} ({coding.code})
                 </span>
               )}
-              {index === response.values.length - 1 && response.note && (
-                <span className="text-gray-500">({response.note})</span>
-              )}
+              {index === (response.values?.length ?? 0) - 1 &&
+                response.note && (
+                  <span className="text-gray-500">({response.note})</span>
+                )}
             </div>
           );
         })}
@@ -273,13 +275,37 @@ function QuestionGroup({
   level = 0,
 }: {
   group: Question;
-  responses: {
-    values: ResponseValue[];
-    note?: string;
-    question_id: string;
-  }[];
+  responses: QuestionnaireResponse["responses"];
   level?: number;
 }) {
+  if (group.repeats) {
+    const rows =
+      responses.find((answer) => answer.question_id === group.id)
+        ?.sub_results ?? [];
+    if (!rows.length) return null;
+    return (
+      <div className="space-y-3">
+        <h4 className="text-lg font-semibold">{group.text}</h4>
+        <RegisteredGroupAnswerView
+          question={group}
+          responses={responses}
+          fallback={rows.map((row, index) => (
+            <QuestionGroup
+              key={index}
+              group={{
+                ...group,
+                repeats: false,
+                structured_type: undefined,
+                text: `${group.text} (${index + 1})`,
+              }}
+              responses={row}
+              level={level}
+            />
+          ))}
+        />
+      </div>
+    );
+  }
   return (
     <div className={cn("space-y-2", group.styling_metadata?.classes)}>
       {group.text && (
@@ -295,35 +321,46 @@ function QuestionGroup({
           {level === 0 && <Separator />}
         </div>
       )}
-      <div
-        className={cn("grid gap-2", group.styling_metadata?.containerClasses)}
-      >
-        {group.questions?.map((question) => {
-          if (question.type === "group") {
-            return (
-              <QuestionGroup
-                key={question.id}
-                group={question}
-                responses={responses}
-                level={level + 1}
-              />
-            );
-          }
+      <RegisteredGroupAnswerView
+        question={group}
+        responses={responses}
+        fallback={
+          <div
+            className={cn(
+              "grid gap-2",
+              group.styling_metadata?.containerClasses,
+            )}
+          >
+            {group.questions?.map((question) => {
+              if (question.type === "group") {
+                return (
+                  <QuestionGroup
+                    key={question.id}
+                    group={question}
+                    responses={responses}
+                    level={level + 1}
+                  />
+                );
+              }
 
-          if (question.type === "structured") return null;
+              if (question.type === "structured") return null;
 
-          const response = responses.find((r) => r.question_id === question.id);
-          if (!response) return null;
+              const response = responses.find(
+                (r) => r.question_id === question.id,
+              );
+              if (!response) return null;
 
-          return (
-            <QuestionResponseValue
-              key={question.id}
-              question={question}
-              response={response}
-            />
-          );
-        })}
-      </div>
+              return (
+                <QuestionResponseValue
+                  key={question.id}
+                  question={question}
+                  response={response}
+                />
+              );
+            })}
+          </div>
+        }
+      />
     </div>
   );
 }

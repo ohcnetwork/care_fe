@@ -23,6 +23,8 @@ interface ExtensionFieldsProps<TFieldValues extends FieldValues> {
   className?: string;
   /** Class name applied to each field */
   fieldClassName?: string;
+  /** Disable all fields, including nested controls and array actions. */
+  readOnly?: boolean;
 }
 
 /**
@@ -39,12 +41,13 @@ export function ExtensionFields<TFieldValues extends FieldValues>({
   basePath = "extensions",
   className,
   fieldClassName,
+  readOnly = false,
 }: ExtensionFieldsProps<TFieldValues>) {
   // Evaluate conditional rules - handles visibility, required, and clearing values
   const { isFieldRequired, isFieldVisible } = useConditionalFields({
     rules: conditionalRules,
     control,
-    setValue,
+    setValue: readOnly ? undefined : setValue,
     basePath,
   });
 
@@ -97,7 +100,10 @@ export function ExtensionFields<TFieldValues extends FieldValues>({
         return (
           <SchemaField
             key={metadata.name}
-            metadata={effectiveMetadata}
+            metadata={{
+              ...effectiveMetadata,
+              readOnly: readOnly || effectiveMetadata.readOnly,
+            }}
             control={control}
             basePath={basePath}
             className={fieldClassName}

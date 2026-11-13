@@ -32,8 +32,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -56,6 +58,8 @@ interface Props {
 const EMPTY_TEMPLATE: PrintTemplate = {
   slug: "",
 };
+
+const URL_PLACEHOLDER = "https://...";
 
 export default function PrintTemplateSheet({ facility, trigger }: Props) {
   const { t } = useTranslation();
@@ -124,7 +128,7 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
   return (
     <Sheet open={open} onOpenChange={handleOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent size="lg" className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>{t("print_templates")}</SheetTitle>
           <SheetDescription>
@@ -132,45 +136,45 @@ export default function PrintTemplateSheet({ facility, trigger }: Props) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-4">
-          {templates.length === 0 && (
-            <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
-              <Printer className="mx-auto mb-2 size-8 text-gray-400" />
-              <p className="text-sm">{t("no_print_templates")}</p>
-              <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
-            </div>
-          )}
+        <SheetBody>
+          <div className="space-y-4">
+            {templates.length === 0 && (
+              <div className="text-center py-8 text-gray-500 border border-dashed rounded-lg">
+                <Printer className="mx-auto mb-2 size-8 text-gray-400" />
+                <p className="text-sm">{t("no_print_templates")}</p>
+                <p className="text-xs mt-1">{t("no_print_templates_hint")}</p>
+              </div>
+            )}
 
-          {templates.map((template, index) => (
-            <TemplateEditor
-              key={index}
-              template={template}
-              onUpdate={(updater) => updateTemplate(index, updater)}
-              onRemove={() => removeTemplate(index)}
-            />
-          ))}
+            {templates.map((template, index) => (
+              <TemplateEditor
+                key={index}
+                template={template}
+                onUpdate={(updater) => updateTemplate(index, updater)}
+                onRemove={() => removeTemplate(index)}
+              />
+            ))}
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={addTemplate}
-          >
-            <Plus className="mr-2 size-4" />
-            {t("add_print_template")}
-          </Button>
-
-          <Separator />
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleSave} disabled={isPending}>
-              {isPending ? t("saving") : t("save")}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={addTemplate}
+            >
+              <Plus className="mr-2 size-4" />
+              {t("add_print_template")}
             </Button>
           </div>
-        </div>
+        </SheetBody>
+
+        <SheetFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            {t("cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={isPending}>
+            {isPending ? t("saving") : t("save")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
@@ -511,7 +515,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
                   },
                 }))
               }
-              placeholder="https://..."
+              placeholder={URL_PLACEHOLDER}
               className="mt-1"
             />
           </div>
@@ -640,7 +644,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
                   },
                 }))
               }
-              placeholder="https://..."
+              placeholder={URL_PLACEHOLDER}
               className="mt-1"
             />
           </div>
@@ -714,7 +718,7 @@ function BrandingSection({ template, onUpdate }: SectionProps) {
                   },
                 }))
               }
-              placeholder="https://..."
+              placeholder={URL_PLACEHOLDER}
               className="mt-1"
             />
           </div>

@@ -19,13 +19,16 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
+  SheetBody,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import RadioInput from "@/components/ui/RadioInput";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import {
@@ -171,7 +174,7 @@ export default function SubQueueFormSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="overflow-hidden">
         <SheetHeader>
           <SheetTitle>
             {isEditMode ? t("edit_service_point") : t("add_service_point")}
@@ -183,79 +186,76 @@ export default function SubQueueFormSheet({
           </SheetDescription>
         </SheetHeader>
 
-        {isEditMode && isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("service_point_name")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("enter_service_point_name")}
-                        {...field}
-                        autoFocus
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <SheetBody>
+          {isEditMode && isLoading ? (
+            <FormSkeleton rows={2} />
+          ) : (
+            <Form {...form}>
+              <form id="sub-queue-form" onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("service_point_name")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("enter_service_point_name")}
+                            {...field}
+                            autoFocus
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("status")}</FormLabel>
-                    <RadioInput
-                      {...field}
-                      options={Object.values(TokenSubQueueStatus).map(
-                        (status) => ({
-                          label: t(status),
-                          value: status,
-                        }),
-                      )}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("status")}</FormLabel>
+                        <RadioInput
+                          {...field}
+                          options={Object.values(TokenSubQueueStatus).map(
+                            (status) => ({
+                              label: t(status),
+                              value: status,
+                            }),
+                          )}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </form>
+            </Form>
+          )}
+        </SheetBody>
 
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                  className="flex-1"
-                >
-                  {t("cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={
-                    isPending || (isEditMode && !form.formState.isDirty)
-                  }
-                  className="flex-1"
-                >
-                  {isPending
-                    ? t("saving")
-                    : isEditMode
-                      ? t("update")
-                      : t("create")}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        )}
+        <SheetFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            form="sub-queue-form"
+            disabled={
+              isLoading || isPending || (isEditMode && !form.formState.isDirty)
+            }
+          >
+            {isPending ? t("saving") : isEditMode ? t("update") : t("create")}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

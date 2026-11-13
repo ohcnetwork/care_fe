@@ -24,7 +24,9 @@ export function DiagnosticReportTimestamps({
 
   if (compact) {
     return (
-      <span className={cn(className ?? "text-xs font-normal text-gray-500")}>
+      <span
+        className={cn(className ?? "text-xs font-normal text-muted-foreground")}
+      >
         {t(hasUpdate ? "updated" : "created")}:{" "}
         <time dateTime={hasUpdate ? report.modified_date : report.created_date}>
           {hasUpdate ? updatedAt : createdAt}
@@ -37,7 +39,7 @@ export function DiagnosticReportTimestamps({
     <span
       className={cn(
         className ??
-          "flex flex-wrap gap-x-4 gap-y-1 text-xs font-normal text-gray-500",
+          "flex flex-wrap gap-x-4 gap-y-1 text-xs font-normal text-muted-foreground",
       )}
     >
       <span>

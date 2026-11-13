@@ -142,7 +142,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
           {t("back")}
         </BackButton>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold wrap-anywhere">

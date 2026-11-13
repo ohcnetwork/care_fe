@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { isBefore, isPast, isSameDay, isToday, startOfToday } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -152,14 +153,19 @@ const DateColumn = ({
     isBeforeToday
   ) {
     return (
-      <button
+      <Button
+        variant="ghost"
+        type="button"
         disabled
         onClick={() => {
           setSelectedDate(date);
         }}
         className={cn(
-          "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden cursor-not-allowed",
-          isSelected ? "ring-2 ring-primary-500" : "",
+          "p-0",
+          cn(
+            "h-full w-full hover:bg-gray-50 rounded-lg relative overflow-hidden cursor-not-allowed",
+            isSelected ? "ring-2 ring-primary-500" : "",
+          ),
         )}
       >
         <div className="relative z-10">
@@ -168,7 +174,7 @@ const DateColumn = ({
             <span className="text-xs text-gray-400 block">--</span>
           )}
         </div>
-      </button>
+      </Button>
     );
   }
 
@@ -178,17 +184,22 @@ const DateColumn = ({
   const isFullyBooked = tokensLeft <= 0;
 
   return (
-    <button
+    <Button
+      variant="outline"
+      type="button"
       disabled={isBeforeToday || isFullyBooked}
       onClick={() => {
         setSelectedDate(date);
       }}
       className={cn(
-        "h-full w-full hover:bg-gray-50 rounded-md relative overflow-hidden border hover:scale-105 hover:shadow-md transition-all",
-        isSelected
-          ? "border-2 border-primary-600 bg-green-50 hover:bg-green-50"
-          : "border-gray-400",
-        isFullyBooked && "bg-gray-200",
+        "p-0",
+        cn(
+          "h-full w-full hover:bg-gray-50 rounded-md relative overflow-hidden border hover:scale-105 hover:shadow-md transition-all",
+          isSelected
+            ? "border-2 border-primary-600 bg-green-50 hover:bg-green-50"
+            : "border-gray-400",
+          isFullyBooked && "bg-gray-200",
+        ),
       )}
     >
       {isSelected && (
@@ -224,6 +235,6 @@ const DateColumn = ({
           style={{ height: `${Math.min(bookedPercentage * 100, 100)}%` }}
         />
       )}
-    </button>
+    </Button>
   );
 };

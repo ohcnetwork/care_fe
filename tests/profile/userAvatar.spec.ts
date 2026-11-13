@@ -42,20 +42,22 @@ test.describe("User Profile Avatar Modification", () => {
 
   // Helper function to save the avatar
   async function saveAvatar(page: Page): Promise<void> {
-    const uploadButton = page.getByRole("button", { name: "Upload" });
+    const uploadButton = page.getByRole("button", {
+      name: "Upload",
+      exact: true,
+    });
+    const uploadResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/v1/users/${username}/profile_picture/` &&
+        response.request().method() === "POST",
+    );
     await uploadButton.click();
+    expect((await uploadResponse).ok()).toBe(true);
 
     // Wait for upload to complete by checking dialog closes
     const dialog = page.getByRole("dialog", { name: "Edit Avatar" });
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
-
-    // Verify no error notification
-    const errorNotification = page
-      .getByRole("region", { name: "Notifications alt+T" })
-      .getByText(/error|failed/i);
-    await expect(errorNotification)
-      .not.toBeVisible({ timeout: 1000 })
-      .catch(() => {});
   }
 
   test.beforeEach(async ({ page }) => {
@@ -190,21 +192,23 @@ test.describe("User Profile Avatar Modification", () => {
     });
   });
 
-  test("Verify avatar section exists on profile page", async ({ page }) => {
-    await test.step("Verify profile page loaded", async () => {
-      await expect(page).toHaveURL(`/users/${username}`);
+  test("opens the avatar editor with the keyboard and returns focus after closing", async ({
+    page,
+  }) => {
+    const trigger = page.getByRole("button", {
+      name: "Change Avatar",
+      exact: true,
     });
-
-    await test.step("Verify avatar edit section is visible", async () => {
-      await expect(
-        page.getByRole("button", { name: /change avatar/i }),
-      ).toBeVisible();
-      await expect(page.getByText("Edit Avatar").first()).toBeVisible();
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const dialog = page.getByRole("dialog", {
+      name: "Edit Avatar",
+      exact: true,
     });
-
-    await test.step("Verify avatar file type requirements displayed", async () => {
-      await expect(page.getByText(/JPG or PNG.*2MB max/i)).toBeVisible();
-    });
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
   });
 
   test("Verify crop button only appears after image upload", async ({

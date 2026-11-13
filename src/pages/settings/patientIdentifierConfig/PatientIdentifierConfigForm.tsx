@@ -506,13 +506,14 @@ export default function PatientIdentifierConfigForm({
                           </FormDescription>
                           <Popover>
                             <PopoverTrigger asChild>
-                              <button
+                              <Button
+                                variant="ghost"
                                 type="button"
-                                aria-label="Help"
-                                className="text-muted-foreground hover:text-primary"
+                                aria-label={t("more_info")}
+                                className="h-auto w-auto p-1 text-muted-foreground hover:text-primary"
                               >
                                 <Info className="w-4 h-4" />
-                              </button>
+                              </Button>
                             </PopoverTrigger>
                             <PopoverContent align="start">
                               <div className="font-semibold mb-1">
