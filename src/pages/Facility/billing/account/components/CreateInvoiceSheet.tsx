@@ -51,7 +51,7 @@ export function CreateInvoiceSheet({
           <SheetTitle>{t("create_invoice")}</SheetTitle>
           <SheetDescription>{t("create_invoice_description")}</SheetDescription>
         </SheetHeader>
-        <div className="h-[calc(100vh-8rem)] overflow-auto mt-6 -mx-4">
+        <div className="h-[calc(100vh-8rem)] overflow-auto mt-6">
           <CreateInvoicePage
             facilityId={facilityId}
             accountId={accountId}
