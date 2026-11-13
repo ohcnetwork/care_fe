@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightIcon, CheckCircle, MoreVertical } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckCircle,
+  MoreVertical,
+  PrinterIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -352,31 +357,31 @@ export default function PrescriptionQueue({
                 </label>
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="link"
-                className={cn(
-                  "underline",
-                  selectedPrescriptionIds.length === 0
-                    ? "pointer-events-none opacity-50"
-                    : "",
-                )}
-                asChild
-              >
+            <div
+              className={cn(
+                "mx-auto md:mr-0 flex flex-col md:flex-row items-center gap-2",
+                selectedPrescriptionIds.length === 0 && "hidden",
+              )}
+            >
+              <Button variant="link" className="underline" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}`}
                 >
                   {t("preview_selected_rx")}
                 </Link>
               </Button>
+              <Button variant="link" asChild>
+                <Link
+                  href={`/medication_requests/patient/${qParams.patient_external_id}/prescriptions/${selectedPrescriptionIds.join(",")}/print`}
+                  className="underline"
+                >
+                  <PrinterIcon />
+                  {t("print_selected_rx")}
+                </Link>
+              </Button>
               <Button variant="outline_primary" asChild>
                 <Link
                   href={`/medication_requests/patient/${qParams.patient_external_id}/bill/prescriptions/${selectedPrescriptionIds.join(",")}`}
-                  className={
-                    selectedPrescriptionIds.length === 0
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }
                 >
                   {t("bill_selected_prescriptions")}
                   <ArrowRightIcon />
