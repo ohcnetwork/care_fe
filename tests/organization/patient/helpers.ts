@@ -55,8 +55,8 @@ export async function navigateToOrganizationPatient(page: Page) {
     .getByRole("textbox", { name: "Search by patient name" })
     .fill(patientName);
   const patientLink = page
-    .getByRole("link")
-    .filter({ has: page.locator("h3").filter({ hasText: patientName }) });
+    .getByRole("link", { name: `Open ${patientName}`, exact: true })
+    .first();
 
   await patientLink.click();
   await page.waitForURL(/\/patient\/([^/]+)/);
