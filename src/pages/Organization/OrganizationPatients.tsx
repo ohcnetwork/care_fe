@@ -1,20 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "raviger";
+import { ChevronRight } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -117,111 +123,115 @@ export default function OrganizationPatients({
               isFetching={isFetching}
             />
             <Frame>
-              <FrameHeader>
+              <FrameHeader className="p-1 md:p-2">
                 <SearchInput
                   options={searchOptions}
                   onSearch={handleSearch}
                   onFieldChange={handleFieldChange}
-                  className="w-full sm:max-w-sm"
+                  selectorVariant="select"
+                  className="w-full sm:max-w-xl"
                 />
               </FrameHeader>
-              <FramePanel>
-                {!isFetching && patients?.results?.length === 0 ? (
-                  <div className="p-2 text-center text-sm text-muted-foreground">
-                    {t("no_patients_found")}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              <FramePanel className="overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4">{t("patient")}</TableHead>
+                      <TableHead className="px-4">{t("phone")}</TableHead>
+                      <TableHead className="px-4">{t("gender")}</TableHead>
+                      <TableHead className="px-4">
+                        {t("last_modified")}
+                      </TableHead>
+                      <TableHead className="px-4">
+                        <span className="sr-only">{t("actions")}</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="bg-background">
                     {isFetching ? (
-                      <CardGridSkeleton count={6} />
-                    ) : (
-                      patients?.results?.map((patient) => (
-                        <Link
-                          key={patient.id}
-                          href={`/patient/${patient.id}`}
-                          className="block"
-                        >
-                          <Card className="h-full hover:border-primary/50 transition-colors">
-                            <CardContent className="p-6">
-                              <div className="flex flex-col h-full">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex items-start space-x-4">
-                                    <Avatar
-                                      name={patient.name || ""}
-                                      className="size-10"
-                                    />
-                                    <div>
-                                      <h3 className="text-sm font-medium text-gray-900">
-                                        {patient.name}
-                                      </h3>
-                                      <p className="text-sm text-gray-500">
-                                        {formatPhoneNumberIntl(
-                                          patient.phone_number,
-                                        )}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="shrink-0"
-                                    asChild
-                                  >
-                                    <div>
-                                      <CareIcon
-                                        icon="l-arrow-up-right"
-                                        className="size-4"
-                                      />
-                                    </div>
-                                  </Button>
-                                </div>
-                                <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-                                  <div className="text-sm">
-                                    <div className="text-gray-500">
-                                      {t("phone")}
-                                    </div>
-                                    <div className="font-medium">
-                                      {formatPhoneNumberIntl(
-                                        patient.phone_number,
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="text-sm">
-                                    <div className="text-gray-500">
-                                      {t("gender")}
-                                    </div>
-                                    <div className="font-medium">
-                                      {patient.gender}
-                                    </div>
-                                  </div>
-                                  {patient.geo_organization && (
-                                    <div className="col-span-2 text-sm">
-                                      <div className="text-gray-500">
-                                        {t("organization")}
-                                      </div>
-                                      <div className="font-medium">
-                                        {patient.geo_organization.name}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                  <div className="text-sm text-gray-500">
-                                    {t("last_modified")}{" "}
-                                    <RelativeDateTooltip
-                                      className="underline underline-offset-2"
-                                      date={patient.modified_date}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
+                      Array.from({ length: 5 }, (_, index) => (
+                        <TableRow key={index} aria-hidden="true">
+                          <TableCell className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="size-9 rounded-md" />
+                              <Skeleton className="h-4 w-36" />
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-28" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-16" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="h-4 w-20" />
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <Skeleton className="ml-auto h-12 w-20 md:h-10" />
+                          </TableCell>
+                        </TableRow>
                       ))
+                    ) : !patients?.results?.length ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="p-6 text-center text-sm text-muted-foreground"
+                        >
+                          {t("no_patients_found")}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      patients.results.map((patient) => {
+                        const patientUrl = `/patient/${patient.id}`;
+                        return (
+                          <TableRow
+                            key={patient.id}
+                            onClick={() => navigate(patientUrl)}
+                            className="cursor-pointer hover:bg-muted/50"
+                          >
+                            <TableCell className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  name={patient.name || ""}
+                                  className="size-9 shrink-0"
+                                />
+                                <span className="font-semibold text-foreground">
+                                  {patient.name}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              {formatPhoneNumberIntl(patient.phone_number) ||
+                                patient.phone_number}
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              {t(`GENDER__${patient.gender}`)}
+                            </TableCell>
+                            <TableCell className="px-4 py-3 text-muted-foreground">
+                              <RelativeDateTooltip
+                                date={patient.modified_date}
+                              />
+                            </TableCell>
+                            <TableCell
+                              className="px-4 py-3 text-right"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button variant="tertiary" asChild>
+                                <Link
+                                  href={patientUrl}
+                                  aria-label={`${t("open")} ${patient.name}`}
+                                >
+                                  {t("open")}
+                                  <ChevronRight data-icon="inline-end" />
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
-                  </div>
-                )}
+                  </TableBody>
+                </Table>
               </FramePanel>
             </Frame>
             <Pagination totalCount={patients?.count ?? 0} />
