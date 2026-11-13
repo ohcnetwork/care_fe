@@ -1,5 +1,4 @@
 import { LucideIcon, Pencil, Plus, Star } from "lucide-react";
-import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +35,6 @@ import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import { tokenNumberPreview } from "./tokenCategoryResourceTypes";
 
 interface Props {
-  facilityId: string;
   resourceType: SchedulableResourceType;
   icon: LucideIcon;
   tokenCategories: TokenCategoryRead[];
@@ -47,7 +45,6 @@ interface Props {
 }
 
 export function TokenCategoryGroup({
-  facilityId,
   resourceType,
   icon: Icon,
   tokenCategories,
@@ -148,35 +145,31 @@ export function TokenCategoryGroup({
                     </span>
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                    <ItemTitle className="line-clamp-none flex-wrap">
-                      <h3 className="text-sm font-medium wrap-break-word">
+                    <ItemTitle className="line-clamp-none">
+                      <h3 className="text-sm font-medium text-wrap wrap-break-word">
                         {tokenCategory.name}
                       </h3>
-                      {tokenCategory.default && (
-                        <Badge variant="primary">
-                          <Star className="fill-current" />
-                          {t("default")}
-                        </Badge>
-                      )}
                     </ItemTitle>
                     <ItemDescription>
+                      {tokenCategory.default && (
+                        <>
+                          <span className="font-medium text-primary-700 dark:text-primary-400">
+                            <Star
+                              className="mr-1 inline size-3.5 -translate-y-px fill-current"
+                              aria-hidden
+                            />
+                            {t("default")}
+                          </span>
+                          <span aria-hidden> · </span>
+                        </>
+                      )}
                       {t("token_category_issued_as", {
                         token: tokenNumberPreview(tokenCategory.shorthand),
                       })}
                     </ItemDescription>
                   </ItemContent>
-                  {/* On narrow screens, wrap actions onto their own line,
-                      aligned with the content column. */}
-                  <ItemActions className="max-sm:basis-full max-sm:pl-17.5">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link
-                        basePath="/"
-                        href={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}`}
-                      >
-                        {t("view")}
-                      </Link>
-                    </Button>
-                    {canWrite && (
+                  {canWrite && (
+                    <ItemActions>
                       <Button
                         variant="outline"
                         size="sm"
@@ -186,10 +179,10 @@ export function TokenCategoryGroup({
                         })}
                       >
                         <Pencil />
-                        {t("edit")}
+                        <span className="max-sm:sr-only">{t("edit")}</span>
                       </Button>
-                    )}
-                  </ItemActions>
+                    </ItemActions>
+                  )}
                 </Item>
               ))}
             </ItemGroup>

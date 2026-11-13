@@ -34,6 +34,7 @@ import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
+import { TokenCategoryDefaultFrame } from "./TokenCategoryDefaultFrame";
 import {
   TOKEN_CATEGORY_RESOURCE_TYPE_ICONS,
   tokenNumberPreview,
@@ -88,7 +89,8 @@ export function TokenCategoryForm({
 
   const handleSaved = (saved: TokenCategoryRead) => {
     queryClient.invalidateQueries({ queryKey: ["tokenCategories"] });
-    queryClient.invalidateQueries({ queryKey: ["tokenCategory", saved.id] });
+    // Used by the token generation sheet to preselect the default category
+    queryClient.invalidateQueries({ queryKey: ["token_categories"] });
     toast.success(
       t(
         isEdit
@@ -207,6 +209,12 @@ export function TokenCategoryForm({
               </FramePanel>
             </Frame>
           </FieldSet>
+          {tokenCategory && (
+            <TokenCategoryDefaultFrame
+              facilityId={facilityId}
+              tokenCategory={tokenCategory}
+            />
+          )}
         </SheetBody>
 
         <SheetFooter>

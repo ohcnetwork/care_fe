@@ -57,7 +57,6 @@ import { SpecimenDefinitionDetail } from "./specimen-definitions/SpecimenDefinit
 import SpecimenDefinitionForm from "./specimen-definitions/SpecimenDefinitionForm";
 import { SpecimenDefinitionsList } from "./specimen-definitions/SpecimenDefinitionsList";
 import TokenCategoryList from "./tokenCategory/TokenCategoryList";
-import TokenCategoryView from "./tokenCategory/TokenCategoryView";
 
 interface SettingsLayoutProps {
   facilityId: string;
@@ -294,9 +293,6 @@ const getRoutes = (facilityId: string) => ({
     <ProductForm facilityId={facilityId} productId={id} />
   ),
   "/token_category": () => <TokenCategoryList facilityId={facilityId} />,
-  "/token_category/:id": ({ id }: { id: string }) => (
-    <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
-  ),
 
   "/patient_identifier_config": () => (
     <PatientIdentifierConfigList facilityId={facilityId} />

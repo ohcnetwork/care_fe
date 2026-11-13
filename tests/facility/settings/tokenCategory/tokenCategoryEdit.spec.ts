@@ -107,36 +107,60 @@ test.describe("Token Category Edit - Permission Tests", () => {
       await expect(updatedItem).toContainText(updatedShorthand);
     });
 
-    test("Admin can access Set as default and Edit buttons after clicking View button", async ({
+    test("Admin can make a token category the default from the edit sheet", async ({
       page,
     }) => {
-      await page
-        .getByRole("region", { name: resourceType, exact: true })
-        .getByRole("listitem")
-        .filter({ hasText: tokenCategoryName })
-        .getByRole("link", { name: "View" })
+      const section = page.getByRole("region", {
+        name: resourceType,
+        exact: true,
+      });
+      const item = () =>
+        section.getByRole("listitem").filter({ hasText: tokenCategoryName });
+      const openEditSheet = async () => {
+        await item()
+          .getByRole("button", { name: `Edit ${tokenCategoryName}` })
+          .click();
+        const sheet = page.getByRole("dialog", { name: "Edit Token Category" });
+        await expect(sheet).toBeVisible();
+        return sheet;
+      };
+
+      await expect(item().getByText("Default", { exact: true })).toHaveCount(0);
+
+      let sheet = await openEditSheet();
+      const defaultFrame = sheet.locator('[data-cy="token-category-default"]');
+      // Applies immediately, without saving the form
+      await defaultFrame
+        .getByRole("button", { name: "Set as default" })
         .click();
-
       await expect(
-        page.getByRole("heading", { name: tokenCategoryName, exact: true }),
+        defaultFrame.getByRole("button", { name: "Set as default" }),
+      ).toHaveCount(0);
+      await expect(
+        defaultFrame.getByText("Default", { exact: true }),
       ).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Set as default", exact: true }),
-      ).toBeVisible();
-
-      // Editing from the detail page opens the same sheet
-      await page.getByRole("button", { name: "Edit", exact: true }).click();
-      const sheet = page.getByRole("dialog", { name: "Edit Token Category" });
-      await expect(sheet).toBeVisible();
-      await expect(
-        sheet.locator('[data-cy="token-category-resource-type"]'),
-      ).toContainText(resourceType);
-      await sheet.getByRole("textbox", { name: "Name" }).fill(updatedName);
-      await sheet.getByRole("button", { name: "Save Changes" }).click();
+      await sheet.getByRole("button", { name: "Close" }).click();
       await expect(sheet).not.toBeVisible();
+
+      // The new default is badged and listed first in its section
+      await expect(item().getByText("Default", { exact: true })).toBeVisible();
+      await page
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .clear();
+      await expect(section.getByRole("listitem").first()).toContainText(
+        tokenCategoryName,
+      );
+
+      // A default can't be unset, only replaced by another category
+      await page
+        .getByRole("searchbox", { name: "Search Token Categories" })
+        .fill(tokenCategoryName);
+      sheet = await openEditSheet();
       await expect(
-        page.getByRole("heading", { name: updatedName, exact: true }),
-      ).toBeVisible();
+        sheet
+          .locator('[data-cy="token-category-default"]')
+          .getByRole("button", { name: "Set as default" }),
+      ).toHaveCount(0);
     });
   });
 });

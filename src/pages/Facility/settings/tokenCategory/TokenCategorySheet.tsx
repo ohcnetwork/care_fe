@@ -22,15 +22,9 @@ interface Props {
   facilityId: string;
   state: TokenCategorySheetState | null;
   onClose: () => void;
-  onSaved?: (tokenCategory: TokenCategoryRead) => void;
 }
 
-export function TokenCategorySheet({
-  facilityId,
-  state,
-  onClose,
-  onSaved,
-}: Props) {
+export function TokenCategorySheet({ facilityId, state, onClose }: Props) {
   const { t } = useTranslation();
 
   // Keep rendering the last opened state while the sheet animates closed.
@@ -79,10 +73,7 @@ export function TokenCategorySheet({
               tokenCategory={
                 shown.mode === "edit" ? shown.tokenCategory : undefined
               }
-              onSaved={(saved) => {
-                onClose();
-                onSaved?.(saved);
-              }}
+              onSaved={onClose}
               onCancel={onClose}
             />
           </>

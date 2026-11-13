@@ -52,9 +52,6 @@ test.describe("Token Category List - Permission Tests", () => {
         .first();
       await expect(firstCategory).toBeVisible();
       await expect(
-        firstCategory.getByRole("link", { name: "View" }),
-      ).toBeVisible();
-      await expect(
         firstCategory.getByRole("button", { name: /^Edit / }),
       ).toBeVisible();
 
@@ -111,7 +108,6 @@ test.describe("Token Category List - Permission Tests", () => {
       await expect(
         page.locator('[data-cy^="token-category-group-"]'),
       ).toHaveCount(0);
-      await expect(page.getByRole("link", { name: "View" })).toHaveCount(0);
       await expect(page.getByRole("button", { name: /^Edit / })).toHaveCount(0);
 
       // Step 4: Verify Token Category link is NOT visible in sidebar

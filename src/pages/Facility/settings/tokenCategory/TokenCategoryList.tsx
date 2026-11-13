@@ -73,9 +73,10 @@ export default function TokenCategoryList({
   const groups = TOKEN_CATEGORY_RESOURCE_TYPES.map(({ type, icon }) => ({
     type,
     icon,
-    tokenCategories: tokenCategories.filter(
-      (category) => category.resource_type === type,
-    ),
+    // The default category (one per resource type) is listed first
+    tokenCategories: tokenCategories
+      .filter((category) => category.resource_type === type)
+      .sort((a, b) => Number(b.default) - Number(a.default)),
   }));
   // While searching, hide sections without matches so results stand out.
   const visibleGroups = searchText
@@ -130,7 +131,6 @@ export default function TokenCategoryList({
             {visibleGroups.map((group) => (
               <TokenCategoryGroup
                 key={group.type}
-                facilityId={facilityId}
                 resourceType={group.type}
                 icon={group.icon}
                 tokenCategories={group.tokenCategories}
