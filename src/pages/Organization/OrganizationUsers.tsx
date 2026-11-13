@@ -1,24 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
+import { Bot, ChevronRight } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
+import { Avatar } from "@/components/Common/Avatar";
+import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
 import SearchInput from "@/components/Common/SearchInput";
 import { SectionHeader } from "@/components/Common/SectionHeader";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
-import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { UserReadMinimal } from "@/types/user/user";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
@@ -32,6 +46,44 @@ interface Props {
   navOrganizationId?: string;
   isServiceAccount?: boolean;
   routeContext?: RouteContext;
+}
+
+function UserStatusBadge({ user }: { user: UserReadMinimal }) {
+  const { t } = useTranslation();
+
+  if (user.deleted) {
+    return (
+      <Badge variant="neutral" size="sm">
+        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+        {t("archived")}
+      </Badge>
+    );
+  }
+
+  if (user.is_service_account) {
+    return (
+      <Badge variant="secondary" size="sm">
+        <Bot />
+        {t("service_account")}
+      </Badge>
+    );
+  }
+
+  if (!user.last_login) {
+    return (
+      <Badge variant="warning" size="sm">
+        <span className="size-1.5 shrink-0 rounded-full bg-current" />
+        {t("never_logged_in")}
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="success" size="sm">
+      <span className="size-1.5 shrink-0 rounded-full bg-current" />
+      {t("active")}
+    </Badge>
+  );
 }
 
 export default function OrganizationUsers({
@@ -185,52 +237,168 @@ export default function OrganizationUsers({
                 }
               />
               <Frame>
-                <FrameHeader>
+                <FrameHeader className="p-1 md:p-2">
                   <SearchInput
                     options={searchOptions}
                     onSearch={handleSearch}
                     onFieldChange={handleFieldChange}
-                    className="w-full sm:max-w-sm"
+                    selectorVariant="select"
+                    className="w-full sm:max-w-xl"
                   />
                 </FrameHeader>
-                <FramePanel>
-                  {!isFetchingUsers && users?.results?.length === 0 ? (
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      {t("no_users_found")}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                <FramePanel className="overflow-hidden p-0 **:data-[slot=table-container]:rounded-none **:data-[slot=table-container]:border-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-4">{t("user")}</TableHead>
+                        <TableHead className="px-4">
+                          {organization?.name
+                            ? t("role_in_organization", {
+                                organization: organization.name,
+                              })
+                            : t("role")}
+                        </TableHead>
+                        {!isServiceAccount && (
+                          <TableHead className="px-4">
+                            {t("last_login")}
+                          </TableHead>
+                        )}
+                        <TableHead className="px-4">{t("status")}</TableHead>
+                        <TableHead className="px-4">
+                          <span className="sr-only">{t("actions")}</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="bg-background">
                       {isFetchingUsers ? (
-                        <CardGridSkeleton count={6} />
-                      ) : (
-                        users?.results?.map((userRole) => (
-                          <UserCard
-                            key={userRole.user.id}
-                            user={userRole.user}
-                            roleName={userRole.role.name}
-                            editRoleAction={
-                              canManageOrganizationUsers && (
-                                <EditUserRoleSheet
-                                  organizationId={id}
-                                  userRole={userRole}
-                                  trigger={
-                                    <Button
-                                      variant="link"
-                                      size="sm"
-                                      className="underline text-gray-500"
-                                    >
-                                      <span>{t("edit")}</span>
-                                    </Button>
-                                  }
-                                />
-                              )
-                            }
-                            isServiceAccount={isServiceAccount}
-                          />
+                        Array.from({ length: 5 }, (_, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Skeleton className="size-9 rounded-md" />
+                                <div className="space-y-1.5">
+                                  <Skeleton className="h-4 w-32" />
+                                  <Skeleton className="h-3 w-20" />
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                            {!isServiceAccount && (
+                              <TableCell className="px-4 py-3">
+                                <Skeleton className="h-4 w-20" />
+                              </TableCell>
+                            )}
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="h-5 w-16 rounded-full" />
+                            </TableCell>
+                            <TableCell className="px-4 py-3">
+                              <Skeleton className="ml-auto h-12 w-44 md:h-10" />
+                            </TableCell>
+                          </TableRow>
                         ))
+                      ) : !users?.results?.length ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={isServiceAccount ? 4 : 5}
+                            className="p-6 text-center text-sm text-muted-foreground"
+                          >
+                            {t("no_users_found")}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        users.results.map((userRole) => {
+                          const { user } = userRole;
+                          const userUrl = `/users/${user.username}`;
+                          const isViewable = !user.deleted;
+                          return (
+                            <TableRow
+                              key={user.id}
+                              onClick={
+                                isViewable ? () => navigate(userUrl) : undefined
+                              }
+                              className={
+                                isViewable
+                                  ? "cursor-pointer hover:bg-muted/50"
+                                  : undefined
+                              }
+                            >
+                              <TableCell className="px-4 py-3">
+                                <div className="flex items-center gap-3">
+                                  {!isServiceAccount && (
+                                    <Avatar
+                                      name={formatName(user, true)}
+                                      imageUrl={user.profile_picture_url}
+                                      className="size-9 shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex min-w-0 flex-col">
+                                    <span className="font-semibold">
+                                      {formatName(user)}
+                                    </span>
+                                    <span className="font-mono text-xs text-muted-foreground">
+                                      @{user.username}
+                                    </span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="px-4 py-3">
+                                {userRole.role.name}
+                              </TableCell>
+                              {!isServiceAccount && (
+                                <TableCell className="px-4 py-3 text-muted-foreground">
+                                  {user.last_login ? (
+                                    <RelativeDateTooltip
+                                      date={user.last_login}
+                                    />
+                                  ) : (
+                                    t("never")
+                                  )}
+                                </TableCell>
+                              )}
+                              <TableCell className="px-4 py-3">
+                                <UserStatusBadge user={user} />
+                              </TableCell>
+                              <TableCell className="px-4 py-3">
+                                <div className="flex items-center justify-end gap-2">
+                                  {canManageOrganizationUsers && (
+                                    // The sheet is portalled, but React events still bubble to the row.
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                      <EditUserRoleSheet
+                                        organizationId={id}
+                                        userRole={userRole}
+                                        trigger={
+                                          <Button
+                                            variant="tertiary"
+                                            aria-label={`${t("change_role")} ${formatName(user)}`}
+                                          >
+                                            {t("change_role")}
+                                          </Button>
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                                  {isViewable && (
+                                    <Button variant="tertiary" asChild>
+                                      <Link
+                                        href={userUrl}
+                                        aria-label={`${t("view")} ${formatName(user)}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {t("view")}
+                                        <ChevronRight data-icon="inline-end" />
+                                      </Link>
+                                    </Button>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
                       )}
-                    </div>
-                  )}
+                    </TableBody>
+                  </Table>
                 </FramePanel>
               </Frame>
               <Pagination totalCount={users?.count || 0} />
