@@ -326,7 +326,7 @@ function PrintInvoices({ facilityId, invoiceIds }: PrintInvoicesProps) {
                                 <TableCell
                                   className={cn(
                                     tableCellClass,
-                                    "font-medium whitespace-pre-wrap",
+                                    "print-wrap font-medium whitespace-pre-wrap",
                                   )}
                                 >
                                   <InvoiceChargeItemTitle

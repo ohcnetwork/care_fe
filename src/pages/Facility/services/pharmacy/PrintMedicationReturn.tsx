@@ -83,6 +83,9 @@ const MedicationReturnContent = ({
               { key: "condition" },
               { key: "return_date" },
             ]}
+            cellConfig={{
+              item: { className: "print-wrap" },
+            }}
             rows={supplyDeliveries.map((delivery) => {
               const product = delivery.supplied_item;
               const inventory = delivery.supplied_inventory_item;
