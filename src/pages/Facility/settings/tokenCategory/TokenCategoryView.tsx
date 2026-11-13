@@ -1,13 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { ArrowLeft, Pencil, Star } from "lucide-react";
+import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  Frame,
+  FrameHeader,
+  FramePanel,
+  FrameTitle,
+} from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Muted,
+  CareUIPageTitle as PageTitle,
+} from "@/components/ui/typography";
 
 import Page from "@/components/Common/Page";
 
@@ -16,36 +33,17 @@ import query from "@/Utils/request/query";
 import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { SCHEDULABLE_RESOURCE_TYPE_COLORS } from "@/types/scheduling/schedule";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
+
+import { TokenCategorySheet } from "./TokenCategorySheet";
+import {
+  TOKEN_CATEGORY_RESOURCE_TYPE_ICONS,
+  tokenNumberPreview,
+} from "./tokenCategoryResourceTypes";
 
 interface Props {
   facilityId: string;
   tokenCategoryId: string;
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="container mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-6">
-          <div className="space-y-4">
-            <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
-            <div className="space-y-2">
-              <div className="h-4 w-full animate-pulse rounded-md bg-gray-200" />
-              <div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function TokenCategoryView({
@@ -54,6 +52,8 @@ export default function TokenCategoryView({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const listPath = `/facility/${facilityId}/settings/token_category`;
 
   const {
     data: tokenCategory,
@@ -77,16 +77,13 @@ export default function TokenCategoryView({
       },
     }),
     onSuccess: () => {
-      // Invalidate and refetch the token category data
       queryClient.invalidateQueries({
         queryKey: ["tokenCategory", tokenCategoryId],
       });
-      // Also invalidate the list to refresh any default indicators
-      queryClient.invalidateQueries({
-        queryKey: ["tokenCategories"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["tokenCategories"] });
     },
   });
+
   const { facility } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { canWriteTokenCategory } = getPermissions(
@@ -94,127 +91,150 @@ export default function TokenCategoryView({
     facility?.permissions ?? [],
   );
 
-  const handleSetDefault = () => {
-    setDefault({});
-  };
+  const backButton = (
+    <Button variant="ghost" size="sm" onClick={() => navigate(listPath)}>
+      <ArrowLeft />
+      {t("token_categories")}
+    </Button>
+  );
 
   if (isLoading) {
     return (
-      <Page title={t("loading")}>
-        <LoadingSkeleton />
+      <Page title={t("token_category")} hideTitleOnPage>
+        <div className="container mx-auto max-w-3xl space-y-6">
+          <Skeleton className="h-9 w-40" />
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-64" />
+            <Skeleton className="h-5 w-32" />
+          </div>
+          <Skeleton className="h-48 w-full rounded-xl" />
+        </div>
       </Page>
     );
   }
 
   if (isError || !tokenCategory) {
     return (
-      <Page title={t("error")}>
-        <div className="container mx-auto max-w-3xl py-8">
-          <Alert variant="destructive">
-            <CareIcon icon="l-exclamation-triangle" className="size-4" />
-            <AlertTitle>{t("error_loading_token_category")}</AlertTitle>
-            <AlertDescription>{t("token_category_not_found")}</AlertDescription>
-          </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/token_category`)
-            }
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
-            {t("back_to_list")}
-          </Button>
+      <Page title={t("token_category")} hideTitleOnPage>
+        <div className="container mx-auto max-w-3xl space-y-6">
+          {backButton}
+          <Empty className="border border-dashed">
+            <EmptyHeader>
+              <EmptyTitle>{t("error_loading_token_category")}</EmptyTitle>
+              <EmptyDescription>
+                {t("token_category_not_found")}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="outline" onClick={() => navigate(listPath)}>
+                {t("back_to_list")}
+              </Button>
+            </EmptyContent>
+          </Empty>
         </div>
       </Page>
     );
   }
 
-  return (
-    <Page
-      title={`Token Category: ${tokenCategory.name}`}
-      hideTitleOnPage={true}
-    >
-      <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/token_category`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
-          {t("back")}
-        </Button>
+  const ResourceIcon =
+    TOKEN_CATEGORY_RESOURCE_TYPE_ICONS[tokenCategory.resource_type];
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{tokenCategory.name}</h1>
-              <Badge
-                variant={
-                  SCHEDULABLE_RESOURCE_TYPE_COLORS[tokenCategory.resource_type]
-                }
-              >
+  return (
+    <Page title={tokenCategory.name} hideTitleOnPage>
+      <div className="container mx-auto max-w-3xl space-y-6 text-foreground">
+        {backButton}
+
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+          <div className="flex min-w-0 items-start gap-4">
+            <span className="inline-flex h-12 min-w-16 shrink-0 items-center justify-center rounded-lg border bg-muted/50 px-3 font-mono text-base font-semibold tracking-wider">
+              {tokenCategory.shorthand}
+            </span>
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <PageTitle className="wrap-break-word">
+                  {tokenCategory.name}
+                </PageTitle>
+                {tokenCategory.default && (
+                  <Badge variant="primary">
+                    <Star className="fill-current" />
+                    {t("default")}
+                  </Badge>
+                )}
+              </div>
+              <Muted className="flex items-center gap-1.5">
+                <ResourceIcon className="size-4" aria-hidden />
                 {t(tokenCategory.resource_type)}
-              </Badge>
+              </Muted>
             </div>
-            {tokenCategory.shorthand && (
-              <p className="mt-1 text-sm text-gray-600">
-                {t("shorthand")}: {tokenCategory.shorthand}
-              </p>
-            )}
           </div>
           {canWriteTokenCategory && (
-            <div className="flex gap-2">
+            <div className="flex shrink-0 flex-wrap gap-2">
               {!tokenCategory.default && (
                 <Button
                   variant="outline"
-                  onClick={handleSetDefault}
+                  onClick={() => setDefault({})}
                   disabled={isSettingDefault}
                 >
-                  <CareIcon icon="l-star" className="mr-2 size-4" />
-                  {isSettingDefault
-                    ? t("setting_as_default")
-                    : t("set_as_default")}
+                  {isSettingDefault ? <Spinner className="size-4" /> : <Star />}
+                  {t(
+                    isSettingDefault ? "setting_as_default" : "set_as_default",
+                  )}
                 </Button>
               )}
-              <Button variant="outline">
-                <Link
-                  basePath="/"
-                  href={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`}
-                >
-                  <CareIcon icon="l-pen" className="mr-2 size-4" />
-                  {t("edit")}
-                </Link>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Pencil />
+                {t("edit")}
               </Button>
             </div>
           )}
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("token_category_details")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500">{t("name")}</p>
-              <p className="font-medium">{tokenCategory.name}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">{t("resource_type")}</p>
-              <p className="text-gray-700">{t(tokenCategory.resource_type)}</p>
-            </div>
-            {tokenCategory.shorthand && (
-              <div>
-                <p className="text-sm text-gray-500">{t("shorthand")}</p>
-                <p className="text-gray-700">{tokenCategory.shorthand}</p>
+        <Frame stacked>
+          <FrameHeader>
+            <FrameTitle>{t("token_category_details")}</FrameTitle>
+          </FrameHeader>
+          <FramePanel>
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">{t("name")}</dt>
+                <dd className="text-sm font-medium wrap-break-word">
+                  {tokenCategory.name}
+                </dd>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">
+                  {t("resource_type")}
+                </dt>
+                <dd className="text-sm font-medium">
+                  {t(tokenCategory.resource_type)}
+                </dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">
+                  {t("shorthand")}
+                </dt>
+                <dd className="font-mono text-sm font-medium">
+                  {tokenCategory.shorthand}
+                </dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-sm text-muted-foreground">
+                  {t("token_number_format")}
+                </dt>
+                <dd className="font-mono text-sm font-medium">
+                  {tokenNumberPreview(tokenCategory.shorthand)}
+                </dd>
+              </div>
+            </dl>
+          </FramePanel>
+        </Frame>
       </div>
+
+      <TokenCategorySheet
+        facilityId={facilityId}
+        state={isEditing ? { mode: "edit", tokenCategory } : null}
+        onClose={() => setIsEditing(false)}
+      />
     </Page>
   );
 }
