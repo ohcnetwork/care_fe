@@ -210,6 +210,12 @@ test.describe("Mark as Completed Shortcut ('m c')", () => {
     await expect(
       page.getByText("Discharged", { exact: true }).first(),
     ).toBeVisible();
+    await expect(
+      page
+        .getByText("Discharge Disposition:", { exact: true })
+        .filter({ visible: true })
+        .locator(".."),
+    ).toContainText("Home");
 
     const encounterId = page.url().match(/\/encounter\/([^/]+)/)?.[1];
     expect(encounterId).toBeTruthy();

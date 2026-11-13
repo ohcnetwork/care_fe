@@ -197,17 +197,17 @@ const DetailRow = ({ label, value, isStrong = false }: DetailRowProps) => {
   );
 };
 
-interface PrescriptionPreviewProps {
+interface Props {
   prescriptionIds: string[];
   patientId: string;
   facilityId: string;
 }
 
-export const PrescriptionPreview = ({
+export const PrintPrescriptions = ({
   prescriptionIds,
   patientId,
   facilityId,
-}: PrescriptionPreviewProps) => {
+}: Props) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
 
